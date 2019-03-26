@@ -152,7 +152,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 			var newResource *Resource
 			{
 				c := Config{
-					CertsSearcher:      certstest.NewSearcher(),
+					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudConfig,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
