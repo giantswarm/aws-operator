@@ -352,6 +352,7 @@ spec:
     spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
+        role: master
       # The controllers must run in the host network namespace so that
       # it isn't governed by policy that would prevent it from working.
       hostNetwork: true

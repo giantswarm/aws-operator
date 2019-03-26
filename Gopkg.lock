@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:b92928b73320648b38c93cacb9082c0fe3f8ac3383ad9bd537eef62c380e0e7a"
+  digest = "1:bfd9c4a3ff18fa3715d243c6dff6465eaf3c9c8cd0a61d81ce74ca0f6eb239f9"
   name = "contrib.go.opencensus.io/exporter/ocagent"
   packages = ["."]
   pruneopts = "UT"
-  revision = "00af367e65149ff1f2f4b93bbfbb84fd9297170d"
-  version = "v0.2.0"
+  revision = "902c0ccba68df93f7fefbe7e7c6f16be33108b40"
+  version = "v0.4.9"
 
 [[projects]]
   digest = "1:b3456d348c50444a4977f688840e9dfc19386275d29326aed5ee043fd4b70cfa"
@@ -21,7 +21,7 @@
   version = "v21.3.0"
 
 [[projects]]
-  digest = "1:5d519587540a82794170ec8144188d5293eea0ed45b4c8c9956aabb1a934ba42"
+  digest = "1:d3ff939ec50e196cf009597b3a987be86c72b18e7188e9911bd658c7d66e5051"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -34,8 +34,8 @@
     "tracing",
   ]
   pruneopts = "UT"
-  revision = "808755da8cf643e4b6b44e0117be7e092de0923c"
-  version = "v11.5.2"
+  revision = "8ac2172594dd318e25270bfa48a224ac5adebe67"
+  version = "v11.6.1"
 
 [[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
@@ -143,11 +143,13 @@
   version = "v2.1.1"
 
 [[projects]]
-  digest = "1:03762622e74c3d16212ca2bee423e7d87bffc137a0340e8e9e6000280a1f9dd6"
+  digest = "1:fdb4ed936abeecb46a8c27dcac83f75c05c87a46d9ec7711411eb785c213fa02"
   name = "github.com/census-instrumentation/opencensus-proto"
   packages = [
     "gen-go/agent/common/v1",
+    "gen-go/agent/metrics/v1",
     "gen-go/agent/trace/v1",
+    "gen-go/metrics/v1",
     "gen-go/resource/v1",
     "gen-go/trace/v1",
   ]
@@ -313,7 +315,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ba24bc2aa78dc460f171b67ef46f65f88653e2089ece74df3521d03b7fdc8c1a"
+  digest = "1:648c2246c814b8cc24080160a9be66ee26d0a236c4f632a393f081520716719f"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -321,7 +323,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "01d00a35fdcebfadddfd63267f106615fe044421"
+  revision = "0d9906466b118620a16f94ec23b3228487ded638"
 
 [[projects]]
   branch = "master"
@@ -374,7 +376,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:33cb6cc9f640eb30fdc6da4deb53eb6363a7391824854b28034c10c368e968ba"
+  digest = "1:0700d9071223ed4a4914f713f05d2ced100a6c8f6a0452240694b1bb93c97dfc"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -382,9 +384,10 @@
     "v_4_0_1",
     "v_4_1_0",
     "v_4_1_1",
+    "v_4_1_2",
   ]
   pruneopts = "T"
-  revision = "02b55c1e9b332f40ef5e0c5636a74fb9f6a23e0d"
+  revision = "fe21dc89ac52fab4e13df4ffa0f9b31a90aab1ab"
 
 [[projects]]
   branch = "master"
@@ -480,7 +483,7 @@
     "informer/collector",
   ]
   pruneopts = "UT"
-  revision = "91bc8c25d0ff277802675379f8d7ae800745c56b"
+  revision = "0caf2c987e044564f6f7da48603f6142159bd784"
 
 [[projects]]
   branch = "master"
@@ -892,7 +895,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "fa4aa9000d2863904891d193dea354d23f3d712a"
+  revision = "7490f0a74525a1f863eaf81b42f3ead3a1ecc43a"
 
 [[projects]]
   branch = "master"
@@ -988,7 +991,7 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:2ae8314c44cd413cfdb5b1df082b350116dd8d2fff973e62c01b285b7affd89e"
+  digest = "1:006e728c96e02ac83ee246183a4b87b44b21e67e004d3a06edd891583a4bf197"
   name = "go.opencensus.io"
   packages = [
     ".",
@@ -998,6 +1001,7 @@
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
     "plugin/ochttp/propagation/tracecontext",
+    "resource",
     "stats",
     "stats/internal",
     "stats/view",
@@ -1008,12 +1012,12 @@
     "trace/tracestate",
   ]
   pruneopts = "UT"
-  revision = "b7bf3cdb64150a8c8c53b769fdeb2ba581bd4d4b"
-  version = "v0.18.0"
+  revision = "3b8e2721f2c3c01fa1bf4a2e455874e7b8319cd7"
+  version = "v0.19.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:4bdca6f23ba729344eae7d52f084bb3bfda10cf50b7a57068a1e284c0620c12f"
+  digest = "1:86e31d843f4cf9628510c8c84c25ad5afdb97c48cb052ea5c4930e566f870128"
   name = "golang.org/x/crypto"
   packages = [
     "pbkdf2",
@@ -1021,7 +1025,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "b7391e95e576cacdcdd422573063bc057239113d"
+  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
@@ -1039,7 +1043,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "addf6b3196f61cd44ce5a76657913698c73479d0"
+  revision = "15845e8f865bdabdefb6e7da65b4d9e8de5e94ef"
 
 [[projects]]
   branch = "master"
@@ -1549,6 +1553,7 @@
     "github.com/giantswarm/k8scloudconfig/v_4_0_1",
     "github.com/giantswarm/k8scloudconfig/v_4_1_0",
     "github.com/giantswarm/k8scloudconfig/v_4_1_1",
+    "github.com/giantswarm/k8scloudconfig/v_4_1_2",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/version",
