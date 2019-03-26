@@ -59,7 +59,7 @@ func Test_DesiredState(t *testing.T) {
 			var newResource *Resource
 			{
 				c := Config{
-					CertsSearcher:      certstest.NewSearcher(),
+					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
