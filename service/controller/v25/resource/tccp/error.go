@@ -8,29 +8,6 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var alreadyExistsError = &microerror.Error{
-	Kind: "alreadyExistsError",
-}
-
-// IsAlreadyExists asserts alreadyExistsError.
-func IsAlreadyExists(err error) bool {
-	c := microerror.Cause(err)
-
-	if c == nil {
-		return false
-	}
-
-	if strings.Contains(c.Error(), cloudformation.ErrCodeAlreadyExistsException) {
-		return true
-	}
-
-	if c == alreadyExistsError {
-		return true
-	}
-
-	return false
-}
-
 var alreadyTerminatedError = &microerror.Error{
 	Kind: "alreadyTerminatedError",
 }
@@ -81,15 +58,6 @@ func IsDeleteInProgress(err error) bool {
 	return false
 }
 
-var deletionMustBeRetriedError = &microerror.Error{
-	Kind: "deletionMustBeRetriedError",
-}
-
-// IsDeletionMustBeRetried asserts deletionMustBeRetriedError.
-func IsDeletionMustBeRetried(err error) bool {
-	return microerror.Cause(err) == deletionMustBeRetriedError
-}
-
 var executionFailedError = &microerror.Error{
 	Kind: "executionFailedError",
 }
@@ -131,34 +99,25 @@ func IsNotExists(err error) bool {
 	return false
 }
 
-var resourceNotReadyError = &microerror.Error{
-	Kind: "resourceNotReadyError",
+var updateInProgressError = &microerror.Error{
+	Kind: "updateInProgressError",
 }
 
-// IsResourceNotReady asserts resourceNotReadyError.
-func IsResourceNotReady(err error) bool {
+// IsUpdateInProgress asserts updateInProgressError.
+func IsUpdateInProgress(err error) bool {
 	c := microerror.Cause(err)
 
 	if c == nil {
 		return false
 	}
 
-	if strings.Contains(c.Error(), "ResourceNotReady") {
+	if strings.Contains(c.Error(), cloudformation.ResourceStatusUpdateInProgress) {
 		return true
 	}
 
-	if c == resourceNotReadyError {
+	if c == updateInProgressError {
 		return true
 	}
 
 	return false
-}
-
-var wrongTypeError = &microerror.Error{
-	Kind: "wrongTypeError",
-}
-
-// IsWrongType asserts wrongTypeError.
-func IsWrongType(err error) bool {
-	return microerror.Cause(err) == wrongTypeError
 }

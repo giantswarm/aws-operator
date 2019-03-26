@@ -62,7 +62,17 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
-		if err != nil {
+		if IsUpdateInProgress(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack is being updated")
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			finalizerskeptcontext.SetKept(ctx)
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
