@@ -21,14 +21,6 @@ func teardown(ctx context.Context, clusterID string, config Config) error {
 	var errors []error
 
 	{
-		err = ensureBastionHostDeleted(ctx, clusterID, config)
-		if err != nil {
-			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete bastion host", "stack", fmt.Sprintf("%#v", err))
-			errors = append(errors, microerror.Mask(err))
-		}
-	}
-
-	{
 		releases := []string{
 			fmt.Sprintf("%s-aws-operator", config.Host.TargetNamespace()),
 			fmt.Sprintf("%s-cert-operator", config.Host.TargetNamespace()),
