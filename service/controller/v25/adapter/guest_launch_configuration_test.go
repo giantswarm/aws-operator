@@ -109,7 +109,8 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
 				StackState: StackState{
-					WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(tc.customObject),
+					WorkerDockerVolumeSizeGB:  key.WorkerDockerVolumeSizeGB(tc.customObject),
+					WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(tc.customObject),
 				},
 			}
 			err := a.Guest.LaunchConfiguration.Adapt(cfg)
