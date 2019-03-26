@@ -280,12 +280,12 @@ workflows:
 #     - e2eTestWIPMasterIPAM:
 #         requires:
 #           - master
-      - e2eTestCurPRIPAM:
-          requires:
-            - pr
-      - e2eTestWIPPRIPAM:
-          requires:
-            - pr
+#     - e2eTestCurPRIPAM:
+#         requires:
+#           - pr
+#     - e2eTestWIPPRIPAM:
+#         requires:
+#           - pr
 
 
 
