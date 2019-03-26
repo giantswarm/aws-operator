@@ -9,6 +9,10 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v4.1.2]
+### Changed
+- Pin calico-kube-controllers to master.
+
 ## [v4.1.1] 
 ### Changed
 - Update kubernetes to 1.13.4 CVE-2019-1002100
