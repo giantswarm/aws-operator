@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
@@ -35,6 +37,24 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if v == 0 && config.UseDefaultTenant {
+		go func() {
+			o := func() error {
+				err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				return nil
+			}
+			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
+
+			err := backoff.RetryNotify(o, b, n)
+			if err != nil {
+				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+			}
+		}()
+
 		wait := true
 		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
 		if err != nil {
@@ -48,6 +68,24 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if !env.KeepResources() {
+		go func() {
+			o := func() error {
+				err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				return nil
+			}
+			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
+
+			err := backoff.RetryNotify(o, b, n)
+			if err != nil {
+				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+			}
+		}()
+
 		if config.UseDefaultTenant {
 			wait := true
 			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
