@@ -345,7 +345,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 	var subnetID string
 	var vpcID string
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for public subnet and vpc")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding public subnet and vpc")
 
 		i := &ec2.DescribeSubnetsInput{
 			Filters: []*ec2.Filter{
