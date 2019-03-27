@@ -463,7 +463,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 					IpRanges: []*ec2.IpRange{
 						{
 							CidrIp:      aws.String("0.0.0.0/0"),
-							Description: aws.String("Allow SSH access from everywhere to port 22."),
+							Description: aws.String("Allow SSH access from anywhere to port 22."),
 						},
 					},
 					ToPort: aws.Int64(22),
