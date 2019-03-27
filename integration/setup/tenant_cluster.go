@@ -409,7 +409,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating bastion security group")
 
 		i := &ec2.CreateSecurityGroupInput{
-			Description: aws.String("Allow SSH access from everywhere to port 22."),
+			Description: aws.String("Allow SSH access from anywhere to port 22."),
 			GroupName:   aws.String(clusterID + "-bastion"),
 			VpcId:       aws.String(vpcID),
 		}
