@@ -413,6 +413,80 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Config) error {
 	var err error
 
+	{
+		err = terminateBastionInstance(ctx, clusterID, config)
+		if IsNotExists(err) {
+			// This here might happen in case the bastion instance got already
+			// deleted.
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = deleteBastionSecurityGroup(ctx, clusterID, config)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	return nil
+}
+
+func deleteBastionSecurityGroup(ctx context.Context, clusterID string, config Config) error {
+	var err error
+
+	var bastionSecurityGroupID string
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion security group")
+
+		i := &ec2.DescribeSecurityGroupsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name:   aws.String("tag:Name"),
+					Values: []*string{aws.String(clusterID + "-bastion")},
+				},
+				{
+					Name:   aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{aws.String(clusterID)},
+				},
+			},
+		}
+
+		o, err := config.AWSClient.EC2.DescribeSecurityGroups(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if len(o.SecurityGroups) != 1 {
+			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(o.SecurityGroups))
+		}
+
+		bastionSecurityGroupID = *o.SecurityGroups[0].GroupId
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion security group %#q", bastionSecurityGroupID))
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleting bastion security group")
+
+		i := &ec2.DeleteSecurityGroupInput{
+			GroupId: aws.String(bastionSecurityGroupID),
+		}
+
+		_, err = config.AWSClient.EC2.DeleteSecurityGroup(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleted bastion security group")
+	}
+
+	return nil
+}
+
+func terminateBastionInstance(ctx context.Context, clusterID string, config Config) error {
+	var err error
+
 	var instanceID string
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion instance id")
@@ -461,6 +535,7 @@ func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Conf
 		instanceID = *o.Reservations[0].Instances[0].InstanceId
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion instance id %#q", instanceID))
+
 	}
 
 	{
@@ -478,51 +553,6 @@ func ensureBastionHostDeleted(ctx context.Context, clusterID string, config Conf
 		}
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "terminated bastion instance")
-	}
-
-	var bastionSecurityGroupID string
-	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion security group")
-
-		i := &ec2.DescribeSecurityGroupsInput{
-			Filters: []*ec2.Filter{
-				{
-					Name:   aws.String("tag:Name"),
-					Values: []*string{aws.String(clusterID + "-bastion")},
-				},
-				{
-					Name:   aws.String("tag:giantswarm.io/cluster"),
-					Values: []*string{aws.String(clusterID)},
-				},
-			},
-		}
-
-		o, err := config.AWSClient.EC2.DescribeSecurityGroups(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		if len(o.SecurityGroups) != 1 {
-			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(o.SecurityGroups))
-		}
-
-		bastionSecurityGroupID = *o.SecurityGroups[0].GroupId
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion security group %#q", bastionSecurityGroupID))
-	}
-
-	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleting bastion security group")
-
-		i := &ec2.DeleteSecurityGroupInput{
-			GroupId: aws.String(bastionSecurityGroupID),
-		}
-
-		_, err = config.AWSClient.EC2.DeleteSecurityGroup(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "deleted bastion security group")
 	}
 
 	return nil
