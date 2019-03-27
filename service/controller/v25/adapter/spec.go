@@ -76,8 +76,8 @@ type StackState struct {
 	WorkerCloudConfigVersion  string
 	WorkerDesired             int
 	WorkerDockerVolumeSizeGB  string
-	WorkerLogVolumeSizeGB     string
 	WorkerKubeletVolumeSizeGB string
+	WorkerLogVolumeSizeGB     string
 	WorkerImageID             string
 	WorkerInstanceMonitoring  bool
 	WorkerInstanceType        string
