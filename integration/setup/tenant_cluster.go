@@ -371,12 +371,12 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		subnetID = *o.Subnets[0].SubnetId
 		vpcID = *o.Subnets[0].VpcId
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for public subnet %#q and vpc %#q", subnetID, vpcID))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found public subnet %#q and vpc %#q", subnetID, vpcID))
 	}
 
 	var workerSecurityGroupID string
 	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", "waiting for worker security group")
+		config.Logger.LogCtx(ctx, "level", "debug", "message", "finding worker security group")
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -401,7 +401,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 
 		workerSecurityGroupID = *o.SecurityGroups[0].GroupId
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for worker security group %#q", workerSecurityGroupID))
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found worker security group %#q", workerSecurityGroupID))
 	}
 
 	var bastionSecurityGroupID string
