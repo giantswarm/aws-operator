@@ -306,11 +306,14 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				WorkerCloudConfigVersion: key.CloudConfigVersion,
 				WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
 				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
-				WorkerImageID:            im,
-				WorkerInstanceMonitoring: r.instanceMonitoring,
-				WorkerInstanceType:       key.WorkerInstanceType(cr),
-				WorkerMax:                cc.Status.TenantCluster.TCCP.ASG.MaxSize,
-				WorkerMin:                cc.Status.TenantCluster.TCCP.ASG.MinSize,
+				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
+				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
+				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
+				WorkerImageID:             im,
+				WorkerInstanceMonitoring:  r.instanceMonitoring,
+				WorkerInstanceType:        key.WorkerInstanceType(cr),
+				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
+				WorkerMin:                 cc.Status.TenantCluster.TCCP.ASG.MinSize,
 
 				VersionBundleVersion: key.VersionBundleVersion(cr),
 			},
