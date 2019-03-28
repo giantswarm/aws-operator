@@ -463,6 +463,10 @@ func deleteBastionSecurityGroup(ctx context.Context, clusterID string, config Co
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		if len(o.SecurityGroups) == 0 {
+			// The security group got already deleted, so we are fine.
+			return nil
+		}
 		if len(o.SecurityGroups) != 1 {
 			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(o.SecurityGroups))
 		}
@@ -529,7 +533,8 @@ func terminateBastionInstance(ctx context.Context, clusterID string, config Conf
 		}
 
 		if len(o.Reservations) == 0 {
-			return microerror.Maskf(notExistsError, "bastion instance")
+			// The instance got already terminated, so we are fine.
+			return nil
 		}
 		if len(o.Reservations) != 1 {
 			return microerror.Maskf(executionFailedError, "expected one bastion instance, got %d", len(o.Reservations))
@@ -541,7 +546,6 @@ func terminateBastionInstance(ctx context.Context, clusterID string, config Conf
 		instanceID = *o.Reservations[0].Instances[0].InstanceId
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found bastion instance id %#q", instanceID))
-
 	}
 
 	{
