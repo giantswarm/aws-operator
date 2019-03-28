@@ -12,6 +12,12 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+// TODO make the resource management more reliable to ensure proper setip and
+// teardown.
+//
+//     https://github.com/giantswarm/giantswarm/issues/5694
+//
+
 func ensureBastionHostCreated(ctx context.Context, clusterID string, config Config) error {
 	var err error
 
