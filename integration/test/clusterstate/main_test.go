@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/giantswarm/e2etests/clusterstate"
-	"github.com/giantswarm/e2etests/clusterstate/provider"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
@@ -27,10 +26,9 @@ func init() {
 		}
 	}
 
-	var p *provider.AWS
+	var p *Provider
 	{
-
-		ac := provider.AWSConfig{
+		c := ProviderConfig{
 			AWSClient:     config.AWSClient,
 			HostFramework: config.Host,
 			Logger:        config.Logger,
@@ -38,7 +36,7 @@ func init() {
 			ClusterID: env.ClusterID(),
 		}
 
-		p, err = provider.NewAWS(ac)
+		p, err = NewProvider(c)
 		if err != nil {
 			panic(err.Error())
 		}
