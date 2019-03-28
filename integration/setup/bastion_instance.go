@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-// TODO make the resource management more reliable to ensure proper setip and
+// TODO make the resource management more reliable to ensure proper setup and
 // teardown.
 //
 //     https://github.com/giantswarm/giantswarm/issues/5694
