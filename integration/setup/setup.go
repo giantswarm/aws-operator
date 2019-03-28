@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
@@ -36,8 +37,10 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	if v == 0 && config.UseDefaultTenant {
-		go func() {
+	{
+		g, ctx := errgroup.WithContext(ctx)
+
+		g.Go(func() error {
 			o := func() error {
 				err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
 				if err != nil {
@@ -53,12 +56,25 @@ func Setup(m *testing.M, config Config) {
 			if err != nil {
 				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			}
-		}()
 
-		wait := true
-		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
+			return nil
+		})
+
+		g.Go(func() error {
+			if v == 0 && config.UseDefaultTenant {
+				wait := true
+				err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			return nil
+		})
+
+		err := g.Wait()
 		if err != nil {
-			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to create tenant cluster", "stack", fmt.Sprintf("%#v", err))
+			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			v = 1
 		}
 	}
@@ -68,7 +84,9 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if !env.KeepResources() {
-		go func() {
+		g, ctx := errgroup.WithContext(ctx)
+
+		g.Go(func() error {
 			o := func() error {
 				err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
 				if err != nil {
@@ -82,17 +100,28 @@ func Setup(m *testing.M, config Config) {
 
 			err := backoff.RetryNotify(o, b, n)
 			if err != nil {
-				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+				return microerror.Mask(err)
 			}
-		}()
 
-		if config.UseDefaultTenant {
-			wait := true
-			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
-			if err != nil {
-				config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete tenant cluster", "stack", fmt.Sprintf("%#v", err))
-				v = 1
+			return nil
+		})
+
+		g.Go(func() error {
+			if config.UseDefaultTenant {
+				wait := true
+				err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			}
+
+			return nil
+		})
+
+		err := g.Wait()
+		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+			v = 1
 		}
 
 		if !env.CircleCI() {
