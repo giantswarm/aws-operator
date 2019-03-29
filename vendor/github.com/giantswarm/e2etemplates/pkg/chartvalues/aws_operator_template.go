@@ -36,7 +36,7 @@ const awsOperatorTemplate = `Installation:
         IncludeTags: true
         Route53:
           Enabled: true
-        RouteTableNames: 'gauss_private_0,gauss_private_1'
+        RouteTableNames: '{{ .Provider.AWS.RouteTableNames }}'
         Encrypter: '{{ .Provider.AWS.Encrypter }}'
         TrustedAdvisor:
           Enabled: false

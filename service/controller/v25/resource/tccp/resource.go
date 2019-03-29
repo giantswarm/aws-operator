@@ -104,6 +104,18 @@ func (r *Resource) Name() string {
 	return Name
 }
 
+// searchMasterInstanceID tries to find any "active" master instance. The method
+// ignores instances that are shutting down or are already terminated. This is
+// because we only need to find the master instance in order to terminate it
+// before updating the TCCP Cloud Formation stack. In case the master instance
+// is already terminated, we ignore it. The used filter name is the following.
+//
+//     instance-state-name
+//
+// To be precise, the following instance states are considered as filter values.
+//
+//     pending, running, stopping, stopped
+//
 func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSConfig) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -124,6 +136,15 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 					Name: aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{
 						aws.String(key.ClusterID(cr)),
+					},
+				},
+				{
+					Name: aws.String("instance-state-name"),
+					Values: []*string{
+						aws.String(ec2.InstanceStateNamePending),
+						aws.String(ec2.InstanceStateNameRunning),
+						aws.String(ec2.InstanceStateNameStopped),
+						aws.String(ec2.InstanceStateNameStopping),
 					},
 				},
 			},
