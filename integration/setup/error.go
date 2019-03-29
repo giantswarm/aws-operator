@@ -9,6 +9,38 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
+}
+
+// IsExecutionFailed asserts executionFailedError.
+func IsExecutionFailed(err error) bool {
+	return microerror.Cause(err) == executionFailedError
+}
+
+var notExistsError = &microerror.Error{
+	Kind: "notExistsError",
+}
+
+// IsNotExists asserts notExistsError.
+func IsNotExists(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), "does not exist") {
+		return true
+	}
+
+	if c == notExistsError {
+		return true
+	}
+
+	return false
+}
+
 var notFoundError = &microerror.Error{
 	Kind: "notFoundError",
 }
