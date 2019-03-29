@@ -22,8 +22,9 @@ type AWSOperatorConfigProvider struct {
 }
 
 type AWSOperatorConfigProviderAWS struct {
-	Encrypter string
-	Region    string
+	Encrypter       string
+	Region          string
+	RouteTableNames string
 }
 
 type AWSOperatorConfigSecret struct {
@@ -62,14 +63,17 @@ type AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWSAccessKey struct {
 
 // NewAWSOperator renders values required by aws-operator-chart.
 func NewAWSOperator(config AWSOperatorConfig) (string, error) {
+	if config.Provider.AWS.Encrypter == "" {
+		config.Provider.AWS.Encrypter = defaultEncrypter
+	}
 	if config.Provider.AWS.Region == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Provider.AWS.Region must not be empty", config)
 	}
+	if config.Provider.AWS.RouteTableNames == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.Provider.AWS.RouteTableNames must not be empty", config)
+	}
 	if config.Secret.AWSOperator.IDRSAPub == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.IDRSAPub must not be empty", config)
-	}
-	if config.Provider.AWS.Encrypter == "" {
-		config.Provider.AWS.Encrypter = defaultEncrypter
 	}
 	if config.Secret.AWSOperator.CredentialDefault.AdminARN == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.CredentialDefault.AdminARN must not be empty", config)

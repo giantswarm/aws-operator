@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
@@ -34,11 +37,44 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	if v == 0 && config.UseDefaultTenant {
-		wait := true
-		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
+	{
+		g, ctx := errgroup.WithContext(ctx)
+
+		g.Go(func() error {
+			o := func() error {
+				//err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
+				//if err != nil {
+				//	return microerror.Mask(err)
+				//}
+
+				return nil
+			}
+			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
+
+			err := backoff.RetryNotify(o, b, n)
+			if err != nil {
+				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+			}
+
+			return nil
+		})
+
+		g.Go(func() error {
+			if v == 0 && config.UseDefaultTenant {
+				wait := true
+				err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			return nil
+		})
+
+		err := g.Wait()
 		if err != nil {
-			config.Logger.LogCtx(ctx, "level", "error", "message", "failed to create tenant cluster", "stack", fmt.Sprintf("%#v", err))
+			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			v = 1
 		}
 	}
@@ -48,13 +84,44 @@ func Setup(m *testing.M, config Config) {
 	}
 
 	if !env.KeepResources() {
-		if config.UseDefaultTenant {
-			wait := true
-			err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
-			if err != nil {
-				config.Logger.LogCtx(ctx, "level", "error", "message", "failed to delete tenant cluster", "stack", fmt.Sprintf("%#v", err))
-				v = 1
+		g, ctx := errgroup.WithContext(ctx)
+
+		g.Go(func() error {
+			o := func() error {
+				//err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
+				//if err != nil {
+				//	return microerror.Mask(err)
+				//}
+
+				return nil
 			}
+			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
+
+			err := backoff.RetryNotify(o, b, n)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		})
+
+		g.Go(func() error {
+			if config.UseDefaultTenant {
+				wait := true
+				err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			return nil
+		})
+
+		err := g.Wait()
+		if err != nil {
+			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+			v = 1
 		}
 
 		if !env.CircleCI() {
@@ -77,8 +144,9 @@ func installAWSOperator(ctx context.Context, config Config) error {
 		c := chartvalues.AWSOperatorConfig{
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
-					Encrypter: "kms",
-					Region:    env.AWSRegion(),
+					Encrypter:       "kms",
+					Region:          env.AWSRegion(),
+					RouteTableNames: env.AWSRouteTable0() + "," + env.AWSRouteTable1(),
 				},
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{
