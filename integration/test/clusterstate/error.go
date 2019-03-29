@@ -13,20 +13,11 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var notFoundError = &microerror.Error{
-	Kind: "notFoundError",
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
 }
 
-// IsNotFound asserts NotFoundError.
-func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
-}
-
-var waitError = &microerror.Error{
-	Kind: "waitError",
-}
-
-// IsWait asserts waitError.
-func IsWait(err error) bool {
-	return microerror.Cause(err) == waitError
+// IsExecutionFailed asserts executionFailedError.
+func IsExecutionFailed(err error) bool {
+	return microerror.Cause(err) == executionFailedError
 }

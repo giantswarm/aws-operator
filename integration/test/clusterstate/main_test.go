@@ -29,9 +29,9 @@ func init() {
 	var p *Provider
 	{
 		c := ProviderConfig{
-			AWSClient:     config.AWSClient,
-			HostFramework: config.Host,
-			Logger:        config.Logger,
+			AWSClient: config.AWSClient,
+			G8sClient: config.Host.G8sClient(),
+			Logger:    config.Logger,
 
 			ClusterID: env.ClusterID(),
 		}

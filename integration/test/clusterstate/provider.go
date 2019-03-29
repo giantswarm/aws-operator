@@ -20,7 +20,7 @@ const (
 
 type ProviderConfig struct {
 	AWSClient *awsclient.Client
-	G8sClient *versioned.Clientset
+	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
 	ClusterID string
@@ -28,7 +28,7 @@ type ProviderConfig struct {
 
 type Provider struct {
 	awsClient *awsclient.Client
-	g8sClient *versioned.Clientset
+	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
 	clusterID string
@@ -61,8 +61,6 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 }
 
 func (p *Provider) RebootMaster() error {
-	var err error
-
 	var instanceID string
 	{
 		i := &ec2.DescribeInstancesInput{
@@ -93,13 +91,13 @@ func (p *Provider) RebootMaster() error {
 			return microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
 		}
 
-		instanceID = o.Reservations[0].Instances[0].InstanceId
+		instanceID = *o.Reservations[0].Instances[0].InstanceId
 	}
 
 	{
 		i := &ec2.RebootInstancesInput{
 			InstanceIds: []*string{
-				instanceID,
+				aws.String(instanceID),
 			},
 		}
 
@@ -113,7 +111,7 @@ func (p *Provider) RebootMaster() error {
 }
 
 func (p *Provider) ReplaceMaster() error {
-	customObject, err := p.g8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
+	customObject, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -121,7 +119,7 @@ func (p *Provider) ReplaceMaster() error {
 	// Change instance type to trigger replacement of existing master node.
 	customObject.Spec.AWS.Masters[0].InstanceType = EC2InstanceType
 
-	_, err = p.g8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+	_, err = p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Update(customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
