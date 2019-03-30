@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-scheduler
+  namespace: kube-system
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
+spec:
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  containers:
+  - name: k8s-scheduler
+    image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+    command:
+    - /hyperkube
+    - scheduler
+    - --config=/etc/kubernetes/config/scheduler.yaml
+    - --v=2
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /healthz
+        port: 10251
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    volumeMounts:
+    - mountPath: /etc/kubernetes/config/
+      name: k8s-config
+      readOnly: true
+    - mountPath: /etc/kubernetes/kubeconfig/
+      name: k8s-kubeconfig
+      readOnly: true
+    - mountPath: /etc/kubernetes/ssl/
+      name: ssl-certs-kubernetes
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/config
+    name: k8s-config
+  - hostPath:
+      path: /etc/kubernetes/kubeconfig
+    name: k8s-kubeconfig
+  - hostPath:
+      path: /etc/kubernetes/ssl
+    name: ssl-certs-kubernetes

@@ -204,7 +204,7 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet.yaml.tmpl" }}"
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "config/kubelet-worker.yaml.tmpl" }}"
 
     - path: /etc/kubernetes/kubeconfig/kubelet.yaml
       filesystem: root
