@@ -11,6 +11,7 @@ version directory, and  then changes are introduced.
 
 ## [v4.2.0] WIP
 - Fix race condition issue with systemd units.
+- Remove `UsePrivilegeSeparation` option from sshd configuration.
 
 ## [v4.1.2]
 ### Changed
