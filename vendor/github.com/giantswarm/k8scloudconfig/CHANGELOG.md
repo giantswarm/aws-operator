@@ -9,9 +9,16 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v4.2.0] WIP
+- Fix race condition issue with systemd units.
+- Remove `UsePrivilegeSeparation` option from sshd configuration.
+
 ## [v4.1.2]
 ### Changed
 - Pin calico-kube-controllers to master.
+- Fix calico-node felix severity log level.
+- Enable `serviceaccount` controller in calico-kube-controller.
+- Remove 'staticPodPath' from worker kubelet configuration.
 
 ## [v4.1.1] 
 ### Changed
