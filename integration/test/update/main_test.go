@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/giantswarm/e2etests/update"
-	"github.com/giantswarm/e2etests/update/provider"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
@@ -29,17 +28,17 @@ func init() {
 
 	}
 
-	var p *provider.AWS
+	var p *Provider
 	{
-		c := provider.AWSConfig{
-			HostFramework: config.Host,
-			Logger:        config.Logger,
+		c := ProviderConfig{
+			G8sClient: config.Host.G8sClient(),
+			Logger:    config.Logger,
 
 			ClusterID:   env.ClusterID(),
 			GithubToken: env.GithubToken(),
 		}
 
-		p, err = provider.NewAWS(c)
+		p, err = NewProvider(c)
 		if err != nil {
 			panic(err.Error())
 		}
