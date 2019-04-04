@@ -1,0 +1,23 @@
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+address: ${DEFAULT_IPV4}
+port: 10250
+healthzBindAddress: ${DEFAULT_IPV4}
+healthzPort: 10248
+clusterDNS:
+  - {{.Cluster.Kubernetes.DNS.IP}}
+clusterDomain: {{.Cluster.Kubernetes.Domain}}
+evictionSoft:
+  memory.available: "500Mi"
+evictionHard:
+  memory.available: "200Mi"
+evictionSoftGracePeriod:
+  memory.available: "5s"
+evictionMaxPodGracePeriod: 60
+authentication:
+  anonymous:
+    enabled: true # Defaults to false as of 1.10
+  webhook:
+    enabled: false # Deafults to true as of 1.10
+authorization:
+  mode: AlwaysAllow # Deafults to webhook as of 1.10
