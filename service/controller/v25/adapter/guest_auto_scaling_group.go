@@ -45,7 +45,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	currentDesiredMinWorkers := minDesiredWorkers(minWorkers, maxWorkers, cfg.StackState.WorkerDesired)
 
 	a.ASGDesiredCapacity = currentDesiredMinWorkers
-	a.ASGMaxSize = maxWorkers
+	a.ASGMaxSize = maxWorkers + 1
 	a.ASGMinSize = minWorkers
 	a.ASGType = key.KindWorker
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
@@ -55,7 +55,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	if minInstancesInService != 0 && minInstancesInService == maxWorkers {
 		// MinInstancesInService must be less than the autoscaling group's MaxSize.
 		// This should only ever be an issue if the min and max workers are exactly one.
-		minInstancesInService = minInstancesInService - 1
+		//minInstancesInService = minInstancesInService - 1
 	}
 
 	a.MinInstancesInService = strconv.Itoa(minInstancesInService)
