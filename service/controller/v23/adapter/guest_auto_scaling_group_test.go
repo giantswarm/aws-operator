@@ -103,6 +103,37 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 			expectedMinInstancesInService:  "5",
 			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
 		},
+		{
+			description: "only one node, all fields present",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					Cluster: defaultClusterWithScaling(1, 1),
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						AZ: "myaz",
+						Workers: []v1alpha1.AWSConfigSpecAWSNode{
+							{},
+						},
+					},
+				},
+				Status: v1alpha1.AWSConfigStatus{
+					AWS: v1alpha1.AWSConfigStatusAWS{
+						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								Name: "myaz",
+							},
+						},
+					},
+				},
+			},
+			expectedError:                  false,
+			expectedAZs:                    []string{"myaz"},
+			expectedASGMaxSize:             1,
+			expectedASGMinSize:             1,
+			expectedHealthCheckGracePeriod: gracePeriodSeconds,
+			expectedMaxBatchSize:           "1",
+			expectedMinInstancesInService:  "0",
+			expectedRollingUpdatePauseTime: rollingUpdatePauseTime,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -161,22 +192,22 @@ func TestWorkerCountRatioMaxBatchSize(t *testing.T) {
 	tcs := []struct {
 		description   string
 		workers       int
-		expectedRatio string
+		expectedRatio int
 	}{
 		{
 			description:   "scaling down to one worker, one should be up",
 			workers:       1,
-			expectedRatio: "1",
+			expectedRatio: 1,
 		},
 		{
 			description:   "scaling down to two worker, one should be up",
 			workers:       2,
-			expectedRatio: "1",
+			expectedRatio: 1,
 		},
 		{
 			description:   "scaling down to zero worker, ratio should be one, because it should never be zero",
 			workers:       0,
-			expectedRatio: "1",
+			expectedRatio: 1,
 		},
 	}
 	for _, tc := range tcs {

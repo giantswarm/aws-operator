@@ -49,8 +49,18 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.ASGMinSize = minWorkers
 	a.ASGType = key.KindWorker
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
-	a.MaxBatchSize = workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio)
-	a.MinInstancesInService = workerCountRatio(currentDesiredMinWorkers, asgMinInstancesRatio)
+	a.MaxBatchSize = strconv.Itoa(workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio))
+
+	minInstancesInService := workerCountRatio(currentDesiredMinWorkers, asgMinInstancesRatio)
+	if minWorkers == 1 && maxWorkers == 1 && minInstancesInService == maxWorkers {
+		// MinInstancesInService must be less than the autoscaling group's MaxSize.
+		// This should only ever be an issue if the min and max workers are exactly one.
+		// If this is the case then the cluster will most likely go down while the new worker
+		// is coming up and the old one is removed.
+		minInstancesInService = minInstancesInService - 1
+	}
+
+	a.MinInstancesInService = strconv.Itoa(minInstancesInService)
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
@@ -62,7 +72,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	return nil
 }
 
-func workerCountRatio(workers int, ratio float32) string {
+func workerCountRatio(workers int, ratio float32) int {
 	value := float32(workers) * ratio
 	rounded := int(value + 0.5)
 
@@ -70,7 +80,7 @@ func workerCountRatio(workers int, ratio float32) string {
 		rounded = 1
 	}
 
-	return strconv.Itoa(rounded)
+	return rounded
 }
 
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
