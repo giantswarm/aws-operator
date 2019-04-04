@@ -244,10 +244,6 @@ func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, curre
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master image id")
 		return false, nil
 	}
-	if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master instance type")
-		return false, nil
-	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master cloudconfig version")
 		return false, nil
@@ -270,10 +266,16 @@ func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, curre
 	}
 	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max")
+		if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+			r.logger.LogCtx(ctx, "level", "warning", "message", "master instance type will be changed while scaling")
+		}
 		return true, nil
 	}
 	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min")
+		if currentState.MasterInstanceType != desiredState.MasterInstanceType {
+			r.logger.LogCtx(ctx, "level", "warning", "message", "master instance type will be changed while scaling")
+		}
 		return true, nil
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
