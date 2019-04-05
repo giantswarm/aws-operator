@@ -52,7 +52,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.MaxBatchSize = strconv.Itoa(workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio))
 
 	minInstancesInService := workerCountRatio(currentDesiredMinWorkers, asgMinInstancesRatio)
-	if minWorkers == 1 && maxWorkers == 1 && minInstancesInService == 1 {
+	if minWorkers == 1 && maxWorkers == 1 {
 		// MinInstancesInService must be less than the autoscaling group's MaxSize.
 		// This should only ever be an issue if the min and max workers are exactly one.
 		// If this is the case then the cluster will most likely go down while the new worker
