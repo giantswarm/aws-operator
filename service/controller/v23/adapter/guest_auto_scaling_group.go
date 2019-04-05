@@ -57,7 +57,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		// This should only ever be an issue if the min and max workers are exactly one.
 		// If this is the case then the cluster will most likely go down while the new worker
 		// is coming up and the old one is removed.
-		minInstancesInService = minInstancesInService - 1
+		minInstancesInService = 0
 	}
 
 	a.MinInstancesInService = strconv.Itoa(minInstancesInService)
