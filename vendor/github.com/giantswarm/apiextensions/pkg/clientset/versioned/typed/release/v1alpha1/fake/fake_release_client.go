@@ -28,12 +28,12 @@ type FakeReleaseV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeReleaseV1alpha1) Releases() v1alpha1.ReleaseInterface {
-	return &FakeReleases{c}
+func (c *FakeReleaseV1alpha1) Releases(namespace string) v1alpha1.ReleaseInterface {
+	return &FakeReleases{c, namespace}
 }
 
-func (c *FakeReleaseV1alpha1) ReleaseCycles() v1alpha1.ReleaseCycleInterface {
-	return &FakeReleaseCycles{c}
+func (c *FakeReleaseV1alpha1) ReleaseCycles(namespace string) v1alpha1.ReleaseCycleInterface {
+	return &FakeReleaseCycles{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

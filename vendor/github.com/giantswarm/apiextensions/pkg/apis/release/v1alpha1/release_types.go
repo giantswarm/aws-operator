@@ -229,7 +229,6 @@ func NewReleaseTypeMeta() metav1.TypeMeta {
 }
 
 // +genclient
-// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Release CRs might look something like the following.
@@ -255,7 +254,7 @@ func NewReleaseTypeMeta() metav1.TypeMeta {
 //	      version: "0.5.0"
 //	    - name: "cluster-operator"
 //	      version: "0.10.0"
-//	  parentVersion: "6.0.1"
+//	  parentVersion: "6.2.1"
 //	  version: "6.1.0"
 //	status:
 //	  cycle:

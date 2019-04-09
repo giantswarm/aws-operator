@@ -375,8 +375,8 @@
   revision = "5ac1ece392f97e08ad0797a549702e3eba9dcd8d"
 
 [[projects]]
-  branch = "master"
-  digest = "1:0700d9071223ed4a4914f713f05d2ced100a6c8f6a0452240694b1bb93c97dfc"
+  branch = "add-1-14"
+  digest = "1:32b52ffa035249c716481fd4d29cc8dc65abe57c1408a3dcd31a61178e510adf"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -385,9 +385,10 @@
     "v_4_1_0",
     "v_4_1_1",
     "v_4_1_2",
+    "v_4_2_0",
   ]
   pruneopts = "T"
-  revision = "fe21dc89ac52fab4e13df4ffa0f9b31a90aab1ab"
+  revision = "86a0d19d18e78232fc3c58e3ccadda4ab43f7c45"
 
 [[projects]]
   branch = "master"
@@ -1539,12 +1540,9 @@
     "github.com/giantswarm/e2etemplates/pkg/chartvalues",
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
-    "github.com/giantswarm/e2etests/clusterstate/provider",
     "github.com/giantswarm/e2etests/ipam",
     "github.com/giantswarm/e2etests/scaling",
-    "github.com/giantswarm/e2etests/scaling/provider",
     "github.com/giantswarm/e2etests/update",
-    "github.com/giantswarm/e2etests/update/provider",
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
@@ -1554,6 +1552,7 @@
     "github.com/giantswarm/k8scloudconfig/v_4_1_0",
     "github.com/giantswarm/k8scloudconfig/v_4_1_1",
     "github.com/giantswarm/k8scloudconfig/v_4_1_2",
+    "github.com/giantswarm/k8scloudconfig/v_4_2_0",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/version",
@@ -1592,6 +1591,7 @@
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/kubernetes",

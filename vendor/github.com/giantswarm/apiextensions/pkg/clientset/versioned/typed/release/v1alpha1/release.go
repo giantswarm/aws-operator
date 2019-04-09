@@ -32,7 +32,7 @@ import (
 // ReleasesGetter has a method to return a ReleaseInterface.
 // A group's client should implement this interface.
 type ReleasesGetter interface {
-	Releases() ReleaseInterface
+	Releases(namespace string) ReleaseInterface
 }
 
 // ReleaseInterface has methods to work with Release resources.
@@ -52,12 +52,14 @@ type ReleaseInterface interface {
 // releases implements ReleaseInterface
 type releases struct {
 	client rest.Interface
+	ns     string
 }
 
 // newReleases returns a Releases
-func newReleases(c *ReleaseV1alpha1Client) *releases {
+func newReleases(c *ReleaseV1alpha1Client, namespace string) *releases {
 	return &releases{
 		client: c.RESTClient(),
+		ns:     namespace,
 	}
 }
 
@@ -65,6 +67,7 @@ func newReleases(c *ReleaseV1alpha1Client) *releases {
 func (c *releases) Get(name string, options v1.GetOptions) (result *v1alpha1.Release, err error) {
 	result = &v1alpha1.Release{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("releases").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -81,6 +84,7 @@ func (c *releases) List(opts v1.ListOptions) (result *v1alpha1.ReleaseList, err 
 	}
 	result = &v1alpha1.ReleaseList{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("releases").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -97,6 +101,7 @@ func (c *releases) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	}
 	opts.Watch = true
 	return c.client.Get().
+		Namespace(c.ns).
 		Resource("releases").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -107,6 +112,7 @@ func (c *releases) Watch(opts v1.ListOptions) (watch.Interface, error) {
 func (c *releases) Create(release *v1alpha1.Release) (result *v1alpha1.Release, err error) {
 	result = &v1alpha1.Release{}
 	err = c.client.Post().
+		Namespace(c.ns).
 		Resource("releases").
 		Body(release).
 		Do().
@@ -118,6 +124,7 @@ func (c *releases) Create(release *v1alpha1.Release) (result *v1alpha1.Release, 
 func (c *releases) Update(release *v1alpha1.Release) (result *v1alpha1.Release, err error) {
 	result = &v1alpha1.Release{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("releases").
 		Name(release.Name).
 		Body(release).
@@ -132,6 +139,7 @@ func (c *releases) Update(release *v1alpha1.Release) (result *v1alpha1.Release, 
 func (c *releases) UpdateStatus(release *v1alpha1.Release) (result *v1alpha1.Release, err error) {
 	result = &v1alpha1.Release{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("releases").
 		Name(release.Name).
 		SubResource("status").
@@ -144,6 +152,7 @@ func (c *releases) UpdateStatus(release *v1alpha1.Release) (result *v1alpha1.Rel
 // Delete takes name of the release and deletes it. Returns an error if one occurs.
 func (c *releases) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("releases").
 		Name(name).
 		Body(options).
@@ -158,6 +167,7 @@ func (c *releases) DeleteCollection(options *v1.DeleteOptions, listOptions v1.Li
 		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("releases").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -170,6 +180,7 @@ func (c *releases) DeleteCollection(options *v1.DeleteOptions, listOptions v1.Li
 func (c *releases) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Release, err error) {
 	result = &v1alpha1.Release{}
 	err = c.client.Patch(pt).
+		Namespace(c.ns).
 		Resource("releases").
 		SubResource(subresources...).
 		Name(name).
