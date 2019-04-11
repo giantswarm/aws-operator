@@ -76,7 +76,7 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 		return microerror.Mask(err)
 	}
 
-	err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotExist(ctx, "default", fmt.Sprintf("%s-api", id)))
+	err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotFound(ctx, "default", fmt.Sprintf("%s-api", id)))
 	if err != nil {
 		return microerror.Mask(err)
 	}

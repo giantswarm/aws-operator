@@ -103,9 +103,6 @@ type ChartSpec struct {
 	// Name is the name of the Helm chart to be deployed.
 	// e.g. kubernetes-prometheus
 	Name string `json:"name" yaml:"name"`
-	// KubeConfig is the kubeconfig to connect to the cluster when deploying
-	// the app.
-	KubeConfig ChartSpecKubeConfig `json:"kubeConfig" yaml:"kubeConfig"`
 	// Namespace is the namespace where the chart should be deployed.
 	// e.g. monitoring
 	Namespace string `json:"namespace" yaml:"namespace"`
@@ -145,20 +142,6 @@ type ChartSpecConfigSecret struct {
 	// ResourceVersion is the Kubernetes resource version of the secret.
 	// Used to detect if the secret has changed, e.g. 12345.
 	ResourceVersion string `json:"resourceVersion" yaml:"resourceVersion"`
-}
-
-type ChartSpecKubeConfig struct {
-	// Secret references a secret containing the kubconfig.
-	Secret ChartSpecKubeConfigSecret `json:"secret" yaml:"secret"`
-}
-
-type ChartSpecKubeConfigSecret struct {
-	// Name is the name of the secret containing the kubeconfig,
-	// e.g. chart-operator-kubeconfig.
-	Name string `json:"name" yaml:"name"`
-	// Namespace is the namespace of the secret containing the kubeconfig,
-	// e.g. giantswarm.
-	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
 type ChartStatus struct {
