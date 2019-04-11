@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -56,6 +56,29 @@ func (c *conditionSet) CRDExists(ctx context.Context, crd *apiextensionsv1beta1.
 				return backoff.Permanent(microerror.Mask(err))
 			}
 			return nil
+		}
+		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		n := backoff.NewNotifier(c.logger, ctx)
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+}
+
+func (c *conditionSet) CRDNotFound(ctx context.Context, crd *apiextensionsv1beta1.CustomResourceDefinition) ConditionFunc {
+	return func() error {
+		o := func() error {
+			_, err := c.extClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(crd.Name, metav1.GetOptions{})
+			if apierrors.IsNotFound(err) {
+				return nil
+			} else if err != nil {
+				return backoff.Permanent(microerror.Mask(err))
+			}
+
+			return microerror.Maskf(waitError, "CRD %#q in namespace %#q still exists", crd.Name, crd.Namespace)
 		}
 		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 		n := backoff.NewNotifier(c.logger, ctx)
@@ -119,7 +142,7 @@ func (c *conditionSet) SecretExists(ctx context.Context, namespace, name string)
 	}
 }
 
-func (c *conditionSet) SecretNotExist(ctx context.Context, namespace, name string) ConditionFunc {
+func (c *conditionSet) SecretNotFound(ctx context.Context, namespace, name string) ConditionFunc {
 	return func() error {
 		o := func() error {
 			_, err := c.k8sClient.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
@@ -128,7 +151,7 @@ func (c *conditionSet) SecretNotExist(ctx context.Context, namespace, name strin
 			} else if err != nil {
 				return backoff.Permanent(microerror.Mask(err))
 			}
-			return microerror.Maskf(stillExistsError, "secret %#q in namespace %#q", name, namespace)
+			return microerror.Maskf(waitError, "Secret %#q in namespace %#q still exists", name, namespace)
 		}
 		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 		n := backoff.NewNotifier(c.logger, ctx)

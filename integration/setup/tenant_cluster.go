@@ -16,12 +16,11 @@ import (
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
-	"github.com/kubernetes/client-go/dynamic"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -76,7 +75,7 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 		return microerror.Mask(err)
 	}
 
-	err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotExist(ctx, "default", fmt.Sprintf("%s-api", id)))
+	err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotFound(ctx, "default", fmt.Sprintf("%s-api", id)))
 	if err != nil {
 		return microerror.Mask(err)
 	}

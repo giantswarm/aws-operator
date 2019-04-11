@@ -32,8 +32,8 @@ func (c *FakeApplicationV1alpha1) Apps(namespace string) v1alpha1.AppInterface {
 	return &FakeApps{c, namespace}
 }
 
-func (c *FakeApplicationV1alpha1) AppCatalogs(namespace string) v1alpha1.AppCatalogInterface {
-	return &FakeAppCatalogs{c, namespace}
+func (c *FakeApplicationV1alpha1) AppCatalogs() v1alpha1.AppCatalogInterface {
+	return &FakeAppCatalogs{c}
 }
 
 func (c *FakeApplicationV1alpha1) Charts(namespace string) v1alpha1.ChartInterface {

@@ -58,15 +58,6 @@ func IsReleaseVersionNotMatching(err error) bool {
 	return microerror.Cause(err) == releaseVersionNotMatchingError
 }
 
-var stillExistsError = &microerror.Error{
-	Kind: "stillExistsError",
-}
-
-// IsStillExists asserts stillExistsError.
-func IsStillExists(err error) bool {
-	return microerror.Cause(err) == stillExistsError
-}
-
 var tarballNotFoundError = &microerror.Error{
 	Kind: "tarballNotFoundError",
 }
@@ -101,4 +92,13 @@ var unexpectedStatusPhaseError = &microerror.Error{
 // IsUnexpectedStatusPhase asserts notFoundError.
 func IsUnexpectedStatusPhase(err error) bool {
 	return microerror.Cause(err) == unexpectedStatusPhaseError
+}
+
+var waitError = &microerror.Error{
+	Kind: "waitError",
+}
+
+// IsWait asserts waitError.
+func IsWait(err error) bool {
+	return microerror.Cause(err) == waitError
 }
