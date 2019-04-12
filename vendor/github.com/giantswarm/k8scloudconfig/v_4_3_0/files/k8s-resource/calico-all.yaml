@@ -352,7 +352,7 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/os: linux
-        role: master
+        kubernetes.io/role: master
       # The controllers must run in the host network namespace so that
       # it isn't governed by policy that would prevent it from working.
       hostNetwork: true
@@ -360,7 +360,7 @@ spec:
         # Mark the pod as a critical add-on for rescheduling.
         - key: CriticalAddonsOnly
           operator: Exists
-        - key: node-role.kubernetes.io/master
+        - key: node.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: calico-kube-controllers
       priorityClassName: system-cluster-critical

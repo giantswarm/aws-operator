@@ -260,7 +260,7 @@ systemd:
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
       --network-plugin=cni \
       --register-node=true \
-      --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
+      --register-with-taints=node.kubernetes.io/master=:NoSchedule \
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="node.kubernetes.io/master,kubernetes.io/role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
