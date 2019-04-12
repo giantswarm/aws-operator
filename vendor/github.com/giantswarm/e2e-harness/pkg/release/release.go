@@ -154,7 +154,7 @@ func (r *Release) Delete(ctx context.Context, name string) error {
 
 // EnsureDeleted makes sure the release is deleted and purged and all
 // conditions are met.
-func (r *Release) EnsureDeleted(ctx context.Context, name string, conditions ...func() error) error {
+func (r *Release) EnsureDeleted(ctx context.Context, name string, conditions ...ConditionFunc) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting release %#q", name))
 
@@ -189,7 +189,7 @@ func (r *Release) EnsureDeleted(ctx context.Context, name string, conditions ...
 // a "app=${name}" pod and streams it logs to the ./logs directory.
 //
 // NOTE: It does not update the release if it already exists.
-func (r *Release) EnsureInstalled(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...func() error) error {
+func (r *Release) EnsureInstalled(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...ConditionFunc) error {
 	var err error
 	isOperator := strings.HasSuffix(name, "-operator")
 
@@ -252,7 +252,7 @@ func (r *Release) EnsureInstalled(ctx context.Context, name string, chartInfo Ch
 	return nil
 }
 
-func (r *Release) Install(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...func() error) error {
+func (r *Release) Install(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...ConditionFunc) error {
 	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
 
 	var err error
@@ -334,7 +334,7 @@ func (r *Release) InstallOperator(ctx context.Context, name string, chartInfo Ch
 	return nil
 }
 
-func (r *Release) Update(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...func() error) error {
+func (r *Release) Update(ctx context.Context, name string, chartInfo ChartInfo, values string, conditions ...ConditionFunc) error {
 	releaseName := fmt.Sprintf("%s-%s", r.namespace, name)
 
 	var err error
@@ -454,7 +454,7 @@ func (r *Release) pullTarball(ctx context.Context, releaseName string, chartInfo
 	return tarball, nil
 }
 
-func (r *Release) waitForConditions(ctx context.Context, conditions ...func() error) error {
+func (r *Release) waitForConditions(ctx context.Context, conditions ...ConditionFunc) error {
 	for _, c := range conditions {
 		err := ctx.Err()
 		if err != nil {

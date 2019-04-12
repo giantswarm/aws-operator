@@ -224,7 +224,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2f1bdf2457213fbc21ba1612e94c2f5ad46859afa5c30588e18a3840bd2a1276"
+  digest = "1:1103d29d8e115f53330c976874af9c1000d722dcd6305c96d30743719ebb1231"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "internal/filelogger",
@@ -233,7 +233,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "bf99ab87d641c54adbc3693dfaf7ce7fe89bd725"
+  revision = "130ef056aaf90dba4f3500d76c073236eaa379b9"
 
 [[projects]]
   branch = "master"
@@ -245,11 +245,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dbd0d24bec764b2a96abf83fc7a4e5b20f76fc5e922d9f228520c15fbca69e56"
+  digest = "1:1aa4cc4501c54834108fd38587e57b1658374939b9a4ab9a4d8f99322bc6187b"
   name = "github.com/giantswarm/e2esetup"
   packages = ["k8s"]
   pruneopts = "UT"
-  revision = "e1a9a7f62751c8559634421229603a1b8be12217"
+  revision = "5b8be38d61b1afe5bf17cb5600599cadbe3feca8"
 
 [[projects]]
   branch = "master"
@@ -806,7 +806,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "8b8c870c3087566adad67b673ddaabb07f26a2c6"
+  revision = "5a3ec6a883d301737d83860ed604021342ff2144"
 
 [[projects]]
   branch = "master"
@@ -830,11 +830,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f806b417865e83457c3659232926203f5b0d39aa741b71d9e3e4c0c774e71a5c"
+  digest = "1:5e412e2a03bd0cfdb102db97212be2e625df74fa8b2d4a8a51f107b1456e256b"
   name = "github.com/prometheus/procfs"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ea9eea63887261e4d8ed8315f4078e88d540c725"
+  revision = "e22ddced71425e65e388b17b7d0289c5ea77d06e"
 
 [[projects]]
   digest = "1:bb495ec276ab82d3dd08504bbc0594a65de8c3b22c6f2aaa92d05b73fbf3a82e"
@@ -905,7 +905,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "38d8ce5564a5b71b2e3a00553993f1b9a7ae852f"
+  revision = "88737f569e3a9c7ab309cdc09a07fe7fc87233c3"
 
 [[projects]]
   branch = "master"
@@ -946,14 +946,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c0b0b67bb6323f4f603950892199a243ee78bbb943605085b6f2dc72daa93bd1"
+  digest = "1:ae913c44e70b411817f8d4d352dc10e595d6b970ba23f2f1e668c95901f8a46a"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "0ad05ae3009d6413d3363aa09b350b2ec37daf09"
+  revision = "b44545bcd369ef9ff9bebcfebf5f3370ef9b1932"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -1324,12 +1324,12 @@
   version = "v2.12.0"
 
 [[projects]]
-  digest = "1:72fd56341405f53c745377e0ebc4abeff87f1a048e0eea6568a20212650f5a82"
+  digest = "1:c696379ad201c1e86591785579e16bf6cf886c362e9a7534e8eb0d1028b20582"
   name = "k8s.io/klog"
   packages = ["."]
   pruneopts = "UT"
-  revision = "71442cd4037d612096940ceb0f3fec3f7fff66e0"
-  version = "v0.2.0"
+  revision = "e531227889390a39d9533dde61f590fe9f4b0035"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:0761d08cbab7345aa2b7715073879dde6235aaa5671adcab409a91da67b97b8b"
@@ -1417,12 +1417,7 @@
     "github.com/giantswarm/k8scloudconfig/v_4_0_1",
     "github.com/giantswarm/k8scloudconfig/v_4_1_0",
     "github.com/giantswarm/k8scloudconfig/v_4_1_1",
-<<<<<<< HEAD
     "github.com/giantswarm/k8scloudconfig/v_4_3_0",
-=======
-    "github.com/giantswarm/k8scloudconfig/v_4_1_2",
-    "github.com/giantswarm/k8scloudconfig/v_4_2_0",
->>>>>>> master
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/version",
