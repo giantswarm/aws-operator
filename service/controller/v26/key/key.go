@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/v25/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/v25/templates/cloudformation/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/v26/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/v26/templates/cloudformation/tccp"
 )
 
 const (
@@ -699,9 +699,9 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/controller/v25/key/key_test.go
-		service/controller/v25/adapter/adapter_test.go
-		service/controller/v25/resource/cloudformation/main_stack_test.go
+		service/controller/v26/key/key_test.go
+		service/controller/v26/adapter/adapter_test.go
+		service/controller/v26/resource/cloudformation/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 2023.4.0 (HVM)
 		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2023.4.0/coreos_production_ami_hvm.txt.

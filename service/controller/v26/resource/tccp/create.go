@@ -11,11 +11,11 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/v22/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/v25/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v25/key"
-	"github.com/giantswarm/aws-operator/service/controller/v25/templates"
+	"github.com/giantswarm/aws-operator/service/controller/v26/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v26/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/v26/templates"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
