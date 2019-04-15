@@ -12,12 +12,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v25/credential"
+	"github.com/giantswarm/aws-operator/service/controller/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v26/credential"
 )
 
 const (
-	name = "bridgezonev25"
+	name = "bridgezonev26"
 )
 
 type Config struct {

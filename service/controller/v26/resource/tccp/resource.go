@@ -10,16 +10,16 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/v25/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v25/detection"
-	"github.com/giantswarm/aws-operator/service/controller/v25/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/v25/key"
+	"github.com/giantswarm/aws-operator/service/controller/v26/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v26/detection"
+	"github.com/giantswarm/aws-operator/service/controller/v26/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/v26/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv25"
+	Name = "tccpv26"
 )
 
 const (

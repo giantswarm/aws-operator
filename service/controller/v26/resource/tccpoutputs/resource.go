@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Name = "tccpoutputsv25"
+	Name = "tccpoutputsv26"
 )
 
 type Config struct {

@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/v25/key"
+	"github.com/giantswarm/aws-operator/service/controller/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v26/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {

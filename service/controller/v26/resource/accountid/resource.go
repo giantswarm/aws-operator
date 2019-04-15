@@ -7,11 +7,11 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/v26/controllercontext"
 )
 
 const (
-	Name = "accountidv25"
+	Name = "accountidv26"
 )
 
 type Config struct {
