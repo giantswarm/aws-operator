@@ -703,28 +703,30 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		service/controller/v26/adapter/adapter_test.go
 		service/controller/v26/resource/cloudformation/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 2023.4.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2023.4.0/coreos_production_ami_hvm.txt.
+		Current Release: CoreOS Container Linux stable 2023.5.0 (HVM)
+		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2023.5.0/coreos_production_ami_hvm.txt.
 	*/
 	imageIDs := map[string]string{
-		"ap-northeast-1": "ami-003b3a37a48d799cf",
-		"ap-northeast-2": "ami-0c2d3bd39b13c3b2d",
-		"ap-south-1":     "ami-0bd5eb3e67407e0df",
-		"ap-southeast-1": "ami-07aafbd1f2a182cd4",
-		"ap-southeast-2": "ami-0cb589c5f6134f078",
-		"ca-central-1":   "ami-0952a9471ff71919e",
-		"cn-north-1":     "ami-0caaf17a3032c1b56",
-		"cn-northwest-1": "ami-0a863f3b0a0720e6a",
-		"eu-central-1":   "ami-015e6cb33a709348e",
-		"eu-west-1":      "ami-04d747d892ccd652a",
-		"eu-west-2":      "ami-056a316ba69c9d9e8",
-		"eu-west-3":      "ami-026d41122f47f745e",
-		"sa-east-1":      "ami-0e9521088a80c2a02",
-		"us-east-1":      "ami-09d5d3bcd3e0e5c30",
-		"us-east-2":      "ami-02accfa372062664b",
-		"us-gov-west-1":  "ami-07600866",
-		"us-west-1":      "ami-0481a60675f6ea007",
-		"us-west-2":      "ami-025acbb0fb1db6a27",
+		"ap-northeast-1": "ami-0d3a9785820124591",
+		"ap-northeast-2": "ami-03230b2fa6af112bf",
+		"ap-south-1":     "ami-0b85fd1356963d2ee",
+		"ap-southeast-1": "ami-0f8a9aa9857d8af7e",
+		"ap-southeast-2": "ami-0e87752a1d331823a",
+		"ca-central-1":   "ami-0c0100bac23bb1d39",
+		"cn-north-1":     "ami-01e99c7e0a343d325",
+		"cn-northwest-1": "ami-0773341917796083a",
+		"eu-central-1":   "ami-012abdf0d2781f0a5",
+		"eu-north-1":     "ami-09fbda19ac2fc6c3f",
+		"eu-west-1":      "ami-01f5fbceb7a9fa4d0",
+		"eu-west-2":      "ami-069966bea0809e21d",
+		"eu-west-3":      "ami-0194c504244182155",
+		"sa-east-1":      "ami-0cd830cc037613a7d",
+		"us-east-1":      "ami-08e58b93705fb503f",
+		"us-east-2":      "ami-03172282aaa2899be",
+		"us-gov-east-1":  "ami-0ff9e298ea0bacf53",
+		"us-gov-west-1":  "ami-e7f59e86",
+		"us-west-1":      "ami-08d3e245ebf4d560f",
+		"us-west-2":      "ami-0a4f49b2488e15346",
 	}
 
 	imageID, ok := imageIDs[region]
