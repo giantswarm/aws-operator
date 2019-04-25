@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
 )
 
 type Encrypter struct {

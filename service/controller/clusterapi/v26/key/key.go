@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/templates/cloudformation/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/templates/cloudformation/tccp"
 )
 
 const (

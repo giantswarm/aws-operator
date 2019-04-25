@@ -14,7 +14,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
 )
 
 type DrainerConfig struct {

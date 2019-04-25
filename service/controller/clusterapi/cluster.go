@@ -16,9 +16,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
-	v26adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v26/adapter"
-	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v26/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
+	v26adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/adapter"
+	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/cloudconfig"
 )
 
 type ClusterConfig struct {

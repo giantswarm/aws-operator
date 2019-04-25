@@ -8,9 +8,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/resource/cpi/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/resource/cpi/template"
 )
 
 const (
