@@ -25,9 +25,9 @@ go build github.com/giantswarm/aws-operator
 
 ## Architecture
 
-The operator uses our [operatorkit](1) framework. It manages an `awsconfig`
-CRD using a generated client stored in our [apiextensions](2) repo. Releases
-are versioned using [version bundles](3).
+The operator uses our [operatorkit][1] framework. It manages an `awsconfig`
+CRD using a generated client stored in our [apiextensions][2] repo. Releases
+are versioned using [version bundles][3].
 
 The operator provisions guest Kubernetes clusters running on AWS. It runs in a
 host Kubernetes cluster also running on AWS.
@@ -38,7 +38,7 @@ host Kubernetes cluster also running on AWS.
 
 ### CloudFormation
 
-The guest Kubernetes clusters are provisioned using [AWS CloudFormation](4). The
+The guest Kubernetes clusters are provisioned using [AWS CloudFormation][4]. The
 resources are split between 3 CloudFormation stacks.
 
 * guest-main manages the guest cluster resources.
@@ -65,8 +65,8 @@ cluster.
 ### Certificates
 
 Authentication for the cluster components and end-users uses TLS certificates.
-These are provisioned using [Hashicorp Vault](5) and are managed by our
-[cert-operator](6).
+These are provisioned using [Hashicorp Vault][5] and are managed by our
+[cert-operator][6].
 
 [5]:https://www.vaultproject.io/
 [6]:https://github.com/giantswarm/cert-operator
