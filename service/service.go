@@ -21,7 +21,7 @@ import (
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
-	"github.com/giantswarm/aws-operator/service/controller"
+	"github.com/giantswarm/aws-operator/service/controller/legacy"
 )
 
 const (
@@ -45,8 +45,8 @@ type Service struct {
 	Version *version.Service
 
 	bootOnce                sync.Once
-	clusterController       *controller.Cluster
-	drainerController       *controller.Drainer
+	clusterController       *legacy.Cluster
+	drainerController       *legacy.Drainer
 	operatorCollector       *collector.Set
 	statusResourceCollector *statusresource.Collector
 }
@@ -114,20 +114,20 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var clusterController *controller.Cluster
+	var clusterController *legacy.Cluster
 	{
 		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		c := controller.ClusterConfig{
+		c := legacy.ClusterConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			APIWhitelist: controller.FrameworkConfigAPIWhitelistConfig{
+			APIWhitelist: legacy.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
 				SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.SubnetList),
 			},
@@ -135,7 +135,7 @@ func New(config Config) (*Service, error) {
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
 			DeleteLoggingBucket:   config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			EncrypterBackend:      config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
-			GuestAWSConfig: controller.ClusterConfigAWSConfig{
+			GuestAWSConfig: legacy.ClusterConfigAWSConfig{
 				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
@@ -145,7 +145,7 @@ func New(config Config) (*Service, error) {
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
 			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
-			HostAWSConfig: controller.ClusterConfigAWSConfig{
+			HostAWSConfig: legacy.ClusterConfigAWSConfig{
 				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
@@ -156,7 +156,7 @@ func New(config Config) (*Service, error) {
 			IncludeTags:      config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange: *ipamNetworkRange,
-			OIDC: controller.ClusterConfigOIDC{
+			OIDC: legacy.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
@@ -173,27 +173,27 @@ func New(config Config) (*Service, error) {
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
-		clusterController, err = controller.NewCluster(c)
+		clusterController, err = legacy.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var drainerController *controller.Drainer
+	var drainerController *legacy.Drainer
 	{
-		c := controller.DrainerConfig{
+		c := legacy.DrainerConfig{
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			GuestAWSConfig: controller.DrainerConfigAWS{
+			GuestAWSConfig: legacy.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			},
-			HostAWSConfig: controller.DrainerConfigAWS{
+			HostAWSConfig: legacy.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
@@ -203,7 +203,7 @@ func New(config Config) (*Service, error) {
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
-		drainerController, err = controller.NewDrainer(c)
+		drainerController, err = legacy.NewDrainer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

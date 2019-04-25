@@ -3,12 +3,12 @@ package service
 import (
 	"github.com/giantswarm/versionbundle"
 
-	"github.com/giantswarm/aws-operator/service/controller/v22"
-	"github.com/giantswarm/aws-operator/service/controller/v22patch1"
-	"github.com/giantswarm/aws-operator/service/controller/v23"
-	"github.com/giantswarm/aws-operator/service/controller/v24"
-	"github.com/giantswarm/aws-operator/service/controller/v25"
-	"github.com/giantswarm/aws-operator/service/controller/v26"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v22"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v23"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v24"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v25"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
 )
 
 // NewVersionBundles returns the array of version bundles defined for the
