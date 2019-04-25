@@ -1,4 +1,4 @@
-package legacy
+package clusterapi
 
 import (
 	"github.com/giantswarm/microerror"
