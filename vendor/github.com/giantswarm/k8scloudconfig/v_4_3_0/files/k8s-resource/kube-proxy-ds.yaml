@@ -25,7 +25,7 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       tolerations:
-      - key: node.kubernetes.io/master
+      - key: node-role.kubernetes.io/master
         operator: Exists
         effect: NoSchedule
       hostNetwork: true

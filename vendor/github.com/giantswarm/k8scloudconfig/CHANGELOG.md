@@ -14,6 +14,7 @@ version directory, and  then changes are introduced.
 ### Changed
 - Update kubernetes to 1.14.1
 - Update calico to 3.6.1
+- Change node labels for master and workers
 
 ## [v4.2.0]
 
