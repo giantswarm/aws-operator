@@ -134,6 +134,7 @@ func Test_NetworkAllocator_Locking(t *testing.T) {
 	fullRange := mustParseCIDR("10.100.0.0/16")
 	netSize := net.CIDRMask(24, 32)
 
+	reservedNetworksMutex := &sync.Mutex{}
 	var reservedNetworks *[]net.IPNet
 	{
 		// Take a pointer to slice so that behaviour is correct between
@@ -163,15 +164,22 @@ func Test_NetworkAllocator_Locking(t *testing.T) {
 				// Add a bit of delay to let it catch up.
 				time.Sleep(100 * time.Millisecond)
 
-				return *reservedNetworks, nil
+				reservedNetworksMutex.Lock()
+				networks := *reservedNetworks
+				reservedNetworksMutex.Unlock()
+				return networks, nil
 			},
 			PersistAllocatedNetwork: func(n net.IPNet) error {
+				reservedNetworksMutex.Lock()
 				*reservedNetworks = append(*reservedNetworks, n)
+				reservedNetworksMutex.Unlock()
 				return nil
 			},
 		}
 
+		reservedNetworksMutex.Lock()
 		numReservedNetworks := len(*reservedNetworks)
+		reservedNetworksMutex.Unlock()
 		numExpectedReservedNetworks := 0
 		if numReservedNetworks != numExpectedReservedNetworks {
 			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
@@ -181,14 +189,18 @@ func Test_NetworkAllocator_Locking(t *testing.T) {
 			t.Error(err)
 		}
 
+		reservedNetworksMutex.Lock()
 		numReservedNetworks = len(*reservedNetworks)
+		reservedNetworksMutex.Unlock()
 		numExpectedReservedNetworks = 1
 		if numReservedNetworks != numExpectedReservedNetworks {
 			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
 		}
 
 		expectedNetwork := mustParseCIDR("10.100.0.0/24")
+		reservedNetworksMutex.Lock()
 		gotNetwork := (*reservedNetworks)[0]
+		reservedNetworksMutex.Unlock()
 		if !reflect.DeepEqual(gotNetwork, expectedNetwork) {
 			t.Errorf("expected subnet %q to be allocated, got %q", expectedNetwork.String(), gotNetwork.String())
 		}
@@ -202,10 +214,16 @@ func Test_NetworkAllocator_Locking(t *testing.T) {
 		callbacks := AllocationCallbacks{
 			GetReservedNetworks: func() ([]net.IPNet, error) {
 				fmt.Printf("reservedNetworks: %#v\n", *reservedNetworks)
-				return *reservedNetworks, nil
+
+				reservedNetworksMutex.Lock()
+				networks := *reservedNetworks
+				reservedNetworksMutex.Unlock()
+				return networks, nil
 			},
 			PersistAllocatedNetwork: func(n net.IPNet) error {
+				reservedNetworksMutex.Lock()
 				*reservedNetworks = append(*reservedNetworks, n)
+				reservedNetworksMutex.Unlock()
 				return nil
 			},
 		}
@@ -218,14 +236,18 @@ func Test_NetworkAllocator_Locking(t *testing.T) {
 			t.Error(err)
 		}
 
+		reservedNetworksMutex.Lock()
 		numReservedNetworks := len(*reservedNetworks)
+		reservedNetworksMutex.Unlock()
 		numExpectedReservedNetworks := 2
 		if numReservedNetworks != numExpectedReservedNetworks {
 			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
 		}
 
 		expectedNetwork := mustParseCIDR("10.100.1.0/24")
+		reservedNetworksMutex.Lock()
 		gotNetwork := (*reservedNetworks)[1]
+		reservedNetworksMutex.Unlock()
 		if !reflect.DeepEqual(gotNetwork, expectedNetwork) {
 			t.Errorf("expected subnet %q to be allocated, got %q", expectedNetwork.String(), gotNetwork.String())
 		}
