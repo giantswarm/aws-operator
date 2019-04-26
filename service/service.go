@@ -17,6 +17,7 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
@@ -87,6 +88,11 @@ func New(config Config) (*Service, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	}
+
+	clusterAPIClient, err := clientset.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	g8sClient, err := versioned.NewForConfig(restConfig)
