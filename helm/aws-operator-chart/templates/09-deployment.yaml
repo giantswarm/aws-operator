@@ -45,9 +45,6 @@ spec:
           readOnly: true
         - name: certs
           mountPath: /etc/ssl/certs/ca-certificates.crt
-        - name: ssh-key
-          mountPath: /.ssh/
-          readOnly: true
         ports:
         - name: http
           containerPort: 8000
