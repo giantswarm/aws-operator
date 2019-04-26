@@ -252,8 +252,8 @@
   revision = "e1a9a7f62751c8559634421229603a1b8be12217"
 
 [[projects]]
-  branch = "master"
-  digest = "1:648c2246c814b8cc24080160a9be66ee26d0a236c4f632a393f081520716719f"
+  branch = "fix-aws"
+  digest = "1:58bae7933f40d330ce8716985a5152da1ed088d81634b0ae5cc0739418b2a58c"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -261,7 +261,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "0d9906466b118620a16f94ec23b3228487ded638"
+  revision = "670338b49534d4938bd6aca050d9a10e12e64c88"
 
 [[projects]]
   branch = "master"
