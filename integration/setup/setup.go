@@ -155,7 +155,6 @@ func installAWSOperator(ctx context.Context, config Config) error {
 						AdminARN:       env.GuestAWSARN(),
 						AWSOperatorARN: env.GuestAWSARN(),
 					},
-					IDRSAPub: env.IDRSAPub(),
 					SecretYaml: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYaml{
 						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
 							AWS: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWS{

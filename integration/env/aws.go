@@ -18,7 +18,6 @@ const (
 	EnvVarHostAWSAccessKeyID        = "HOST_AWS_ACCESS_KEY_ID"
 	EnvVarHostAWSAccessKeySecret    = "HOST_AWS_SECRET_ACCESS_KEY"
 	EnvVarHostAWSAccessKeyToken     = "HOST_AWS_SESSION_TOKEN"
-	EnvVarIDRSAPub                  = "IDRSA_PUB"
 )
 
 var (
@@ -79,11 +78,6 @@ func init() {
 	}
 
 	hostAWSAccessKeyToken = os.Getenv(EnvVarHostAWSAccessKeyToken)
-
-	idRSAPub = os.Getenv(EnvVarIDRSAPub)
-	if idRSAPub == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarIDRSAPub))
-	}
 }
 
 func AWSAPIHostedZoneGuest() string {
@@ -132,8 +126,4 @@ func HostAWSAccessKeySecret() string {
 
 func HostAWSAccessKeyToken() string {
 	return hostAWSAccessKeyToken
-}
-
-func IDRSAPub() string {
-	return idRSAPub
 }
