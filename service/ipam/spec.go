@@ -5,6 +5,8 @@ import (
 	"net"
 )
 
+// AllocationCallbacks holds function pointers for two methods that must be
+// called inside a lock when allocating new network range.
 type AllocationCallbacks struct {
 	// GetReservedNetworks implementation must return all networks that are
 	// allocated on any given moment. Failing to do that will result in
