@@ -126,7 +126,7 @@ func Test_NetworkAllocator_Locking(t *testing.T) {
 		    inside a lock in Allocate().
 		  * In thread #2 wait for that signal before calling Allocate().
 		  * When thread #1 has sent signal, it sleeps for a little while so that it
-			guarantees that thread #2 is waiting for mutex.
+		    guarantees that thread #2 is waiting for mutex.
 		  * Each thread then performs subnet allocation and verifies that allocated
 		    subnet matches the expectation.
 	*/
