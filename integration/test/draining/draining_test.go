@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/service/controller/v24/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v24/key"
 )
 
 const (
