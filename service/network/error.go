@@ -1,4 +1,4 @@
-package ipam
+package network
 
 import "github.com/giantswarm/microerror"
 
