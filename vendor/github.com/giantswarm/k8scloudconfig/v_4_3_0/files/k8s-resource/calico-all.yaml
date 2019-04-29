@@ -118,14 +118,11 @@ spec:
         kubernetes.io/os: linux
       hostNetwork: true
       tolerations:
-        # Make sure calico-node gets scheduled on all nodes.
-        - effect: NoSchedule
-          operator: Exists
         # Mark the pod as a critical add-on for rescheduling.
         - key: CriticalAddonsOnly
           operator: Exists
-        - effect: NoExecute
-          operator: Exists
+        # Make sure the pod gets scheduled on all nodes.
+        - operator: Exists
       serviceAccountName: calico-node
       priorityClassName: system-cluster-critical
       # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force

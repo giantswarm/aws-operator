@@ -25,9 +25,11 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       tolerations:
-      - key: node-role.kubernetes.io/master
+      # Mark the pod as a critical add-on for rescheduling.
+      - key: CriticalAddonsOnly
         operator: Exists
-        effect: NoSchedule
+      # Make sure the pod gets scheduled on all nodes.
+      - operator: Exists
       hostNetwork: true
       priorityClassName: system-node-critical
       serviceAccountName: kube-proxy
