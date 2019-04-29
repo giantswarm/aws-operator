@@ -12,8 +12,10 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
@@ -22,6 +24,7 @@ import (
 )
 
 type ClusterConfig struct {
+	CMAClient    clientset.Interface
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
@@ -104,7 +107,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
+			Watcher: config.CMAClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll),
 
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: informer.DefaultResyncPeriod,
