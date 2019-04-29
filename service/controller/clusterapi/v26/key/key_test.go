@@ -112,26 +112,6 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 
-func Test_ClusterCustomer(t *testing.T) {
-	t.Parallel()
-	expectedCustomer := "test-customer"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Customer: v1alpha1.ClusterCustomer{
-					ID: "test-customer",
-				},
-			},
-		},
-	}
-
-	if ClusterCustomer(customObject) != expectedCustomer {
-		t.Fatalf("Expected customer ID %s but was %s", expectedCustomer, ClusterCustomer(customObject))
-	}
-}
-
 func Test_ClusterCloudProviderTag(t *testing.T) {
 	t.Parallel()
 	expectedID := "test-cluster"
@@ -167,7 +147,7 @@ func Test_ClusterNamespace(t *testing.T) {
 	}
 }
 
-func Test_ClusterOrganization(t *testing.T) {
+func Test_OrganizationID(t *testing.T) {
 	t.Parallel()
 	expectedOrg := "test-org"
 
@@ -182,8 +162,8 @@ func Test_ClusterOrganization(t *testing.T) {
 		},
 	}
 
-	if ClusterOrganization(customObject) != expectedOrg {
-		t.Fatalf("Expected organization ID %s but was %s", expectedOrg, ClusterOrganization(customObject))
+	if OrganizationID(customObject) != expectedOrg {
+		t.Fatalf("Expected organization ID %s but was %s", expectedOrg, OrganizationID(customObject))
 	}
 }
 
