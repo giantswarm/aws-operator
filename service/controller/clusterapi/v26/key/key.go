@@ -241,18 +241,6 @@ func BaseDomain(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.HostedZones.API.Name
 }
 
-func HostedZoneNameAPI(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.HostedZones.API.Name
-}
-
-func HostedZoneNameEtcd(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.HostedZones.Etcd.Name
-}
-
-func HostedZoneNameIngress(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.HostedZones.Ingress.Name
-}
-
 func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }
