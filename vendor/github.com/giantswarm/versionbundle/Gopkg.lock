@@ -36,12 +36,6 @@
   version = "v0.3.0"
 
 [[projects]]
-  name = "github.com/go-resty/resty"
-  packages = ["."]
-  revision = "9ac9c42358f7c3c69ac9f8610e8790d7c338e85d"
-  version = "v1.0"
-
-[[projects]]
   name = "github.com/go-stack/stack"
   packages = ["."]
   revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
@@ -58,15 +52,6 @@
   name = "github.com/kr/logfmt"
   packages = ["."]
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/kylelemons/godebug"
-  packages = [
-    "diff",
-    "pretty"
-  ]
-  revision = "d65d576e9348f5982d7f6d83682b694e731a45c6"
 
 [[projects]]
   name = "golang.org/x/net"
@@ -104,9 +89,15 @@
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
+[[projects]]
+  name = "gopkg.in/resty.v1"
+  packages = ["."]
+  revision = "fa5875c0caa5c260ab78acec5a244215a730247f"
+  version = "v1.12.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0cb190680f8a8e3cacb299d44b8882f0d125e8f7a35415c918069b63835a69be"
+  inputs-digest = "e646c3794bf400a9cac7d0f005eaffea1fd6dbc68efb7d0aeba513e23258a0be"
   solver-name = "gps-cdcl"
   solver-version = 1
