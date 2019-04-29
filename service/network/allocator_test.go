@@ -1,4 +1,4 @@
-package ipam
+package network
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func mustParseCIDR(val string) net.IPNet {
 	return *n
 }
 
-func Test_NetworkAllocator(t *testing.T) {
+func Test_Allocator(t *testing.T) {
 	testCases := []struct {
 		name           string
 		callbacks      AllocationCallbacks
@@ -114,7 +114,7 @@ func Test_NetworkAllocator(t *testing.T) {
 	}
 }
 
-func Test_NetworkAllocator_Locking(t *testing.T) {
+func Test_Allocator_Locking(t *testing.T) {
 	svc, err := New(Config{Logger: microloggertest.New()})
 	if err != nil {
 		t.Fatal(err)
