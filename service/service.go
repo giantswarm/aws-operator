@@ -45,8 +45,8 @@ type Service struct {
 	Version *version.Service
 
 	bootOnce                sync.Once
-	clusterController       *legacy.Cluster
-	drainerController       *legacy.Drainer
+	legacyClusterController *legacy.Cluster
+	legacyDrainerController *legacy.Drainer
 	operatorCollector       *collector.Set
 	statusResourceCollector *statusresource.Collector
 }
@@ -114,7 +114,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var clusterController *legacy.Cluster
+	var legacyClusterController *legacy.Cluster
 	{
 		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
 		if err != nil {
@@ -173,13 +173,13 @@ func New(config Config) (*Service, error) {
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
-		clusterController, err = legacy.NewCluster(c)
+		legacyClusterController, err = legacy.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var drainerController *legacy.Drainer
+	var legacyDrainerController *legacy.Drainer
 	{
 		c := legacy.DrainerConfig{
 			G8sClient:    g8sClient,
@@ -203,7 +203,7 @@ func New(config Config) (*Service, error) {
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
-		drainerController, err = legacy.NewDrainer(c)
+		legacyDrainerController, err = legacy.NewDrainer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -260,8 +260,8 @@ func New(config Config) (*Service, error) {
 		Version: versionService,
 
 		bootOnce:                sync.Once{},
-		clusterController:       clusterController,
-		drainerController:       drainerController,
+		legacyClusterController: legacyClusterController,
+		legacyDrainerController: legacyDrainerController,
 		operatorCollector:       operatorCollector,
 		statusResourceCollector: statusResourceCollector,
 	}
@@ -274,7 +274,7 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
-		go s.clusterController.Boot(ctx)
-		go s.drainerController.Boot(ctx)
+		go s.legacyClusterController.Boot(ctx)
+		go s.legacyDrainerController.Boot(ctx)
 	})
 }
