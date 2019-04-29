@@ -100,27 +100,22 @@ const (
 )
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
-	return customObject.Spec.Cluster.Kubernetes.API.Domain
-	return mustG8sSpecFromCMASpec(cluster.Spec.ProviderSpec).Cluster.DNS.Domain
+	return fmt.Sprintf("api.%s.%s", providerSpec(cluster).Cluster.DNS.Domain, providerStatus(cluster).Cluster.ID)
 }
 
-func AutoScalingGroupName(customObject v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
+func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
 }
 
-func AvailabilityZone(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.AZ
-}
-
-func AWSCliContainerRegistry(customObject v1alpha1.Cluster) string {
-	if IsChinaRegion(customObject) {
+func AWSCliContainerRegistry(cluster v1alpha1.Cluster) string {
+	if IsChinaRegion(cluster) {
 		return chinaAWSCliContainerRegistry
 	}
 	return defaultAWSCliContainerRegistry
 }
 
-func BucketName(customObject v1alpha1.Cluster, accountID string) string {
-	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
+func BucketName(cluster v1alpha1.Cluster, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
 }
 
 // BucketObjectName computes the S3 object path to the actual cloud config.
@@ -128,16 +123,16 @@ func BucketName(customObject v1alpha1.Cluster, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/master
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
-func BucketObjectName(customObject v1alpha1.Cluster, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
+func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(cluster), CloudConfigVersion, role)
 }
 
-func CredentialName(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.CredentialSecret.Name
+func CredentialName(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.CredentialSecret.Name
 }
 
-func CredentialNamespace(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.CredentialSecret.Namespace
+func CredentialNamespace(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.CredentialSecret.Namespace
 }
 
 func CloudConfigSmallTemplates() []string {
@@ -166,123 +161,119 @@ func CloudFormationGuestTemplates() []string {
 	}
 }
 
-func ClusterCloudProviderTag(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
+func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf(CloudProviderTagName, ClusterID(cluster))
 }
 
-func ClusterCustomer(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.Cluster.Customer.ID
+func ClusterEtcdDomain(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s:%d", cluster.Spec.Cluster.Etcd.Domain, cluster.Spec.Cluster.Etcd.Port)
 }
 
-func ClusterEtcdDomain(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, customObject.Spec.Cluster.Etcd.Port)
+func ClusterID(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.Cluster.ID
 }
 
-func ClusterID(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.Cluster.ID
-}
-
-func ClusterNamespace(customObject v1alpha1.Cluster) string {
-	return ClusterID(customObject)
+func ClusterNamespace(cluster v1alpha1.Cluster) string {
+	return ClusterID(cluster)
 }
 
 // ClusterOrganization returns the org name from the custom object.
 // It uses ClusterCustomer until this field is renamed in the custom object.
-func ClusterOrganization(customObject v1alpha1.Cluster) string {
-	return ClusterCustomer(customObject)
+func ClusterOrganization(cluster v1alpha1.Cluster) string {
+	return ClusterCustomer(cluster)
 }
 
-func ClusterTags(customObject v1alpha1.Cluster, installationName string) map[string]string {
-	cloudProviderTag := ClusterCloudProviderTag(customObject)
+func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]string {
+	cloudProviderTag := ClusterCloudProviderTag(cluster)
 	tags := map[string]string{
 		cloudProviderTag:    CloudProviderTagOwnedValue,
-		ClusterTagName:      ClusterID(customObject),
+		ClusterTagName:      ClusterID(cluster),
 		InstallationTagName: installationName,
-		OrganizationTagName: ClusterOrganization(customObject),
+		OrganizationTagName: ClusterOrganization(cluster),
 	}
 
 	return tags
 }
 
-func CustomerID(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.Cluster.Customer.ID
+func CustomerID(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.Cluster.Customer.ID
 }
 
-func DockerVolumeResourceName(customObject v1alpha1.Cluster) string {
-	return getResourcenameWithTimeHash("DockerVolume", customObject)
+func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
+	return getResourcenameWithTimeHash("DockerVolume", cluster)
 }
 
-func DockerVolumeName(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-docker", ClusterID(customObject))
+func DockerVolumeName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-docker", ClusterID(cluster))
 }
 
-func EtcdVolumeName(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
+func EtcdVolumeName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(cluster))
 }
 
-func LogVolumeName(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-log", ClusterID(customObject))
+func LogVolumeName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-log", ClusterID(cluster))
 }
 
-func EC2ServiceDomain(customObject v1alpha1.Cluster) string {
+func EC2ServiceDomain(cluster v1alpha1.Cluster) string {
 	domain := "ec2.amazonaws.com"
 
-	if IsChinaRegion(customObject) {
+	if IsChinaRegion(cluster) {
 		domain += ".cn"
 	}
 
 	return domain
 }
 
-func BaseDomain(customObject v1alpha1.Cluster) string {
+func BaseDomain(cluster v1alpha1.Cluster) string {
 	// TODO remove other zones and make it a BaseDomain in the CR.
 	// CloudFormation creates a separate HostedZone with the same name.
 	// Probably the easiest way for now is to just allow single domain for
 	// everything which we do now.
-	return customObject.Spec.AWS.HostedZones.API.Name
+	return cluster.Spec.AWS.HostedZones.API.Name
 }
 
-func HostedZoneNameAPI(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.HostedZones.API.Name
+func HostedZoneNameAPI(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.HostedZones.API.Name
 }
 
-func HostedZoneNameEtcd(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.HostedZones.Etcd.Name
+func HostedZoneNameEtcd(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.HostedZones.Etcd.Name
 }
 
-func HostedZoneNameIngress(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.HostedZones.Ingress.Name
+func HostedZoneNameIngress(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.HostedZones.Ingress.Name
 }
 
-func IngressControllerInsecurePort(customObject v1alpha1.Cluster) int {
-	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
+func IngressControllerInsecurePort(cluster v1alpha1.Cluster) int {
+	return cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort
 }
 
-func IngressControllerSecurePort(customObject v1alpha1.Cluster) int {
-	return customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort
+func IngressControllerSecurePort(cluster v1alpha1.Cluster) int {
+	return cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort
 }
 
-func InstanceProfileName(customObject v1alpha1.Cluster, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
+func InstanceProfileName(cluster v1alpha1.Cluster, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, ProfileNameTemplate)
 }
 
-func IsChinaRegion(customObject v1alpha1.Cluster) bool {
-	return strings.HasPrefix(Region(customObject), "cn-")
+func IsChinaRegion(cluster v1alpha1.Cluster) bool {
+	return strings.HasPrefix(Region(cluster), "cn-")
 }
 
-func IsDeleted(customObject v1alpha1.Cluster) bool {
-	return customObject.GetDeletionTimestamp() != nil
+func IsDeleted(cluster v1alpha1.Cluster) bool {
+	return cluster.GetDeletionTimestamp() != nil
 }
 
-func KubernetesAPISecurePort(customObject v1alpha1.Cluster) int {
-	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
+func KubernetesAPISecurePort(cluster v1alpha1.Cluster) int {
+	return cluster.Spec.Cluster.Kubernetes.API.SecurePort
 }
 
-func EtcdDomain(customObject v1alpha1.Cluster) string {
-	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", BaseDomain(customObject)}, ".")
+func EtcdDomain(cluster v1alpha1.Cluster) string {
+	return strings.Join([]string{"etcd", ClusterID(cluster), "k8s", BaseDomain(cluster)}, ".")
 }
 
-func EtcdPort(customObject v1alpha1.Cluster) int {
+func EtcdPort(cluster v1alpha1.Cluster) int {
 	return 2379
 }
 
@@ -303,60 +294,60 @@ func LoadBalancerName(domainName string, cluster v1alpha1.Cluster) (string, erro
 	return lbName, nil
 }
 
-func MainGuestStackName(customObject v1alpha1.Cluster) string {
-	clusterID := ClusterID(customObject)
+func MainGuestStackName(cluster v1alpha1.Cluster) string {
+	clusterID := ClusterID(cluster)
 
 	return fmt.Sprintf("cluster-%s-guest-main", clusterID)
 }
 
-func MainHostPreStackName(customObject v1alpha1.Cluster) string {
-	clusterID := ClusterID(customObject)
+func MainHostPreStackName(cluster v1alpha1.Cluster) string {
+	clusterID := ClusterID(cluster)
 
 	return fmt.Sprintf("cluster-%s-host-setup", clusterID)
 }
 
-func MainHostPostStackName(customObject v1alpha1.Cluster) string {
-	clusterID := ClusterID(customObject)
+func MainHostPostStackName(cluster v1alpha1.Cluster) string {
+	clusterID := ClusterID(cluster)
 
 	return fmt.Sprintf("cluster-%s-host-main", clusterID)
 }
 
-func MasterCount(customObject v1alpha1.Cluster) int {
-	return len(customObject.Spec.AWS.Masters)
+func MasterCount(cluster v1alpha1.Cluster) int {
+	return len(cluster.Spec.AWS.Masters)
 }
 
-func MasterImageID(customObject v1alpha1.Cluster) string {
+func MasterImageID(cluster v1alpha1.Cluster) string {
 	var imageID string
 
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		imageID = customObject.Spec.AWS.Masters[0].ImageID
+	if len(cluster.Spec.AWS.Masters) > 0 {
+		imageID = cluster.Spec.AWS.Masters[0].ImageID
 	}
 
 	return imageID
 }
 
-func MasterInstanceResourceName(customObject v1alpha1.Cluster) string {
-	return getResourcenameWithTimeHash("MasterInstance", customObject)
+func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
+	return getResourcenameWithTimeHash("MasterInstance", cluster)
 }
 
-func MasterInstanceName(customObject v1alpha1.Cluster) string {
-	clusterID := ClusterID(customObject)
+func MasterInstanceName(cluster v1alpha1.Cluster) string {
+	clusterID := ClusterID(cluster)
 
 	return fmt.Sprintf("%s-master", clusterID)
 }
 
-func MasterInstanceType(customObject v1alpha1.Cluster) string {
+func MasterInstanceType(cluster v1alpha1.Cluster) string {
 	var instanceType string
 
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		instanceType = customObject.Spec.AWS.Masters[0].InstanceType
+	if len(cluster.Spec.AWS.Masters) > 0 {
+		instanceType = cluster.Spec.AWS.Masters[0].InstanceType
 	}
 
 	return instanceType
 }
 
-func MasterRoleARN(customObject v1alpha1.Cluster, accountID string) string {
-	return baseRoleARN(customObject, accountID, "master")
+func MasterRoleARN(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "master")
 }
 
 func NATEIPName(idx int) string {
@@ -386,16 +377,16 @@ func NATRouteName(idx int) string {
 	return fmt.Sprintf("NATRoute%02d", idx)
 }
 
-func PeerAccessRoleName(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
+func PeerAccessRoleName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
 }
 
-func PeerID(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.VPC.PeerID
+func PeerID(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.VPC.PeerID
 }
 
-func PolicyName(customObject v1alpha1.Cluster, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
+func PolicyName(cluster v1alpha1.Cluster, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, PolicyNameTemplate)
 }
 
 func PrivateSubnetRouteTableAssociationName(idx int) string {
@@ -416,8 +407,8 @@ func PrivateRouteTableName(idx int) string {
 	return fmt.Sprintf("PrivateRouteTable%02d", idx)
 }
 
-func PrivateSubnetCIDR(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
+func PrivateSubnetCIDR(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.VPC.PrivateSubnetCIDR
 }
 
 func PrivateSubnetName(idx int) string {
@@ -429,8 +420,8 @@ func PrivateSubnetName(idx int) string {
 	return fmt.Sprintf("PrivateSubnet%02d", idx)
 }
 
-func PublicSubnetCIDR(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
+func PublicSubnetCIDR(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.VPC.PublicSubnetCIDR
 }
 
 func PublicSubnetRouteTableAssociationName(idx int) string {
@@ -460,121 +451,121 @@ func PublicSubnetName(idx int) string {
 	return fmt.Sprintf("PublicSubnet%02d", idx)
 }
 
-func CIDR(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.VPC.CIDR
+func CIDR(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.VPC.CIDR
 }
 
-func Region(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.AWS.Region
+func Region(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.AWS.Region
 }
 
-func RegionARN(customObject v1alpha1.Cluster) string {
+func RegionARN(cluster v1alpha1.Cluster) string {
 	regionARN := "aws"
 
-	if IsChinaRegion(customObject) {
+	if IsChinaRegion(cluster) {
 		regionARN += "-cn"
 	}
 
 	return regionARN
 }
 
-func RoleName(customObject v1alpha1.Cluster, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, RoleNameTemplate)
+func RoleName(cluster v1alpha1.Cluster, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, RoleNameTemplate)
 }
 
-func RouteTableName(customObject v1alpha1.Cluster, suffix string, idx int) string {
+func RouteTableName(cluster v1alpha1.Cluster, suffix string, idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
 	if idx < 1 {
-		return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+		return fmt.Sprintf("%s-%s", ClusterID(cluster), suffix)
 	}
-	return fmt.Sprintf("%s-%s%02d", ClusterID(customObject), suffix, idx)
+	return fmt.Sprintf("%s-%s%02d", ClusterID(cluster), suffix, idx)
 }
 
-func S3ServiceDomain(customObject v1alpha1.Cluster) string {
-	s3Domain := fmt.Sprintf("s3.%s.amazonaws.com", Region(customObject))
+func S3ServiceDomain(cluster v1alpha1.Cluster) string {
+	s3Domain := fmt.Sprintf("s3.%s.amazonaws.com", Region(cluster))
 
-	if IsChinaRegion(customObject) {
+	if IsChinaRegion(cluster) {
 		s3Domain += ".cn"
 	}
 
 	return s3Domain
 }
 
-func ScalingMax(customObject v1alpha1.Cluster) int {
-	return customObject.Spec.Cluster.Scaling.Max
+func ScalingMax(cluster v1alpha1.Cluster) int {
+	return cluster.Spec.Cluster.Scaling.Max
 }
 
-func ScalingMin(customObject v1alpha1.Cluster) int {
-	return customObject.Spec.Cluster.Scaling.Min
+func ScalingMin(cluster v1alpha1.Cluster) int {
+	return cluster.Spec.Cluster.Scaling.Min
 }
 
-func SecurityGroupName(customObject v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
+func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
 }
 
-func SmallCloudConfigPath(customObject v1alpha1.Cluster, accountID string, role string) string {
-	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(customObject, role))
+func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
+	return fmt.Sprintf("%s/%s", BucketName(cluster, accountID), BucketObjectName(cluster, role))
 }
 
-func SmallCloudConfigS3HTTPURL(customObject v1alpha1.Cluster, accountID string, role string) string {
-	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(customObject), SmallCloudConfigPath(customObject, accountID, role))
+func SmallCloudConfigS3HTTPURL(cluster v1alpha1.Cluster, accountID string, role string) string {
+	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(cluster), SmallCloudConfigPath(cluster, accountID, role))
 }
 
-func SmallCloudConfigS3URL(customObject v1alpha1.Cluster, accountID string, role string) string {
-	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(customObject, accountID, role))
+func SmallCloudConfigS3URL(cluster v1alpha1.Cluster, accountID string, role string) string {
+	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(cluster, accountID, role))
 }
 
-func SpecAvailabilityZones(customObject v1alpha1.Cluster) int {
-	return customObject.Spec.AWS.AvailabilityZones
+func SpecAvailabilityZones(cluster v1alpha1.Cluster) int {
+	return cluster.Spec.AWS.AvailabilityZones
 }
 
-func StatusAvailabilityZones(customObject v1alpha1.Cluster) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
-	return customObject.Status.AWS.AvailabilityZones
+func StatusAvailabilityZones(cluster v1alpha1.Cluster) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
+	return cluster.Status.AWS.AvailabilityZones
 }
 
 // StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.
-func StatusNetworkCIDR(customObject v1alpha1.Cluster) string {
-	return customObject.Status.Cluster.Network.CIDR
+func StatusNetworkCIDR(cluster v1alpha1.Cluster) string {
+	return cluster.Status.Cluster.Network.CIDR
 }
 
-func StatusScalingDesiredCapacity(customObject v1alpha1.Cluster) int {
-	return customObject.Status.Cluster.Scaling.DesiredCapacity
+func StatusScalingDesiredCapacity(cluster v1alpha1.Cluster) int {
+	return cluster.Status.Cluster.Scaling.DesiredCapacity
 }
 
-func SubnetName(customObject v1alpha1.Cluster, suffix string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), suffix)
+func SubnetName(cluster v1alpha1.Cluster, suffix string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), suffix)
 }
 
-func TargetLogBucketName(customObject v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(customObject))
+func TargetLogBucketName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(cluster))
 }
 
 func ToClusterEndpoint(v interface{}) (string, error) {
-	customObject, err := ToCustomObject(v)
+	cluster, err := ToCustomObject(v)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return ClusterAPIEndpoint(customObject), nil
+	return ClusterAPIEndpoint(cluster), nil
 }
 
 func ToClusterID(v interface{}) (string, error) {
-	customObject, err := ToCustomObject(v)
+	cluster, err := ToCustomObject(v)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return ClusterID(customObject), nil
+	return ClusterID(cluster), nil
 }
 
 func ToClusterStatus(v interface{}) (v1alpha1.StatusCluster, error) {
-	customObject, err := ToCustomObject(v)
+	cluster, err := ToCustomObject(v)
 	if err != nil {
 		return v1alpha1.StatusCluster{}, microerror.Mask(err)
 	}
 
-	return customObject.Status.Cluster, nil
+	return cluster.Status.Cluster, nil
 }
 
 func ToCustomObject(v interface{}) (v1alpha1.Cluster, error) {
@@ -586,36 +577,36 @@ func ToCustomObject(v interface{}) (v1alpha1.Cluster, error) {
 	if !ok {
 		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
 	}
-	customObject := *customObjectPointer
+	cluster := *customObjectPointer
 
-	customObject = *customObject.DeepCopy()
+	cluster = *cluster.DeepCopy()
 
-	return customObject, nil
+	return cluster, nil
 }
 
 func ToNodeCount(v interface{}) (int, error) {
-	customObject, err := ToCustomObject(v)
+	cluster, err := ToCustomObject(v)
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
 
-	nodeCount := MasterCount(customObject) + WorkerCount(customObject)
+	nodeCount := MasterCount(cluster) + WorkerCount(cluster)
 
 	return nodeCount, nil
 }
 
 func ToVersionBundleVersion(v interface{}) (string, error) {
-	customObject, err := ToCustomObject(v)
+	cluster, err := ToCustomObject(v)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return VersionBundleVersion(customObject), nil
+	return VersionBundleVersion(cluster), nil
 }
 
 // VersionBundleVersion returns the version contained in the Version Bundle.
-func VersionBundleVersion(customObject v1alpha1.Cluster) string {
-	return customObject.Spec.VersionBundle.Version
+func VersionBundleVersion(cluster v1alpha1.Cluster) string {
+	return cluster.Spec.VersionBundle.Version
 }
 
 func VPCPeeringRouteName(idx int) string {
@@ -627,53 +618,53 @@ func VPCPeeringRouteName(idx int) string {
 	return fmt.Sprintf("VPCPeeringRoute%02d", idx)
 }
 
-func WorkerCount(customObject v1alpha1.Cluster) int {
-	return len(customObject.Spec.AWS.Workers)
+func WorkerCount(cluster v1alpha1.Cluster) int {
+	return len(cluster.Spec.AWS.Workers)
 }
 
 // WorkerDockerVolumeSizeGB returns size of a docker volume configured for
 // worker nodes. If there are no workers in custom object, 0 is returned as
 // size.
-func WorkerDockerVolumeSizeGB(customObject v1alpha1.Cluster) string {
-	if len(customObject.Spec.AWS.Workers) <= 0 {
+func WorkerDockerVolumeSizeGB(cluster v1alpha1.Cluster) string {
+	if len(cluster.Spec.AWS.Workers) <= 0 {
 		return defaultDockerVolumeSizeGB
 	}
 
-	if customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB <= 0 {
+	if cluster.Spec.AWS.Workers[0].DockerVolumeSizeGB <= 0 {
 		return defaultDockerVolumeSizeGB
 	}
 
-	return strconv.Itoa(customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB)
+	return strconv.Itoa(cluster.Spec.AWS.Workers[0].DockerVolumeSizeGB)
 }
 
-func WorkerImageID(customObject v1alpha1.Cluster) string {
+func WorkerImageID(cluster v1alpha1.Cluster) string {
 	var imageID string
 
-	if len(customObject.Spec.AWS.Workers) > 0 {
-		imageID = customObject.Spec.AWS.Workers[0].ImageID
+	if len(cluster.Spec.AWS.Workers) > 0 {
+		imageID = cluster.Spec.AWS.Workers[0].ImageID
 	}
 
 	return imageID
 }
 
-func WorkerInstanceType(customObject v1alpha1.Cluster) string {
+func WorkerInstanceType(cluster v1alpha1.Cluster) string {
 	var instanceType string
 
-	if len(customObject.Spec.AWS.Workers) > 0 {
-		instanceType = customObject.Spec.AWS.Workers[0].InstanceType
+	if len(cluster.Spec.AWS.Workers) > 0 {
+		instanceType = cluster.Spec.AWS.Workers[0].InstanceType
 
 	}
 
 	return instanceType
 }
 
-func WorkerRoleARN(customObject v1alpha1.Cluster, accountID string) string {
-	return baseRoleARN(customObject, accountID, "worker")
+func WorkerRoleARN(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "worker")
 }
 
-func baseRoleARN(customObject v1alpha1.Cluster, accountID string, kind string) string {
-	clusterID := ClusterID(customObject)
-	partition := RegionARN(customObject)
+func baseRoleARN(cluster v1alpha1.Cluster, accountID string, kind string) string {
+	clusterID := ClusterID(cluster)
+	partition := RegionARN(cluster)
 
 	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, RoleNameTemplate)
 }
@@ -691,8 +682,8 @@ func componentName(domainName string) (string, error) {
 }
 
 // ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.Cluster) (string, error) {
-	region := Region(customObject)
+func ImageID(cluster v1alpha1.Cluster) (string, error) {
+	region := Region(cluster)
 
 	/*
 		Container Linux AMIs for each active AWS region.
@@ -738,8 +729,8 @@ func ImageID(customObject v1alpha1.Cluster) (string, error) {
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,
 // time hash and cluster ID.
-func getResourcenameWithTimeHash(prefix string, customObject v1alpha1.Cluster) string {
-	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
+func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string {
+	clusterID := strings.Replace(ClusterID(cluster), "-", "", -1)
 
 	h := sha1.New()
 	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
