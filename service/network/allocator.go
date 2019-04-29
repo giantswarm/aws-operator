@@ -47,10 +47,14 @@ func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize n
 	var err error
 	var reservedSubnets []net.IPNet
 	{
-		reservedSubnets, err = callbacks.GetReservedNetworks()
+		i.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets")
+
+		reservedSubnets, err = callbacks.GetReservedNetworks(ctx)
 		if err != nil {
 			return net.IPNet{}, microerror.Mask(err)
 		}
+
+		i.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("got allocated subnets: %q", reservedSubnets))
 	}
 
 	var subnet net.IPNet
@@ -68,7 +72,7 @@ func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize n
 	{
 		i.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("persisting allocation candidate: %q", subnet.String()))
 
-		err = callbacks.PersistAllocatedNetwork(subnet)
+		err = callbacks.PersistAllocatedNetwork(ctx, subnet)
 		if err != nil {
 			return net.IPNet{}, microerror.Mask(err)
 		}
