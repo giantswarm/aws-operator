@@ -93,7 +93,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	clusterAPIClient, err := clientset.NewForConfig(restConfig)
+	cmaClient, err := clientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -131,6 +131,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := clusterapi.ClusterConfig{
+			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
@@ -191,6 +192,7 @@ func New(config Config) (*Service, error) {
 	var clusterapiDrainerController *clusterapi.Drainer
 	{
 		c := clusterapi.DrainerConfig{
+			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
