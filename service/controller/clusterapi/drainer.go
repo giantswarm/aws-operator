@@ -96,8 +96,8 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
-			// like operatorkit.giantswarm.io/aws-operator-drainer.
-			Name: config.ProjectName + "-drainer",
+			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
+			Name: config.ProjectName + "-drainer-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
