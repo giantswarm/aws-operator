@@ -137,7 +137,7 @@ func (c *Client) DeleteRelease(ctx context.Context, releaseName string, options 
 
 		return nil
 	}
-	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+	b := backoff.NewMaxRetries(10, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
@@ -383,7 +383,7 @@ func (c *Client) GetReleaseContent(ctx context.Context, releaseName string) (*Re
 
 			return nil
 		}
-		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		b := backoff.NewMaxRetries(10, 5*time.Second)
 		n := backoff.NewNotifier(c.logger, ctx)
 
 		err := backoff.RetryNotify(o, b, n)
@@ -425,7 +425,8 @@ func (c *Client) GetReleaseHistory(ctx context.Context, releaseName string) (*Re
 
 			return nil
 		}
-		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+		b := backoff.NewMaxRetries(10, 5*time.Second)
+
 		n := backoff.NewNotifier(c.logger, ctx)
 
 		err = backoff.RetryNotify(o, b, n)
@@ -459,6 +460,7 @@ func (c *Client) GetReleaseHistory(ctx context.Context, releaseName string) (*Re
 
 		history = &ReleaseHistory{
 			AppVersion:   appVersion,
+			Description:  release.Info.Description,
 			LastDeployed: lastDeployed,
 			Name:         release.Name,
 			Version:      version,
@@ -486,6 +488,8 @@ func (c *Client) InstallReleaseFromTarball(ctx context.Context, path, ns string,
 			return backoff.Permanent(microerror.Mask(err))
 		} else if IsTarballNotFound(err) {
 			return backoff.Permanent(microerror.Mask(err))
+		} else if IsYamlConversionFailed(err) {
+			return backoff.Permanent(microerror.Mask(err))
 		} else if err != nil {
 			if IsInvalidGZipHeader(err) {
 				content, readErr := ioutil.ReadFile(path)
@@ -495,12 +499,13 @@ func (c *Client) InstallReleaseFromTarball(ctx context.Context, path, ns string,
 					c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("could not read chart tarball %s", path), "stack", fmt.Sprintf("%#v", readErr))
 				}
 			}
+			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("err string: %#q", err.Error()))
 			return microerror.Mask(err)
 		}
 
 		return nil
 	}
-	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+	b := backoff.NewMaxRetries(10, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
@@ -660,6 +665,8 @@ func (c *Client) UpdateReleaseFromTarball(ctx context.Context, releaseName, path
 		release, err := c.newHelmClientFromTunnel(t).UpdateRelease(releaseName, path, options...)
 		if IsReleaseNotFound(err) {
 			return backoff.Permanent(microerror.Mask(err))
+		} else if IsYamlConversionFailed(err) {
+			return backoff.Permanent(microerror.Mask(err))
 		} else if err != nil {
 			if IsInvalidGZipHeader(err) {
 				content, readErr := ioutil.ReadFile(path)
@@ -669,12 +676,13 @@ func (c *Client) UpdateReleaseFromTarball(ctx context.Context, releaseName, path
 					c.logger.LogCtx(ctx, "level", "error", "message", fmt.Sprintf("could not read chart tarball %s", path), "stack", fmt.Sprintf("%#v", readErr))
 				}
 			}
+			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("err string: %#q", err.Error()))
 			return microerror.Mask(err)
 		}
 
 		return nil
 	}
-	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+	b := backoff.NewMaxRetries(10, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)

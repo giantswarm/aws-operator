@@ -78,7 +78,7 @@ func (c *conditionSet) CRDNotFound(ctx context.Context, crd *apiextensionsv1beta
 				return backoff.Permanent(microerror.Mask(err))
 			}
 
-			return microerror.Maskf(waitError, "CRD %#q in namespace %#q still exists", crd.Name, crd.Namespace)
+			return microerror.Maskf(waitError, "CRD %#q still exists", crd.Name)
 		}
 		b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
 		n := backoff.NewNotifier(c.logger, ctx)
@@ -98,13 +98,38 @@ func (c *conditionSet) PodExists(ctx context.Context, namespace, labelSelector s
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			if len(pods.Items) > 1 {
-				return microerror.Mask(tooManyResultsError)
+			if len(pods.Items) != 1 {
+				return microerror.Maskf(waitError, "expected 1 pod but got %d", len(pods.Items))
 			}
 
 			pod := pods.Items[0]
 			if pod.Status.Phase != v1.PodRunning {
-				return microerror.Maskf(unexpectedStatusPhaseError, string(pod.Status.Phase))
+				return microerror.Maskf(waitError, "expected Pod phase %#q but got %#q", v1.PodRunning, pod.Status.Phase)
+			}
+
+			return nil
+		}
+		b := backoff.NewExponential(backoff.MediumMaxWait, backoff.LongMaxInterval)
+
+		err := backoff.Retry(o, b)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+}
+
+func (c *conditionSet) PodNotFound(ctx context.Context, namespace, labelSelector string) ConditionFunc {
+	return func() error {
+		o := func() error {
+			pods, err := c.k8sClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			if len(pods.Items) != 0 {
+				return microerror.Maskf(waitError, "expected no Pods for label selector %#q but got %d", labelSelector, len(pods.Items))
 			}
 
 			return nil

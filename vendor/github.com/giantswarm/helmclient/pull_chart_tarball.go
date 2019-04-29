@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
@@ -65,7 +66,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 		return nil
 	}
 
-	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+	b := backoff.NewMaxRetries(10, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)

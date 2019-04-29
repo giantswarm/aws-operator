@@ -10,8 +10,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/go-resty/resty"
 	"golang.org/x/sync/errgroup"
+	"gopkg.in/resty.v1"
 )
 
 type CollectorConfig struct {
