@@ -177,25 +177,19 @@ func ClusterNamespace(cluster v1alpha1.Cluster) string {
 	return ClusterID(cluster)
 }
 
-// ClusterOrganization returns the org name from the custom object.
-// It uses ClusterCustomer until this field is renamed in the custom object.
-func ClusterOrganization(cluster v1alpha1.Cluster) string {
-	return ClusterCustomer(cluster)
-}
-
 func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]string {
 	cloudProviderTag := ClusterCloudProviderTag(cluster)
 	tags := map[string]string{
 		cloudProviderTag:    CloudProviderTagOwnedValue,
 		ClusterTagName:      ClusterID(cluster),
 		InstallationTagName: installationName,
-		OrganizationTagName: ClusterOrganization(cluster),
+		OrganizationTagName: OrganizationID(cluster),
 	}
 
 	return tags
 }
 
-func CustomerID(cluster v1alpha1.Cluster) string {
+func OrganizationID(cluster v1alpha1.Cluster) string {
 	return cluster.Spec.Cluster.Customer.ID
 }
 
