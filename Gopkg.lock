@@ -170,10 +170,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:73215600773eac8399396c41e888a01d9f64a5ebdf8d3c381533f8793c2f2326"
+  digest = "1:e8d95d77bff0bda4bceaedc496aa9c879630d87fe6db34b6eb3797bc97d09913"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
+    "pkg/apis/cluster/v1alpha1",
     "pkg/apis/core/v1alpha1",
     "pkg/apis/example/v1alpha1",
     "pkg/apis/provider/v1alpha1",
@@ -314,7 +315,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:88b53a453d7e4e63413d2a19fc856e59f5a966a1a0e3e326d32cb788110b028a"
+  digest = "1:466d26602d826c3e0f1eab2ca221869bcefa3ed3964eca319f6f521025dce153"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -326,7 +327,7 @@
     "v_4_2_0",
   ]
   pruneopts = "T"
-  revision = "80b22e313bd60f651c8f24456e366931ef2a347d"
+  revision = "d47fc4c35ff564f2fc0f49de09912ec0cb6518dc"
 
 [[projects]]
   branch = "master"
@@ -954,7 +955,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "804c0c7841b595338f049388006a3945cb3cfad1"
+  revision = "2cc0cad0ac78f3ede1f4d2b6ca16ea3038641af4"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -1427,6 +1428,7 @@
     "github.com/aws/aws-sdk-go/service/support",
     "github.com/aws/aws-sdk-go/service/support/supportiface",
     "github.com/docker/distribution/reference",
+    "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned",
@@ -1491,6 +1493,7 @@
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
@@ -1499,6 +1502,7 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/rest",
+    "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1",
     "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset",
     "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake",
   ]
