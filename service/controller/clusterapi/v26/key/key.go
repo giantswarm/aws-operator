@@ -169,7 +169,7 @@ func ClusterCloudProviderTag(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
 }
 
-func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
+func ClusterEtcdEndpoint(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, customObject.Spec.Cluster.Etcd.Port)
 }
 
