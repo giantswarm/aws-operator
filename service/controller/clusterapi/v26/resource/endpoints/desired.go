@@ -45,7 +45,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Labels: map[string]string{
 				"app":      masterEndpointsName,
 				"cluster":  key.ClusterID(customObject),
-				"customer": key.CustomerID(customObject),
+				"customer": key.OrganizationID(customObject),
 			},
 		},
 		Subsets: []v1.EndpointSubset{
