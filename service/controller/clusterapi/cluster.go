@@ -134,7 +134,9 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			ResourceSets: resourceSets,
 			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
 
-			Name: config.ProjectName,
+			// Name is used to compute finalizer names. This here results in something
+			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
+			Name: config.ProjectName + "-cluster-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
