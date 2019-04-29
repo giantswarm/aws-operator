@@ -223,14 +223,6 @@ func BaseDomain(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Cluster.DNS.Domain
 }
 
-func IngressControllerInsecurePort(cluster v1alpha1.Cluster) int {
-	return cluster.Spec.Cluster.Kubernetes.IngressController.InsecurePort
-}
-
-func IngressControllerSecurePort(cluster v1alpha1.Cluster) int {
-	return cluster.Spec.Cluster.Kubernetes.IngressController.SecurePort
-}
-
 func InstanceProfileName(cluster v1alpha1.Cluster, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, ProfileNameTemplate)
 }
