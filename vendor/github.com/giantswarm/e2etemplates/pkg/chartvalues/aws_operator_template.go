@@ -47,7 +47,6 @@ const awsOperatorTemplate = `Installation:
         CredentialDefault:
           AdminARN: '{{ .Secret.AWSOperator.CredentialDefault.AdminARN }}'
           AWSOperatorARN: '{{ .Secret.AWSOperator.CredentialDefault.AWSOperatorARN }}'
-        IDRSAPub: {{ .Secret.AWSOperator.IDRSAPub }}
         SecretYaml: |
           service:
             aws:

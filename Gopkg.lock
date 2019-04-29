@@ -253,7 +253,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:648c2246c814b8cc24080160a9be66ee26d0a236c4f632a393f081520716719f"
+  digest = "1:58bae7933f40d330ce8716985a5152da1ed088d81634b0ae5cc0739418b2a58c"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -261,7 +261,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "0d9906466b118620a16f94ec23b3228487ded638"
+  revision = "bc1f756465508f779020b96df683c6cd41ba5c79"
 
 [[projects]]
   branch = "master"
@@ -898,7 +898,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:86e31d843f4cf9628510c8c84c25ad5afdb97c48cb052ea5c4930e566f870128"
+  digest = "1:c72812eff46e3f038674f00d9e043412d2bafd79bdbb4995075aa16b83445135"
   name = "golang.org/x/crypto"
   packages = [
     "pbkdf2",
@@ -906,7 +906,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "c05e17bb3b2dca130fc919668a96b4bec9eb9442"
+  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
 
 [[projects]]
   branch = "master"
@@ -947,14 +947,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:656ce95b4cdf841c00825f4cb94f6e0e1422d7d6faaf3094e94cd18884a32251"
+  digest = "1:1a4cf0c4cbbda6ef0b6f168acc112df2a8e182945d71dc8367593a3b378db106"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "a129542de9ae0895210abff9c95d67a1f33cb93d"
+  revision = "804c0c7841b595338f049388006a3945cb3cfad1"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -1365,17 +1365,19 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "07b8972065522ba66df16032247530e1dbaca011"
+  revision = "c5d3b0f4bee0a2c36e3f715a6b15dcc231c64adc"
 
 [[projects]]
-  digest = "1:907f11e231d19019732ab538c67e96e501476be1a5bdac715048ec1ad8d6021c"
+  digest = "1:03cc91613f9bc1269c215c7611b294f6b4c315cf26388b4d9a9cf03040656e63"
   name = "sigs.k8s.io/cluster-api"
   packages = [
     "pkg/apis/cluster/common",
     "pkg/apis/cluster/v1alpha1",
     "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/fake",
     "pkg/client/clientset_generated/clientset/scheme",
     "pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1",
+    "pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1/fake",
   ]
   pruneopts = "UT"
   revision = "29fee0a9ef590af33bbaa167ed17a8be50825679"
@@ -1498,6 +1500,7 @@
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/rest",
     "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset",
+    "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
