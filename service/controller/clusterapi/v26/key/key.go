@@ -100,7 +100,7 @@ const (
 )
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("api.%s.%s", providerStatus(cluster).Cluster.ID, providerSpec(cluster).Cluster.DNS.Domain)
+	return fmt.Sprintf("api.%s.%s", ClusterID(cluster), BaseDomain(cluster))
 }
 
 func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
@@ -166,11 +166,11 @@ func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterEtcdDomain(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s:%d", cluster.Spec.Cluster.Etcd.Domain, cluster.Spec.Cluster.Etcd.Port)
+	return fmt.Sprintf("etcd.%s.%s", ClusterID(cluster), providerSpec(cluster).Cluster.DNS.Domain)
 }
 
 func ClusterID(cluster v1alpha1.Cluster) string {
-	return cluster.Spec.Cluster.ID
+	return providerStatus(cluster).Cluster.ID
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
@@ -226,23 +226,7 @@ func EC2ServiceDomain(cluster v1alpha1.Cluster) string {
 }
 
 func BaseDomain(cluster v1alpha1.Cluster) string {
-	// TODO remove other zones and make it a BaseDomain in the CR.
-	// CloudFormation creates a separate HostedZone with the same name.
-	// Probably the easiest way for now is to just allow single domain for
-	// everything which we do now.
-	return cluster.Spec.AWS.HostedZones.API.Name
-}
-
-func HostedZoneNameAPI(cluster v1alpha1.Cluster) string {
-	return cluster.Spec.AWS.HostedZones.API.Name
-}
-
-func HostedZoneNameEtcd(cluster v1alpha1.Cluster) string {
-	return cluster.Spec.AWS.HostedZones.Etcd.Name
-}
-
-func HostedZoneNameIngress(cluster v1alpha1.Cluster) string {
-	return cluster.Spec.AWS.HostedZones.Ingress.Name
+	return providerSpec(cluster).Cluster.DNS.Domain
 }
 
 func IngressControllerInsecurePort(cluster v1alpha1.Cluster) int {
