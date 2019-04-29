@@ -27,7 +27,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Name: key.ClusterNamespace(customObject),
 			Labels: map[string]string{
 				"cluster":  key.ClusterID(customObject),
-				"customer": key.ClusterCustomer(customObject),
+				"customer": key.OrganizationID(customObject),
 			},
 		},
 	}

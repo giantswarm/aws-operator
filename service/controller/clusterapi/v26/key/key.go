@@ -169,10 +169,6 @@ func ClusterCloudProviderTag(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf(CloudProviderTagName, ClusterID(customObject))
 }
 
-func ClusterCustomer(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Customer.ID
-}
-
 func ClusterEtcdDomain(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s:%d", customObject.Spec.Cluster.Etcd.Domain, customObject.Spec.Cluster.Etcd.Port)
 }
@@ -185,25 +181,19 @@ func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
 	return ClusterID(customObject)
 }
 
-// ClusterOrganization returns the org name from the custom object.
-// It uses ClusterCustomer until this field is renamed in the custom object.
-func ClusterOrganization(customObject v1alpha1.AWSConfig) string {
-	return ClusterCustomer(customObject)
-}
-
 func ClusterTags(customObject v1alpha1.AWSConfig, installationName string) map[string]string {
 	cloudProviderTag := ClusterCloudProviderTag(customObject)
 	tags := map[string]string{
 		cloudProviderTag:    CloudProviderTagOwnedValue,
 		ClusterTagName:      ClusterID(customObject),
 		InstallationTagName: installationName,
-		OrganizationTagName: ClusterOrganization(customObject),
+		OrganizationTagName: OrganizationID(customObject),
 	}
 
 	return tags
 }
 
-func CustomerID(customObject v1alpha1.AWSConfig) string {
+func OrganizationID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
