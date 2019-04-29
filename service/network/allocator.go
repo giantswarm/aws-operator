@@ -1,4 +1,4 @@
-package ipam
+package network
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	ipamlib "github.com/giantswarm/ipam"
+	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -15,17 +15,17 @@ type Config struct {
 	Logger micrologger.Logger
 }
 
-type ipam struct {
+type allocator struct {
 	logger micrologger.Logger
 	mutex  *sync.Mutex
 }
 
-func New(config Config) (NetworkAllocator, error) {
+func New(config Config) (Allocator, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	r := &ipam{
+	r := &allocator{
 		logger: config.Logger,
 		mutex:  &sync.Mutex{},
 	}
@@ -33,7 +33,7 @@ func New(config Config) (NetworkAllocator, error) {
 	return r, nil
 }
 
-func (i *ipam) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks AllocationCallbacks) (net.IPNet, error) {
+func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks AllocationCallbacks) (net.IPNet, error) {
 	i.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
 	i.mutex.Lock()
 	i.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
@@ -57,7 +57,7 @@ func (i *ipam) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IP
 	{
 		i.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
 
-		subnet, err = ipamlib.Free(fullRange, netSize, reservedSubnets)
+		subnet, err = ipam.Free(fullRange, netSize, reservedSubnets)
 		if err != nil {
 			return net.IPNet{}, microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", fullRange.String(), netSize.String(), reservedSubnets)
 		}

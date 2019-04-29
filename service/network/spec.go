@@ -1,4 +1,4 @@
-package ipam
+package network
 
 import (
 	"context"
@@ -19,9 +19,9 @@ type AllocationCallbacks struct {
 	PersistAllocatedNetwork func(net.IPNet) error
 }
 
-// NetworkAllocator is an interface for IPAM implementation that manages
-// network range and subnets for an installation.
-type NetworkAllocator interface {
+// Allocator is an interface for IPAM implementation that manages network range
+// and subnets for an installation.
+type Allocator interface {
 	// Allocate performs the subnet allocation from given fullRange for a CIDR
 	// block with netSize. It requires function pointers to callbacks that are
 	// used for getting currently reserved networks and persisting allocated
