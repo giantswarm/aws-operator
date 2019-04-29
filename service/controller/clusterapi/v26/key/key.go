@@ -100,7 +100,7 @@ const (
 )
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("api.%s.%s", providerSpec(cluster).Cluster.DNS.Domain, providerStatus(cluster).Cluster.ID)
+	return fmt.Sprintf("api.%s.%s", providerStatus(cluster).Cluster.ID, providerSpec(cluster).Cluster.DNS.Domain)
 }
 
 func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
