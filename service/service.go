@@ -17,6 +17,7 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
@@ -92,6 +93,11 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	cmaClient, err := clientset.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	g8sClient, err := versioned.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -125,6 +131,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := clusterapi.ClusterConfig{
+			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
@@ -185,6 +192,7 @@ func New(config Config) (*Service, error) {
 	var clusterapiDrainerController *clusterapi.Drainer
 	{
 		c := clusterapi.DrainerConfig{
+			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,

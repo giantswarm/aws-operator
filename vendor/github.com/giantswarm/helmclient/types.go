@@ -22,6 +22,8 @@ type ReleaseContent struct {
 type ReleaseHistory struct {
 	// AppVersion is the app version of the Helm Chart that has been deployed.
 	AppVersion string
+	// Description is a human-friendly "log entry" about this Helm release.
+	Description string
 	// LastDeployed is the time the Helm Chart was last deployed.
 	LastDeployed time.Time
 	// Name is the name of the Helm Release.

@@ -33,7 +33,6 @@ type AWSOperatorConfigSecret struct {
 
 type AWSOperatorConfigSecretAWSOperator struct {
 	CredentialDefault AWSOperatorConfigSecretAWSOperatorCredentialDefault
-	IDRSAPub          string
 	SecretYaml        AWSOperatorConfigSecretAWSOperatorSecretYaml
 }
 
@@ -71,9 +70,6 @@ func NewAWSOperator(config AWSOperatorConfig) (string, error) {
 	}
 	if config.Provider.AWS.RouteTableNames == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Provider.AWS.RouteTableNames must not be empty", config)
-	}
-	if config.Secret.AWSOperator.IDRSAPub == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.IDRSAPub must not be empty", config)
 	}
 	if config.Secret.AWSOperator.CredentialDefault.AdminARN == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.CredentialDefault.AdminARN must not be empty", config)

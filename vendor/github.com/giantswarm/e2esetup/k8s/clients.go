@@ -20,9 +20,10 @@ type ClientsConfig struct {
 type Clients struct {
 	logger micrologger.Logger
 
-	extClient *apiextensionsclient.Clientset
-	g8sClient *versioned.Clientset
-	k8sClient *kubernetes.Clientset
+	extClient  *apiextensionsclient.Clientset
+	g8sClient  *versioned.Clientset
+	k8sClient  *kubernetes.Clientset
+	restConfig *rest.Config
 }
 
 func NewClients(config ClientsConfig) (*Clients, error) {
@@ -75,9 +76,10 @@ func NewClients(config ClientsConfig) (*Clients, error) {
 	c := &Clients{
 		logger: config.Logger,
 
-		extClient: extClient,
-		g8sClient: g8sClient,
-		k8sClient: k8sClient,
+		extClient:  extClient,
+		g8sClient:  g8sClient,
+		k8sClient:  k8sClient,
+		restConfig: restConfig,
 	}
 
 	return c, nil
@@ -93,4 +95,8 @@ func (c *Clients) G8sClient() *versioned.Clientset {
 
 func (c *Clients) K8sClient() *kubernetes.Clientset {
 	return c.k8sClient
+}
+
+func (c *Clients) RestConfig() *rest.Config {
+	return rest.CopyConfig(c.restConfig)
 }
