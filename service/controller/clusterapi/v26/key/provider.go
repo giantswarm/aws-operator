@@ -39,7 +39,7 @@ func mustG8sStatusFromCMAStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWS
 			return g8sStatus
 		}
 
-		err := json.Unmarshal(cmaStatus.Raw, &g8sStatusus)
+		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
 		if err != nil {
 			panic(err)
 		}

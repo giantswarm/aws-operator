@@ -11,12 +11,12 @@ type AllocationCallbacks struct {
 	// GetReservedNetworks implementation must return all networks that are
 	// allocated on any given moment. Failing to do that will result in
 	// overlapping allocations.
-	GetReservedNetworks func() ([]net.IPNet, error)
+	GetReservedNetworks func(context.Context) ([]net.IPNet, error)
 
 	// PersistAllocatedNetwork must mutate shared persistent state so that on
 	// successful execution persistet network is visible when
 	// GetReservedNetworks() is called.
-	PersistAllocatedNetwork func(net.IPNet) error
+	PersistAllocatedNetwork func(context.Context, net.IPNet) error
 }
 
 // Allocator is an interface for IPAM implementation that manages network range
