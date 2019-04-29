@@ -3,4 +3,4 @@
 # versionbundle
 
 Package versionbundle provides primitives for dynamic and recursive version
-management within infrastructures of distributed microservices.  
+management within infrastructures of distributed microservices. 
