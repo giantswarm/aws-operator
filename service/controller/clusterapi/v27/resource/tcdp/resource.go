@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -48,6 +48,6 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*cloudformation.Tag {
-	tags := key.ClusterTags(customObject, r.installationName)
+	tags := legacykey.ClusterTags(customObject, r.installationName)
 	return awstags.NewCloudFormation(tags)
 }

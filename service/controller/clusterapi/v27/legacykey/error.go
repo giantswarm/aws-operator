@@ -1,4 +1,4 @@
-package key
+package legacykey
 
 import "github.com/giantswarm/microerror"
 

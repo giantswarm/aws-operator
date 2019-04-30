@@ -8,11 +8,11 @@ import (
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -20,18 +20,18 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	service := &v1.Service{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      "master",
-			Namespace: key.ClusterID(customObject),
+			Namespace: legacykey.ClusterID(customObject),
 			Labels: map[string]string{
-				key.LabelApp:           "master",
-				key.LegacyLabelCluster: key.ClusterID(customObject),
-				key.LabelCustomer:      key.OrganizationID(customObject),
-				key.LabelCluster:       key.ClusterID(customObject),
-				key.LabelOrganization:  key.OrganizationID(customObject),
-				key.LabelVersionBundle: key.VersionBundleVersion(customObject),
+				legacykey.LabelApp:           "master",
+				legacykey.LegacyLabelCluster: legacykey.ClusterID(customObject),
+				legacykey.LabelCustomer:      legacykey.OrganizationID(customObject),
+				legacykey.LabelCluster:       legacykey.ClusterID(customObject),
+				legacykey.LabelOrganization:  legacykey.OrganizationID(customObject),
+				legacykey.LabelVersionBundle: legacykey.VersionBundleVersion(customObject),
 			},
 			Annotations: map[string]string{
-				key.AnnotationEtcdDomain:        key.ClusterEtcdEndpoint(customObject),
-				key.AnnotationPrometheusCluster: key.ClusterID(customObject),
+				legacykey.AnnotationEtcdDomain:        legacykey.ClusterEtcdEndpoint(customObject),
+				legacykey.AnnotationPrometheusCluster: legacykey.ClusterID(customObject),
 			},
 		},
 		Spec: v1.ServiceSpec{

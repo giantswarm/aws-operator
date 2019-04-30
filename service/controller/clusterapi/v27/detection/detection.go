@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 type Config struct {
@@ -45,11 +45,11 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (boo
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != legacykey.ScalingMax(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", "detected the tenant cluster should scale due to scaling max changes")
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != legacykey.ScalingMin(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", "detected the tenant cluster should scale due to scaling min changes")
 		return true, nil
 	}
@@ -71,19 +71,19 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bo
 		return false, microerror.Mask(err)
 	}
 
-	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
+	if cc.Status.TenantCluster.MasterInstance.Type != legacykey.MasterInstanceType(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", "detected the tenant cluster should update due to master instance type changes")
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(cr) {
+	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != legacykey.WorkerDockerVolumeSizeGB(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", "detected the tenant cluster should update due to worker instance docker volume size changes")
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
+	if cc.Status.TenantCluster.WorkerInstance.Type != legacykey.WorkerInstanceType(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", "detected the tenant cluster should update due to worker instance type changes")
 		return true, nil
 	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(cr) {
+	if cc.Status.TenantCluster.VersionBundleVersion != legacykey.VersionBundleVersion(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", "detected the tenant cluster should update due to version bundle version changes")
 		return true, nil
 	}
