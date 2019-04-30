@@ -63,8 +63,8 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.Guest.RecordSets.ClusterBaseDomain != tc.expectedBaseDomain {
-				t.Fatalf("ClusterBaseDomain == %q, want %q", a.Guest.RecordSets.ClusterBaseDomain, tc.expectedBaseDomain)
+			if a.Guest.RecordSets.BaseDomain != tc.expectedBaseDomain {
+				t.Fatalf("BaseDomain == %q, want %q", a.Guest.RecordSets.BaseDomain, tc.expectedBaseDomain)
 			}
 			if a.Guest.RecordSets.ClusterID != tc.expectedClusterID {
 				t.Fatalf("ClusterID == %q, want %q", a.Guest.RecordSets.ClusterID, tc.expectedClusterID)
