@@ -10,16 +10,16 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/detection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/detection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv26"
+	Name = "tccpv27"
 )
 
 const (

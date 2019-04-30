@@ -10,12 +10,12 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/templates"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
