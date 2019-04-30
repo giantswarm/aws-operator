@@ -21,6 +21,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
 	v26adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/adapter"
 	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27"
+	v27adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/adapter"
+	v27cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/cloudconfig"
 )
 
 type ClusterConfig struct {
@@ -249,8 +252,62 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV27 *controller.ResourceSet
+	{
+		c := v27.ClusterResourceSetConfig{
+			CertsSearcher:          certsSearcher,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v27cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v27adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
+		}
+
+		resourceSetV27, err = v27.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV26,
+		resourceSetV27,
 	}
 
 	return resourceSets, nil
