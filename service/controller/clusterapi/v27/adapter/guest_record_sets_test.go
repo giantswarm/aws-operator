@@ -9,12 +9,12 @@ import (
 func TestAdapterRecordSetsRegularFields(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description               string
-		customObject              v1alpha1.AWSConfig
-		route53Enabled            bool
-		expectedClusterBaseDomain string
-		expectedClusterID         string
-		expectedRoute53Enabled    bool
+		description            string
+		customObject           v1alpha1.AWSConfig
+		route53Enabled         bool
+		expectedBaseDomain     string
+		expectedClusterID      string
+		expectedRoute53Enabled bool
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -44,10 +44,10 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 					},
 				},
 			},
-			route53Enabled:            true,
-			expectedRoute53Enabled:    true,
-			expectedClusterID:         "test-cluster",
-			expectedClusterBaseDomain: "installation.aws.eu-central-1.gigantic.io",
+			route53Enabled:         true,
+			expectedRoute53Enabled: true,
+			expectedClusterID:      "test-cluster",
+			expectedBaseDomain:     "installation.aws.eu-central-1.gigantic.io",
 		},
 	}
 
@@ -63,8 +63,8 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.Guest.RecordSets.ClusterBaseDomain != tc.expectedClusterBaseDomain {
-				t.Fatalf("ClusterBaseDomain == %q, want %q", a.Guest.RecordSets.ClusterBaseDomain, tc.expectedClusterBaseDomain)
+			if a.Guest.RecordSets.ClusterBaseDomain != tc.expectedBaseDomain {
+				t.Fatalf("ClusterBaseDomain == %q, want %q", a.Guest.RecordSets.ClusterBaseDomain, tc.expectedBaseDomain)
 			}
 			if a.Guest.RecordSets.ClusterID != tc.expectedClusterID {
 				t.Fatalf("ClusterID == %q, want %q", a.Guest.RecordSets.ClusterID, tc.expectedClusterID)

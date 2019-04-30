@@ -50,9 +50,9 @@ func Test_AvailabilityZone(t *testing.T) {
 	}
 }
 
-func Test_ClusterBaseDomain(t *testing.T) {
+func Test_BaseDomain(t *testing.T) {
 	t.Parallel()
-	expectedClusterBaseDomain := "installtion.eu-central-1.aws.gigantic.io"
+	expectedBaseDomain := "installtion.eu-central-1.aws.gigantic.io"
 
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -66,9 +66,9 @@ func Test_ClusterBaseDomain(t *testing.T) {
 		},
 	}
 
-	ClusterBaseDomain := ClusterBaseDomain(customObject)
-	if ClusterBaseDomain != expectedClusterBaseDomain {
-		t.Fatalf("ClusterBaseDomain == %q, want %q", ClusterBaseDomain, expectedClusterBaseDomain)
+	baseDomain := ClusterBaseDomain(customObject)
+	if baseDomain != expectedBaseDomain {
+		t.Fatalf("BaseDomain == %q, want %q", baseDomain, expectedBaseDomain)
 	}
 }
 
