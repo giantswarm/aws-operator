@@ -18,17 +18,19 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
+	v26 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
 	v26adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/adapter"
 	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/network"
 )
 
 type ClusterConfig struct {
-	CMAClient    clientset.Interface
-	G8sClient    versioned.Interface
-	K8sClient    kubernetes.Interface
-	K8sExtClient apiextensionsclient.Interface
-	Logger       micrologger.Logger
+	CMAClient        clientset.Interface
+	G8sClient        versioned.Interface
+	K8sClient        kubernetes.Interface
+	K8sExtClient     apiextensionsclient.Interface
+	Logger           micrologger.Logger
+	NetworkAllocator network.Allocator
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -210,6 +212,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
