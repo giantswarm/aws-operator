@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 const (
@@ -50,11 +50,11 @@ func (r *Resource) addPeerRoleARNToContext(ctx context.Context, cr v1alpha1.AWSC
 	var peerRoleArn string
 	{
 		i := &iam.GetRoleInput{
-			RoleName: aws.String(key.PeerAccessRoleName(cr)),
+			RoleName: aws.String(legacykey.PeerAccessRoleName(cr)),
 		}
 		o, err := cc.Client.ControlPlane.AWS.IAM.GetRole(i)
 		if IsNotFound(err) {
-			return microerror.Maskf(notFoundError, key.PeerAccessRoleName(cr))
+			return microerror.Maskf(notFoundError, legacykey.PeerAccessRoleName(cr))
 		} else if err != nil {
 			return microerror.Mask(err)
 		}

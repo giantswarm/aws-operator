@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 const (
@@ -58,7 +58,7 @@ func (r *Resource) addVPCCIDRToContext(ctx context.Context, cr v1alpha1.AWSConfi
 	}
 
 	{
-		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, key.PeerID(cr))
+		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, legacykey.PeerID(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}

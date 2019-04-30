@@ -9,7 +9,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
@@ -109,8 +109,8 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 			cfg := Config{
 				CustomObject: tc.customObject,
 				StackState: StackState{
-					WorkerDockerVolumeSizeGB:  key.WorkerDockerVolumeSizeGB(tc.customObject),
-					WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(tc.customObject),
+					WorkerDockerVolumeSizeGB:  legacykey.WorkerDockerVolumeSizeGB(tc.customObject),
+					WorkerKubeletVolumeSizeGB: legacykey.WorkerDockerVolumeSizeGB(tc.customObject),
 				},
 			}
 			err := a.Guest.LaunchConfiguration.Adapt(cfg)
@@ -122,8 +122,8 @@ func Test_AdapterLaunchConfiguration_RegularFields(t *testing.T) {
 				t.Errorf("unexpected error %v", err)
 			}
 
-			if a.Guest.LaunchConfiguration.ASGType != key.KindWorker {
-				t.Errorf("unexpected ASGType, got %q, want %q", a.Guest.LaunchConfiguration.ASGType, key.KindWorker)
+			if a.Guest.LaunchConfiguration.ASGType != legacykey.KindWorker {
+				t.Errorf("unexpected ASGType, got %q, want %q", a.Guest.LaunchConfiguration.ASGType, legacykey.KindWorker)
 			}
 			if a.Guest.LaunchConfiguration.WorkerInstanceType != tc.expectedInstanceType {
 				t.Errorf("unexpected InstanceType, got %q, want %q", a.Guest.LaunchConfiguration.WorkerInstanceType, tc.expectedInstanceType)
@@ -146,7 +146,7 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	}{
 		{
 			description:  "contains S3 URL",
-			expectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", key.CloudConfigVersion),
+			expectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/worker", legacykey.CloudConfigVersion),
 		},
 	}
 

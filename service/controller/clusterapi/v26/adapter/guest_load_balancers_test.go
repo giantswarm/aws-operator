@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func TestAdapterLoadBalancersRegularFields(t *testing.T) {
@@ -47,7 +47,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					},
 				},
 			},
-			errorMatcher: key.IsMissingCloudConfigKey,
+			errorMatcher: legacykey.IsMissingCloudConfigKey,
 		},
 		{
 			description:  "empty custom object",

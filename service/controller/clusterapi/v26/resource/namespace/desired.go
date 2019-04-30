@@ -7,11 +7,11 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -24,10 +24,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			APIVersion: "v1",
 		},
 		ObjectMeta: apismetav1.ObjectMeta{
-			Name: key.ClusterNamespace(customObject),
+			Name: legacykey.ClusterNamespace(customObject),
 			Labels: map[string]string{
-				"cluster":  key.ClusterID(customObject),
-				"customer": key.OrganizationID(customObject),
+				"cluster":  legacykey.ClusterID(customObject),
+				"customer": legacykey.OrganizationID(customObject),
 			},
 		},
 	}

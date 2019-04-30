@@ -9,13 +9,13 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 // EnsureDeleted detaches and deletes the EBS volumes. We don't return
 // errors so deletion logic in following resources is executed.
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCustomObject(obj)
+	cr, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}

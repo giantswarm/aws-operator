@@ -19,7 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func init() {
@@ -36,7 +36,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
 
-		oldObj, err := key.ToCustomObject(obj)
+		oldObj, err := legacykey.ToCustomObject(obj)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -52,7 +52,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
-	if key.StatusNetworkCIDR(cr) == "" {
+	if legacykey.StatusNetworkCIDR(cr) == "" {
 		var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
 		var subnetCIDR net.IPNet
 		{
@@ -63,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(cr))
+			randomAZs, err := r.selectRandomAZs(legacykey.SpecAvailabilityZones(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -189,7 +189,7 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
-		cidr := key.StatusNetworkCIDR(ac)
+		cidr := legacykey.StatusNetworkCIDR(ac)
 		if cidr == "" {
 			continue
 		}

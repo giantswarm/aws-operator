@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+import "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 
 type GuestRecordSetsAdapter struct {
 	BaseDomain                 string
@@ -11,9 +11,9 @@ type GuestRecordSetsAdapter struct {
 }
 
 func (a *GuestRecordSetsAdapter) Adapt(config Config) error {
-	a.BaseDomain = key.BaseDomain(config.CustomObject)
-	a.EtcdDomain = key.EtcdDomain(config.CustomObject)
-	a.ClusterID = key.ClusterID(config.CustomObject)
+	a.BaseDomain = legacykey.BaseDomain(config.CustomObject)
+	a.EtcdDomain = legacykey.EtcdDomain(config.CustomObject)
+	a.ClusterID = legacykey.ClusterID(config.CustomObject)
 	a.MasterInstanceResourceName = config.StackState.MasterInstanceResourceName
 	a.Route53Enabled = config.Route53Enabled
 

@@ -19,7 +19,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 const (
@@ -160,8 +160,8 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = key.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = key.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = legacykey.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		workerRoleARN = legacykey.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -262,8 +262,8 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = key.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = key.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = legacykey.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		workerRoleARN = legacykey.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -622,7 +622,7 @@ func (e *Encrypter) postAuthAWSRole(name string, data *AWSAuthRole) error {
 }
 
 func (e *Encrypter) keyName(customObject v1alpha1.AWSConfig) string {
-	return key.ClusterID(customObject)
+	return legacykey.ClusterID(customObject)
 }
 
 func authAWSRolePath(role string) string {

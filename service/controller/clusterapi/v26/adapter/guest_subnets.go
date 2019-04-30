@@ -3,7 +3,7 @@ package adapter
 import (
 	"sort"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 	"github.com/giantswarm/microerror"
 )
 
@@ -27,7 +27,7 @@ type GuestSubnetsAdapter struct {
 }
 
 func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
-	zones := key.StatusAvailabilityZones(cfg.CustomObject)
+	zones := legacykey.StatusAvailabilityZones(cfg.CustomObject)
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
 	})
@@ -40,29 +40,29 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 	}
 
 	for i, az := range zones {
-		snetName := key.PublicSubnetName(i)
+		snetName := legacykey.PublicSubnetName(i)
 		snet := Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Public.CIDR,
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PublicSubnetRouteTableAssociationName(i),
+				Name:           legacykey.PublicSubnetRouteTableAssociationName(i),
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     snetName,
 			},
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
 
-		snetName = key.PrivateSubnetName(i)
+		snetName = legacykey.PrivateSubnetName(i)
 		snet = Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR,
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PrivateSubnetRouteTableAssociationName(i),
-				RouteTableName: key.PrivateRouteTableName(i),
+				Name:           legacykey.PrivateSubnetRouteTableAssociationName(i),
+				RouteTableName: legacykey.PrivateRouteTableName(i),
 				SubnetName:     snetName,
 			},
 		}

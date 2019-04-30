@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 type GuestOutputsAdapter struct {
@@ -19,7 +19,7 @@ func (a *GuestOutputsAdapter) Adapt(config Config) error {
 	a.Master.Instance.Type = config.StackState.MasterInstanceType
 	a.Master.CloudConfig.Version = config.StackState.MasterCloudConfigVersion
 
-	a.Worker.ASG.Ref = key.WorkerASGRef
+	a.Worker.ASG.Ref = legacykey.WorkerASGRef
 	a.Worker.CloudConfig.Version = config.StackState.WorkerCloudConfigVersion
 	a.Worker.DockerVolumeSizeGB = config.StackState.WorkerDockerVolumeSizeGB
 	a.Worker.ImageID = config.StackState.WorkerImageID

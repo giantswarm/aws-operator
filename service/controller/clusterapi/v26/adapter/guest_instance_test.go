@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func Test_Adapter_Instance_RegularFields(t *testing.T) {
@@ -94,7 +94,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 	}{
 		{
 			Description:  "case 0 S3 URL",
-			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", key.CloudConfigVersion),
+			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/version/0.1.0/cloudconfig/%s/master", legacykey.CloudConfigVersion),
 			Region:       "eu-central-1",
 		},
 	}

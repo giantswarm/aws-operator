@@ -8,16 +8,16 @@ import (
 	"k8s.io/api/core/v1"
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	instanceName := key.MasterInstanceName(customObject)
+	instanceName := legacykey.MasterInstanceName(customObject)
 	masterInstance, err := r.findMasterInstance(ctx, instanceName)
 	if IsNotFound(err) {
 		// During updates the master instance is shut down and thus cannot be found.
@@ -41,11 +41,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	endpoints := &v1.Endpoints{
 		ObjectMeta: apismetav1.ObjectMeta{
 			Name:      masterEndpointsName,
-			Namespace: key.ClusterID(customObject),
+			Namespace: legacykey.ClusterID(customObject),
 			Labels: map[string]string{
 				"app":      masterEndpointsName,
-				"cluster":  key.ClusterID(customObject),
-				"customer": key.OrganizationID(customObject),
+				"cluster":  legacykey.ClusterID(customObject),
+				"customer": legacykey.OrganizationID(customObject),
 			},
 		},
 		Subsets: []v1.EndpointSubset{

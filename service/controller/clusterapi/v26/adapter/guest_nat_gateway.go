@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 type Gateway struct {
@@ -18,14 +18,14 @@ type GuestNATGatewayAdapter struct {
 }
 
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
-	for i := 0; i < len(key.StatusAvailabilityZones(cfg.CustomObject)); i++ {
+	for i := 0; i < len(legacykey.StatusAvailabilityZones(cfg.CustomObject)); i++ {
 		gw := Gateway{
-			ClusterID:             key.ClusterID(cfg.CustomObject),
-			NATGWName:             key.NATGatewayName(i),
-			NATEIPName:            key.NATEIPName(i),
-			NATRouteName:          key.NATRouteName(i),
-			PrivateRouteTableName: key.PrivateRouteTableName(i),
-			PublicSubnetName:      key.PublicSubnetName(i),
+			ClusterID:             legacykey.ClusterID(cfg.CustomObject),
+			NATGWName:             legacykey.NATGatewayName(i),
+			NATEIPName:            legacykey.NATEIPName(i),
+			NATRouteName:          legacykey.NATRouteName(i),
+			PrivateRouteTableName: legacykey.PrivateRouteTableName(i),
+			PublicSubnetName:      legacykey.PublicSubnetName(i),
 		}
 		a.Gateways = append(a.Gateways, gw)
 	}

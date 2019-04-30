@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 const (
@@ -47,16 +47,16 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
 
-	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindMaster)
+	s.MasterSecurityGroupName = legacykey.SecurityGroupName(cfg.CustomObject, legacykey.KindMaster)
 	s.MasterSecurityGroupRules = masterRules
 
-	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindWorker)
+	s.WorkerSecurityGroupName = legacykey.SecurityGroupName(cfg.CustomObject, legacykey.KindWorker)
 	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
-	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindIngress)
+	s.IngressSecurityGroupName = legacykey.SecurityGroupName(cfg.CustomObject, legacykey.KindIngress)
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
-	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindEtcd)
+	s.EtcdELBSecurityGroupName = legacykey.SecurityGroupName(cfg.CustomObject, legacykey.KindEtcd)
 	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
 	return nil
@@ -117,19 +117,19 @@ func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSCon
 	return []securityGroupRule{
 		{
 			Description:         "Allow traffic from the ingress security group to the ingress controller port 443.",
-			Port:                key.IngressControllerSecurePort,
+			Port:                legacykey.IngressControllerSecurePort,
 			Protocol:            tcpProtocol,
 			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		{
 			Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
-			Port:                key.IngressControllerInsecurePort,
+			Port:                legacykey.IngressControllerInsecurePort,
 			Protocol:            tcpProtocol,
 			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		{
 			Description: "Allow traffic from control plane to ingress controller secure port for tenant cluster scraping.",
-			Port:        key.IngressControllerSecurePort,
+			Port:        legacykey.IngressControllerSecurePort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  hostClusterCIDR,
 		},
@@ -214,15 +214,15 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		rules := []securityGroupRule{
 			{
 				Description: "Allow traffic from control plane CIDR.",
-				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
 				Protocol:    tcpProtocol,
 				SourceCIDR:  hostClusterCIDR,
 			},
 			{
 				Description: "Allow traffic from tenant cluster CIDR.",
-				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
 				Protocol:    tcpProtocol,
-				SourceCIDR:  key.StatusNetworkCIDR(cfg.CustomObject),
+				SourceCIDR:  legacykey.StatusNetworkCIDR(cfg.CustomObject),
 			},
 		}
 
@@ -232,7 +232,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 			if subnet != "" {
 				subnetRule := securityGroupRule{
 					Description: "Custom Whitelist CIDR.",
-					Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+					Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
 					Protocol:    tcpProtocol,
 					SourceCIDR:  subnet,
 				}
@@ -256,7 +256,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		allowAllRule := []securityGroupRule{
 			{
 				Description: "Allow all traffic to the master instance.",
-				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
 				Protocol:    tcpProtocol,
 				SourceCIDR:  defaultCIDR,
 			},
@@ -272,7 +272,7 @@ func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
 	for _, address := range cfg.ControlPlaneNATGatewayAddresses {
 		gatewayRule := securityGroupRule{
 			Description: "Allow traffic from gateways.",
-			Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+			Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
 			Protocol:    tcpProtocol,
 			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
 		}

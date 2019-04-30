@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/templates"
 )
 
@@ -56,7 +56,7 @@ type GuestInstanceAdapterMasterInstance struct {
 
 func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	{
-		i.Cluster.ID = key.ClusterID(config.CustomObject)
+		i.Cluster.ID = legacykey.ClusterID(config.CustomObject)
 	}
 
 	{
@@ -64,7 +64,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		zones := key.StatusAvailabilityZones(config.CustomObject)
+		zones := legacykey.StatusAvailabilityZones(config.CustomObject)
 		sort.Slice(zones, func(i, j int) bool {
 			return zones[i].Name < zones[j].Name
 		})
@@ -74,13 +74,13 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		}
 
 		i.Master.AZ = zones[0].Name
-		i.Master.PrivateSubnet = key.PrivateSubnetName(0)
+		i.Master.PrivateSubnet = legacykey.PrivateSubnetName(0)
 
 		c := SmallCloudconfigConfig{
-			InstanceRole: key.KindMaster,
-			S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, key.KindMaster),
+			InstanceRole: legacykey.KindMaster,
+			S3URL:        legacykey.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, legacykey.KindMaster),
 		}
-		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
+		rendered, err := templates.Render(legacykey.CloudConfigSmallTemplates(), c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -88,13 +88,13 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 
 		i.Master.EncrypterBackend = config.EncrypterBackend
 
-		i.Master.DockerVolume.Name = key.DockerVolumeName(config.CustomObject)
+		i.Master.DockerVolume.Name = legacykey.DockerVolumeName(config.CustomObject)
 
 		i.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 
-		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
+		i.Master.EtcdVolume.Name = legacykey.EtcdVolumeName(config.CustomObject)
 
-		i.Master.LogVolume.Name = key.LogVolumeName(config.CustomObject)
+		i.Master.LogVolume.Name = legacykey.LogVolumeName(config.CustomObject)
 
 		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 

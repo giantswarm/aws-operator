@@ -11,11 +11,11 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -26,8 +26,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	bucketStateNames := []string{
-		key.TargetLogBucketName(customObject),
-		key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
+		legacykey.TargetLogBucketName(customObject),
+		legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 	}
 
 	var currentBucketState []BucketState

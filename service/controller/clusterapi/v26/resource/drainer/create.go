@@ -14,13 +14,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 // EnsureCreated creates DrainerConfigs for ASG instances in terminating/wait
 // state then lets node-operator to do its job.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -123,10 +123,10 @@ func (r *Resource) createDrainerConfig(ctx context.Context, customObject provide
 	c := &corev1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				key.InstanceIDAnnotation: instanceID,
+				legacykey.InstanceIDAnnotation: instanceID,
 			},
 			Labels: map[string]string{
-				key.ClusterIDLabel: key.ClusterID(customObject),
+				legacykey.ClusterIDLabel: legacykey.ClusterID(customObject),
 			},
 			Name: privateDNS,
 		},
@@ -134,9 +134,9 @@ func (r *Resource) createDrainerConfig(ctx context.Context, customObject provide
 			Guest: corev1alpha1.DrainerConfigSpecGuest{
 				Cluster: corev1alpha1.DrainerConfigSpecGuestCluster{
 					API: corev1alpha1.DrainerConfigSpecGuestClusterAPI{
-						Endpoint: key.ClusterAPIEndpoint(customObject),
+						Endpoint: legacykey.ClusterAPIEndpoint(customObject),
 					},
-					ID: key.ClusterID(customObject),
+					ID: legacykey.ClusterID(customObject),
 				},
 				Node: corev1alpha1.DrainerConfigSpecGuestNode{
 					Name: privateDNS,

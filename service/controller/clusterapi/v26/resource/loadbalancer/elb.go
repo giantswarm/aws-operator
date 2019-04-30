@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 const (
@@ -79,7 +79,7 @@ func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string 
 }
 
 func containsClusterTag(tags []*elb.Tag, customObject v1alpha1.AWSConfig) bool {
-	tagKey := key.ClusterCloudProviderTag(customObject)
+	tagKey := legacykey.ClusterCloudProviderTag(customObject)
 
 	for _, tag := range tags {
 		if *tag.Key == tagKey && *tag.Value == cloudProviderClusterTagValue {

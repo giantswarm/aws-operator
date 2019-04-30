@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 type EC2ClientMock struct {
@@ -27,7 +27,7 @@ func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.D
 	output := &ec2.DescribeVolumesOutput{}
 	volumes := []*ec2.Volume{}
 
-	clusterTag := key.ClusterCloudProviderTag(e.customObject)
+	clusterTag := legacykey.ClusterCloudProviderTag(e.customObject)
 
 	for _, mock := range e.ebsVolumes {
 		vol := &ec2.Volume{

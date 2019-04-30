@@ -10,11 +10,11 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -29,7 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		g := &errgroup.Group{}
 
 		g.Go(func() error {
-			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(customObject))
+			certs, err := r.certsSearcher.SearchCluster(legacykey.ClusterID(customObject))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -39,7 +39,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(customObject))
+			keys, err := r.randomKeysSearcher.SearchCluster(legacykey.ClusterID(customObject))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -66,9 +66,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			}
 
 			m.Lock()
-			k := key.BucketObjectName(customObject, key.KindMaster)
+			k := legacykey.BucketObjectName(customObject, legacykey.KindMaster)
 			output[k] = BucketObjectState{
-				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
+				Bucket: legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}
@@ -84,9 +84,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			}
 
 			m.Lock()
-			k := key.BucketObjectName(customObject, key.KindWorker)
+			k := legacykey.BucketObjectName(customObject, legacykey.KindWorker)
 			output[k] = BucketObjectState{
-				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
+				Bucket: legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}

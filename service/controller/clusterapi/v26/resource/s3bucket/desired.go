@@ -6,11 +6,11 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/legacykey"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -24,12 +24,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	// other buckets can not forward logs to it
 	bucketsState := []BucketState{
 		{
-			Name:             key.TargetLogBucketName(customObject),
+			Name:             legacykey.TargetLogBucketName(customObject),
 			IsLoggingBucket:  true,
 			IsLoggingEnabled: true,
 		},
 		{
-			Name:             key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
+			Name:             legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 			IsLoggingBucket:  false,
 			IsLoggingEnabled: true,
 		},
