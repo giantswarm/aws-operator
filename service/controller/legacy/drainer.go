@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v24"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v27"
 )
 
 type DrainerConfig struct {
@@ -271,6 +272,30 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var v27ResourceSet *controller.ResourceSet
+	{
+		c := v27.DrainerResourceSetConfig{
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+
+			ProjectName:    config.ProjectName,
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		v27ResourceSet, err = v27.NewDrainerResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v22ResourceSet,
 		v22patch1ResourceSet,
@@ -278,6 +303,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		v24ResourceSet,
 		v25ResourceSet,
 		v26ResourceSet,
+		v27ResourceSet,
 	}
 
 	return resourceSets, nil
