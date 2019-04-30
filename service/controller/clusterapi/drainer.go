@@ -10,14 +10,17 @@ import (
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
 )
 
 type DrainerConfig struct {
+	CMAClient    clientset.Interface
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
@@ -65,7 +68,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
+			Watcher: config.CMAClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll),
 
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: 30 * time.Second,
@@ -93,8 +96,8 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
-			// like operatorkit.giantswarm.io/aws-operator-drainer.
-			Name: config.ProjectName + "-drainer",
+			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
+			Name: config.ProjectName + "-drainer-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
