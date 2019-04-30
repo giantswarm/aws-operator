@@ -333,46 +333,6 @@ func Test_LogVolumeName(t *testing.T) {
 	}
 }
 
-func Test_IngressControllerInsecurePort(t *testing.T) {
-	t.Parallel()
-	expectedPort := 30010
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						InsecurePort: expectedPort,
-					},
-				},
-			},
-		},
-	}
-
-	if IngressControllerInsecurePort(customObject) != expectedPort {
-		t.Fatalf("Expected ingress controller insecure port %d but was %d", expectedPort, IngressControllerInsecurePort(customObject))
-	}
-}
-
-func Test_IngressControllerSecurePort(t *testing.T) {
-	t.Parallel()
-	expectedPort := 30011
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						SecurePort: expectedPort,
-					},
-				},
-			},
-		},
-	}
-
-	if IngressControllerSecurePort(customObject) != expectedPort {
-		t.Fatalf("Expected ingress controller secure port %d but was %d", expectedPort, IngressControllerSecurePort(customObject))
-	}
-}
-
 func Test_IsChinaRegion(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {

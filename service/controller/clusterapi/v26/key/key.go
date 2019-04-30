@@ -88,6 +88,11 @@ const (
 )
 
 const (
+	IngressControllerInsecurePort = 30010
+	IngressControllerSecurePort   = 30011
+)
+
+const (
 	NodeDrainerLifecycleHookName = "NodeDrainer"
 	WorkerASGRef                 = "workerAutoScalingGroup"
 )
@@ -229,14 +234,6 @@ func BaseDomain(customObject v1alpha1.AWSConfig) string {
 	// Probably the easiest way for now is to just allow single domain for
 	// everything which we do now.
 	return customObject.Spec.AWS.HostedZones.API.Name
-}
-
-func IngressControllerInsecurePort(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.Cluster.Kubernetes.IngressController.InsecurePort
-}
-
-func IngressControllerSecurePort(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.Cluster.Kubernetes.IngressController.SecurePort
 }
 
 func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {

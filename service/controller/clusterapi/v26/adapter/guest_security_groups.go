@@ -117,19 +117,19 @@ func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSCon
 	return []securityGroupRule{
 		{
 			Description:         "Allow traffic from the ingress security group to the ingress controller port 443.",
-			Port:                key.IngressControllerSecurePort(customObject),
+			Port:                key.IngressControllerSecurePort,
 			Protocol:            tcpProtocol,
 			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		{
 			Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
-			Port:                key.IngressControllerInsecurePort(customObject),
+			Port:                key.IngressControllerInsecurePort,
 			Protocol:            tcpProtocol,
 			SourceSecurityGroup: ingressSecurityGroupName,
 		},
 		{
 			Description: "Allow traffic from control plane to ingress controller secure port for tenant cluster scraping.",
-			Port:        key.IngressControllerSecurePort(customObject),
+			Port:        key.IngressControllerSecurePort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  hostClusterCIDR,
 		},
