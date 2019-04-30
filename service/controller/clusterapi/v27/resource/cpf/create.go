@@ -199,7 +199,7 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.AWSConfi
 	var recordSets *template.ParamsMainRecordSets
 	{
 		recordSets = &template.ParamsMainRecordSets{
-			BaseDomain:                 legacykey.BaseDomain(cr),
+			BaseDomain:                 legacykey.ClusterBaseDomain(cr),
 			ClusterID:                  legacykey.ClusterID(cr),
 			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
 			Route53Enabled:             r.route53Enabled,

@@ -16,12 +16,12 @@ func Test_Controller_Resource_CPF_Template_Render(t *testing.T) {
 		}
 		routeTables := &ParamsMainRouteTables{
 			PrivateRoutes: []ParamsMainRouteTablesRoute{
-				ParamsMainRouteTablesRoute{
+				{
 					PeerConnectionID: "PeerConnectionID",
 				},
 			},
 			PublicRoutes: []ParamsMainRouteTablesRoute{
-				ParamsMainRouteTablesRoute{
+				{
 					PeerConnectionID: "PeerConnectionID",
 				},
 			},

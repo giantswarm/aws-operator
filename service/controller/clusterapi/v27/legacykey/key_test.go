@@ -66,7 +66,7 @@ func Test_BaseDomain(t *testing.T) {
 		},
 	}
 
-	baseDomain := BaseDomain(customObject)
+	baseDomain := ClusterBaseDomain(customObject)
 	if baseDomain != expectedBaseDomain {
 		t.Fatalf("BaseDomain == %q, want %q", baseDomain, expectedBaseDomain)
 	}

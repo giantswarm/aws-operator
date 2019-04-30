@@ -31,10 +31,10 @@ func TestAdapterRouteTablesRegularFields(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-central-1a",
 							},
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-central-1b",
 							},
 						},

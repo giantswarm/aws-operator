@@ -21,7 +21,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	baseDomain := legacykey.BaseDomain(customObject)
+	baseDomain := legacykey.ClusterBaseDomain(customObject)
 	intermediateZone := "k8s." + baseDomain
 	finalZone := legacykey.ClusterID(customObject) + ".k8s." + baseDomain
 

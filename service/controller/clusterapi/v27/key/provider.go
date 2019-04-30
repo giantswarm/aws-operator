@@ -1,4 +1,4 @@
-package legacykey
+package key
 
 import (
 	"encoding/json"

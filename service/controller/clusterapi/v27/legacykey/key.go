@@ -228,8 +228,8 @@ func EC2ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	return domain
 }
 
-func BaseDomain(customObject v1alpha1.AWSConfig) string {
-	// TODO remove other zones and make it a BaseDomain in the CR.
+func ClusterBaseDomain(customObject v1alpha1.AWSConfig) string {
+	// TODO remove other zones and make it a ClusterBaseDomain in the CR.
 	// CloudFormation creates a separate HostedZone with the same name.
 	// Probably the easiest way for now is to just allow single domain for
 	// everything which we do now.
@@ -253,7 +253,7 @@ func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
 }
 
 func EtcdDomain(customObject v1alpha1.AWSConfig) string {
-	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", BaseDomain(customObject)}, ".")
+	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", ClusterBaseDomain(customObject)}, ".")
 }
 
 func EtcdPort(customObject v1alpha1.AWSConfig) int {

@@ -11,7 +11,7 @@ type GuestRecordSetsAdapter struct {
 }
 
 func (a *GuestRecordSetsAdapter) Adapt(config Config) error {
-	a.BaseDomain = legacykey.BaseDomain(config.CustomObject)
+	a.BaseDomain = legacykey.ClusterBaseDomain(config.CustomObject)
 	a.EtcdDomain = legacykey.EtcdDomain(config.CustomObject)
 	a.ClusterID = legacykey.ClusterID(config.CustomObject)
 	a.MasterInstanceResourceName = config.StackState.MasterInstanceResourceName
