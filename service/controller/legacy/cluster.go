@@ -35,6 +35,8 @@ import (
 	v26adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v26/adapter"
 	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v26/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27"
+	v27adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v27/adapter"
+	v27cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v27/cloudconfig"
 )
 
 type ClusterConfig struct {
