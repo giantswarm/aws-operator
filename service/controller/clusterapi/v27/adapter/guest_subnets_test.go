@@ -22,7 +22,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-west-1b",
 								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
@@ -33,7 +33,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 									},
 								},
 							},
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-west-1a",
 								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
@@ -44,7 +44,7 @@ func TestAdapterSubnetsRegularFields(t *testing.T) {
 									},
 								},
 							},
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-west-1c",
 								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 									Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{

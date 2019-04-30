@@ -38,7 +38,7 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 					Status: v1alpha1.AWSConfigStatus{
 						AWS: v1alpha1.AWSConfigStatusAWS{
 							AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-								v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+								{
 									Name: "eu-west-1a",
 								},
 							},
@@ -122,7 +122,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-west-1a",
 							},
 						},

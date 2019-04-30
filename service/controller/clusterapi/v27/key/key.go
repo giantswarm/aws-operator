@@ -1,25 +1,23 @@
 package key
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"fmt"
+
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
-func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.Kubernetes.API.Domain
+func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("api.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
-func ClusterID(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.Cluster.ID
+func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Cluster.DNS.Domain
 }
 
-func ClusterNamespace(customObject v1alpha1.AWSConfig) string {
-	return ClusterID(customObject)
+func ClusterID(cluster v1alpha1.Cluster) string {
+	return providerStatus(cluster).Cluster.ID
 }
 
-func BaseDomain(customObject v1alpha1.AWSConfig) string {
-	// TODO remove other zones and make it a BaseDomain in the CR.
-	// CloudFormation creates a separate HostedZone with the same name.
-	// Probably the easiest way for now is to just allow single domain for
-	// everything which we do now.
-	return customObject.Spec.AWS.HostedZones.API.Name
+func ClusterNamespace(cluster v1alpha1.Cluster) string {
+	return ClusterID(cluster)
 }

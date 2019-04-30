@@ -21,7 +21,7 @@ func Test_migrateSpec(t *testing.T) {
 			spec: providerv1alpha1.AWSConfigSpec{
 				AWS: providerv1alpha1.AWSConfigSpecAWS{
 					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
+						{},
 					},
 				},
 				Cluster: providerv1alpha1.Cluster{
@@ -50,7 +50,7 @@ func Test_migrateSpec(t *testing.T) {
 						},
 					},
 					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
+						{},
 					},
 				},
 				Cluster: providerv1alpha1.Cluster{
@@ -87,7 +87,7 @@ func Test_migrateSpec(t *testing.T) {
 						},
 					},
 					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
+						{},
 					},
 				},
 				Cluster: providerv1alpha1.Cluster{
@@ -120,7 +120,7 @@ func Test_migrateSpec(t *testing.T) {
 						},
 					},
 					Workers: []providerv1alpha1.AWSConfigSpecAWSNode{
-						providerv1alpha1.AWSConfigSpecAWSNode{},
+						{},
 					},
 				},
 				Cluster: providerv1alpha1.Cluster{

@@ -121,7 +121,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				Bucket: aws.String(bucketInput.Name),
 				ServerSideEncryptionConfiguration: &s3.ServerSideEncryptionConfiguration{
 					Rules: []*s3.ServerSideEncryptionRule{
-						&s3.ServerSideEncryptionRule{
+						{
 							ApplyServerSideEncryptionByDefault: &s3.ServerSideEncryptionByDefault{
 								SSEAlgorithm: aws.String(S3BucketEncryptionAlgorithm),
 							},
