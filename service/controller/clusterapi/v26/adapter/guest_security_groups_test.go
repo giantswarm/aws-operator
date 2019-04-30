@@ -28,12 +28,6 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
 						ID: "test-cluster",
-						Kubernetes: v1alpha1.ClusterKubernetes{
-							IngressController: v1alpha1.ClusterKubernetesIngressController{
-								SecurePort:   30010,
-								InsecurePort: 30011,
-							},
-						},
 					},
 				},
 			},
@@ -81,19 +75,19 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 			expectedWorkerSecurityGroupRules: []securityGroupRule{
 				{
 					Description:         "Allow traffic from the ingress security group to the ingress controller port 443.",
-					Port:                30010,
-					Protocol:            "tcp",
-					SourceSecurityGroup: "IngressSecurityGroup",
-				},
-				{
-					Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
 					Port:                30011,
 					Protocol:            "tcp",
 					SourceSecurityGroup: "IngressSecurityGroup",
 				},
 				{
+					Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
+					Port:                30010,
+					Protocol:            "tcp",
+					SourceSecurityGroup: "IngressSecurityGroup",
+				},
+				{
 					Description: "Allow traffic from control plane to ingress controller secure port for tenant cluster scraping.",
-					Port:        30010,
+					Port:        30011,
 					Protocol:    "tcp",
 					SourceCIDR:  "10.0.0.0/16",
 				},

@@ -86,17 +86,17 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort(cfg.CustomObject))
+	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort)
 	a.IngressElbName = ingressElbName
 	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB: httpsPort,
 
-			PortInstance: key.IngressControllerSecurePort(cfg.CustomObject),
+			PortInstance: key.IngressControllerSecurePort,
 		},
 		{
 			PortELB:      httpPort,
-			PortInstance: key.IngressControllerInsecurePort(cfg.CustomObject),
+			PortInstance: key.IngressControllerInsecurePort,
 		},
 	}
 	a.IngressElbScheme = externalELBScheme

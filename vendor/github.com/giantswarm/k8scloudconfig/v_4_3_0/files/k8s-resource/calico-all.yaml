@@ -7,12 +7,12 @@
 #  - Added resource limits to install-cni.
 #  - Added 'priorityClassName: system-cluster-critical' to calico daemonset.
 #
-# Calico Version v3.5.1
-# https://docs.projectcalico.org/v3.2/releases#v3.5.1
+# Calico Version v3.6.1
+# https://docs.projectcalico.org/v3.2/releases#v3.6.1
 # This manifest includes the following component versions:
-#   calico/node:v3.5.1
-#   calico/cni:v3.5.1
-#   calico/kube-controllers:v3.5.1
+#   calico/node:v3.6.1
+#   calico/cni:v3.6.1
+#   calico/kube-controllers:v3.6.1
 
 # This ConfigMap is used to configure a self-hosted Calico installation.
 kind: ConfigMap
@@ -115,17 +115,14 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       hostNetwork: true
       tolerations:
-        # Make sure calico-node gets scheduled on all nodes.
-        - effect: NoSchedule
-          operator: Exists
         # Mark the pod as a critical add-on for rescheduling.
         - key: CriticalAddonsOnly
           operator: Exists
-        - effect: NoExecute
-          operator: Exists
+        # Make sure the pod gets scheduled on all nodes.
+        - operator: Exists
       serviceAccountName: calico-node
       priorityClassName: system-cluster-critical
       # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
@@ -135,7 +132,7 @@ spec:
         # This container installs the Calico CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: {{ .RegistryDomain }}/giantswarm/cni:v3.5.1
+          image: {{ .RegistryDomain }}/giantswarm/cni:v3.6.1
           command: ["/install-cni.sh"]
           env:
             # Name of the CNI config file to create.
@@ -181,7 +178,7 @@ spec:
         # container programs network policy and routes on each
         # host.
         - name: calico-node
-          image: {{ .RegistryDomain }}/giantswarm/node:v3.5.1
+          image: {{ .RegistryDomain }}/giantswarm/node:v3.6.1
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
@@ -351,8 +348,8 @@ spec:
         k8s-app: calico-kube-controllers
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
-        role: master
+        kubernetes.io/os: linux
+        kubernetes.io/role: master
       # The controllers must run in the host network namespace so that
       # it isn't governed by policy that would prevent it from working.
       hostNetwork: true
@@ -366,7 +363,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: calico-kube-controllers
-          image: {{ .RegistryDomain }}/giantswarm/kube-controllers:v3.5.1
+          image: {{ .RegistryDomain }}/giantswarm/kube-controllers:v3.6.1
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
