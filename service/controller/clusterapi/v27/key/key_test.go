@@ -112,26 +112,6 @@ func Test_ClusterID(t *testing.T) {
 	}
 }
 
-func Test_ClusterCustomer(t *testing.T) {
-	t.Parallel()
-	expectedCustomer := "test-customer"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Customer: v1alpha1.ClusterCustomer{
-					ID: "test-customer",
-				},
-			},
-		},
-	}
-
-	if ClusterCustomer(customObject) != expectedCustomer {
-		t.Fatalf("Expected customer ID %s but was %s", expectedCustomer, ClusterCustomer(customObject))
-	}
-}
-
 func Test_ClusterCloudProviderTag(t *testing.T) {
 	t.Parallel()
 	expectedID := "test-cluster"
@@ -167,7 +147,7 @@ func Test_ClusterNamespace(t *testing.T) {
 	}
 }
 
-func Test_ClusterOrganization(t *testing.T) {
+func Test_OrganizationID(t *testing.T) {
 	t.Parallel()
 	expectedOrg := "test-org"
 
@@ -182,8 +162,8 @@ func Test_ClusterOrganization(t *testing.T) {
 		},
 	}
 
-	if ClusterOrganization(customObject) != expectedOrg {
-		t.Fatalf("Expected organization ID %s but was %s", expectedOrg, ClusterOrganization(customObject))
+	if OrganizationID(customObject) != expectedOrg {
+		t.Fatalf("Expected organization ID %s but was %s", expectedOrg, OrganizationID(customObject))
 	}
 }
 
@@ -350,46 +330,6 @@ func Test_LogVolumeName(t *testing.T) {
 
 	if LogVolumeName(customObject) != expectedName {
 		t.Fatalf("Expected Log volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
-	}
-}
-
-func Test_IngressControllerInsecurePort(t *testing.T) {
-	t.Parallel()
-	expectedPort := 30010
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						InsecurePort: expectedPort,
-					},
-				},
-			},
-		},
-	}
-
-	if IngressControllerInsecurePort(customObject) != expectedPort {
-		t.Fatalf("Expected ingress controller insecure port %d but was %d", expectedPort, IngressControllerInsecurePort(customObject))
-	}
-}
-
-func Test_IngressControllerSecurePort(t *testing.T) {
-	t.Parallel()
-	expectedPort := 30011
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					IngressController: v1alpha1.ClusterKubernetesIngressController{
-						SecurePort: expectedPort,
-					},
-				},
-			},
-		},
-	}
-
-	if IngressControllerSecurePort(customObject) != expectedPort {
-		t.Fatalf("Expected ingress controller secure port %d but was %d", expectedPort, IngressControllerSecurePort(customObject))
 	}
 }
 
@@ -1367,7 +1307,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-015e6cb33a709348e",
+			expectedImageID: "ami-012abdf0d2781f0a5",
 		},
 		{
 			description: "different region",
@@ -1379,7 +1319,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-04d747d892ccd652a",
+			expectedImageID: "ami-01f5fbceb7a9fa4d0",
 		},
 		{
 			description: "invalid region",
