@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -146,7 +146,7 @@ func (e *EBS) ListVolumes(customObject v1alpha1.AWSConfig, filterFuncs ...func(t
 	i := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String(fmt.Sprintf("tag:%s", key.ClusterCloudProviderTag(customObject))),
+				Name: aws.String(fmt.Sprintf("tag:%s", legacykey.ClusterCloudProviderTag(customObject))),
 				Values: []*string{
 					aws.String(cloudProviderClusterTagValue),
 				},

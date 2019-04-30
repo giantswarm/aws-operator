@@ -139,7 +139,7 @@ func Test_splitSubnetToStatusAZs(t *testing.T) {
 			subnet: mustParseCIDR("10.100.4.0/22"),
 			azs:    []string{"eu-west-1b"},
 			expectedAZs: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: "eu-west-1b",
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
@@ -158,7 +158,7 @@ func Test_splitSubnetToStatusAZs(t *testing.T) {
 			subnet: mustParseCIDR("10.100.4.0/22"),
 			azs:    []string{"eu-west-1c", "eu-west-1a"},
 			expectedAZs: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: "eu-west-1c",
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
@@ -169,7 +169,7 @@ func Test_splitSubnetToStatusAZs(t *testing.T) {
 						},
 					},
 				},
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: "eu-west-1a",
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
@@ -188,7 +188,7 @@ func Test_splitSubnetToStatusAZs(t *testing.T) {
 			subnet: mustParseCIDR("10.100.4.0/22"),
 			azs:    []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
 			expectedAZs: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: "eu-west-1a",
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
@@ -199,7 +199,7 @@ func Test_splitSubnetToStatusAZs(t *testing.T) {
 						},
 					},
 				},
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: "eu-west-1b",
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
@@ -210,7 +210,7 @@ func Test_splitSubnetToStatusAZs(t *testing.T) {
 						},
 					},
 				},
-				v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
 					Name: "eu-west-1c",
 					Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{

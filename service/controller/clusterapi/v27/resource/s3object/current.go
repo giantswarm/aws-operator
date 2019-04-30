@@ -11,11 +11,11 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -31,7 +31,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// anything here anymore. The current implementation relies on the bucket
 	// deletion of the s3bucket resource, which deletes all S3 objects and the
 	// bucket itself.
-	if key.IsDeleted(customObject) {
+	if legacykey.IsDeleted(customObject) {
 		if cc.Status.TenantCluster.Encryption.Key == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "no encryption key in controller context")
 
@@ -42,7 +42,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	bucketName := key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID)
+	bucketName := legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID)
 
 	var objects []*s3.Object
 	{

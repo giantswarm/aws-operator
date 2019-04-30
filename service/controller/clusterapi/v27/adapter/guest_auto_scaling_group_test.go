@@ -50,7 +50,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "myaz",
 							},
 						},
@@ -87,7 +87,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "myaz",
 							},
 						},
@@ -118,7 +118,7 @@ func TestAdapterAutoScalingGroupRegularFields(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "myaz",
 							},
 						},

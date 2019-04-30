@@ -10,12 +10,12 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/cpf/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCustomObject(obj)
+	cr, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -36,7 +36,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPostStackName(cr)),
+			StackName: aws.String(legacykey.MainHostPostStackName(cr)),
 		}
 
 		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
@@ -95,8 +95,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
-			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			StackName:                   aws.String(key.MainHostPostStackName(cr)),
+			EnableTerminationProtection: aws.Bool(legacykey.EnableTerminationProtection),
+			StackName:                   aws.String(legacykey.MainHostPostStackName(cr)),
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
@@ -113,7 +113,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPostStackName(cr)),
+			StackName: aws.String(legacykey.MainHostPostStackName(cr)),
 		}
 
 		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
@@ -135,7 +135,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 
 	var tenantPrivateSubnetCidrs []string
 	{
-		for _, az := range key.StatusAvailabilityZones(cr) {
+		for _, az := range legacykey.StatusAvailabilityZones(cr) {
 			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
 		}
 	}
@@ -178,7 +178,7 @@ func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.AWSConfig) (
 			RouteTableID: id,
 			// Requester CIDR block, we create the peering connection from the
 			// tenant's CIDR for being able to access Vault's ELB.
-			CidrBlock: key.StatusNetworkCIDR(cr),
+			CidrBlock: legacykey.StatusNetworkCIDR(cr),
 			// The peer connection id is fetched from the cloud formation stack
 			// outputs in the stackoutput resource.
 			PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
@@ -199,8 +199,8 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.AWSConfi
 	var recordSets *template.ParamsMainRecordSets
 	{
 		recordSets = &template.ParamsMainRecordSets{
-			BaseDomain:                 key.BaseDomain(cr),
-			ClusterID:                  key.ClusterID(cr),
+			BaseDomain:                 legacykey.ClusterBaseDomain(cr),
+			ClusterID:                  legacykey.ClusterID(cr),
 			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
 			Route53Enabled:             r.route53Enabled,
 		}

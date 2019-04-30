@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/credential"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/drainfinisher"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpoutputs"
@@ -116,12 +116,12 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		customObject, err := key.ToCustomObject(obj)
+		customObject, err := legacykey.ToCustomObject(obj)
 		if err != nil {
 			return false
 		}
 
-		if key.VersionBundleVersion(customObject) == VersionBundle().Version {
+		if legacykey.VersionBundleVersion(customObject) == VersionBundle().Version {
 			return true
 		}
 

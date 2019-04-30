@@ -64,7 +64,7 @@ func TestAdapterGuestMain(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "eu-central-1a",
 								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
@@ -109,7 +109,7 @@ func TestAdapterGuestMain(t *testing.T) {
 				Status: v1alpha1.AWSConfigStatus{
 					AWS: v1alpha1.AWSConfigStatusAWS{
 						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+							{
 								Name: "cn-north-1a",
 								Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 									Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{

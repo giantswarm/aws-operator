@@ -170,7 +170,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 	{
 		input := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
-				&ec2.Filter{
+				{
 					Name: aws.String(fmt.Sprintf("tag:%s", tagInstallation)),
 					Values: []*string{
 						aws.String(e.installationName),

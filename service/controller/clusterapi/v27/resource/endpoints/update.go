@@ -8,11 +8,11 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	apiv1 "k8s.io/api/core/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -24,7 +24,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if endpointsToUpdate != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating Kubernetes endpoints")
 
-		namespace := key.ClusterNamespace(customObject)
+		namespace := legacykey.ClusterNamespace(customObject)
 		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(endpointsToUpdate)
 		if err != nil {
 			return microerror.Mask(err)

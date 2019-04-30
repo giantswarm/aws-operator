@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+import "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 
 type GuestLifecycleHooksAdapter struct {
 	Worker GuestLifecycleHooksAdapterWorker
@@ -20,8 +20,8 @@ type GuestLifecycleHooksAdapterLifecycleHook struct {
 }
 
 func (a *GuestLifecycleHooksAdapter) Adapt(config Config) error {
-	a.Worker.ASG.Ref = key.WorkerASGRef
-	a.Worker.LifecycleHook.Name = key.NodeDrainerLifecycleHookName
+	a.Worker.ASG.Ref = legacykey.WorkerASGRef
+	a.Worker.LifecycleHook.Name = legacykey.NodeDrainerLifecycleHookName
 
 	return nil
 }

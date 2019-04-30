@@ -27,7 +27,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/bridgezone"
@@ -539,14 +539,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var statusResource controller.Resource
 	{
 		c := statusresource.ResourceConfig{
-			ClusterEndpointFunc:      key.ToClusterEndpoint,
-			ClusterIDFunc:            key.ToClusterID,
-			ClusterStatusFunc:        key.ToClusterStatus,
-			NodeCountFunc:            key.ToNodeCount,
+			ClusterEndpointFunc:      legacykey.ToClusterEndpoint,
+			ClusterIDFunc:            legacykey.ToClusterID,
+			ClusterStatusFunc:        legacykey.ToClusterStatus,
+			NodeCountFunc:            legacykey.ToNodeCount,
 			Logger:                   config.Logger,
 			RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
 			TenantCluster:            tenantCluster,
-			VersionBundleVersionFunc: key.ToVersionBundleVersion,
+			VersionBundleVersionFunc: legacykey.ToVersionBundleVersion,
 		}
 
 		statusResource, err = statusresource.NewResource(c)
@@ -628,12 +628,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		customObject, err := key.ToCustomObject(obj)
+		customObject, err := legacykey.ToCustomObject(obj)
 		if err != nil {
 			return false
 		}
 
-		if key.VersionBundleVersion(customObject) == VersionBundle().Version {
+		if legacykey.VersionBundleVersion(customObject) == VersionBundle().Version {
 			return true
 		}
 
