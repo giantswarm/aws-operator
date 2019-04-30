@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -65,9 +65,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketAclInput{
-				Bucket:       aws.String(key.TargetLogBucketName(customObject)),
-				GrantReadACP: aws.String(key.LogDeliveryURI),
-				GrantWrite:   aws.String(key.LogDeliveryURI),
+				Bucket:       aws.String(legacykey.TargetLogBucketName(customObject)),
+				GrantReadACP: aws.String(legacykey.LogDeliveryURI),
+				GrantWrite:   aws.String(legacykey.LogDeliveryURI),
 			}
 
 			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketAcl(i)
@@ -78,7 +78,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketLifecycleConfigurationInput{
-				Bucket: aws.String(key.TargetLogBucketName(customObject)),
+				Bucket: aws.String(legacykey.TargetLogBucketName(customObject)),
 				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 					Rules: []*s3.LifecycleRule{
 						{
@@ -104,7 +104,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
 					LoggingEnabled: &s3.LoggingEnabled{
-						TargetBucket: aws.String(key.TargetLogBucketName(customObject)),
+						TargetBucket: aws.String(legacykey.TargetLogBucketName(customObject)),
 						TargetPrefix: aws.String(bucketInput.Name + "/"),
 					},
 				},

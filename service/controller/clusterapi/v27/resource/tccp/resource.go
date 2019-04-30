@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -129,13 +129,13 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(key.MasterInstanceName(cr)),
+						aws.String(legacykey.MasterInstanceName(cr)),
 					},
 				},
 				{
 					Name: aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{
-						aws.String(key.ClusterID(cr)),
+						aws.String(legacykey.ClusterID(cr)),
 					},
 				},
 				{

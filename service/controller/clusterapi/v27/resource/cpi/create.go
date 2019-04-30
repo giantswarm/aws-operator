@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/cpi/template"
 )
 
@@ -18,7 +18,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCustomObject(obj)
+	cr, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -31,7 +31,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(legacykey.MainHostPreStackName(cr)),
 		}
 
 		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
@@ -88,8 +88,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
-			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			StackName:                   aws.String(key.MainHostPreStackName(cr)),
+			EnableTerminationProtection: aws.Bool(legacykey.EnableTerminationProtection),
+			StackName:                   aws.String(legacykey.MainHostPreStackName(cr)),
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
@@ -106,7 +106,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(legacykey.MainHostPreStackName(cr)),
 		}
 
 		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
@@ -127,7 +127,7 @@ func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig)
 	}
 
 	iamRoles := &template.ParamsMainIAMRoles{
-		PeerAccessRoleName: key.PeerAccessRoleName(cr),
+		PeerAccessRoleName: legacykey.PeerAccessRoleName(cr),
 		Tenant: template.ParamsMainIAMRolesTenant{
 			AWS: template.ParamsMainIAMRolesTenantAWS{
 				Account: template.ParamsMainIAMRolesTenantAWSAccount{

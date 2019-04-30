@@ -9,13 +9,13 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 // EnsureDeleted ensures that any ELBs from Kubernetes LoadBalancer services
 // are deleted. This is needed because the use the VPC public subnet.
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}

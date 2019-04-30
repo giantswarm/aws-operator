@@ -6,7 +6,7 @@ import (
 	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -56,17 +56,17 @@ func getARN(credential *v1.Secret) (string, error) {
 }
 
 func readCredential(k8sClient kubernetes.Interface, obj interface{}) (*v1.Secret, error) {
-	customObject, err := key.ToCustomObject(obj)
+	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	credentialName := key.CredentialName(customObject)
+	credentialName := legacykey.CredentialName(customObject)
 	if credentialName == "" {
 		return nil, microerror.Mask(credentialNameEmpty)
 	}
 
-	credentialNamespace := key.CredentialNamespace(customObject)
+	credentialNamespace := legacykey.CredentialNamespace(customObject)
 	if credentialName == "" {
 		return nil, microerror.Mask(credentialNamespaceEmpty)
 	}

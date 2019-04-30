@@ -23,7 +23,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -68,7 +68,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var customObject providerv1alpha1.AWSConfig
 	var oldSpec providerv1alpha1.AWSConfigSpec
 	{
-		o, err := key.ToCustomObject(obj)
+		o, err := legacykey.ToCustomObject(obj)
 		if err != nil {
 			return microerror.Mask(err)
 		}
