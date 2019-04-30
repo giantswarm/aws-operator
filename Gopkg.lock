@@ -315,7 +315,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e5fca7f5ba3fe7a4a874c09ce289ef63e500e3ed232b48c6d5dd71fa13669ebe"
+  digest = "1:8add281b1e8847aa2509e40a681d0f2be65d43b3ec9258b27bbdf15c8e00e3fa"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -328,7 +328,7 @@
     "v_4_3_0",
   ]
   pruneopts = "T"
-  revision = "76e104d79190afa91d06f04fffad28a6a44825e0"
+  revision = "205a78ee7ea7b712a7a41ca163b96cf81d0533a1"
 
 [[projects]]
   branch = "master"
@@ -1494,6 +1494,7 @@
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake",
     "k8s.io/apimachinery/pkg/api/errors",
+    "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",

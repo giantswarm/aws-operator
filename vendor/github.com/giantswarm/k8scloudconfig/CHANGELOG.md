@@ -15,6 +15,7 @@ version directory, and  then changes are introduced.
 - Update kubernetes to 1.14.1
 - Update calico to 3.6.1
 - Change node labels for master and workers
+- Update kube-proxy and calico to tolerate every taint effects and CriticalAddonsOnly
 
 ## [v4.2.0]
 
