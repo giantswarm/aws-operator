@@ -31,7 +31,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// anything here anymore. The current implementation relies on the bucket
 	// deletion of the s3bucket resource, which deletes all S3 objects and the
 	// bucket itself.
-	if legacykey.IsDeleted(customObject) {
+	if legacykey.ClusterIsDeleted(customObject) {
 		if cc.Status.TenantCluster.Encryption.Key == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "no encryption key in controller context")
 

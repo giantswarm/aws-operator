@@ -18,6 +18,10 @@ func ClusterID(cluster v1alpha1.Cluster) string {
 	return providerStatus(cluster).Cluster.ID
 }
 
+func ClusterIsDeleted(cluster v1alpha1.Cluster) bool {
+	return cluster.GetDeletionTimestamp() != nil
+}
+
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
 	return ClusterID(cluster)
 }

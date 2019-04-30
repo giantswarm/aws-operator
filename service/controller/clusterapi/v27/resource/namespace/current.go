@@ -54,7 +54,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, nil
 	}
 
-	if namespace == nil && legacykey.IsDeleted(customObject) {
+	if namespace == nil && legacykey.ClusterIsDeleted(customObject) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "resource deletion completed")
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

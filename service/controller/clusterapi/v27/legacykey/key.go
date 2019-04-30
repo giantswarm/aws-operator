@@ -136,6 +136,10 @@ func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
 	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
 }
 
+func ClusterIsDeleted(customObject v1alpha1.AWSConfig) bool {
+	return customObject.GetDeletionTimestamp() != nil
+}
+
 func CredentialName(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.CredentialSecret.Name
 }
@@ -242,10 +246,6 @@ func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) st
 
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
-}
-
-func IsDeleted(customObject v1alpha1.AWSConfig) bool {
-	return customObject.GetDeletionTimestamp() != nil
 }
 
 func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
