@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/randomkeys/randomkeystest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
 
 func Test_CurrentState(t *testing.T) {

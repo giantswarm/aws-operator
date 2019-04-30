@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it

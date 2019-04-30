@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
 
 const (

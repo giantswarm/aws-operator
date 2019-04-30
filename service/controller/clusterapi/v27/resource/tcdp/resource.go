@@ -7,12 +7,12 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tcdpv26"
+	Name = "tcdpv27"
 )
 
 type Config struct {

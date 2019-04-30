@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
