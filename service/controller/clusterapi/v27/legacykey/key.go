@@ -49,9 +49,7 @@ const (
 
 	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
 
-	chinaAWSCliContainerRegistry   = "docker://registry-intl.cn-shanghai.aliyuncs.com/giantswarm/awscli:latest"
-	defaultAWSCliContainerRegistry = "quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
-	defaultDockerVolumeSizeGB      = "100"
+	defaultDockerVolumeSizeGB = "100"
 )
 
 const (
@@ -114,13 +112,6 @@ func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) str
 
 func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
-}
-
-func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
-	if IsChinaRegion(customObject) {
-		return chinaAWSCliContainerRegistry
-	}
-	return defaultAWSCliContainerRegistry
 }
 
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
@@ -242,10 +233,6 @@ func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) st
 
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
-}
-
-func IsDeleted(customObject v1alpha1.AWSConfig) bool {
-	return customObject.GetDeletionTimestamp() != nil
 }
 
 func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
