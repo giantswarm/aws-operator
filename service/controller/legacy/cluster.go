@@ -552,6 +552,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
