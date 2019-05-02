@@ -315,7 +315,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e5fca7f5ba3fe7a4a874c09ce289ef63e500e3ed232b48c6d5dd71fa13669ebe"
+  digest = "1:c9081687fa45ef9c5bf263fb5ec743a230e7f0f6abe88ca95a190ee377320b71"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -328,7 +328,7 @@
     "v_4_3_0",
   ]
   pruneopts = "T"
-  revision = "76e104d79190afa91d06f04fffad28a6a44825e0"
+  revision = "099728ef42b2b5c3dec8a83f86379cf53660f5c9"
 
 [[projects]]
   branch = "master"

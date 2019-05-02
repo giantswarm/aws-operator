@@ -18,9 +18,9 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	v26 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26"
-	v26adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/adapter"
-	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v26/cloudconfig"
+	v27 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27"
+	v27adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/adapter"
+	v27cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -198,9 +198,9 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV26 *controller.ResourceSet
+	var resourceSetV27 *controller.ResourceSet
 	{
-		c := v26.ClusterResourceSetConfig{
+		c := v27.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
@@ -229,13 +229,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v26cloudconfig.OIDCConfig{
+			OIDC: v27cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			APIWhitelist: v26adapter.APIWhitelist{
+			APIWhitelist: v27adapter.APIWhitelist{
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
@@ -246,14 +246,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VaultAddress:   config.VaultAddress,
 		}
 
-		resourceSetV26, err = v26.NewClusterResourceSet(c)
+		resourceSetV27, err = v27.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV26,
+		resourceSetV27,
 	}
 
 	return resourceSets, nil

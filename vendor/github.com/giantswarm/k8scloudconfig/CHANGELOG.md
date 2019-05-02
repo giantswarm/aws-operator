@@ -9,12 +9,17 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v4.3.0] WIP
+## [v4.4.0] WIP
+
+### Changed
+
+## [v4.3.0]
 
 ### Changed
 - Update kubernetes to 1.14.1
 - Update calico to 3.6.1
 - Change node labels for master and workers
+- Update kube-proxy and calico to tolerate every taint effects and CriticalAddonsOnly
 
 ## [v4.2.0]
 
