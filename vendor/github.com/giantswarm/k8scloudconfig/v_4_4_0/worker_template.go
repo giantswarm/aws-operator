@@ -1,4 +1,4 @@
-package v_4_3_0
+package v_4_4_0
 
 const WorkerTemplate = `---
 ignition:

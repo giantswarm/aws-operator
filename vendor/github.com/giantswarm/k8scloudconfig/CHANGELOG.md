@@ -9,7 +9,11 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v4.3.0] WIP
+## [v4.4.0] WIP
+
+### Changed
+
+## [v4.3.0]
 
 ### Changed
 - Update kubernetes to 1.14.1
