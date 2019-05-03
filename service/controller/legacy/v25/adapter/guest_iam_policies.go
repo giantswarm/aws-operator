@@ -30,7 +30,11 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	i.WorkerProfileName = key.InstanceProfileName(cfg.CustomObject, key.KindWorker)
 	i.WorkerRoleName = key.RoleName(cfg.CustomObject, key.KindWorker)
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
-	i.KMSKeyARN = cfg.TenantClusterKMSKeyARN
+
+	if cfg.TenantClusterKMSKeyARN != "" {
+		i.KMSKeyARN = cfg.TenantClusterKMSKeyARN
+	}
+
 	i.S3Bucket = key.BucketName(cfg.CustomObject, cfg.TenantClusterAccountID)
 
 	return nil
