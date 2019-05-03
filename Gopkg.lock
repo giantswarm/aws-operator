@@ -245,12 +245,12 @@
   revision = "510670380f27586e15cd725b804db1f8b145ae9f"
 
 [[projects]]
-  branch = "master"
-  digest = "1:1aa4cc4501c54834108fd38587e57b1658374939b9a4ab9a4d8f99322bc6187b"
+  branch = "ensure-crd"
+  digest = "1:766a1dc9804de1c692fbad5a8b3816fcb920586524a7c4f1996dff52152e164a"
   name = "github.com/giantswarm/e2esetup"
   packages = ["k8s"]
   pruneopts = "UT"
-  revision = "8373c3d3cffd1232055dcf4200e00f005c50da70"
+  revision = "4424c711c56f2e3d6ff4a1424862458836be95b5"
 
 [[projects]]
   branch = "master"
