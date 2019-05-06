@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/aws-operator/service/network"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -14,8 +15,9 @@ const (
 )
 
 type Config struct {
-	G8sClient versioned.Interface
-	Logger    micrologger.Logger
+	G8sClient        versioned.Interface
+	Logger           micrologger.Logger
+	NetworkAllocator network.Allocator
 
 	AllocatedSubnetMaskBits int
 	AvailabilityZones       []string
@@ -23,8 +25,9 @@ type Config struct {
 }
 
 type Resource struct {
-	g8sClient versioned.Interface
-	logger    micrologger.Logger
+	g8sClient        versioned.Interface
+	logger           micrologger.Logger
+	networkAllocator network.Allocator
 
 	allocatedSubnetMask net.IPMask
 	availabilityZones   []string
@@ -38,6 +41,9 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.NetworkAllocator == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkAllocator must not be empty", config)
+	}
 
 	if len(config.AvailabilityZones) == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AvailabilityZones must not be empty", config)
@@ -47,8 +53,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newResource := &Resource{
-		g8sClient: config.G8sClient,
-		logger:    config.Logger,
+		g8sClient:        config.G8sClient,
+		logger:           config.Logger,
+		networkAllocator: config.NetworkAllocator,
 
 		allocatedSubnetMask: net.CIDRMask(config.AllocatedSubnetMaskBits, 32),
 		availabilityZones:   config.AvailabilityZones,

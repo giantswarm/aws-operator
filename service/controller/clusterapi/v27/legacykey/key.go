@@ -71,18 +71,10 @@ const (
 )
 
 const (
-	ClusterIDLabel = "giantswarm.io/cluster"
-
-	AnnotationEtcdDomain        = "giantswarm.io/etcd-domain"
-	AnnotationPrometheusCluster = "giantswarm.io/prometheus-cluster"
-
 	LabelApp           = "app"
 	LabelCluster       = "giantswarm.io/cluster"
-	LabelCustomer      = "customer"
 	LabelOrganization  = "giantswarm.io/organization"
 	LabelVersionBundle = "giantswarm.io/version-bundle"
-
-	LegacyLabelCluster = "cluster"
 )
 
 const (
@@ -197,15 +189,15 @@ func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
 	return getResourcenameWithTimeHash("DockerVolume", customObject)
 }
 
-func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameDocker(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-docker", ClusterID(customObject))
 }
 
-func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameEtcd(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
-func LogVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameLog(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-log", ClusterID(customObject))
 }
 
@@ -247,21 +239,16 @@ func EtcdPort(customObject v1alpha1.AWSConfig) int {
 	return 2379
 }
 
-// LoadBalancerName produces a unique name for the load balancer.
-// It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
-func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {
-	if ClusterID(cluster) == "" {
-		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.id")
-	}
+func ELBNameAPI(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-api", ClusterID(customObject))
+}
 
-	componentName, err := componentName(domainName)
-	if err != nil {
-		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.id")
-	}
+func ELBNameEtcd(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
+}
 
-	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)
-
-	return lbName, nil
+func ELBNameIngress(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-ingress", ClusterID(customObject))
 }
 
 func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
@@ -637,18 +624,6 @@ func baseRoleARN(customObject v1alpha1.AWSConfig, accountID string, kind string)
 	partition := RegionARN(customObject)
 
 	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, RoleNameTemplate)
-}
-
-// componentName returns the first component of a domain name.
-// e.g. apiserver.example.customer.cloud.com -> apiserver
-func componentName(domainName string) (string, error) {
-	splits := strings.SplitN(domainName, ".", 2)
-
-	if len(splits) != 2 {
-		return "", microerror.Mask(malformedCloudConfigKeyError)
-	}
-
-	return splits[0], nil
 }
 
 // ImageID returns the EC2 AMI for the configured region.

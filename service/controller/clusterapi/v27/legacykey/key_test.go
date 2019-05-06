@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_AutoScalingGroupName(t *testing.T) {
@@ -289,7 +287,7 @@ func Test_DockerVolumeResourceName_Inequivalence(t *testing.T) {
 	}
 }
 
-func Test_EtcdVolumeName(t *testing.T) {
+func Test_VolumeNameEtcd(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-etcd"
 
@@ -306,12 +304,12 @@ func Test_EtcdVolumeName(t *testing.T) {
 		},
 	}
 
-	if EtcdVolumeName(customObject) != expectedName {
-		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	if VolumeNameEtcd(customObject) != expectedName {
+		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, VolumeNameEtcd(customObject))
 	}
 }
 
-func Test_LogVolumeName(t *testing.T) {
+func Test_VolumeNameLog(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-log"
 
@@ -328,8 +326,8 @@ func Test_LogVolumeName(t *testing.T) {
 		},
 	}
 
-	if LogVolumeName(customObject) != expectedName {
-		t.Fatalf("Expected Log volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	if VolumeNameLog(customObject) != expectedName {
+		t.Fatalf("Expected Log volume name %s but was %s", expectedName, VolumeNameEtcd(customObject))
 	}
 }
 
@@ -979,135 +977,6 @@ func Test_InstanceProfileName(t *testing.T) {
 
 	if InstanceProfileName(customObject, profileType) != expectedName {
 		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
-	}
-}
-
-func TestLoadBalancerName(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		desc       string
-		domainName string
-		tpo        v1alpha1.AWSConfig
-		res        string
-		err        error
-	}{
-		{
-			desc:       "works",
-			domainName: "component.foo.bar.example.com",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "foo-customer",
-					},
-				},
-			},
-			res: "foo-customer-component",
-		},
-		{
-			desc:       "also works",
-			domainName: "component.of.a.well.formed.domain",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "quux-the-customer",
-					},
-				},
-			},
-			res: "quux-the-customer-component",
-		},
-		{
-			desc:       "missing ID key in cloudconfig",
-			domainName: "component.foo.bar.example.com",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "",
-					},
-				},
-			},
-			res: "",
-			err: missingCloudConfigKeyError,
-		},
-		{
-			desc:       "malformed domain name",
-			domainName: "not a domain name",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "foo-customer",
-					},
-				},
-			},
-			res: "",
-			err: malformedCloudConfigKeyError,
-		},
-		{
-			desc:       "missing domain name",
-			domainName: "",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "foo-customer",
-					},
-				},
-			},
-			res: "",
-			err: malformedCloudConfigKeyError,
-		},
-	}
-
-	for _, tc := range tests {
-		res, err := LoadBalancerName(tc.domainName, tc.tpo)
-
-		if err != nil {
-			underlying := microerror.Cause(err)
-			assert.Equal(t, tc.err, underlying, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-		}
-
-		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-	}
-}
-
-func TestComponentName(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		desc       string
-		domainName string
-		res        string
-		err        error
-	}{
-		{
-			desc:       "one level of subdomains",
-			domainName: "foo.bar.com",
-			res:        "foo",
-		},
-		{
-			desc:       "two levels of subdomains",
-			domainName: "foo.bar.quux.com",
-			res:        "foo",
-		},
-		{
-			desc:       "malformed domain",
-			domainName: "not a domain name",
-			res:        "",
-			err:        malformedCloudConfigKeyError,
-		},
-		{
-			desc:       "empty domain",
-			domainName: "",
-			res:        "",
-			err:        malformedCloudConfigKeyError,
-		},
-	}
-
-	for _, tc := range tests {
-		res, err := componentName(tc.domainName)
-
-		if err != nil {
-			assert.True(t, IsMalformedCloudConfigKey(err), fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-		}
-
-		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
 	}
 }
 
