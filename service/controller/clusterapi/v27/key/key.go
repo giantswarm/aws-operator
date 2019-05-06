@@ -96,6 +96,18 @@ func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("DockerVolume", cluster)
 }
 
+func ELBNameAPI(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-api", ClusterID(cluster))
+}
+
+func ELBNameEtcd(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(cluster))
+}
+
+func ELBNameIngress(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-ingress", ClusterID(cluster))
+}
+
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
 }
