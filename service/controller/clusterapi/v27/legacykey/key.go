@@ -73,11 +73,8 @@ const (
 const (
 	LabelApp           = "app"
 	LabelCluster       = "giantswarm.io/cluster"
-	LabelCustomer      = "customer"
 	LabelOrganization  = "giantswarm.io/organization"
 	LabelVersionBundle = "giantswarm.io/version-bundle"
-
-	LegacyLabelCluster = "cluster"
 )
 
 const (
