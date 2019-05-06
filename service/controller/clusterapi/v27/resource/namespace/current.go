@@ -11,6 +11,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
@@ -54,7 +55,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, nil
 	}
 
-	if namespace == nil && legacykey.IsDeleted(customObject) {
+	if namespace == nil && key.IsDeleted(&customObject) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "resource deletion completed")
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
