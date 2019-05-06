@@ -289,7 +289,7 @@ func Test_DockerVolumeResourceName_Inequivalence(t *testing.T) {
 	}
 }
 
-func Test_EtcdVolumeName(t *testing.T) {
+func Test_VolumeNameEtcd(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-etcd"
 
@@ -306,12 +306,12 @@ func Test_EtcdVolumeName(t *testing.T) {
 		},
 	}
 
-	if EtcdVolumeName(customObject) != expectedName {
-		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	if VolumeNameEtcd(customObject) != expectedName {
+		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, VolumeNameEtcd(customObject))
 	}
 }
 
-func Test_LogVolumeName(t *testing.T) {
+func Test_VolumeNameLog(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-log"
 
@@ -328,8 +328,8 @@ func Test_LogVolumeName(t *testing.T) {
 		},
 	}
 
-	if LogVolumeName(customObject) != expectedName {
-		t.Fatalf("Expected Log volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	if VolumeNameLog(customObject) != expectedName {
+		t.Fatalf("Expected Log volume name %s but was %s", expectedName, VolumeNameEtcd(customObject))
 	}
 }
 

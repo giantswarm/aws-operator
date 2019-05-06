@@ -192,15 +192,15 @@ func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
 	return getResourcenameWithTimeHash("DockerVolume", customObject)
 }
 
-func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameDocker(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-docker", ClusterID(customObject))
 }
 
-func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameEtcd(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
-func LogVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameLog(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-log", ClusterID(customObject))
 }
 
