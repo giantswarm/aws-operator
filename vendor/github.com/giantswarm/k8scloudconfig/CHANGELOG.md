@@ -20,6 +20,7 @@ version directory, and  then changes are introduced.
 - Update calico to 3.6.1
 - Change node labels for master and workers
 - Update kube-proxy and calico to tolerate every taint effects and CriticalAddonsOnly
+- Add managed giantswarm label to calico daemonset
 
 ## [v4.2.0]
 
@@ -384,7 +385,9 @@ chart-operator).
 
 ## [v0.1.0]
 
-
+[v4.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_4_0
+[v4.3.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_3_0
+[v4.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_2_0
 [v4.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_1_0
 [v4.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_0_0
 [v3.7.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_4
