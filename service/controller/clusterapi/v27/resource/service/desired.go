@@ -11,6 +11,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
+const (
+	AnnotationEtcdDomain        = "giantswarm.io/etcd-domain"
+	AnnotationPrometheusCluster = "giantswarm.io/prometheus-cluster"
+)
+
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := legacykey.ToCustomObject(obj)
 	if err != nil {
@@ -30,8 +35,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				legacykey.LabelVersionBundle: legacykey.VersionBundleVersion(customObject),
 			},
 			Annotations: map[string]string{
-				legacykey.AnnotationEtcdDomain:        legacykey.ClusterEtcdEndpoint(customObject),
-				legacykey.AnnotationPrometheusCluster: legacykey.ClusterID(customObject),
+				AnnotationEtcdDomain:        legacykey.ClusterEtcdEndpoint(customObject),
+				AnnotationPrometheusCluster: legacykey.ClusterID(customObject),
 			},
 		},
 		Spec: v1.ServiceSpec{
