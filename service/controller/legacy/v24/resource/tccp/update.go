@@ -241,45 +241,45 @@ func (r *Resource) shouldScale(ctx context.Context, cr v1alpha1.AWSConfig, curre
 	}
 
 	if currentState.MasterImageID != desiredState.MasterImageID {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to difference in master image IDs: current ID is %q but desired ID is %q", currentState.MasterImageID, desiredState.MasterImageID)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in master image IDs: current ID is %q but desired ID is %q", currentState.MasterImageID, desiredState.MasterImageID))
 		return false, nil
 	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to difference in master cloudconfig versions: current version is %q but desired version is %q", currentState.MasterCloudConfigVersion, desiredState.MasterCloudConfigVersion)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in master cloudconfig versions: current version is %q but desired version is %q", currentState.MasterCloudConfigVersion, desiredState.MasterCloudConfigVersion))
 		return false, nil
 	}
 	if currentState.WorkerDockerVolumeSizeGB != desiredState.WorkerDockerVolumeSizeGB {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to difference in worker docker volume sizes: current size is %d but desired size is %d", currentState.WorkerDockerVolumeSizeGB, desiredState.WorkerDockerVolumeSizeGB)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in worker docker volume sizes: current size is %d but desired size is %d", currentState.WorkerDockerVolumeSizeGB, desiredState.WorkerDockerVolumeSizeGB))
 		return false, nil
 	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to difference in worker image IDs: current ID is %q but desired ID is %q", currentState.WorkerImageID, desiredState.WorkerImageID)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in worker image IDs: current ID is %q but desired ID is %q", currentState.WorkerImageID, desiredState.WorkerImageID))
 		return false, nil
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to difference in worker instance types: current type is %q but desired type is %q", currentState.WorkerInstanceType, desiredState.WorkerInstanceType)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in worker instance types: current type is %q but desired type is %q", currentState.WorkerInstanceType, desiredState.WorkerInstanceType))
 		return false, nil
 	}
 	if currentState.WorkerCloudConfigVersion != desiredState.WorkerCloudConfigVersion {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version: current version is %q but desired is %q", currentState.WorkerCloudConfigVersion, desiredState.WorkerCloudConfigVersion)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to worker cloudconfig version: current version is %q but desired is %q", currentState.WorkerCloudConfigVersion, desiredState.WorkerCloudConfigVersion))
 		return false, nil
 	}
 	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max: cc.Status.TenantCluster.TCCP.ASG.MaxSize %d differs from key.ScalingMax(cr) %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.ScalingMax(cr))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("scaling due to scaling.max: cc.Status.TenantCluster.TCCP.ASG.MaxSize %d differs from key.ScalingMax(cr) %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.ScalingMax(cr)))
 		if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-			r.logger.LogCtx(ctx, "level", "warning", "message", "master instance type will be changed while scaling: current type is %q but desired type is %q", currentState.MasterInstanceType, desiredState.MasterInstanceType)
+			r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("master instance type will be changed while scaling: current type is %q but desired type is %q", currentState.MasterInstanceType, desiredState.MasterInstanceType))
 		}
 		return true, nil
 	}
 	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min: cc.Status.TenantCluster.TCCP.ASG.MinSize %d differs from key.ScalingMin(cr): %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.ScalingMin(cr))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("scaling due to scaling.min: cc.Status.TenantCluster.TCCP.ASG.MinSize %d differs from key.ScalingMin(cr): %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.ScalingMin(cr)))
 		if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-			r.logger.LogCtx(ctx, "level", "warning", "message", "master instance type will be changed while scaling: current type is %q but desired type is %q", currentState.MasterInstanceType, desiredState.MasterInstanceType)
+			r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("master instance type will be changed while scaling: current type is %q but desired type is %q", currentState.MasterInstanceType, desiredState.MasterInstanceType))
 		}
 		return true, nil
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to version bundle version difference: current version is %q but desired is %q", currentState.VersionBundleVersion, desiredState.VersionBundleVersion)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to version bundle version difference: current version is %q but desired is %q", currentState.VersionBundleVersion, desiredState.VersionBundleVersion))
 		return false, nil
 	}
 
