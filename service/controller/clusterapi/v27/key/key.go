@@ -16,6 +16,20 @@ const (
 	CloudConfigVersion = "v_4_0_0"
 )
 
+const (
+	LabelApp           = "app"
+	LabelCluster       = "giantswarm.io/cluster"
+	LabelOrganization  = "giantswarm.io/organization"
+	LabelVersionBundle = "giantswarm.io/version-bundle"
+)
+
+// AWS Tags used for cost analysis and general resource tagging.
+const (
+	TagCluster      = "giantswarm.io/cluster"
+	TagInstallation = "giantswarm.io/installation"
+	TagOrganization = "giantswarm.io/organization"
+)
+
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
 }
@@ -37,6 +51,10 @@ func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Cluster.DNS.Domain
 }
 
+func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(cluster))
+}
+
 func ClusterID(cluster v1alpha1.Cluster) string {
 	return providerStatus(cluster).Cluster.ID
 }
@@ -45,12 +63,37 @@ func ClusterNamespace(cluster v1alpha1.Cluster) string {
 	return ClusterID(cluster)
 }
 
+func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]string {
+	TagCloudProvider := ClusterCloudProviderTag(cluster)
+
+	tags := map[string]string{
+		TagCloudProvider: "owned",
+		TagCluster:       ClusterID(cluster),
+		TagInstallation:  installationName,
+		TagOrganization:  OrganizationID(cluster),
+	}
+
+	return tags
+}
+
+func CredentialName(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.CredentialSecret.Name
+}
+
+func CredentialNamespace(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.CredentialSecret.Namespace
+}
+
 func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("DockerVolume", cluster)
 }
 
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
+}
+
+func OrganizationID(cluster v1alpha1.Cluster) string {
+	return cluster.Labels[LabelOrganization]
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
