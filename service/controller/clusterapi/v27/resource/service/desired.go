@@ -28,8 +28,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Namespace: legacykey.ClusterID(customObject),
 			Labels: map[string]string{
 				legacykey.LabelApp:           "master",
-				legacykey.LegacyLabelCluster: legacykey.ClusterID(customObject),
-				legacykey.LabelCustomer:      legacykey.OrganizationID(customObject),
 				legacykey.LabelCluster:       legacykey.ClusterID(customObject),
 				legacykey.LabelOrganization:  legacykey.OrganizationID(customObject),
 				legacykey.LabelVersionBundle: legacykey.VersionBundleVersion(customObject),

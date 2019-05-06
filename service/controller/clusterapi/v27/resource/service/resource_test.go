@@ -26,8 +26,6 @@ func Test_toService(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -53,8 +51,6 @@ func Test_toService(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -83,8 +79,6 @@ func Test_toService(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -142,8 +136,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -169,8 +161,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -200,8 +190,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -227,8 +215,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy456",
-						legacykey.LabelCustomer:      "customer2",
 						legacykey.LabelCluster:       "xy456",
 						legacykey.LabelOrganization:  "org2",
 						legacykey.LabelVersionBundle: "1.2.4",
@@ -258,8 +244,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -285,8 +269,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -316,8 +298,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -343,8 +323,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -379,8 +357,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
@@ -407,8 +383,6 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
