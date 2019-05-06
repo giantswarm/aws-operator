@@ -24,6 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/controller/legacy"
+	"github.com/giantswarm/aws-operator/service/network"
 )
 
 const (
@@ -123,6 +124,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var networkAllocator network.Allocator
+	{
+		c := network.Config{
+			Logger: config.Logger,
+		}
+		networkAllocator, err = network.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var clusterapiClusterController *clusterapi.Cluster
 	{
 		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
@@ -131,11 +143,12 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := clusterapi.ClusterConfig{
-			CMAClient:    cmaClient,
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Logger:       config.Logger,
+			CMAClient:        cmaClient,
+			G8sClient:        g8sClient,
+			K8sClient:        k8sClient,
+			K8sExtClient:     k8sExtClient,
+			Logger:           config.Logger,
+			NetworkAllocator: networkAllocator,
 
 			APIWhitelist: clusterapi.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
@@ -228,10 +241,11 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := legacy.ClusterConfig{
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Logger:       config.Logger,
+			G8sClient:        g8sClient,
+			K8sClient:        k8sClient,
+			K8sExtClient:     k8sExtClient,
+			Logger:           config.Logger,
+			NetworkAllocator: networkAllocator,
 
 			APIWhitelist: legacy.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
