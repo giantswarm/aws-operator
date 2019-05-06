@@ -126,7 +126,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, customObject provide
 				legacykey.InstanceIDAnnotation: instanceID,
 			},
 			Labels: map[string]string{
-				legacykey.ClusterIDLabel: legacykey.ClusterID(customObject),
+				legacykey.LabelCluster: legacykey.ClusterID(customObject),
 			},
 			Name: privateDNS,
 		},
