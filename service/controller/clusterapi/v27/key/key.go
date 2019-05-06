@@ -96,6 +96,16 @@ func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("DockerVolume", cluster)
 }
 
+func EC2ServiceDomain(cluster v1alpha1.Cluster) string {
+	domain := "ec2.amazonaws.com"
+
+	if isChinaRegion(cluster) {
+		domain += ".cn"
+	}
+
+	return domain
+}
+
 func ELBNameAPI(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-api", ClusterID(cluster))
 }
@@ -114,6 +124,10 @@ func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
 	return cluster.Labels[LabelOrganization]
+}
+
+func Region(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.Region
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
@@ -154,4 +168,8 @@ func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string
 	upperClusterID := strings.ToUpper(id)
 
 	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
+}
+
+func isChinaRegion(cluster v1alpha1.Cluster) bool {
+	return strings.HasPrefix(Region(cluster), "cn-")
 }
