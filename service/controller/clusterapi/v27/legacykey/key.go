@@ -71,8 +71,6 @@ const (
 )
 
 const (
-	ClusterIDLabel = "giantswarm.io/cluster"
-
 	AnnotationEtcdDomain        = "giantswarm.io/etcd-domain"
 	AnnotationPrometheusCluster = "giantswarm.io/prometheus-cluster"
 
