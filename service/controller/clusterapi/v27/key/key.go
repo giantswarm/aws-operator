@@ -30,6 +30,10 @@ const (
 	TagOrganization = "giantswarm.io/organization"
 )
 
+func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
+}
+
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
 }
@@ -53,6 +57,10 @@ func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
 
 func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(cluster))
+}
+
+func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("etcd.%s.%s:2379", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterID(cluster v1alpha1.Cluster) string {
@@ -107,6 +115,18 @@ func SmallCloudConfigS3URL(cluster v1alpha1.Cluster, accountID string, role stri
 // VersionBundleVersion returns the version contained in the Version Bundle.
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Cluster.VersionBundle.Version
+}
+
+func VolumeNameDocker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-docker", ClusterID(cluster))
+}
+
+func VolumeNameEtcd(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(cluster))
+}
+
+func VolumeNameLog(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-log", ClusterID(cluster))
 }
 
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a

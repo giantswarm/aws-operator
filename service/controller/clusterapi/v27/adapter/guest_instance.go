@@ -88,13 +88,13 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 
 		i.Master.EncrypterBackend = config.EncrypterBackend
 
-		i.Master.DockerVolume.Name = legacykey.DockerVolumeName(config.CustomObject)
+		i.Master.DockerVolume.Name = legacykey.VolumeNameDocker(config.CustomObject)
 
 		i.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 
-		i.Master.EtcdVolume.Name = legacykey.EtcdVolumeName(config.CustomObject)
+		i.Master.EtcdVolume.Name = legacykey.VolumeNameEtcd(config.CustomObject)
 
-		i.Master.LogVolume.Name = legacykey.LogVolumeName(config.CustomObject)
+		i.Master.LogVolume.Name = legacykey.VolumeNameLog(config.CustomObject)
 
 		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 
