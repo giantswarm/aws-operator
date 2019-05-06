@@ -18,7 +18,7 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 		Description              string
 		Config                   Config
 		ExpectedAZ               string
-		ExpectedEtcdVolumeName   string
+		ExpectedVolumeNameEtcd   string
 		ExpectedInstanceType     string
 		ExpectedEncrypterBackend string
 	}{
@@ -51,7 +51,7 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 				EncrypterBackend: "my-encrypter-backend",
 			},
 			ExpectedAZ:               "eu-west-1a",
-			ExpectedEtcdVolumeName:   "test-cluster-etcd",
+			ExpectedVolumeNameEtcd:   "test-cluster-etcd",
 			ExpectedInstanceType:     "m3.large",
 			ExpectedEncrypterBackend: "my-encrypter-backend",
 		},
@@ -69,8 +69,8 @@ func Test_Adapter_Instance_RegularFields(t *testing.T) {
 				t.Fatalf("unexpected a.Master.AZ, got %q, want %q", a.Master.AZ, tc.ExpectedAZ)
 			}
 
-			if a.Master.EtcdVolume.Name != tc.ExpectedEtcdVolumeName {
-				t.Fatalf("unexpected a.Master.EtcdVolume.Name, got %q, want %q", a.Master.EtcdVolume.Name, tc.ExpectedEtcdVolumeName)
+			if a.Master.EtcdVolume.Name != tc.ExpectedVolumeNameEtcd {
+				t.Fatalf("unexpected a.Master.EtcdVolume.Name, got %q, want %q", a.Master.EtcdVolume.Name, tc.ExpectedVolumeNameEtcd)
 			}
 
 			if a.Master.Instance.Type != tc.ExpectedInstanceType {
