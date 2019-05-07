@@ -152,6 +152,14 @@ func RegionARN(cluster v1alpha1.Cluster) string {
 	return regionARN
 }
 
+func RoleARNMaster(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "master")
+}
+
+func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "worker")
+}
+
 func RoleName(cluster v1alpha1.Cluster, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
 }

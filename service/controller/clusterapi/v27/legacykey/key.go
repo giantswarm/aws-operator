@@ -281,7 +281,7 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
-func MasterRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+func RoleARNMaster(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "master")
 }
 
@@ -587,7 +587,7 @@ func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
-func WorkerRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+func RoleARNWorker(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "worker")
 }
 

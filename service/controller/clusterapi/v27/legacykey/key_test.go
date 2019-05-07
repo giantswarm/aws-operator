@@ -1125,7 +1125,7 @@ func Test_RegionARN(t *testing.T) {
 	}
 }
 
-func Test_MasterRoleARN(t *testing.T) {
+func Test_RoleARNMaster(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1167,7 +1167,7 @@ func Test_MasterRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := MasterRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNMaster(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Master role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
@@ -1175,7 +1175,7 @@ func Test_MasterRoleARN(t *testing.T) {
 	}
 }
 
-func Test_WorkerRoleARN(t *testing.T) {
+func Test_RoleARNWorker(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1217,7 +1217,7 @@ func Test_WorkerRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := WorkerRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNWorker(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Worker role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
