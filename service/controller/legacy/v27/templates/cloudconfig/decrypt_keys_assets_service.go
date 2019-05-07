@@ -9,6 +9,8 @@ Requires=wait-for-domains.service
 
 [Service]
 Type=oneshot
+Restart=on-failure
+RestartSec=30s
 ExecStart=/opt/bin/decrypt-keys-assets
 
 [Install]
