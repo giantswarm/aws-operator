@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/microerror"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_AutoScalingGroupName(t *testing.T) {
@@ -289,7 +287,7 @@ func Test_DockerVolumeResourceName_Inequivalence(t *testing.T) {
 	}
 }
 
-func Test_EtcdVolumeName(t *testing.T) {
+func Test_VolumeNameEtcd(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-etcd"
 
@@ -306,12 +304,12 @@ func Test_EtcdVolumeName(t *testing.T) {
 		},
 	}
 
-	if EtcdVolumeName(customObject) != expectedName {
-		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	if VolumeNameEtcd(customObject) != expectedName {
+		t.Fatalf("Expected Etcd volume name %s but was %s", expectedName, VolumeNameEtcd(customObject))
 	}
 }
 
-func Test_LogVolumeName(t *testing.T) {
+func Test_VolumeNameLog(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-log"
 
@@ -328,8 +326,8 @@ func Test_LogVolumeName(t *testing.T) {
 		},
 	}
 
-	if LogVolumeName(customObject) != expectedName {
-		t.Fatalf("Expected Log volume name %s but was %s", expectedName, EtcdVolumeName(customObject))
+	if VolumeNameLog(customObject) != expectedName {
+		t.Fatalf("Expected Log volume name %s but was %s", expectedName, VolumeNameEtcd(customObject))
 	}
 }
 
@@ -412,42 +410,6 @@ func Test_KubernetesAPISecurePort(t *testing.T) {
 
 	if KubernetesAPISecurePort(customObject) != expectedPort {
 		t.Fatalf("Expected kubernetes api secure port %d but was %d", expectedPort, KubernetesAPISecurePort(customObject))
-	}
-}
-
-func Test_MasterImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if MasterImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected master image ID %s but was %s", tc.expectedImageID, MasterImageID(tc.customObject))
-		}
 	}
 }
 
@@ -828,46 +790,6 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 	}
 }
 
-func Test_WorkerImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
-					},
-				},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if WorkerImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected worker image ID %s but was %s", tc.expectedImageID, WorkerImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_WorkerInstanceType(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -908,7 +830,7 @@ func Test_WorkerInstanceType(t *testing.T) {
 	}
 }
 
-func Test_MainGuestStackName(t *testing.T) {
+func Test_StackNameTCCP(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-guest-main"
 
@@ -920,13 +842,13 @@ func Test_MainGuestStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainGuestStackName(cluster)
+	actual := StackNameTCCP(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
 
-func Test_MainHostPreStackName(t *testing.T) {
+func Test_StackNameCPI(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-host-setup"
 
@@ -938,13 +860,13 @@ func Test_MainHostPreStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPreStackName(cluster)
+	actual := StackNameCPI(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
 
-func Test_MainHostPostStackName(t *testing.T) {
+func Test_StackNameCPF(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-host-main"
 
@@ -956,158 +878,9 @@ func Test_MainHostPostStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPostStackName(cluster)
+	actual := StackNameCPF(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
-	}
-}
-
-func Test_InstanceProfileName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker-EC2-K8S-Role"
-	profileType := "worker"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	if InstanceProfileName(customObject, profileType) != expectedName {
-		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
-	}
-}
-
-func TestLoadBalancerName(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		desc       string
-		domainName string
-		tpo        v1alpha1.AWSConfig
-		res        string
-		err        error
-	}{
-		{
-			desc:       "works",
-			domainName: "component.foo.bar.example.com",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "foo-customer",
-					},
-				},
-			},
-			res: "foo-customer-component",
-		},
-		{
-			desc:       "also works",
-			domainName: "component.of.a.well.formed.domain",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "quux-the-customer",
-					},
-				},
-			},
-			res: "quux-the-customer-component",
-		},
-		{
-			desc:       "missing ID key in cloudconfig",
-			domainName: "component.foo.bar.example.com",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "",
-					},
-				},
-			},
-			res: "",
-			err: missingCloudConfigKeyError,
-		},
-		{
-			desc:       "malformed domain name",
-			domainName: "not a domain name",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "foo-customer",
-					},
-				},
-			},
-			res: "",
-			err: malformedCloudConfigKeyError,
-		},
-		{
-			desc:       "missing domain name",
-			domainName: "",
-			tpo: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "foo-customer",
-					},
-				},
-			},
-			res: "",
-			err: malformedCloudConfigKeyError,
-		},
-	}
-
-	for _, tc := range tests {
-		res, err := LoadBalancerName(tc.domainName, tc.tpo)
-
-		if err != nil {
-			underlying := microerror.Cause(err)
-			assert.Equal(t, tc.err, underlying, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-		}
-
-		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-	}
-}
-
-func TestComponentName(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		desc       string
-		domainName string
-		res        string
-		err        error
-	}{
-		{
-			desc:       "one level of subdomains",
-			domainName: "foo.bar.com",
-			res:        "foo",
-		},
-		{
-			desc:       "two levels of subdomains",
-			domainName: "foo.bar.quux.com",
-			res:        "foo",
-		},
-		{
-			desc:       "malformed domain",
-			domainName: "not a domain name",
-			res:        "",
-			err:        malformedCloudConfigKeyError,
-		},
-		{
-			desc:       "empty domain",
-			domainName: "",
-			res:        "",
-			err:        malformedCloudConfigKeyError,
-		},
-	}
-
-	for _, tc := range tests {
-		res, err := componentName(tc.domainName)
-
-		if err != nil {
-			assert.True(t, IsMalformedCloudConfigKey(err), fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
-		}
-
-		assert.Equal(t, tc.res, res, fmt.Sprintf("[%s] The input values didn't produce the expected output", tc.desc))
 	}
 }
 
@@ -1286,69 +1059,6 @@ func Test_PeerID(t *testing.T) {
 
 	if actual != expected {
 		t.Fatalf("Expected PeerID %s but was %s", expected, actual)
-	}
-}
-
-func Test_ImageID(t *testing.T) {
-	t.Parallel()
-	testCases := []struct {
-		description     string
-		customObject    v1alpha1.AWSConfig
-		errorMatcher    func(error) bool
-		expectedImageID string
-	}{
-		{
-			description: "basic match",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-central-1",
-					},
-				},
-			},
-			errorMatcher:    nil,
-			expectedImageID: "ami-012abdf0d2781f0a5",
-		},
-		{
-			description: "different region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-west-1",
-					},
-				},
-			},
-			errorMatcher:    nil,
-			expectedImageID: "ami-01f5fbceb7a9fa4d0",
-		},
-		{
-			description: "invalid region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "invalid-1",
-					},
-				},
-			},
-			errorMatcher: IsInvalidConfig,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			imageID, err := ImageID(tc.customObject)
-			if tc.errorMatcher != nil && err == nil {
-				t.Error("expected error didn't happen")
-			}
-
-			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
-				t.Error("expected", true, "got", false)
-			}
-
-			if tc.expectedImageID != imageID {
-				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
-			}
-		})
 	}
 }
 

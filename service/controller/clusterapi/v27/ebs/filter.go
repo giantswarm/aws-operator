@@ -26,7 +26,7 @@ func IsFiltered(vol *ec2.Volume, filterFuncs []func(t *ec2.Tag) bool) bool {
 
 func NewDockerVolumeFilter(customObject v1alpha1.AWSConfig) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
-		if *t.Key == nameTagKey && *t.Value == legacykey.DockerVolumeName(customObject) {
+		if *t.Key == nameTagKey && *t.Value == legacykey.VolumeNameDocker(customObject) {
 			return true
 		}
 		return false
@@ -35,7 +35,7 @@ func NewDockerVolumeFilter(customObject v1alpha1.AWSConfig) func(t *ec2.Tag) boo
 
 func NewEtcdVolumeFilter(customObject v1alpha1.AWSConfig) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
-		if *t.Key == nameTagKey && *t.Value == legacykey.EtcdVolumeName(customObject) {
+		if *t.Key == nameTagKey && *t.Value == legacykey.VolumeNameEtcd(customObject) {
 			return true
 		}
 		return false

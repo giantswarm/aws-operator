@@ -145,12 +145,12 @@
   revision = "6480d4af844c189cf5dd913db24ddd339d3a4f85"
 
 [[projects]]
-  digest = "1:f1f2bd73c025d24c3b93abf6364bccb802cf2fdedaa44360804c67800e8fab8d"
+  digest = "1:36a5ff9459163d104f2af9776c8db63f3eb4339f527a00a9835c8d562eb116ba"
   name = "github.com/evanphx/json-patch"
   packages = ["."]
   pruneopts = "UT"
-  revision = "72bf35d0ff611848c1dc9df0f976c81192392fa5"
-  version = "v4.1.0"
+  revision = "5858425f75500d40c52783dce87d085a483ce135"
+  version = "v4.2.0"
 
 [[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
@@ -250,7 +250,7 @@
   name = "github.com/giantswarm/e2esetup"
   packages = ["k8s"]
   pruneopts = "UT"
-  revision = "5b8be38d61b1afe5bf17cb5600599cadbe3feca8"
+  revision = "8373c3d3cffd1232055dcf4200e00f005c50da70"
 
 [[projects]]
   branch = "master"
@@ -315,7 +315,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e5fca7f5ba3fe7a4a874c09ce289ef63e500e3ed232b48c6d5dd71fa13669ebe"
+  digest = "1:d6a9075372d1d97344d8b074482b4e97fd5f8ef4dff15e8d66fc0e66269aa684"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -328,7 +328,7 @@
     "v_4_3_0",
   ]
   pruneopts = "T"
-  revision = "76e104d79190afa91d06f04fffad28a6a44825e0"
+  revision = "f078a0371865a6b880eda2a2f41eb3409e4896d8"
 
 [[projects]]
   branch = "master"
@@ -760,12 +760,12 @@
   version = "v2.1.0"
 
 [[projects]]
-  digest = "1:e0f50a07c0def90588d69f77178712c6fdc67eb6576365f551cce98b44b501bf"
+  digest = "1:93131d8002d7025da13582877c32d1fc302486775a1b06f62241741006428c5e"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   pruneopts = "UT"
-  revision = "63909f0a90ab0f36909e8e044e46ace10cf13ba2"
-  version = "v1.3.0"
+  revision = "728039f679cbcd4f6a54e080d2219a4c4928c546"
+  version = "v1.4.0"
 
 [[projects]]
   branch = "master"
@@ -801,7 +801,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:676d6ed014fbc459fc851ce36797b75f5c5cdf730f0c2c4a7f5355b2e19303dc"
+  digest = "1:83cafe4aa5ad67688af16001c10cfc9c0c511b44fe06db16edd7d49ef99e8362"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
@@ -809,7 +809,7 @@
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "deade0365a1841693f25d0bebbc7f844bef0b65b"
+  revision = "6aba2189ebe6959268894366998500defefa2907"
 
 [[projects]]
   branch = "master"
@@ -926,7 +926,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "4829fb13d2c62012c17688fa7f629f371014946d"
+  revision = "7f726cade0ab7c929c16ce0b5b25bd201e25f39f"
 
 [[projects]]
   branch = "master"
@@ -949,14 +949,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1a4cf0c4cbbda6ef0b6f168acc112df2a8e182945d71dc8367593a3b378db106"
+  digest = "1:4cf0abce65ca9e0e906fdd0d76ad1dd1dcc94afe5901473cbc7f8d623cceabb4"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "2cc0cad0ac78f3ede1f4d2b6ca16ea3038641af4"
+  revision = "a43fa875dd822b81eb6d2ad538bc1f4caba169bd"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -1013,7 +1013,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "357c62f0e4bbba7e6cc403ae09edcf3e2b9028fe"
+  revision = "54afdca5d873f7b529e2ce3def1a99df16feda90"
 
 [[projects]]
   digest = "1:a1f1707d71a652caa4da563d6a98e1d1cf3a1500dec7059e5989753b09112e27"
@@ -1367,7 +1367,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/util/proto"]
   pruneopts = "UT"
-  revision = "c5d3b0f4bee0a2c36e3f715a6b15dcc231c64adc"
+  revision = "411b2483e5034420675ebcdd4a55fc76fe5e55cf"
 
 [[projects]]
   digest = "1:03cc91613f9bc1269c215c7611b294f6b4c315cf26388b4d9a9cf03040656e63"
