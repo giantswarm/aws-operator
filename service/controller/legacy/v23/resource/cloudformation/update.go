@@ -234,45 +234,45 @@ func (r *Resource) shouldScale(ctx context.Context, customObject v1alpha1.AWSCon
 	}
 
 	if currentState.MasterImageID != desiredState.MasterImageID {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master image id")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in master image IDs: current ID is %q but desired ID is %q", currentState.MasterImageID, desiredState.MasterImageID))
 		return false, nil
 	}
 	if currentState.MasterCloudConfigVersion != desiredState.MasterCloudConfigVersion {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to master cloudconfig version")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in master cloudconfig versions: current version is %q but desired version is %q", currentState.MasterCloudConfigVersion, desiredState.MasterCloudConfigVersion))
 		return false, nil
 	}
 	if currentState.WorkerDockerVolumeSizeGB != desiredState.WorkerDockerVolumeSizeGB {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker docker volume size")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in worker docker volume sizes: current size is %d but desired size is %d", currentState.WorkerDockerVolumeSizeGB, desiredState.WorkerDockerVolumeSizeGB))
 		return false, nil
 	}
 	if currentState.WorkerImageID != desiredState.WorkerImageID {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker image id")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in worker image IDs: current ID is %q but desired ID is %q", currentState.WorkerImageID, desiredState.WorkerImageID))
 		return false, nil
 	}
 	if currentState.WorkerInstanceType != desiredState.WorkerInstanceType {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker instance type")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to difference in worker instance types: current type is %q but desired type is %q", currentState.WorkerInstanceType, desiredState.WorkerInstanceType))
 		return false, nil
 	}
 	if currentState.WorkerCloudConfigVersion != desiredState.WorkerCloudConfigVersion {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to worker cloudconfig version")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to worker cloudconfig version: current version is %q but desired is %q", currentState.WorkerCloudConfigVersion, desiredState.WorkerCloudConfigVersion))
 		return false, nil
 	}
 	if !cc.Status.Cluster.ASG.IsEmpty() && cc.Status.Cluster.ASG.MaxSize != key.ScalingMax(customObject) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.max")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("scaling due to scaling.max: cc.Status.Cluster.ASG.MaxSize %d differs from key.ScalingMax(customObject) %d", cc.Status.Cluster.ASG.MaxSize, key.ScalingMax(customObject)))
 		if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-			r.logger.LogCtx(ctx, "level", "warning", "message", "master instance type will be changed while scaling")
+			r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("master instance type will be changed while scaling: current type is %q but desired type is %q", currentState.MasterInstanceType, desiredState.MasterInstanceType))
 		}
 		return true, nil
 	}
 	if !cc.Status.Cluster.ASG.IsEmpty() && cc.Status.Cluster.ASG.MinSize != key.ScalingMin(customObject) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "scaling due to scaling.min")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("scaling due to scaling.min: cc.Status.Cluster.ASG.MinSize %d differs from key.ScalingMin(customObject): %d", cc.Status.Cluster.ASG.MinSize, key.ScalingMin(customObject)))
 		if currentState.MasterInstanceType != desiredState.MasterInstanceType {
-			r.logger.LogCtx(ctx, "level", "warning", "message", "master instance type will be changed while scaling")
+			r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("master instance type will be changed while scaling: current type is %q but desired type is %q", currentState.MasterInstanceType, desiredState.MasterInstanceType))
 		}
 		return true, nil
 	}
 	if currentState.VersionBundleVersion != desiredState.VersionBundleVersion {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not scaling due to version bundle version")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not scaling due to version bundle version difference: current version is %q but desired is %q", currentState.VersionBundleVersion, desiredState.VersionBundleVersion))
 		return false, nil
 	}
 

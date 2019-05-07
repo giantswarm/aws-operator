@@ -49,13 +49,8 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	}
 
 	// API load balancer settings.
-	apiElbName, err := legacykey.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.API.Domain, cfg.CustomObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	a.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
-	a.APIElbName = apiElbName
+	a.APIElbName = legacykey.ELBNameAPI(cfg.CustomObject)
 	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      legacykey.KubernetesAPISecurePort(cfg.CustomObject),
@@ -65,13 +60,8 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.APIElbScheme = externalELBScheme
 
 	// etcd load balancer settings.
-	etcdElbName, err := legacykey.LoadBalancerName(legacykey.EtcdDomain(cfg.CustomObject), cfg.CustomObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	a.EtcdElbHealthCheckTarget = heathCheckTarget(legacykey.EtcdPort(cfg.CustomObject))
-	a.EtcdElbName = etcdElbName
+	a.EtcdElbName = legacykey.ELBNameEtcd(cfg.CustomObject)
 	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      legacykey.EtcdPort(cfg.CustomObject),
@@ -81,13 +71,8 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.EtcdElbScheme = internalELBScheme
 
 	// Ingress load balancer settings.
-	ingressElbName, err := legacykey.LoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	a.IngressElbHealthCheckTarget = heathCheckTarget(legacykey.IngressControllerSecurePort)
-	a.IngressElbName = ingressElbName
+	a.IngressElbName = legacykey.ELBNameIngress(cfg.CustomObject)
 	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB: httpsPort,

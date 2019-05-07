@@ -38,8 +38,6 @@ const (
 	// OrganizationTagName is used for AWS resource tagging.
 	OrganizationTagName = "giantswarm.io/organization"
 
-	// ProfileNameTemplate will be included in the IAM instance profile name.
-	ProfileNameTemplate = "EC2-K8S-Role"
 	// RoleNameTemplate will be included in the IAM role name.
 	RoleNameTemplate = "EC2-K8S-Role"
 	// PolicyNameTemplate will be included in the IAM policy name.
@@ -49,9 +47,7 @@ const (
 
 	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
 
-	chinaAWSCliContainerRegistry   = "docker://registry-intl.cn-shanghai.aliyuncs.com/giantswarm/awscli:latest"
-	defaultAWSCliContainerRegistry = "quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
-	defaultDockerVolumeSizeGB      = "100"
+	defaultDockerVolumeSizeGB = "100"
 )
 
 const (
@@ -73,18 +69,10 @@ const (
 )
 
 const (
-	ClusterIDLabel = "giantswarm.io/cluster"
-
-	AnnotationEtcdDomain        = "giantswarm.io/etcd-domain"
-	AnnotationPrometheusCluster = "giantswarm.io/prometheus-cluster"
-
 	LabelApp           = "app"
 	LabelCluster       = "giantswarm.io/cluster"
-	LabelCustomer      = "customer"
 	LabelOrganization  = "giantswarm.io/organization"
 	LabelVersionBundle = "giantswarm.io/version-bundle"
-
-	LegacyLabelCluster = "cluster"
 )
 
 const (
@@ -114,13 +102,6 @@ func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) str
 
 func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.AZ
-}
-
-func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
-	if IsChinaRegion(customObject) {
-		return chinaAWSCliContainerRegistry
-	}
-	return defaultAWSCliContainerRegistry
 }
 
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
@@ -206,15 +187,15 @@ func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
 	return getResourcenameWithTimeHash("DockerVolume", customObject)
 }
 
-func DockerVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameDocker(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-docker", ClusterID(customObject))
 }
 
-func EtcdVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameEtcd(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
-func LogVolumeName(customObject v1alpha1.AWSConfig) string {
+func VolumeNameLog(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-log", ClusterID(customObject))
 }
 
@@ -236,16 +217,8 @@ func ClusterBaseDomain(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.HostedZones.API.Name
 }
 
-func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
-}
-
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
-}
-
-func IsDeleted(customObject v1alpha1.AWSConfig) bool {
-	return customObject.GetDeletionTimestamp() != nil
 }
 
 func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
@@ -260,53 +233,32 @@ func EtcdPort(customObject v1alpha1.AWSConfig) int {
 	return 2379
 }
 
-// LoadBalancerName produces a unique name for the load balancer.
-// It takes the domain name, extracts the first subdomain, and combines it with the cluster name.
-func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {
-	if ClusterID(cluster) == "" {
-		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.id")
-	}
-
-	componentName, err := componentName(domainName)
-	if err != nil {
-		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.id")
-	}
-
-	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)
-
-	return lbName, nil
+func ELBNameAPI(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-api", ClusterID(customObject))
 }
 
-func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-guest-main", clusterID)
+func ELBNameEtcd(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(customObject))
 }
 
-func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-host-setup", clusterID)
+func ELBNameIngress(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-ingress", ClusterID(customObject))
 }
 
-func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
+func StackNameCPF(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-host-main", ClusterID(customObject))
+}
 
-	return fmt.Sprintf("cluster-%s-host-main", clusterID)
+func StackNameCPI(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(customObject))
+}
+
+func StackNameTCCP(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(customObject))
 }
 
 func MasterCount(customObject v1alpha1.AWSConfig) int {
 	return len(customObject.Spec.AWS.Masters)
-}
-
-func MasterImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		imageID = customObject.Spec.AWS.Masters[0].ImageID
-	}
-
-	return imageID
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
@@ -450,6 +402,10 @@ func RegionARN(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return regionARN
+}
+
+func ProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
+	return RoleName(customObject, profileType)
 }
 
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
@@ -620,16 +576,6 @@ func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) string {
 	return strconv.Itoa(customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB)
 }
 
-func WorkerImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Workers) > 0 {
-		imageID = customObject.Spec.AWS.Workers[0].ImageID
-	}
-
-	return imageID
-}
-
 func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
@@ -652,20 +598,8 @@ func baseRoleARN(customObject v1alpha1.AWSConfig, accountID string, kind string)
 	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, RoleNameTemplate)
 }
 
-// componentName returns the first component of a domain name.
-// e.g. apiserver.example.customer.cloud.com -> apiserver
-func componentName(domainName string) (string, error) {
-	splits := strings.SplitN(domainName, ".", 2)
-
-	if len(splits) != 2 {
-		return "", microerror.Mask(malformedCloudConfigKeyError)
-	}
-
-	return splits[0], nil
-}
-
 // ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
+func ImageID(customObject v1alpha1.AWSConfig) string {
 	region := Region(customObject)
 
 	/*
@@ -704,12 +638,7 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		"us-west-2":      "ami-0a4f49b2488e15346",
 	}
 
-	imageID, ok := imageIDs[region]
-	if !ok {
-		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
-	}
-
-	return imageID, nil
+	return imageIDs[region]
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,

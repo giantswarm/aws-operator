@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	versionedfake "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
+	"github.com/giantswarm/aws-operator/service/network"
 	"github.com/giantswarm/micrologger/microloggertest"
 	apiextensionsclientfake "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
 	kubernetesfake "k8s.io/client-go/kubernetes/fake"
@@ -16,11 +17,25 @@ func newTestClusterConfig() ClusterConfig {
 		panic(err)
 	}
 
+	testLogger := microloggertest.New()
+
+	var networkAllocator network.Allocator
+	{
+		c := network.Config{
+			Logger: testLogger,
+		}
+		networkAllocator, err = network.New(c)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	return ClusterConfig{
-		G8sClient:    versionedfake.NewSimpleClientset(),
-		K8sClient:    kubernetesfake.NewSimpleClientset(),
-		K8sExtClient: apiextensionsclientfake.NewSimpleClientset(),
-		Logger:       microloggertest.New(),
+		G8sClient:        versionedfake.NewSimpleClientset(),
+		K8sClient:        kubernetesfake.NewSimpleClientset(),
+		K8sExtClient:     apiextensionsclientfake.NewSimpleClientset(),
+		Logger:           testLogger,
+		NetworkAllocator: networkAllocator,
 
 		AccessLogsExpiration: 365,
 		GuestAWSConfig: ClusterConfigAWSConfig{

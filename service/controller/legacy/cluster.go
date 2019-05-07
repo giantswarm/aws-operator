@@ -16,34 +16,36 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v22"
+	v22 "github.com/giantswarm/aws-operator/service/controller/legacy/v22"
 	v22adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v22/adapter"
 	v22cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v22/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1"
 	v22patch1adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1/adapter"
 	v22patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v23"
+	v23 "github.com/giantswarm/aws-operator/service/controller/legacy/v23"
 	v23adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v23/adapter"
 	v23cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v23/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v24"
+	v24 "github.com/giantswarm/aws-operator/service/controller/legacy/v24"
 	v24adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v24/adapter"
 	v24cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v24/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v25"
+	v25 "github.com/giantswarm/aws-operator/service/controller/legacy/v25"
 	v25adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v25/adapter"
 	v25cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v25/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
+	v26 "github.com/giantswarm/aws-operator/service/controller/legacy/v26"
 	v26adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v26/adapter"
 	v26cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v26/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27"
+	v27 "github.com/giantswarm/aws-operator/service/controller/legacy/v27"
 	v27adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v27/adapter"
 	v27cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v27/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/network"
 )
 
 type ClusterConfig struct {
-	G8sClient    versioned.Interface
-	K8sClient    kubernetes.Interface
-	K8sExtClient apiextensionsclient.Interface
-	Logger       micrologger.Logger
+	G8sClient        versioned.Interface
+	K8sClient        kubernetes.Interface
+	K8sExtClient     apiextensionsclient.Interface
+	Logger           micrologger.Logger
+	NetworkAllocator network.Allocator
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -223,6 +225,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
@@ -277,6 +280,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
@@ -331,6 +335,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			HostAWSClients:     controlPlaneAWSClients,
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
@@ -385,6 +390,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
@@ -438,6 +444,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
@@ -491,6 +498,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,
@@ -544,6 +552,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			},
 			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:       config.AccessLogsExpiration,

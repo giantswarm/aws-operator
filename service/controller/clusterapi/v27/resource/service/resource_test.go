@@ -26,15 +26,13 @@ func Test_toService(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -53,15 +51,13 @@ func Test_toService(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -83,15 +79,13 @@ func Test_toService(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -142,15 +136,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -169,15 +161,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -200,15 +190,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -227,15 +215,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy456",
-						legacykey.LabelCustomer:      "customer2",
 						legacykey.LabelCluster:       "xy456",
 						legacykey.LabelOrganization:  "org2",
 						legacykey.LabelVersionBundle: "1.2.4",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -258,15 +244,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -285,15 +269,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy456",
-						legacykey.AnnotationEtcdDomain:        "etcd2.cluster.NOTmydomain:433",
+						AnnotationPrometheusCluster: "xy456",
+						AnnotationEtcdDomain:        "etcd2.cluster.NOTmydomain:433",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -316,15 +298,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -343,15 +323,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -379,15 +357,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{
@@ -407,15 +383,13 @@ func Test_isServiceModified(t *testing.T) {
 					Namespace: "xy123",
 					Labels: map[string]string{
 						legacykey.LabelApp:           "master",
-						legacykey.LegacyLabelCluster: "xy123",
-						legacykey.LabelCustomer:      "customer1",
 						legacykey.LabelCluster:       "xy123",
 						legacykey.LabelOrganization:  "org1",
 						legacykey.LabelVersionBundle: "1.2.3",
 					},
 					Annotations: map[string]string{
-						legacykey.AnnotationPrometheusCluster: "xy123",
-						legacykey.AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
+						AnnotationPrometheusCluster: "xy123",
+						AnnotationEtcdDomain:        "etcd.cluster.mydomain:2379",
 					},
 				},
 				Spec: corev1.ServiceSpec{

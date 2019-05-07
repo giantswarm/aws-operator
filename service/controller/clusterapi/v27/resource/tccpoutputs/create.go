@@ -46,7 +46,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster cloud formation stack outputs")
 
-		o, s, err := cloudFormation.DescribeOutputsAndStatus(legacykey.MainGuestStackName(cr))
+		o, s, err := cloudFormation.DescribeOutputsAndStatus(legacykey.StackNameTCCP(cr))
 		if cloudformation.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster cloud formation stack does not exist")

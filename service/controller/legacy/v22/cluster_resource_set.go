@@ -45,6 +45,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22/resource/workerasgname"
+	"github.com/giantswarm/aws-operator/service/network"
 )
 
 const (
@@ -61,6 +62,7 @@ type ClusterResourceSetConfig struct {
 	HostAWSClients     aws.Clients
 	K8sClient          kubernetes.Interface
 	Logger             micrologger.Logger
+	NetworkAllocator   network.Allocator
 	RandomKeysSearcher randomkeys.Interface
 
 	AccessLogsExpiration       int
@@ -256,8 +258,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
+			G8sClient:        config.G8sClient,
+			Logger:           config.Logger,
+			NetworkAllocator: config.NetworkAllocator,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
 			AvailabilityZones:       config.GuestAvailabilityZones,
