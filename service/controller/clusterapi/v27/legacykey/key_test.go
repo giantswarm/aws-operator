@@ -413,42 +413,6 @@ func Test_KubernetesAPISecurePort(t *testing.T) {
 	}
 }
 
-func Test_MasterImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if MasterImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected master image ID %s but was %s", tc.expectedImageID, MasterImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_MasterInstanceName(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -826,46 +790,6 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 	}
 }
 
-func Test_WorkerImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
-					},
-				},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if WorkerImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected worker image ID %s but was %s", tc.expectedImageID, WorkerImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_WorkerInstanceType(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -906,7 +830,7 @@ func Test_WorkerInstanceType(t *testing.T) {
 	}
 }
 
-func Test_MainGuestStackName(t *testing.T) {
+func Test_StackNameTCCP(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-guest-main"
 
@@ -918,13 +842,13 @@ func Test_MainGuestStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainGuestStackName(cluster)
+	actual := StackNameTCCP(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
 
-func Test_MainHostPreStackName(t *testing.T) {
+func Test_StackNameCPI(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-host-setup"
 
@@ -936,13 +860,13 @@ func Test_MainHostPreStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPreStackName(cluster)
+	actual := StackNameCPI(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
 
-func Test_MainHostPostStackName(t *testing.T) {
+func Test_StackNameCPF(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-host-main"
 
@@ -954,29 +878,9 @@ func Test_MainHostPostStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPostStackName(cluster)
+	actual := StackNameCPF(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
-	}
-}
-
-func Test_InstanceProfileName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker-EC2-K8S-Role"
-	profileType := "worker"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	if InstanceProfileName(customObject, profileType) != expectedName {
-		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
 	}
 }
 
@@ -1158,69 +1062,6 @@ func Test_PeerID(t *testing.T) {
 	}
 }
 
-func Test_ImageID(t *testing.T) {
-	t.Parallel()
-	testCases := []struct {
-		description     string
-		customObject    v1alpha1.AWSConfig
-		errorMatcher    func(error) bool
-		expectedImageID string
-	}{
-		{
-			description: "basic match",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-central-1",
-					},
-				},
-			},
-			errorMatcher:    nil,
-			expectedImageID: "ami-012abdf0d2781f0a5",
-		},
-		{
-			description: "different region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-west-1",
-					},
-				},
-			},
-			errorMatcher:    nil,
-			expectedImageID: "ami-01f5fbceb7a9fa4d0",
-		},
-		{
-			description: "invalid region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "invalid-1",
-					},
-				},
-			},
-			errorMatcher: IsInvalidConfig,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			imageID, err := ImageID(tc.customObject)
-			if tc.errorMatcher != nil && err == nil {
-				t.Error("expected error didn't happen")
-			}
-
-			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
-				t.Error("expected", true, "got", false)
-			}
-
-			if tc.expectedImageID != imageID {
-				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
-			}
-		})
-	}
-}
-
 func Test_TargetLogBucketName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-g8s-access-logs"
@@ -1284,7 +1125,7 @@ func Test_RegionARN(t *testing.T) {
 	}
 }
 
-func Test_MasterRoleARN(t *testing.T) {
+func Test_RoleARNMaster(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1326,7 +1167,7 @@ func Test_MasterRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := MasterRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNMaster(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Master role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
@@ -1334,7 +1175,7 @@ func Test_MasterRoleARN(t *testing.T) {
 	}
 }
 
-func Test_WorkerRoleARN(t *testing.T) {
+func Test_RoleARNWorker(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1376,7 +1217,7 @@ func Test_WorkerRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := WorkerRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNWorker(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Worker role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
