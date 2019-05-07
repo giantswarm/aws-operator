@@ -38,8 +38,6 @@ const (
 	// OrganizationTagName is used for AWS resource tagging.
 	OrganizationTagName = "giantswarm.io/organization"
 
-	// ProfileNameTemplate will be included in the IAM instance profile name.
-	ProfileNameTemplate = "EC2-K8S-Role"
 	// RoleNameTemplate will be included in the IAM role name.
 	RoleNameTemplate = "EC2-K8S-Role"
 	// PolicyNameTemplate will be included in the IAM policy name.
@@ -219,10 +217,6 @@ func ClusterBaseDomain(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.AWS.HostedZones.API.Name
 }
 
-func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
-}
-
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
 }
@@ -251,36 +245,20 @@ func ELBNameIngress(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-ingress", ClusterID(customObject))
 }
 
-func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-guest-main", clusterID)
+func StackNameCPF(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-host-main", ClusterID(customObject))
 }
 
-func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-host-setup", clusterID)
+func StackNameCPI(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(customObject))
 }
 
-func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-host-main", clusterID)
+func StackNameTCCP(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(customObject))
 }
 
 func MasterCount(customObject v1alpha1.AWSConfig) int {
 	return len(customObject.Spec.AWS.Masters)
-}
-
-func MasterImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		imageID = customObject.Spec.AWS.Masters[0].ImageID
-	}
-
-	return imageID
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
@@ -424,6 +402,10 @@ func RegionARN(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return regionARN
+}
+
+func ProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
+	return RoleName(customObject, profileType)
 }
 
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
@@ -594,16 +576,6 @@ func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) string {
 	return strconv.Itoa(customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB)
 }
 
-func WorkerImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Workers) > 0 {
-		imageID = customObject.Spec.AWS.Workers[0].ImageID
-	}
-
-	return imageID
-}
-
 func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
@@ -627,7 +599,7 @@ func baseRoleARN(customObject v1alpha1.AWSConfig, accountID string, kind string)
 }
 
 // ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
+func ImageID(customObject v1alpha1.AWSConfig) string {
 	region := Region(customObject)
 
 	/*
@@ -666,12 +638,7 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		"us-west-2":      "ami-0a4f49b2488e15346",
 	}
 
-	imageID, ok := imageIDs[region]
-	if !ok {
-		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
-	}
-
-	return imageID, nil
+	return imageIDs[region]
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,

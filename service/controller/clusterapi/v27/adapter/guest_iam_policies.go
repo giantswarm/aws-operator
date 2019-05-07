@@ -24,10 +24,10 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	i.ClusterID = clusterID
 	i.EC2ServiceDomain = legacykey.EC2ServiceDomain(cfg.CustomObject)
 	i.MasterPolicyName = legacykey.PolicyName(cfg.CustomObject, legacykey.KindMaster)
-	i.MasterProfileName = legacykey.InstanceProfileName(cfg.CustomObject, legacykey.KindMaster)
+	i.MasterProfileName = legacykey.ProfileName(cfg.CustomObject, legacykey.KindMaster)
 	i.MasterRoleName = legacykey.RoleName(cfg.CustomObject, legacykey.KindMaster)
 	i.WorkerPolicyName = legacykey.PolicyName(cfg.CustomObject, legacykey.KindWorker)
-	i.WorkerProfileName = legacykey.InstanceProfileName(cfg.CustomObject, legacykey.KindWorker)
+	i.WorkerProfileName = legacykey.ProfileName(cfg.CustomObject, legacykey.KindWorker)
 	i.WorkerRoleName = legacykey.RoleName(cfg.CustomObject, legacykey.KindWorker)
 	i.RegionARN = legacykey.RegionARN(cfg.CustomObject)
 	i.KMSKeyARN = cfg.TenantClusterKMSKeyARN

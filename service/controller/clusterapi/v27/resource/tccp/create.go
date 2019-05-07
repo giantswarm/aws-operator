@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(legacykey.MainGuestStackName(cr)),
+			StackName: aws.String(legacykey.StackNameTCCP(cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -164,7 +164,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.AWSConfig) error
 					ParameterValue: aws.String(legacykey.VersionBundleVersion(cr)),
 				},
 			},
-			StackName:    aws.String(legacykey.MainGuestStackName(cr)),
+			StackName:    aws.String(legacykey.StackNameTCCP(cr)),
 			Tags:         r.getCloudFormationTags(cr),
 			TemplateBody: aws.String(templateBody),
 		}
@@ -250,7 +250,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.AWSConfig, templ
 					ParameterValue: aws.String(legacykey.VersionBundleVersion(cr)),
 				},
 			},
-			StackName:    aws.String(legacykey.MainGuestStackName(cr)),
+			StackName:    aws.String(legacykey.StackNameTCCP(cr)),
 			TemplateBody: aws.String(templateBody),
 		}
 
@@ -275,10 +275,6 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	im, err := legacykey.ImageID(cr)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
 
 	var templateBody string
 	{
@@ -294,10 +290,10 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 			PublicRouteTables:               r.publicRouteTables,
 			Route53Enabled:                  r.route53Enabled,
 			StackState: adapter.StackState{
-				Name: legacykey.MainGuestStackName(cr),
+				Name: legacykey.StackNameTCCP(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
-				MasterImageID:              im,
+				MasterImageID:              legacykey.ImageID(cr),
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         legacykey.MasterInstanceType(cr),
 				MasterCloudConfigVersion:   legacykey.CloudConfigVersion,
@@ -309,7 +305,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
 				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
 				WorkerKubeletVolumeSizeGB: legacykey.WorkerDockerVolumeSizeGB(cr),
-				WorkerImageID:             im,
+				WorkerImageID:             legacykey.ImageID(cr),
 				WorkerInstanceMonitoring:  r.instanceMonitoring,
 				WorkerInstanceType:        legacykey.WorkerInstanceType(cr),
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
