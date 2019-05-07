@@ -38,8 +38,6 @@ const (
 	// OrganizationTagName is used for AWS resource tagging.
 	OrganizationTagName = "giantswarm.io/organization"
 
-	// ProfileNameTemplate will be included in the IAM instance profile name.
-	ProfileNameTemplate = "EC2-K8S-Role"
 	// RoleNameTemplate will be included in the IAM role name.
 	RoleNameTemplate = "EC2-K8S-Role"
 	// PolicyNameTemplate will be included in the IAM policy name.
@@ -217,10 +215,6 @@ func ClusterBaseDomain(customObject v1alpha1.AWSConfig) string {
 	// Probably the easiest way for now is to just allow single domain for
 	// everything which we do now.
 	return customObject.Spec.AWS.HostedZones.API.Name
-}
-
-func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }
 
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
@@ -424,6 +418,10 @@ func RegionARN(customObject v1alpha1.AWSConfig) string {
 	}
 
 	return regionARN
+}
+
+func ProfileName(customObject v1alpha1.AWSConfig, profileType string) string {
+	return RoleName(customObject, profileType)
 }
 
 func RoleName(customObject v1alpha1.AWSConfig, profileType string) string {
