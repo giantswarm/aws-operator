@@ -275,10 +275,6 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	im, err := legacykey.ImageID(cr)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
 
 	var templateBody string
 	{
@@ -297,7 +293,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				Name: legacykey.StackNameTCCP(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
-				MasterImageID:              im,
+				MasterImageID:              legacykey.ImageID(cr),
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         legacykey.MasterInstanceType(cr),
 				MasterCloudConfigVersion:   legacykey.CloudConfigVersion,
@@ -309,7 +305,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
 				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
 				WorkerKubeletVolumeSizeGB: legacykey.WorkerDockerVolumeSizeGB(cr),
-				WorkerImageID:             im,
+				WorkerImageID:             legacykey.ImageID(cr),
 				WorkerInstanceMonitoring:  r.instanceMonitoring,
 				WorkerInstanceType:        legacykey.WorkerInstanceType(cr),
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,

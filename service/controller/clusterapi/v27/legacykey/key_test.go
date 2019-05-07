@@ -413,42 +413,6 @@ func Test_KubernetesAPISecurePort(t *testing.T) {
 	}
 }
 
-func Test_MasterImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if MasterImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected master image ID %s but was %s", tc.expectedImageID, MasterImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_MasterInstanceName(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -826,46 +790,6 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 	}
 }
 
-func Test_WorkerImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
-					},
-				},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if WorkerImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected worker image ID %s but was %s", tc.expectedImageID, WorkerImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_WorkerInstanceType(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -1135,69 +1059,6 @@ func Test_PeerID(t *testing.T) {
 
 	if actual != expected {
 		t.Fatalf("Expected PeerID %s but was %s", expected, actual)
-	}
-}
-
-func Test_ImageID(t *testing.T) {
-	t.Parallel()
-	testCases := []struct {
-		description     string
-		customObject    v1alpha1.AWSConfig
-		errorMatcher    func(error) bool
-		expectedImageID string
-	}{
-		{
-			description: "basic match",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-central-1",
-					},
-				},
-			},
-			errorMatcher:    nil,
-			expectedImageID: "ami-012abdf0d2781f0a5",
-		},
-		{
-			description: "different region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-west-1",
-					},
-				},
-			},
-			errorMatcher:    nil,
-			expectedImageID: "ami-01f5fbceb7a9fa4d0",
-		},
-		{
-			description: "invalid region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "invalid-1",
-					},
-				},
-			},
-			errorMatcher: IsInvalidConfig,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			imageID, err := ImageID(tc.customObject)
-			if tc.errorMatcher != nil && err == nil {
-				t.Error("expected error didn't happen")
-			}
-
-			if tc.errorMatcher != nil && !tc.errorMatcher(err) {
-				t.Error("expected", true, "got", false)
-			}
-
-			if tc.expectedImageID != imageID {
-				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
-			}
-		})
 	}
 }
 
