@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 func TestAdapterLoadBalancersRegularFields(t *testing.T) {
@@ -34,21 +32,6 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedIngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 		expectedIngressElbScheme                 string
 	}{
-		{
-			description: "empty custom object with AZs (to test for missing cloud config key",
-			customObject: v1alpha1.AWSConfig{
-				Status: v1alpha1.AWSConfigStatus{
-					AWS: v1alpha1.AWSConfigStatusAWS{
-						AvailabilityZones: []v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-							{
-								Name: "eu-central-1a",
-							},
-						},
-					},
-				},
-			},
-			errorMatcher: legacykey.IsMissingCloudConfigKey,
-		},
 		{
 			description:  "empty custom object",
 			customObject: v1alpha1.AWSConfig{},
