@@ -56,7 +56,7 @@ func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Cluster.DNS.Domain
+	return clusterProviderSpec(cluster).Cluster.DNS.Domain
 }
 
 func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
@@ -68,7 +68,7 @@ func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterID(cluster v1alpha1.Cluster) string {
-	return providerStatus(cluster).Cluster.ID
+	return clusterProviderStatus(cluster).Cluster.ID
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
@@ -89,11 +89,11 @@ func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]s
 }
 
 func CredentialName(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.CredentialSecret.Name
+	return clusterProviderSpec(cluster).Provider.CredentialSecret.Name
 }
 
 func CredentialNamespace(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.CredentialSecret.Namespace
+	return clusterProviderSpec(cluster).Provider.CredentialSecret.Namespace
 }
 
 func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
@@ -139,7 +139,7 @@ func ProfileName(cluster v1alpha1.Cluster, profileType string) string {
 }
 
 func Region(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.Region
+	return clusterProviderSpec(cluster).Provider.Region
 }
 
 func RegionARN(cluster v1alpha1.Cluster) string {
@@ -178,7 +178,7 @@ func StackNameTCCP(cluster v1alpha1.Cluster) string {
 
 // VersionBundleVersion returns the version contained in the Version Bundle.
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Cluster.VersionBundle.Version
+	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }
 
 func VolumeNameDocker(cluster v1alpha1.Cluster) string {
