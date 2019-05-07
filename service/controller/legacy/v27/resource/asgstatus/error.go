@@ -1,6 +1,8 @@
 package asgstatus
 
 import (
+	"strings"
+
 	"github.com/giantswarm/microerror"
 )
 
@@ -28,5 +30,19 @@ var notFoundError = &microerror.Error{
 
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), "does not exist") {
+		return true
+	}
+
+	if c == notFoundError {
+		return true
+	}
+
+	return false
 }
