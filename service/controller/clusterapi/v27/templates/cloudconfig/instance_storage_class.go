@@ -1,6 +1,6 @@
 package cloudconfig
 
-const InstanceStorageClassContent = `apiVersion: storage.k8s.io/v1beta1
+const InstanceStorageClassContent = `apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: gp2
