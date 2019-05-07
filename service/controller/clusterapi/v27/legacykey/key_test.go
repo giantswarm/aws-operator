@@ -960,26 +960,6 @@ func Test_MainHostPostStackName(t *testing.T) {
 	}
 }
 
-func Test_InstanceProfileName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker-EC2-K8S-Role"
-	profileType := "worker"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	if InstanceProfileName(customObject, profileType) != expectedName {
-		t.Fatalf("Expected instance profile name '%s' but was '%s'", expectedName, InstanceProfileName(customObject, profileType))
-	}
-}
-
 func Test_VersionBundleVersion(t *testing.T) {
 	t.Parallel()
 	expectedVersion := "0.1.0"

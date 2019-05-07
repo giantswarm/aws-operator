@@ -17,6 +17,10 @@ const (
 )
 
 const (
+	EC2RoleK8s = "EC2-K8S-Role"
+)
+
+const (
 	LabelApp           = "app"
 	LabelCluster       = "giantswarm.io/cluster"
 	LabelOrganization  = "giantswarm.io/organization"
@@ -126,8 +130,26 @@ func OrganizationID(cluster v1alpha1.Cluster) string {
 	return cluster.Labels[LabelOrganization]
 }
 
+func ProfileName(cluster v1alpha1.Cluster, profileType string) string {
+	return RoleName(cluster, profileType)
+}
+
 func Region(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Provider.Region
+}
+
+func RegionARN(cluster v1alpha1.Cluster) string {
+	regionARN := "aws"
+
+	if isChinaRegion(cluster) {
+		regionARN += "-cn"
+	}
+
+	return regionARN
+}
+
+func RoleName(cluster v1alpha1.Cluster, profileType string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
@@ -153,6 +175,13 @@ func VolumeNameEtcd(cluster v1alpha1.Cluster) string {
 
 func VolumeNameLog(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-log", ClusterID(cluster))
+}
+
+func baseRoleARN(cluster v1alpha1.Cluster, accountID string, kind string) string {
+	clusterID := ClusterID(cluster)
+	partition := RegionARN(cluster)
+
+	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
 }
 
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a
