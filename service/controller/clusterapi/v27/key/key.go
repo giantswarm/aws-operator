@@ -160,6 +160,18 @@ func SmallCloudConfigS3URL(cluster v1alpha1.Cluster, accountID string, role stri
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(cluster, accountID, role))
 }
 
+func StackNameCPF(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("cluster-%s-host-main", ClusterID(cluster))
+}
+
+func StackNameCPI(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(cluster))
+}
+
+func StackNameTCCP(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
+}
+
 // VersionBundleVersion returns the version contained in the Version Bundle.
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Cluster.VersionBundle.Version

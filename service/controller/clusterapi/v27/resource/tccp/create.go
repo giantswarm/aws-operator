@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(legacykey.MainGuestStackName(cr)),
+			StackName: aws.String(legacykey.StackNameTCCP(cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -164,7 +164,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.AWSConfig) error
 					ParameterValue: aws.String(legacykey.VersionBundleVersion(cr)),
 				},
 			},
-			StackName:    aws.String(legacykey.MainGuestStackName(cr)),
+			StackName:    aws.String(legacykey.StackNameTCCP(cr)),
 			Tags:         r.getCloudFormationTags(cr),
 			TemplateBody: aws.String(templateBody),
 		}
@@ -250,7 +250,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.AWSConfig, templ
 					ParameterValue: aws.String(legacykey.VersionBundleVersion(cr)),
 				},
 			},
-			StackName:    aws.String(legacykey.MainGuestStackName(cr)),
+			StackName:    aws.String(legacykey.StackNameTCCP(cr)),
 			TemplateBody: aws.String(templateBody),
 		}
 
@@ -294,7 +294,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 			PublicRouteTables:               r.publicRouteTables,
 			Route53Enabled:                  r.route53Enabled,
 			StackState: adapter.StackState{
-				Name: legacykey.MainGuestStackName(cr),
+				Name: legacykey.StackNameTCCP(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
 				MasterImageID:              im,

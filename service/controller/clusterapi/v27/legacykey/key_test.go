@@ -906,7 +906,7 @@ func Test_WorkerInstanceType(t *testing.T) {
 	}
 }
 
-func Test_MainGuestStackName(t *testing.T) {
+func Test_StackNameTCCP(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-guest-main"
 
@@ -918,13 +918,13 @@ func Test_MainGuestStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainGuestStackName(cluster)
+	actual := StackNameTCCP(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
 
-func Test_MainHostPreStackName(t *testing.T) {
+func Test_StackNameCPI(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-host-setup"
 
@@ -936,13 +936,13 @@ func Test_MainHostPreStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPreStackName(cluster)
+	actual := StackNameCPI(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}
 }
 
-func Test_MainHostPostStackName(t *testing.T) {
+func Test_StackNameCPF(t *testing.T) {
 	t.Parallel()
 	expected := "cluster-xyz-host-main"
 
@@ -954,7 +954,7 @@ func Test_MainHostPostStackName(t *testing.T) {
 		},
 	}
 
-	actual := MainHostPostStackName(cluster)
+	actual := StackNameCPF(cluster)
 	if actual != expected {
 		t.Fatalf("Expected main stack name %s but was %s", expected, actual)
 	}

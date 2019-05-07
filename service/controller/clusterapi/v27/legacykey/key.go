@@ -245,22 +245,16 @@ func ELBNameIngress(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-ingress", ClusterID(customObject))
 }
 
-func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-guest-main", clusterID)
+func StackNameCPF(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-host-main", ClusterID(customObject))
 }
 
-func MainHostPreStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-host-setup", clusterID)
+func StackNameCPI(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(customObject))
 }
 
-func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
-	clusterID := ClusterID(customObject)
-
-	return fmt.Sprintf("cluster-%s-host-main", clusterID)
+func StackNameTCCP(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(customObject))
 }
 
 func MasterCount(customObject v1alpha1.AWSConfig) int {
