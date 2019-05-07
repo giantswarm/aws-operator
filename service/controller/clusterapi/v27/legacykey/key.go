@@ -261,16 +261,6 @@ func MasterCount(customObject v1alpha1.AWSConfig) int {
 	return len(customObject.Spec.AWS.Masters)
 }
 
-func MasterImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		imageID = customObject.Spec.AWS.Masters[0].ImageID
-	}
-
-	return imageID
-}
-
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
 	return getResourcenameWithTimeHash("MasterInstance", customObject)
 }
@@ -586,16 +576,6 @@ func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) string {
 	return strconv.Itoa(customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB)
 }
 
-func WorkerImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Workers) > 0 {
-		imageID = customObject.Spec.AWS.Workers[0].ImageID
-	}
-
-	return imageID
-}
-
 func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
@@ -619,7 +599,7 @@ func baseRoleARN(customObject v1alpha1.AWSConfig, accountID string, kind string)
 }
 
 // ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
+func ImageID(customObject v1alpha1.AWSConfig) string {
 	region := Region(customObject)
 
 	/*
@@ -658,12 +638,7 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		"us-west-2":      "ami-0a4f49b2488e15346",
 	}
 
-	imageID, ok := imageIDs[region]
-	if !ok {
-		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
-	}
-
-	return imageID, nil
+	return imageIDs[region]
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,

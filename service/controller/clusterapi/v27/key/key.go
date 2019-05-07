@@ -122,6 +122,10 @@ func ELBNameIngress(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-ingress", ClusterID(cluster))
 }
 
+func ImageID(cluster v1alpha1.Cluster) string {
+	return imageIDs()[Region(cluster)]
+}
+
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
 }
@@ -209,6 +213,38 @@ func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string
 	upperClusterID := strings.ToUpper(id)
 
 	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
+}
+
+// imageIDs returns our Container Linux AMIs for each active AWS region. Note
+// that AMIs should always be for HVM virtualisation, not PV. Current Release is
+// CoreOS Container Linux stable 2023.5.0. AMI IDs are copied from the following
+// resource.
+//
+//     https://stable.release.core-os.net/amd64-usr/2023.5.0/coreos_production_ami_hvm.txt.
+//
+func imageIDs() map[string]string {
+	return map[string]string{
+		"ap-northeast-1": "ami-0d3a9785820124591",
+		"ap-northeast-2": "ami-03230b2fa6af112bf",
+		"ap-south-1":     "ami-0b85fd1356963d2ee",
+		"ap-southeast-1": "ami-0f8a9aa9857d8af7e",
+		"ap-southeast-2": "ami-0e87752a1d331823a",
+		"ca-central-1":   "ami-0c0100bac23bb1d39",
+		"cn-north-1":     "ami-01e99c7e0a343d325",
+		"cn-northwest-1": "ami-0773341917796083a",
+		"eu-central-1":   "ami-012abdf0d2781f0a5",
+		"eu-north-1":     "ami-09fbda19ac2fc6c3f",
+		"eu-west-1":      "ami-01f5fbceb7a9fa4d0",
+		"eu-west-2":      "ami-069966bea0809e21d",
+		"eu-west-3":      "ami-0194c504244182155",
+		"sa-east-1":      "ami-0cd830cc037613a7d",
+		"us-east-1":      "ami-08e58b93705fb503f",
+		"us-east-2":      "ami-03172282aaa2899be",
+		"us-gov-east-1":  "ami-0ff9e298ea0bacf53",
+		"us-gov-west-1":  "ami-e7f59e86",
+		"us-west-1":      "ami-08d3e245ebf4d560f",
+		"us-west-2":      "ami-0a4f49b2488e15346",
+	}
 }
 
 func isChinaRegion(cluster v1alpha1.Cluster) bool {
