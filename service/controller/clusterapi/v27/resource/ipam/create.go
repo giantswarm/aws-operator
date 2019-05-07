@@ -62,10 +62,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			callbacks := network.AllocationCallbacks{
-				GetReservedNetworks: r.getReservedSubnets,
-				PersistAllocatedNetwork: func(ctx context.Context, subnet net.IPNet) error {
-					return r.splitAndPersistReservedSubnet(ctx, cr, subnet, randomAZs)
-				},
+				GetReservedNetworks:     r.getReservedSubnets,
+				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, randomAZs),
 			}
 
 			subnetCIDR, err = r.networkAllocator.Allocate(ctx, r.networkRange, r.allocatedSubnetMask, callbacks)
@@ -74,6 +72,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("allocated cluster subnet CIDR %#q", subnetCIDR))
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
+			reconciliationcanceledcontext.SetCanceled(ctx)
+
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
@@ -131,6 +133,12 @@ func (r *Resource) getReservedSubnets(ctx context.Context) ([]net.IPNet, error) 
 	return reservedSubnets, nil
 }
 
+func (r *Resource) persistAllocatedNetwork(cr v1alpha1.AWSConfig, azs []string) func(ctx context.Context, subnet net.IPNet) error {
+	return func(ctx context.Context, subnet net.IPNet) error {
+		return r.splitAndPersistReservedSubnet(ctx, cr, subnet, azs)
+	}
+}
+
 func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr v1alpha1.AWSConfig, subnet net.IPNet, azs []string) error {
 	statusAZs, err := splitSubnetToStatusAZs(subnet, azs)
 	if err != nil {
@@ -148,9 +156,6 @@ func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr v1alpha
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR status to persist network allocation and chosen availability zones")
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
-	reconciliationcanceledcontext.SetCanceled(ctx)
 
 	return nil
 }
