@@ -118,14 +118,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerASGNameKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCP.ASG.Name = v
-	}
-
-	{
 		v, err := cloudFormation.GetOutputValue(outputs, legacykey.VersionBundleVersionKey)
 		if err != nil {
 			return microerror.Mask(err)
