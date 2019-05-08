@@ -131,8 +131,20 @@ func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
 }
 
+func MasterCount(cluster v1alpha1.Cluster) int {
+	return 1
+}
+
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
+}
+
+func MasterInstanceName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master", ClusterID(cluster))
+}
+
+func MasterInstanceType(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.Master.InstanceType
 }
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
@@ -189,7 +201,6 @@ func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Cluster.VersionBundle.Version
 }
