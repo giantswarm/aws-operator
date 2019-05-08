@@ -1,6 +1,25 @@
 package cloudconfig
 
 const DecryptTLSAssetsScript = `#!/bin/bash -e
+
+retry(){
+    # Taken from https://unix.stackexchange.com/a/137639
+    local n=1
+    local max_retries=10
+    local delay=15
+    while true; do
+        "$@" && break || {
+        if [[ $n -lt $max_retries ]]; then
+            ((n++))
+            echo "Command failed. Attempt $n/$max_retries:"
+            sleep $delay;
+        else
+            fail "The command has failed after $n attempts."
+        fi
+        }
+    done
+}
+
 {{ if eq .EncrypterType "vault" }}
 token_path=/var/token
 nonce_path=/var/nonce
@@ -117,29 +136,39 @@ EOF
 
 main
 {{ else }}
-rkt run \
-  --volume=ssl,kind=host,source=/etc/kubernetes/ssl,readOnly=false \
-  --mount=volume=ssl,target=/etc/kubernetes/ssl \
-  --uuid-file-save=/var/run/coreos/decrypt-tls-assets.uuid \
-  --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
-  --net=host \
-  --trust-keys-from-https \
-  quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 --exec=/bin/bash -- \
-    -ec \
-    'echo decrypting tls assets
-    shopt -s nullglob
-    for encKey in $(find /etc/kubernetes/ssl -name "*.pem.enc"); do
-      echo decrypting $encKey
-      f=$(mktemp $encKey.XXXXXXXX)
-      /usr/bin/aws \
-        --region {{.AWS.Region}} kms decrypt \
-        --ciphertext-blob fileb://$encKey \
-        --output text \
-        --query Plaintext \
-      | base64 -d > $f
-      mv -f $f ${encKey%.enc}
-    done;'
 
-rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+aws_decrypt(){
+    rkt run \
+    --volume=ssl,kind=host,source=/etc/kubernetes/ssl,readOnly=false \
+    --mount=volume=ssl,target=/etc/kubernetes/ssl \
+    --uuid-file-save=/var/run/coreos/decrypt-tls-assets.uuid \
+    --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
+    --net=host \
+    --trust-keys-from-https \
+    quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 --exec=/bin/bash -- \
+        -ec \
+        'echo decrypting tls assets
+        shopt -s nullglob
+        for encKey in $(find /etc/kubernetes/ssl -name "*.pem.enc"); do
+        echo decrypting $encKey
+        f=$(mktemp $encKey.XXXXXXXX)
+        /usr/bin/aws \
+            --region {{.AWS.Region}} kms decrypt \
+            --ciphertext-blob fileb://$encKey \
+            --output text \
+            --query Plaintext \
+        | base64 -d > $f
+        mv -f $f ${encKey%.enc}
+        done;'
+
+    rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+}
+
+main() {
+    echo "Starting decryption with rkt"
+    retry aws_decrypt
+}
+
+main
 {{ end }}
 chown -R etcd:etcd /etc/kubernetes/ssl/etcd`

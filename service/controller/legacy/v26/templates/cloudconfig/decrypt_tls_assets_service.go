@@ -9,7 +9,7 @@ Requires=wait-for-domains.service
 
 [Service]
 Type=oneshot
-ExecStart=/opt/bin/decrypt-tls-assets -x
+ExecStart=/opt/bin/decrypt-tls-assets
 
 [Install]
 WantedBy=multi-user.target

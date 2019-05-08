@@ -9,7 +9,7 @@ Requires=wait-for-domains.service
 
 [Service]
 Type=oneshot
-ExecStart=/opt/bin/decrypt-keys-assets -x
+ExecStart=/opt/bin/decrypt-keys-assets
 
 [Install]
 WantedBy=multi-user.target
