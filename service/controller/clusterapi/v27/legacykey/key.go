@@ -304,7 +304,7 @@ func NATRouteName(idx int) string {
 	return fmt.Sprintf("NATRoute%02d", idx)
 }
 
-func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
+func RolePeerAccess(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 

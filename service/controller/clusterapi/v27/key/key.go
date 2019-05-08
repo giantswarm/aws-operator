@@ -169,6 +169,10 @@ func RoleName(cluster v1alpha1.Cluster, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
 }
 
+func RolePeerAccess(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
+}
+
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
 	return fmt.Sprintf("%s/%s", BucketName(cluster, accountID), BucketObjectName(cluster, role))
 }
