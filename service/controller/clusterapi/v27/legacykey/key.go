@@ -96,14 +96,6 @@ func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Kubernetes.API.Domain
 }
 
-func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
-}
-
-func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.AZ
-}
-
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
