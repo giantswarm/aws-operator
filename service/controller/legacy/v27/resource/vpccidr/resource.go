@@ -12,7 +12,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/key"
 )
 
 const (
@@ -21,6 +20,8 @@ const (
 
 type Config struct {
 	Logger micrologger.Logger
+
+	VPCPeerID string
 }
 
 type Resource struct {
@@ -30,6 +31,8 @@ type Resource struct {
 	// and the value is the CIDR.
 	cidrs map[string]string
 	mutex sync.Mutex
+
+	vpcPeerID string
 }
 
 func New(config Config) (*Resource, error) {
@@ -37,11 +40,17 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.VPCPeerID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.VPCPeerID must not be empty", config)
+	}
+
 	r := &Resource{
 		logger: config.Logger,
 
 		cidrs: map[string]string{},
 		mutex: sync.Mutex{},
+
+		vpcPeerID: config.VPCPeerID,
 	}
 
 	return r, nil
@@ -58,7 +67,7 @@ func (r *Resource) addVPCCIDRToContext(ctx context.Context, cr v1alpha1.AWSConfi
 	}
 
 	{
-		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, key.PeerID(cr))
+		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, r.vpcPeerID)
 		if err != nil {
 			return microerror.Mask(err)
 		}

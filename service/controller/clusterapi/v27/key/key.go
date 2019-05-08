@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
@@ -199,6 +200,21 @@ func StackNameCPI(cluster v1alpha1.Cluster) string {
 
 func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
+}
+
+func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
+	if v == nil {
+		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+	}
+
+	p, ok := v.(*v1alpha1.Cluster)
+	if !ok {
+		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+	}
+
+	c := p.DeepCopy()
+
+	return *c, nil
 }
 
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {

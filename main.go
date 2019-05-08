@@ -119,6 +119,7 @@ func mainError() error {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.RouteTables, "", "Names of the public route tables in control plane separated by commas, required for accessing public ELBs from tenant nodes.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.VPCPeerID, "", "Control Plane VPC ID to peer Tenant Clusters with.")
 
 	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
 
