@@ -34,10 +34,6 @@ const (
 	TagOrganization = "giantswarm.io/organization"
 )
 
-func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
-}
-
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
 }

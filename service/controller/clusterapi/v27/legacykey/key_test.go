@@ -10,27 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func Test_AutoScalingGroupName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker"
-	groupName := "worker"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Customer: v1alpha1.ClusterCustomer{
-					ID: "test-customer",
-				},
-			},
-		},
-	}
-
-	if AutoScalingGroupName(customObject, groupName) != expectedName {
-		t.Fatalf("Expected auto scaling group name %s but was %s", expectedName, AutoScalingGroupName(customObject, groupName))
-	}
-}
-
 func Test_AvailabilityZone(t *testing.T) {
 	t.Parallel()
 	expectedAZ := "eu-central-1a"
