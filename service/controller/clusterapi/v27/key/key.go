@@ -21,6 +21,15 @@ const (
 )
 
 const (
+	IngressControllerInsecurePort = 30010
+	IngressControllerSecurePort   = 30011
+)
+
+const (
+	KubernetesSecurePort = 443
+)
+
+const (
 	LabelApp           = "app"
 	LabelCluster       = "giantswarm.io/cluster"
 	LabelOrganization  = "giantswarm.io/organization"

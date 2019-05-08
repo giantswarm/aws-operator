@@ -81,6 +81,10 @@ const (
 )
 
 const (
+	KubernetesSecurePort = 443
+)
+
+const (
 	NodeDrainerLifecycleHookName = "NodeDrainer"
 	WorkerASGRef                 = "workerAutoScalingGroup"
 )
@@ -211,10 +215,6 @@ func ClusterBaseDomain(customObject v1alpha1.AWSConfig) string {
 
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
-}
-
-func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
 }
 
 func EtcdDomain(customObject v1alpha1.AWSConfig) string {

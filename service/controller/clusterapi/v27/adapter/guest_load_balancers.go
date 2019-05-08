@@ -53,8 +53,8 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.APIElbName = legacykey.ELBNameAPI(cfg.CustomObject)
 	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			PortELB:      legacykey.KubernetesAPISecurePort(cfg.CustomObject),
-			PortInstance: legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+			PortELB:      legacykey.KubernetesSecurePort,
+			PortInstance: legacykey.KubernetesSecurePort,
 		},
 	}
 	a.APIElbScheme = externalELBScheme
