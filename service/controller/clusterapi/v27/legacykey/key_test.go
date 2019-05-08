@@ -10,23 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func Test_AvailabilityZone(t *testing.T) {
-	t.Parallel()
-	expectedAZ := "eu-central-1a"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				AZ: "eu-central-1a",
-			},
-		},
-	}
-
-	if AvailabilityZone(customObject) != expectedAZ {
-		t.Fatalf("Expected availability zone %s but was %s", expectedAZ, AvailabilityZone(customObject))
-	}
-}
-
 func Test_BaseDomain(t *testing.T) {
 	t.Parallel()
 	expectedBaseDomain := "installtion.eu-central-1.aws.gigantic.io"
