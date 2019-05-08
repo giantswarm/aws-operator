@@ -50,7 +50,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/vpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -570,19 +569,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var workerASGNameResource controller.Resource
-	{
-		c := workerasgname.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		workerASGNameResource, err = workerasgname.NewResource(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resources := []controller.Resource{
 		accountIDResource,
 		natGatewayAddressesResource,
@@ -591,7 +577,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		vpcCIDRResource,
 		tccpOutputsResource,
 		tccpSubnetResource,
-		workerASGNameResource,
 		asgStatusResource,
 		statusResource,
 		migrationResource,

@@ -15,10 +15,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/credential"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/drainfinisher"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/tccpoutputs"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/workerasgname"
 )
 
 type DrainerResourceSetConfig struct {
@@ -34,6 +34,19 @@ type DrainerResourceSetConfig struct {
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
+
+	var asgStatusResource controller.Resource
+	{
+		c := asgstatus.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var drainerResource controller.Resource
 	{
@@ -75,22 +88,9 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var workerASGNameResource controller.Resource
-	{
-		c := workerasgname.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		workerASGNameResource, err = workerasgname.NewResource(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resources := []controller.Resource{
 		tccpOutputsResource,
-		workerASGNameResource,
+		asgStatusResource,
 		drainerResource,
 		drainFinisherResource,
 	}
