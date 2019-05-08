@@ -246,11 +246,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1aa4cc4501c54834108fd38587e57b1658374939b9a4ab9a4d8f99322bc6187b"
+  digest = "1:766a1dc9804de1c692fbad5a8b3816fcb920586524a7c4f1996dff52152e164a"
   name = "github.com/giantswarm/e2esetup"
   packages = ["k8s"]
   pruneopts = "UT"
-  revision = "8373c3d3cffd1232055dcf4200e00f005c50da70"
+  revision = "d5d694bf51575b7110d466b8fe7f9c590decaec2"
 
 [[projects]]
   branch = "master"
@@ -1439,6 +1439,7 @@
     "github.com/giantswarm/certs",
     "github.com/giantswarm/certs/certstest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
+    "github.com/giantswarm/e2e-harness/pkg/harness",
     "github.com/giantswarm/e2e-harness/pkg/release",
     "github.com/giantswarm/e2eclients/aws",
     "github.com/giantswarm/e2esetup/k8s",
