@@ -7,36 +7,83 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"k8s.io/api/core/v1"
+	"github.com/giantswarm/operatorkit/client/k8scrdclient"
+	v1 "k8s.io/api/core/v1"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 type SetupConfig struct {
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	Clients *Clients
+	Logger  micrologger.Logger
 }
 
 type Setup struct {
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	clients *Clients
+	logger  micrologger.Logger
 }
 
 func NewSetup(config SetupConfig) (*Setup, error) {
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	s := &Setup{
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		clients: config.Clients,
+		logger:  config.Logger,
 	}
 
 	return s, nil
+}
+
+func (s *Setup) EnsureCRDCreated(ctx context.Context, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
+	var err error
+
+	var crdClient *k8scrdclient.CRDClient
+	{
+		c := k8scrdclient.Config{
+			K8sExtClient: s.clients.ExtClient(),
+			Logger:       s.logger,
+		}
+
+		crdClient, err = k8scrdclient.New(c)
+	}
+
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+
+	err = crdClient.EnsureCreated(ctx, crd, b)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func (s *Setup) EnsureCRDDeleted(ctx context.Context, crd *apiextensionsv1beta1.CustomResourceDefinition) error {
+	var err error
+
+	var crdClient *k8scrdclient.CRDClient
+	{
+		c := k8scrdclient.Config{
+			K8sExtClient: s.clients.ExtClient(),
+			Logger:       s.logger,
+		}
+
+		crdClient, err = k8scrdclient.New(c)
+	}
+
+	b := backoff.NewExponential(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+
+	err = crdClient.EnsureDeleted(ctx, crd, b)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }
 
 func (s *Setup) EnsureNamespaceCreated(ctx context.Context, namespace string) error {
@@ -49,7 +96,7 @@ func (s *Setup) EnsureNamespaceCreated(ctx context.Context, namespace string) er
 					Name: namespace,
 				},
 			}
-			_, err := s.k8sClient.CoreV1().Namespaces().Create(n)
+			_, err := s.clients.K8sClient().CoreV1().Namespaces().Create(n)
 			if errors.IsAlreadyExists(err) {
 				// fall through
 			} else if err != nil {
@@ -58,7 +105,7 @@ func (s *Setup) EnsureNamespaceCreated(ctx context.Context, namespace string) er
 		}
 
 		{
-			n, err := s.k8sClient.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+			n, err := s.clients.K8sClient().CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -86,7 +133,7 @@ func (s *Setup) EnsureNamespaceDeleted(ctx context.Context, namespace string) er
 
 	o := func() error {
 		{
-			err := s.k8sClient.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{})
+			err := s.clients.K8sClient().CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{})
 			if errors.IsNotFound(err) {
 				// fall through
 			} else if err != nil {
