@@ -44,6 +44,11 @@ const (
 	TagOrganization = "giantswarm.io/organization"
 )
 
+const (
+	RefNodeDrainer = "NodeDrainer"
+	RefWorkerASG   = "workerAutoScalingGroup"
+)
+
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
 }
