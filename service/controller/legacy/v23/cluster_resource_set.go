@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/tenantcluster"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	awsservice "github.com/giantswarm/aws-operator/service/aws"
@@ -57,6 +58,7 @@ const (
 
 type ClusterResourceSetConfig struct {
 	CertsSearcher      certs.Interface
+	CMAClient          clientset.Interface
 	G8sClient          versioned.Interface
 	HostAWSConfig      aws.Config
 	HostAWSClients     aws.Clients
@@ -258,6 +260,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
+			CMAClient:        config.CMAClient,
 			G8sClient:        config.G8sClient,
 			Logger:           config.Logger,
 			NetworkAllocator: config.NetworkAllocator,
