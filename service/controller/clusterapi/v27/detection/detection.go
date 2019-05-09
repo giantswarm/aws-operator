@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type Config struct {
@@ -40,18 +40,18 @@ func New(config Config) (*Detection, error) {
 //     The tenant cluster's scaling max changes.
 //     The tenant cluster's scaling min changes.
 //
-func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
+func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != legacykey.ScalingMax(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while legacykey.ScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, legacykey.ScalingMax(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.ScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.ScalingMax(cr)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != legacykey.ScalingMin(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while legacykey.ScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, legacykey.ScalingMin(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.ScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.ScalingMin(cr)))
 		return true, nil
 	}
 
@@ -66,26 +66,26 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (boo
 //     The worker node's instance type changes.
 //     The tenant cluster's version changes.
 //
-func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
+func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	if cc.Status.TenantCluster.MasterInstance.Type != legacykey.MasterInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while legacykey.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, legacykey.MasterInstanceType(cr)))
+	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != legacykey.WorkerDockerVolumeSizeGB(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance docker volume size changes: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB is %q while legacykey.WorkerDockerVolumeSizeGB(cr) is %q", cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB, legacykey.WorkerDockerVolumeSizeGB(cr)))
+	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance docker volume size changes: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB is %q while key.WorkerDockerVolumeSizeGB(cr) is %q", cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB, key.WorkerDockerVolumeSizeGB(cr)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.Type != legacykey.WorkerInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while legacykey.WorkerInstanceType(cr) is %q", cc.Status.TenantCluster.WorkerInstance.Type, legacykey.WorkerInstanceType(cr)))
+	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(cr) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(cr)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.VersionBundleVersion != legacykey.VersionBundleVersion(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while legacykey.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, legacykey.VersionBundleVersion(cr)))
+	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(cr)))
 		return true, nil
 	}
 

@@ -3,12 +3,11 @@ package kms
 import (
 	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
-func keyAlias(customObject v1alpha1.AWSConfig) string {
-	clusterID := legacykey.ClusterID(customObject)
-	return fmt.Sprintf("alias/%s", clusterID)
+func keyAlias(cr v1alpha1.Cluster) string {
+	return fmt.Sprintf("alias/%s", key.ClusterID(cr))
 }

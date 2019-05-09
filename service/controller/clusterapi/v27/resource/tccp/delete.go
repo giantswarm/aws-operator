@@ -10,11 +10,11 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -33,7 +33,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(legacykey.StackNameTCCP(cr)),
+			StackName:                   aws.String(key.StackNameTCCP(cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
@@ -64,7 +64,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(legacykey.StackNameTCCP(cr)),
+			StackName: aws.String(key.StackNameTCCP(cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)

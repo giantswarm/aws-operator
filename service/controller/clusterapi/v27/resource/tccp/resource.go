@@ -6,15 +6,15 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -116,7 +116,7 @@ func (r *Resource) Name() string {
 //
 //     pending, running, stopping, stopped
 //
-func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSConfig) (string, error) {
+func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.Cluster) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -129,13 +129,13 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(legacykey.MasterInstanceName(cr)),
+						aws.String(key.MasterInstanceName(cr)),
 					},
 				},
 				{
 					Name: aws.String("tag:giantswarm.io/cluster"),
 					Values: []*string{
-						aws.String(legacykey.ClusterID(cr)),
+						aws.String(key.ClusterID(cr)),
 					},
 				},
 				{
@@ -171,7 +171,7 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.AWSCo
 	return instanceID, nil
 }
 
-func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.AWSConfig) error {
+func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
