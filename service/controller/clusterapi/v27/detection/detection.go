@@ -46,12 +46,12 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.Cluster) (bool,
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.ScalingMax(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.ScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.ScalingMax(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.WorkerScalingMax(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.WorkerScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.WorkerScalingMax(cr)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.ScalingMin(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.ScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.ScalingMin(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.WorkerScalingMin(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.WorkerScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.WorkerScalingMin(cr)))
 		return true, nil
 	}
 

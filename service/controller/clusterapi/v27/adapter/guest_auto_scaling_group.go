@@ -23,8 +23,8 @@ type GuestAutoScalingGroupAdapter struct {
 }
 
 func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
-	maxWorkers := legacykey.ScalingMax(cfg.CustomObject)
-	minWorkers := legacykey.ScalingMin(cfg.CustomObject)
+	maxWorkers := legacykey.WorkerScalingMax(cfg.CustomObject)
+	minWorkers := legacykey.WorkerScalingMin(cfg.CustomObject)
 
 	if minWorkers <= 0 {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", minWorkers)

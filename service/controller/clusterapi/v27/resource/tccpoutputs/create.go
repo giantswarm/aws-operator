@@ -10,18 +10,28 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
-	HostedZoneNameServersKey  = "HostedZoneNameServers"
-	VPCIDKey                  = "VPCID"
-	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
-	WorkerASGNameKey          = "WorkerASGName"
+	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
+	HostedZoneNameServersKey      = "HostedZoneNameServers"
+	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
+	MasterImageIDKey              = "MasterImageID"
+	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
+	MasterInstanceTypeKey         = "MasterInstanceType"
+	VersionBundleVersionKey       = "VersionBundleVersion"
+	VPCIDKey                      = "VPCID"
+	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
+	WorkerASGNameKey              = "WorkerASGName"
+	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
+	WorkerImageIDKey              = "WorkerImageID"
+	WorkerInstanceTypeKey         = "WorkerInstanceType"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -46,7 +56,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster cloud formation stack outputs")
 
-		o, s, err := cloudFormation.DescribeOutputsAndStatus(legacykey.StackNameTCCP(cr))
+		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.StackNameTCCP(cr))
 		if cloudformation.IsStackNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster cloud formation stack does not exist")
@@ -70,7 +80,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.DockerVolumeResourceNameKey)
+		v, err := cloudFormation.GetOutputValue(outputs, DockerVolumeResourceNameKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -86,7 +96,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.MasterImageIDKey)
+		v, err := cloudFormation.GetOutputValue(outputs, MasterImageIDKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -94,7 +104,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.MasterInstanceResourceNameKey)
+		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceResourceNameKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -102,7 +112,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.MasterInstanceTypeKey)
+		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceTypeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -110,7 +120,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.MasterCloudConfigVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, MasterCloudConfigVersionKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -118,7 +128,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.VersionBundleVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, VersionBundleVersionKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -134,7 +144,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			//
 			//     https://github.com/giantswarm/giantswarm/issues/5570
 			//
-			v, err := searchVPCID(cc.Client.TenantCluster.AWS.EC2, legacykey.ClusterID(cr))
+			v, err := searchVPCID(cc.Client.TenantCluster.AWS.EC2, key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -155,7 +165,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			//
 			//     https://github.com/giantswarm/giantswarm/issues/5496
 			//
-			v, err := searchPeeringConnectionID(cc.Client.TenantCluster.AWS.EC2, legacykey.ClusterID(cr))
+			v, err := searchPeeringConnectionID(cc.Client.TenantCluster.AWS.EC2, key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -168,7 +178,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.WorkerCloudConfigVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, WorkerCloudConfigVersionKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -176,7 +186,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.WorkerDockerVolumeSizeKey)
+		v, err := cloudFormation.GetOutputValue(outputs, WorkerDockerVolumeSizeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -184,7 +194,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.WorkerImageIDKey)
+		v, err := cloudFormation.GetOutputValue(outputs, WorkerImageIDKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -192,7 +202,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, legacykey.WorkerInstanceTypeKey)
+		v, err := cloudFormation.GetOutputValue(outputs, WorkerInstanceTypeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
