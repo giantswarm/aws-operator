@@ -31,7 +31,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		// three resync periods max or something.
 		r.logger.LogCtx(ctx, "level", "debug", "message", "master instance not found")
 		resourcecanceledcontext.SetCanceled(ctx)
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 		return nil, nil
 	} else if err != nil {
