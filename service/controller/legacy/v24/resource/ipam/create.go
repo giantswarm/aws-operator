@@ -113,7 +113,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			callbacks := network.AllocationCallbacks{
-				GetReservedNetworks:     r.getReservedSubnets,
+				GetReservedNetworks:     r.getReservedNetworks,
 				PersistAllocatedNetwork: r.persistAllocatedNetwork(customResource, randomAZs),
 			}
 
@@ -135,7 +135,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) getReservedSubnets(ctx context.Context) ([]net.IPNet, error) {
+func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error) {
 	var err error
 	var mutex sync.Mutex
 	var reservedSubnets []net.IPNet
