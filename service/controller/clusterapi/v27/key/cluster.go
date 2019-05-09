@@ -54,7 +54,7 @@ func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(cluster), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(cluster), CloudConfigVersion, role)
 }
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
@@ -221,7 +221,7 @@ func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 	return *c, nil
 }
 
-func VersionBundleVersion(cluster v1alpha1.Cluster) string {
+func ClusterVersion(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }
 

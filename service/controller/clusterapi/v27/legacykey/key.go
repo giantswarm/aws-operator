@@ -100,7 +100,7 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(customObject), CloudConfigVersion, role)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -522,11 +522,10 @@ func ToVersionBundleVersion(v interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	return VersionBundleVersion(customObject), nil
+	return ClusterVersion(customObject), nil
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
-func VersionBundleVersion(customObject v1alpha1.AWSConfig) string {
+func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.VersionBundle.Version
 }
 

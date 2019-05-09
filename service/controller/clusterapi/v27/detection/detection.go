@@ -84,8 +84,8 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(md) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(md)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(md) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(md) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(md)))
+	if cc.Status.TenantCluster.VersionBundleVersion != key.ClusterVersion(cl) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.ClusterVersion(md) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.ClusterVersion(cl)))
 		return true, nil
 	}
 
