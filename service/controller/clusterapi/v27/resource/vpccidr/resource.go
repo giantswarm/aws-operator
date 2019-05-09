@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
@@ -60,7 +59,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addVPCCIDRToContext(ctx context.Context, cluster v1alpha1.Cluster) error {
+func (r *Resource) addVPCCIDRToContext(ctx context.Context) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
