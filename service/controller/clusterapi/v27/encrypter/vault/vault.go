@@ -160,8 +160,8 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = legacykey.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = legacykey.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = legacykey.RoleARNMaster(customObject, cc.Status.TenantCluster.AWSAccountID)
+		workerRoleARN = legacykey.RoleARNWorker(customObject, cc.Status.TenantCluster.AWSAccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -262,8 +262,8 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = legacykey.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = legacykey.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = legacykey.RoleARNMaster(customObject, cc.Status.TenantCluster.AWSAccountID)
+		workerRoleARN = legacykey.RoleARNWorker(customObject, cc.Status.TenantCluster.AWSAccountID)
 	}
 
 	var roleData *AWSAuthRole

@@ -21,6 +21,15 @@ const (
 )
 
 const (
+	IngressControllerInsecurePort = 30010
+	IngressControllerSecurePort   = 30011
+)
+
+const (
+	KubernetesSecurePort = 443
+)
+
+const (
 	LabelApp           = "app"
 	LabelCluster       = "giantswarm.io/cluster"
 	LabelOrganization  = "giantswarm.io/organization"
@@ -33,10 +42,6 @@ const (
 	TagInstallation = "giantswarm.io/installation"
 	TagOrganization = "giantswarm.io/organization"
 )
-
-func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
-}
 
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
@@ -126,8 +131,20 @@ func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
 }
 
+func MasterCount(cluster v1alpha1.Cluster) int {
+	return 1
+}
+
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
+}
+
+func MasterInstanceName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master", ClusterID(cluster))
+}
+
+func MasterInstanceType(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.Master.InstanceType
 }
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
@@ -150,6 +167,14 @@ func RegionARN(cluster v1alpha1.Cluster) string {
 	}
 
 	return regionARN
+}
+
+func RoleARNMaster(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "master")
+}
+
+func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "worker")
 }
 
 func RoleName(cluster v1alpha1.Cluster, profileType string) string {
@@ -176,7 +201,6 @@ func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {
 	return providerSpec(cluster).Cluster.VersionBundle.Version
 }

@@ -28,6 +28,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// When a tenant cluster is created, the CPI resource creates a peer role and
+	// with it an ARN for it. As long as the peer role ARN is not present, we have
+	// to cancel the resource to prevent further TCCP resource actions.
+	{
+		if cc.Status.ControlPlane.PeerRole.ARN == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane peer role arn is not yet set up")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+	}
+
 	// When the TCCP cloud formation stack is transitioning, it means it is
 	// updating in most cases. We do not want to interfere with the current
 	// process and stop here. We will then check on the next reconciliation loop

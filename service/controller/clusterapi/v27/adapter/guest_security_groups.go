@@ -214,13 +214,13 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		rules := []securityGroupRule{
 			{
 				Description: "Allow traffic from control plane CIDR.",
-				Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+				Port:        legacykey.KubernetesSecurePort,
 				Protocol:    tcpProtocol,
 				SourceCIDR:  hostClusterCIDR,
 			},
 			{
 				Description: "Allow traffic from tenant cluster CIDR.",
-				Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+				Port:        legacykey.KubernetesSecurePort,
 				Protocol:    tcpProtocol,
 				SourceCIDR:  legacykey.StatusNetworkCIDR(cfg.CustomObject),
 			},
@@ -232,7 +232,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 			if subnet != "" {
 				subnetRule := securityGroupRule{
 					Description: "Custom Whitelist CIDR.",
-					Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+					Port:        legacykey.KubernetesSecurePort,
 					Protocol:    tcpProtocol,
 					SourceCIDR:  subnet,
 				}
@@ -256,7 +256,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		allowAllRule := []securityGroupRule{
 			{
 				Description: "Allow all traffic to the master instance.",
-				Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+				Port:        legacykey.KubernetesSecurePort,
 				Protocol:    tcpProtocol,
 				SourceCIDR:  defaultCIDR,
 			},
@@ -272,7 +272,7 @@ func getHostClusterNATGatewayRules(cfg Config) ([]securityGroupRule, error) {
 	for _, address := range cfg.ControlPlaneNATGatewayAddresses {
 		gatewayRule := securityGroupRule{
 			Description: "Allow traffic from gateways.",
-			Port:        legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+			Port:        legacykey.KubernetesSecurePort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
 		}

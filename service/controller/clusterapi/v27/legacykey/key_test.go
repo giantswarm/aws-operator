@@ -10,44 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func Test_AutoScalingGroupName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker"
-	groupName := "worker"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Customer: v1alpha1.ClusterCustomer{
-					ID: "test-customer",
-				},
-			},
-		},
-	}
-
-	if AutoScalingGroupName(customObject, groupName) != expectedName {
-		t.Fatalf("Expected auto scaling group name %s but was %s", expectedName, AutoScalingGroupName(customObject, groupName))
-	}
-}
-
-func Test_AvailabilityZone(t *testing.T) {
-	t.Parallel()
-	expectedAZ := "eu-central-1a"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				AZ: "eu-central-1a",
-			},
-		},
-	}
-
-	if AvailabilityZone(customObject) != expectedAZ {
-		t.Fatalf("Expected availability zone %s but was %s", expectedAZ, AvailabilityZone(customObject))
-	}
-}
-
 func Test_BaseDomain(t *testing.T) {
 	t.Parallel()
 	expectedBaseDomain := "installtion.eu-central-1.aws.gigantic.io"
@@ -390,26 +352,6 @@ func Test_IsChinaRegion(t *testing.T) {
 				t.Errorf("unexpected result, expecting %t, want %t", tc.expectedResult, IsChinaRegion(tc.customObject))
 			}
 		})
-	}
-}
-
-func Test_KubernetesAPISecurePort(t *testing.T) {
-	t.Parallel()
-	expectedPort := 443
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					API: v1alpha1.ClusterKubernetesAPI{
-						SecurePort: expectedPort,
-					},
-				},
-			},
-		},
-	}
-
-	if KubernetesAPISecurePort(customObject) != expectedPort {
-		t.Fatalf("Expected kubernetes api secure port %d but was %d", expectedPort, KubernetesAPISecurePort(customObject))
 	}
 }
 
@@ -1125,7 +1067,7 @@ func Test_RegionARN(t *testing.T) {
 	}
 }
 
-func Test_MasterRoleARN(t *testing.T) {
+func Test_RoleARNMaster(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1167,7 +1109,7 @@ func Test_MasterRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := MasterRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNMaster(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Master role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
@@ -1175,7 +1117,7 @@ func Test_MasterRoleARN(t *testing.T) {
 	}
 }
 
-func Test_WorkerRoleARN(t *testing.T) {
+func Test_RoleARNWorker(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1217,7 +1159,7 @@ func Test_WorkerRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := WorkerRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNWorker(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Worker role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
