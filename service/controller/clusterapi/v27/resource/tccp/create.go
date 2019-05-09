@@ -100,7 +100,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		update, err := r.detection.ShouldUpdate(ctx, cr)
+		update, err := r.detection.ShouldUpdate(ctx, cr, cc.Status.TenantCluster.TCCP.MachineDeployment)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -116,7 +116,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		scale, err := r.detection.ShouldScale(ctx, cr)
+		scale, err := r.detection.ShouldScale(ctx, cc.Status.TenantCluster.TCCP.MachineDeployment)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -168,7 +168,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 			Capabilities: []*string{
 				aws.String(namedIAMCapability),
 			},
-			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
+			EnableTerminationProtection: aws.Bool(true),
 			Parameters: []*cloudformation.Parameter{
 				{
 					ParameterKey:   aws.String(versionBundleVersionParameterKey),
@@ -312,13 +312,13 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 
 				WorkerCloudConfigVersion: key.CloudConfigVersion,
 				WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
-				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
+				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cc.Status.TenantCluster.TCCP.MachineDeployment),
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
 				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
-				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
+				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cc.Status.TenantCluster.TCCP.MachineDeployment),
 				WorkerImageID:             key.ImageID(cr),
 				WorkerInstanceMonitoring:  r.instanceMonitoring,
-				WorkerInstanceType:        key.WorkerInstanceType(cr),
+				WorkerInstanceType:        key.WorkerInstanceType(cc.Status.TenantCluster.TCCP.MachineDeployment),
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
 				WorkerMin:                 cc.Status.TenantCluster.TCCP.ASG.MinSize,
 
