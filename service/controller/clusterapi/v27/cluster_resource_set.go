@@ -91,6 +91,7 @@ type ClusterResourceSetConfig struct {
 	RegistryDomain             string
 	SSOPublicKey               string
 	VaultAddress               string
+	VPCPeerID                  string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -561,6 +562,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := vpccidr.Config{
 			Logger: config.Logger,
+
+			VPCPeerID: config.VPCPeerID,
 		}
 
 		vpcCIDRResource, err = vpccidr.New(c)

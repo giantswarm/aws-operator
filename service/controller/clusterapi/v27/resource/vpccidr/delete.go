@@ -5,16 +5,16 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := legacykey.ToCustomObject(obj)
+	cluster, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.addVPCCIDRToContext(ctx, cr)
+	err = r.addVPCCIDRToContext(ctx, cluster)
 	if err != nil {
 		return microerror.Mask(err)
 	}

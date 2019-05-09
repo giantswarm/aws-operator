@@ -71,6 +71,7 @@ type ClusterConfig struct {
 	RouteTables                string
 	SSOPublicKey               string
 	VaultAddress               string
+	VPCPeerID                  string
 }
 
 type ClusterConfigAWSConfig struct {
@@ -584,6 +585,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			RegistryDomain: config.RegistryDomain,
 			SSOPublicKey:   config.SSOPublicKey,
 			VaultAddress:   config.VaultAddress,
+			VPCPeerID:      config.VPCPeerID,
 		}
 
 		resourceSetV27, err = v27.NewClusterResourceSet(c)

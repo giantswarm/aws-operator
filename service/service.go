@@ -194,6 +194,7 @@ func New(config Config) (*Service, error) {
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		clusterapiClusterController, err = clusterapi.NewCluster(c)
@@ -291,6 +292,7 @@ func New(config Config) (*Service, error) {
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		legacyClusterController, err = legacy.NewCluster(c)
