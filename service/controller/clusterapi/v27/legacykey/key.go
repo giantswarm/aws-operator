@@ -51,21 +51,11 @@ const (
 )
 
 const (
-	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	MasterImageIDKey              = "MasterImageID"
-	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
-	MasterInstanceTypeKey         = "MasterInstanceType"
-	MasterInstanceMonitoring      = "Monitoring"
-	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
-	VersionBundleVersionKey       = "VersionBundleVersion"
-	WorkerCountKey                = "WorkerCount"
-	WorkerMaxKey                  = "WorkerMax"
-	WorkerMinKey                  = "WorkerMin"
-	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
-	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceMonitoring      = "Monitoring"
-	WorkerInstanceTypeKey         = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	MasterInstanceMonitoring = "Monitoring"
+	WorkerCountKey           = "WorkerCount"
+	WorkerMaxKey             = "WorkerMax"
+	WorkerMinKey             = "WorkerMin"
+	WorkerInstanceMonitoring = "Monitoring"
 )
 
 const (
