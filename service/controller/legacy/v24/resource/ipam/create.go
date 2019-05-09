@@ -122,7 +122,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("allocated cluster subnet CIDR %#q", subnetCIDR))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated CR status with allocated cluster subnet CIDR %#q", subnetCIDR))
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
