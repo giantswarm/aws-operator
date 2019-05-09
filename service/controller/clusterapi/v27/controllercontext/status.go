@@ -1,6 +1,9 @@
 package controllercontext
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+)
 
 type ContextStatus struct {
 	ControlPlane  ContextStatusControlPlane
@@ -57,11 +60,12 @@ type ContextStatusTenantClusterMasterInstance struct {
 }
 
 type ContextStatusTenantClusterTCCP struct {
-	ASG             ContextStatusTenantClusterTCCPASG
-	IsTransitioning bool
-	RouteTables     []*ec2.RouteTable
-	Subnets         []*ec2.Subnet
-	VPC             ContextStatusTenantClusterTCCPVPC
+	ASG               ContextStatusTenantClusterTCCPASG
+	IsTransitioning   bool
+	MachineDeployment v1alpha1.MachineDeployment
+	RouteTables       []*ec2.RouteTable
+	Subnets           []*ec2.Subnet
+	VPC               ContextStatusTenantClusterTCCPVPC
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
