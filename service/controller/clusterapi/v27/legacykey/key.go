@@ -413,11 +413,11 @@ func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	return s3Domain
 }
 
-func ScalingMax(customObject v1alpha1.AWSConfig) int {
+func WorkerScalingMax(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Scaling.Max
 }
 
-func ScalingMin(customObject v1alpha1.AWSConfig) int {
+func WorkerScalingMin(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Scaling.Min
 }
 

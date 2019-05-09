@@ -46,12 +46,12 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (boo
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != legacykey.ScalingMax(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while legacykey.ScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, legacykey.ScalingMax(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != legacykey.WorkerScalingMax(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while legacykey.WorkerScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, legacykey.WorkerScalingMax(cr)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != legacykey.ScalingMin(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while legacykey.ScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, legacykey.ScalingMin(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != legacykey.WorkerScalingMin(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while legacykey.WorkerScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, legacykey.WorkerScalingMin(cr)))
 		return true, nil
 	}
 
