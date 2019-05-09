@@ -8,7 +8,15 @@ import (
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
-func mustG8sClusterSpecFromCMASpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv1alpha1.AWSClusterSpec {
+func clusterProviderSpec(cluster cmav1alpha1.Cluster) g8sv1alpha1.AWSClusterSpec {
+	return mustG8sClusterSpecFromCMAClusterSpec(cluster.Spec.ProviderSpec)
+}
+
+func clusterProviderStatus(cluster cmav1alpha1.Cluster) g8sv1alpha1.AWSClusterStatus {
+	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus)
+}
+
+func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv1alpha1.AWSClusterSpec {
 	if cmaSpec.Value == nil {
 		panic("provider spec value must not be empty")
 	}
@@ -28,7 +36,7 @@ func mustG8sClusterSpecFromCMASpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv1alpha1
 	return g8sSpec
 }
 
-func mustG8sClusterStatusFromCMAStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
+func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
 	if cmaStatus == nil {
 		panic("provider status value must not be empty")
 	}
@@ -46,12 +54,4 @@ func mustG8sClusterStatusFromCMAStatus(cmaStatus *runtime.RawExtension) g8sv1alp
 	}
 
 	return g8sStatus
-}
-
-func clusterProviderSpec(cluster cmav1alpha1.Cluster) g8sv1alpha1.AWSClusterSpec {
-	return mustG8sClusterSpecFromCMASpec(cluster.Spec.ProviderSpec)
-}
-
-func clusterProviderStatus(cluster cmav1alpha1.Cluster) g8sv1alpha1.AWSClusterStatus {
-	return mustG8sClusterStatusFromCMAStatus(cluster.Status.ProviderStatus)
 }

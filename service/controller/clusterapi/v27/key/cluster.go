@@ -145,7 +145,7 @@ func MasterInstanceName(cluster v1alpha1.Cluster) string {
 }
 
 func MasterInstanceType(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.Master.InstanceType
+	return clusterProviderSpec(cluster).Provider.Master.InstanceType
 }
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
