@@ -40,18 +40,18 @@ func New(config Config) (*Detection, error) {
 //     The tenant cluster's scaling max changes.
 //     The tenant cluster's scaling min changes.
 //
-func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
+func (d *Detection) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.WorkerScalingMax(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.WorkerScalingMax(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.WorkerScalingMax(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.WorkerScalingMax(md) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.WorkerScalingMax(md) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.WorkerScalingMax(md)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.WorkerScalingMin(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.WorkerScalingMin(cr) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.WorkerScalingMin(cr)))
+	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.WorkerScalingMin(md) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.WorkerScalingMin(md) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.WorkerScalingMin(md)))
 		return true, nil
 	}
 
@@ -66,26 +66,26 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.Cluster) (bool,
 //     The worker node's instance type changes.
 //     The tenant cluster's version changes.
 //
-func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
+func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
+	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cl) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cl) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cl)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance docker volume size changes: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB is %q while key.WorkerDockerVolumeSizeGB(cr) is %q", cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB, key.WorkerDockerVolumeSizeGB(cr)))
+	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(md) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance docker volume size changes: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB is %q while key.WorkerDockerVolumeSizeGB(md) is %q", cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB, key.WorkerDockerVolumeSizeGB(md)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(cr) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(cr)))
+	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(md) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(md) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(md)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(cr)))
+	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(md) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(md) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(md)))
 		return true, nil
 	}
 
