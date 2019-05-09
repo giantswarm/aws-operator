@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	v22 "github.com/giantswarm/aws-operator/service/controller/legacy/v22"
@@ -41,6 +42,7 @@ import (
 )
 
 type ClusterConfig struct {
+	CMAClient        clientset.Interface
 	G8sClient        versioned.Interface
 	K8sClient        kubernetes.Interface
 	K8sExtClient     apiextensionsclient.Interface
@@ -216,6 +218,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v22.ClusterResourceSetConfig{
 			CertsSearcher: certsSearcher,
+			CMAClient:     config.CMAClient,
 			G8sClient:     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
@@ -271,6 +274,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v22patch1.ClusterResourceSetConfig{
 			CertsSearcher: certsSearcher,
+			CMAClient:     config.CMAClient,
 			G8sClient:     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
@@ -326,6 +330,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v23.ClusterResourceSetConfig{
 			CertsSearcher: certsSearcher,
+			CMAClient:     config.CMAClient,
 			G8sClient:     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
@@ -381,6 +386,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v24.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
@@ -435,6 +441,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v25.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
@@ -489,6 +496,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v26.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
@@ -543,6 +551,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := v27.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{

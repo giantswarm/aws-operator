@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/network"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 )
 
 const (
@@ -15,6 +16,7 @@ const (
 )
 
 type Config struct {
+	CMAClient        clientset.Interface
 	G8sClient        versioned.Interface
 	Logger           micrologger.Logger
 	NetworkAllocator network.Allocator

@@ -75,11 +75,6 @@ const (
 )
 
 const (
-	NodeDrainerLifecycleHookName = "NodeDrainer"
-	WorkerASGRef                 = "workerAutoScalingGroup"
-)
-
-const (
 	KindMaster  = "master"
 	KindIngress = "ingress"
 	KindWorker  = "worker"

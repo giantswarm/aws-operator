@@ -242,6 +242,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := legacy.ClusterConfig{
+			CMAClient:        cmaClient,
 			G8sClient:        g8sClient,
 			K8sClient:        k8sClient,
 			K8sExtClient:     k8sExtClient,

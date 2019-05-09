@@ -204,6 +204,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		c := v27.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
+			CMAClient:              config.CMAClient,
 			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
