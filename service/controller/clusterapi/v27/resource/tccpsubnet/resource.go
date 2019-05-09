@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -40,7 +39,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addSubnetsToContext(ctx context.Context, cr v1alpha1.AWSConfig) error {
+func (r *Resource) addSubnetsToContext(ctx context.Context) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
