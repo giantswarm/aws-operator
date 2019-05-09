@@ -50,7 +50,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/vpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -92,6 +91,7 @@ type ClusterResourceSetConfig struct {
 	RegistryDomain             string
 	SSOPublicKey               string
 	VaultAddress               string
+	VPCPeerID                  string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -562,22 +562,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := vpccidr.Config{
 			Logger: config.Logger,
+
+			VPCPeerID: config.VPCPeerID,
 		}
 
 		vpcCIDRResource, err = vpccidr.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var workerASGNameResource controller.Resource
-	{
-		c := workerasgname.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		workerASGNameResource, err = workerasgname.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -591,7 +580,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		vpcCIDRResource,
 		tccpOutputsResource,
 		tccpSubnetResource,
-		workerASGNameResource,
 		asgStatusResource,
 		statusResource,
 		migrationResource,

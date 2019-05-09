@@ -57,6 +57,7 @@ func Test_Service_New(t *testing.T) {
 
 				v := viper.New()
 				commonViperSettings(f, v)
+				v.Set(f.Service.AWS.VPCPeerID, "vpc-e6a1e18e")
 
 				return Config{
 					Logger: microloggertest.New(),
@@ -80,6 +81,7 @@ func Test_Service_New(t *testing.T) {
 				commonViperSettings(f, v)
 				v.Set(f.Service.AWS.Encrypter, "vault")
 				v.Set(f.Service.AWS.VaultAddress, "http://vault")
+				v.Set(f.Service.AWS.VPCPeerID, "vpc-e6a1e18e")
 
 				return Config{
 					Logger: microloggertest.New(),

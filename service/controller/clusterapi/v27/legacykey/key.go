@@ -51,21 +51,11 @@ const (
 )
 
 const (
-	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	MasterImageIDKey              = "MasterImageID"
-	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
-	MasterInstanceTypeKey         = "MasterInstanceType"
-	MasterInstanceMonitoring      = "Monitoring"
-	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
-	VersionBundleVersionKey       = "VersionBundleVersion"
-	WorkerCountKey                = "WorkerCount"
-	WorkerMaxKey                  = "WorkerMax"
-	WorkerMinKey                  = "WorkerMin"
-	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
-	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceMonitoring      = "Monitoring"
-	WorkerInstanceTypeKey         = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	MasterInstanceMonitoring = "Monitoring"
+	WorkerCountKey           = "WorkerCount"
+	WorkerMaxKey             = "WorkerMax"
+	WorkerMinKey             = "WorkerMin"
+	WorkerInstanceMonitoring = "Monitoring"
 )
 
 const (
@@ -78,6 +68,10 @@ const (
 const (
 	IngressControllerInsecurePort = 30010
 	IngressControllerSecurePort   = 30011
+)
+
+const (
+	KubernetesSecurePort = 443
 )
 
 const (
@@ -94,14 +88,6 @@ const (
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Kubernetes.API.Domain
-}
-
-func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
-}
-
-func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.AZ
 }
 
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
@@ -221,10 +207,6 @@ func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
 }
 
-func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
-}
-
 func EtcdDomain(customObject v1alpha1.AWSConfig) string {
 	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", ClusterBaseDomain(customObject)}, ".")
 }
@@ -281,7 +263,7 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
-func MasterRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+func RoleARNMaster(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "master")
 }
 
@@ -312,7 +294,7 @@ func NATRouteName(idx int) string {
 	return fmt.Sprintf("NATRoute%02d", idx)
 }
 
-func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
+func RolePeerAccess(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 
@@ -587,7 +569,7 @@ func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
-func WorkerRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+func RoleARNWorker(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "worker")
 }
 

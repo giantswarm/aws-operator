@@ -64,6 +64,7 @@ func newTestClusterConfig() ClusterConfig {
 		RegistryDomain:      "quay.io",
 		SSOPublicKey:        "test",
 		EncrypterBackend:    "kms",
+		VPCPeerID:           "vpc-e6a1e18e",
 	}
 }
 

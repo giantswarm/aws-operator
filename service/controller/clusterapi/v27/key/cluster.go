@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
@@ -18,6 +19,15 @@ const (
 
 const (
 	EC2RoleK8s = "EC2-K8S-Role"
+)
+
+const (
+	IngressControllerInsecurePort = 30010
+	IngressControllerSecurePort   = 30011
+)
+
+const (
+	KubernetesSecurePort = 443
 )
 
 const (
@@ -33,10 +43,6 @@ const (
 	TagInstallation = "giantswarm.io/installation"
 	TagOrganization = "giantswarm.io/organization"
 )
-
-func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
-}
 
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
@@ -126,8 +132,20 @@ func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
 }
 
+func MasterCount(cluster v1alpha1.Cluster) int {
+	return 1
+}
+
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
+}
+
+func MasterInstanceName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master", ClusterID(cluster))
+}
+
+func MasterInstanceType(cluster v1alpha1.Cluster) string {
+	return providerSpec(cluster).Provider.Master.InstanceType
 }
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
@@ -152,8 +170,20 @@ func RegionARN(cluster v1alpha1.Cluster) string {
 	return regionARN
 }
 
+func RoleARNMaster(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "master")
+}
+
+func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "worker")
+}
+
 func RoleName(cluster v1alpha1.Cluster, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
+}
+
+func RolePeerAccess(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
@@ -176,7 +206,21 @@ func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
+func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
+	if v == nil {
+		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+	}
+
+	p, ok := v.(*v1alpha1.Cluster)
+	if !ok {
+		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+	}
+
+	c := p.DeepCopy()
+
+	return *c, nil
+}
+
 func VersionBundleVersion(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }

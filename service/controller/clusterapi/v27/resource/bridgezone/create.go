@@ -18,7 +18,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	if !r.route53Enabled {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
 	}
 
