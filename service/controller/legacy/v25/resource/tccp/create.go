@@ -318,10 +318,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				VersionBundleVersion: key.VersionBundleVersion(cr),
 			},
 			TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
-		}
-
-		if r.encrypterBackend == encrypter.KMSBackend {
-			c.TenantClusterKMSKeyARN = cc.Status.TenantCluster.Encryption.Key
+			TenantClusterKMSKeyARN: cc.Status.TenantCluster.Encryption.Key,
 		}
 
 		a, err := adapter.NewGuest(c)
