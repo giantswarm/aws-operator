@@ -12,11 +12,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -28,8 +28,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var asgName string
 	{
 		i := &cloudformation.DescribeStackResourceInput{
-			LogicalResourceId: aws.String(legacykey.WorkerASGRef),
-			StackName:         aws.String(legacykey.StackNameTCCP(cr)),
+			LogicalResourceId: aws.String(key.RefWorkerASG),
+			StackName:         aws.String(key.StackNameTCCP(cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStackResource(i)
