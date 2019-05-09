@@ -127,7 +127,7 @@ func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.AWSConfig)
 	}
 
 	iamRoles := &template.ParamsMainIAMRoles{
-		PeerAccessRoleName: legacykey.PeerAccessRoleName(cr),
+		PeerAccessRoleName: legacykey.RolePeerAccess(cr),
 		Tenant: template.ParamsMainIAMRolesTenant{
 			AWS: template.ParamsMainIAMRolesTenantAWS{
 				Account: template.ParamsMainIAMRolesTenantAWSAccount{

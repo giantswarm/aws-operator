@@ -903,26 +903,6 @@ func Test_PolicyName(t *testing.T) {
 	}
 }
 
-func Test_PeerAccessRoleName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-vpc-peer-access"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	actual := PeerAccessRoleName(customObject)
-	if actual != expectedName {
-		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
-	}
-}
-
 func Test_MasterCount(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
