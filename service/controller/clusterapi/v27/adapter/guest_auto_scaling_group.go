@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type GuestAutoScalingGroupAdapter struct {
@@ -23,8 +23,8 @@ type GuestAutoScalingGroupAdapter struct {
 }
 
 func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
-	maxWorkers := legacykey.WorkerScalingMax(cfg.CustomObject)
-	minWorkers := legacykey.WorkerScalingMin(cfg.CustomObject)
+	maxWorkers := key.WorkerScalingMax(cfg.CustomObject)
+	minWorkers := key.WorkerScalingMin(cfg.CustomObject)
 
 	if minWorkers <= 0 {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", minWorkers)
@@ -35,7 +35,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	}
 
 	{
-		numAZs := len(legacykey.StatusAvailabilityZones(cfg.CustomObject))
+		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
 		if numAZs < 1 {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
@@ -47,8 +47,8 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.ASGDesiredCapacity = currentDesiredMinWorkers
 	a.ASGMaxSize = maxWorkers
 	a.ASGMinSize = minWorkers
-	a.ASGType = legacykey.KindWorker
-	a.ClusterID = legacykey.ClusterID(cfg.CustomObject)
+	a.ASGType = key.KindWorker
+	a.ClusterID = key.ClusterID(cfg.CustomObject)
 	a.MaxBatchSize = strconv.Itoa(workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio))
 
 	minInstancesInService := workerCountRatio(currentDesiredMinWorkers, asgMinInstancesRatio)
@@ -64,8 +64,8 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	for i, az := range legacykey.StatusAvailabilityZones(cfg.CustomObject) {
-		a.PrivateSubnets = append(a.PrivateSubnets, legacykey.PrivateSubnetName(i))
+	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
+		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
 		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
 
