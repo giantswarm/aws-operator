@@ -42,6 +42,7 @@ type Config struct {
 	EncrypterBackend                string
 	GuestAccountID                  string
 	InstallationName                string
+	MachineDeployment               v1alpha1.MachineDeployment
 	PublicRouteTables               string
 	Route53Enabled                  bool
 	StackState                      StackState

@@ -18,7 +18,8 @@ const (
 )
 
 const (
-	EC2RoleK8s = "EC2-K8S-Role"
+	EC2RoleK8s   = "EC2-K8S-Role"
+	EC2PolicyK8s = "EC2-K8S-Policy"
 )
 
 const (
@@ -157,8 +158,20 @@ func OrganizationID(cluster v1alpha1.Cluster) string {
 	return cluster.Labels[LabelOrganization]
 }
 
-func ProfileName(cluster v1alpha1.Cluster, profileType string) string {
-	return RoleName(cluster, profileType)
+func PolicyNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2PolicyK8s)
+}
+
+func PolicyNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2PolicyK8s)
+}
+
+func ProfileNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func ProfileNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
 }
 
 func Region(cluster v1alpha1.Cluster) string {
@@ -183,8 +196,12 @@ func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
 	return baseRoleARN(cluster, accountID, "worker")
 }
 
-func RoleName(cluster v1alpha1.Cluster, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
+func RoleNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func RoleNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
 }
 
 func RolePeerAccess(cluster v1alpha1.Cluster) string {
@@ -209,6 +226,10 @@ func StackNameCPI(cluster v1alpha1.Cluster) string {
 
 func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
+}
+
+func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
+	return clusterProviderStatus(cluster).Provider.Network.CIDR
 }
 
 func ToCluster(v interface{}) (v1alpha1.Cluster, error) {

@@ -17,8 +17,10 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/network"
 )
@@ -108,7 +110,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	})
 
 	g.Go(func() error {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfig CRs")
 
 		subnets, err := getAWSConfigSubnets(r.g8sClient)
 		if err != nil {
@@ -118,10 +120,29 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfig CRs")
 
 		return nil
 	})
+
+	/*
+		TODO(tuommaki): Activate this once there's CRD registered for Cluster type.
+		g.Go(func() error {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
+
+			subnets, err := getClusterSubnets(r.cmaClient)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			mutex.Lock()
+			reservedSubnets = append(reservedSubnets, subnets...)
+			mutex.Unlock()
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+
+			return nil
+		})
+	*/
 
 	err = g.Wait()
 	if err != nil {
@@ -186,6 +207,30 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
 		cidr := legacykey.StatusNetworkCIDR(ac)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
+func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
+	clusterList, err := cmaClient.Cluster().Clusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, c := range clusterList.Items {
+		cidr := key.StatusClusterNetworkCIDR(c)
 		if cidr == "" {
 			continue
 		}

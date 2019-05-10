@@ -23,8 +23,8 @@ type GuestAutoScalingGroupAdapter struct {
 }
 
 func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
-	maxWorkers := key.WorkerScalingMax(cfg.CustomObject)
-	minWorkers := key.WorkerScalingMin(cfg.CustomObject)
+	maxWorkers := key.WorkerScalingMax(cfg.MachineDeployment)
+	minWorkers := key.WorkerScalingMin(cfg.MachineDeployment)
 
 	if minWorkers <= 0 {
 		return microerror.Maskf(invalidConfigError, "at least 1 worker required, found %d", minWorkers)
@@ -35,7 +35,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	}
 
 	{
-		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
+		numAZs := len(key.StatusAvailabilityZones(cfg.MachineDeployment))
 		if numAZs < 1 {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
@@ -47,7 +47,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.ASGDesiredCapacity = currentDesiredMinWorkers
 	a.ASGMaxSize = maxWorkers
 	a.ASGMinSize = minWorkers
-	a.ASGType = key.KindWorker
+	a.ASGType = "worker"
 	a.ClusterID = key.ClusterID(cfg.CustomObject)
 	a.MaxBatchSize = strconv.Itoa(workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio))
 
@@ -64,7 +64,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	for i, az := range key.StatusAvailabilityZones(cfg.CustomObject) {
+	for i, az := range key.StatusAvailabilityZones(cfg.MachineDeployment) {
 		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
 		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
