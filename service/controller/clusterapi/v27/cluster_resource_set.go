@@ -628,7 +628,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if legacykey.VersionBundleVersion(customObject) == VersionBundle().Version {
+		if legacykey.ClusterVersion(customObject) == VersionBundle().Version {
 			return true
 		}
 

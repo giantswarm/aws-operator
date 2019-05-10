@@ -3,13 +3,13 @@ package ebs
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type EC2ClientMock struct {
-	customObject v1alpha1.AWSConfig
+	customObject v1alpha1.Cluster
 	ebsVolumes   []ebsVolumeMock
 }
 
@@ -27,7 +27,7 @@ func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.D
 	output := &ec2.DescribeVolumesOutput{}
 	volumes := []*ec2.Volume{}
 
-	clusterTag := legacykey.ClusterCloudProviderTag(e.customObject)
+	clusterTag := key.ClusterCloudProviderTag(e.customObject)
 
 	for _, mock := range e.ebsVolumes {
 		vol := &ec2.Volume{

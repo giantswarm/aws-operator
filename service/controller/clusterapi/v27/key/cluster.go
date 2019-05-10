@@ -28,6 +28,7 @@ const (
 )
 
 const (
+	EtcdPort             = 2379
 	KubernetesSecurePort = 443
 )
 
@@ -60,7 +61,7 @@ func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(cluster), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(cluster), CloudConfigVersion, role)
 }
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
@@ -98,6 +99,10 @@ func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]s
 	}
 
 	return tags
+}
+
+func ClusterVersion(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }
 
 func CredentialName(cluster v1alpha1.Cluster) string {
@@ -166,8 +171,12 @@ func PolicyNameWorker(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2PolicyK8s)
 }
 
-func ProfileName(cluster v1alpha1.Cluster, profileType string) string {
-	return RoleName(cluster, profileType)
+func ProfileNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func ProfileNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
 }
 
 func Region(cluster v1alpha1.Cluster) string {
@@ -192,12 +201,29 @@ func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
 	return baseRoleARN(cluster, accountID, "worker")
 }
 
-func RoleName(cluster v1alpha1.Cluster, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
+func RoleNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func RoleNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
 }
 
 func RolePeerAccess(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
+}
+
+func RouteTableName(cluster v1alpha1.Cluster, suffix string, idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return fmt.Sprintf("%s-%s", ClusterID(cluster), suffix)
+	}
+	return fmt.Sprintf("%s-%s%02d", ClusterID(cluster), suffix, idx)
+}
+
+func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
@@ -237,10 +263,6 @@ func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 	c := p.DeepCopy()
 
 	return *c, nil
-}
-
-func VersionBundleVersion(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }
 
 func VolumeNameDocker(cluster v1alpha1.Cluster) string {

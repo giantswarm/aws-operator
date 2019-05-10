@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type GuestInternetGatewayAdapter struct {
@@ -10,10 +10,10 @@ type GuestInternetGatewayAdapter struct {
 }
 
 func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
-	a.ClusterID = legacykey.ClusterID(cfg.CustomObject)
+	a.ClusterID = key.ClusterID(cfg.CustomObject)
 
-	for i := 0; i < len(legacykey.StatusAvailabilityZones(cfg.CustomObject)); i++ {
-		a.PrivateRouteTables = append(a.PrivateRouteTables, legacykey.PrivateRouteTableName(i))
+	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
+		a.PrivateRouteTables = append(a.PrivateRouteTables, key.PrivateRouteTableName(i))
 	}
 
 	return nil

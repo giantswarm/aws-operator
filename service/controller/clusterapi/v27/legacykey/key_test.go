@@ -826,23 +826,6 @@ func Test_StackNameCPF(t *testing.T) {
 	}
 }
 
-func Test_VersionBundleVersion(t *testing.T) {
-	t.Parallel()
-	expectedVersion := "0.1.0"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
-				Version: "0.1.0",
-			},
-		},
-	}
-
-	if VersionBundleVersion(customObject) != expectedVersion {
-		t.Fatalf("Expected version in version bundle to be %s but was %s", expectedVersion, VersionBundleVersion(customObject))
-	}
-}
-
 func Test_BucketObjectName(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{

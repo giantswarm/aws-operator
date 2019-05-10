@@ -6,24 +6,31 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 func Test_ListVolumes(t *testing.T) {
 	t.Parallel()
 
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+	customObject := v1alpha1.Cluster{
+		Status: v1alpha1.ClusterStatus{
+			ProviderStatus: &runtime.RawExtension{
+				Raw: []byte(`
+					{
+						"cluster": {
+							"id": "test-cluster"
+						}
+					}
+				`),
 			},
 		},
 	}
 
 	testCases := []struct {
 		description     string
-		obj             v1alpha1.AWSConfig
+		obj             v1alpha1.Cluster
 		filterFuncs     []func(t *ec2.Tag) bool
 		expectedVolumes []Volume
 		ebsVolumes      []ebsVolumeMock

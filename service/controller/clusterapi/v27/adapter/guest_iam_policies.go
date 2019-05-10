@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type GuestIAMPoliciesAdapter struct {
@@ -19,19 +19,19 @@ type GuestIAMPoliciesAdapter struct {
 }
 
 func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
-	clusterID := legacykey.ClusterID(cfg.CustomObject)
+	clusterID := key.ClusterID(cfg.CustomObject)
 
 	i.ClusterID = clusterID
-	i.EC2ServiceDomain = legacykey.EC2ServiceDomain(cfg.CustomObject)
-	i.MasterPolicyName = legacykey.PolicyNameMaster(cfg.CustomObject)
-	i.MasterProfileName = legacykey.ProfileName(cfg.CustomObject, legacykey.KindMaster)
-	i.MasterRoleName = legacykey.RoleName(cfg.CustomObject, legacykey.KindMaster)
-	i.WorkerPolicyName = legacykey.PolicyNameWorker(cfg.CustomObject)
-	i.WorkerProfileName = legacykey.ProfileName(cfg.CustomObject, legacykey.KindWorker)
-	i.WorkerRoleName = legacykey.RoleName(cfg.CustomObject, legacykey.KindWorker)
-	i.RegionARN = legacykey.RegionARN(cfg.CustomObject)
+	i.EC2ServiceDomain = key.EC2ServiceDomain(cfg.CustomObject)
+	i.MasterPolicyName = key.PolicyNameMaster(cfg.CustomObject)
+	i.MasterProfileName = key.ProfileNameMaster(cfg.CustomObject)
+	i.MasterRoleName = key.RoleNameMaster(cfg.CustomObject)
+	i.WorkerPolicyName = key.PolicyNameWorker(cfg.CustomObject)
+	i.WorkerProfileName = key.ProfileNameWorker(cfg.CustomObject)
+	i.WorkerRoleName = key.RoleNameWorker(cfg.CustomObject)
+	i.RegionARN = key.RegionARN(cfg.CustomObject)
 	i.KMSKeyARN = cfg.TenantClusterKMSKeyARN
-	i.S3Bucket = legacykey.BucketName(cfg.CustomObject, cfg.TenantClusterAccountID)
+	i.S3Bucket = key.BucketName(cfg.CustomObject, cfg.TenantClusterAccountID)
 
 	return nil
 }
