@@ -154,7 +154,7 @@ required = [
 
 [[constraint]]
   name = "sigs.k8s.io/cluster-api"
-  version = "=v0.1.0"
+  version = "=v0.1.1"
 
 
 
