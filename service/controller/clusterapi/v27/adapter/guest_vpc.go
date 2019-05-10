@@ -21,7 +21,7 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.ClusterID = legacykey.ClusterID(cfg.CustomObject)
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.ControlPlaneAccountID
-	v.PeerVPCID = legacykey.PeerID(cfg.CustomObject)
+	v.PeerVPCID = cfg.ControlPlaneVPCID
 	v.Region = legacykey.Region(cfg.CustomObject)
 	v.RegionARN = legacykey.RegionARN(cfg.CustomObject)
 	v.PeerRoleArn = cfg.ControlPlanePeerRoleARN
