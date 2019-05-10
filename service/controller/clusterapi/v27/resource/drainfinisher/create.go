@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
@@ -107,7 +108,7 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		AutoScalingGroupName:  aws.String(workerASGName),
 		InstanceId:            aws.String(instanceID),
 		LifecycleActionResult: aws.String("CONTINUE"),
-		LifecycleHookName:     aws.String(legacykey.NodeDrainerLifecycleHookName),
+		LifecycleHookName:     aws.String(key.RefNodeDrainer),
 	}
 
 	cc, err := controllercontext.FromContext(ctx)
