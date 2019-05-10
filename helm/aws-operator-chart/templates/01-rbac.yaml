@@ -10,6 +10,17 @@ rules:
     verbs:
       - "*"
   - apiGroups:
+      - cluster.k8s.io
+    resources:
+      - clusters
+      - machinedeployments
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
       - apiextensions.k8s.io
     resources:
       - customresourcedefinitions
