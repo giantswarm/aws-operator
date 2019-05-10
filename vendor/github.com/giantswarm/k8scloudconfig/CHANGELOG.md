@@ -13,6 +13,8 @@ version directory, and  then changes are introduced.
 
 ### Changed
 
+-- Change Felix configuration to add metric server and expose data to be scraped for prometheus.
+
 ## [v4.3.0]
 
 ### Changed

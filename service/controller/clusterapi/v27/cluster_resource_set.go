@@ -354,6 +354,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
 			PublicRouteTables:  config.RouteTables,
 			Route53Enabled:     config.Route53Enabled,
+			VPCPeerID:          config.VPCPeerID,
 		}
 
 		tccpResource, err = tccp.New(c)
