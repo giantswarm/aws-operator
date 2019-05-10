@@ -18,7 +18,8 @@ const (
 )
 
 const (
-	EC2RoleK8s = "EC2-K8S-Role"
+	EC2RoleK8s   = "EC2-K8S-Role"
+	EC2PolicyK8s = "EC2-K8S-Policy"
 )
 
 const (
@@ -155,6 +156,14 @@ func MasterInstanceType(cluster v1alpha1.Cluster) string {
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
 	return cluster.Labels[LabelOrganization]
+}
+
+func PolicyNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2PolicyK8s)
+}
+
+func PolicyNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2PolicyK8s)
 }
 
 func ProfileName(cluster v1alpha1.Cluster, profileType string) string {
