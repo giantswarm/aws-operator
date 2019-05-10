@@ -389,10 +389,6 @@ func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 
-func PeerID(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.PeerID
-}
-
 func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
 }

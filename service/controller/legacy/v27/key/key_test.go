@@ -1330,25 +1330,6 @@ func Test_CIDR(t *testing.T) {
 	}
 }
 
-func Test_PeerID(t *testing.T) {
-	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					PeerID: "vpc-abcd",
-				},
-			},
-		},
-	}
-	expected := "vpc-abcd"
-	actual := PeerID(customObject)
-
-	if actual != expected {
-		t.Fatalf("Expected PeerID %s but was %s", expected, actual)
-	}
-}
-
 func Test_ImageID(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
