@@ -59,7 +59,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane network cidr")
 
-		if key.StatusNetworkCIDR(cr) == "" {
+		if key.StatusClusterNetworkCIDR(cr) == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane network cidr")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil

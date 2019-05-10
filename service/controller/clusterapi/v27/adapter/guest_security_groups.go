@@ -47,16 +47,16 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
 
-	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindMaster)
+	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, "master")
 	s.MasterSecurityGroupRules = masterRules
 
-	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindWorker)
+	s.WorkerSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, "worker")
 	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
-	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindIngress)
+	s.IngressSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, "ingress")
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
-	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindEtcd)
+	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, "etcd-elb")
 	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
 	return nil
@@ -222,7 +222,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 				Description: "Allow traffic from tenant cluster CIDR.",
 				Port:        key.KubernetesSecurePort,
 				Protocol:    tcpProtocol,
-				SourceCIDR:  key.StatusNetworkCIDR(cfg.CustomObject),
+				SourceCIDR:  key.StatusClusterNetworkCIDR(cfg.CustomObject),
 			},
 		}
 

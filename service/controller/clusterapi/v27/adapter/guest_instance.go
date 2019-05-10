@@ -64,7 +64,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		zones := key.StatusAvailabilityZones(config.CustomObject)
+		zones := key.StatusAvailabilityZones(config.MachineDeployment)
 		sort.Slice(zones, func(i, j int) bool {
 			return zones[i].Name < zones[j].Name
 		})
@@ -77,8 +77,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.PrivateSubnet = key.PrivateSubnetName(0)
 
 		c := SmallCloudconfigConfig{
-			InstanceRole: key.KindMaster,
-			S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, key.KindMaster),
+			InstanceRole: "master",
+			S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, "master"),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {

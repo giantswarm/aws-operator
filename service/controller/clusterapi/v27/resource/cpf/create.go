@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/cpf/template"
 )
@@ -135,7 +136,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.AWSConfig) 
 
 	var tenantPrivateSubnetCidrs []string
 	{
-		for _, az := range legacykey.StatusAvailabilityZones(cr) {
+		for _, az := range key.StatusAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment) {
 			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
 		}
 	}

@@ -28,6 +28,7 @@ const (
 )
 
 const (
+	EtcdPort             = 2379
 	KubernetesSecurePort = 443
 )
 
@@ -98,6 +99,10 @@ func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]s
 	}
 
 	return tags
+}
+
+func ClusterVersion(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }
 
 func CredentialName(cluster v1alpha1.Cluster) string {
@@ -208,6 +213,19 @@ func RolePeerAccess(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
 }
 
+func RouteTableName(cluster v1alpha1.Cluster, suffix string, idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return fmt.Sprintf("%s-%s", ClusterID(cluster), suffix)
+	}
+	return fmt.Sprintf("%s-%s%02d", ClusterID(cluster), suffix, idx)
+}
+
+func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
+}
+
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
 	return fmt.Sprintf("%s/%s", BucketName(cluster, accountID), BucketObjectName(cluster, role))
 }
@@ -245,10 +263,6 @@ func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 	c := p.DeepCopy()
 
 	return *c, nil
-}
-
-func ClusterVersion(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
 }
 
 func VolumeNameDocker(cluster v1alpha1.Cluster) string {

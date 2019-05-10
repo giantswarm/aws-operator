@@ -42,14 +42,14 @@ type GuestLoadBalancersAdapter struct {
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	{
-		numAZs := len(key.StatusAvailabilityZones(cfg.CustomObject))
+		numAZs := len(key.StatusAvailabilityZones(cfg.MachineDeployment))
 		if numAZs < 1 {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
 	}
 
 	// API load balancer settings.
-	a.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
+	a.APIElbHealthCheckTarget = heathCheckTarget(key.KubernetesSecurePort)
 	a.APIElbName = key.ELBNameAPI(cfg.CustomObject)
 	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
@@ -60,12 +60,12 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.APIElbScheme = externalELBScheme
 
 	// etcd load balancer settings.
-	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort(cfg.CustomObject))
+	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort)
 	a.EtcdElbName = key.ELBNameEtcd(cfg.CustomObject)
 	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			PortELB:      key.EtcdPort(cfg.CustomObject),
-			PortInstance: key.EtcdPort(cfg.CustomObject),
+			PortELB:      key.EtcdPort,
+			PortInstance: key.EtcdPort,
 		},
 	}
 	a.EtcdElbScheme = internalELBScheme
@@ -93,7 +93,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
-	for i := 0; i < len(key.StatusAvailabilityZones(cfg.CustomObject)); i++ {
+	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
 		a.PublicSubnets = append(a.PublicSubnets, key.PublicSubnetName(i))
 		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
 	}
