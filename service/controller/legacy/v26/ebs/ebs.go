@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	cenkaltibackoff "github.com/cenkalti/backoff"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
@@ -64,7 +65,24 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 
 		return nil
 	}
-	b := backoff.NewExponential(30*time.Second, 5*time.Second)
+
+	var b cenkaltibackoff.BackOff
+	{
+		b := &cenkaltibackoff.ExponentialBackOff{
+			// If EBS cannot be deleted on first try, it's probably still in use so it
+			// makes sense to give some time for unmount/detach logic to complete
+			// before retrying.
+			InitialInterval:     5 * time.Second,
+			RandomizationFactor: cenkaltibackoff.DefaultRandomizationFactor,
+			Multiplier:          cenkaltibackoff.DefaultMultiplier,
+			MaxInterval:         30 * time.Second,
+			MaxElapsedTime:      5 * time.Second,
+			Clock:               cenkaltibackoff.SystemClock,
+		}
+
+		b.Reset()
+	}
+
 	n := backoff.NewNotifier(e.logger, context.Background())
 
 	err := backoff.RetryNotify(o, b, n)
