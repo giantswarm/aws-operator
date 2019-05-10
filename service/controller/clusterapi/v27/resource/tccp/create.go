@@ -294,6 +294,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 			ControlPlaneAccountID:           cc.Status.ControlPlane.AWSAccountID,
 			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
 			ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
+			ControlPlaneVPCID:               r.vpcPeerID,
 			ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
 			CustomObject:                    cr,
 			EncrypterBackend:                r.encrypterBackend,
