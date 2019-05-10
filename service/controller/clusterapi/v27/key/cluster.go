@@ -211,6 +211,10 @@ func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
 }
 
+func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
+	return clusterProviderStatus(cluster).Provider.Network.CIDR
+}
+
 func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 	if v == nil {
 		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
