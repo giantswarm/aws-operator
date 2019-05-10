@@ -27,8 +27,8 @@ package adapter
 
 import (
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 type Config struct {
@@ -38,7 +38,7 @@ type Config struct {
 	ControlPlanePeerRoleARN         string
 	ControlPlaneVPCID               string
 	ControlPlaneVPCCidr             string
-	CustomObject                    v1alpha1.AWSConfig
+	CustomObject                    v1alpha1.Cluster
 	EncrypterBackend                string
 	GuestAccountID                  string
 	InstallationName                string
