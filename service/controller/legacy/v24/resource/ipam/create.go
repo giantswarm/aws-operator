@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	clusterapiv1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v24/controllercontext"
@@ -331,16 +331,16 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	return results, nil
 }
 
-func statusClusterNetworkCIDR(cluster clusterapiv1alpha1.Cluster) string {
+func statusClusterNetworkCIDR(cluster cmav1alpha1.Cluster) string {
 	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus).Provider.Network.CIDR
 }
 
-func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) clusterv1alpha1.AWSClusterStatus {
+func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
 	if cmaStatus == nil {
 		panic("provider status value must not be empty")
 	}
 
-	var g8sStatus clusterv1alpha1.AWSClusterStatus
+	var g8sStatus g8sv1alpha1.AWSClusterStatus
 	{
 		if len(cmaStatus.Raw) == 0 {
 			return g8sStatus
