@@ -882,27 +882,6 @@ func Test_RoleName(t *testing.T) {
 	}
 }
 
-func Test_PolicyName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker-EC2-K8S-Policy"
-	profileType := "worker"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	actual := PolicyName(customObject, profileType)
-	if actual != expectedName {
-		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
-	}
-}
-
 func Test_MasterCount(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
@@ -924,44 +903,6 @@ func Test_MasterCount(t *testing.T) {
 	actual := MasterCount(customObject)
 	if actual != expected {
 		t.Fatalf("Expected master count %d but was %d", expected, actual)
-	}
-}
-
-func Test_PrivateSubnetCIDR(t *testing.T) {
-	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					PrivateSubnetCIDR: "172.31.0.0/16",
-				},
-			},
-		},
-	}
-	expected := "172.31.0.0/16"
-	actual := PrivateSubnetCIDR(customObject)
-
-	if actual != expected {
-		t.Fatalf("Expected PrivateSubnetCIDR %s but was %s", expected, actual)
-	}
-}
-
-func Test_CIDR(t *testing.T) {
-	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					CIDR: "172.31.0.0/16",
-				},
-			},
-		},
-	}
-	expected := "172.31.0.0/16"
-	actual := CIDR(customObject)
-
-	if actual != expected {
-		t.Fatalf("Expected CIDR %s but was %s", expected, actual)
 	}
 }
 
