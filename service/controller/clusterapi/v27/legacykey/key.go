@@ -45,7 +45,7 @@ const (
 	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
 	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 
-	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
+	AnnotationInstanceID = "aws-operator.giantswarm.io/instance"
 
 	defaultDockerVolumeSizeGB = "100"
 )
