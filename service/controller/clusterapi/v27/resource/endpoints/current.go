@@ -4,27 +4,27 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the master endpoints in the Kubernetes API")
 
-	namespace := legacykey.ClusterNamespace(customObject)
+	namespace := key.ClusterNamespace(cr)
 
 	// Lookup the current state of the endpoints.
-	var endpoints *apiv1.Endpoints
+	var endpoints *corev1.Endpoints
 	{
-		manifest, err := r.k8sClient.CoreV1().Endpoints(namespace).Get(masterEndpointsName, apismetav1.GetOptions{})
+		manifest, err := r.k8sClient.CoreV1().Endpoints(namespace).Get(masterEndpointsName, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the master endpoints in the Kubernetes API")
 			// fall through

@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -12,9 +11,12 @@ import (
 )
 
 const (
-	// http://docs.aws.amazon.com/sdk-for-go/api/service/ec2/#InstanceState
+	// ec2RunningState is the unsigned integer identifier EC2 uses to express
+	// running instances.
+	//
+	//     http://docs.aws.amazon.com/sdk-for-go/api/service/ec2/#InstanceState
+	//
 	ec2RunningState = 16
-	tagKeyName      = "Name"
 )
 
 func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (*ec2.Instance, error) {
@@ -25,7 +27,7 @@ func (r Resource) findMasterInstance(ctx context.Context, instanceName string) (
 
 	filters := []*ec2.Filter{
 		{
-			Name: aws.String(fmt.Sprintf("tag:%s", tagKeyName)),
+			Name: aws.String("tag:Name"),
 			Values: []*string{
 				aws.String(instanceName),
 			},
