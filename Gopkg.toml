@@ -113,7 +113,7 @@ required = [
   name = "github.com/giantswarm/randomkeys"
 
 [[constraint]]
-  branch = "master"
+  branch = "collector-set"
   name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
