@@ -146,12 +146,12 @@ func (r *Resource) deleteDrainerConfig(ctx context.Context, drainerConfig corev1
 }
 
 func instanceIDFromAnnotations(annotations map[string]string) (string, error) {
-	instanceID, ok := annotations[legacykey.InstanceIDAnnotation]
+	instanceID, ok := annotations[legacykey.AnnotationInstanceID]
 	if !ok {
-		return "", microerror.Maskf(missingAnnotationError, legacykey.InstanceIDAnnotation)
+		return "", microerror.Maskf(missingAnnotationError, legacykey.AnnotationInstanceID)
 	}
 	if instanceID == "" {
-		return "", microerror.Maskf(missingAnnotationError, legacykey.InstanceIDAnnotation)
+		return "", microerror.Maskf(missingAnnotationError, legacykey.AnnotationInstanceID)
 	}
 
 	return instanceID, nil
