@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -23,7 +23,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if endpointsToCreate != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating Kubernetes endpoints")
 
-		namespace := legacykey.ClusterNamespace(customObject)
+		namespace := key.ClusterNamespace(cr)
 		_, err = r.k8sClient.CoreV1().Endpoints(namespace).Create(endpointsToCreate)
 		if apierrors.IsAlreadyExists(err) {
 			// fall through
@@ -49,7 +49,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	var endpointsToCreate *apiv1.Endpoints
+	var endpointsToCreate *corev1.Endpoints
 	if currentEndpoints == nil || desiredEndpoints.Name != currentEndpoints.Name {
 		endpointsToCreate = desiredEndpoints
 	}

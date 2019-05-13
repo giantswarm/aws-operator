@@ -5,19 +5,19 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
-	"k8s.io/api/core/v1"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	instanceName := legacykey.MasterInstanceName(customObject)
+	instanceName := key.MasterInstanceName(cr)
 	masterInstance, err := r.findMasterInstance(ctx, instanceName)
 	if IsNotFound(err) {
 		// During updates the master instance is shut down and thus cannot be found.
@@ -38,24 +38,24 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	endpoints := &v1.Endpoints{
-		ObjectMeta: apismetav1.ObjectMeta{
+	endpoints := &corev1.Endpoints{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      masterEndpointsName,
-			Namespace: legacykey.ClusterID(customObject),
+			Namespace: key.ClusterID(cr),
 			Labels: map[string]string{
 				"app":      masterEndpointsName,
-				"cluster":  legacykey.ClusterID(customObject),
-				"customer": legacykey.OrganizationID(customObject),
+				"cluster":  key.ClusterID(cr),
+				"customer": key.OrganizationID(cr),
 			},
 		},
-		Subsets: []v1.EndpointSubset{
+		Subsets: []corev1.EndpointSubset{
 			{
-				Addresses: []v1.EndpointAddress{
+				Addresses: []corev1.EndpointAddress{
 					{
 						IP: *masterInstance.PrivateIpAddress,
 					},
 				},
-				Ports: []v1.EndpointPort{
+				Ports: []corev1.EndpointPort{
 					{
 						Port: httpsPort,
 					},
