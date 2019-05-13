@@ -2,12 +2,12 @@ package cpi
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -48,7 +48,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) getCloudFormationTags(customObject v1alpha1.AWSConfig) []*cloudformation.Tag {
-	tags := legacykey.ClusterTags(customObject, r.installationName)
+func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
+	tags := key.ClusterTags(cr, r.installationName)
 	return awstags.NewCloudFormation(tags)
 }
