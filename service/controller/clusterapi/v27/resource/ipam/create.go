@@ -21,7 +21,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -33,11 +32,16 @@ func init() {
 // EnsureCreated allocates guest cluster network segment. It gathers existing
 // subnets from existing AWSConfig/Status objects and existing VPCs from AWS.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	var cr v1alpha1.AWSConfig
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
 
-		oldObj, err := legacykey.ToCustomObject(obj)
+		oldObj, err := key.ToCluster(obj)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -53,12 +57,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
-	if legacykey.StatusNetworkCIDR(cr) == "" {
+	if key.StatusClusterNetworkCIDR(cr) == "" {
 		var subnetCIDR net.IPNet
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
-			randomAZs, err := r.selectRandomAZs(legacykey.SpecAvailabilityZones(cr))
+			randomAZs, err := r.selectRandomAZs(key.WorkerAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -206,7 +210,7 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
-		cidr := legacykey.StatusNetworkCIDR(ac)
+		cidr := key.StatusAWSConfigNetworkCIDR(ac)
 		if cidr == "" {
 			continue
 		}
