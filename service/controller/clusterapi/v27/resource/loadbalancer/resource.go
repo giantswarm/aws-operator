@@ -26,15 +26,15 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	// Dependencies.
 	if config.Logger == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	newResource := &Resource{
+	r := &Resource{
 		// Dependencies.
 		logger: config.Logger,
 	}
 
-	return newResource, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {
