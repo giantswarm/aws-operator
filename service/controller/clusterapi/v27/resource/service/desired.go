@@ -30,7 +30,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				legacykey.LabelApp:           "master",
 				legacykey.LabelCluster:       legacykey.ClusterID(customObject),
 				legacykey.LabelOrganization:  legacykey.OrganizationID(customObject),
-				legacykey.LabelVersionBundle: legacykey.VersionBundleVersion(customObject),
+				legacykey.LabelVersionBundle: legacykey.ClusterVersion(customObject),
 			},
 			Annotations: map[string]string{
 				AnnotationEtcdDomain:        legacykey.ClusterEtcdEndpoint(customObject),

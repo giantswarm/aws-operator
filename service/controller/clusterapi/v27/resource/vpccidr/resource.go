@@ -7,12 +7,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
 )
 
 const (
@@ -21,6 +19,8 @@ const (
 
 type Config struct {
 	Logger micrologger.Logger
+
+	VPCPeerID string
 }
 
 type Resource struct {
@@ -30,6 +30,8 @@ type Resource struct {
 	// and the value is the CIDR.
 	cidrs map[string]string
 	mutex sync.Mutex
+
+	vpcPeerID string
 }
 
 func New(config Config) (*Resource, error) {
@@ -37,11 +39,17 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.VPCPeerID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.VPCPeerID must not be empty", config)
+	}
+
 	r := &Resource{
 		logger: config.Logger,
 
 		cidrs: map[string]string{},
 		mutex: sync.Mutex{},
+
+		vpcPeerID: config.VPCPeerID,
 	}
 
 	return r, nil
@@ -51,14 +59,14 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addVPCCIDRToContext(ctx context.Context, cr v1alpha1.AWSConfig) error {
+func (r *Resource) addVPCCIDRToContext(ctx context.Context) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	{
-		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, legacykey.PeerID(cr))
+		cidr, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, r.vpcPeerID)
 		if err != nil {
 			return microerror.Mask(err)
 		}

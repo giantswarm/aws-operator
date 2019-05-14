@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -73,7 +73,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return e, nil
 }
 
-func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
+func (e *Encrypter) EncryptionKey(ctx context.Context, customObject v1alpha1.Cluster) (string, error) {
 	err := e.ensureToken()
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -146,7 +146,7 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return ciphertext, nil
 }
 
-func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.Cluster) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -160,8 +160,8 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = legacykey.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = legacykey.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWSAccountID)
+		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWSAccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -201,7 +201,7 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	return nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject v1alpha1.Cluster) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -253,7 +253,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -262,8 +262,8 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = legacykey.MasterRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = legacykey.WorkerRoleARN(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWSAccountID)
+		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWSAccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -303,7 +303,7 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject v1alpha1.Cluster) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -621,8 +621,8 @@ func (e *Encrypter) postAuthAWSRole(name string, data *AWSAuthRole) error {
 	return nil
 }
 
-func (e *Encrypter) keyName(customObject v1alpha1.AWSConfig) string {
-	return legacykey.ClusterID(customObject)
+func (e *Encrypter) keyName(customObject v1alpha1.Cluster) string {
+	return key.ClusterID(customObject)
 }
 
 func authAWSRolePath(role string) string {

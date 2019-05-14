@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/bits"
 	"math/rand"
@@ -10,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
@@ -17,9 +19,13 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v26/key"
+	"github.com/giantswarm/aws-operator/service/network"
 )
 
 func init() {
@@ -30,8 +36,6 @@ func init() {
 // EnsureCreated allocates guest cluster network segment. It gathers existing
 // subnets from existing AWSConfig/Status objects and existing VPCs from AWS.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	var err error
-
 	var cr v1alpha1.AWSConfig
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
@@ -53,49 +57,31 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
 	if key.StatusNetworkCIDR(cr) == "" {
-		var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
 		var subnetCIDR net.IPNet
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
-
-			subnetCIDR, err = r.allocateSubnet(ctx)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 
 			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			statusAZs, err = splitSubnetToStatusAZs(subnetCIDR, randomAZs)
+			callbacks := network.AllocationCallbacks{
+				GetReservedNetworks:     r.getReservedNetworks,
+				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, randomAZs),
+			}
+
+			subnetCIDR, err = r.networkAllocator.Allocate(ctx, r.networkRange, r.allocatedSubnetMask, callbacks)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("allocated cluster subnet CIDR %#q", subnetCIDR))
-		}
-
-		// Once we have all information together, regardless the update path, we
-		// update the CR status. Note that we try to use the latest resource version
-		// of the CR to get the status update properly sorted without any conflict.
-		{
-			r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status")
-
-			cr.Status.Cluster.Network.CIDR = subnetCIDR.String()
-			cr.Status.AWS.AvailabilityZones = statusAZs
-
-			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(cr.Namespace).UpdateStatus(&cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR status")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated CR status with allocated cluster subnet CIDR %#q", subnetCIDR))
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
-		}
 
+		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
 	}
@@ -103,7 +89,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
+func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error) {
 	var err error
 	var mutex sync.Mutex
 	var reservedSubnets []net.IPNet
@@ -142,26 +128,60 @@ func (r *Resource) allocateSubnet(ctx context.Context) (net.IPNet, error) {
 		return nil
 	})
 
+	/*
+		TODO(tuommaki): Activate this once there's CRD registered for Cluster type.
+		g.Go(func() error {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
+
+			subnets, err := getClusterSubnets(r.cmaClient)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			mutex.Lock()
+			reservedSubnets = append(reservedSubnets, subnets...)
+			mutex.Unlock()
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+
+			return nil
+		})
+	*/
+
 	err = g.Wait()
 	if err != nil {
-		return net.IPNet{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	reservedSubnets = ipam.CanonicalizeSubnets(r.networkRange, reservedSubnets)
 
-	var subnet net.IPNet
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
+	return reservedSubnets, nil
+}
 
-		subnet, err = ipam.Free(r.networkRange, r.allocatedSubnetMask, reservedSubnets)
-		if err != nil {
-			return net.IPNet{}, microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", r.networkRange.String(), r.allocatedSubnetMask.String(), reservedSubnets)
-		}
+func (r *Resource) persistAllocatedNetwork(cr v1alpha1.AWSConfig, azs []string) func(ctx context.Context, subnet net.IPNet) error {
+	return func(ctx context.Context, subnet net.IPNet) error {
+		return r.splitAndPersistReservedSubnet(ctx, cr, subnet, azs)
+	}
+}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet %#q", subnet.String()))
+func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr v1alpha1.AWSConfig, subnet net.IPNet, azs []string) error {
+	statusAZs, err := splitSubnetToStatusAZs(subnet, azs)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
-	return subnet, nil
+	r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status to persist network allocation and chosen availability zones")
+
+	cr.Status.Cluster.Network.CIDR = subnet.String()
+	cr.Status.AWS.AvailabilityZones = statusAZs
+
+	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(cr.Namespace).UpdateStatus(&cr)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR status to persist network allocation and chosen availability zones")
+
+	return nil
 }
 
 func (r *Resource) selectRandomAZs(n int) ([]string, error) {
@@ -205,6 +225,30 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	return results, nil
 }
 
+func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
+	clusterList, err := cmaClient.Cluster().Clusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, c := range clusterList.Items {
+		cidr := statusClusterNetworkCIDR(c)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
 func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -227,6 +271,30 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	return results, nil
+}
+
+func statusClusterNetworkCIDR(cluster cmav1alpha1.Cluster) string {
+	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus).Provider.Network.CIDR
+}
+
+func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
+	if cmaStatus == nil {
+		panic("provider status value must not be empty")
+	}
+
+	var g8sStatus g8sv1alpha1.AWSClusterStatus
+	{
+		if len(cmaStatus.Raw) == 0 {
+			return g8sStatus
+		}
+
+		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return g8sStatus
 }
 
 // splitSubnetToStatusAZs splits subnet such that each AZ gets private and

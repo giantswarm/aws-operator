@@ -3,14 +3,16 @@ package endpoints
 import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 const (
 	// Name is the identifier of the resource.
 	Name = "endpointsv27"
+)
 
+const (
 	httpsPort           = 443
 	masterEndpointsName = "master"
 )
@@ -49,14 +51,14 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func toEndpoints(v interface{}) (*apiv1.Endpoints, error) {
+func toEndpoints(v interface{}) (*corev1.Endpoints, error) {
 	if v == nil {
 		return nil, nil
 	}
 
-	endpoints, ok := v.(*apiv1.Endpoints)
+	endpoints, ok := v.(*corev1.Endpoints)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &apiv1.Endpoints{}, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &corev1.Endpoints{}, v)
 	}
 
 	return endpoints, nil

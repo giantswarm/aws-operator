@@ -45,27 +45,17 @@ const (
 	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
 	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 
-	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
+	AnnotationInstanceID = "aws-operator.giantswarm.io/instance"
 
 	defaultDockerVolumeSizeGB = "100"
 )
 
 const (
-	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	MasterImageIDKey              = "MasterImageID"
-	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
-	MasterInstanceTypeKey         = "MasterInstanceType"
-	MasterInstanceMonitoring      = "Monitoring"
-	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
-	VersionBundleVersionKey       = "VersionBundleVersion"
-	WorkerCountKey                = "WorkerCount"
-	WorkerMaxKey                  = "WorkerMax"
-	WorkerMinKey                  = "WorkerMin"
-	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
-	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceMonitoring      = "Monitoring"
-	WorkerInstanceTypeKey         = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
+	MasterInstanceMonitoring = "Monitoring"
+	WorkerCountKey           = "WorkerCount"
+	WorkerMaxKey             = "WorkerMax"
+	WorkerMinKey             = "WorkerMin"
+	WorkerInstanceMonitoring = "Monitoring"
 )
 
 const (
@@ -81,8 +71,7 @@ const (
 )
 
 const (
-	NodeDrainerLifecycleHookName = "NodeDrainer"
-	WorkerASGRef                 = "workerAutoScalingGroup"
+	KubernetesSecurePort = 443
 )
 
 const (
@@ -96,14 +85,6 @@ func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Kubernetes.API.Domain
 }
 
-func AutoScalingGroupName(customObject v1alpha1.AWSConfig, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
-}
-
-func AvailabilityZone(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.AZ
-}
-
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
@@ -114,7 +95,7 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(customObject), CloudConfigVersion, role)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -221,10 +202,6 @@ func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
 }
 
-func KubernetesAPISecurePort(customObject v1alpha1.AWSConfig) int {
-	return customObject.Spec.Cluster.Kubernetes.API.SecurePort
-}
-
 func EtcdDomain(customObject v1alpha1.AWSConfig) string {
 	return strings.Join([]string{"etcd", ClusterID(customObject), "k8s", ClusterBaseDomain(customObject)}, ".")
 }
@@ -281,7 +258,7 @@ func MasterInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
-func MasterRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+func RoleARNMaster(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "master")
 }
 
@@ -312,16 +289,16 @@ func NATRouteName(idx int) string {
 	return fmt.Sprintf("NATRoute%02d", idx)
 }
 
-func PeerAccessRoleName(customObject v1alpha1.AWSConfig) string {
+func RolePeerAccess(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 
-func PeerID(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.PeerID
+func PolicyNameMaster(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(customObject), PolicyNameTemplate)
 }
 
-func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
+func PolicyNameWorker(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(customObject), PolicyNameTemplate)
 }
 
 func PrivateSubnetRouteTableAssociationName(idx int) string {
@@ -342,10 +319,6 @@ func PrivateRouteTableName(idx int) string {
 	return fmt.Sprintf("PrivateRouteTable%02d", idx)
 }
 
-func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
-}
-
 func PrivateSubnetName(idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
@@ -353,10 +326,6 @@ func PrivateSubnetName(idx int) string {
 		return "PrivateSubnet"
 	}
 	return fmt.Sprintf("PrivateSubnet%02d", idx)
-}
-
-func PublicSubnetCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
 }
 
 func PublicSubnetRouteTableAssociationName(idx int) string {
@@ -384,10 +353,6 @@ func PublicSubnetName(idx int) string {
 		return "PublicSubnet"
 	}
 	return fmt.Sprintf("PublicSubnet%02d", idx)
-}
-
-func CIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.CIDR
 }
 
 func Region(customObject v1alpha1.AWSConfig) string {
@@ -431,11 +396,11 @@ func S3ServiceDomain(customObject v1alpha1.AWSConfig) string {
 	return s3Domain
 }
 
-func ScalingMax(customObject v1alpha1.AWSConfig) int {
+func WorkerScalingMax(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Scaling.Max
 }
 
-func ScalingMin(customObject v1alpha1.AWSConfig) int {
+func WorkerScalingMin(customObject v1alpha1.AWSConfig) int {
 	return customObject.Spec.Cluster.Scaling.Min
 }
 
@@ -540,11 +505,10 @@ func ToVersionBundleVersion(v interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	return VersionBundleVersion(customObject), nil
+	return ClusterVersion(customObject), nil
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
-func VersionBundleVersion(customObject v1alpha1.AWSConfig) string {
+func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.VersionBundle.Version
 }
 
@@ -587,7 +551,7 @@ func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	return instanceType
 }
 
-func WorkerRoleARN(customObject v1alpha1.AWSConfig, accountID string) string {
+func RoleARNWorker(customObject v1alpha1.AWSConfig, accountID string) string {
 	return baseRoleARN(customObject, accountID, "worker")
 }
 

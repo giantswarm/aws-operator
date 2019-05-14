@@ -8,19 +8,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
-	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clusterv1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 // EnsureCreated creates DrainerConfigs for ASG instances in terminating/wait
 // state then lets node-operator to do its job.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -91,14 +91,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			n := customObject.GetNamespace()
+			n := cr.GetNamespace()
 			o := metav1.GetOptions{}
 
 			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Get(privateDNS, o)
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for guest cluster node %#q", *instance.InstanceId))
 
-				err := r.createDrainerConfig(ctx, customObject, *instance.InstanceId, privateDNS)
+				err := r.createDrainerConfig(ctx, cr, *instance.InstanceId, privateDNS)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -116,17 +116,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, customObject providerv1alpha1.AWSConfig, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cr clusterv1alpha1.Cluster, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for guest cluster nodes %#q", instanceID))
 
-	n := customObject.GetNamespace()
+	n := cr.GetNamespace()
 	c := &corev1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				legacykey.InstanceIDAnnotation: instanceID,
+				key.AnnotationInstanceID: instanceID,
 			},
 			Labels: map[string]string{
-				legacykey.LabelCluster: legacykey.ClusterID(customObject),
+				key.LabelCluster: key.ClusterID(cr),
 			},
 			Name: privateDNS,
 		},
@@ -134,9 +134,9 @@ func (r *Resource) createDrainerConfig(ctx context.Context, customObject provide
 			Guest: corev1alpha1.DrainerConfigSpecGuest{
 				Cluster: corev1alpha1.DrainerConfigSpecGuestCluster{
 					API: corev1alpha1.DrainerConfigSpecGuestClusterAPI{
-						Endpoint: legacykey.ClusterAPIEndpoint(customObject),
+						Endpoint: key.ClusterAPIEndpoint(cr),
 					},
-					ID: legacykey.ClusterID(customObject),
+					ID: key.ClusterID(cr),
 				},
 				Node: corev1alpha1.DrainerConfigSpecGuestNode{
 					Name: privateDNS,

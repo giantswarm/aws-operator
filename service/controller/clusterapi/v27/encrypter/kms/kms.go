@@ -5,13 +5,13 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type Encrypter struct {
@@ -44,7 +44,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return kms, nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -75,7 +75,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.
 
 	if oldKeyScheduledForDeletion {
 		// In such case we just delete the alias so we can alias newly
-		// created legacykey.
+		// created key.
 
 		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting old encryption key alias")
 
@@ -95,11 +95,11 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
 
-		tags := legacykey.ClusterTags(cr, e.installationName)
+		tags := key.ClusterTags(cr, e.installationName)
 
 		// TODO already created case should be handled here. Otherwise there is a
 		// chance alias wasn't created yet and EncryptionKey will tell there is no
-		// legacykey. We can check tags to see if the key was created.
+		// key. We can check tags to see if the key was created.
 		//
 		//     https://github.com/giantswarm/giantswarm/issues/4262
 		//
@@ -119,7 +119,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.
 
 	// NOTE: Key roation must be enabled before creation alias. Otherwise
 	// it is not guaranteed it will be reconciled. Right now we *always*
-	// enable rotation before aliasing the legacykey. So it is enough reconcile
+	// enable rotation before aliasing the key. So it is enough reconcile
 	// aliasing properly to make sure rotation is enabled.
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "enabling encryption key rotation")
@@ -155,7 +155,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr v1alpha1.AWSConfig) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -214,7 +214,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr v1alpha1.
 	return nil
 }
 
-func (k *Encrypter) EncryptionKey(ctx context.Context, cr v1alpha1.AWSConfig) (string, error) {
+func (k *Encrypter) EncryptionKey(ctx context.Context, cr v1alpha1.Cluster) (string, error) {
 	out, err := k.describeKey(ctx, cr)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -251,7 +251,7 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }
 
-func (k *Encrypter) describeKey(ctx context.Context, cr v1alpha1.AWSConfig) (*kms.DescribeKeyOutput, error) {
+func (k *Encrypter) describeKey(ctx context.Context, cr v1alpha1.Cluster) (*kms.DescribeKeyOutput, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

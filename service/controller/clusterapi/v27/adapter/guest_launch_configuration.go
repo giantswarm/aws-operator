@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates"
 )
 
@@ -29,8 +29,8 @@ type BlockDeviceMapping struct {
 }
 
 func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
-	l.ASGType = legacykey.KindWorker
-	l.WorkerInstanceType = legacykey.WorkerInstanceType(config.CustomObject)
+	l.ASGType = "worker"
+	l.WorkerInstanceType = key.WorkerInstanceType(config.MachineDeployment)
 	l.WorkerImageID = config.StackState.WorkerImageID
 	l.WorkerAssociatePublicIPAddress = false
 
@@ -115,10 +115,10 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 
 	// small cloud config field.
 	c := SmallCloudconfigConfig{
-		InstanceRole: legacykey.KindWorker,
-		S3URL:        legacykey.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, legacykey.KindWorker),
+		InstanceRole: "worker",
+		S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, "worker"),
 	}
-	rendered, err := templates.Render(legacykey.CloudConfigSmallTemplates(), c)
+	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
 		return microerror.Mask(err)
 	}

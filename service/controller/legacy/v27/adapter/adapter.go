@@ -36,6 +36,7 @@ type Config struct {
 	ControlPlaneAccountID           string
 	ControlPlaneNATGatewayAddresses []*ec2.Address
 	ControlPlanePeerRoleARN         string
+	ControlPlaneVPCID               string
 	ControlPlaneVPCCidr             string
 	CustomObject                    v1alpha1.AWSConfig
 	EncrypterBackend                string

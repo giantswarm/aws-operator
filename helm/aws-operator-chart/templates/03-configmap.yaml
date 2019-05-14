@@ -28,6 +28,7 @@ data:
         trustedAdvisor:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
+        vpcPeerID: '{{ .Values.Installation.V1.Provider.AWS.VPCPeerID }}'
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'

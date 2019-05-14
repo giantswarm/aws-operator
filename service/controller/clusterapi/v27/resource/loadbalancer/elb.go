@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go/service/elb"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	loadBalancerTagChunkSize     = 20
 )
 
-func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alpha1.AWSConfig) (*LoadBalancerState, error) {
+func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject v1alpha1.Cluster) (*LoadBalancerState, error) {
 	lbState := &LoadBalancerState{}
 	clusterLBNames := []string{}
 
@@ -78,8 +78,8 @@ func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string 
 	return chunks
 }
 
-func containsClusterTag(tags []*elb.Tag, customObject v1alpha1.AWSConfig) bool {
-	tagKey := legacykey.ClusterCloudProviderTag(customObject)
+func containsClusterTag(tags []*elb.Tag, customObject v1alpha1.Cluster) bool {
+	tagKey := key.ClusterCloudProviderTag(customObject)
 
 	for _, tag := range tags {
 		if *tag.Key == tagKey && *tag.Value == cloudProviderClusterTagValue {

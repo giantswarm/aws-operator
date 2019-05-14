@@ -12,13 +12,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 // EnsureCreated completes ASG lifecycle hooks for nodes drained by
 // node-operator, and then deletes drained DrainerConfigs.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -41,7 +41,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		n := v1.NamespaceAll
 		o := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", legacykey.LabelCluster, legacykey.ClusterID(customObject)),
+			LabelSelector: fmt.Sprintf("%s=%s", key.LabelCluster, key.ClusterID(cr)),
 		}
 
 		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
@@ -107,7 +107,7 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		AutoScalingGroupName:  aws.String(workerASGName),
 		InstanceId:            aws.String(instanceID),
 		LifecycleActionResult: aws.String("CONTINUE"),
-		LifecycleHookName:     aws.String(legacykey.NodeDrainerLifecycleHookName),
+		LifecycleHookName:     aws.String(key.RefNodeDrainer),
 	}
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -145,12 +145,12 @@ func (r *Resource) deleteDrainerConfig(ctx context.Context, drainerConfig corev1
 }
 
 func instanceIDFromAnnotations(annotations map[string]string) (string, error) {
-	instanceID, ok := annotations[legacykey.InstanceIDAnnotation]
+	instanceID, ok := annotations[key.AnnotationInstanceID]
 	if !ok {
-		return "", microerror.Maskf(missingAnnotationError, legacykey.InstanceIDAnnotation)
+		return "", microerror.Maskf(missingAnnotationError, key.AnnotationInstanceID)
 	}
 	if instanceID == "" {
-		return "", microerror.Maskf(missingAnnotationError, legacykey.InstanceIDAnnotation)
+		return "", microerror.Maskf(missingAnnotationError, key.AnnotationInstanceID)
 	}
 
 	return instanceID, nil

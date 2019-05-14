@@ -10,44 +10,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
 
-func Test_AutoScalingGroupName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker"
-	groupName := "worker"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-				Customer: v1alpha1.ClusterCustomer{
-					ID: "test-customer",
-				},
-			},
-		},
-	}
-
-	if AutoScalingGroupName(customObject, groupName) != expectedName {
-		t.Fatalf("Expected auto scaling group name %s but was %s", expectedName, AutoScalingGroupName(customObject, groupName))
-	}
-}
-
-func Test_AvailabilityZone(t *testing.T) {
-	t.Parallel()
-	expectedAZ := "eu-central-1a"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				AZ: "eu-central-1a",
-			},
-		},
-	}
-
-	if AvailabilityZone(customObject) != expectedAZ {
-		t.Fatalf("Expected availability zone %s but was %s", expectedAZ, AvailabilityZone(customObject))
-	}
-}
-
 func Test_BaseDomain(t *testing.T) {
 	t.Parallel()
 	expectedBaseDomain := "installtion.eu-central-1.aws.gigantic.io"
@@ -390,26 +352,6 @@ func Test_IsChinaRegion(t *testing.T) {
 				t.Errorf("unexpected result, expecting %t, want %t", tc.expectedResult, IsChinaRegion(tc.customObject))
 			}
 		})
-	}
-}
-
-func Test_KubernetesAPISecurePort(t *testing.T) {
-	t.Parallel()
-	expectedPort := 443
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				Kubernetes: v1alpha1.ClusterKubernetes{
-					API: v1alpha1.ClusterKubernetesAPI{
-						SecurePort: expectedPort,
-					},
-				},
-			},
-		},
-	}
-
-	if KubernetesAPISecurePort(customObject) != expectedPort {
-		t.Fatalf("Expected kubernetes api secure port %d but was %d", expectedPort, KubernetesAPISecurePort(customObject))
 	}
 }
 
@@ -884,23 +826,6 @@ func Test_StackNameCPF(t *testing.T) {
 	}
 }
 
-func Test_VersionBundleVersion(t *testing.T) {
-	t.Parallel()
-	expectedVersion := "0.1.0"
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
-				Version: "0.1.0",
-			},
-		},
-	}
-
-	if VersionBundleVersion(customObject) != expectedVersion {
-		t.Fatalf("Expected version in version bundle to be %s but was %s", expectedVersion, VersionBundleVersion(customObject))
-	}
-}
-
 func Test_BucketObjectName(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
@@ -940,47 +865,6 @@ func Test_RoleName(t *testing.T) {
 	}
 }
 
-func Test_PolicyName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-worker-EC2-K8S-Policy"
-	profileType := "worker"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	actual := PolicyName(customObject, profileType)
-	if actual != expectedName {
-		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
-	}
-}
-
-func Test_PeerAccessRoleName(t *testing.T) {
-	t.Parallel()
-	expectedName := "test-cluster-vpc-peer-access"
-
-	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
-	}
-
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: cluster,
-		},
-	}
-
-	actual := PeerAccessRoleName(customObject)
-	if actual != expectedName {
-		t.Fatalf("Expected  name '%s' but was '%s'", expectedName, actual)
-	}
-}
-
 func Test_MasterCount(t *testing.T) {
 	t.Parallel()
 	customObject := v1alpha1.AWSConfig{
@@ -1002,63 +886,6 @@ func Test_MasterCount(t *testing.T) {
 	actual := MasterCount(customObject)
 	if actual != expected {
 		t.Fatalf("Expected master count %d but was %d", expected, actual)
-	}
-}
-
-func Test_PrivateSubnetCIDR(t *testing.T) {
-	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					PrivateSubnetCIDR: "172.31.0.0/16",
-				},
-			},
-		},
-	}
-	expected := "172.31.0.0/16"
-	actual := PrivateSubnetCIDR(customObject)
-
-	if actual != expected {
-		t.Fatalf("Expected PrivateSubnetCIDR %s but was %s", expected, actual)
-	}
-}
-
-func Test_CIDR(t *testing.T) {
-	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					CIDR: "172.31.0.0/16",
-				},
-			},
-		},
-	}
-	expected := "172.31.0.0/16"
-	actual := CIDR(customObject)
-
-	if actual != expected {
-		t.Fatalf("Expected CIDR %s but was %s", expected, actual)
-	}
-}
-
-func Test_PeerID(t *testing.T) {
-	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			AWS: v1alpha1.AWSConfigSpecAWS{
-				VPC: v1alpha1.AWSConfigSpecAWSVPC{
-					PeerID: "vpc-abcd",
-				},
-			},
-		},
-	}
-	expected := "vpc-abcd"
-	actual := PeerID(customObject)
-
-	if actual != expected {
-		t.Fatalf("Expected PeerID %s but was %s", expected, actual)
 	}
 }
 
@@ -1125,7 +952,7 @@ func Test_RegionARN(t *testing.T) {
 	}
 }
 
-func Test_MasterRoleARN(t *testing.T) {
+func Test_RoleARNMaster(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1167,7 +994,7 @@ func Test_MasterRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := MasterRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNMaster(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Master role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}
@@ -1175,7 +1002,7 @@ func Test_MasterRoleARN(t *testing.T) {
 	}
 }
 
-func Test_WorkerRoleARN(t *testing.T) {
+func Test_RoleARNWorker(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
@@ -1217,7 +1044,7 @@ func Test_WorkerRoleARN(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			roleARN := WorkerRoleARN(tc.customObject, tc.accountID)
+			roleARN := RoleARNWorker(tc.customObject, tc.accountID)
 			if tc.expectedRoleARN != roleARN {
 				t.Errorf("unexpected Worker role ARN, expecting %q, want %q", tc.expectedRoleARN, roleARN)
 			}

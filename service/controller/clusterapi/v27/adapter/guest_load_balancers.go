@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -42,46 +42,46 @@ type GuestLoadBalancersAdapter struct {
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	{
-		numAZs := len(legacykey.StatusAvailabilityZones(cfg.CustomObject))
+		numAZs := len(key.StatusAvailabilityZones(cfg.MachineDeployment))
 		if numAZs < 1 {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
 	}
 
 	// API load balancer settings.
-	a.APIElbHealthCheckTarget = heathCheckTarget(cfg.CustomObject.Spec.Cluster.Kubernetes.API.SecurePort)
-	a.APIElbName = legacykey.ELBNameAPI(cfg.CustomObject)
+	a.APIElbHealthCheckTarget = heathCheckTarget(key.KubernetesSecurePort)
+	a.APIElbName = key.ELBNameAPI(cfg.CustomObject)
 	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			PortELB:      legacykey.KubernetesAPISecurePort(cfg.CustomObject),
-			PortInstance: legacykey.KubernetesAPISecurePort(cfg.CustomObject),
+			PortELB:      key.KubernetesSecurePort,
+			PortInstance: key.KubernetesSecurePort,
 		},
 	}
 	a.APIElbScheme = externalELBScheme
 
 	// etcd load balancer settings.
-	a.EtcdElbHealthCheckTarget = heathCheckTarget(legacykey.EtcdPort(cfg.CustomObject))
-	a.EtcdElbName = legacykey.ELBNameEtcd(cfg.CustomObject)
+	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort)
+	a.EtcdElbName = key.ELBNameEtcd(cfg.CustomObject)
 	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			PortELB:      legacykey.EtcdPort(cfg.CustomObject),
-			PortInstance: legacykey.EtcdPort(cfg.CustomObject),
+			PortELB:      key.EtcdPort,
+			PortInstance: key.EtcdPort,
 		},
 	}
 	a.EtcdElbScheme = internalELBScheme
 
 	// Ingress load balancer settings.
-	a.IngressElbHealthCheckTarget = heathCheckTarget(legacykey.IngressControllerSecurePort)
-	a.IngressElbName = legacykey.ELBNameIngress(cfg.CustomObject)
+	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort)
+	a.IngressElbName = key.ELBNameIngress(cfg.CustomObject)
 	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB: httpsPort,
 
-			PortInstance: legacykey.IngressControllerSecurePort,
+			PortInstance: key.IngressControllerSecurePort,
 		},
 		{
 			PortELB:      httpPort,
-			PortInstance: legacykey.IngressControllerInsecurePort,
+			PortInstance: key.IngressControllerInsecurePort,
 		},
 	}
 	a.IngressElbScheme = externalELBScheme
@@ -93,9 +93,9 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
-	for i := 0; i < len(legacykey.StatusAvailabilityZones(cfg.CustomObject)); i++ {
-		a.PublicSubnets = append(a.PublicSubnets, legacykey.PublicSubnetName(i))
-		a.PrivateSubnets = append(a.PrivateSubnets, legacykey.PrivateSubnetName(i))
+	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
+		a.PublicSubnets = append(a.PublicSubnets, key.PublicSubnetName(i))
+		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
 	}
 
 	return nil

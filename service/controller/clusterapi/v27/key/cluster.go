@@ -7,7 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+)
+
+const (
+	AnnotationInstanceID = "aws-operator.giantswarm.io/instance"
 )
 
 const (
@@ -17,7 +22,18 @@ const (
 )
 
 const (
-	EC2RoleK8s = "EC2-K8S-Role"
+	EC2RoleK8s   = "EC2-K8S-Role"
+	EC2PolicyK8s = "EC2-K8S-Policy"
+)
+
+const (
+	IngressControllerInsecurePort = 30010
+	IngressControllerSecurePort   = 30011
+)
+
+const (
+	EtcdPort             = 2379
+	KubernetesSecurePort = 443
 )
 
 const (
@@ -34,9 +50,10 @@ const (
 	TagOrganization = "giantswarm.io/organization"
 )
 
-func AutoScalingGroupName(cluster v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
-}
+const (
+	RefNodeDrainer = "NodeDrainer"
+	RefWorkerASG   = "workerAutoScalingGroup"
+)
 
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
@@ -48,7 +65,7 @@ func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(cluster), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(cluster), CloudConfigVersion, role)
 }
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
@@ -56,7 +73,7 @@ func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Cluster.DNS.Domain
+	return clusterProviderSpec(cluster).Cluster.DNS.Domain
 }
 
 func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
@@ -68,7 +85,7 @@ func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterID(cluster v1alpha1.Cluster) string {
-	return providerStatus(cluster).Cluster.ID
+	return clusterProviderStatus(cluster).Cluster.ID
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
@@ -88,12 +105,16 @@ func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]s
 	return tags
 }
 
+func ClusterVersion(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
+}
+
 func CredentialName(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.CredentialSecret.Name
+	return clusterProviderSpec(cluster).Provider.CredentialSecret.Name
 }
 
 func CredentialNamespace(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.CredentialSecret.Namespace
+	return clusterProviderSpec(cluster).Provider.CredentialSecret.Namespace
 }
 
 func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
@@ -126,20 +147,44 @@ func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
 }
 
+func MasterCount(cluster v1alpha1.Cluster) int {
+	return 1
+}
+
 func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("MasterInstance", cluster)
+}
+
+func MasterInstanceName(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master", ClusterID(cluster))
+}
+
+func MasterInstanceType(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Provider.Master.InstanceType
 }
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
 	return cluster.Labels[LabelOrganization]
 }
 
-func ProfileName(cluster v1alpha1.Cluster, profileType string) string {
-	return RoleName(cluster, profileType)
+func PolicyNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2PolicyK8s)
+}
+
+func PolicyNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2PolicyK8s)
+}
+
+func ProfileNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func ProfileNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
 }
 
 func Region(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Provider.Region
+	return clusterProviderSpec(cluster).Provider.Region
 }
 
 func RegionARN(cluster v1alpha1.Cluster) string {
@@ -152,8 +197,37 @@ func RegionARN(cluster v1alpha1.Cluster) string {
 	return regionARN
 }
 
-func RoleName(cluster v1alpha1.Cluster, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(cluster), profileType, EC2RoleK8s)
+func RoleARNMaster(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "master")
+}
+
+func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
+	return baseRoleARN(cluster, accountID, "worker")
+}
+
+func RoleNameMaster(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func RoleNameWorker(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
+}
+
+func RolePeerAccess(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
+}
+
+func RouteTableName(cluster v1alpha1.Cluster, suffix string, idx int) string {
+	// Since CloudFormation cannot recognize resource renaming, use non-indexed
+	// resource name for first AZ.
+	if idx < 1 {
+		return fmt.Sprintf("%s-%s", ClusterID(cluster), suffix)
+	}
+	return fmt.Sprintf("%s-%s%02d", ClusterID(cluster), suffix, idx)
+}
+
+func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
@@ -176,9 +250,23 @@ func StackNameTCCP(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
-func VersionBundleVersion(cluster v1alpha1.Cluster) string {
-	return providerSpec(cluster).Cluster.VersionBundle.Version
+func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
+	return clusterProviderStatus(cluster).Provider.Network.CIDR
+}
+
+func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
+	if v == nil {
+		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+	}
+
+	p, ok := v.(*v1alpha1.Cluster)
+	if !ok {
+		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+	}
+
+	c := p.DeepCopy()
+
+	return *c, nil
 }
 
 func VolumeNameDocker(cluster v1alpha1.Cluster) string {

@@ -53,7 +53,7 @@ type Service struct {
 	legacyClusterController     *legacy.Cluster
 	legacyDrainerController     *legacy.Drainer
 	operatorCollector           *collector.Set
-	statusResourceCollector     *statusresource.Collector
+	statusResourceCollector     *statusresource.CollectorSet
 }
 
 // New creates a new configured service object.
@@ -194,6 +194,7 @@ func New(config Config) (*Service, error) {
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		clusterapiClusterController, err = clusterapi.NewCluster(c)
@@ -241,6 +242,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := legacy.ClusterConfig{
+			CMAClient:        cmaClient,
 			G8sClient:        g8sClient,
 			K8sClient:        k8sClient,
 			K8sExtClient:     k8sExtClient,
@@ -291,6 +293,7 @@ func New(config Config) (*Service, error) {
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		legacyClusterController, err = legacy.NewCluster(c)
@@ -347,14 +350,14 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var statusResourceCollector *statusresource.Collector
+	var statusResourceCollector *statusresource.CollectorSet
 	{
-		c := statusresource.CollectorConfig{
+		c := statusresource.CollectorSetConfig{
 			Logger:  config.Logger,
 			Watcher: g8sClient.ProviderV1alpha1().AWSConfigs("").Watch,
 		}
 
-		statusResourceCollector, err = statusresource.NewCollector(c)
+		statusResourceCollector, err = statusresource.NewCollectorSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

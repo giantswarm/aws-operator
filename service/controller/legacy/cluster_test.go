@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	apiextensionsclientfake "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
 	kubernetesfake "k8s.io/client-go/kubernetes/fake"
+	clusterapiclientfake "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 )
 
 func newTestClusterConfig() ClusterConfig {
@@ -31,6 +32,7 @@ func newTestClusterConfig() ClusterConfig {
 	}
 
 	return ClusterConfig{
+		CMAClient:        clusterapiclientfake.NewSimpleClientset(),
 		G8sClient:        versionedfake.NewSimpleClientset(),
 		K8sClient:        kubernetesfake.NewSimpleClientset(),
 		K8sExtClient:     apiextensionsclientfake.NewSimpleClientset(),
@@ -64,6 +66,7 @@ func newTestClusterConfig() ClusterConfig {
 		RegistryDomain:      "quay.io",
 		SSOPublicKey:        "test",
 		EncrypterBackend:    "kms",
+		VPCPeerID:           "vpc-e6a1e18e",
 	}
 }
 

@@ -5,16 +5,16 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.encrypter.EnsureDeletedEncryptionKey(ctx, customObject)
+	err = r.encrypter.EnsureDeletedEncryptionKey(ctx, cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}

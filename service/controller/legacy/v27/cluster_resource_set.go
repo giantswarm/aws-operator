@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/tenantcluster"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/adapter"
@@ -50,7 +51,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/vpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/resource/workerasgname"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -64,6 +64,7 @@ const (
 type ClusterResourceSetConfig struct {
 	CertsSearcher          certs.Interface
 	ControlPlaneAWSClients aws.Clients
+	CMAClient              clientset.Interface
 	G8sClient              versioned.Interface
 	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface
@@ -92,6 +93,7 @@ type ClusterResourceSetConfig struct {
 	RegistryDomain             string
 	SSOPublicKey               string
 	VaultAddress               string
+	VPCPeerID                  string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -241,6 +243,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
+			CMAClient:        config.CMAClient,
 			G8sClient:        config.G8sClient,
 			Logger:           config.Logger,
 			NetworkAllocator: config.NetworkAllocator,
@@ -351,6 +354,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
 			PublicRouteTables:  config.RouteTables,
 			Route53Enabled:     config.Route53Enabled,
+			VPCPeerID:          config.VPCPeerID,
 		}
 
 		tccpResource, err = tccp.New(c)
@@ -562,22 +566,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := vpccidr.Config{
 			Logger: config.Logger,
+
+			VPCPeerID: config.VPCPeerID,
 		}
 
 		vpcCIDRResource, err = vpccidr.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var workerASGNameResource controller.Resource
-	{
-		c := workerasgname.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		workerASGNameResource, err = workerasgname.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -591,7 +584,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		vpcCIDRResource,
 		tccpOutputsResource,
 		tccpSubnetResource,
-		workerASGNameResource,
 		asgStatusResource,
 		statusResource,
 		migrationResource,

@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type RouteTableName struct {
@@ -20,14 +20,14 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	r.HostClusterCIDR = cfg.ControlPlaneVPCCidr
 	r.PublicRouteTableName = RouteTableName{
 		ResourceName: "PublicRouteTable",
-		TagName:      legacykey.RouteTableName(cfg.CustomObject, suffixPublic, 0),
+		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),
 	}
 
-	for i := 0; i < len(legacykey.StatusAvailabilityZones(cfg.CustomObject)); i++ {
+	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
 		rtName := RouteTableName{
-			ResourceName:        legacykey.PrivateRouteTableName(i),
-			TagName:             legacykey.RouteTableName(cfg.CustomObject, suffixPrivate, i),
-			VPCPeeringRouteName: legacykey.VPCPeeringRouteName(i),
+			ResourceName:        key.PrivateRouteTableName(i),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),
+			VPCPeeringRouteName: key.VPCPeeringRouteName(i),
 		}
 		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)
 	}

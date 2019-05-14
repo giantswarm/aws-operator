@@ -6,24 +6,24 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	if !r.route53Enabled {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
 	}
 
-	baseDomain := legacykey.ClusterBaseDomain(customObject)
+	baseDomain := key.ClusterBaseDomain(cr)
 	intermediateZone := "k8s." + baseDomain
-	finalZone := legacykey.ClusterID(customObject) + ".k8s." + baseDomain
+	finalZone := key.ClusterID(cr) + ".k8s." + baseDomain
 
 	_, defaultGuest, err := r.route53Clients(ctx)
 	if err != nil {
@@ -37,7 +37,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -55,7 +55,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		if IsNotFound(err) {
 			// Delegation may be already deleted. It must be handled.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone delegation not found in intermediate zone")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource reconciliation for custom object")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)

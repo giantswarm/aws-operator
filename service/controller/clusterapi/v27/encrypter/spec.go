@@ -3,7 +3,7 @@ package encrypter
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 const (
@@ -17,17 +17,17 @@ type Interface interface {
 }
 
 type Encrypter interface {
-	EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error)
+	EncryptionKey(ctx context.Context, customObject v1alpha1.Cluster) (string, error)
 	Encrypt(ctx context.Context, key, plaintext string) (string, error)
 	IsKeyNotFound(error) bool
 }
 
 type Resource interface {
-	EnsureCreatedEncryptionKey(context.Context, v1alpha1.AWSConfig) error
-	EnsureDeletedEncryptionKey(context.Context, v1alpha1.AWSConfig) error
+	EnsureCreatedEncryptionKey(context.Context, v1alpha1.Cluster) error
+	EnsureDeletedEncryptionKey(context.Context, v1alpha1.Cluster) error
 }
 
 type RoleManager interface {
-	EnsureCreatedAuthorizedIAMRoles(context.Context, v1alpha1.AWSConfig) error
-	EnsureDeletedAuthorizedIAMRoles(context.Context, v1alpha1.AWSConfig) error
+	EnsureCreatedAuthorizedIAMRoles(context.Context, v1alpha1.Cluster) error
+	EnsureDeletedAuthorizedIAMRoles(context.Context, v1alpha1.Cluster) error
 }
