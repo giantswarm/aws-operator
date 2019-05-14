@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/bits"
 	"math/rand"
@@ -10,13 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
@@ -37,7 +39,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cr v1alpha1.AWSConfig
+	var cr cmav1alpha1.Cluster
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
 
@@ -46,7 +48,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		newObj, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(oldObj.GetNamespace()).Get(oldObj.GetName(), metav1.GetOptions{})
+		newObj, err := r.cmaClient.ClusterV1alpha1().Clusters(oldObj.GetNamespace()).Get(oldObj.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -158,24 +160,32 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	return reservedSubnets, nil
 }
 
-func (r *Resource) persistAllocatedNetwork(cr v1alpha1.AWSConfig, azs []string) func(ctx context.Context, subnet net.IPNet) error {
+func (r *Resource) persistAllocatedNetwork(cr cmav1alpha1.Cluster, azs []string) func(ctx context.Context, subnet net.IPNet) error {
 	return func(ctx context.Context, subnet net.IPNet) error {
 		return r.splitAndPersistReservedSubnet(ctx, cr, subnet, azs)
 	}
 }
 
-func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr v1alpha1.AWSConfig, subnet net.IPNet, azs []string) error {
-	statusAZs, err := splitSubnetToStatusAZs(subnet, azs)
+func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr cmav1alpha1.Cluster, subnet net.IPNet, azs []string) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status to persist network allocation and chosen availability zones")
+
+	var providerStatus g8sv1alpha1.AWSClusterStatus
+
+	err := json.Unmarshal(cr.Status.ProviderStatus.Raw, &providerStatus)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status to persist network allocation and chosen availability zones")
+	providerStatus.Provider.Network.CIDR = subnet.String()
 
-	cr.Status.Cluster.Network.CIDR = subnet.String()
-	cr.Status.AWS.AvailabilityZones = statusAZs
+	b, err := json.Marshal(providerStatus)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(cr.Namespace).UpdateStatus(&cr)
+	cr.Status.ProviderStatus.Raw = b
+
+	_, err = r.cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).UpdateStatus(&cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -274,40 +284,40 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	return results, nil
 }
 
-// splitSubnetToStatusAZs splits subnet such that each AZ gets private and
-// public network. Size of these subnets depends on subnet.Mask and number of
-// AZs.
-func splitSubnetToStatusAZs(subnet net.IPNet, AZs []string) ([]v1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
-	subnets, err := splitNetwork(subnet, uint(len(AZs)*2))
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
-	subnetIdx := 0
-	for _, az := range AZs {
-		private := subnets[subnetIdx]
-		subnetIdx++
-		public := subnets[subnetIdx]
-		subnetIdx++
-
-		statusAZ := v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-			Name: az,
-			Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-				Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-					CIDR: private.String(),
-				},
-				Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-					CIDR: public.String(),
-				},
-			},
-		}
-
-		statusAZs = append(statusAZs, statusAZ)
-	}
-
-	return statusAZs, nil
-}
+//// splitSubnetToStatusAZs splits subnet such that each AZ gets private and
+//// public network. Size of these subnets depends on subnet.Mask and number of
+//// AZs.
+//func splitSubnetToStatusAZs(subnet net.IPNet, AZs []string) ([]v1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
+//	subnets, err := splitNetwork(subnet, uint(len(AZs)*2))
+//	if err != nil {
+//		return nil, microerror.Mask(err)
+//	}
+//
+//	var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
+//	subnetIdx := 0
+//	for _, az := range AZs {
+//		private := subnets[subnetIdx]
+//		subnetIdx++
+//		public := subnets[subnetIdx]
+//		subnetIdx++
+//
+//		statusAZ := v1alpha1.AWSConfigStatusAWSAvailabilityZone{
+//			Name: az,
+//			Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+//				Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+//					CIDR: private.String(),
+//				},
+//				Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+//					CIDR: public.String(),
+//				},
+//			},
+//		}
+//
+//		statusAZs = append(statusAZs, statusAZ)
+//	}
+//
+//	return statusAZs, nil
+//}
 
 // calculateSubnetMask calculates new subnet mask to accommodate n subnets.
 func calculateSubnetMask(networkMask net.IPMask, n uint) (net.IPMask, error) {
