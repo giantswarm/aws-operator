@@ -150,6 +150,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 					Encrypter:       "kms",
 					Region:          env.AWSRegion(),
 					RouteTableNames: env.AWSRouteTable0() + "," + env.AWSRouteTable1(),
+					VPCPeerID:       vpcID,
 				},
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{
