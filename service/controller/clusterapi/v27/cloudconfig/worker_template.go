@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_3_0"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
@@ -15,7 +15,7 @@ import (
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
+func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr v1alpha1.Cluster, clusterCerts certs.Cluster) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -26,7 +26,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
-			customObject:  customObject,
+			cluster:       cr,
 			encrypter:     c.encrypter,
 			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
@@ -35,7 +35,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = customObject.Spec.Cluster
+		params.Cluster = cmaClusterToG8sCluster(cr)
 		params.Extension = &WorkerExtension{
 			baseExtension: be,
 			ctlCtx:        cc,
@@ -214,7 +214,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	var newUnits []k8scloudconfig.UnitAsset
 
 	for _, m := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, e.customObject.Spec)
+		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, cmaClusterToG8sConfig(e.cluster))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
