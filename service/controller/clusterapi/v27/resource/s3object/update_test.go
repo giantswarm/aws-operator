@@ -26,6 +26,21 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		{
 			description: "current state empty, desired state empty, empty update change",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
@@ -45,6 +60,21 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		{
 			description: "current state empty, desired state not empty, empty update change",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
@@ -72,6 +102,21 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		{
 			description: "current state matches desired state, empty update change",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
@@ -105,6 +150,21 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		{
 			description: "current state does not match desired state, update bucket object",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
@@ -142,6 +202,21 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		{
 			description: "current state does not match desired state, update bucket object",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`

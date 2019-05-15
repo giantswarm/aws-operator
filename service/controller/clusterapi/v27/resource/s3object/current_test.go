@@ -26,12 +26,27 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "basic match",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
 							{
 								"cluster": {
-									"id": "5xchu"
+									"id": "test-cluster"
 								}
 							}
 						`),
@@ -45,12 +60,27 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "S3 error",
 			obj: &v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"versionBundle": {
+											"version": "1.0.0"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
 							{
 								"cluster": {
-									"id": "5xchu"
+									"id": "test-cluster"
 								}
 							}
 						`),
