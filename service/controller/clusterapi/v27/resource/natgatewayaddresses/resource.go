@@ -5,9 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
@@ -53,7 +53,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addNATGatewayAddressesToContext(ctx context.Context, cr v1alpha1.AWSConfig) error {
+func (r *Resource) addNATGatewayAddressesToContext(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
