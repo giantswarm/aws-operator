@@ -284,41 +284,6 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	return results, nil
 }
 
-//// splitSubnetToStatusAZs splits subnet such that each AZ gets private and
-//// public network. Size of these subnets depends on subnet.Mask and number of
-//// AZs.
-//func splitSubnetToStatusAZs(subnet net.IPNet, AZs []string) ([]v1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
-//	subnets, err := splitNetwork(subnet, uint(len(AZs)*2))
-//	if err != nil {
-//		return nil, microerror.Mask(err)
-//	}
-//
-//	var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
-//	subnetIdx := 0
-//	for _, az := range AZs {
-//		private := subnets[subnetIdx]
-//		subnetIdx++
-//		public := subnets[subnetIdx]
-//		subnetIdx++
-//
-//		statusAZ := v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-//			Name: az,
-//			Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-//				Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-//					CIDR: private.String(),
-//				},
-//				Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-//					CIDR: public.String(),
-//				},
-//			},
-//		}
-//
-//		statusAZs = append(statusAZs, statusAZ)
-//	}
-//
-//	return statusAZs, nil
-//}
-
 // calculateSubnetMask calculates new subnet mask to accommodate n subnets.
 func calculateSubnetMask(networkMask net.IPMask, n uint) (net.IPMask, error) {
 	if n == 0 {
