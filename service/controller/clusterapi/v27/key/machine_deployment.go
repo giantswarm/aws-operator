@@ -12,6 +12,10 @@ func StatusAvailabilityZones(cluster v1alpha1.MachineDeployment) []g8sv1alpha1.A
 	return nil
 }
 
+func WorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
+	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
+}
+
 func WorkerInstanceType(cr v1alpha1.MachineDeployment) string {
 	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
 }

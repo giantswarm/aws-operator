@@ -58,7 +58,7 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkRange must not be empty", config)
 	}
 
-	newResource := &Resource{
+	r := &Resource{
 		cmaClient:        config.CMAClient,
 		g8sClient:        config.G8sClient,
 		logger:           config.Logger,
@@ -69,7 +69,7 @@ func New(config Config) (*Resource, error) {
 		networkRange:        config.NetworkRange,
 	}
 
-	return newResource, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {
