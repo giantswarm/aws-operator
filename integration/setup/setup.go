@@ -9,11 +9,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
+	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
 	"golang.org/x/sync/errgroup"
 
@@ -137,6 +140,11 @@ func Setup(m *testing.M, config Config) {
 }
 
 func installAWSOperator(ctx context.Context, config Config) error {
+	vpcID, err := ensureHostVPCCreated(ctx, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	var err error
 
 	var values string
@@ -262,4 +270,64 @@ func installResources(ctx context.Context, config Config) error {
 	}
 
 	return nil
+}
+
+func ensureHostVPCCreated(ctx context.Context, config Config) (string, error) {
+	stackName := "host-peer-" + env.ClusterID()
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating stack %#q", stackName))
+
+		os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
+		os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
+		os.Setenv("CLUSTER_NAME", env.ClusterID())
+		stackInput := &cloudformation.CreateStackInput{
+			StackName:        aws.String(stackName),
+			TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
+			TimeoutInMinutes: aws.Int64(2),
+		}
+		_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
+		if IsStackAlreadyExists(err) {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stack %#q is already created", stackName))
+		} else if err != nil {
+			return "", microerror.Mask(err)
+		} else {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created stack %#q", stackName))
+		}
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for stack %#q complete status", stackName))
+
+		err := config.AWSClient.CloudFormation.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+			StackName: aws.String(stackName),
+		})
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q complete status", stackName))
+	}
+
+	var vpcID string
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding `VPCID` output in stack %#q", stackName))
+
+		describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
+			StackName: aws.String(stackName),
+		})
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		for _, o := range describeOutput.Stacks[0].Outputs {
+			if *o.OutputKey == "VPCID" {
+				vpcID = *o.OutputValue
+				break
+			}
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found `VPCID` output in stack %#q", stackName))
+	}
+
+	return vpcID, nil
 }
