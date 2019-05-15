@@ -9,16 +9,18 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
+	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
+	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 	// S3BucketEncryptionAlgorithm is used to determine which algorithm use S3 to encrypt buckets.
 	S3BucketEncryptionAlgorithm = "AES256"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -53,7 +55,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			i := &s3.PutBucketTaggingInput{
 				Bucket: aws.String(bucketInput.Name),
 				Tagging: &s3.Tagging{
-					TagSet: r.getS3BucketTags(customObject),
+					TagSet: r.getS3BucketTags(cr),
 				},
 			}
 
@@ -65,9 +67,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketAclInput{
-				Bucket:       aws.String(legacykey.TargetLogBucketName(customObject)),
-				GrantReadACP: aws.String(legacykey.LogDeliveryURI),
-				GrantWrite:   aws.String(legacykey.LogDeliveryURI),
+				Bucket:       aws.String(key.TargetLogBucketName(cr)),
+				GrantReadACP: aws.String(LogDeliveryURI),
+				GrantWrite:   aws.String(LogDeliveryURI),
 			}
 
 			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketAcl(i)
@@ -78,7 +80,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketLifecycleConfigurationInput{
-				Bucket: aws.String(legacykey.TargetLogBucketName(customObject)),
+				Bucket: aws.String(key.TargetLogBucketName(cr)),
 				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 					Rules: []*s3.LifecycleRule{
 						{
@@ -104,7 +106,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
 					LoggingEnabled: &s3.LoggingEnabled{
-						TargetBucket: aws.String(legacykey.TargetLogBucketName(customObject)),
+						TargetBucket: aws.String(key.TargetLogBucketName(cr)),
 						TargetPrefix: aws.String(bucketInput.Name + "/"),
 					},
 				},
