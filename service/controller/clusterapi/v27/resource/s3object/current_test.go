@@ -4,28 +4,19 @@ import (
 	"context"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
 
 func Test_CurrentState(t *testing.T) {
-	t.Parallel()
-	clusterTpo := &v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID:      "test-cluster",
-				Version: "myversion",
-			},
-		},
-	}
-
 	testCases := []struct {
-		obj             *v1alpha1.AWSConfig
+		obj             interface{}
 		description     string
 		expectedS3Error bool
 		expectedKey     string
@@ -33,15 +24,39 @@ func Test_CurrentState(t *testing.T) {
 		expectedBody    string
 	}{
 		{
-			description:    "basic match",
-			obj:            clusterTpo,
+			description: "basic match",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			expectedKey:    "cloudconfig/myversion/worker",
 			expectedBucket: "myaccountid-g8s-test-cluster",
 			expectedBody:   "mybody",
 		},
 		{
-			description:     "S3 error",
-			obj:             clusterTpo,
+			description: "S3 error",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			expectedS3Error: true,
 		},
 	}

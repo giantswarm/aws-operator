@@ -6,25 +6,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
 
 func Test_DesiredState(t *testing.T) {
-	t.Parallel()
-	clusterTpo := &v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-			},
-		},
-	}
-
 	masterKeyPattern := "cloudconfig/v[\\d_]+/master"
 	workerKeyPattern := "cloudconfig/v[\\d_]+/worker"
 
@@ -32,14 +24,26 @@ func Test_DesiredState(t *testing.T) {
 	workerKeyRegexp := regexp.MustCompile(workerKeyPattern)
 
 	testCases := []struct {
-		obj            *v1alpha1.AWSConfig
+		obj            interface{}
 		description    string
 		expectedBucket string
 		expectedBody   string
 	}{
 		{
-			description:    "basic match",
-			obj:            clusterTpo,
+			description: "basic match",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			expectedBody:   "mybody-",
 			expectedBucket: "myaccountid-g8s-test-cluster",
 		},
@@ -56,6 +60,7 @@ func Test_DesiredState(t *testing.T) {
 			}
 
 			var err error
+
 			var newResource *Resource
 			{
 				c := Config{
@@ -71,7 +76,7 @@ func Test_DesiredState(t *testing.T) {
 				}
 			}
 
-			c := controllercontext.Context{
+			ctx := controllercontext.NewContext(context.Background(), controllercontext.Context{
 				Client: controllercontext.ContextClient{
 					TenantCluster: controllercontext.ContextClientTenantCluster{
 						AWS: awsClients,
@@ -82,9 +87,7 @@ func Test_DesiredState(t *testing.T) {
 						AWSAccountID: "myaccountid",
 					},
 				},
-			}
-			ctx := context.TODO()
-			ctx = controllercontext.NewContext(ctx, c)
+			})
 
 			result, err := newResource.GetDesiredState(ctx, tc.obj)
 			if err != nil {

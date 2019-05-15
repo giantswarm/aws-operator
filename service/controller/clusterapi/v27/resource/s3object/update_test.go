@@ -5,42 +5,58 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
 
 func Test_Resource_S3Object_newUpdate(t *testing.T) {
-	t.Parallel()
-	clusterTpo := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-			},
-		},
-	}
-
 	testCases := []struct {
 		description   string
-		obj           v1alpha1.AWSConfig
+		obj           interface{}
 		currentState  map[string]BucketObjectState
 		desiredState  map[string]BucketObjectState
 		expectedState map[string]BucketObjectState
 	}{
 		{
-			description:   "current state empty, desired state empty, empty update change",
-			obj:           clusterTpo,
+			description: "current state empty, desired state empty, empty update change",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState:  map[string]BucketObjectState{},
 			desiredState:  map[string]BucketObjectState{},
 			expectedState: map[string]BucketObjectState{},
 		},
 		{
-			description:  "current state empty, desired state not empty, empty update change",
-			obj:          clusterTpo,
+			description: "current state empty, desired state not empty, empty update change",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{},
 			desiredState: map[string]BucketObjectState{
 				"master": {
@@ -55,7 +71,19 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		},
 		{
 			description: "current state matches desired state, empty update change",
-			obj:         clusterTpo,
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{
 				"master": {
 					Body:   "master-body",
@@ -76,7 +104,19 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		},
 		{
 			description: "current state does not match desired state, update bucket object",
-			obj:         clusterTpo,
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{
 				"master": {
 					Body:   "master-body",
@@ -101,7 +141,19 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 		},
 		{
 			description: "current state does not match desired state, update bucket object",
-			obj:         clusterTpo,
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{
 				"master": {
 					Body:   "master-body",
@@ -146,6 +198,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 			cloudConfig := &CloudConfigMock{}
 
 			var err error
+
 			var newResource *Resource
 			{
 				c := Config{
@@ -161,15 +214,13 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 				}
 			}
 
-			ctx := context.TODO()
-			cc := controllercontext.Context{
+			ctx := controllercontext.NewContext(context.Background(), controllercontext.Context{
 				Client: controllercontext.ContextClient{
 					TenantCluster: controllercontext.ContextClientTenantCluster{
 						AWS: awsClients,
 					},
 				},
-			}
-			ctx = controllercontext.NewContext(ctx, cc)
+			})
 
 			result, err := newResource.newUpdateChange(ctx, tc.obj, tc.currentState, tc.desiredState)
 			if err != nil {
