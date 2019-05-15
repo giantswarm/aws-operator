@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 func Test_Resource_S3Bucket_newDelete(t *testing.T) {
@@ -19,10 +20,16 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 	}{
 		{
 			description: "current and desired state empty, expected empty",
-			obj: &v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "5xchu",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
 					},
 				},
 			},
@@ -32,10 +39,16 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state empty, desired state not empty, expected empty",
-			obj: &v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "5xchu",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
 					},
 				},
 			},
@@ -49,10 +62,16 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty but equal, expected desired state avoiding delivery log bucket",
-			obj: &v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "5xchu",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
 					},
 				},
 			},
