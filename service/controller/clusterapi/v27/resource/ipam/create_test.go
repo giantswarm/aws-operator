@@ -5,8 +5,6 @@ import (
 	"net"
 	"reflect"
 	"testing"
-
-	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 func mustParseCIDR(val string) net.IPNet {
@@ -16,113 +14,6 @@ func mustParseCIDR(val string) net.IPNet {
 	}
 
 	return *n
-}
-
-func Test_selectRandomAZs_properties(t *testing.T) {
-	testCases := []struct {
-		name         string
-		azs          []string
-		n            int
-		errorMatcher func(error) bool
-	}{
-		{
-			name:         "case 0: select one AZ out of three",
-			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
-			n:            1,
-			errorMatcher: nil,
-		},
-		{
-			name:         "case 1: select three AZs out of three",
-			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
-			n:            2,
-			errorMatcher: nil,
-		},
-		{
-			name:         "case 2: select three AZs out of three",
-			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
-			n:            3,
-			errorMatcher: nil,
-		},
-		{
-			name:         "case 3: error when requesting more AZs than there are configured",
-			azs:          []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"},
-			n:            5,
-			errorMatcher: IsInvalidParameter,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			r := Resource{
-				logger:            microloggertest.New(),
-				availabilityZones: tc.azs,
-			}
-
-			azs, err := r.selectRandomAZs(tc.n)
-
-			switch {
-			case err == nil && tc.errorMatcher == nil:
-				// correct; carry on
-			case err != nil && tc.errorMatcher == nil:
-				t.Fatalf("error == %#v, want nil", err)
-			case err == nil && tc.errorMatcher != nil:
-				t.Fatalf("error == nil, want non-nil")
-			case !tc.errorMatcher(err):
-				t.Fatalf("error == %#v, want matching", err)
-			}
-
-			if tc.errorMatcher != nil {
-				return
-			}
-
-			if tc.n != len(azs) {
-				t.Fatalf("got %d AZs in the first round, expected %d", len(azs), tc.n)
-			}
-		})
-	}
-}
-
-func Test_selectRandomAZs_random(t *testing.T) {
-	originalAZs := []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"}
-	r := Resource{
-		logger:            microloggertest.New(),
-		availabilityZones: originalAZs,
-	}
-
-	nTestRounds := 25
-	numAZs := len(originalAZs) - 1
-	selectedAZs := make([][]string, 0)
-
-	for i := 0; i < nTestRounds; i++ {
-		azs, err := r.selectRandomAZs(numAZs)
-		if err != nil {
-			t.Fatalf("unexpected error: %#v", err)
-		}
-
-		differsFromOriginal := false
-		differsFromEarlier := false
-		for _, selectedAZs := range selectedAZs {
-			for j, az := range originalAZs[:numAZs] {
-				if azs[j] != az {
-					differsFromOriginal = true
-				}
-			}
-
-			for j, az := range selectedAZs {
-				if azs[j] != az {
-					differsFromEarlier = true
-				}
-			}
-
-			if differsFromOriginal && differsFromEarlier {
-				return
-			}
-		}
-
-		selectedAZs = append(selectedAZs, azs)
-	}
-
-	t.Fatalf("after %d test rounds there was no difference in generated AZs over time and order of original AZs", nTestRounds)
 }
 
 func Test_calculateSubnetMask(t *testing.T) {

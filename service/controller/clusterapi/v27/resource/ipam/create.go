@@ -5,11 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/bits"
-	"math/rand"
 	"net"
-	"sort"
 	"sync"
-	"time"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -25,11 +22,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/network"
 )
-
-func init() {
-	// Seed RNG for AZ shuffling.
-	rand.Seed(time.Now().UnixNano())
-}
 
 // EnsureCreated allocates guest cluster network segment. It gathers existing
 // subnets from existing AWSConfig/Status objects and existing VPCs from AWS.
@@ -64,14 +56,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
-			randomAZs, err := r.selectRandomAZs(key.WorkerAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			callbacks := network.AllocationCallbacks{
 				GetReservedNetworks:     r.getReservedNetworks,
-				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, randomAZs),
+				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, key.WorkerAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment)),
 			}
 
 			subnetCIDR, err = r.networkAllocator.Allocate(ctx, r.networkRange, r.allocatedSubnetMask, callbacks)
@@ -193,23 +180,6 @@ func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr cmav1al
 	r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR status to persist network allocation and chosen availability zones")
 
 	return nil
-}
-
-func (r *Resource) selectRandomAZs(n int) ([]string, error) {
-	if n > len(r.availabilityZones) {
-		return nil, microerror.Maskf(invalidParameterError, "requested nubmer of AZs %d is bigger than number of available AZs %d", n, len(r.availabilityZones))
-	}
-
-	// availabilityZones must be copied so that original slice doesn't get shuffled.
-	shuffledAZs := make([]string, len(r.availabilityZones))
-	copy(shuffledAZs, r.availabilityZones)
-	rand.Shuffle(len(shuffledAZs), func(i, j int) {
-		shuffledAZs[i], shuffledAZs[j] = shuffledAZs[j], shuffledAZs[i]
-	})
-
-	shuffledAZs = shuffledAZs[0:n]
-	sort.Strings(shuffledAZs)
-	return shuffledAZs, nil
 }
 
 func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
