@@ -142,8 +142,6 @@ func installAWSOperator(ctx context.Context, config Config) error {
 		return microerror.Mask(err)
 	}
 
-	var err error
-
 	var values string
 	{
 		c := chartvalues.AWSOperatorConfig{
