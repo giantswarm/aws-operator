@@ -4,20 +4,21 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_3_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, cr v1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -33,19 +34,19 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
-			customObject:  customObject,
+			cluster:       cr,
 			encrypter:     c.encrypter,
 			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
 
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = customObject.Spec.Cluster
+		params.Cluster = cmaClusterToG8sCluster(cr)
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
+		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
 			baseExtension: be,
 			ctlCtx:        cc,
@@ -312,7 +313,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	var newUnits []k8scloudconfig.UnitAsset
 
 	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, cmaClusterToG8sConfig(e.cluster))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
