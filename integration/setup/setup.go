@@ -137,7 +137,10 @@ func Setup(m *testing.M, config Config) {
 }
 
 func installAWSOperator(ctx context.Context, config Config) error {
-	var err error
+	vpcID, err := ensureHostVPCCreated(ctx, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	var values string
 	{
@@ -147,6 +150,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 					Encrypter:       "kms",
 					Region:          env.AWSRegion(),
 					RouteTableNames: env.AWSRouteTable0() + "," + env.AWSRouteTable1(),
+					VPCPeerID:       vpcID,
 				},
 			},
 			Secret: chartvalues.AWSOperatorConfigSecret{

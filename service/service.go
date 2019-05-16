@@ -193,7 +193,6 @@ func New(config Config) (*Service, error) {
 			},
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
-			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
@@ -293,7 +292,6 @@ func New(config Config) (*Service, error) {
 
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
-			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),

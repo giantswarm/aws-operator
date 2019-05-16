@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
-	"path"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command"
@@ -123,8 +121,6 @@ func mainError() error {
 
 	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
 
-	// TODO(nhlfr): Deprecate these options when cert-operator will be implemented.
-	daemonCommand.PersistentFlags().String(f.Service.AWS.PubKeyFile, path.Join(string(os.PathSeparator), ".ssh", "id_rsa.pub"), "Public key to be imported as a keypair in AWS.")
 	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.AdvancedMonitoringEC2, false, "Advanced EC2 monitoring.")

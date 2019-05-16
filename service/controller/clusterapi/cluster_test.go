@@ -62,7 +62,6 @@ func newTestClusterConfig() ClusterConfig {
 		IPAMNetworkRange:    *ipamNetworkCIDR,
 		DeleteLoggingBucket: true,
 		ProjectName:         "aws-operator",
-		PubKeyFile:          "~/.ssh/id_rsa.pub",
 		RegistryDomain:      "quay.io",
 		SSOPublicKey:        "test",
 		EncrypterBackend:    "kms",
