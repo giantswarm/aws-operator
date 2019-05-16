@@ -253,7 +253,7 @@
   revision = "d5d694bf51575b7110d466b8fe7f9c590decaec2"
 
 [[projects]]
-  branch = "fix-aws"
+  branch = "master"
   digest = "1:8a7e4723c8373577c48a98c4cbd035739e4b31e04a63314731bf1b8dc6b1f81e"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -262,7 +262,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "320a3ead3428795d07e1aab467874e7631240008"
+  revision = "e1dee7aa2368796a35e95a3672b5905c811b9974"
 
 [[projects]]
   branch = "master"
