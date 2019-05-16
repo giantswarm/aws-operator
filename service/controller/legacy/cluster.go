@@ -67,7 +67,6 @@ type ClusterConfig struct {
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
 	ProjectName                string
-	PubKeyFile                 string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
