@@ -170,8 +170,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 
-			CalicoMTU:               config.CalicoMTU,
 			CalicoCIDR:              config.CalicoCIDR,
+			CalicoMTU:               config.CalicoMTU,
 			CalicoSubnet:            config.CalicoSubnet,
 			ClusterIPRange:          config.ClusterIPRange,
 			DockerDaemonCIDR:        config.DockerDaemonCIDR,

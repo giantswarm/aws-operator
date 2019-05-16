@@ -58,6 +58,29 @@ func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.
 }
 
 func dnsIPFromRange(s string) net.IP {
+	ip := ipFromString(s)
+	ip[3] = 10
+	return ip
+}
+
+func ipFromString(cidr string) net.IP {
+	ip, _, err := net.ParseCIDR(cidr)
+	if err != nil {
+		panic(err)
+	}
+
+	// Only IPV4 CIDRs are supported.
+	ip = ip.To4()
+	if ip == nil {
+		panic("CIDR must be an IPV4 range")
+	}
+
+	// IP must be a network address.
+	if ip[3] != 0 {
+		panic("CIDR address must be a network address")
+	}
+
+	return ip
 }
 
 func stringToUserList(s string) []g8sv1alpha1.ClusterKubernetesSSHUser {

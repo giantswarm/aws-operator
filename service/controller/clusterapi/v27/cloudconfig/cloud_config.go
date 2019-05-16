@@ -93,11 +93,11 @@ func New(config Config) (*CloudConfig, error) {
 		}
 	}
 
-	if config.CalicoMTU == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoMTU must not be empty", config)
-	}
 	if config.CalicoCIDR == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoCIDR must not be empty", config)
+	}
+	if config.CalicoMTU == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoMTU must not be empty", config)
 	}
 	if config.CalicoSubnet == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoSubnet must not be empty", config)
@@ -128,8 +128,8 @@ func New(config Config) (*CloudConfig, error) {
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
 
-		calicoMTU:               config.CalicoMTU,
 		calicoCIDR:              config.CalicoCIDR,
+		calicoMTU:               config.CalicoMTU,
 		calicoSubnet:            config.CalicoSubnet,
 		clusterIPRange:          config.ClusterIPRange,
 		dockerDaemonCIDR:        config.DockerDaemonCIDR,
