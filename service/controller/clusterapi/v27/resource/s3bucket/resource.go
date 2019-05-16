@@ -2,12 +2,12 @@ package s3bucket
 
 import (
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -56,7 +56,7 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
-	newResource := &Resource{
+	r := &Resource{
 		// Dependencies.
 		logger: config.Logger,
 
@@ -67,7 +67,7 @@ func New(config Config) (*Resource, error) {
 		installationName:     config.InstallationName,
 	}
 
-	return newResource, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {
@@ -97,8 +97,8 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 	return false
 }
 
-func (r *Resource) getS3BucketTags(customObject v1alpha1.AWSConfig) []*s3.Tag {
-	tags := legacykey.ClusterTags(customObject, r.installationName)
+func (r *Resource) getS3BucketTags(customObject v1alpha1.Cluster) []*s3.Tag {
+	tags := key.ClusterTags(customObject, r.installationName)
 	return awstags.NewS3(tags)
 }
 

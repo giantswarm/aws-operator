@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
@@ -19,10 +20,16 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	}{
 		{
 			description: "Get bucket name from custom object.",
-			obj: &v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "5xchu",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
 					},
 				},
 			},

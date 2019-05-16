@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"k8s.io/api/core/v1"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -17,30 +17,30 @@ const (
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	service := &v1.Service{
-		ObjectMeta: apismetav1.ObjectMeta{
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      "master",
-			Namespace: legacykey.ClusterID(customObject),
+			Namespace: key.ClusterID(cr),
 			Labels: map[string]string{
-				legacykey.LabelApp:           "master",
-				legacykey.LabelCluster:       legacykey.ClusterID(customObject),
-				legacykey.LabelOrganization:  legacykey.OrganizationID(customObject),
-				legacykey.LabelVersionBundle: legacykey.ClusterVersion(customObject),
+				key.LabelApp:           "master",
+				key.LabelCluster:       key.ClusterID(cr),
+				key.LabelOrganization:  key.OrganizationID(cr),
+				key.LabelVersionBundle: key.ClusterVersion(cr),
 			},
 			Annotations: map[string]string{
-				AnnotationEtcdDomain:        legacykey.ClusterEtcdEndpoint(customObject),
-				AnnotationPrometheusCluster: legacykey.ClusterID(customObject),
+				AnnotationEtcdDomain:        key.ClusterEtcdEndpoint(cr),
+				AnnotationPrometheusCluster: key.ClusterID(cr),
 			},
 		},
-		Spec: v1.ServiceSpec{
-			Ports: []v1.ServicePort{
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
 				{
-					Protocol:   v1.ProtocolTCP,
+					Protocol:   corev1.ProtocolTCP,
 					Port:       httpsPort,
 					TargetPort: intstr.FromInt(httpsPort),
 				},
