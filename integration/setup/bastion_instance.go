@@ -396,6 +396,17 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 				          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDo5PU8w8RDWYDd8SSIKOiYJCeN398PAEJApFGpPWprewBmiDGGMHHDIDV//QR+o5MhR2hBmJ+Pw1K/Edr4u0cfGlIIb6lSVdha+jDEp0l1PtqyQzubzTH3y/RDzxCakAa419N1G3DwzJHkWBxbpyqx7i/DOYcxgQP4vCGvYgkvuOkQYCNk2hfuXAl/Aucv3JXlsuNktyXQ6XKf+Twa2Bg8jIAaYUNGqgKgzMcsCElE55bxVuYeXl441CzD2fdHmXyGwo6nefN7PZ790SxQzkGM8wBpESgc7U4IPUY/dnsn4yQBYw2meontHWGLmZjrvEYxoS7Uv4o8BX8cScgVZUhRojHvNWBBcwOx+hhuPbqoqdc8IFXQLHTTa/szvY9gwlipBejj6nJrRpl3Kxw+EX4QP/loDxkykWQUoByU479Z6/gOtgAkPOe8xZblny6r3uCZyUlaYR9ht2aOEbH8bLuYBaDTPvunMIH/RSgbNxys/Dss3ZC7MJgXtoaSpb/AGdqv1Uj4AdNJJm8544AFhmR/Tky0rms3NpaSEiwO+E5ZIJiBevqPbGWkodbfKM6uydS+wrqHOR+zTNLuwhTHVnNRZ//ePBMptnzR1qbuMmaEgmqMM1HjFflUUVdDLFK6TxcdU3YPJnnWlwGk2bCjlamGjHx0hvoJVSY+Oap6o23cJQ== theo@giantswarm.io"
 				        ],
 				        "shell": "/bin/bash"
+				      },
+				      {
+				        "groups": [
+				          "sudo",
+				          "docker"
+				        ],
+				        "name": "jannis",
+				        "sshAuthorizedKeys": [
+				          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCrHyOvY5nH1DCybBDcA0BdZ916zrtaeP1fNBaqbxsfCg3m8SjMZVb62W5PHI5177o4Ci4JoMUj/+HpVY07Ao5UXCJ3J+LXPNaAsyzfijHBpVas7YgWG9pv3OtElFnB3wYPz1VpJH2BCy6p1SomvxqyJ6ihLeLIzWaXHoGu5d73aeKXKEelrpvl5Y2wFPSQBqIbl7prRB+q4ChG+D6ZR/9Zd8Tzth7WUrimJbmDUWBUKmhfgEYTjKVmIuUrHA2yRBv6dRE1yP9A3W5A8fOHMlcyEsKw+ZK4i7LZn+GRVY144K67w38B85KlPBmhVEXrbvFOLXZxzZqg9glb1TnVZ7eGzJBH3B72GB7y/igEytaGcHw/qt53+B/zYPTJFLC9fpyaLWC4JswzyOlNlybMZJY6EFxlvb+c0ALt935fhq+3+20SUIikZsTbQGMxnaTI7V48PMTxngNRykdBMYleB9iNQ6Weh2Ox8ZJFaWjKTGgtVujMtJEHI0rDpB8GnVgu0/No36z32E6juBApDCRLuoJDnNd47z6yM4Zq+bKL/xUIp5gTNKdiD1hVVrBv/HoECtHZjRrXklX0+wRPQV2AuTdl7kK1IfRtLet9osQgpEDVVD91D3xgPX4W2n2F180F6wgQLMzQuzcHtlepaDv459D2Mac1krkKbnNC131ElPfIMw== j.schaefer@estwx.de"
+				        ],
+				        "shell": "/bin/bash"
 				      }
 				    ]
 				  },

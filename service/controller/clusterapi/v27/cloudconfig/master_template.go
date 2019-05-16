@@ -57,7 +57,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, cr v1alpha1.Cluster
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.RegistryDomain = c.registryDomain
-		params.SSOPublicKey = c.SSOPublicKey
+		params.SSOPublicKey = c.ssoPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
