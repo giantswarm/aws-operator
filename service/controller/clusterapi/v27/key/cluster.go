@@ -157,6 +157,15 @@ func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
 }
 
+func KubeletLabels(cluster v1alpha1.Cluster) string {
+	var labels string
+
+	labels = ensureLabel(labels, "aws-operator.giantswarm.io/version", ClusterVersion(cluster))
+	labels = ensureLabel(labels, "giantswarm.io/provider", "aws")
+
+	return labels
+}
+
 func MasterCount(cluster v1alpha1.Cluster) int {
 	return 1
 }
@@ -300,6 +309,38 @@ func baseRoleARN(cluster v1alpha1.Cluster, accountID string, kind string) string
 	partition := RegionARN(cluster)
 
 	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
+}
+
+func ensureLabel(labels string, key string, value string) string {
+	if key == "" {
+		return labels
+	}
+	if value == "" {
+		return labels
+	}
+
+	var split []string
+	if labels != "" {
+		split = strings.Split(labels, ",")
+	}
+
+	var found bool
+	for i, l := range split {
+		if !strings.HasPrefix(l, key+"=") {
+			continue
+		}
+
+		found = true
+		split[i] = key + "=" + value
+	}
+
+	if !found {
+		split = append(split, key+"="+value)
+	}
+
+	joined := strings.Join(split, ",")
+
+	return joined
 }
 
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a
