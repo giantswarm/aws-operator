@@ -161,7 +161,17 @@ aws_decrypt(){
         mv -f $f ${encKey%.enc}
         done;'
 
-    rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+		retVal=$?
+		if [ $retVal -ne 0 ]; then
+    	return retVal
+		fi
+
+		rkt rm --uuid-file=/var/run/coreos/decrypt-tls-assets.uuid || :
+
+		retVal=$?
+		if [ $retVal -ne 0 ]; then
+    	return retVal
+		fi
 }
 
 main() {
