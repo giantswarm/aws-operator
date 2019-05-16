@@ -17,7 +17,6 @@ https://quay.io/repository/giantswarm/aws-operator
 
 ### How to build
 
-
 Build the standard way.
 
 ```
