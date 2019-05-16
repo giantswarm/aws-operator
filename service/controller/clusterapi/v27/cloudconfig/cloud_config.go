@@ -36,7 +36,7 @@ type CloudConfig struct {
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
 	registryDomain      string
-	SSOPublicKey        string
+	ssoPublicKey        string
 }
 
 // OIDCConfig represents the configuration of the OIDC authorization provider
@@ -93,7 +93,7 @@ func New(config Config) (*CloudConfig, error) {
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
 		registryDomain:      config.RegistryDomain,
-		SSOPublicKey:        config.SSOPublicKey,
+		ssoPublicKey:        config.SSOPublicKey,
 	}
 
 	return newCloudConfig, nil
