@@ -20,11 +20,25 @@ type Config struct {
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 
-	IgnitionPath           string
-	OIDC                   OIDCConfig
-	PodInfraContainerImage string
-	RegistryDomain         string
-	SSOPublicKey           string
+	CalicoCIDR              int
+	CalicoMTU               int
+	CalicoSubnet            string
+	ClusterIPRange          string
+	DockerDaemonCIDR        string
+	IgnitionPath            string
+	NetworkSetupDockerImage string
+	OIDC                    ConfigOIDC
+	PodInfraContainerImage  string
+	RegistryDomain          string
+	SSHUserList             string
+	SSOPublicKey            string
+}
+
+type ConfigOIDC struct {
+	ClientID      string
+	IssuerURL     string
+	UsernameClaim string
+	GroupsClaim   string
 }
 
 // CloudConfig implements the cloud config service interface.
@@ -32,19 +46,19 @@ type CloudConfig struct {
 	encrypter encrypter.Interface
 	logger    micrologger.Logger
 
-	ignitionPath        string
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
-	registryDomain      string
-	SSOPublicKey        string
-}
 
-// OIDCConfig represents the configuration of the OIDC authorization provider
-type OIDCConfig struct {
-	ClientID      string
-	IssuerURL     string
-	UsernameClaim string
-	GroupsClaim   string
+	calicoCIDR              int
+	calicoMTU               int
+	calicoSubnet            string
+	clusterIPRange          string
+	dockerDaemonCIDR        string
+	ignitionPath            string
+	networkSetupDockerImage string
+	registryDomain          string
+	sshUserList             string
+	ssoPublicKey            string
 }
 
 // New creates a new configured cloud config service.
@@ -54,12 +68,6 @@ func New(config Config) (*CloudConfig, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-	if config.IgnitionPath == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
-	}
-	if config.RegistryDomain == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
 	}
 
 	var k8sAPIExtraArgs []string
@@ -85,15 +93,51 @@ func New(config Config) (*CloudConfig, error) {
 		}
 	}
 
+	if config.CalicoMTU == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoMTU must not be empty", config)
+	}
+	if config.CalicoCIDR == 0 {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoCIDR must not be empty", config)
+	}
+	if config.CalicoSubnet == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CalicoSubnet must not be empty", config)
+	}
+	if config.ClusterIPRange == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterIPRange must not be empty", config)
+	}
+	if config.DockerDaemonCIDR == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.DockerDaemonCIDR must not be empty", config)
+	}
+	if config.IgnitionPath == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
+	}
+	if config.NetworkSetupDockerImage == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkSetupDockerImage must not be empty", config)
+	}
+	if config.RegistryDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
+	}
+	if config.SSHUserList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.SSHUserList must not be empty", config)
+	}
+
 	newCloudConfig := &CloudConfig{
 		encrypter: config.Encrypter,
 		logger:    config.Logger,
 
-		ignitionPath:        config.IgnitionPath,
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
-		registryDomain:      config.RegistryDomain,
-		SSOPublicKey:        config.SSOPublicKey,
+
+		calicoMTU:               config.CalicoMTU,
+		calicoCIDR:              config.CalicoCIDR,
+		calicoSubnet:            config.CalicoSubnet,
+		clusterIPRange:          config.ClusterIPRange,
+		dockerDaemonCIDR:        config.DockerDaemonCIDR,
+		ignitionPath:            config.IgnitionPath,
+		networkSetupDockerImage: config.NetworkSetupDockerImage,
+		registryDomain:          config.RegistryDomain,
+		sshUserList:             config.SSHUserList,
+		ssoPublicKey:            config.SSOPublicKey,
 	}
 
 	return newCloudConfig, nil
