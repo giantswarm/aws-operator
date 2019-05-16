@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_3_0"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
@@ -15,7 +16,7 @@ import (
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr v1alpha1.Cluster, clusterCerts certs.Cluster) (string, error) {
+func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -35,8 +36,9 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr v1alpha1.Cluster
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = cmaClusterToG8sCluster(cr)
+		params.Cluster = c.cmaClusterToG8sConfig(cr).Cluster
 		params.Extension = &WorkerExtension{
+			awsConfigSpec: c.cmaClusterToG8sConfig(cr),
 			baseExtension: be,
 			ctlCtx:        cc,
 
@@ -74,6 +76,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr v1alpha1.Cluster
 }
 
 type WorkerExtension struct {
+	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
 
 	// TODO Pass context to k8scloudconfig rendering fucntions
@@ -214,7 +217,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	var newUnits []k8scloudconfig.UnitAsset
 
 	for _, m := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, cmaClusterToG8sConfig(e.cluster))
+		c, err := k8scloudconfig.RenderAssetContent(m.AssetContent, e.awsConfigSpec)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

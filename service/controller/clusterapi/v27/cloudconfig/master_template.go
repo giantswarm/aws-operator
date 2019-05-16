@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_3_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/vault"
@@ -18,7 +19,7 @@ import (
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, cr v1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -41,13 +42,14 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, cr v1alpha1.Cluster
 
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = cmaClusterToG8sCluster(cr)
+		params.Cluster = c.cmaClusterToG8sConfig(cr).Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
+			awsConfigSpec: c.cmaClusterToG8sConfig(cr),
 			baseExtension: be,
 			ctlCtx:        cc,
 
@@ -93,6 +95,7 @@ type RandomKeyTmplSet struct {
 }
 
 type MasterExtension struct {
+	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
 
 	// TODO Pass context to k8scloudconfig rendering fucntions
@@ -313,7 +316,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	var newUnits []k8scloudconfig.UnitAsset
 
 	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, cmaClusterToG8sConfig(e.cluster))
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.awsConfigSpec)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

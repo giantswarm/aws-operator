@@ -8,6 +8,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 type baseExtension struct {
@@ -29,7 +30,7 @@ func (e *baseExtension) templateData() templateData {
 	}
 
 	data := templateData{
-		AWSConfigSpec: cmaClusterToG8sConfig(e.cluster),
+		AWSRegion:     key.Region(e.cluster),
 		EncrypterType: encrypterType,
 		VaultAddress:  vaultAddress,
 		EncryptionKey: e.encryptionKey,

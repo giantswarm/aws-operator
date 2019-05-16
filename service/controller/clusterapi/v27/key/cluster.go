@@ -19,6 +19,7 @@ const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
 	CloudConfigVersion = "v_4_0_0"
+	CloudProvider      = "aws"
 )
 
 const (
@@ -33,6 +34,7 @@ const (
 
 const (
 	EtcdPort             = 2379
+	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443
 )
 
@@ -81,11 +83,19 @@ func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("etcd.%s.%s:2379", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("etcd.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+}
+
+func ClusterEtcdEndpointWithPort(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s:2379", ClusterEtcdEndpoint(cluster))
 }
 
 func ClusterID(cluster v1alpha1.Cluster) string {
 	return clusterProviderStatus(cluster).Cluster.ID
+}
+
+func ClusterKubeletEndpoint(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("worker.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {

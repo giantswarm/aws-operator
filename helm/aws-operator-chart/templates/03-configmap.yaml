@@ -29,6 +29,24 @@ data:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
         vpcPeerID: '{{ .Values.Installation.V1.Provider.AWS.VPCPeerID }}'
+
+      cluster:
+        calico:
+          cidr: '{{ .Values.Installation.V1.Guest.Calico.CIDR }}'
+          mtu: 1430
+          subnet: '{{ .Values.Installation.V1.Guest.Calico.Subnet }}'
+        docker:
+          daemon:
+            cidr: '{{ .Values.Installation.V1.Guest.Docker.CIDR }}'
+        kubernetes:
+          api:
+            clusterIPRange: '{{ .Values.Installation.V1.Guest.Kubernetes.API.ClusterIPRange }}'
+          networkSetup:
+            docker:
+              image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
+          ssh:
+            userList: '{{ .Values.Installation.V1.Guest.SSH.UserList }}'
+
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'

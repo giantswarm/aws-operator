@@ -132,7 +132,7 @@ rkt run \
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
       /usr/bin/aws \
-        --region {{.AWS.Region}} kms decrypt \
+        --region {{.AWSRegion}} kms decrypt \
         --ciphertext-blob fileb://$encKey \
         --output text \
         --query Plaintext \
