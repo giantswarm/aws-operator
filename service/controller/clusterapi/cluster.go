@@ -3,6 +3,7 @@ package clusterapi
 import (
 	"net"
 
+	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
@@ -129,7 +130,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          NewClusterCRD(),
+			CRD:          clusterv1alpha1.NewClusterCRD(),
 			CRDClient:    crdClient,
 			Informer:     newInformer,
 			Logger:       config.Logger,
