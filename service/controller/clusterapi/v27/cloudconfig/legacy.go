@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"net"
+	"strings"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
@@ -60,4 +61,27 @@ func dnsIPFromRange(s string) net.IP {
 }
 
 func stringToUserList(s string) []g8sv1alpha1.ClusterKubernetesSSHUser {
+	var list []g8sv1alpha1.ClusterKubernetesSSHUser
+
+	for _, user := range strings.Split(s, ",") {
+		if user == "" {
+			continue
+		}
+
+		trimmed := strings.TrimSpace(user)
+		split := strings.Split(trimmed, ":")
+
+		if len(split) != 2 {
+			panic("SSH user format must be <name>:<public key>")
+		}
+
+		u := g8sv1alpha1.ClusterKubernetesSSHUser{
+			Name:      split[0],
+			PublicKey: split[1],
+		}
+
+		list = append(list, u)
+	}
+
+	return list
 }
