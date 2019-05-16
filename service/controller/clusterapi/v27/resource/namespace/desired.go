@@ -4,30 +4,30 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	apiv1 "k8s.io/api/core/v1"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	// Compute the desired state of the namespace to have a reference of how
 	// the data should be.
-	namespace := &apiv1.Namespace{
-		TypeMeta: apismetav1.TypeMeta{
+	namespace := &corev1.Namespace{
+		TypeMeta: metav1.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",
 		},
-		ObjectMeta: apismetav1.ObjectMeta{
-			Name: legacykey.ClusterNamespace(customObject),
+		ObjectMeta: metav1.ObjectMeta{
+			Name: key.ClusterNamespace(cr),
 			Labels: map[string]string{
-				"cluster":  legacykey.ClusterID(customObject),
-				"customer": legacykey.OrganizationID(customObject),
+				"cluster":  key.ClusterID(cr),
+				"customer": key.OrganizationID(cr),
 			},
 		},
 	}

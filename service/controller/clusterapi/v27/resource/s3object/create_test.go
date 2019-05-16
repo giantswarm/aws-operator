@@ -5,42 +5,58 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 )
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
-	t.Parallel()
-	clusterTpo := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
-			},
-		},
-	}
-
 	testCases := []struct {
 		description   string
-		obj           v1alpha1.AWSConfig
+		obj           interface{}
 		currentState  map[string]BucketObjectState
 		desiredState  map[string]BucketObjectState
 		expectedState map[string]BucketObjectState
 	}{
 		{
-			description:   "current state empty, desired state empty, empty create change",
-			obj:           clusterTpo,
+			description: "current state empty, desired state empty, empty create change",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState:  map[string]BucketObjectState{},
 			desiredState:  map[string]BucketObjectState{},
 			expectedState: map[string]BucketObjectState{},
 		},
 		{
-			description:  "current state empty, desired state not empty, create change == desired state",
-			obj:          clusterTpo,
+			description: "current state empty, desired state not empty, create change == desired state",
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{},
 			desiredState: map[string]BucketObjectState{
 				"master": {
@@ -59,7 +75,19 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty, create change == desired state",
-			obj:         clusterTpo,
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{
 				"mykey": {
 					Body:   "mykey",
@@ -84,7 +112,19 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		},
 		{
 			description: "current state has 1 object, desired state has 2 objects, create change == missing object",
-			obj:         clusterTpo,
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{
 				"master": {
 					Body:   "master-body",
@@ -115,7 +155,19 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		},
 		{
 			description: "current state matches desired state, empty create change",
-			obj:         clusterTpo,
+			obj: &v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "5xchu"
+								}
+							}
+						`),
+					},
+				},
+			},
 			currentState: map[string]BucketObjectState{
 				"master": {
 					Body:   "master-body",
