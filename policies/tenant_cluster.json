@@ -17,6 +17,7 @@
                 "iam:CreatePolicy",
                 "iam:CreatePolicyVersion",
                 "iam:CreateRole",
+                "iam:CreateServiceLinkedRole",
                 "iam:DeleteInstanceProfile",
                 "iam:DeletePolicy",
                 "iam:DeletePolicyVersion",
