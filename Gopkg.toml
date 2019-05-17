@@ -69,7 +69,7 @@ required = [
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
-  branch = "master"
+  branch = "private-repo"
   name = "github.com/giantswarm/e2esetup"
 
 [[constraint]]
