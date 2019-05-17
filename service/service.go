@@ -397,8 +397,8 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
-		//go s.clusterapiClusterController.Boot(ctx)
-		//go s.clusterapiDrainerController.Boot(ctx)
+		go s.clusterapiClusterController.Boot(ctx)
+		go s.clusterapiDrainerController.Boot(ctx)
 		go s.legacyClusterController.Boot(ctx)
 		go s.legacyDrainerController.Boot(ctx)
 	})
