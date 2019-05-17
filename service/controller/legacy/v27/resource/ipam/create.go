@@ -128,24 +128,21 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		return nil
 	})
 
-	/*
-		TODO(tuommaki): Activate this once there's CRD registered for Cluster type.
-		g.Go(func() error {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
+	g.Go(func() error {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
 
-			subnets, err := getClusterSubnets(r.cmaClient)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			mutex.Lock()
-			reservedSubnets = append(reservedSubnets, subnets...)
-			mutex.Unlock()
+		subnets, err := getClusterSubnets(r.cmaClient)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
 
-			return nil
-		})
-	*/
+		return nil
+	})
 
 	err = g.Wait()
 	if err != nil {
