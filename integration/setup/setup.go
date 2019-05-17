@@ -306,5 +306,7 @@ func newSSHUserList(ctx context.Context, config Config) (string, error) {
 		}
 	}
 
+	fmt.Printf("%#v\n", sshUserList)
+
 	return sshUserList, nil
 }
