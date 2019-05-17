@@ -152,7 +152,7 @@ type ChartStatus struct {
 	// https://docs.helm.sh/developing_charts/#the-chart-yaml-file
 	AppVersion string `json:"appVersion" yaml:"appVersion"`
 	// Reason is the description of the last status of helm release when the chart is
-	// not installed successfully, e.g. deploy resource already exists
+	// not installed successfully, e.g. deploy resource already exists.
 	Reason string `json:"reason,omitempty" yaml:"reason,omitempty"`
 	// Release is the status of the Helm release for the deployed chart.
 	Release ChartStatusRelease `json:"release" yaml:"release"`
