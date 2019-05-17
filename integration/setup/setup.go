@@ -13,6 +13,7 @@ import (
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
+	"github.com/giantswarm/e2esetup/privaterepo"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
 	"golang.org/x/sync/errgroup"
@@ -137,6 +138,10 @@ func Setup(m *testing.M, config Config) {
 }
 
 func installAWSOperator(ctx context.Context, config Config) error {
+	sshUserList, err := newSSHUserList(ctx, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 	vpcID, err := ensureHostVPCCreated(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
@@ -153,6 +158,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 					VPCPeerID:       vpcID,
 				},
 			},
+			RegistryPullSecret: env.RegistryPullSecret(),
 			Secret: chartvalues.AWSOperatorConfigSecret{
 				AWSOperator: chartvalues.AWSOperatorConfigSecretAWSOperator{
 					CredentialDefault: chartvalues.AWSOperatorConfigSecretAWSOperatorCredentialDefault{
@@ -177,7 +183,9 @@ func installAWSOperator(ctx context.Context, config Config) error {
 					},
 				},
 			},
-			RegistryPullSecret: env.RegistryPullSecret(),
+			SSH: chartvalues.AWSOperatorConfigSSH{
+				UserList: sshUserList,
+			},
 		}
 
 		values, err = chartvalues.NewAWSOperator(c)
@@ -266,4 +274,37 @@ func installResources(ctx context.Context, config Config) error {
 	}
 
 	return nil
+}
+
+func newSSHUserList(ctx context.Context, config Config) (string, error) {
+	var err error
+
+	var privateRepo *privaterepo.PrivateRepo
+	{
+		c := privaterepo.Config{
+			Owner: "giantswarm",
+			Repo:  "installations",
+			Token: env.GithubToken(),
+		}
+
+		privateRepo, err = privaterepo.New(c)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
+
+	var sshUserList string
+	{
+		content, err := privateRepo.Content(ctx, "default-draughtsman-configmap-values.yaml")
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		sshUserList, err = privaterepo.ContentToSSHUserList(content)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
+
+	return sshUserList, nil
 }
