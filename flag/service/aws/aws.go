@@ -16,7 +16,6 @@ type AWS struct {
 	IncludeTags            string
 	LoggingBucket          loggingbucket.LoggingBucket
 	PodInfraContainerImage string
-	PubKeyFile             string
 	Region                 string
 	Route53                route53.Route53
 	RouteTables            string
