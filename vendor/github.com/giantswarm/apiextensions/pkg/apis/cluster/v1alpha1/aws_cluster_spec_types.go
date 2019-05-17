@@ -30,6 +30,7 @@ import (
 //         name: credential-default
 //         namespace: giantswarm
 //       master:
+//         availabilityZone: eu-central-1a
 //         instanceType: m4.large
 //       region: eu-central-1
 //
@@ -78,5 +79,6 @@ type AWSClusterSpecProviderCredentialSecret struct {
 }
 
 type AWSClusterSpecProviderMaster struct {
-	InstanceType string `json:"instanceType" yaml:"instanceType"`
+	AvailabilityZone string `json:"availabilityZone" yaml:"availabilityZone"`
+	InstanceType     string `json:"instanceType" yaml:"instanceType"`
 }
