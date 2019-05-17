@@ -45,6 +45,7 @@ func NewClusterCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 			Subresources: &apiextensionsv1beta1.CustomResourceSubresources{
 				Status: &apiextensionsv1beta1.CustomResourceSubresourceStatus{},
 			},
+			Version: "v1alpha1",
 		},
 	}
 }
