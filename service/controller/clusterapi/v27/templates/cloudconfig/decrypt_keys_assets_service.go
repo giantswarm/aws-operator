@@ -2,10 +2,10 @@ package cloudconfig
 
 const DecryptKeysAssetsService = `
 [Unit]
-Description=Decrypt Secret Keys
+Description=Decrypt Keys assets
 Before=k8s-kubelet.service
-After=wait-for-domains.service
-Requires=wait-for-domains.service
+After=wait-for-domains-service vault-aws-authorizer.service
+Requires=wait-for-domains.service vault-aws-authorizer.service
 
 [Service]
 Type=oneshot
