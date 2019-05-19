@@ -193,7 +193,7 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		},
 		{
 			AssetContent: cloudconfig.VaultAWSAuthorizerService,
-			Name:         "vault-aws-authorizer-service.service",
+			Name:         "vault-aws-authorizer.service",
 			Enabled:      true,
 		},
 		{
