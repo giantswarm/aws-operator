@@ -71,13 +71,17 @@ EOF
 )
     fi
 
+    counter=3
+    while ! token_is_valid || [ $counter -eq 0 ]; do
     curl -k \
       --request POST \
       --silent \
       --data "$login_payload" \
-      {{ .VaultAddress }}/v1/auth/aws/login | tee  \
+	  {{ .VaultAddress }}/v1/auth/aws/login | tee  \
       >(jq -r .auth.client_token > $token_path) \
       >(jq -r .auth.metadata.nonce > $nonce_path)
+      ((counter--))
+    done
 }
 
 main () {
