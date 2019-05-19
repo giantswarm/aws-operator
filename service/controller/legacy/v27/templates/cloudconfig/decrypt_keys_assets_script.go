@@ -63,8 +63,6 @@ main() {
 {{ else }}
   kms_keys_assets_decrypt
 {{ end }}
-
-chown -R etcd:etcd /etc/kubernetes/ssl/etcd
 }
 
 main

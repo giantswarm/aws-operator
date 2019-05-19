@@ -4,7 +4,7 @@ const VaultAWSAuthorizerService = `
 [Unit]
 Description=Token decryption retrieval
 Before=k8s-kubelet.service
-After=wait-for-domains-service
+After=wait-for-domains.service
 Requires=wait-for-domains.service
 
 [Service]
