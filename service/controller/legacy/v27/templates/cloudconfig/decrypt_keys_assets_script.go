@@ -1,6 +1,9 @@
 package cloudconfig
 
 const DecryptKeysAssetsScript = `#!/bin/bash -e
+
+token_path=/var/token
+
 vault_keys_assets_decrypt() {
     echo decrypting keys assets
     shopt -s nullglob

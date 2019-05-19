@@ -1,6 +1,9 @@
 package cloudconfig
 
 const DecryptTLSAssetsScript = `#!/bin/bash -e
+
+token_path=/var/token
+
 vault_tls_assets_decrypt() {
     echo decrypting tls assets
     shopt -s nullglob
