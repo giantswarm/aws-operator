@@ -5,15 +5,15 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	apismetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -25,8 +25,8 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	if endpointsToDelete != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting Kubernetes endpoints")
 
-		namespace := legacykey.ClusterNamespace(customObject)
-		err := r.k8sClient.CoreV1().Endpoints(namespace).Delete(endpointsToDelete.Name, &apismetav1.DeleteOptions{})
+		namespace := key.ClusterNamespace(cr)
+		err := r.k8sClient.CoreV1().Endpoints(namespace).Delete(endpointsToDelete.Name, &metav1.DeleteOptions{})
 		if apierrors.IsNotFound(err) {
 			// fall through
 		} else if err != nil {
@@ -65,7 +65,7 @@ func (r *Resource) newDeleteChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the endpoints has to be deleted")
 
-	var endpointsToDelete *apiv1.Endpoints
+	var endpointsToDelete *corev1.Endpoints
 	if currentEndpoints != nil && desiredEndpoints.Name == currentEndpoints.Name {
 		endpointsToDelete = desiredEndpoints
 	}

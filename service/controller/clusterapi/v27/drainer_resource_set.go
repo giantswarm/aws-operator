@@ -121,7 +121,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if legacykey.VersionBundleVersion(customObject) == VersionBundle().Version {
+		if legacykey.ClusterVersion(customObject) == VersionBundle().Version {
 			return true
 		}
 

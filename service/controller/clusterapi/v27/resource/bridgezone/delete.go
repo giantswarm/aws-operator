@@ -6,11 +6,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -21,9 +21,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	baseDomain := legacykey.ClusterBaseDomain(customObject)
+	baseDomain := key.ClusterBaseDomain(cr)
 	intermediateZone := "k8s." + baseDomain
-	finalZone := legacykey.ClusterID(customObject) + ".k8s." + baseDomain
+	finalZone := key.ClusterID(cr) + ".k8s." + baseDomain
 
 	_, defaultGuest, err := r.route53Clients(ctx)
 	if err != nil {

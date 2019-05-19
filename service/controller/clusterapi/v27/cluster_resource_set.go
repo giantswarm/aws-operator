@@ -39,7 +39,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/loadbalancer"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/migration"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/peerrolearn"
@@ -222,19 +221,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		encryptionResource, err = encryption.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var migrationResource controller.Resource
-	{
-		c := migration.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		migrationResource, err = migration.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -586,7 +572,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpSubnetResource,
 		asgStatusResource,
 		statusResource,
-		migrationResource,
 		ipamResource,
 		bridgeZoneResource,
 		encryptionResource,
@@ -628,7 +613,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if legacykey.VersionBundleVersion(customObject) == VersionBundle().Version {
+		if legacykey.ClusterVersion(customObject) == VersionBundle().Version {
 			return true
 		}
 

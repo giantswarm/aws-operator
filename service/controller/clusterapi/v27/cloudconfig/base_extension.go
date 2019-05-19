@@ -3,15 +3,15 @@ package cloudconfig
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter/vault"
 )
 
 type baseExtension struct {
-	customObject  v1alpha1.AWSConfig
+	cluster       v1alpha1.Cluster
 	encrypter     encrypter.Interface
 	encryptionKey string
 }
@@ -19,6 +19,7 @@ type baseExtension struct {
 func (e *baseExtension) templateData() templateData {
 	var encrypterType string
 	var vaultAddress string
+
 	v, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
 		encrypterType = encrypter.VaultBackend
@@ -26,8 +27,9 @@ func (e *baseExtension) templateData() templateData {
 	} else {
 		encrypterType = encrypter.KMSBackend
 	}
+
 	data := templateData{
-		AWSConfigSpec: e.customObject.Spec,
+		AWSConfigSpec: cmaClusterToG8sConfig(e.cluster),
 		EncrypterType: encrypterType,
 		VaultAddress:  vaultAddress,
 		EncryptionKey: e.encryptionKey,

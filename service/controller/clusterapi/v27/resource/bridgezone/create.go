@@ -7,11 +7,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -22,9 +22,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	baseDomain := legacykey.ClusterBaseDomain(customObject)
+	baseDomain := key.ClusterBaseDomain(cr)
 	intermediateZone := "k8s." + baseDomain
-	finalZone := legacykey.ClusterID(customObject) + ".k8s." + baseDomain
+	finalZone := key.ClusterID(cr) + ".k8s." + baseDomain
 
 	guest, defaultGuest, err := r.route53Clients(ctx)
 	if err != nil {

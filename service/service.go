@@ -53,7 +53,7 @@ type Service struct {
 	legacyClusterController     *legacy.Cluster
 	legacyDrainerController     *legacy.Drainer
 	operatorCollector           *collector.Set
-	statusResourceCollector     *statusresource.Collector
+	statusResourceCollector     *statusresource.CollectorSet
 }
 
 // New creates a new configured service object.
@@ -188,7 +188,6 @@ func New(config Config) (*Service, error) {
 
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
-			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
@@ -287,7 +286,6 @@ func New(config Config) (*Service, error) {
 
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
-			PubKeyFile:             config.Viper.GetString(config.Flag.Service.AWS.PubKeyFile),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
@@ -350,14 +348,14 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var statusResourceCollector *statusresource.Collector
+	var statusResourceCollector *statusresource.CollectorSet
 	{
-		c := statusresource.CollectorConfig{
+		c := statusresource.CollectorSetConfig{
 			Logger:  config.Logger,
 			Watcher: g8sClient.ProviderV1alpha1().AWSConfigs("").Watch,
 		}
 
-		statusResourceCollector, err = statusresource.NewCollector(c)
+		statusResourceCollector, err = statusresource.NewCollectorSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -399,8 +397,8 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.operatorCollector.Boot(ctx)
 		go s.statusResourceCollector.Boot(ctx)
 
-		//go s.clusterapiClusterController.Boot(ctx)
-		//go s.clusterapiDrainerController.Boot(ctx)
+		go s.clusterapiClusterController.Boot(ctx)
+		go s.clusterapiDrainerController.Boot(ctx)
 		go s.legacyClusterController.Boot(ctx)
 		go s.legacyDrainerController.Boot(ctx)
 	})

@@ -10,11 +10,11 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -29,7 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		g := &errgroup.Group{}
 
 		g.Go(func() error {
-			certs, err := r.certsSearcher.SearchCluster(legacykey.ClusterID(customObject))
+			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -39,7 +39,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			keys, err := r.randomKeysSearcher.SearchCluster(legacykey.ClusterID(customObject))
+			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -60,15 +60,15 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		m := sync.Mutex{}
 
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, clusterCerts, clusterKeys)
+			b, err := r.cloudConfig.NewMasterTemplate(ctx, cr, clusterCerts, clusterKeys)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			m.Lock()
-			k := legacykey.BucketObjectName(customObject, legacykey.KindMaster)
+			k := key.BucketObjectName(cr, "master")
 			output[k] = BucketObjectState{
-				Bucket: legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
+				Bucket: key.BucketName(cr, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}
@@ -78,15 +78,15 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewWorkerTemplate(ctx, customObject, clusterCerts)
+			b, err := r.cloudConfig.NewWorkerTemplate(ctx, cr, clusterCerts)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			m.Lock()
-			k := legacykey.BucketObjectName(customObject, legacykey.KindWorker)
+			k := key.BucketObjectName(cr, "worker")
 			output[k] = BucketObjectState{
-				Bucket: legacykey.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
+				Bucket: key.BucketName(cr, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}

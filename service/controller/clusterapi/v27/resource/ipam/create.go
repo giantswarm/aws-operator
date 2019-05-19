@@ -2,45 +2,45 @@ package ipam
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/bits"
-	"math/rand"
 	"net"
-	"sort"
 	"sync"
-	"time"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 	"github.com/giantswarm/aws-operator/service/network"
 )
-
-func init() {
-	// Seed RNG for AZ shuffling.
-	rand.Seed(time.Now().UnixNano())
-}
 
 // EnsureCreated allocates guest cluster network segment. It gathers existing
 // subnets from existing AWSConfig/Status objects and existing VPCs from AWS.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	var cr v1alpha1.AWSConfig
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var cr cmav1alpha1.Cluster
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "fetching latest version of custom resource")
 
-		oldObj, err := legacykey.ToCustomObject(obj)
+		oldObj, err := key.ToCluster(obj)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		newObj, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(oldObj.GetNamespace()).Get(oldObj.GetName(), metav1.GetOptions{})
+		newObj, err := r.cmaClient.ClusterV1alpha1().Clusters(oldObj.GetNamespace()).Get(oldObj.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -51,19 +51,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if subnet needs to be allocated for cluster")
 
-	if legacykey.StatusNetworkCIDR(cr) == "" {
+	if key.StatusClusterNetworkCIDR(cr) == "" {
 		var subnetCIDR net.IPNet
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
-			randomAZs, err := r.selectRandomAZs(legacykey.SpecAvailabilityZones(cr))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			callbacks := network.AllocationCallbacks{
 				GetReservedNetworks:     r.getReservedNetworks,
-				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, randomAZs),
+				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, key.WorkerAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment)),
 			}
 
 			subnetCIDR, err = r.networkAllocator.Allocate(ctx, r.networkRange, r.allocatedSubnetMask, callbacks)
@@ -108,7 +103,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	})
 
 	g.Go(func() error {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfig CRs")
 
 		subnets, err := getAWSConfigSubnets(r.g8sClient)
 		if err != nil {
@@ -118,7 +113,23 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfig CRs")
+
+		return nil
+	})
+
+	g.Go(func() error {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
+
+		subnets, err := getClusterSubnets(r.cmaClient)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
 
 		return nil
 	})
@@ -133,24 +144,32 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	return reservedSubnets, nil
 }
 
-func (r *Resource) persistAllocatedNetwork(cr v1alpha1.AWSConfig, azs []string) func(ctx context.Context, subnet net.IPNet) error {
+func (r *Resource) persistAllocatedNetwork(cr cmav1alpha1.Cluster, azs []string) func(ctx context.Context, subnet net.IPNet) error {
 	return func(ctx context.Context, subnet net.IPNet) error {
 		return r.splitAndPersistReservedSubnet(ctx, cr, subnet, azs)
 	}
 }
 
-func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr v1alpha1.AWSConfig, subnet net.IPNet, azs []string) error {
-	statusAZs, err := splitSubnetToStatusAZs(subnet, azs)
+func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr cmav1alpha1.Cluster, subnet net.IPNet, azs []string) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status to persist network allocation and chosen availability zones")
+
+	var providerStatus g8sv1alpha1.AWSClusterStatus
+
+	err := json.Unmarshal(cr.Status.ProviderStatus.Raw, &providerStatus)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "updating CR status to persist network allocation and chosen availability zones")
+	providerStatus.Provider.Network.CIDR = subnet.String()
 
-	cr.Status.Cluster.Network.CIDR = subnet.String()
-	cr.Status.AWS.AvailabilityZones = statusAZs
+	b, err := json.Marshal(providerStatus)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-	_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(cr.Namespace).UpdateStatus(&cr)
+	cr.Status.ProviderStatus.Raw = b
+
+	_, err = r.cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).UpdateStatus(&cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -158,23 +177,6 @@ func (r *Resource) splitAndPersistReservedSubnet(ctx context.Context, cr v1alpha
 	r.logger.LogCtx(ctx, "level", "debug", "message", "updated CR status to persist network allocation and chosen availability zones")
 
 	return nil
-}
-
-func (r *Resource) selectRandomAZs(n int) ([]string, error) {
-	if n > len(r.availabilityZones) {
-		return nil, microerror.Maskf(invalidParameterError, "requested nubmer of AZs %d is bigger than number of available AZs %d", n, len(r.availabilityZones))
-	}
-
-	// availabilityZones must be copied so that original slice doesn't get shuffled.
-	shuffledAZs := make([]string, len(r.availabilityZones))
-	copy(shuffledAZs, r.availabilityZones)
-	rand.Shuffle(len(shuffledAZs), func(i, j int) {
-		shuffledAZs[i], shuffledAZs[j] = shuffledAZs[j], shuffledAZs[i]
-	})
-
-	shuffledAZs = shuffledAZs[0:n]
-	sort.Strings(shuffledAZs)
-	return shuffledAZs, nil
 }
 
 func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
@@ -185,7 +187,31 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 
 	var results []net.IPNet
 	for _, ac := range awsConfigList.Items {
-		cidr := legacykey.StatusNetworkCIDR(ac)
+		cidr := key.StatusAWSConfigNetworkCIDR(ac)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
+func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
+	clusterList, err := cmaClient.Cluster().Clusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, c := range clusterList.Items {
+		cidr := key.StatusClusterNetworkCIDR(c)
 		if cidr == "" {
 			continue
 		}
@@ -223,41 +249,6 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	return results, nil
-}
-
-// splitSubnetToStatusAZs splits subnet such that each AZ gets private and
-// public network. Size of these subnets depends on subnet.Mask and number of
-// AZs.
-func splitSubnetToStatusAZs(subnet net.IPNet, AZs []string) ([]v1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
-	subnets, err := splitNetwork(subnet, uint(len(AZs)*2))
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var statusAZs []v1alpha1.AWSConfigStatusAWSAvailabilityZone
-	subnetIdx := 0
-	for _, az := range AZs {
-		private := subnets[subnetIdx]
-		subnetIdx++
-		public := subnets[subnetIdx]
-		subnetIdx++
-
-		statusAZ := v1alpha1.AWSConfigStatusAWSAvailabilityZone{
-			Name: az,
-			Subnet: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-				Private: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-					CIDR: private.String(),
-				},
-				Public: v1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-					CIDR: public.String(),
-				},
-			},
-		}
-
-		statusAZs = append(statusAZs, statusAZ)
-	}
-
-	return statusAZs, nil
 }
 
 // calculateSubnetMask calculates new subnet mask to accommodate n subnets.

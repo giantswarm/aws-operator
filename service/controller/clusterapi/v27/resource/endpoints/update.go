@@ -6,13 +6,13 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	customObject, err := legacykey.ToCustomObject(obj)
+	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -24,7 +24,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if endpointsToUpdate != nil {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating Kubernetes endpoints")
 
-		namespace := legacykey.ClusterNamespace(customObject)
+		namespace := key.ClusterNamespace(cr)
 		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(endpointsToUpdate)
 		if err != nil {
 			return microerror.Mask(err)
@@ -69,7 +69,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the endpoints has to be updated")
 
-	var endpointsToUpdate *apiv1.Endpoints
+	var endpointsToUpdate *corev1.Endpoints
 
 	// The subsets can change if the private IP of the master node has changed.
 	// We then need to update the endpoints resource.

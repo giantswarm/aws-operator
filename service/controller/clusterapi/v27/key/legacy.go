@@ -1,6 +1,7 @@
 package key
 
 import (
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudformation/tccp"
 )
@@ -31,4 +32,8 @@ func CloudFormationGuestTemplates() []string {
 		tccp.Subnets,
 		tccp.VPC,
 	}
+}
+
+func StatusAWSConfigNetworkCIDR(customObject v1alpha1.AWSConfig) string {
+	return customObject.Status.Cluster.Network.CIDR
 }

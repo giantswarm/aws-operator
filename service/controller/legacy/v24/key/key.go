@@ -601,7 +601,8 @@ func ToNodeCount(v interface{}) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	nodeCount := MasterCount(customObject) + WorkerCount(customObject)
+	// DesiredCapacity only returns number of workers, so we need to add the master
+	nodeCount := customObject.Status.Cluster.Scaling.DesiredCapacity + 1
 
 	return nodeCount, nil
 }

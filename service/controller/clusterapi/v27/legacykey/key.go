@@ -45,7 +45,7 @@ const (
 	// LogDeliveryURI is used for setting the correct ACL in the access log bucket
 	LogDeliveryURI = "uri=http://acs.amazonaws.com/groups/s3/LogDelivery"
 
-	InstanceIDAnnotation = "aws-operator.giantswarm.io/instance"
+	AnnotationInstanceID = "aws-operator.giantswarm.io/instance"
 
 	defaultDockerVolumeSizeGB = "100"
 )
@@ -95,7 +95,7 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(customObject), CloudConfigVersion, role)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -293,8 +293,12 @@ func RolePeerAccess(customObject v1alpha1.AWSConfig) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(customObject))
 }
 
-func PolicyName(customObject v1alpha1.AWSConfig, profileType string) string {
-	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, PolicyNameTemplate)
+func PolicyNameMaster(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-master-%s", ClusterID(customObject), PolicyNameTemplate)
+}
+
+func PolicyNameWorker(customObject v1alpha1.AWSConfig) string {
+	return fmt.Sprintf("%s-worker-%s", ClusterID(customObject), PolicyNameTemplate)
 }
 
 func PrivateSubnetRouteTableAssociationName(idx int) string {
@@ -315,10 +319,6 @@ func PrivateRouteTableName(idx int) string {
 	return fmt.Sprintf("PrivateRouteTable%02d", idx)
 }
 
-func PrivateSubnetCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.PrivateSubnetCIDR
-}
-
 func PrivateSubnetName(idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
@@ -326,10 +326,6 @@ func PrivateSubnetName(idx int) string {
 		return "PrivateSubnet"
 	}
 	return fmt.Sprintf("PrivateSubnet%02d", idx)
-}
-
-func PublicSubnetCIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.PublicSubnetCIDR
 }
 
 func PublicSubnetRouteTableAssociationName(idx int) string {
@@ -357,10 +353,6 @@ func PublicSubnetName(idx int) string {
 		return "PublicSubnet"
 	}
 	return fmt.Sprintf("PublicSubnet%02d", idx)
-}
-
-func CIDR(customObject v1alpha1.AWSConfig) string {
-	return customObject.Spec.AWS.VPC.CIDR
 }
 
 func Region(customObject v1alpha1.AWSConfig) string {
@@ -502,7 +494,8 @@ func ToNodeCount(v interface{}) (int, error) {
 		return 0, microerror.Mask(err)
 	}
 
-	nodeCount := MasterCount(customObject) + WorkerCount(customObject)
+	// DesiredCapacity only returns number of workers, so we need to add the master
+	nodeCount := customObject.Status.Cluster.Scaling.DesiredCapacity + 1
 
 	return nodeCount, nil
 }
@@ -513,11 +506,10 @@ func ToVersionBundleVersion(v interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	return VersionBundleVersion(customObject), nil
+	return ClusterVersion(customObject), nil
 }
 
-// VersionBundleVersion returns the version contained in the Version Bundle.
-func VersionBundleVersion(customObject v1alpha1.AWSConfig) string {
+func ClusterVersion(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.VersionBundle.Version
 }
 

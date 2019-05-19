@@ -7,12 +7,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
 )
 
 const (
@@ -139,14 +139,14 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 // the Etcd volume for the master instance will be returned. If persistentVolume
 // is set then any Persistent Volumes associated with the cluster will be
 // returned.
-func (e *EBS) ListVolumes(customObject v1alpha1.AWSConfig, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
+func (e *EBS) ListVolumes(cr v1alpha1.Cluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
 	var volumes []Volume
 
 	// We filter to only select clusters with the cluster cloud provider tag.
 	i := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String(fmt.Sprintf("tag:%s", legacykey.ClusterCloudProviderTag(customObject))),
+				Name: aws.String(fmt.Sprintf("tag:%s", key.ClusterCloudProviderTag(cr))),
 				Values: []*string{
 					aws.String(cloudProviderClusterTagValue),
 				},

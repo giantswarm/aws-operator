@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/bits"
 	"math/rand"
@@ -10,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
@@ -17,6 +19,9 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22/key"
@@ -174,6 +179,22 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		return nil
 	})
 
+	g.Go(func() error {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
+
+		subnets, err := getClusterSubnets(r.cmaClient)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+
+		return nil
+	})
+
 	err = g.Wait()
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -262,6 +283,30 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	return results, nil
 }
 
+func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
+	clusterList, err := cmaClient.Cluster().Clusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, c := range clusterList.Items {
+		cidr := statusClusterNetworkCIDR(c)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
 func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	ctlCtx, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -284,6 +329,30 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	return results, nil
+}
+
+func statusClusterNetworkCIDR(cluster cmav1alpha1.Cluster) string {
+	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus).Provider.Network.CIDR
+}
+
+func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
+	if cmaStatus == nil {
+		panic("provider status value must not be empty")
+	}
+
+	var g8sStatus g8sv1alpha1.AWSClusterStatus
+	{
+		if len(cmaStatus.Raw) == 0 {
+			return g8sStatus
+		}
+
+		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return g8sStatus
 }
 
 // splitSubnetToStatusAZs splits subnet such that each AZ gets private and

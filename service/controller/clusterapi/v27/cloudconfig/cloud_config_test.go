@@ -6,13 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_3_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/encrypter"
@@ -21,17 +22,20 @@ import (
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		CustomObject v1alpha1.AWSConfig
+		CustomObject v1alpha1.Cluster
 		ClusterKeys  randomkeys.Cluster
 	}{
 		{
-			CustomObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					Cluster: v1alpha1.Cluster{
-						ID: "al9qy",
-						Etcd: v1alpha1.ClusterEtcd{
-							Port: 2379,
-						},
+			CustomObject: v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "al9qy"
+								}
+							}
+						`),
 					},
 				},
 			},
@@ -78,16 +82,22 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		CustomObject v1alpha1.AWSConfig
+		CustomObject v1alpha1.Cluster
 	}{
 		{
-			CustomObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "123456789-super-magic-aws-region",
-					},
-					Cluster: v1alpha1.Cluster{
-						ID: "al9qy",
+			CustomObject: v1alpha1.Cluster{
+				Status: v1alpha1.ClusterStatus{
+					ProviderStatus: &runtime.RawExtension{
+						Raw: []byte(`
+							{
+								"cluster": {
+									"id": "al9qy"
+								},
+								"provider": {
+									"region": "123456789-super-magic-aws-region"
+								}
+							}
+						`),
 					},
 				},
 			},
