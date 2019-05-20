@@ -129,6 +129,16 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: FilePermission,
 		},
 		{
+			AssetContent: cloudconfig.DecryptKeysAssetsScript,
+			Path:         "/opt/bin/decrypt-keys-assets",
+			Owner: k8scloudconfig.Owner{
+				User:  FileOwnerUser,
+				Group: FileOwnerGroup,
+			},
+			Permissions: FilePermission,
+		},
+
+		{
 			AssetContent: e.RandomKeyTmplSet.APIServerEncryptionKey,
 			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 			Owner: k8scloudconfig.Owner{
@@ -147,8 +157,8 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: FilePermission,
 		},
 		{
-			AssetContent: cloudconfig.DecryptKeysAssetsScript,
-			Path:         "/opt/bin/decrypt-keys-assets",
+			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
+			Path:         "/opt/bin/vault-aws-authorizer",
 			Owner: k8scloudconfig.Owner{
 				User:  FileOwnerUser,
 				Group: FileOwnerGroup,
@@ -283,6 +293,12 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
+			Enabled:      true,
+		},
+
+		{
+			AssetContent: cloudconfig.VaultAWSAuthorizerService,
+			Name:         "vault-aws-authorizer.service",
 			Enabled:      true,
 		},
 		{
