@@ -2,10 +2,10 @@ package cloudconfig
 
 const DecryptKeysAssetsService = `
 [Unit]
-Description=Decrypt Secret Keys
+Description=Decrypt Keys assets
 Before=k8s-kubelet.service
-After=wait-for-domains.service
-Requires=wait-for-domains.service
+After=decrypt-tls-assets.service
+Requires=decrypt-tls-assets.service
 
 [Service]
 Type=oneshot
