@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +17,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	if finalizerskeptcontext.IsKept(ctx) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not removing secret finalizers")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finalizers requested to be kept")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		return nil
 	}
 
 	for _, s := range newSecretAccessors(ctx, cr) {
