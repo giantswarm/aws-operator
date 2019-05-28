@@ -19,6 +19,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// When the operator's resource implementations request the CR's finalizers to
+	// be kept, their deletion logic is delayed. That implies that we should not
+	// remove the secret finalizers here already, since certain resource
+	// implementations may still require secrets to be available during their own
+	// deletion logic execution in upcoming reconciliation loops.
 	if finalizerskeptcontext.IsKept(ctx) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not removing secret finalizers")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finalizers requested to be kept")
