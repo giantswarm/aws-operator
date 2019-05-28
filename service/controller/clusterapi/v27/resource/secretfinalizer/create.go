@@ -36,10 +36,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found secret %#q in namespace %#q", s.Name, s.Namespace))
 		}
 
-		if !containsString(secret.Finalizers, newSecretFinalizer(secret)) {
+		if !containsString(secret.Finalizers, secretFinalizer) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("adding finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
 
-			secret.Finalizers = append(secret.Finalizers, newSecretFinalizer(secret))
+			secret.Finalizers = append(secret.Finalizers, secretFinalizer)
 
 			_, err := r.k8sClient.CoreV1().Secrets(s.Namespace).Update(secret)
 			if err != nil {

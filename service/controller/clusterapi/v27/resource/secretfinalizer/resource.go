@@ -10,6 +10,10 @@ const (
 	Name = "secretfinalizerv1"
 )
 
+const (
+	secretFinalizer = "aws-operator.giantswarm.io/secretfinalizer"
+)
+
 type Config struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
