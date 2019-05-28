@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -17,48 +18,51 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	name := key.KubecConfigSecretName(cr)
-	namespace := key.KubecConfigSecretNamespace(cr)
+	for _, s := range newSecretAccessors(ctx, cr) {
+		var secret *corev1.Secret
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding secret %#q in namespace %#q", s.Name, s.Namespace))
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding kubeconfig secret %#q in namespace %#q", name, namespace))
+			secret, err = r.k8sClient.CoreV1().Secrets(s.Namespace).Get(s.Name, metav1.GetOptions{})
+			if errors.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find secret %#q in namespace %#q", s.Name, s.Namespace))
+				r.logger.LogCtx(ctx, "level", "debug", "message", "continuing with next secret")
+				continue
 
-	kubeConfig, err := r.k8sClient.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
-	if errors.IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find kubeconfig secret %#q in namespace %#q", name, namespace))
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		return nil
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
 
-	} else if err != nil {
-		return microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found kubeconfig secret %#q in namespace %#q", name, namespace))
-
-	finalizerTag := key.KubeConfigFinalizer(cr)
-
-	if contains(kubeConfig.Finalizers, finalizerTag) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("clear finalizer for kubeconfig secret %#q in namespace %#q", name, namespace))
-
-		kubeConfig.Finalizers = filter(kubeConfig.Finalizers, finalizerTag)
-
-		_, err := r.k8sClient.CoreV1().Secrets(namespace).Update(kubeConfig)
-		if err != nil {
-			return microerror.Mask(err)
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found secret %#q in namespace %#q", s.Name, s.Namespace))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finalizer clear for kubeconfig secret %#q in namespace %#q", name, namespace))
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("kubeconfig secret %#q in namespace %#q do not have matching finalizer", name, namespace))
+		if !containsString(secret.Finalizers, newSecretFinalizer(secret)) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removing finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
+
+			secret.Finalizers = filterString(secret.Finalizers, newSecretFinalizer(secret))
+
+			_, err := r.k8sClient.CoreV1().Secrets(s.Namespace).Update(secret)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removed finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finalizer already removed for secret %#q in namespace %#q", s.Name, s.Namespace))
+		}
 	}
+
 	return nil
 }
 
-func filter(finalizers []string, matching string) []string {
-	var ret []string
-	for _, f := range finalizers {
-		if f != matching {
-			ret = append(ret, f)
+func filterString(list []string, match string) []string {
+	var filtered []string
+
+	for _, s := range list {
+		if s != match {
+			filtered = append(filtered, s)
 		}
 	}
-	return ret
+
+	return filtered
 }
