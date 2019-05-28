@@ -35,7 +35,7 @@ func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.
 				},
 				CloudProvider: key.CloudProvider,
 				DNS: g8sv1alpha1.ClusterKubernetesDNS{
-					IP: ipFromRange(c.clusterIPRange),
+					IP: dnsIPFromRange(c.clusterIPRange),
 				},
 				Kubelet: g8sv1alpha1.ClusterKubernetesKubelet{
 					Domain: key.ClusterKubeletEndpoint(cr),
@@ -57,7 +57,11 @@ func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.
 	}
 }
 
-func ipFromRange(s string) net.IP {
+// dnsIPFromRange takes the cluster IP range and returns the Kube DNS IP we use
+// internally. It must be some specific IP, so we chose the last IP octet to be
+// 10. The only reason is to do this is to have some static value we apply
+// everywhere.
+func dnsIPFromRange(s string) net.IP {
 	ip := ipFromString(s)
 	ip[3] = 10
 	return ip
