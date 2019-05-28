@@ -11,10 +11,10 @@ const (
 )
 
 type AWSOperatorConfig struct {
-	Provider AWSOperatorConfigProvider
-	Secret   AWSOperatorConfigSecret
-
+	Provider           AWSOperatorConfigProvider
 	RegistryPullSecret string
+	Secret             AWSOperatorConfigSecret
+	SSH                AWSOperatorConfigSSH
 }
 
 type AWSOperatorConfigProvider struct {
@@ -61,6 +61,10 @@ type AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWSAccessKey struct {
 	Token  string
 }
 
+type AWSOperatorConfigSSH struct {
+	UserList string
+}
+
 // NewAWSOperator renders values required by aws-operator-chart.
 func NewAWSOperator(config AWSOperatorConfig) (string, error) {
 	if config.Provider.AWS.Encrypter == "" {
@@ -74,6 +78,9 @@ func NewAWSOperator(config AWSOperatorConfig) (string, error) {
 	}
 	if config.Provider.AWS.VPCPeerID == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Provider.AWS.VPCPeerID must not be empty", config)
+	}
+	if config.RegistryPullSecret == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.RegistryPullSecret must not be empty", config)
 	}
 	if config.Secret.AWSOperator.CredentialDefault.AdminARN == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.CredentialDefault.AdminARN must not be empty", config)
@@ -93,8 +100,8 @@ func NewAWSOperator(config AWSOperatorConfig) (string, error) {
 	if config.Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.Secret == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AWSOperator.SecretYaml.Service.AWS.HostAccessKey.Secret must not be empty", config)
 	}
-	if config.RegistryPullSecret == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.RegistryPullSecret must not be empty", config)
+	if config.SSH.UserList == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.SSH.UserList must not be empty", config)
 	}
 
 	values, err := render.Render(awsOperatorTemplate, config)

@@ -35,7 +35,12 @@ type ClusterConfig struct {
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
 	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	CalicoCIDR                 int
+	CalicoMTU                  int
+	CalicoSubnet               string
+	ClusterIPRange             string
 	DeleteLoggingBucket        bool
+	DockerDaemonCIDR           string
 	EncrypterBackend           string
 	GuestAWSConfig             ClusterConfigAWSConfig
 	GuestPrivateSubnetMaskBits int
@@ -47,12 +52,14 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
 	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
+	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
 	VPCPeerID                  string
@@ -216,9 +223,18 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			AccessLogsExpiration:  config.AccessLogsExpiration,
+			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			APIWhitelist: v27adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			CalicoCIDR:                 config.CalicoCIDR,
+			CalicoMTU:                  config.CalicoMTU,
+			CalicoSubnet:               config.CalicoSubnet,
+			ClusterIPRange:             config.ClusterIPRange,
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			DockerDaemonCIDR:           config.DockerDaemonCIDR,
 			EncrypterBackend:           config.EncrypterBackend,
 			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
@@ -230,19 +246,17 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v27cloudconfig.OIDCConfig{
+			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
+			OIDC: v27cloudconfig.ConfigOIDC{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			APIWhitelist: v27adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
 			RegistryDomain: config.RegistryDomain,
+			SSHUserList:    config.SSHUserList,
 			SSOPublicKey:   config.SSOPublicKey,
 			VaultAddress:   config.VaultAddress,
 			VPCPeerID:      config.VPCPeerID,

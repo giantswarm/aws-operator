@@ -75,6 +75,11 @@ type ClusterResourceSetConfig struct {
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
 	APIWhitelist               adapter.APIWhitelist
+	CalicoCIDR                 int
+	CalicoMTU                  int
+	CalicoSubnet               string
+	ClusterIPRange             string
+	DockerDaemonCIDR           string
 	EncrypterBackend           string
 	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
@@ -85,12 +90,14 @@ type ClusterResourceSetConfig struct {
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	DeleteLoggingBucket        bool
-	OIDC                       cloudconfig.OIDCConfig
+	NetworkSetupDockerImage    string
+	OIDC                       cloudconfig.ConfigOIDC
 	ProjectName                string
 	Route53Enabled             bool
 	RouteTables                string
 	PodInfraContainerImage     string
 	RegistryDomain             string
+	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
 	VPCPeerID                  string
@@ -164,11 +171,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 
-			IgnitionPath:           config.IgnitionPath,
-			OIDC:                   config.OIDC,
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			RegistryDomain:         config.RegistryDomain,
-			SSOPublicKey:           config.SSOPublicKey,
+			CalicoCIDR:              config.CalicoCIDR,
+			CalicoMTU:               config.CalicoMTU,
+			CalicoSubnet:            config.CalicoSubnet,
+			ClusterIPRange:          config.ClusterIPRange,
+			DockerDaemonCIDR:        config.DockerDaemonCIDR,
+			IgnitionPath:            config.IgnitionPath,
+			NetworkSetupDockerImage: config.NetworkSetupDockerImage,
+			OIDC:                    config.OIDC,
+			PodInfraContainerImage:  config.PodInfraContainerImage,
+			RegistryDomain:          config.RegistryDomain,
+			SSHUserList:             config.SSHUserList,
+			SSOPublicKey:            config.SSOPublicKey,
 		}
 
 		cloudConfig, err = cloudconfig.New(c)

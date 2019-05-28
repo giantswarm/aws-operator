@@ -19,6 +19,7 @@ const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
 	CloudConfigVersion = "v_4_0_0"
+	CloudProvider      = "aws"
 )
 
 const (
@@ -33,6 +34,7 @@ const (
 
 const (
 	EtcdPort             = 2379
+	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443
 )
 
@@ -81,11 +83,19 @@ func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("etcd.%s.%s:2379", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("etcd.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+}
+
+func ClusterEtcdEndpointWithPort(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s:2379", ClusterEtcdEndpoint(cluster))
 }
 
 func ClusterID(cluster v1alpha1.Cluster) string {
 	return clusterProviderStatus(cluster).Cluster.ID
+}
+
+func ClusterKubeletEndpoint(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("worker.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
@@ -145,6 +155,15 @@ func ELBNameIngress(cluster v1alpha1.Cluster) string {
 
 func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
+}
+
+func KubeletLabels(cluster v1alpha1.Cluster) string {
+	var labels string
+
+	labels = ensureLabel(labels, "aws-operator.giantswarm.io/version", ClusterVersion(cluster))
+	labels = ensureLabel(labels, "giantswarm.io/provider", "aws")
+
+	return labels
 }
 
 func MasterCount(cluster v1alpha1.Cluster) int {
@@ -290,6 +309,38 @@ func baseRoleARN(cluster v1alpha1.Cluster, accountID string, kind string) string
 	partition := RegionARN(cluster)
 
 	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
+}
+
+func ensureLabel(labels string, key string, value string) string {
+	if key == "" {
+		return labels
+	}
+	if value == "" {
+		return labels
+	}
+
+	var split []string
+	if labels != "" {
+		split = strings.Split(labels, ",")
+	}
+
+	var found bool
+	for i, l := range split {
+		if !strings.HasPrefix(l, key+"=") {
+			continue
+		}
+
+		found = true
+		split[i] = key + "=" + value
+	}
+
+	if !found {
+		split = append(split, key+"="+value)
+	}
+
+	joined := strings.Join(split, ",")
+
+	return joined
 }
 
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a
