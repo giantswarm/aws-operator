@@ -35,7 +35,7 @@ func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.
 				},
 				CloudProvider: key.CloudProvider,
 				DNS: g8sv1alpha1.ClusterKubernetesDNS{
-					IP: dnsIPFromRange(c.clusterIPRange),
+					IP: ipFromRange(c.clusterIPRange),
 				},
 				Kubelet: g8sv1alpha1.ClusterKubernetesKubelet{
 					Domain: key.ClusterKubeletEndpoint(cr),
@@ -57,7 +57,7 @@ func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.
 	}
 }
 
-func dnsIPFromRange(s string) net.IP {
+func ipFromRange(s string) net.IP {
 	ip := ipFromString(s)
 	ip[3] = 10
 	return ip
