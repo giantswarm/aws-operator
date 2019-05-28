@@ -45,6 +45,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpoutputs"
@@ -463,6 +464,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var secretFinalizerResource controller.Resource
+	{
+		c := secretfinalizer.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		secretFinalizerResource, err = secretfinalizer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var serviceResource controller.Resource
 	{
 		c := service.Config{
@@ -585,6 +599,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		namespaceResource,
 		serviceResource,
 		endpointsResource,
+		secretFinalizerResource,
 	}
 
 	{
