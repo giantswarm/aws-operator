@@ -84,6 +84,7 @@ rules:
       - secrets
     verbs:
       - get
+      - update
       - watch
   - apiGroups:
       - ""
