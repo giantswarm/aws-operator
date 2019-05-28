@@ -61,7 +61,7 @@ required = [
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
-  branch = "aws-operator-template"
+  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
@@ -69,7 +69,7 @@ required = [
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
-  branch = "private-repo"
+  branch = "master"
   name = "github.com/giantswarm/e2esetup"
 
 [[constraint]]

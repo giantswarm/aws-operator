@@ -245,7 +245,7 @@
   revision = "510670380f27586e15cd725b804db1f8b145ae9f"
 
 [[projects]]
-  branch = "private-repo"
+  branch = "master"
   digest = "1:c57ed22f0f051730ac23a98838a94a8b041f8ec5d1c0fb4897f8d96cd613fef3"
   name = "github.com/giantswarm/e2esetup"
   packages = [
@@ -253,10 +253,10 @@
     "privaterepo",
   ]
   pruneopts = "UT"
-  revision = "08f37eb877a587c9bb9dfff9a163fd31178b3496"
+  revision = "7dc774e74245eed73c00db3c9b935a6961517174"
 
 [[projects]]
-  branch = "aws-operator-template"
+  branch = "master"
   digest = "1:1ef737848b8d33ae75698708356fa0f87fd79af8608366de0faafc17e1252b5b"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -265,7 +265,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "c639d875ec0d7f1ea412da8e6ce22d5d97129d84"
+  revision = "8f55ebe96ce5fc597bc0689970ab6fa6dfa6dfb9"
 
 [[projects]]
   branch = "master"
@@ -442,11 +442,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3875d7f3d86809c14accabc458cdf3dd5d75e5655bb86e743dc5087ad2d41948"
+  digest = "1:ada93273a920fccde2bfffac65a2364a53cca5106356adf884cb7b30e736ac84"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "79ed3e21ad13b73210f5b1acf71d45effcccb8d3"
+  revision = "0c0bae95b77a9afc8f96e3fc66d7998b0497ec48"
 
 [[projects]]
   branch = "master"
@@ -963,14 +963,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c79c407099598f99bada27ce2a07210a67a75b7294947ab3f981e735d9295c22"
+  digest = "1:107a534dfc1cd42e4f9fc48f335a9af498c99dd43118f925be74c153d1c9a7e2"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "791d8a0f4d093bd8fe272dea2cd28991154796fb"
+  revision = "adf421d2caf4ffcf74142ff5fb9ee323b21a819e"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
