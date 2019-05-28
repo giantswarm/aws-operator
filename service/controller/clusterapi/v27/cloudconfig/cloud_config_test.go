@@ -27,6 +27,21 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 	}{
 		{
 			CustomObject: v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"dns": {
+											"domain": "giantswarm.io"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
@@ -86,6 +101,21 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 	}{
 		{
 			CustomObject: v1alpha1.Cluster{
+				Spec: v1alpha1.ClusterSpec{
+					ProviderSpec: v1alpha1.ProviderSpec{
+						Value: &runtime.RawExtension{
+							Raw: []byte(`
+								{
+									"cluster": {
+										"dns": {
+											"domain": "giantswarm.io"
+										}
+									}
+								}
+							`),
+						},
+					},
+				},
 				Status: v1alpha1.ClusterStatus{
 					ProviderStatus: &runtime.RawExtension{
 						Raw: []byte(`
@@ -141,10 +171,18 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 		}
 
 		c := Config{
-			Encrypter:      &encrypter.EncrypterMock{},
-			Logger:         microloggertest.New(),
-			IgnitionPath:   packagePath,
-			RegistryDomain: "quay.io",
+			Encrypter: &encrypter.EncrypterMock{},
+			Logger:    microloggertest.New(),
+
+			CalicoCIDR:              18,
+			CalicoMTU:               1430,
+			CalicoSubnet:            "172.18.128.0",
+			ClusterIPRange:          "172.18.192.0/22",
+			DockerDaemonCIDR:        "172.18.224.1/19",
+			IgnitionPath:            packagePath,
+			NetworkSetupDockerImage: "quay.io/giantswarm/k8s-setup-network-environment",
+			RegistryDomain:          "quay.io",
+			SSHUserList:             "user:ssh-rsa base64==",
 		}
 
 		ccService, err = New(c)

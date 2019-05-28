@@ -33,7 +33,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				key.LabelVersionBundle: key.ClusterVersion(cr),
 			},
 			Annotations: map[string]string{
-				AnnotationEtcdDomain:        key.ClusterEtcdEndpoint(cr),
+				AnnotationEtcdDomain:        key.ClusterEtcdEndpointWithPort(cr),
 				AnnotationPrometheusCluster: key.ClusterID(cr),
 			},
 		},
