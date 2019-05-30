@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/cloudconfig"
 )
 
 const (
