@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it

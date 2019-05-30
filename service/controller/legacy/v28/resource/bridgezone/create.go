@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
