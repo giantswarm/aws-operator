@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	name = "encryptionv27"
+	name = "encryptionv28"
 )
 
 type Config struct {
