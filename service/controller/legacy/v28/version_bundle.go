@@ -8,13 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "Ensure the usage of the correct encryption key for AWS China.",
-				Kind:        versionbundle.KindFixed,
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Prevent race conditions in decryption units for AWS China.",
+				Component:   "TODO",
+				Description: "TODO",
 				Kind:        versionbundle.KindFixed,
 			},
 		},
@@ -41,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "5.1.0",
+		Version: "5.2.0",
 	}
 }
