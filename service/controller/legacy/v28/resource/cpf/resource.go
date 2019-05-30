@@ -12,7 +12,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cpfv28"
+	Name = "cpfv27"
 )
 
 type Config struct {

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Name = "ipamv28"
+	Name = "ipamv27"
 )
 
 type Config struct {

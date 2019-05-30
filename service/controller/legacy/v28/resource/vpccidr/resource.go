@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Name = "vpccidrv28"
+	Name = "vpccidrv27"
 )
 
 type Config struct {

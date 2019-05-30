@@ -1,4 +1,4 @@
-package v28
+package v27
 
 import (
 	"github.com/giantswarm/versionbundle"
