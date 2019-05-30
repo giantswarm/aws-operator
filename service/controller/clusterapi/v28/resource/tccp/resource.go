@@ -19,7 +19,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv27"
+	Name = "tccpv28"
 )
 
 const (
