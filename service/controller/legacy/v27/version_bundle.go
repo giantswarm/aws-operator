@@ -8,9 +8,14 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
-				Kind:        versionbundle.KindChanged,
+				Component:   "aws-operator",
+				Description: "Ensure the usage of the correct encryption key for AWS China.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Prevent race conditions in decryption units for AWS China.",
+				Kind:        versionbundle.KindFixed,
 			},
 		},
 		Components: []versionbundle.Component{
