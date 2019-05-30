@@ -23,8 +23,8 @@ import (
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 

@@ -12,8 +12,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/credential"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/credential"
 )
 
 const (
