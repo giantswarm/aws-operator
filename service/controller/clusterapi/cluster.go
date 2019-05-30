@@ -21,6 +21,9 @@ import (
 	v27 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27"
 	v27adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/adapter"
 	v27cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/cloudconfig"
+	v28 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
+	v28adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/adapter"
+	v28cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -268,8 +271,72 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV28 *controller.ResourceSet
+	{
+		c := v28.ClusterResourceSetConfig{
+			CertsSearcher:          certsSearcher,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			CMAClient:              config.CMAClient,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:  config.AccessLogsExpiration,
+			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			APIWhitelist: v28adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			CalicoCIDR:                 config.CalicoCIDR,
+			CalicoMTU:                  config.CalicoMTU,
+			CalicoSubnet:               config.CalicoSubnet,
+			ClusterIPRange:             config.ClusterIPRange,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			DockerDaemonCIDR:           config.DockerDaemonCIDR,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
+			OIDC: v28cloudconfig.ConfigOIDC{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSHUserList:    config.SSHUserList,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
+			VPCPeerID:      config.VPCPeerID,
+		}
+
+		resourceSetV28, err = v28.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV27,
+		resourceSetV28,
 	}
 
 	return resourceSets, nil
