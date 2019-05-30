@@ -5,8 +5,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
