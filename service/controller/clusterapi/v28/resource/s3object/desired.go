@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {

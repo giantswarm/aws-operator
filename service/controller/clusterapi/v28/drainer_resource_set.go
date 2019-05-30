@@ -12,13 +12,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/credential"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/legacykey"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/asgstatus"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/credential"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/tccpoutputs"
 )
 
 type DrainerResourceSetConfig struct {

@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

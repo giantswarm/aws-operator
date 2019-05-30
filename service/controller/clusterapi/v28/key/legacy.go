@@ -2,8 +2,8 @@ package key
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudformation/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/templates/cloudformation/tccp"
 )
 
 // NOTE that code below is deprecated and needs refactoring.

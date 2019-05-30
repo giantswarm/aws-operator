@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/microerror"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/templates/cloudconfig"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
