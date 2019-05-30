@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "asgstatusv27"
+	Name = "asgstatusv28"
 )
 
 type Config struct {
