@@ -16,7 +16,6 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
 )
 
@@ -132,30 +131,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v27ResourceSet *controller.ResourceSet
-	{
-		c := v27.DrainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				Region:          config.HostAWSConfig.Region,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-			},
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-
-			ProjectName:    config.ProjectName,
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		v27ResourceSet, err = v27.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v28ResourceSet *controller.ResourceSet
 	{
 		c := v28.DrainerResourceSetConfig{
@@ -181,7 +156,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v27ResourceSet,
 		v28ResourceSet,
 	}
 
