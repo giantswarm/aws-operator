@@ -16,8 +16,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	v27 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v27"
-	v28 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v27"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
 )
 
 type DrainerConfig struct {
