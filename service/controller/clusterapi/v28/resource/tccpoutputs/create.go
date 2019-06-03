@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/cloudformation"
@@ -137,44 +135,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
-		if cloudformation.IsOutputNotFound(err) {
-			// TODO this exception is necessary for clusters upgrading from v24 to
-			// v25. The code can be cleaned up in v28 and the controller context value
-			// assignment can be managed like the other examples below.
-			//
-			//     https://github.com/giantswarm/giantswarm/issues/5570
-			//
-			v, err := searchVPCID(cc.Client.TenantCluster.AWS.EC2, key.ClusterID(cr))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			cc.Status.TenantCluster.TCCP.VPC.ID = v
-		} else if err != nil {
+		if err != nil {
 			return microerror.Mask(err)
-		} else {
-			cc.Status.TenantCluster.TCCP.VPC.ID = v
 		}
+		cc.Status.TenantCluster.TCCP.VPC.ID = v
 	}
 
 	{
 		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
-		if cloudformation.IsOutputNotFound(err) {
-			// TODO this exception is necessary for clusters upgrading from v23 to
-			// v24. The code can be cleaned up in v25 and the controller context value
-			// assignment can be managed like the other examples below.
-			//
-			//     https://github.com/giantswarm/giantswarm/issues/5496
-			//
-			v, err := searchPeeringConnectionID(cc.Client.TenantCluster.AWS.EC2, key.ClusterID(cr))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
-		} else if err != nil {
+		if err != nil {
 			return microerror.Mask(err)
-		} else {
-			cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 		}
+		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 	}
 
 	{
@@ -210,66 +182,4 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
-}
-
-func searchPeeringConnectionID(client EC2, clusterID string) (string, error) {
-	var peeringID string
-	{
-		i := &ec2.DescribeVpcPeeringConnectionsInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("status-code"),
-					Values: []*string{
-						aws.String("active"),
-					},
-				},
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
-						aws.String(clusterID),
-					},
-				},
-			},
-		}
-
-		o, err := client.DescribeVpcPeeringConnections(i)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-		if len(o.VpcPeeringConnections) != 1 {
-			return "", microerror.Maskf(executionFailedError, "expected one vpc peering connection, got %d", len(o.VpcPeeringConnections))
-		}
-
-		peeringID = *o.VpcPeeringConnections[0].VpcPeeringConnectionId
-	}
-
-	return peeringID, nil
-}
-
-func searchVPCID(client EC2, clusterID string) (string, error) {
-	var vpcID string
-	{
-		i := &ec2.DescribeVpcsInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
-						aws.String(clusterID),
-					},
-				},
-			},
-		}
-
-		o, err := client.DescribeVpcs(i)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-		if len(o.Vpcs) != 1 {
-			return "", microerror.Maskf(executionFailedError, "expected one vpc, got %d", len(o.Vpcs))
-		}
-
-		vpcID = *o.Vpcs[0].VpcId
-	}
-
-	return vpcID, nil
 }
