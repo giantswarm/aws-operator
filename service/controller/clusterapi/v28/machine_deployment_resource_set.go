@@ -16,12 +16,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/asgstatus"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/tccpoutputs"
 )
 
-type DrainerResourceSetConfig struct {
+type MachineDeploymentResourceSetConfig struct {
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	K8sClient              kubernetes.Interface
@@ -32,7 +29,7 @@ type DrainerResourceSetConfig struct {
 	Route53Enabled bool
 }
 
-func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
+func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var asgStatusResource controller.Resource
@@ -48,51 +45,8 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var drainerResource controller.Resource
-	{
-		c := drainer.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		drainerResource, err = drainer.NewResource(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var drainFinisherResource controller.Resource
-	{
-		c := drainfinisher.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		drainFinisherResource, err = drainfinisher.NewResource(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var tccpOutputsResource controller.Resource
-	{
-		c := tccpoutputs.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		tccpOutputsResource, err = tccpoutputs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resources := []controller.Resource{
-		tccpOutputsResource,
 		asgStatusResource,
-		drainerResource,
-		drainFinisherResource,
 	}
 
 	{
@@ -116,12 +70,12 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToCluster(obj)
+		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return false
 		}
 
-		if key.ClusterVersion(cr) == VersionBundle().Version {
+		if key.WorkerVersion(cr) == VersionBundle().Version {
 			return true
 		}
 
