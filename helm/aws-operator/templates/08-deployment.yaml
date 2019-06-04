@@ -36,7 +36,7 @@ spec:
       serviceAccountName: aws-operator
       containers:
       - name: aws-operator
-        image: quay.io/giantswarm/aws-operator:[[ .SHA ]]
+        image: quay.io/giantswarm/aws-operator:[[ .DockerTag ]]
         volumeMounts:
         - name: aws-operator-configmap
           mountPath: /var/run/aws-operator/configmap/
