@@ -19,7 +19,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
@@ -47,13 +47,14 @@ type Config struct {
 type Service struct {
 	Version *version.Service
 
-	bootOnce                    sync.Once
-	clusterapiClusterController *clusterapi.Cluster
-	clusterapiDrainerController *clusterapi.Drainer
-	legacyClusterController     *legacy.Cluster
-	legacyDrainerController     *legacy.Drainer
-	operatorCollector           *collector.Set
-	statusResourceCollector     *statusresource.CollectorSet
+	bootOnce                              sync.Once
+	clusterapiClusterController           *clusterapi.Cluster
+	clusterapiDrainerController           *clusterapi.Drainer
+	clusterapiMachineDeploymentController *clusterapi.MachineDeployment
+	legacyClusterController               *legacy.Cluster
+	legacyDrainerController               *legacy.Drainer
+	operatorCollector                     *collector.Set
+	statusResourceCollector               *statusresource.CollectorSet
 }
 
 // New creates a new configured service object.
@@ -114,9 +115,9 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	var awsConfig clientaws.Config
+	var awsConfig aws.Config
 	{
-		awsConfig = clientaws.Config{
+		awsConfig = aws.Config{
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
@@ -150,41 +151,29 @@ func New(config Config) (*Service, error) {
 			Logger:           config.Logger,
 			NetworkAllocator: networkAllocator,
 
+			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
+			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
 			APIWhitelist: clusterapi.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
 				SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.SubnetList),
 			},
-			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
-			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
-			CalicoCIDR:            config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
-			CalicoMTU:             config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
-			CalicoSubnet:          config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
-			ClusterIPRange:        config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
-			DeleteLoggingBucket:   config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
-			DockerDaemonCIDR:      config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
-			EncrypterBackend:      config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
-			GuestAWSConfig: clusterapi.ClusterConfigAWSConfig{
-				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
-				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
-				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
-			},
+			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
+			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
+			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
+			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
+			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
+			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
+			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
+			GuestAvailabilityZones:     config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
 			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
-			HostAWSConfig: clusterapi.ClusterConfigAWSConfig{
-				AccessKeyID:       config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
-				AccessKeySecret:   config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-				AvailabilityZones: config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
-				SessionToken:      config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
-				Region:            config.Viper.GetString(config.Flag.Service.AWS.Region),
-			},
-			IgnitionPath:            config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
-			IncludeTags:             config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
-			InstallationName:        config.Viper.GetString(config.Flag.Service.Installation.Name),
-			IPAMNetworkRange:        *ipamNetworkRange,
-			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			HostAWSConfig:              awsConfig,
+			IgnitionPath:               config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
+			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
+			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
+			IPAMNetworkRange:           *ipamNetworkRange,
+			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			OIDC: clusterapi.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
@@ -217,23 +206,32 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			GuestAWSConfig: clusterapi.DrainerConfigAWS{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.AccessKey.Session),
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			},
-			HostAWSConfig: clusterapi.DrainerConfigAWS{
-				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
-				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
-				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			},
+			HostAWSConfig:  awsConfig,
 			ProjectName:    config.ProjectName,
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
 		clusterapiDrainerController, err = clusterapi.NewDrainer(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterapiMachineDeploymentController *clusterapi.MachineDeployment
+	{
+		c := clusterapi.MachineDeploymentConfig{
+			CMAClient:    cmaClient,
+			G8sClient:    g8sClient,
+			K8sClient:    k8sClient,
+			K8sExtClient: k8sExtClient,
+			Logger:       config.Logger,
+
+			HostAWSConfig:  awsConfig,
+			ProjectName:    config.ProjectName,
+			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+		}
+
+		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -386,13 +384,14 @@ func New(config Config) (*Service, error) {
 	s := &Service{
 		Version: versionService,
 
-		bootOnce:                    sync.Once{},
-		clusterapiClusterController: clusterapiClusterController,
-		clusterapiDrainerController: clusterapiDrainerController,
-		legacyClusterController:     legacyClusterController,
-		legacyDrainerController:     legacyDrainerController,
-		operatorCollector:           operatorCollector,
-		statusResourceCollector:     statusResourceCollector,
+		bootOnce:                              sync.Once{},
+		clusterapiClusterController:           clusterapiClusterController,
+		clusterapiDrainerController:           clusterapiDrainerController,
+		clusterapiMachineDeploymentController: clusterapiMachineDeploymentController,
+		legacyClusterController:               legacyClusterController,
+		legacyDrainerController:               legacyDrainerController,
+		operatorCollector:                     operatorCollector,
+		statusResourceCollector:               statusResourceCollector,
 	}
 
 	return s, nil
@@ -405,6 +404,7 @@ func (s *Service) Boot(ctx context.Context) {
 
 		go s.clusterapiClusterController.Boot(ctx)
 		go s.clusterapiDrainerController.Boot(ctx)
+		go s.clusterapiMachineDeploymentController.Boot(ctx)
 		go s.legacyClusterController.Boot(ctx)
 		go s.legacyDrainerController.Boot(ctx)
 	})

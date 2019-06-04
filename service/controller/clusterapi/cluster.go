@@ -17,7 +17,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	aws "github.com/giantswarm/aws-operator/client/aws"
 	v28 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
 	v28adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/adapter"
 	v28cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/cloudconfig"
@@ -42,12 +42,12 @@ type ClusterConfig struct {
 	DeleteLoggingBucket        bool
 	DockerDaemonCIDR           string
 	EncrypterBackend           string
-	GuestAWSConfig             ClusterConfigAWSConfig
+	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
 	GuestUpdateEnabled         bool
-	HostAWSConfig              ClusterConfigAWSConfig
+	HostAWSConfig              aws.Config
 	IgnitionPath               string
 	IncludeTags                bool
 	InstallationName           string
@@ -63,14 +63,6 @@ type ClusterConfig struct {
 	SSOPublicKey               string
 	VaultAddress               string
 	VPCPeerID                  string
-}
-
-type ClusterConfigAWSConfig struct {
-	AccessKeyID       string
-	AccessKeySecret   string
-	AvailabilityZones []string
-	Region            string
-	SessionToken      string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -164,16 +156,16 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	var controlPlaneAWSClients awsclient.Clients
+	var controlPlaneAWSClients aws.Clients
 	{
-		c := awsclient.Config{
+		c := aws.Config{
 			AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 			AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
 			Region:          config.HostAWSConfig.Region,
 			SessionToken:    config.HostAWSConfig.SessionToken,
 		}
 
-		controlPlaneAWSClients, err = awsclient.NewClients(c)
+		controlPlaneAWSClients, err = aws.NewClients(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -212,16 +204,11 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			CMAClient:              config.CMAClient,
 			G8sClient:              config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				Region:          config.HostAWSConfig.Region,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-			},
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			NetworkAllocator:   config.NetworkAllocator,
-			RandomKeysSearcher: randomKeysSearcher,
+			HostAWSConfig:          config.HostAWSConfig,
+			K8sClient:              config.K8sClient,
+			Logger:                 config.Logger,
+			NetworkAllocator:       config.NetworkAllocator,
+			RandomKeysSearcher:     randomKeysSearcher,
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
@@ -236,7 +223,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,
 			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestAvailabilityZones:     config.GuestAvailabilityZones,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,

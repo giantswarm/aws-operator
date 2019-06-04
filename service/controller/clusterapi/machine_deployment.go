@@ -1,8 +1,6 @@
 package clusterapi
 
 import (
-	"time"
-
 	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
@@ -19,7 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
 )
 
-type DrainerConfig struct {
+type MachineDeploymentConfig struct {
 	CMAClient    clientset.Interface
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
@@ -31,11 +29,11 @@ type DrainerConfig struct {
 	Route53Enabled bool
 }
 
-type Drainer struct {
+type MachineDeployment struct {
 	*controller.Controller
 }
 
-func NewDrainer(config DrainerConfig) (*Drainer, error) {
+func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, error) {
 	if config.CMAClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
 	}
@@ -59,10 +57,10 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.CMAClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll),
+			Watcher: config.CMAClient.ClusterV1alpha1().MachineDeployments(corev1.NamespaceAll),
 
 			RateWait:     informer.DefaultRateWait,
-			ResyncPeriod: 30 * time.Second,
+			ResyncPeriod: informer.DefaultResyncPeriod,
 		}
 
 		newInformer, err = informer.New(c)
@@ -71,7 +69,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		}
 	}
 
-	resourceSets, err := newDrainerResourceSets(config)
+	resourceSets, err := newMachineDeploymentResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -79,7 +77,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          clusterv1alpha1.NewClusterCRD(),
+			CRD:          clusterv1alpha1.NewMachineDeploymentCRD(),
 			CRDClient:    crdClient,
 			Informer:     newInformer,
 			Logger:       config.Logger,
@@ -87,8 +85,8 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			RESTClient:   config.CMAClient.ClusterV1alpha1().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
-			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
-			Name: config.ProjectName + "-drainer-controller",
+			// like operatorkit.giantswarm.io/aws-operator-machine-deployment-controller.
+			Name: config.ProjectName + "-machine-deployment-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -97,14 +95,14 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		}
 	}
 
-	d := &Drainer{
+	c := &MachineDeployment{
 		Controller: operatorkitController,
 	}
 
-	return d, nil
+	return c, nil
 }
 
-func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
+func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	var controlPlaneAWSClients aws.Clients
@@ -124,7 +122,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 
 	var v28ResourceSet *controller.ResourceSet
 	{
-		c := v28.DrainerResourceSetConfig{
+		c := v28.MachineDeploymentResourceSetConfig{
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			K8sClient:              config.K8sClient,
@@ -135,7 +133,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		v28ResourceSet, err = v28.NewDrainerResourceSet(c)
+		v28ResourceSet, err = v28.NewMachineDeploymentResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
