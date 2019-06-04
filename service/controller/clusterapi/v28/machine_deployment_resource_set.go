@@ -70,12 +70,12 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToCluster(obj)
+		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return false
 		}
 
-		if key.ClusterVersion(cr) == VersionBundle().Version {
+		if key.WorkerVersion(cr) == VersionBundle().Version {
 			return true
 		}
 
