@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
@@ -14,8 +13,6 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/statusresource"
-	"github.com/giantswarm/tenantcluster"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
@@ -28,7 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/legacykey"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/bridgezone"
@@ -527,54 +524,38 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var certsSearcher certs.Interface
-	{
-		c := certs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-
-			WatchTimeout: 5 * time.Second,
-		}
-
-		certsSearcher, err = certs.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var tenantCluster tenantcluster.Interface
-	{
-		c := tenantcluster.Config{
-			CertsSearcher: certsSearcher,
-			Logger:        config.Logger,
-
-			CertID: certs.APICert,
-		}
-
-		tenantCluster, err = tenantcluster.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var statusResource controller.Resource
-	{
-		c := statusresource.ResourceConfig{
-			ClusterEndpointFunc:      legacykey.ToClusterEndpoint,
-			ClusterIDFunc:            legacykey.ToClusterID,
-			ClusterStatusFunc:        legacykey.ToClusterStatus,
-			NodeCountFunc:            legacykey.ToNodeCount,
-			Logger:                   config.Logger,
-			RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
-			TenantCluster:            tenantCluster,
-			VersionBundleVersionFunc: legacykey.ToVersionBundleVersion,
-		}
-
-		statusResource, err = statusresource.NewResource(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+	// TODO use that code later when the new Node Pool ready status resource is
+	// used again.
+	//
+	//var certsSearcher certs.Interface
+	//{
+	//	c := certs.Config{
+	//		K8sClient: config.K8sClient,
+	//		Logger:    config.Logger,
+	//
+	//		WatchTimeout: 5 * time.Second,
+	//	}
+	//
+	//	certsSearcher, err = certs.NewSearcher(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
+	//
+	//var tenantCluster tenantcluster.Interface
+	//{
+	//	c := tenantcluster.Config{
+	//		CertsSearcher: certsSearcher,
+	//		Logger:        config.Logger,
+	//
+	//		CertID: certs.APICert,
+	//	}
+	//
+	//	tenantCluster, err = tenantcluster.New(c)
+	//	if err != nil {
+	//		return nil, microerror.Mask(err)
+	//	}
+	//}
 
 	var vpcCIDRResource controller.Resource
 	{
@@ -599,7 +580,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpOutputsResource,
 		tccpSubnetResource,
 		asgStatusResource,
-		statusResource,
 		ipamResource,
 		bridgeZoneResource,
 		encryptionResource,
@@ -637,12 +617,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		customObject, err := legacykey.ToCustomObject(obj)
+		cr, err := key.ToCluster(obj)
 		if err != nil {
 			return false
 		}
 
-		if legacykey.ClusterVersion(customObject) == VersionBundle().Version {
+		if key.ClusterVersion(cr) == VersionBundle().Version {
 			return true
 		}
 
