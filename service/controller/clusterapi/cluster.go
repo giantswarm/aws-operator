@@ -17,8 +17,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	aws "github.com/giantswarm/aws-operator/client/aws"
-	v28 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
+	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
 	v28adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/adapter"
 	v28cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/network"
