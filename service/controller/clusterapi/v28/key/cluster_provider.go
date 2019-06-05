@@ -2,6 +2,7 @@ package key
 
 import (
 	"encoding/json"
+	"fmt"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -20,10 +21,17 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 	if cmaSpec.Value == nil {
 		panic("provider spec value must not be empty")
 	}
+	fmt.Printf("\n")
+	fmt.Printf("4\n")
+	fmt.Printf("%#v\n", cmaSpec.Value.Raw)
+	fmt.Printf("\n")
 
 	var g8sSpec g8sv1alpha1.AWSClusterSpec
 	{
 		if len(cmaSpec.Value.Raw) == 0 {
+			fmt.Printf("\n")
+			fmt.Printf("5\n")
+			fmt.Printf("\n")
 			return g8sSpec
 		}
 
@@ -32,6 +40,10 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 			panic(err)
 		}
 	}
+	fmt.Printf("\n")
+	fmt.Printf("6\n")
+	fmt.Printf("%#v\n", g8sSpec)
+	fmt.Printf("\n")
 
 	return g8sSpec
 }
