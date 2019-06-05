@@ -23,7 +23,7 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 	}
 	fmt.Printf("\n")
 	fmt.Printf("4\n")
-	fmt.Printf("%#v\n", cmaSpec.Value.Raw)
+	fmt.Printf("%s\n", cmaSpec.Value.Raw)
 	fmt.Printf("\n")
 
 	var g8sSpec g8sv1alpha1.AWSClusterSpec
