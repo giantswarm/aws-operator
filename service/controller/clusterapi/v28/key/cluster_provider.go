@@ -21,21 +21,22 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 	if cmaSpec.Value == nil {
 		panic("provider spec value must not be empty")
 	}
-	fmt.Printf("\n")
-	fmt.Printf("4\n")
-	fmt.Printf("%s\n", cmaSpec.Value.Raw)
-	fmt.Printf("\n")
 
 	var g8sSpec g8sv1alpha1.AWSClusterSpec
 	{
-		if len(cmaSpec.Value.Raw) == 0 {
+		if cmaSpec.Value == nil || len(cmaSpec.Value.Raw) == 0 {
 			fmt.Printf("\n")
 			fmt.Printf("5\n")
 			fmt.Printf("\n")
 			return g8sSpec
 		}
 
-		err := json.Unmarshal(cmaSpec.Value.Raw, &g8sSpec)
+		b, err := cmaSpec.Value.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(b, &g8sSpec)
 		if err != nil {
 			panic(err)
 		}
