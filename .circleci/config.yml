@@ -18,9 +18,10 @@ e2eTest: &e2eTest
         command: ./e2e-harness teardown
         when: always
 
+orbs:
+  architect: giantswarm/architect@0.1.0
 
-
-version: 2
+version: 2.1
 jobs:
   build:
     machine: true
@@ -226,6 +227,18 @@ workflows:
   build_e2e:
     jobs:
       - build
+      - architect/push-to-app-catalog:
+          name: "build and push aws-operator chart"
+          app_catalog: "control-plane-catalog"
+          app_catalog_test: "control-plane-test-catalog"
+          chart: "aws-operator"
+          # Make sure docker image is successfully built.
+          requires:
+            - build
+          # Needed to trigger job on git tag.
+          filters:
+            tags:
+              only: /^v.*/
       - hold:
           type: approval
       - master:
