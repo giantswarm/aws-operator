@@ -22,7 +22,12 @@ func mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(cmaSpec cmav1alpha
 			return g8sSpec
 		}
 
-		err := json.Unmarshal(cmaSpec.Value.Raw, &g8sSpec)
+		b, err := cmaSpec.Value.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(b, &g8sSpec)
 		if err != nil {
 			panic(err)
 		}
