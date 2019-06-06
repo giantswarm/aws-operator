@@ -37,6 +37,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/loadbalancer"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/machinedeployment"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/peerrolearn"
@@ -61,8 +62,8 @@ const (
 
 type ClusterResourceSetConfig struct {
 	CertsSearcher          certs.Interface
-	ControlPlaneAWSClients aws.Clients
 	CMAClient              clientset.Interface
+	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface
@@ -253,6 +254,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var machineDeploymentResource controller.Resource
+	{
+		c := machinedeployment.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentResource, err = machinedeployment.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -573,6 +587,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		machineDeploymentResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
