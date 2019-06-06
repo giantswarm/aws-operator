@@ -275,17 +275,22 @@ func statusClusterNetworkCIDR(cluster cmav1alpha1.Cluster) string {
 }
 
 func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
-	if cmaStatus == nil {
-		panic("provider status value must not be empty")
-	}
-
 	var g8sStatus g8sv1alpha1.AWSClusterStatus
 	{
+		if cmaStatus == nil {
+			return g8sStatus
+		}
+
 		if len(cmaStatus.Raw) == 0 {
 			return g8sStatus
 		}
 
-		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
+		b, err := cmaStatus.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(b, &g8sStatus)
 		if err != nil {
 			panic(err)
 		}
