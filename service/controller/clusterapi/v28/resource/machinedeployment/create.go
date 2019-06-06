@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
@@ -34,7 +35,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 		if len(out.Items) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find machine deployment for cluster")
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
+			reconciliationcanceledcontext.SetCanceled(ctx)
+
 			return nil
 		}
 		if len(out.Items) != 1 {
