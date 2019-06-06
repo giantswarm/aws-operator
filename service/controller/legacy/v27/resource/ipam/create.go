@@ -285,12 +285,7 @@ func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g
 			return g8sStatus
 		}
 
-		b, err := cmaStatus.MarshalJSON()
-		if err != nil {
-			panic(err)
-		}
-
-		err = json.Unmarshal(b, &g8sStatus)
+		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
 		if err != nil {
 			panic(err)
 		}

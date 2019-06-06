@@ -27,12 +27,7 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 			return g8sSpec
 		}
 
-		b, err := cmaSpec.Value.MarshalJSON()
-		if err != nil {
-			panic(err)
-		}
-
-		err = json.Unmarshal(b, &g8sSpec)
+		err := json.Unmarshal(cmaSpec.Value.Raw, &g8sSpec)
 		if err != nil {
 			panic(err)
 		}
@@ -52,12 +47,7 @@ func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g
 			return g8sStatus
 		}
 
-		b, err := cmaStatus.MarshalJSON()
-		if err != nil {
-			panic(err)
-		}
-
-		err = json.Unmarshal(b, &g8sStatus)
+		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
 		if err != nil {
 			panic(err)
 		}
