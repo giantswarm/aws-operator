@@ -36,13 +36,19 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 			panic(err)
 		}
 
+		fmt.Printf("\n")
+		fmt.Printf("7\n")
+		fmt.Printf("%s\n", b)
+		fmt.Printf("%#v\n", cmaSpec.Value.Object)
+		fmt.Printf("\n")
+
 		err = json.Unmarshal(b, &g8sSpec)
 		if err != nil {
 			panic(err)
 		}
 	}
 	fmt.Printf("\n")
-	fmt.Printf("6\n")
+	fmt.Printf("8\n")
 	fmt.Printf("%#v\n", g8sSpec)
 	fmt.Printf("\n")
 

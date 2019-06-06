@@ -669,20 +669,20 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 		fmt.Printf("\n")
-		fmt.Printf("3\n")
+		fmt.Printf("4\n")
 		fmt.Printf("%#v\n", key.ClusterVersion(cr))
 		fmt.Printf("%#v\n", VersionBundle().Version)
 		fmt.Printf("\n")
 
 		if key.ClusterVersion(cr) == VersionBundle().Version {
 			fmt.Printf("\n")
-			fmt.Printf("7\n")
+			fmt.Printf("9\n")
 			fmt.Printf("\n")
 			return true
 		}
 
 		fmt.Printf("\n")
-		fmt.Printf("8\n")
+		fmt.Printf("10\n")
 		fmt.Printf("\n")
 		return false
 	}
