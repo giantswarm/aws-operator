@@ -37,12 +37,12 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 }
 
 func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
-	if cmaStatus == nil {
-		panic("provider status value must not be empty")
-	}
-
 	var g8sStatus g8sv1alpha1.AWSClusterStatus
 	{
+		if cmaStatus == nil {
+			return g8sStatus
+		}
+
 		if len(cmaStatus.Raw) == 0 {
 			return g8sStatus
 		}
