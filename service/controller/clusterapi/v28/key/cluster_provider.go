@@ -2,7 +2,6 @@ package key
 
 import (
 	"encoding/json"
-	"fmt"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,10 +23,7 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 
 	var g8sSpec g8sv1alpha1.AWSClusterSpec
 	{
-		if cmaSpec.Value == nil || len(cmaSpec.Value.Raw) == 0 {
-			fmt.Printf("\n")
-			fmt.Printf("5\n")
-			fmt.Printf("\n")
+		if len(cmaSpec.Value.Raw) == 0 {
 			return g8sSpec
 		}
 
@@ -36,37 +32,32 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 			panic(err)
 		}
 
-		fmt.Printf("\n")
-		fmt.Printf("7\n")
-		fmt.Printf("%s\n", b)
-		fmt.Printf("%#v\n", cmaSpec.Value.Object)
-		fmt.Printf("\n")
-
 		err = json.Unmarshal(b, &g8sSpec)
 		if err != nil {
 			panic(err)
 		}
 	}
-	fmt.Printf("\n")
-	fmt.Printf("8\n")
-	fmt.Printf("%#v\n", g8sSpec)
-	fmt.Printf("\n")
 
 	return g8sSpec
 }
 
 func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
-	if cmaStatus == nil {
-		panic("provider status value must not be empty")
-	}
-
 	var g8sStatus g8sv1alpha1.AWSClusterStatus
 	{
+		if cmaStatus == nil {
+			return g8sStatus
+		}
+
 		if len(cmaStatus.Raw) == 0 {
 			return g8sStatus
 		}
 
-		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
+		b, err := cmaStatus.MarshalJSON()
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(b, &g8sStatus)
 		if err != nil {
 			panic(err)
 		}

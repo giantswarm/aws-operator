@@ -617,72 +617,26 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	// 1
-	// &v1alpha1.Cluster{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""},
-	// ObjectMeta:v1.ObjectMeta{Name:"8y5kc", GenerateName:"",
-	// Namespace:"default",
-	// SelfLink:"/apis/cluster.k8s.io/v1alpha1/namespaces/default/clusters/8y5kc",
-	// UID:"f8bf88f7-86ad-11e9-82f1-0a742243f2b4", ResourceVersion:"51913900",
-	// Generation:2, CreationTimestamp:v1.Time{Time:time.Time{wall:0x0,
-	// ext:63695238537, loc:(*time.Location)(0x3bd3860)}},
-	// DeletionTimestamp:(*v1.Time)(nil),
-	// DeletionGracePeriodSeconds:(*int64)(nil), Labels:map[string]string(nil),
-	// Annotations:map[string]string(nil),
-	// OwnerReferences:[]v1.OwnerReference(nil),
-	// Initializers:(*v1.Initializers)(nil), Finalizers:[]string(nil),
-	// ClusterName:""},
-	// Spec:v1alpha1.ClusterSpec{ClusterNetwork:v1alpha1.ClusterNetworkingConfig{Services:v1alpha1.NetworkRanges{CIDRBlocks:[]string(nil)},
-	// Pods:v1alpha1.NetworkRanges{CIDRBlocks:[]string(nil)}, ServiceDomain:""},
-	// ProviderSpec:v1alpha1.ProviderSpec{Value:(*runtime.RawExtension)(0xc0007c7ce0),
-	// ValueFrom:(*v1alpha1.ProviderSpecSource)(nil)}},
-	// Status:v1alpha1.ClusterStatus{APIEndpoints:[]v1alpha1.APIEndpoint(nil),
-	// ErrorReason:"", ErrorMessage:"",
-	// ProviderStatus:(*runtime.RawExtension)(nil)}}
-	//
-	// 3
-	// v1alpha1.Cluster{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""},
-	// ObjectMeta:v1.ObjectMeta{Name:"8y5kc", GenerateName:"",
-	// Namespace:"default",
-	// SelfLink:"/apis/cluster.k8s.io/v1alpha1/namespaces/default/clusters/8y5kc",
-	// UID:"f8bf88f7-86ad-11e9-82f1-0a742243f2b4", ResourceVersion:"51913900",
-	// Generation:2, CreationTimestamp:v1.Time{Time:time.Time{wall:0x0,
-	// ext:63695238537, loc:(*time.Location)(0x3bd3860)}},
-	// DeletionTimestamp:(*v1.Time)(nil),
-	// DeletionGracePeriodSeconds:(*int64)(nil), Labels:map[string]string(nil),
-	// Annotations:map[string]string(nil),
-	// OwnerReferences:[]v1.OwnerReference(nil),
-	// Initializers:(*v1.Initializers)(nil), Finalizers:[]string(nil),
-	// ClusterName:""},
-	// Spec:v1alpha1.ClusterSpec{ClusterNetwork:v1alpha1.ClusterNetworkingConfig{Services:v1alpha1.NetworkRanges{CIDRBlocks:[]string(nil)},
-	// Pods:v1alpha1.NetworkRanges{CIDRBlocks:[]string(nil)}, ServiceDomain:""},
-	// ProviderSpec:v1alpha1.ProviderSpec{Value:(*runtime.RawExtension)(0xc00056e480),
-	// ValueFrom:(*v1alpha1.ProviderSpecSource)(nil)}},
-	// Status:v1alpha1.ClusterStatus{APIEndpoints:[]v1alpha1.APIEndpoint(nil),
-	// ErrorReason:"", ErrorMessage:"",
-	// ProviderStatus:(*runtime.RawExtension)(nil)}}
-	//
-	// 5
-	//
 	handlesFunc := func(obj interface{}) bool {
 		cr, err := key.ToCluster(obj)
 		if err != nil {
 			return false
 		}
 		fmt.Printf("\n")
-		fmt.Printf("4\n")
+		fmt.Printf("1\n")
 		fmt.Printf("%#v\n", key.ClusterVersion(cr))
 		fmt.Printf("%#v\n", VersionBundle().Version)
 		fmt.Printf("\n")
 
 		if key.ClusterVersion(cr) == VersionBundle().Version {
 			fmt.Printf("\n")
-			fmt.Printf("9\n")
+			fmt.Printf("2\n")
 			fmt.Printf("\n")
 			return true
 		}
 
 		fmt.Printf("\n")
-		fmt.Printf("10\n")
+		fmt.Printf("3\n")
 		fmt.Printf("\n")
 		return false
 	}
