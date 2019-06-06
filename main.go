@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	description string     = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
+	description string     = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS. lol hi"
 	f           *flag.Flag = flag.New()
 	gitCommit   string     = "n/a"
 	name        string     = "aws-operator"
