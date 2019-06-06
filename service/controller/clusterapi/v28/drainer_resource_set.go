@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
@@ -18,10 +19,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/machinedeployment"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/tccpoutputs"
 )
 
 type DrainerResourceSetConfig struct {
+	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	K8sClient              kubernetes.Interface
@@ -74,6 +77,19 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var machineDeploymentResource controller.Resource
+	{
+		c := machinedeployment.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentResource, err = machinedeployment.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpOutputsResource controller.Resource
 	{
 		c := tccpoutputs.Config{
@@ -89,6 +105,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		machineDeploymentResource,
 		tccpOutputsResource,
 		asgStatusResource,
 		drainerResource,

@@ -125,6 +125,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v28ResourceSet *controller.ResourceSet
 	{
 		c := v28.DrainerResourceSetConfig{
+			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			K8sClient:              config.K8sClient,
