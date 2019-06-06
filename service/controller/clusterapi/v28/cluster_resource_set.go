@@ -2,7 +2,6 @@ package v28
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"strings"
 
@@ -637,22 +636,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		if err != nil {
 			return false
 		}
-		fmt.Printf("\n")
-		fmt.Printf("1\n")
-		fmt.Printf("%#v\n", key.ClusterVersion(cr))
-		fmt.Printf("%#v\n", VersionBundle().Version)
-		fmt.Printf("\n")
 
 		if key.ClusterVersion(cr) == VersionBundle().Version {
-			fmt.Printf("\n")
-			fmt.Printf("2\n")
-			fmt.Printf("\n")
 			return true
 		}
 
-		fmt.Printf("\n")
-		fmt.Printf("3\n")
-		fmt.Printf("\n")
 		return false
 	}
 
