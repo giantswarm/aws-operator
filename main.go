@@ -24,19 +24,23 @@ var (
 )
 
 func main() {
-	err := mainError()
+	err := mainError(context.Background())
 	if err != nil {
 		panic(fmt.Sprintf("%#v", err))
 	}
 }
 
-func mainError() error {
+func mainError(ctx context.Context) error {
 	var err error
 
-	ctx := context.Background()
-	logger, err := micrologger.New(micrologger.Config{})
-	if err != nil {
-		return microerror.Mask(err)
+	var newLogger micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		newLogger, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	// We define a server factory to create the custom server once all command
@@ -47,7 +51,7 @@ func mainError() error {
 		{
 			c := service.Config{
 				Flag:   f,
-				Logger: logger,
+				Logger: newLogger,
 				Viper:  v,
 
 				Description: description,
@@ -68,7 +72,7 @@ func mainError() error {
 		var newServer microserver.Server
 		{
 			c := server.Config{
-				Logger:  logger,
+				Logger:  newLogger,
 				Service: newService,
 				Viper:   v,
 
@@ -88,7 +92,7 @@ func mainError() error {
 	var newCommand command.Command
 	{
 		c := command.Config{
-			Logger:        logger,
+			Logger:        newLogger,
 			ServerFactory: serverFactory,
 
 			Description:    description,
