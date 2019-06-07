@@ -33,11 +33,11 @@ func main() {
 func mainError(ctx context.Context) error {
 	var err error
 
-	var newLogger micrologger.Logger
+	var logger micrologger.Logger
 	{
 		c := micrologger.Config{}
 
-		newLogger, err = micrologger.New(c)
+		logger, err = micrologger.New(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -51,7 +51,7 @@ func mainError(ctx context.Context) error {
 		{
 			c := service.Config{
 				Flag:   f,
-				Logger: newLogger,
+				Logger: logger,
 				Viper:  v,
 
 				Description: description,
@@ -72,7 +72,7 @@ func mainError(ctx context.Context) error {
 		var newServer microserver.Server
 		{
 			c := server.Config{
-				Logger:  newLogger,
+				Logger:  logger,
 				Service: newService,
 				Viper:   v,
 
@@ -92,7 +92,7 @@ func mainError(ctx context.Context) error {
 	var newCommand command.Command
 	{
 		c := command.Config{
-			Logger:        newLogger,
+			Logger:        logger,
 			ServerFactory: serverFactory,
 
 			Description:    description,
