@@ -24,7 +24,7 @@ var (
 )
 
 func main() {
-	err := mainError(context.Background())
+	err := mainE(context.Background())
 	if err != nil {
 		panic(fmt.Sprintf("%#v", err))
 	}
