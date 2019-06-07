@@ -24,19 +24,23 @@ var (
 )
 
 func main() {
-	err := mainError()
+	err := mainE(context.Background())
 	if err != nil {
 		panic(fmt.Sprintf("%#v", err))
 	}
 }
 
-func mainError() error {
+func mainE(ctx context.Context) error {
 	var err error
 
-	ctx := context.Background()
-	logger, err := micrologger.New(micrologger.Config{})
-	if err != nil {
-		return microerror.Mask(err)
+	var logger micrologger.Logger
+	{
+		c := micrologger.Config{}
+
+		logger, err = micrologger.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	// We define a server factory to create the custom server once all command

@@ -27,10 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
-const (
-	RedactedString = "[REDACTED]"
-)
-
 // Config represents the configuration used to create a new service.
 type Config struct {
 	Logger micrologger.Logger
