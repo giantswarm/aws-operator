@@ -30,7 +30,7 @@ func main() {
 	}
 }
 
-func mainError(ctx context.Context) error {
+func mainE(ctx context.Context) error {
 	var err error
 
 	var logger micrologger.Logger
