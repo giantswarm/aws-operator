@@ -3,6 +3,9 @@ kind: Pod
 metadata:
   name: k8s-controller-manager
   namespace: kube-system
+  labels:
+    k8s-app: controller-manager
+    tier: control-plane
   annotations:
     scheduler.alpha.kubernetes.io/critical-pod: ''
 spec:

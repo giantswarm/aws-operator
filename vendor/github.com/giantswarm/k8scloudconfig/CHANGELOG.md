@@ -13,7 +13,8 @@ version directory, and  then changes are introduced.
 
 ### Changed
 
--- Change Felix configuration to add metric server and expose data to be scraped for prometheus.
+- Change Felix configuration to add metric server and expose data to be scraped for prometheus.
+- Add `k8s-app` label for `api-server`, `controller-manager` and `scheduler`.
 
 ## [v4.3.0]
 
