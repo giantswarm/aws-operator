@@ -138,7 +138,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.ClusterVersion(cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == VersionBundle().Version {
 			return true
 		}
 
@@ -146,9 +146,14 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		cr, err := key.ToCluster(obj)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
 		var tenantClusterAWSClients aws.Clients
 		{
-			arn, err := credential.GetARN(config.K8sClient, obj)
+			arn, err := credential.GetARN(config.K8sClient, cr)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}

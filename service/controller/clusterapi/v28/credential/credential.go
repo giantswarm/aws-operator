@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
@@ -20,10 +21,25 @@ const (
 	DefaultNamespace = "giantswarm"
 )
 
-func GetARN(k8sClient kubernetes.Interface, obj interface{}) (string, error) {
-	credential, err := readCredential(k8sClient, obj)
-	if err != nil {
-		return "", microerror.Mask(err)
+func GetARN(k8sClient kubernetes.Interface, cr v1alpha1.Cluster) (string, error) {
+	var err error
+
+	var credential *corev1.Secret
+	{
+		credentialName := key.CredentialName(cr)
+		if credentialName == "" {
+			return "", microerror.Mask(credentialNameEmpty)
+		}
+
+		credentialNamespace := key.CredentialNamespace(cr)
+		if credentialName == "" {
+			return "", microerror.Mask(credentialNamespaceEmpty)
+		}
+
+		credential, err = k8sClient.CoreV1().Secrets(credentialNamespace).Get(credentialName, metav1.GetOptions{})
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
 	arn, err := getARN(credential)
@@ -57,28 +73,4 @@ func getARN(credential *corev1.Secret) (string, error) {
 	}
 
 	return string(arn), nil
-}
-
-func readCredential(k8sClient kubernetes.Interface, obj interface{}) (*corev1.Secret, error) {
-	cr, err := key.ToCluster(obj)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	credentialName := key.CredentialName(cr)
-	if credentialName == "" {
-		return nil, microerror.Mask(credentialNameEmpty)
-	}
-
-	credentialNamespace := key.CredentialNamespace(cr)
-	if credentialName == "" {
-		return nil, microerror.Mask(credentialNamespaceEmpty)
-	}
-
-	credential, err := k8sClient.CoreV1().Secrets(credentialNamespace).Get(credentialName, metav1.GetOptions{})
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	return credential, nil
 }

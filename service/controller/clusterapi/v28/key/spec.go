@@ -7,3 +7,7 @@ import (
 type DeletionTimestampGetter interface {
 	GetDeletionTimestamp() *metav1.Time
 }
+
+type LabelsGetter interface {
+	GetLabels() map[string]string
+}

@@ -2,6 +2,10 @@ package key
 
 import "fmt"
 
+const (
+	LabelOperatorVersion = "aws-operator.giantswarm.io/version"
+)
+
 func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
@@ -31,6 +35,10 @@ func NATRouteName(idx int) string {
 		return "NATRoute"
 	}
 	return fmt.Sprintf("NATRoute%02d", idx)
+}
+
+func OperatorVersion(getter LabelsGetter) string {
+	return getter.GetLabels()[LabelOperatorVersion]
 }
 
 func PrivateRouteTableName(idx int) string {

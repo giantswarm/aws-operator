@@ -135,6 +135,12 @@ func processInterfaceMap(in map[interface{}]interface{}) map[string]interface{} 
 }
 
 func processValue(v interface{}) interface{} {
+	// yaml null-valued key unmarshalls to nil value in Go, so nil is a valid value that has to be handled
+	// See https://helm.sh/docs/chart_template_guide/#deleting-a-default-key.
+	if v == nil {
+		return v
+	}
+
 	switch v := v.(type) {
 	case bool:
 		return v

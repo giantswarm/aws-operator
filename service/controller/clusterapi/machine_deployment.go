@@ -123,6 +123,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	var v28ResourceSet *controller.ResourceSet
 	{
 		c := v28.MachineDeploymentResourceSetConfig{
+			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			K8sClient:              config.K8sClient,

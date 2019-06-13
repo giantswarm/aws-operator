@@ -13,6 +13,8 @@ import (
 //     kind: AWSMachineDeploymentSpec
 //     apiVersion: cluster.giantswarm.io/v1alpha1
 //     metadata:
+//       labels:
+//         aws-operator.giantswarm.io/version: 2.0.0
 //       name: al9qy
 //     nodePool:
 //       description: my fancy node pool
@@ -22,8 +24,6 @@ import (
 //       scaling:
 //         max: 3
 //         min: 3
-//       versionBundle:
-//         version: 4.9.0
 //     provider:
 //       availabilityZones:
 //         - eu-central-1a
@@ -38,10 +38,9 @@ type AWSMachineDeploymentSpec struct {
 }
 
 type AWSMachineDeploymentSpecNodePool struct {
-	Description   string                                        `json:"description" yaml:"description"`
-	Machine       AWSMachineDeploymentSpecNodePoolMachine       `json:"machine" yaml:"machine"`
-	Scaling       AWSMachineDeploymentSpecNodePoolScaling       `json:"scaling" yaml:"scaling"`
-	VersionBundle AWSMachineDeploymentSpecNodePoolVersionBundle `json:"versionBundle" yaml:"versionBundle"`
+	Description string                                  `json:"description" yaml:"description"`
+	Machine     AWSMachineDeploymentSpecNodePoolMachine `json:"machine" yaml:"machine"`
+	Scaling     AWSMachineDeploymentSpecNodePoolScaling `json:"scaling" yaml:"scaling"`
 }
 
 type AWSMachineDeploymentSpecNodePoolMachine struct {
@@ -52,10 +51,6 @@ type AWSMachineDeploymentSpecNodePoolMachine struct {
 type AWSMachineDeploymentSpecNodePoolScaling struct {
 	Max int `json:"max" yaml:"max"`
 	Min int `json:"min" yaml:"min"`
-}
-
-type AWSMachineDeploymentSpecNodePoolVersionBundle struct {
-	Version string `json:"version" yaml:"version"`
 }
 
 type AWSMachineDeploymentSpecProvider struct {

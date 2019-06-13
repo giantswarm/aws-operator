@@ -9,7 +9,10 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/controller/resource/metricsresource"
 	"github.com/giantswarm/operatorkit/controller/resource/retryresource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
@@ -19,6 +22,7 @@ import (
 )
 
 type MachineDeploymentResourceSetConfig struct {
+	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	K8sClient              kubernetes.Interface
@@ -75,7 +79,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			return false
 		}
 
-		if key.WorkerVersion(cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == VersionBundle().Version {
 			return true
 		}
 
@@ -83,9 +87,26 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
+		var cr v1alpha1.Cluster
+		{
+			md, err := key.ToMachineDeployment(obj)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			id := key.WorkerClusterID(md)
+
+			m, err := config.CMAClient.ClusterV1alpha1().Clusters(metav1.NamespaceAll).Get(id, metav1.GetOptions{})
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			cr = *m
+		}
+
 		var tenantClusterAWSClients aws.Clients
 		{
-			arn, err := credential.GetARN(config.K8sClient, obj)
+			arn, err := credential.GetARN(config.K8sClient, cr)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}

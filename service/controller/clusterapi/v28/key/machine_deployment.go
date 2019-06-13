@@ -8,6 +8,10 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
+func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
+	return cr.Labels[LabelCluster]
+}
+
 // TODO this method has to be properly implemented and renamed eventually.
 func StatusAvailabilityZones(cluster v1alpha1.MachineDeployment) []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return nil
@@ -46,8 +50,4 @@ func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
 
 func WorkerScalingMin(cr v1alpha1.MachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
-}
-
-func WorkerVersion(cr v1alpha1.MachineDeployment) string {
-	return machineDeploymentProviderSpec(cr).NodePool.VersionBundle.Version
 }

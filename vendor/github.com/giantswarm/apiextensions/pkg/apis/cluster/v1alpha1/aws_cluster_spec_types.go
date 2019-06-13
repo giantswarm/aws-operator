@@ -12,6 +12,9 @@ import (
 //     kind: AWSClusterSpec
 //     apiVersion: cluster.giantswarm.io/v1alpha1
 //     metadata:
+//       labels:
+//         aws-operator.giantswarm.io/version: 2.0.0
+//         cluster-operator.giantswarm.io/version: 1.0.0
 //       name: 8y5kc
 //     cluster:
 //       description: my fancy cluster
@@ -23,8 +26,6 @@ import (
 //           groups: groups
 //         clientID: foobar-dex-client
 //         issuerURL: https://dex.8y5kc.fr-east-1.foobar.example.com
-//       versionBundle:
-//         version: 4.9.0
 //     provider:
 //       credentialSecret:
 //         name: credential-default
@@ -42,10 +43,9 @@ type AWSClusterSpec struct {
 }
 
 type AWSClusterSpecCluster struct {
-	Description   string                             `json:"description" yaml:"description"`
-	DNS           AWSClusterSpecClusterDNS           `json:"dns" yaml:"dns"`
-	OIDC          AWSClusterSpecClusterOIDC          `json:"oidc" yaml:"oidc"`
-	VersionBundle AWSClusterSpecClusterVersionBundle `json:"versionBundle" yaml:"versionBundle"`
+	Description string                    `json:"description" yaml:"description"`
+	DNS         AWSClusterSpecClusterDNS  `json:"dns" yaml:"dns"`
+	OIDC        AWSClusterSpecClusterOIDC `json:"oidc" yaml:"oidc"`
 }
 
 type AWSClusterSpecClusterDNS struct {
@@ -61,10 +61,6 @@ type AWSClusterSpecClusterOIDC struct {
 type AWSClusterSpecClusterOIDCClaims struct {
 	Username string `json:"username" yaml:"username"`
 	Groups   string `json:"groups" yaml:"groups"`
-}
-
-type AWSClusterSpecClusterVersionBundle struct {
-	Version string `json:"version" yaml:"version"`
 }
 
 type AWSClusterSpecProvider struct {

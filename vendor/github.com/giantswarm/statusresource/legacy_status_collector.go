@@ -90,12 +90,14 @@ func (c *LegacyStatusCollector) Collect(ch chan<- prometheus.Metric) error {
 				t1 := timeForCreatedCondition(p)
 				t2 := m.GetCreationTimestamp().Time
 
-				ch <- prometheus.MustNewConstMetric(
-					legacyCreationSecondsCollectorDescription,
-					prometheus.GaugeValue,
-					t1.Sub(t2).Seconds(),
-					m.GetName(),
-				)
+				if !t1.IsZero() && !t2.IsZero() {
+					ch <- prometheus.MustNewConstMetric(
+						legacyCreationSecondsCollectorDescription,
+						prometheus.GaugeValue,
+						t1.Sub(t2).Seconds(),
+						m.GetName(),
+					)
+				}
 			}
 
 			{
