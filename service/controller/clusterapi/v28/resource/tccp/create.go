@@ -172,7 +172,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 			Parameters: []*cloudformation.Parameter{
 				{
 					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.OperatorVersion(cr)),
+					ParameterValue: aws.String(key.OperatorVersion(&cr)),
 				},
 			},
 			StackName:    aws.String(key.StackNameTCCP(cr)),
@@ -258,7 +258,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.Cluster, templat
 			Parameters: []*cloudformation.Parameter{
 				{
 					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.OperatorVersion(cr)),
+					ParameterValue: aws.String(key.OperatorVersion(&cr)),
 				},
 			},
 			StackName:    aws.String(key.StackNameTCCP(cr)),
@@ -324,7 +324,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
 				WorkerMin:                 cc.Status.TenantCluster.TCCP.ASG.MinSize,
 
-				VersionBundleVersion: key.OperatorVersion(cr),
+				VersionBundleVersion: key.OperatorVersion(&cr),
 			},
 			TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
 		}

@@ -30,7 +30,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				key.LabelApp:           "master",
 				key.LabelCluster:       key.ClusterID(cr),
 				key.LabelOrganization:  key.OrganizationID(cr),
-				key.LabelVersionBundle: key.OperatorVersion(cr),
+				key.LabelVersionBundle: key.OperatorVersion(&cr),
 			},
 			Annotations: map[string]string{
 				AnnotationEtcdDomain:        key.ClusterEtcdEndpointWithPort(cr),
