@@ -619,7 +619,7 @@ spec:
         - name: etcd-certs
           hostPath:
             path: /etc/kubernetes/ssl/etcd
-            defaultMode: 0400
+            mode: 0400
 
 ---
 
