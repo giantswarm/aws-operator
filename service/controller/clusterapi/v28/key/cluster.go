@@ -67,7 +67,7 @@ func BucketName(cluster v1alpha1.Cluster, accountID string) string {
 //     /version/3.4.0/cloudconfig/v_3_2_5/worker
 //
 func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", ClusterVersion(cluster), CloudConfigVersion, role)
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(&cluster), CloudConfigVersion, role)
 }
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
@@ -115,10 +115,6 @@ func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]s
 	return tags
 }
 
-func ClusterVersion(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.VersionBundle.Version
-}
-
 func CredentialName(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.CredentialSecret.Name
 }
@@ -160,7 +156,7 @@ func ImageID(cluster v1alpha1.Cluster) string {
 func KubeletLabels(cluster v1alpha1.Cluster) string {
 	var labels string
 
-	labels = ensureLabel(labels, "aws-operator.giantswarm.io/version", ClusterVersion(cluster))
+	labels = ensureLabel(labels, "aws-operator.giantswarm.io/version", OperatorVersion(&cluster))
 	labels = ensureLabel(labels, "giantswarm.io/provider", "aws")
 
 	return labels

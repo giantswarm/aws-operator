@@ -51,7 +51,3 @@ func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
 func WorkerScalingMin(cr v1alpha1.MachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
 }
-
-func WorkerVersion(cr v1alpha1.MachineDeployment) string {
-	return machineDeploymentProviderSpec(cr).NodePool.VersionBundle.Version
-}
