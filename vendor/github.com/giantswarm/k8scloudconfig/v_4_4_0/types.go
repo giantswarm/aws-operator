@@ -97,8 +97,22 @@ type FileMetadata struct {
 }
 
 type Owner struct {
-	User  string
-	Group string
+	Group Group
+	User  User
+}
+
+// Group object reflects spec for ignition Group object.
+// If both ID and name are specified, ID is preferred.
+type Group struct {
+	ID   int
+	Name string
+}
+
+// User object reflects spec for ignition User object.
+// If both ID and name are specified, ID is preferred.
+type User struct {
+	ID   int
+	Name string
 }
 
 type FileAsset struct {

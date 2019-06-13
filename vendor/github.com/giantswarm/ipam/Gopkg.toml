@@ -25,6 +25,7 @@
 #   unused-packages = true
 
 
+
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/microerror"
@@ -34,8 +35,10 @@
   name = "github.com/giantswarm/microstorage"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/prometheus/client_golang"
+  version = "0.9.3"
+
+
 
 [prune]
   go-tests = true

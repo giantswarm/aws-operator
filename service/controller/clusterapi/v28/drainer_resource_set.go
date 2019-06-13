@@ -138,7 +138,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.ClusterVersion(cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == VersionBundle().Version {
 			return true
 		}
 
