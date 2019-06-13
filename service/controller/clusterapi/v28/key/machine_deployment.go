@@ -6,10 +6,12 @@ import (
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
-	return cr.Labels[LabelCluster]
+	return cr.Labels[label.Cluster]
 }
 
 // TODO this method has to be properly implemented and renamed eventually.

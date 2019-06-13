@@ -8,6 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
 
@@ -27,10 +28,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Name:      "master",
 			Namespace: key.ClusterID(cr),
 			Labels: map[string]string{
-				key.LabelApp:           "master",
-				key.LabelCluster:       key.ClusterID(cr),
-				key.LabelOrganization:  key.OrganizationID(cr),
-				key.LabelVersionBundle: key.OperatorVersion(&cr),
+				label.App:           "master",
+				label.Cluster:       key.ClusterID(cr),
+				label.Organization:  key.OrganizationID(cr),
+				label.VersionBundle: key.OperatorVersion(&cr),
 			},
 			Annotations: map[string]string{
 				AnnotationEtcdDomain:        key.ClusterEtcdEndpointWithPort(cr),
