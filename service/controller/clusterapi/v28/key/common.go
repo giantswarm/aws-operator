@@ -1,9 +1,9 @@
 package key
 
-import "fmt"
+import (
+	"fmt"
 
-const (
-	LabelOperatorVersion = "aws-operator.giantswarm.io/version"
+	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 func IsDeleted(getter DeletionTimestampGetter) bool {
@@ -38,7 +38,7 @@ func NATRouteName(idx int) string {
 }
 
 func OperatorVersion(getter LabelsGetter) string {
-	return getter.GetLabels()[LabelOperatorVersion]
+	return getter.GetLabels()[label.OperatorVersion]
 }
 
 func PrivateRouteTableName(idx int) string {
