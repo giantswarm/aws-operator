@@ -11,6 +11,8 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
@@ -41,7 +43,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		n := v1.NamespaceAll
 		o := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", key.LabelCluster, key.ClusterID(cr)),
+			LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(cr)),
 		}
 
 		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
@@ -145,12 +147,12 @@ func (r *Resource) deleteDrainerConfig(ctx context.Context, drainerConfig corev1
 }
 
 func instanceIDFromAnnotations(annotations map[string]string) (string, error) {
-	instanceID, ok := annotations[key.AnnotationInstanceID]
+	instanceID, ok := annotations[annotation.InstanceID]
 	if !ok {
-		return "", microerror.Maskf(missingAnnotationError, key.AnnotationInstanceID)
+		return "", microerror.Maskf(missingAnnotationError, annotation.InstanceID)
 	}
 	if instanceID == "" {
-		return "", microerror.Maskf(missingAnnotationError, key.AnnotationInstanceID)
+		return "", microerror.Maskf(missingAnnotationError, annotation.InstanceID)
 	}
 
 	return instanceID, nil

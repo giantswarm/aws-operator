@@ -9,10 +9,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-)
 
-const (
-	AnnotationInstanceID = "aws-operator.giantswarm.io/instance"
+	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 const (
@@ -36,13 +34,6 @@ const (
 	EtcdPort             = 2379
 	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443
-)
-
-const (
-	LabelApp           = "app"
-	LabelCluster       = "giantswarm.io/cluster"
-	LabelOrganization  = "giantswarm.io/organization"
-	LabelVersionBundle = "giantswarm.io/version-bundle"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.
@@ -179,7 +170,7 @@ func MasterInstanceType(cluster v1alpha1.Cluster) string {
 }
 
 func OrganizationID(cluster v1alpha1.Cluster) string {
-	return cluster.Labels[LabelOrganization]
+	return cluster.Labels[label.Organization]
 }
 
 func PolicyNameMaster(cluster v1alpha1.Cluster) string {
