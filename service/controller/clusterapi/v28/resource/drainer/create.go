@@ -13,6 +13,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clusterv1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
@@ -123,10 +125,10 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr clusterv1alpha1.C
 	c := &corev1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				key.AnnotationInstanceID: instanceID,
+				annotation.InstanceID: instanceID,
 			},
 			Labels: map[string]string{
-				key.LabelCluster: key.ClusterID(cr),
+				label.Cluster: key.ClusterID(cr),
 			},
 			Name: privateDNS,
 		},
