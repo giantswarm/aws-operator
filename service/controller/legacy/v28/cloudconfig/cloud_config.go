@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	FileOwnerUser  = "root"
-	FileOwnerGroup = "root"
-	FilePermission = 0700
+	FileOwnerUserName  = "root"
+	FileOwnerGroupName = "root"
+	FilePermission     = 0700
 )
 
 // Config represents the configuration used to create a cloud config service.

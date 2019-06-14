@@ -97,8 +97,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0700,
 		},
@@ -106,8 +110,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
 			Path:         "/opt/bin/vault-aws-authorizer",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0700,
 		},
@@ -116,8 +124,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0700,
 		},
@@ -143,8 +155,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				AssetContent: string(data),
 				Path:         f.AbsolutePath + ".enc",
 				Owner: k8scloudconfig.Owner{
-					User:  FileOwnerUser,
-					Group: FileOwnerGroup,
+					Group: k8scloudconfig.Group{
+						Name: FileOwnerGroupName,
+					},
+					User: k8scloudconfig.User{
+						Name: FileOwnerUserName,
+					},
 				},
 				Permissions: 0700,
 			}
