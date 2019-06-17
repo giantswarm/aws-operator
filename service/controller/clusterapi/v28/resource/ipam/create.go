@@ -70,7 +70,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
-
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
