@@ -15,8 +15,15 @@ func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
 }
 
 // TODO this method has to be properly implemented and renamed eventually.
-func StatusAvailabilityZones(cluster v1alpha1.MachineDeployment) []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone {
-	return nil
+func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone {
+	var azs []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
+	for _, s := range WorkerAvailabilityZones(cr) {
+		azs = append(azs, g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
+			Name: s,
+		})
+	}
+
+	return azs
 }
 
 func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {
