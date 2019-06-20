@@ -35,7 +35,11 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	}
 
 	{
-		numAZs := len(key.StatusAvailabilityZones(cfg.MachineDeployment))
+		// TODO(tuommaki): When Cluster - MachineDeployment syncing is
+		// implemented, this information should probably come from Cluster
+		// status - possibly?
+		// OLD: numAZs := len(key.StatusAvailabilityZones(cfg.MachineDeployment))
+		numAZs := len(key.WorkerAvailabilityZones(cfg.MachineDeployment))
 		if numAZs < 1 {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
