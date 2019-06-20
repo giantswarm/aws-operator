@@ -13,7 +13,9 @@ rules:
       - cluster.k8s.io
     resources:
       - clusters
+      - clusters/status
       - machinedeployments
+      - machinedeployments/status
     verbs:
       - get
       - list
