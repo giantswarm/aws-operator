@@ -34,6 +34,9 @@ spec:
         hostPath:
           path: /etc/ssl/certs/ca-certificates.crt
       serviceAccountName: aws-operator
+      securityContext:
+        runAsUser: {{ .Values.userID }}
+        runAsGroup: {{ .Values.groupID }}
       containers:
       - name: aws-operator
         image: quay.io/giantswarm/aws-operator:[[ .SHA ]]
