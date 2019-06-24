@@ -96,7 +96,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 
 			id := key.WorkerClusterID(md)
 
-			m, err := config.CMAClient.ClusterV1alpha1().Clusters(metav1.NamespaceAll).Get(id, metav1.GetOptions{})
+			m, err := config.CMAClient.ClusterV1alpha1().Clusters(md.Namespace).Get(id, metav1.GetOptions{})
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
