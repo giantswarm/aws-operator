@@ -2,7 +2,6 @@ package v28
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
@@ -95,11 +94,9 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 				return nil, microerror.Mask(err)
 			}
 
-			fmt.Printf("%#v\n", md.Labels)
-
 			id := key.WorkerClusterID(md)
 
-			m, err := config.CMAClient.ClusterV1alpha1().Clusters(metav1.NamespaceAll).Get(id, metav1.GetOptions{})
+			m, err := config.CMAClient.ClusterV1alpha1().Clusters(md.Namespace).Get(id, metav1.GetOptions{})
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
