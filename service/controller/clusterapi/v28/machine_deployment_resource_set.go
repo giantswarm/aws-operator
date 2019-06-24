@@ -2,6 +2,7 @@ package v28
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
@@ -93,6 +94,8 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
+
+			fmt.Printf("%#v\n", md.Labels)
 
 			id := key.WorkerClusterID(md)
 
