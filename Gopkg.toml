@@ -165,3 +165,7 @@ required = [
 [[prune.project]]
   name = "github.com/giantswarm/k8scloudconfig"
   unused-packages = false
+
+[[constraint]]
+  name = "github.com/google/go-cmp"
+  version = "0.3.0"
