@@ -1,4 +1,4 @@
-package ipam
+package network
 
 import (
 	"fmt"
@@ -7,16 +7,7 @@ import (
 	"testing"
 )
 
-func mustParseCIDR(val string) net.IPNet {
-	_, n, err := net.ParseCIDR(val)
-	if err != nil {
-		panic(err)
-	}
-
-	return *n
-}
-
-func Test_calculateSubnetMask(t *testing.T) {
+func Test_CalculateSubnetMask(t *testing.T) {
 	testCases := []struct {
 		name         string
 		mask         net.IPMask
@@ -84,7 +75,7 @@ func Test_calculateSubnetMask(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			mask, err := calculateSubnetMask(tc.mask, tc.n)
+			mask, err := CalculateSubnetMask(tc.mask, tc.n)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -104,7 +95,7 @@ func Test_calculateSubnetMask(t *testing.T) {
 	}
 }
 
-func Test_splitNetwork(t *testing.T) {
+func Test_Split(t *testing.T) {
 	testCases := []struct {
 		name            string
 		network         net.IPNet
@@ -150,7 +141,7 @@ func Test_splitNetwork(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			subnets, err := splitNetwork(tc.network, tc.n)
+			subnets, err := Split(tc.network, tc.n)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
