@@ -22,19 +22,17 @@ func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
 }
 
 // TODO this method has to be properly implemented and renamed eventually.
-func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone {
+func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
 	var workerSubnet net.IPNet
 	{
 		s := WorkerSubnet(cr)
 		if s == "" {
-			//return nil, microerror.Maskf(notFoundError, "MachineDeployment is missing subnet allocation")
-			panic("MachineDeployment is missing subnet allocation")
+			return nil, microerror.Maskf(notFoundError, "MachineDeployment is missing subnet allocation")
 		}
 
 		_, n, err := net.ParseCIDR(s)
 		if err != nil {
-			//return nil, microerror.Mask(err)
-			panic(err)
+			return nil, microerror.Mask(err)
 		}
 
 		workerSubnet = *n
@@ -44,15 +42,13 @@ func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) []g8sv1alpha1.AWSCon
 	{
 		azsSubnets, err := splitNetwork(workerSubnet, uint(len(WorkerAvailabilityZones(cr))))
 		if err != nil {
-			//return nil, microerror.Mask(err)
-			panic(err)
+			return nil, microerror.Mask(err)
 		}
 
 		for i, s := range WorkerAvailabilityZones(cr) {
 			subnets, err := splitNetwork(azsSubnets[i], 2)
 			if err != nil {
-				//return nil, microerror.Mask(err)
-				panic(err)
+				return nil, microerror.Mask(err)
 			}
 
 			azs = append(azs, g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
@@ -69,7 +65,7 @@ func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) []g8sv1alpha1.AWSCon
 		}
 	}
 
-	return azs
+	return azs, nil
 }
 
 func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {

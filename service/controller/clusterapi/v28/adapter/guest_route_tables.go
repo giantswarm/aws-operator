@@ -23,7 +23,7 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),
 	}
 
-	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
 		rtName := RouteTableName{
 			ResourceName:        key.PrivateRouteTableName(i),
 			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),

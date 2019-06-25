@@ -137,8 +137,7 @@ func TestStatusAvailabilityZones(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var err error // TODO: shall be filled later
-			zones := StatusAvailabilityZones(withg8sMachineDeploymentSpecToCMAMachineDeployment(tc.cr, tc.providerExtension))
+			zones, err := StatusAvailabilityZones(withg8sMachineDeploymentSpecToCMAMachineDeployment(tc.cr, tc.providerExtension))
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
