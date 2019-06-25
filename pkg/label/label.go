@@ -1,10 +1,16 @@
 package label
 
 const (
-	App                     = "app"
-	Cluster                 = "giantswarm.io/cluster"
-	Organization            = "giantswarm.io/organization"
-	OperatorVersion         = "aws-operator.giantswarm.io/version"
+	App = "app"
+)
+
+const (
+	Cluster       = "giantswarm.io/cluster"
+	Organization  = "giantswarm.io/organization"
+	VersionBundle = "giantswarm.io/version-bundle"
+)
+
+const (
 	MachineDeploymentSubnet = "machine-deployment.giantswarm.io/subnet"
-	VersionBundle           = "giantswarm.io/version-bundle"
+	OperatorVersion         = "aws-operator.giantswarm.io/version"
 )
