@@ -10,12 +10,3 @@ var invalidConfigError = &microerror.Error{
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
-
-var invalidParameterError = &microerror.Error{
-	Kind: "invalid parameter",
-}
-
-// IsInvalidParameter asserts invalidParameterError.
-func IsInvalidParameter(err error) bool {
-	return microerror.Cause(err) == invalidParameterError
-}
