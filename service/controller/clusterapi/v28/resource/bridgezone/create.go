@@ -2,6 +2,7 @@ package bridgezone
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/giantswarm/microerror"
@@ -23,8 +24,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	baseDomain := key.ClusterBaseDomain(cr)
-	intermediateZone := "k8s." + baseDomain
-	finalZone := key.ClusterID(cr) + ".k8s." + baseDomain
+	intermediateZone := baseDomain
+	finalZone := key.ClusterID(cr) + "." + baseDomain
+
+	if !strings.HasPrefix(baseDomain, "k8s.") {
+		intermediateZone = "k8s." + baseDomain
+		finalZone = key.ClusterID(cr) + ".k8s." + baseDomain
+	}
 
 	guest, defaultGuest, err := r.route53Clients(ctx)
 	if err != nil {
