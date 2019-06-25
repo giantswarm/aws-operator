@@ -1,55 +1,73 @@
 package key
 
 import (
+	"encoding/json"
 	"strconv"
 	"testing"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	g8sclusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	g8sproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/google/go-cmp/cmp"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
+func withg8sMachineDeploymentSpecToCMAMachineDeployment(cr v1alpha1.MachineDeployment, providerExtension g8sclusterv1alpha1.AWSMachineDeploymentSpec) v1alpha1.MachineDeployment {
+	var err error
+
+	if cr.Spec.Template.Spec.ProviderSpec.Value == nil {
+		cr.Spec.Template.Spec.ProviderSpec.Value = &runtime.RawExtension{}
+	}
+
+	cr.Spec.Template.Spec.ProviderSpec.Value.Raw, err = json.Marshal(&providerExtension)
+	if err != nil {
+		panic(err)
+	}
+
+	return cr
+}
+
 func TestStatusAvailabilityZones(t *testing.T) {
 	testCases := []struct {
-		name          string
-		cr            v1alpha1.MachineDeployment
-		expectedZones []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
-		errorMatcher  func(error) bool
+		name              string
+		cr                v1alpha1.MachineDeployment
+		providerExtension g8sclusterv1alpha1.AWSMachineDeploymentSpec
+		expectedZones     []g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZone
+		errorMatcher      func(error) bool
 	}{
 		{
 			name: "case 0: Test with three AZs",
-			cr:   nil,
-			expectedZones: []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
+			cr:   v1alpha1.MachineDeployment{},
+			expectedZones: []g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZone{
 				{
 					Name: "eu-central-1a",
-					Subnet: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-						Private: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
 							CIDR: "",
 						},
-						Public: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
 							CIDR: "",
 						},
 					},
 				},
 				{
 					Name: "eu-central-1b",
-					Subnet: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-						Private: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
 							CIDR: "",
 						},
-						Public: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
 							CIDR: "",
 						},
 					},
 				},
 				{
 					Name: "eu-central-1c",
-					Subnet: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-						Private: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
 							CIDR: "",
 						},
-						Public: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
 							CIDR: "",
 						},
 					},
@@ -60,21 +78,8 @@ func TestStatusAvailabilityZones(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			cr := v1alpha1.MachineDeployment{
-				Spec: v1alpha1.MachineDeploymentSpec{
-					Template: v1alpha1.MachineTemplateSpec{
-						Spec: v1alpha1.MachineSpec{
-							ProviderSpec: v1alpha1.ProviderSpec{
-								Value: &runtime.RawExtension{
-									Raw: nil,
-								},
-							},
-						},
-					},
-				},
-			}
 			var err error // TODO: shall be filled later
-			zones := StatusAvailabilityZones(tc.cr)
+			zones := StatusAvailabilityZones(withg8sMachineDeploymentSpecToCMAMachineDeployment(tc.cr, tc.providerExtension))
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
