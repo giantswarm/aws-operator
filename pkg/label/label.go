@@ -11,6 +11,5 @@ const (
 )
 
 const (
-	MachineDeploymentSubnet = "machine-deployment.giantswarm.io/subnet"
-	OperatorVersion         = "aws-operator.giantswarm.io/version"
+	OperatorVersion = "aws-operator.giantswarm.io/version"
 )

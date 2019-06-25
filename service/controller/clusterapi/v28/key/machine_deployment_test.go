@@ -7,7 +7,7 @@ import (
 
 	g8sclusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	g8sproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/google/go-cmp/cmp"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -41,8 +41,8 @@ func TestStatusAvailabilityZones(t *testing.T) {
 			name: "case 0: Test with two AZs",
 			cr: v1alpha1.MachineDeployment{
 				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						label.MachineDeploymentSubnet: "10.100.4.0/24",
+					Annotations: map[string]string{
+						annotation.MachineDeploymentSubnet: "10.100.4.0/24",
 					},
 				},
 			},
@@ -83,8 +83,8 @@ func TestStatusAvailabilityZones(t *testing.T) {
 			name: "case 1: Test with three AZs",
 			cr: v1alpha1.MachineDeployment{
 				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						label.MachineDeploymentSubnet: "10.100.4.0/24",
+					Annotations: map[string]string{
+						annotation.MachineDeploymentSubnet: "10.100.4.0/24",
 					},
 				},
 			},

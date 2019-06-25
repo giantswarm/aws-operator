@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 )
 
@@ -28,7 +28,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cs = key.StatusClusterNetworkCIDR(*cl)
-		ms = cr.Labels[label.MachineDeploymentSubnet]
+		ms = cr.Annotations[annotation.MachineDeploymentSubnet]
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found cluster for machine deployment")
 	}
@@ -55,7 +55,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		md.Labels[label.MachineDeploymentSubnet] = cs
+		md.Annotations[annotation.MachineDeploymentSubnet] = cs
 
 		_, err = r.cmaClient.ClusterV1alpha1().MachineDeployments(md.Namespace).Update(md)
 		if err != nil {
