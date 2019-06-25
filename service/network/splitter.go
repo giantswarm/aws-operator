@@ -14,8 +14,7 @@ func CalculateSubnetMask(networkMask net.IPMask, n uint) (net.IPMask, error) {
 		return nil, microerror.Maskf(invalidParameterError, "divide by zero")
 	}
 
-	// Amount of bits needed to accommodate enough subnets for public and
-	// private subnet in each AZ.
+	// Calculate amount of bits needed to accommodate at least N subnets.
 	subnetBitsNeeded := bits.Len(n - 1)
 
 	maskOnes, maskBits := networkMask.Size()
