@@ -36,19 +36,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		if ms != "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "subnet found in machine deployment")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "not updating subnet label of machine deployment")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not updating subnet annotation of machine deployment")
 			return nil
 		}
 
 		if cs == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "subnet not found in cluster")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "not updating subnet label of machine deployment")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not updating subnet annotation of machine deployment")
 			return nil
 		}
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating subnet label of machine deployment with %q", cs))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating subnet annotation of machine deployment with %q", cs))
 
 		md, err := r.cmaClient.ClusterV1alpha1().MachineDeployments(cr.Namespace).Get(cr.Name, metav1.GetOptions{})
 		if err != nil {
@@ -62,7 +62,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated subnet label of machine deployment with %q", cs))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated subnet annotation of machine deployment with %q", cs))
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 		reconciliationcanceledcontext.SetCanceled(ctx)
