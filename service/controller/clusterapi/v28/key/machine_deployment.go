@@ -10,16 +10,15 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
-	return cr.Labels[label.Cluster]
+func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
+	return cr.Labels[label.MachineDeploymentSubnet]
 }
 
-func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
-	return cr.Annotations[annotation.MachineDeploymentSubnet]
+func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
+	return cr.Labels[label.Cluster]
 }
 
 // TODO this method has to be properly implemented and renamed eventually.
