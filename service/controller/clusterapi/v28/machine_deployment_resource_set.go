@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/resource/machinedeploymentsubnet"
 )
 
 type MachineDeploymentResourceSetConfig struct {
@@ -49,8 +50,22 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var machineDeploymentSubnetResource controller.Resource
+	{
+		c := machinedeploymentsubnet.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentSubnetResource, err = machinedeploymentsubnet.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		asgStatusResource,
+		machineDeploymentSubnetResource,
 	}
 
 	{
