@@ -1,3 +1,4 @@
+// NOTE this package is deprecated and can be dropped once legacy/v23 is gone.
 package aws
 
 import (
