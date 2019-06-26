@@ -1,17 +1,16 @@
 package key
 
 import (
-	"math/bits"
 	"net"
 	"strconv"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/service/network"
 )
 
 func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
@@ -41,13 +40,13 @@ func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSCo
 
 	var azs []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
 	{
-		azsSubnets, err := splitNetwork(workerSubnet, uint(len(WorkerAvailabilityZones(cr))))
+		azsSubnets, err := network.Split(workerSubnet, uint(len(WorkerAvailabilityZones(cr))))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		for i, s := range WorkerAvailabilityZones(cr) {
-			subnets, err := splitNetwork(azsSubnets[i], 2)
+			subnets, err := network.Split(azsSubnets[i], 2)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -102,42 +101,4 @@ func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
 
 func WorkerScalingMin(cr v1alpha1.MachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
-}
-
-// calculateSubnetMask calculates new subnet mask to accommodate n subnets.
-func calculateSubnetMask(networkMask net.IPMask, n uint) (net.IPMask, error) {
-	if n == 0 {
-		return nil, microerror.Maskf(invalidParameterError, "divide by zero")
-	}
-
-	// Amount of bits needed to accommodate enough subnets for public and
-	// private subnet in each AZ.
-	subnetBitsNeeded := bits.Len(n - 1)
-
-	maskOnes, maskBits := networkMask.Size()
-	if subnetBitsNeeded > maskBits-maskOnes {
-		return nil, microerror.Maskf(invalidParameterError, "no room in network mask %s to accommodate %d subnets", networkMask.String(), n)
-	}
-
-	return net.CIDRMask(maskOnes+subnetBitsNeeded, maskBits), nil
-}
-
-// splitNetwork returns n subnets from network.
-func splitNetwork(network net.IPNet, n uint) ([]net.IPNet, error) {
-	mask, err := calculateSubnetMask(network.Mask, n)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var subnets []net.IPNet
-	for i := uint(0); i < n; i++ {
-		subnet, err := ipam.Free(network, mask, subnets)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		subnets = append(subnets, subnet)
-	}
-
-	return subnets, nil
 }
