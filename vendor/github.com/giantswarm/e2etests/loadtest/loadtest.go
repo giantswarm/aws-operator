@@ -2,6 +2,7 @@ package loadtest
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -13,16 +14,23 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/helm/pkg/helm"
 )
 
 type Config struct {
 	GuestFramework *framework.Guest
 	Logger         micrologger.Logger
+
+	ClusterID    string
+	CommonDomain string
 }
 
 type LoadTest struct {
 	guestFramework *framework.Guest
 	logger         micrologger.Logger
+
+	clusterID    string
+	commonDomain string
 }
 
 func New(config Config) (*LoadTest, error) {
@@ -33,9 +41,19 @@ func New(config Config) (*LoadTest, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.ClusterID == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", config)
+	}
+	if config.CommonDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CommonDomain must not be empty", config)
+	}
+
 	s := &LoadTest{
 		guestFramework: config.GuestFramework,
 		logger:         config.Logger,
+
+		clusterID:    config.ClusterID,
+		commonDomain: config.CommonDomain,
 	}
 
 	return s, nil
@@ -108,6 +126,29 @@ func (l *LoadTest) InstallTestApp(ctx context.Context) error {
 		}
 	}
 
+	var loadTestEndpoint string
+	{
+		loadTestEndpoint = fmt.Sprintf("testapp.%s.%s", l.clusterID, l.clusterID)
+
+		l.logger.Log("level", "debug", "message", "loadtest-app endpoint is %#q", loadTestEndpoint)
+	}
+
+	var jsonValues []byte
+	{
+		values := LoadTestApp{
+			Ingress: LoadTestAppIngress{
+				Hosts: []string{
+					loadTestEndpoint,
+				},
+			},
+		}
+
+		jsonValues, err = json.Marshal(values)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	// Install the e2e app chart in the tenant cluster.
 	{
 		l.logger.Log("level", "debug", "message", "installing loadtest-app for testing")
@@ -117,7 +158,7 @@ func (l *LoadTest) InstallTestApp(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 
-		err = helmClient.InstallReleaseFromTarball(ctx, tarballPath, ChartNamespace)
+		err = helmClient.InstallReleaseFromTarball(ctx, tarballPath, ChartNamespace, helm.ValueOverrides(jsonValues))
 		if err != nil {
 			return microerror.Mask(err)
 		}

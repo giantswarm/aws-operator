@@ -29,6 +29,9 @@ func init() {
 		c := loadtest.Config{
 			GuestFramework: config.Guest,
 			Logger:         config.Logger,
+
+			ClusterID:    env.ClusterID(),
+			CommonDomain: env.CommonDomain(),
 		}
 
 		loadTestTest, err = loadtest.New(c)
