@@ -44,8 +44,8 @@ func init() {
 
 	{
 		c := loadtest.Config{
-			Logger:         config.Logger,
-			Provider:       p,
+			Logger:   config.Logger,
+			Provider: p,
 		}
 
 		loadTestTest, err = loadtest.New(c)
