@@ -123,7 +123,7 @@ type AppSpec struct {
 	// e.g. monitoring
 	Namespace string `json:"namespace" yaml:"namespace"`
 	// UserConfig is the user config to be applied when the app is deployed.
-	UserConfig AppSpecConfig `json:"userConfig" yaml:"userConfig"`
+	UserConfig AppSpecUserConfig `json:"userConfig" yaml:"userConfig"`
 	// Version is the version of the app that should be deployed.
 	// e.g. 1.0.0
 	Version string `json:"version" yaml:"version"`
@@ -194,8 +194,8 @@ type AppSpecUserConfigConfigMap struct {
 	// Name is the name of the config map containing user values to apply,
 	// e.g. prometheus-user-values.
 	Name string `json:"name" yaml:"name"`
-	// Namespace is the namespace of the user values config map,
-	// e.g. monitoring.
+	// Namespace is the namespace of the user values config map on the control plane,
+	// e.g. 123ab.
 	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
