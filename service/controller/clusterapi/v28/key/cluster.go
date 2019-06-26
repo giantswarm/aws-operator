@@ -147,8 +147,8 @@ func ImageID(cluster v1alpha1.Cluster) string {
 func KubeletLabels(cluster v1alpha1.Cluster) string {
 	var labels string
 
-	labels = ensureLabel(labels, "aws-operator.giantswarm.io/version", OperatorVersion(&cluster))
-	labels = ensureLabel(labels, "giantswarm.io/provider", "aws")
+	labels = ensureLabel(labels, label.Provider, "aws")
+	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(&cluster))
 
 	return labels
 }

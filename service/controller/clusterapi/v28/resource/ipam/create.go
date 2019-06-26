@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/bits"
 	"net"
 	"sync"
 
@@ -70,7 +69,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
-
 		}
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found out subnet doesn't need to be allocated for cluster")
@@ -249,42 +247,4 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	return results, nil
-}
-
-// calculateSubnetMask calculates new subnet mask to accommodate n subnets.
-func calculateSubnetMask(networkMask net.IPMask, n uint) (net.IPMask, error) {
-	if n == 0 {
-		return nil, microerror.Maskf(invalidParameterError, "divide by zero")
-	}
-
-	// Amount of bits needed to accommodate enough subnets for public and
-	// private subnet in each AZ.
-	subnetBitsNeeded := bits.Len(n - 1)
-
-	maskOnes, maskBits := networkMask.Size()
-	if subnetBitsNeeded > maskBits-maskOnes {
-		return nil, microerror.Maskf(invalidParameterError, "no room in network mask %s to accommodate %d subnets", networkMask.String(), n)
-	}
-
-	return net.CIDRMask(maskOnes+subnetBitsNeeded, maskBits), nil
-}
-
-// splitNetwork returns n subnets from network.
-func splitNetwork(network net.IPNet, n uint) ([]net.IPNet, error) {
-	mask, err := calculateSubnetMask(network.Mask, n)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var subnets []net.IPNet
-	for i := uint(0); i < n; i++ {
-		subnet, err := ipam.Free(network, mask, subnets)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		subnets = append(subnets, subnet)
-	}
-
-	return subnets, nil
 }

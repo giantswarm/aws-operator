@@ -9,3 +9,7 @@ PrintMotd no # handled by PAM
 ClientAliveCountMax 2
 PasswordAuthentication no
 TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem
+MaxAuthTries 5
+LoginGraceTime 60
+AllowTcpForwarding no
+AllowAgentForwarding no

@@ -95,6 +95,10 @@ func PublicSubnetRouteTableAssociationName(idx int) string {
 	return fmt.Sprintf("PublicSubnetRouteTableAssociation%02d", idx)
 }
 
+func ReleaseVersion(getter LabelsGetter) string {
+	return getter.GetLabels()[label.ReleaseVersion]
+}
+
 func VPCPeeringRouteName(idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
