@@ -268,21 +268,23 @@
   revision = "8f55ebe96ce5fc597bc0689970ab6fa6dfa6dfb9"
 
 [[projects]]
-  branch = "master"
-  digest = "1:faa4a5c0df5c4e2a803572e0be18720d34a38fd03848e49b8dd69deb6c180119"
+  branch = "loadtest"
+  digest = "1:a76cb89d3741bfc569ba044d8855c18db6b0dae3633c0ca7dda0a88aceb745b8"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
     "clusterstate/provider",
     "ipam",
     "ipam/provider",
+    "loadtest",
+    "loadtest/provider",
     "scaling",
     "scaling/provider",
     "update",
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "fdec8e1d93ef6b67c005cdd6de2d111b0aaf52da"
+  revision = "8762179f6eddc14c6d5f4e1a4fb07ba0cac6b2e0"
 
 [[projects]]
   branch = "master"
@@ -1462,6 +1464,7 @@
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
     "github.com/giantswarm/e2etests/clusterstate",
     "github.com/giantswarm/e2etests/ipam",
+    "github.com/giantswarm/e2etests/loadtest",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/update",
     "github.com/giantswarm/exporterkit/collector",
