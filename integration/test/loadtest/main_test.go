@@ -7,13 +7,12 @@ import (
 
 	"github.com/giantswarm/e2etests/loadtest"
 
-	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
 var (
-	config           setup.Config
-	clusterStateTest *clusterstate.ClusterState
+	config       setup.Config
+	loadTestTest *loadtest.LoadTest
 )
 
 func init() {
@@ -26,26 +25,10 @@ func init() {
 		}
 	}
 
-	var p *Provider
-	{
-		c := ProviderConfig{
-			AWSClient: config.AWSClient,
-			G8sClient: config.Host.G8sClient(),
-			Logger:    config.Logger,
-
-			ClusterID: env.ClusterID(),
-		}
-
-		p, err = NewProvider(c)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-
 	{
 		c := loadtest.Config{
-			Logger:   config.Logger,
-			Provider: p,
+			GuestFramework: config.Guest,
+			Logger:         config.Logger,
 		}
 
 		loadTestTest, err = loadtest.New(c)

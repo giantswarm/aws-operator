@@ -4,6 +4,14 @@ import (
 	"context"
 )
 
+const (
+	CNRAddress      = "https://quay.io"
+	CNROrganization = "giantswarm"
+	ChartChannel    = "stable"
+	ChartName       = "loadtest-app-chart"
+	ChartNamespace  = "e2e-app"
+)
+
 type Interface interface {
 	// Test executes the loadtest test using the configured provider
 	// implementation. The provider implementation has to be aware of the tenant

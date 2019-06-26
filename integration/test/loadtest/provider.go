@@ -55,3 +55,7 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 func (p *Provider) InstallTestApp(ctx context.Context) error {
 	return nil
 }
+
+func (p *Provider) WaitForTestApp(ctx context.Context) error {
+	return nil
+}
