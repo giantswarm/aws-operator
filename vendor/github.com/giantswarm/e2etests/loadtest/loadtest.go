@@ -128,9 +128,9 @@ func (l *LoadTest) InstallTestApp(ctx context.Context) error {
 
 	var loadTestEndpoint string
 	{
-		loadTestEndpoint = fmt.Sprintf("testapp.%s.%s", l.clusterID, l.clusterID)
+		loadTestEndpoint = fmt.Sprintf("testapp.%s.%s", l.clusterID, l.commonDomain)
 
-		l.logger.Log("level", "debug", "message", "loadtest-app endpoint is %#q", loadTestEndpoint)
+		l.logger.Log("level", "debug", "message", fmt.Sprintf("loadtest-app endpoint is %#q", loadTestEndpoint))
 	}
 
 	var jsonValues []byte
@@ -172,11 +172,11 @@ func (l *LoadTest) InstallTestApp(ctx context.Context) error {
 func (l *LoadTest) CheckTestAppIsInstalled(ctx context.Context) error {
 	var podCount = 1
 
-	l.logger.Log("level", "debug", "message", fmt.Sprintf("waiting for %d pods of the e2e-app to be up", podCount))
+	l.logger.Log("level", "debug", "message", fmt.Sprintf("waiting for %d pods of the loadtest-app to be up", podCount))
 
 	o := func() error {
 		lo := metav1.ListOptions{
-			LabelSelector: "app=loadtest-app",
+			LabelSelector: "app.kubernetes.io/name=testapp-chart",
 		}
 		l, err := l.guestFramework.K8sClient().CoreV1().Pods(ChartNamespace).List(lo)
 		if err != nil {
