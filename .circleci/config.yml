@@ -152,6 +152,32 @@ jobs:
 #     TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 
+  
+  
+  e2eTestCurPRLoadTest:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/loadtest"
+    <<: *e2eTest
+
+  e2eTestCurMasterLoadTest:
+    environment:
+      TESTED_VERSION: "current"
+      TEST_DIR: "integration/test/loadtest"
+    <<: *e2eTest
+
+  e2eTestWIPPRLoadTest:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/loadtest"
+    <<: *e2eTest
+
+  e2eTestWIPMasterLoadTest:
+    environment:
+      TESTED_VERSION: "wip"
+      TEST_DIR: "integration/test/loadtest"
+    <<: *e2eTest
+
 
 
   e2eTestCurPRRecreateCluster:
@@ -299,6 +325,21 @@ workflows:
 #     - e2eTestWIPPRIPAM:
 #         requires:
 #           - pr
+
+
+
+#     - e2eTestCurMasterLoadTest:
+#         requires:
+#           - master
+#     - e2eTestWIPMasterLoadTest:
+#         requires:
+#           - master
+      - e2eTestCurPRLoadTest:
+          requires:
+            - pr
+      - e2eTestWIPPRLoadTest:
+          requires:
+            - pr
 
 
 
