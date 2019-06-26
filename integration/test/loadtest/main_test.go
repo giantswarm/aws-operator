@@ -7,6 +7,7 @@ import (
 
 	"github.com/giantswarm/e2etests/loadtest"
 
+	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
 
