@@ -28,24 +28,8 @@ import (
 type AWSClusterStatus struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Cluster           AWSClusterStatusCluster  `json:"cluster" yaml:"cluster"`
+	Cluster           CommonClusterStatus      `json:"cluster" yaml:"cluster"`
 	Provider          AWSClusterStatusProvider `json:"provider" yaml:"provider"`
-}
-
-type AWSClusterStatusCluster struct {
-	Conditions []AWSClusterStatusClusterCondition `json:"conditions" yaml:"conditions"`
-	ID         string                             `json:"id" yaml:"id"`
-	Versions   []AWSClusterStatusClusterVersion   `json:"versions" yaml:"versions"`
-}
-
-type AWSClusterStatusClusterCondition struct {
-	LastTransitionTime DeepCopyTime `json:"lastTransitionTime" yaml:"lastTransitionTime"`
-	Type               string       `json:"type" yaml:"type"`
-}
-
-type AWSClusterStatusClusterVersion struct {
-	LastTransitionTime DeepCopyTime `json:"lastTransitionTime" yaml:"lastTransitionTime"`
-	Version            string       `json:"version" yaml:"version"`
 }
 
 type AWSClusterStatusProvider struct {

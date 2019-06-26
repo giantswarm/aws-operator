@@ -15,6 +15,7 @@ version directory, and  then changes are introduced.
 
 - Change Felix configuration to add metric server and expose data to be scraped for prometheus.
 - Add `k8s-app` label for `api-server`, `controller-manager` and `scheduler`.
+- Harden SSH config and tuned networking kernel settings
 
 ## [v4.3.0]
 

@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/e2e-harness/pkg/harness"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -32,8 +31,7 @@ func NewClients(config ClientsConfig) (*Clients, error) {
 	}
 
 	if config.KubeConfigPath == "" {
-		// When we start using kind we should default that to "$HOME/.kube/kind-config-kind".
-		config.KubeConfigPath = harness.DefaultKubeConfig
+		config.KubeConfigPath = e2eHarnessDefaultKubeconfig
 	}
 
 	var err error
