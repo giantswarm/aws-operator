@@ -19,12 +19,12 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "containerlinux",
-				Description: "Updated to 2079.5.1. More info here: https://github.com/coreos/manifest/releases/tag/v2079.5.1",
+				Description: "Update to 2079.5.1. More info here: https://github.com/coreos/manifest/releases/tag/v2079.5.1",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "etcd",
-				Description: "Updated to 3.3.13. More info here: https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.3.md#v3313-2019-05-02",
+				Description: "Update to 3.3.13. More info here: https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.3.md#v3313-2019-05-02",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
