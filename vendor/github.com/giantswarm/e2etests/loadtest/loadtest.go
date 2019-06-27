@@ -178,7 +178,7 @@ func (l *LoadTest) CheckTestAppIsInstalled(ctx context.Context) error {
 		lo := metav1.ListOptions{
 			LabelSelector: "app.kubernetes.io/name=testapp-chart",
 		}
-		l, err := l.guestFramework.K8sClient().CoreV1().Pods(ChartNamespace).List(lo)
+		l, err := l.guestFramework.K8sClient().CoreV1().Pods("test").List(lo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
