@@ -54,11 +54,6 @@ func teardown(ctx context.Context, config Config) error {
 		}
 	}
 
-	{
-		// TODO there should be error handling for the framework teardown.
-		config.Host.Teardown()
-	}
-
 	if len(errors) > 0 {
 		return microerror.Mask(errors[0])
 	}
