@@ -41,7 +41,6 @@ func NewConfig() (Config, error) {
 	var awsClient *e2eclientsaws.Client
 	{
 		awsClient, err = e2eclientsaws.NewClient()
-
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
