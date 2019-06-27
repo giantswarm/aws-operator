@@ -17,17 +17,26 @@ const (
 )
 
 type Interface interface {
-	// Test executes the loadtest test using the configured provider
-	// implementation. The provider implementation has to be aware of the tenant
-	// cluster it has to act against. The test processes the following steps to
-	// ensure Nginx Ingress Controller and cluster-autoscaler behave correctly
-	// under load.
+	// Test executes the loadtest test that checks that tenant cluster
+	// components behave correctly under load. This primarily involves testing
+	// the HPA configuration for Nginx Ingress Controller is correct and
+	// interacts correctly with the cluster-autoscaler when it is enabled.
 	//
-	//     - Enable HPA for Nginx Ingress Controller using user configmap.
-	//     - Install Storm Forger testapp as test workload.
-	//     - Wait for test workload to be ready.
-	//     - Trigger load test using Storm Forger CLI.
-	//     - Analyze results from Storm Forger CLI.
+	// The load test is performed by Stormforger. Their testapp is installed as
+	// the test workload and a job is created to trigger the loadtest via their
+	// CLI.
+	//
+	// https://github.com/stormforger/cli
+	// https://github.com/stormforger/testapp
+	//
+	//     - Generate loadtest-app endpoint for the tenant cluster.
+	//     - Enable HPA for Nginx Ingress Controller via user configmap.
+	//     - Install loadtest-app chart in the tenant cluster.
+	//     - Wait for loadtest-app deployment to be ready.
+	//     - Install stormforger-cli chart in the tenant cluster.
+	//     - Wait for stormforger-cli job to be completed.
+	//     - Get logs for stormforger-cli pod with the results.
+	//     - Parse the results and determine whether the test passed.
 	//
 	Test(ctx context.Context) error
 }

@@ -87,6 +87,17 @@ func (l *LoadTest) Test(ctx context.Context) error {
 	}
 
 	{
+		l.logger.LogCtx(ctx, "level", "debug", "message", "creating namespace")
+
+		err = l.CreateNamespace(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		l.logger.LogCtx(ctx, "level", "debug", "message", "created namespace")
+	}
+
+	{
 		l.logger.LogCtx(ctx, "level", "debug", "message", "installing loadtest-app")
 
 		err = l.InstallTestApp(ctx, loadTestEndpoint)
@@ -172,6 +183,25 @@ func (l *LoadTest) CheckLoadTestResults(ctx context.Context, jsonResults []byte)
 	if apdexScore < ApdexPassThreshold {
 		return microerror.Maskf(invalidExecutionError, "apdex score of %d is less than %d", apdexScore, ApdexPassThreshold)
 	}
+
+	return nil
+}
+
+func (l *LoadTest) CreateNamespace(ctx context.Context) error {
+	l.logger.Log("level", "debug", "message", fmt.Sprintf("creating namespace %#q", LoadTestNamespace))
+
+	ns := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: LoadTestNamespace,
+		},
+	}
+
+	_, err := l.guestFramework.K8sClient().CoreV1().Namespaces().Create(ns)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	l.logger.Log("level", "debug", "message", fmt.Sprintf("created namespace %#q", LoadTestNamespace))
 
 	return nil
 }
