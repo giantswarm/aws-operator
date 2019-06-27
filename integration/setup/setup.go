@@ -125,6 +125,7 @@ func Setup(m *testing.M, config Config) {
 			v = 1
 		}
 
+		// TODO discuss how useful this is at all. Who needs this and why?
 		if !env.CircleCI() {
 			err := teardown(ctx, config)
 			if err != nil {
