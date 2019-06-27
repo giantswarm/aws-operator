@@ -11,7 +11,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "servicev28"
+	Name = "servicev29"
 )
 
 const (

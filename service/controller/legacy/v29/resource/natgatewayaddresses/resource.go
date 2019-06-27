@@ -9,11 +9,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
 )
 
 const (
-	Name = "natgatewayaddressesv28"
+	Name = "natgatewayaddressesv29"
 )
 
 type Config struct {

@@ -9,8 +9,8 @@ import (
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_4_0"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/templates/cloudconfig"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
