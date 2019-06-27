@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 type GuestIAMPoliciesAdapter struct {

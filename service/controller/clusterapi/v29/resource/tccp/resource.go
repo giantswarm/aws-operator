@@ -10,16 +10,16 @@ import (
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/detection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv28"
+	Name = "tccpv29"
 )
 
 const (

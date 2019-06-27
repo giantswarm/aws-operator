@@ -6,9 +6,9 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
