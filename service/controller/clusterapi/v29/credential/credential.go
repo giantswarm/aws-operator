@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (

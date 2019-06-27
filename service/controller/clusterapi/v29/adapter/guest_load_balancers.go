@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (

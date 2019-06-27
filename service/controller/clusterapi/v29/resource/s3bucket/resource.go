@@ -7,12 +7,12 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv28"
+	Name = "s3bucketv29"
 	// LifecycleLoggingBucketID is the Lifecycle ID for the logging bucket
 	LifecycleLoggingBucketID = "ExpirationLogs"
 )

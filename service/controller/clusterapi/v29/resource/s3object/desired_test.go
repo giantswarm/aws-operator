@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 )
 
 func Test_DesiredState(t *testing.T) {

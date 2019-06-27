@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	Name = "machinedeploymentsubnetv28"
+	Name = "machinedeploymentsubnetv29"
 )
 
 type Config struct {
