@@ -124,15 +124,6 @@ func Setup(m *testing.M, config Config) {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			v = 1
 		}
-
-		// TODO discuss how useful this is at all. Who needs this and why?
-		if !env.CircleCI() {
-			err := teardown(ctx, config)
-			if err != nil {
-				// teardown errors are logged inside the function.
-				v = 1
-			}
-		}
 	}
 
 	os.Exit(v)
