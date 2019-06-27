@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/integration/key"
 )
 
 func teardown(ctx context.Context, config Config) error {
@@ -21,12 +22,13 @@ func teardown(ctx context.Context, config Config) error {
 
 	{
 		releases := []string{
-			fmt.Sprintf("%s-aws-operator", config.Host.TargetNamespace()),
-			fmt.Sprintf("%s-cert-operator", config.Host.TargetNamespace()),
-			fmt.Sprintf("%s-node-operator", config.Host.TargetNamespace()),
+			key.AWSOperatorReleaseName(),
+			key.CertOperatorReleaseName(),
+			key.NodeOperatorReleaseName(),
+			key.VaultReleaseName(),
 
-			fmt.Sprintf("e2esetup-awsconfig-%s", env.ClusterID()),
-			fmt.Sprintf("e2esetup-certs-%s", env.ClusterID()),
+			key.AWSConfigReleaseName(env.ClusterID()),
+			key.CertsReleaseName(env.ClusterID()),
 		}
 
 		for _, release := range releases {
