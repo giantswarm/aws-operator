@@ -31,6 +31,7 @@ func init() {
 			GuestFramework: config.Guest,
 			Logger:         config.Logger,
 
+			AuthToken:    env.StormForgerAPIToken(),
 			ClusterID:    env.ClusterID(),
 			CommonDomain: env.CommonDomain(),
 		}

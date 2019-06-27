@@ -21,6 +21,7 @@ const (
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
+	EnvVarStormForgerAPIToken  = "STORMFORGER_API_TOKEN"
 	EnvVarTestedVersion        = "TESTED_VERSION"
 	EnvVarTestDir              = "TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
@@ -32,6 +33,7 @@ var (
 	clusterID            string
 	registryPullSecret   string
 	githubToken          string
+	stormForgerAPIToken  string
 	testDir              string
 	testedVersion        string
 	keepResources        string
@@ -63,6 +65,8 @@ func init() {
 	if registryPullSecret == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarRegistryPullSecret))
 	}
+
+	stormForgerAPIToken = os.Getenv(EnvVarStormForgerAPIToken)
 
 	testDir = os.Getenv(EnvVarTestDir)
 
@@ -123,6 +127,10 @@ func GithubToken() string {
 
 func RegistryPullSecret() string {
 	return registryPullSecret
+}
+
+func StormForgerAPIToken() string {
+	return stormForgerAPIToken
 }
 
 func TestedVersion() string {
