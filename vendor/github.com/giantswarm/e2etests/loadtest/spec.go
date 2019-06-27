@@ -5,11 +5,15 @@ import (
 )
 
 const (
-	CNRAddress      = "https://quay.io"
-	CNROrganization = "giantswarm"
-	ChartChannel    = "stable"
-	ChartName       = "loadtest-app-chart"
-	ChartNamespace  = "e2e-app"
+	// ApdexPassThreshold is the minimum value allowed for the test to pass.
+	ApdexPassThreshold = 0.95
+	AppChartName       = "loadtest-app-chart"
+	CNRAddress         = "https://quay.io"
+	CNROrganization    = "giantswarm"
+	ChartChannel       = "stable"
+	ChartNamespace     = "e2e-app"
+	JobChartName       = "stormforger-cli-chart"
+	LoadTestNamespace  = "loadtest"
 )
 
 type Interface interface {

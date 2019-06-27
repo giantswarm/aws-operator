@@ -9,24 +9,24 @@ import (
 )
 
 type KVMConfig struct {
-	HostFramework *framework.Host
-	Logger        micrologger.Logger
+	Clients Clients
+	Logger  micrologger.Logger
 
 	ClusterID   string
 	GithubToken string
 }
 
 type KVM struct {
-	hostFramework *framework.Host
-	logger        micrologger.Logger
+	clients Clients
+	logger  micrologger.Logger
 
 	clusterID   string
 	githubToken string
 }
 
 func NewKVM(config KVMConfig) (*KVM, error) {
-	if config.HostFramework == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostFramework must not be empty", config)
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -40,8 +40,8 @@ func NewKVM(config KVMConfig) (*KVM, error) {
 	}
 
 	k := &KVM{
-		hostFramework: config.HostFramework,
-		logger:        config.Logger,
+		clients: config.Clients,
+		logger:  config.Logger,
 
 		clusterID:   config.ClusterID,
 		githubToken: config.GithubToken,
@@ -51,7 +51,7 @@ func NewKVM(config KVMConfig) (*KVM, error) {
 }
 
 func (k *KVM) CurrentStatus() (v1alpha1.StatusCluster, error) {
-	customObject, err := k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
+	customObject, err := k.clients.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return v1alpha1.StatusCluster{}, microerror.Mask(err)
 	}
@@ -98,7 +98,7 @@ func (k *KVM) NextVersion() (string, error) {
 }
 
 func (k *KVM) UpdateVersion(nextVersion string) error {
-	customObject, err := k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
+	customObject, err := k.clients.G8sClient().ProviderV1alpha1().KVMConfigs("default").Get(k.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -106,7 +106,7 @@ func (k *KVM) UpdateVersion(nextVersion string) error {
 	customObject.Spec.Cluster.Kubernetes.Kubelet.Labels = ensureLabel(customObject.Spec.Cluster.Kubernetes.Kubelet.Labels, "kvm-operator.giantswarm.io/version", nextVersion)
 	customObject.Spec.VersionBundle.Version = nextVersion
 
-	_, err = k.hostFramework.G8sClient().ProviderV1alpha1().KVMConfigs("default").Update(customObject)
+	_, err = k.clients.G8sClient().ProviderV1alpha1().KVMConfigs("default").Update(customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
