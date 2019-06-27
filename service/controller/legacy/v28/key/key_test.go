@@ -1348,7 +1348,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-012abdf0d2781f0a5",
+			expectedImageID: "ami-0018c6ee88479b31e",
 		},
 		{
 			description: "different region",
@@ -1360,7 +1360,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-01f5fbceb7a9fa4d0",
+			expectedImageID: "ami-018351c24af175181",
 		},
 		{
 			description: "invalid region",

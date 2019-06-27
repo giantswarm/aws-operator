@@ -6,7 +6,7 @@ import (
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_3_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_4_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
@@ -127,8 +127,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: FilePermission,
 		},
@@ -136,8 +140,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.DecryptKeysAssetsScript,
 			Path:         "/opt/bin/decrypt-keys-assets",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: FilePermission,
 		},
@@ -146,8 +154,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: e.RandomKeyTmplSet.APIServerEncryptionKey,
 			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0644,
 		},
@@ -155,8 +167,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: FilePermission,
 		},
@@ -164,8 +180,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
 			Path:         "/opt/bin/vault-aws-authorizer",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: FilePermission,
 		},
@@ -175,8 +195,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.IngressControllerConfigMap,
 			Path:         "/srv/ingress-controller-cm.yml",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0644,
 		},
@@ -186,8 +210,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.NVMEUdevRule,
 			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0644,
 		},
@@ -195,8 +223,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: cloudconfig.NVMEUdevScript,
 			Path:         "/opt/ebs-nvme-mapping",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0766,
 		},
@@ -204,8 +236,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			AssetContent: storageClass,
 			Path:         "/srv/default-storage-class.yaml",
 			Owner: k8scloudconfig.Owner{
-				User:  FileOwnerUser,
-				Group: FileOwnerGroup,
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
 			},
 			Permissions: 0644,
 		},
@@ -231,8 +267,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				AssetContent: string(data),
 				Path:         f.AbsolutePath + ".enc",
 				Owner: k8scloudconfig.Owner{
-					User:  FileOwnerUser,
-					Group: FileOwnerGroup,
+					Group: k8scloudconfig.Group{
+						Name: FileOwnerGroupName,
+					},
+					User: k8scloudconfig.User{
+						Name: FileOwnerUserName,
+					},
 				},
 				Permissions: 0700,
 			}
