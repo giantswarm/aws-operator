@@ -240,8 +240,7 @@ func (l *LoadTest) InstallTestApp(ctx context.Context, loadTestEndpoint string) 
 			Logger:    l.logger,
 			K8sClient: l.guestFramework.K8sClient(),
 
-			RestConfig:      l.guestFramework.RestConfig(),
-			TillerNamespace: TillerNamespace,
+			RestConfig: l.guestFramework.RestConfig(),
 		}
 
 		tenantHelmClient, err = helmclient.New(c)

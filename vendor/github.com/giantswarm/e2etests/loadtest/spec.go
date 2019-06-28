@@ -13,7 +13,6 @@ const (
 	ChartChannel       = "stable"
 	ChartNamespace     = "e2e-app"
 	JobChartName       = "stormforger-cli-chart"
-	TillerNamespace    = "giantswarm"
 )
 
 type Interface interface {
