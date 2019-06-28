@@ -2,6 +2,9 @@ package clusterstate
 
 import (
 	"context"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 const (
@@ -11,6 +14,21 @@ const (
 	ChartName       = "e2e-app-chart"
 	ChartNamespace  = "e2e-app"
 )
+
+type LegacyFramework interface {
+	// K8sClient returns a properly configured tenant cluster client for the
+	// Kubernetes API.
+	K8sClient() kubernetes.Interface
+	// RestConfig returns the rest config used to generate the Kubernetes client as
+	// returned by K8sClient.
+	RestConfig() *rest.Config
+	// WaitForAPIUp waits for the currently configured tenant cluster Kubernetes
+	// API to be down.
+	WaitForAPIDown() error
+	// WaitForGuestReady waits for the currently configured tenant cluster to be
+	// ready.
+	WaitForGuestReady(ctx context.Context) error
+}
 
 type Interface interface {
 	// Test executes the cluster state test using the configured provider

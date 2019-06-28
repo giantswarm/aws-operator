@@ -10,6 +10,7 @@ versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
 ## [v4.5.0] WIP
+- Add configuration necessery for generic support of rbd storage.
 
 ## [v4.4.0]
 
