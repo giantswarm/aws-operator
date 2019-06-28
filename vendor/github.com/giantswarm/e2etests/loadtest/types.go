@@ -34,7 +34,7 @@ type LoadTestResultsDataAttributes struct {
 }
 
 type LoadTestResultsDataAttributesBasicStatistics struct {
-	Apdex75 float32 `json:apdex_75`
+	Apdex75 float32 `json:"apdex_75"`
 }
 
 // LoadTestValues passes values to the stormforger-cli chart.

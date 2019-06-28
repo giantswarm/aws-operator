@@ -269,7 +269,7 @@
 
 [[projects]]
   branch = "loadtest"
-  digest = "1:99f7431c2e866610690f443731cfa845653b56d3b61a3d2811d43ecba2931d5a"
+  digest = "1:e52f2cc575d7996861808709853e8adca26f80be3f8147ac388d1a49456cd1ab"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
@@ -283,7 +283,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "f31b8241c2b3d33148de67741eb748ce25d845c1"
+  revision = "259d5f74e527870f28a8ad8d90cc54acb402cdab"
 
 [[projects]]
   branch = "master"

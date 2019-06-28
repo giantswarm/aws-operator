@@ -157,14 +157,7 @@ func (l *LoadTest) CheckLoadTestResults(ctx context.Context, jsonResults []byte)
 
 	l.logger.LogCtx(ctx, "level", "debug", "message", "checking loadtest results")
 
-	var prettyJSON bytes.Buffer
-
-	err = json.Indent(&prettyJSON, jsonResults, "", "\t")
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	l.logger.LogCtx(ctx, "level", "debug", "message", prettyJSON.String())
+	l.logger.LogCtx(ctx, "level", "debug", "message", jsonResults)
 
 	var results LoadTestResults
 
