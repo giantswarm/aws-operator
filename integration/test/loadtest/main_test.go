@@ -49,7 +49,7 @@ func init() {
 	{
 		clients = &loadtest.Clients{
 			ControlPlaneHelmClient: controlPlaneHelmClient,
-			ControlPlaneK8sClient:  config.Guest.K8sClient(),
+			ControlPlaneK8sClient:  config.Host.K8sClient(),
 		}
 	}
 
