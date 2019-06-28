@@ -16,7 +16,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 )
 
 type DrainerConfig struct {
@@ -122,9 +122,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v28ResourceSet *controller.ResourceSet
+	var v29ResourceSet *controller.ResourceSet
 	{
-		c := v28.DrainerResourceSetConfig{
+		c := v29.DrainerResourceSetConfig{
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
@@ -136,14 +136,14 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		v28ResourceSet, err = v28.NewDrainerResourceSet(c)
+		v29ResourceSet, err = v29.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v28ResourceSet,
+		v29ResourceSet,
 	}
 
 	return resourceSets, nil
