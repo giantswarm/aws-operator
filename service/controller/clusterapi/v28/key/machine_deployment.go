@@ -1,71 +1,29 @@
 package key
 
 import (
-	"net"
 	"strconv"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/service/network"
 )
 
 func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
 	return cr.Labels[label.Cluster]
 }
 
-func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
-	return cr.Annotations[annotation.MachineDeploymentSubnet]
-}
-
 // TODO this method has to be properly implemented and renamed eventually.
-func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
-	var workerSubnet net.IPNet
-	{
-		s := WorkerSubnet(cr)
-		if s == "" {
-			return nil, microerror.Maskf(notFoundError, "MachineDeployment is missing subnet allocation")
-		}
-
-		_, n, err := net.ParseCIDR(s)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		workerSubnet = *n
-	}
-
+func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	var azs []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
-	{
-		azsSubnets, err := network.Split(workerSubnet, uint(len(WorkerAvailabilityZones(cr))))
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		for i, s := range WorkerAvailabilityZones(cr) {
-			subnets, err := network.Split(azsSubnets[i], 2)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			azs = append(azs, g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				Name: s,
-				Subnet: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-					Private: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-						CIDR: subnets[0].String(),
-					},
-					Public: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-						CIDR: subnets[1].String(),
-					},
-				},
-			})
-		}
+	for _, s := range WorkerAvailabilityZones(cr) {
+		azs = append(azs, g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
+			Name: s,
+		})
 	}
 
-	return azs, nil
+	return azs
 }
 
 func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {

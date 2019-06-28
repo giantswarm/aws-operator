@@ -28,7 +28,11 @@ type GuestSubnetsAdapter struct {
 }
 
 func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
-	zones := key.StatusAvailabilityZones(cfg.MachineDeployment)
+	zones, err := key.StatusAvailabilityZones(cfg.MachineDeployment)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
 	})

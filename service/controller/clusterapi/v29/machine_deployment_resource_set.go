@@ -18,7 +18,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentsubnet"
 )
 
@@ -37,19 +36,6 @@ type MachineDeploymentResourceSetConfig struct {
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	var asgStatusResource controller.Resource
-	{
-		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		asgStatusResource, err = asgstatus.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var machineDeploymentSubnetResource controller.Resource
 	{
 		c := machinedeploymentsubnet.Config{
@@ -64,7 +50,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	resources := []controller.Resource{
-		asgStatusResource,
 		machineDeploymentSubnetResource,
 	}
 
