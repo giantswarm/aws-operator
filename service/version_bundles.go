@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/giantswarm/versionbundle"
 
-	clusterapiv28 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
+	clusterapiv29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v23"
@@ -20,7 +20,7 @@ import (
 func NewVersionBundles() []versionbundle.Bundle {
 	var versionBundles []versionbundle.Bundle
 
-	versionBundles = append(versionBundles, clusterapiv28.VersionBundle())
+	versionBundles = append(versionBundles, clusterapiv29.VersionBundle())
 
 	versionBundles = append(versionBundles, v22.VersionBundle())
 	versionBundles = append(versionBundles, v22patch1.VersionBundle())
