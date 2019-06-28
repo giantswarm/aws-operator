@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/apprclient"
 	"github.com/giantswarm/backoff"
+	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -20,8 +21,9 @@ import (
 )
 
 type Config struct {
-	Clients *Clients
-	Logger  micrologger.Logger
+	Clients        *Clients
+	GuestFramework *framework.Guest
+	Logger         micrologger.Logger
 
 	AuthToken    string
 	ClusterID    string
@@ -29,8 +31,9 @@ type Config struct {
 }
 
 type LoadTest struct {
-	logger  micrologger.Logger
-	clients *Clients
+	clients        *Clients
+	guestFramework *framework.Guest
+	logger         micrologger.Logger
 
 	authToken    string
 	clusterID    string
@@ -38,8 +41,14 @@ type LoadTest struct {
 }
 
 func New(config Config) (*LoadTest, error) {
-	if config.Clients == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
+	if config.Clients.ControlPlaneHelmClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.ControlPlaneHelmClient must not be empty", config)
+	}
+	if config.Clients.ControlPlaneK8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients.ControlPlaneK8sClient must not be empty", config)
+	}
+	if config.GuestFramework == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.GuestFramework must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -56,8 +65,9 @@ func New(config Config) (*LoadTest, error) {
 	}
 
 	s := &LoadTest{
-		clients: config.Clients,
-		logger:  config.Logger,
+		clients:        config.Clients,
+		guestFramework: config.GuestFramework,
+		logger:         config.Logger,
 
 		authToken:    config.AuthToken,
 		clusterID:    config.ClusterID,
@@ -223,8 +233,24 @@ func (l *LoadTest) InstallTestApp(ctx context.Context, loadTestEndpoint string) 
 		}
 	}
 
+	var tenantHelmClient helmclient.Interface
+
 	{
-		err = l.installChart(ctx, l.clients.TenantHelmClient, AppChartName, jsonValues)
+		c := helmclient.Config{
+			Logger:    l.logger,
+			K8sClient: l.guestFramework.K8sClient(),
+
+			RestConfig: l.guestFramework.RestConfig(),
+		}
+
+		tenantHelmClient, err = helmclient.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	{
+		err = l.installChart(ctx, tenantHelmClient, AppChartName, jsonValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -240,7 +266,7 @@ func (l *LoadTest) WaitForLoadTestApp(ctx context.Context) error {
 		lo := metav1.ListOptions{
 			LabelSelector: "app.kubernetes.io/name=loadtest-app",
 		}
-		l, err := l.clients.TenantK8sClient.AppsV1().Deployments(metav1.NamespaceDefault).List(lo)
+		l, err := l.guestFramework.K8sClient().AppsV1().Deployments(metav1.NamespaceDefault).List(lo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
