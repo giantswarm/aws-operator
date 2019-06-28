@@ -5,6 +5,8 @@ package loadtest
 import (
 	"testing"
 
+	"github.com/giantswarm/helmclient"
+
 	"github.com/giantswarm/e2etests/loadtest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -26,10 +28,53 @@ func init() {
 		}
 	}
 
+	var controlPlaneHelmClient helmclient.Interface
+
+	{
+		c := helmclient.Config{
+			Logger:    config.Logger,
+			K8sClient: config.Host.K8sClient(),
+
+			RestConfig: config.Host.RestConfig(),
+		}
+
+		controlPlaneHelmClient, err = helmclient.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	var tenantHelmClient helmclient.Interface
+
+	{
+		c := helmclient.Config{
+			Logger:    config.Logger,
+			K8sClient: config.Guest.K8sClient(),
+
+			RestConfig: config.Guest.RestConfig(),
+		}
+
+		tenantHelmClient, err = helmclient.New(c)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	var clients *loadtest.Clients
+
+	{
+		clients = &loadtest.Clients{
+			ControlPlaneHelmClient: controlPlaneHelmClient,
+			ControlPlaneK8sClient:  config.Guest.K8sClient(),
+			TenantHelmClient:       tenantHelmClient,
+			TenantK8sClient:        config.Host.K8sClient(),
+		}
+	}
+
 	{
 		c := loadtest.Config{
-			GuestFramework: config.Guest,
-			Logger:         config.Logger,
+			Clients: clients,
+			Logger:  config.Logger,
 
 			AuthToken:    env.StormForgerAPIToken(),
 			ClusterID:    env.ClusterID(),

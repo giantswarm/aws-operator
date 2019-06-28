@@ -10,7 +10,6 @@ import (
 
 	"github.com/giantswarm/apprclient"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -21,8 +20,8 @@ import (
 )
 
 type Config struct {
-	GuestFramework *framework.Guest
-	Logger         micrologger.Logger
+	Clients *Clients
+	Logger  micrologger.Logger
 
 	AuthToken    string
 	ClusterID    string
@@ -30,8 +29,8 @@ type Config struct {
 }
 
 type LoadTest struct {
-	guestFramework *framework.Guest
-	logger         micrologger.Logger
+	logger  micrologger.Logger
+	clients *Clients
 
 	authToken    string
 	clusterID    string
@@ -39,8 +38,8 @@ type LoadTest struct {
 }
 
 func New(config Config) (*LoadTest, error) {
-	if config.GuestFramework == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestFramework must not be empty", config)
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -57,8 +56,8 @@ func New(config Config) (*LoadTest, error) {
 	}
 
 	s := &LoadTest{
-		guestFramework: config.GuestFramework,
-		logger:         config.Logger,
+		clients: config.Clients,
+		logger:  config.Logger,
 
 		authToken:    config.AuthToken,
 		clusterID:    config.ClusterID,
@@ -77,57 +76,43 @@ func (l *LoadTest) Test(ctx context.Context) error {
 
 		l.logger.Log("level", "debug", "message", fmt.Sprintf("loadtest-app endpoint is %#q", loadTestEndpoint))
 	}
-	{
-		l.logger.LogCtx(ctx, "level", "debug", "message", "enabling HPA for Nginx Ingress Controller")
 
+	{
 		/* TODO Update user values configmap and trigger chartconfig CR update.
 		 */
-
-		l.logger.LogCtx(ctx, "level", "debug", "message", "enabled HPA for Nginx Ingress Controller")
 	}
 
 	{
-		l.logger.LogCtx(ctx, "level", "debug", "message", "creating namespace")
-
-		err = l.CreateNamespace(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		l.logger.LogCtx(ctx, "level", "debug", "message", "created namespace")
-	}
-
-	{
-		l.logger.LogCtx(ctx, "level", "debug", "message", "installing loadtest-app")
+		l.logger.LogCtx(ctx, "level", "debug", "message", "installing loadtest app")
 
 		err = l.InstallTestApp(ctx, loadTestEndpoint)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		l.logger.LogCtx(ctx, "level", "debug", "message", "installed loadtest-app")
+		l.logger.LogCtx(ctx, "level", "debug", "message", "installed loadtest app")
 	}
 
 	{
-		l.logger.LogCtx(ctx, "level", "debug", "message", "waiting for loadtest-app to be ready")
+		l.logger.LogCtx(ctx, "level", "debug", "message", "waiting for loadtest app to be ready")
 
 		err = l.WaitForLoadTestApp(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		l.logger.LogCtx(ctx, "level", "debug", "message", "loadtest-app is ready")
+		l.logger.LogCtx(ctx, "level", "debug", "message", "loadtest app is ready")
 	}
 
 	{
-		l.logger.LogCtx(ctx, "level", "debug", "message", "starting loadtest job")
+		l.logger.LogCtx(ctx, "level", "debug", "message", "installing loadtest job")
 
-		err = l.StartLoadTestJob(ctx, loadTestEndpoint)
+		err = l.InstallLoadTestJob(ctx, loadTestEndpoint)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		l.logger.LogCtx(ctx, "level", "debug", "message", "started loadtest job")
+		l.logger.LogCtx(ctx, "level", "debug", "message", "installed loadtest job")
 	}
 
 	var jsonResults []byte
@@ -181,27 +166,40 @@ func (l *LoadTest) CheckLoadTestResults(ctx context.Context, jsonResults []byte)
 	apdexScore := results.Data.Attributes.BasicStatistics.Apdex75
 
 	if apdexScore < ApdexPassThreshold {
-		return microerror.Maskf(invalidExecutionError, "apdex score of %d is less than %d", apdexScore, ApdexPassThreshold)
+		return microerror.Maskf(invalidExecutionError, "apdex score of %f is less than %f", apdexScore, ApdexPassThreshold)
 	}
+
+	l.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("load test passed: apdex score of %f is >= %f", apdexScore, ApdexPassThreshold))
 
 	return nil
 }
 
-func (l *LoadTest) CreateNamespace(ctx context.Context) error {
-	l.logger.Log("level", "debug", "message", fmt.Sprintf("creating namespace %#q", LoadTestNamespace))
+func (l *LoadTest) InstallLoadTestJob(ctx context.Context, loadTestEndpoint string) error {
+	var err error
 
-	ns := &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: LoadTestNamespace,
-		},
+	var jsonValues []byte
+	{
+		values := LoadTestValues{
+			Auth: LoadTestValuesAuth{
+				Token: l.authToken,
+			},
+			Test: LoadTestValuesTest{
+				Endpoint: loadTestEndpoint,
+			},
+		}
+
+		jsonValues, err = json.Marshal(values)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
-	_, err := l.guestFramework.K8sClient().CoreV1().Namespaces().Create(ns)
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		err = l.installChart(ctx, l.clients.ControlPlaneHelmClient, JobChartName, jsonValues)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
-
-	l.logger.Log("level", "debug", "message", fmt.Sprintf("created namespace %#q", LoadTestNamespace))
 
 	return nil
 }
@@ -226,37 +224,7 @@ func (l *LoadTest) InstallTestApp(ctx context.Context, loadTestEndpoint string) 
 	}
 
 	{
-		err = l.installChart(ctx, AppChartName, jsonValues)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	return nil
-}
-
-func (l *LoadTest) StartLoadTestJob(ctx context.Context, loadTestEndpoint string) error {
-	var err error
-
-	var jsonValues []byte
-	{
-		values := LoadTestValues{
-			Auth: LoadTestValuesAuth{
-				Token: l.authToken,
-			},
-			Test: LoadTestValuesTest{
-				Endpoint: loadTestEndpoint,
-			},
-		}
-
-		jsonValues, err = json.Marshal(values)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		err = l.installChart(ctx, JobChartName, jsonValues)
+		err = l.installChart(ctx, l.clients.TenantHelmClient, AppChartName, jsonValues)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -272,7 +240,7 @@ func (l *LoadTest) WaitForLoadTestApp(ctx context.Context) error {
 		lo := metav1.ListOptions{
 			LabelSelector: "app.kubernetes.io/name=loadtest-app",
 		}
-		l, err := l.guestFramework.K8sClient().AppsV1().Deployments(LoadTestNamespace).List(lo)
+		l, err := l.clients.TenantK8sClient.AppsV1().Deployments(metav1.NamespaceDefault).List(lo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -288,7 +256,7 @@ func (l *LoadTest) WaitForLoadTestApp(ctx context.Context) error {
 		return nil
 	}
 
-	b := backoff.NewConstant(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+	b := backoff.NewConstant(2*time.Minute, 15*time.Second)
 	n := func(err error, delay time.Duration) {
 		l.logger.Log("level", "debug", "message", err.Error())
 	}
@@ -311,31 +279,24 @@ func (l *LoadTest) WaitForLoadTestJob(ctx context.Context) ([]byte, error) {
 
 	o := func() error {
 		lo := metav1.ListOptions{
+			FieldSelector: "status.Phase=Succeeded",
 			LabelSelector: "app.kubernetes.io/name=stormforger-cli",
 		}
-		l, err := l.guestFramework.K8sClient().CoreV1().Pods(LoadTestNamespace).List(lo)
+		l, err := l.clients.ControlPlaneK8sClient.CoreV1().Pods(metav1.NamespaceDefault).List(lo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		if len(l.Items) == podCount {
-			pod := l.Items[0]
+			podName = l.Items[0].Name
 
-			if pod.Status.Phase == corev1.PodSucceeded {
-				podName = pod.Name
-
-				return nil
-			}
-
-			return microerror.Maskf(waitError, "want %#q pod found %#q", corev1.PodSucceeded, pod.Status.Phase)
-		} else {
-			return microerror.Maskf(waitError, "want %d pods found %d", podCount, len(l.Items))
+			return nil
 		}
 
-		return nil
+		return microerror.Maskf(waitError, "want %d Succeeded pods found %d", podCount, len(l.Items))
 	}
 
-	b := backoff.NewConstant(backoff.ShortMaxWait, backoff.ShortMaxInterval)
+	b := backoff.NewConstant(20*time.Minute, 30*time.Second)
 	n := func(err error, delay time.Duration) {
 		l.logger.Log("level", "debug", "message", err.Error())
 	}
@@ -347,7 +308,7 @@ func (l *LoadTest) WaitForLoadTestJob(ctx context.Context) ([]byte, error) {
 
 	l.logger.Log("level", "debug", "message", "waited for stormforger-cli job")
 
-	req := l.guestFramework.K8sClient().CoreV1().Pods(LoadTestNamespace).GetLogs(podName, &corev1.PodLogOptions{})
+	req := l.clients.ControlPlaneK8sClient.CoreV1().Pods(metav1.NamespaceDefault).GetLogs(podName, &corev1.PodLogOptions{})
 
 	readCloser, err := req.Stream()
 	if err != nil {
@@ -366,7 +327,7 @@ func (l *LoadTest) WaitForLoadTestJob(ctx context.Context) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (l *LoadTest) installChart(ctx context.Context, chartName string, jsonValues []byte) error {
+func (l *LoadTest) installChart(ctx context.Context, helmClient helmclient.Interface, chartName string, jsonValues []byte) error {
 	var err error
 
 	var apprClient *apprclient.Client
@@ -385,27 +346,6 @@ func (l *LoadTest) installChart(ctx context.Context, chartName string, jsonValue
 		}
 	}
 
-	var helmClient *helmclient.Client
-	{
-		c := helmclient.Config{
-			Logger:    l.logger,
-			K8sClient: l.guestFramework.K8sClient(),
-
-			RestConfig: l.guestFramework.RestConfig(),
-		}
-
-		helmClient, err = helmclient.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		err = helmClient.EnsureTillerInstalled(ctx)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	// Install the chart in the tenant cluster.
 	{
 		l.logger.Log("level", "debug", "message", fmt.Sprintf("installing %#q", chartName))
 

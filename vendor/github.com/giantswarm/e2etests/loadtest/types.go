@@ -1,5 +1,18 @@
 package loadtest
 
+import (
+	"github.com/giantswarm/helmclient"
+	"k8s.io/client-go/kubernetes"
+)
+
+// Clients are configured in the e2e test.
+type Clients struct {
+	ControlPlaneHelmClient helmclient.Interface
+	ControlPlaneK8sClient  kubernetes.Interface
+	TenantHelmClient       helmclient.Interface
+	TenantK8sClient        kubernetes.Interface
+}
+
 // LoadTestApp passes values to the loadtest-app chart.
 type LoadTestApp struct {
 	Ingress LoadTestAppIngress `json:"ingress"`
