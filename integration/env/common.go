@@ -88,10 +88,6 @@ func init() {
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 }
 
-func CircleCI() bool {
-	return circleCI == strings.ToLower("true")
-}
-
 func CircleSHA() string {
 	return circleSHA
 }

@@ -14,7 +14,12 @@ import (
 //     apiVersion: cluster.giantswarm.io/v1alpha1
 //     metadata:
 //       labels:
-//         aws-operator.giantswarm.io/version: 2.0.0
+//         aws-operator.giantswarm.io/version: 6.2.0
+//         cluster-operator.giantswarm.io/version: 0.17.0
+//         giantswarm.io/cluster: 8y5kc
+//         giantswarm.io/organization: "giantswarm"
+//         giantswarm.io/machine-deployment: al9qy
+//         release.giantswarm.io/version: 7.3.1
 //       name: al9qy
 //     nodePool:
 //       description: my fancy node pool
