@@ -312,7 +312,7 @@ func (l *LoadTest) WaitForLoadTestJob(ctx context.Context) ([]byte, error) {
 
 	o := func() error {
 		lo := metav1.ListOptions{
-			FieldSelector: "status.Phase=Succeeded",
+			FieldSelector: "status.phase=Succeeded",
 			LabelSelector: "app.kubernetes.io/name=stormforger-cli",
 		}
 		l, err := l.clients.ControlPlaneK8sClient.CoreV1().Pods(metav1.NamespaceDefault).List(lo)
