@@ -49,4 +49,14 @@ type LoadTestValuesAuth struct {
 
 type LoadTestValuesTest struct {
 	Endpoint string `json:"endpoint"`
+	Name     string `json:"name"`
+}
+
+// UserConfigMapValues enables autoscaling for Nginx Ingress Controller.
+type UserConfigMapValues struct {
+	Data UserConfigMapValuesData `yaml:"autoscaling-enabled"`
+}
+
+type UserConfigMapValuesData struct {
+	AutoscalingEnabled bool `yaml:"autoscaling-enabled"`
 }

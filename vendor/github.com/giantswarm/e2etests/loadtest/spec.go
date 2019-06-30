@@ -6,13 +6,17 @@ import (
 
 const (
 	// ApdexPassThreshold is the minimum value allowed for the test to pass.
-	ApdexPassThreshold = 0.95
-	AppChartName       = "loadtest-app-chart"
-	CNRAddress         = "https://quay.io"
-	CNROrganization    = "giantswarm"
-	ChartChannel       = "stable"
-	ChartNamespace     = "e2e-app"
-	JobChartName       = "stormforger-cli-chart"
+	ApdexPassThreshold      = 0.95
+	AppChartName            = "loadtest-app-chart"
+	CNRAddress              = "https://quay.io"
+	CNROrganization         = "giantswarm"
+	ChartChannel            = "stable"
+	ChartNamespace          = "e2e-app"
+	CustomResourceName      = "kubernetes-nginx-ingress-controller-chart"
+	CustomResourceNamespace = "giantswarm"
+	JobChartName            = "stormforger-cli-chart"
+	TestName                = "aws-operator-e2e"
+	UserConfigMapName       = "nginx-ingress-controller-user-values"
 )
 
 type Interface interface {
@@ -29,10 +33,11 @@ type Interface interface {
 	// https://github.com/stormforger/testapp
 	//
 	//     - Generate loadtest-app endpoint for the tenant cluster.
-	//     - Enable HPA for Nginx Ingress Controller via user configmap.
+	//     - Enable HPA for Nginx Ingress Controller in the tenant cluster via
+	// 		 user configmap.
 	//     - Install loadtest-app chart in the tenant cluster.
 	//     - Wait for loadtest-app deployment to be ready.
-	//     - Install stormforger-cli chart in the tenant cluster.
+	//     - Install stormforger-cli chart.
 	//     - Wait for stormforger-cli job to be completed.
 	//     - Get logs for stormforger-cli pod with the results.
 	//     - Parse the results and determine whether the test passed.
