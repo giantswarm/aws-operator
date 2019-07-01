@@ -110,7 +110,7 @@ systemd:
       EnvironmentFile=/etc/network-environment
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
-      Environment="NETWORK_CONFIG_CONTAINER="
+      Environment="PATH=/opt/bin/:/usr/bin/:/usr/sbin:$PATH"
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME
@@ -135,6 +135,7 @@ systemd:
       -v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \
       -v /etc/cni/net.d/:/etc/cni/net.d/ \
       -v /opt/cni/bin/:/opt/cni/bin/ \
+      -v /opt/bin:/opt/bin \
       -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
       -v /etc/iscsi/:/etc/iscsi/ \
       -v /dev/disk/by-path/:/dev/disk/by-path/ \
@@ -147,6 +148,7 @@ systemd:
       -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
       -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
       -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
+      -e PATH \
       --name $NAME \
       $IMAGE \
       /hyperkube kubelet \

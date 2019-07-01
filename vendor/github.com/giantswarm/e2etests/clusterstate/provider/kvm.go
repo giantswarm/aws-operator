@@ -1,29 +1,28 @@
 package provider
 
 import (
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type KVMConfig struct {
-	HostFramework *framework.Host
-	Logger        micrologger.Logger
+	Clients Clients
+	Logger  micrologger.Logger
 
 	ClusterID string
 }
 
 type KVM struct {
-	hostFramework *framework.Host
-	logger        micrologger.Logger
+	clients Clients
+	logger  micrologger.Logger
 
 	clusterID string
 }
 
 func NewKVM(config KVMConfig) (*KVM, error) {
-	if config.HostFramework == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostFramework must not be empty", config)
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -33,14 +32,14 @@ func NewKVM(config KVMConfig) (*KVM, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ClusterID must not be empty", config)
 	}
 
-	a := &KVM{
-		hostFramework: config.HostFramework,
-		logger:        config.Logger,
+	k := &KVM{
+		clients: config.Clients,
+		logger:  config.Logger,
 
 		clusterID: config.ClusterID,
 	}
 
-	return a, nil
+	return k, nil
 }
 
 func (k *KVM) RebootMaster() error {
@@ -67,7 +66,7 @@ func (k *KVM) deleteMasterPod() error {
 		LabelSelector: "app=master",
 	}
 
-	pods, err := k.hostFramework.K8sClient().CoreV1().Pods(namespace).List(listOptions)
+	pods, err := k.clients.K8sClient().CoreV1().Pods(namespace).List(listOptions)
 	if err != nil {
 		return microerror.Mask(err)
 	} else if len(pods.Items) == 0 {
@@ -77,7 +76,7 @@ func (k *KVM) deleteMasterPod() error {
 	}
 
 	masterPod := pods.Items[0]
-	err = k.hostFramework.K8sClient().CoreV1().Pods(namespace).Delete(masterPod.Name, &metav1.DeleteOptions{})
+	err = k.clients.K8sClient().CoreV1().Pods(namespace).Delete(masterPod.Name, &metav1.DeleteOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}

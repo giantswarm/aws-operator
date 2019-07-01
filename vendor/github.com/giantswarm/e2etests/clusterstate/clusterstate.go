@@ -7,7 +7,6 @@ import (
 
 	"github.com/giantswarm/apprclient"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -18,20 +17,20 @@ import (
 )
 
 type Config struct {
-	GuestFramework *framework.Guest
-	Logger         micrologger.Logger
-	Provider       provider.Interface
+	LegacyFramework LegacyFramework
+	Logger          micrologger.Logger
+	Provider        provider.Interface
 }
 
 type ClusterState struct {
-	guestFramework *framework.Guest
-	logger         micrologger.Logger
-	provider       provider.Interface
+	legacyFramework LegacyFramework
+	logger          micrologger.Logger
+	provider        provider.Interface
 }
 
 func New(config Config) (*ClusterState, error) {
-	if config.GuestFramework == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestFramework must not be empty", config)
+	if config.LegacyFramework == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LegacyFramework must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -41,9 +40,9 @@ func New(config Config) (*ClusterState, error) {
 	}
 
 	s := &ClusterState{
-		guestFramework: config.GuestFramework,
-		logger:         config.Logger,
-		provider:       config.Provider,
+		legacyFramework: config.LegacyFramework,
+		logger:          config.Logger,
+		provider:        config.Provider,
 	}
 
 	return s, nil
@@ -88,7 +87,7 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting api to go down")
 
-		err = c.guestFramework.WaitForAPIDown()
+		err = c.legacyFramework.WaitForAPIDown()
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -99,7 +98,7 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster")
 
-		err = c.guestFramework.WaitForGuestReady(ctx)
+		err = c.legacyFramework.WaitForGuestReady(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -132,7 +131,7 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting api to go down")
 
-		err = c.guestFramework.WaitForAPIDown()
+		err = c.legacyFramework.WaitForAPIDown()
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -143,7 +142,7 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "waiting for guest cluster")
 
-		err = c.guestFramework.WaitForGuestReady(ctx)
+		err = c.legacyFramework.WaitForGuestReady(ctx)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -188,9 +187,9 @@ func (c *ClusterState) InstallTestApp(ctx context.Context) error {
 	{
 		c := helmclient.Config{
 			Logger:    c.logger,
-			K8sClient: c.guestFramework.K8sClient(),
+			K8sClient: c.legacyFramework.K8sClient(),
 
-			RestConfig: c.guestFramework.RestConfig(),
+			RestConfig: c.legacyFramework.RestConfig(),
 		}
 
 		helmClient, err = helmclient.New(c)
@@ -231,7 +230,7 @@ func (c *ClusterState) CheckTestAppIsInstalled(ctx context.Context) error {
 		lo := metav1.ListOptions{
 			LabelSelector: "app=e2e-app",
 		}
-		l, err := c.guestFramework.K8sClient().CoreV1().Pods(ChartNamespace).List(lo)
+		l, err := c.legacyFramework.K8sClient().CoreV1().Pods(ChartNamespace).List(lo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
