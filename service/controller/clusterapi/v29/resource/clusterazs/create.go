@@ -55,7 +55,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// Include master's AZ.
 		azsMap[key.MasterAvailabilityZone(cr)] = struct{}{}
 
-		// ...and workers'.
+		// Include worker AZs.
 		for _, md := range machineDeployments {
 			for _, az := range key.WorkerAvailabilityZones(md) {
 				azsMap[az] = struct{}{}
