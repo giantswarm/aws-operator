@@ -29,6 +29,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
@@ -221,6 +222,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterAZsResource controller.Resource
+	{
+		c := clusterazs.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		clusterAZsResource, err = clusterazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -587,6 +601,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	resources := []controller.Resource{
 		machineDeploymentResource,
+		clusterAZsResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,

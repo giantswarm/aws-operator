@@ -153,6 +153,10 @@ func KubeletLabels(cluster v1alpha1.Cluster) string {
 	return labels
 }
 
+func MasterAvailabilityZone(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Provider.Master.AvailabilityZone
+}
+
 func MasterCount(cluster v1alpha1.Cluster) int {
 	return 1
 }
