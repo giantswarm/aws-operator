@@ -8,8 +8,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
@@ -21,7 +21,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCustomObject(obj)
+	cr, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -34,7 +34,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's data plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(key.StackNameTCDP(&cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -121,8 +121,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
-			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			StackName:                   aws.String(stackName(cr)),
+			EnableTerminationProtection: aws.Bool(true),
+			StackName:                   aws.String(key.StackNameTCDP(&cr)),
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
@@ -139,7 +139,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's data plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.MainHostPreStackName(cr)),
+			StackName: aws.String(key.StackNameTCDP(&cr)),
 		}
 
 		err = cc.Client.TenantCluster.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
@@ -153,13 +153,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	minDesiredNodes := minDesiredWorkers(key.ScalingMin(cr), key.ScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
+	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(cr), key.WorkerScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
@@ -178,7 +178,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.AWSConfi
 	return autoScalingGroup, nil
 }
 
-func (r *Resource) newIAMPolicies(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPolicies(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -200,7 +200,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr v1alpha1.AWSConfig) (*
 	return iamPolicies, nil
 }
 
-func (r *Resource) newLaunchConfiguration(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLaunchConfiguration, error) {
+func (r *Resource) newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainLaunchConfiguration, error) {
 	imageID, err := key.ImageID(cr)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -229,11 +229,11 @@ func (r *Resource) newLaunchConfiguration(ctx context.Context, cr v1alpha1.AWSCo
 	return launchConfiguration, nil
 }
 
-func (r *Resource) newLifecycleHooks(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainLifecycleHooks, error) {
+func (r *Resource) newLifecycleHooks(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainLifecycleHooks, error) {
 	return &template.ParamsMainLifecycleHooks{}, nil
 }
 
-func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainOutputs, error) {
 	imageID, err := key.ImageID(cr)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -256,7 +256,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 	return outputs, nil
 }
 
-func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSecurityGroups, error) {
+func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -278,7 +278,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr v1alpha1.AWSConfig)
 	return securityGroups, nil
 }
 
-func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainSubnets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -313,7 +313,7 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.AWSConfig) (*temp
 	return subnets, nil
 }
 
-func asgName(cr v1alpha1.AWSConfig) string {
+func asgName(cr v1alpha1.MachineDeployment) string {
 	return fmt.Sprintf("asg-%s-tcdp", key.ClusterID(cr))
 }
 
@@ -352,17 +352,6 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	}
 
 	return minWorkers
-}
-
-// TODO for the tenant cluster migration we simply hard code something here.
-// Once we are clear with the reconcilable types for the node pools we have to
-// generate the types according to the node pools with the hardcoded ID below.
-func nodePoolID(cr v1alpha1.AWSConfig) string {
-	return "pb6m9"
-}
-
-func stackName(cr v1alpha1.AWSConfig) string {
-	return fmt.Sprintf("cluster-%s-tcdp", key.ClusterID(cr))
 }
 
 func workerCountRatio(workers int, ratio float32) string {

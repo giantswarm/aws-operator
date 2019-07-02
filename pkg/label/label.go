@@ -5,10 +5,11 @@ const (
 )
 
 const (
-	Cluster       = "giantswarm.io/cluster"
-	Organization  = "giantswarm.io/organization"
-	Provider      = "giantswarm.io/provider"
-	VersionBundle = "giantswarm.io/version-bundle"
+	Cluster           = "giantswarm.io/cluster"
+	MachineDeployment = "giantswarm.io/machine-deployment"
+	Organization      = "giantswarm.io/organization"
+	Provider          = "giantswarm.io/provider"
+	VersionBundle     = "giantswarm.io/version-bundle"
 )
 
 const (
