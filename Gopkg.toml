@@ -125,6 +125,10 @@ required = [
   name = "github.com/giantswarm/versionbundle"
 
 [[constraint]]
+  name = "github.com/google/go-cmp"
+  version = "0.3.0"
+
+[[constraint]]
   name = "github.com/prometheus/client_golang"
   version = "0.9.3"
 
@@ -156,8 +160,6 @@ required = [
   name = "sigs.k8s.io/cluster-api"
   version = "=v0.1.1"
 
-
-
 [prune]
   go-tests = true
   unused-packages = true
@@ -165,7 +167,3 @@ required = [
 [[prune.project]]
   name = "github.com/giantswarm/k8scloudconfig"
   unused-packages = false
-
-[[constraint]]
-  name = "github.com/google/go-cmp"
-  version = "0.3.0"
