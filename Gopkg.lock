@@ -170,7 +170,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6fad467c6c5612d7a7c998d3134b33675a670c8221e739d6fce33c893024b22e"
+  digest = "1:bc67d452c6d01459e89b80dfe6460c2b0b46e661063aeaa615fc11debd73d5ab"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -194,7 +194,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "a21bb0978d428172d1e0f5d17ffcc944ca96ce2c"
+  revision = "49bc8cba4c8e4eee46d81f3d9aa92d133c09e656"
 
 [[projects]]
   branch = "master"
@@ -225,7 +225,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bb7eaa96534fd9a94eea350dd45ee982f9d9a8a8f7d4fcdbea8860f735db274c"
+  digest = "1:169046d4e462ff71a713eee496624e77d9f9952f9ead947b9947bf5170e1fdbf"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "internal/filelogger",
@@ -234,7 +234,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "fa7385ca3cbf686bb09a39f45c657f0fe76c5710"
+  revision = "94388dde639308b70027f93cee0ae9012c989a6c"
 
 [[projects]]
   branch = "master"
@@ -269,7 +269,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:faa4a5c0df5c4e2a803572e0be18720d34a38fd03848e49b8dd69deb6c180119"
+  digest = "1:0020f60d83964a8b6e968615d5e27fd4248f6f452b2871dcab65bb03f0ea5286"
   name = "github.com/giantswarm/e2etests"
   packages = [
     "clusterstate",
@@ -282,7 +282,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "fdec8e1d93ef6b67c005cdd6de2d111b0aaf52da"
+  revision = "77a5e4a1839462b0b86b7d1cffe6ab13aa4934e4"
 
 [[projects]]
   branch = "master"
@@ -318,7 +318,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:48af67535947cb8b858d4296c29071cc1efe1dc1100e2a429eb3e248d064efed"
+  digest = "1:752708b1242d6dca553f10d8753f8365a69dd1950a8e9fb8812a2dbbf71aaa64"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -332,7 +332,7 @@
     "v_4_4_0",
   ]
   pruneopts = "T"
-  revision = "a963eb0559f8cf9c5f4c53957e32b4e8142980b6"
+  revision = "f5aebcd5d6b7ae93af8e10a082092008638b119d"
 
 [[projects]]
   branch = "master"
@@ -408,7 +408,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:06d85b7a32fefc8d774db32228e925c01fc7d95b209486d135cb51ccddcaf6c1"
+  digest = "1:ea12c5546fcade954db5ca2f724c92c5b3003554ef7f1314174ec203568b7591"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -418,17 +418,17 @@
     "controller/context/reconciliationcanceledcontext",
     "controller/context/resourcecanceledcontext",
     "controller/context/updateallowedcontext",
-    "controller/resource/internal",
-    "controller/resource/metricsresource",
-    "controller/resource/retryresource",
     "flag/service/kubernetes",
     "flag/service/kubernetes/tls",
     "flag/service/kubernetes/watch",
     "informer",
     "informer/collector",
+    "resource/wrapper/internal",
+    "resource/wrapper/metricsresource",
+    "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "b1bed61beabc7cfff87fcbe8177fb5621e2c2784"
+  revision = "e5d2b8071b3678d427e342e6ae500b5059de778a"
 
 [[projects]]
   branch = "master"
@@ -978,14 +978,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fe40fbf915905f8a2397b321b3f10190edbdf5d293f087d01d7eb3a6d1a4adca"
+  digest = "1:afb5346f71acefc3da7ad800f952cb2bcdb762194b05304bbf54d7f9490e31c5"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c5567b49c5d04a5f83870795b8c0e2df43a8ce32"
+  revision = "04f50cda93cbb67f2afa353c52f342100e80e625"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -1042,7 +1042,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "6af8c5fc6601ab6b41cd32742a65ce2f5bd9db57"
+  revision = "eb59cef1c072c61ea4f7623910448d5e9c6a4455"
 
 [[projects]]
   digest = "1:cde568cda33e1c7f75353ae84df1880d5d364d9ffbf269c34cdc23fffe539a45"
@@ -1507,10 +1507,10 @@
     "github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext",
     "github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext",
     "github.com/giantswarm/operatorkit/controller/context/updateallowedcontext",
-    "github.com/giantswarm/operatorkit/controller/resource/metricsresource",
-    "github.com/giantswarm/operatorkit/controller/resource/retryresource",
     "github.com/giantswarm/operatorkit/flag/service/kubernetes",
     "github.com/giantswarm/operatorkit/informer",
+    "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
+    "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
     "github.com/giantswarm/randomkeys/randomkeystest",
     "github.com/giantswarm/statusresource",
