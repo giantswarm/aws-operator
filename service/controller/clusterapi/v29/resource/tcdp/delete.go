@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -27,7 +27,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(key.StackNameCPI(cr)),
+			StackName:                   aws.String(key.MainHostPreStackName(cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
@@ -58,21 +58,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's data plane cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.StackNameCPI(cr)),
+			StackName: aws.String(key.MainHostPreStackName(cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
-		if IsUpdateInProgress(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack is being updated")
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-			return nil
-
-		} else if err != nil {
+		if err != nil {
 			return microerror.Mask(err)
 		}
 

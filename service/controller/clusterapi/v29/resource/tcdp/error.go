@@ -70,26 +70,3 @@ func IsNotExists(err error) bool {
 
 	return false
 }
-
-var updateInProgressError = &microerror.Error{
-	Kind: "updateInProgressError",
-}
-
-// IsUpdateInProgress asserts updateInProgressError.
-func IsUpdateInProgress(err error) bool {
-	c := microerror.Cause(err)
-
-	if c == nil {
-		return false
-	}
-
-	if strings.Contains(c.Error(), cloudformation.ResourceStatusUpdateInProgress) {
-		return true
-	}
-
-	if c == updateInProgressError {
-		return true
-	}
-
-	return false
-}

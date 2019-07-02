@@ -2,9 +2,9 @@ package tcdp
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
@@ -18,7 +18,8 @@ const (
 type Config struct {
 	Logger micrologger.Logger
 
-	InstallationName string
+	InstallationName   string
+	InstanceMonitoring bool
 }
 
 // Resource implements the TCDP resource, which stands for Tenant Cluster Data
@@ -26,7 +27,8 @@ type Config struct {
 type Resource struct {
 	logger micrologger.Logger
 
-	installationName string
+	installationName   string
+	instanceMonitoring bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -34,10 +36,15 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.InstallationName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+
 	r := &Resource{
 		logger: config.Logger,
 
-		installationName: config.InstallationName,
+		installationName:   config.InstallationName,
+		instanceMonitoring: config.InstanceMonitoring,
 	}
 
 	return r, nil
@@ -47,7 +54,8 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) getCloudFormationTags(cluster v1alpha1.Cluster) []*cloudformation.Tag {
-	tags := key.ClusterTags(cluster, r.installationName)
+func (r *Resource) getCloudFormationTags(cr v1alpha1.AWSConfig) []*cloudformation.Tag {
+	tags := key.ClusterTags(cr, r.installationName)
+	tags["giantswarm.io/node-pool"] = nodePoolID(cr)
 	return awstags.NewCloudFormation(tags)
 }
