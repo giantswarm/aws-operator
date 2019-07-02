@@ -62,7 +62,7 @@ func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
 }
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("api.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
@@ -74,7 +74,7 @@ func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("etcd.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterEtcdEndpointWithPort(cluster v1alpha1.Cluster) string {
@@ -86,7 +86,7 @@ func ClusterID(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterKubeletEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("worker.%s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("worker.%s.k8s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
@@ -151,6 +151,10 @@ func KubeletLabels(cluster v1alpha1.Cluster) string {
 	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(&cluster))
 
 	return labels
+}
+
+func MasterAvailabilityZone(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Provider.Master.AvailabilityZone
 }
 
 func MasterCount(cluster v1alpha1.Cluster) int {

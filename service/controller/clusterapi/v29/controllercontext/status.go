@@ -38,6 +38,7 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
+	AvailabilityZones     []string
 	AWSAccountID          string
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string

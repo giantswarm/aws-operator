@@ -569,6 +569,20 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:bf40199583e5143d1472fc34d10d6f4b69d97572142acf343b3e43136da40823"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/flags",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
+  version = "v0.3.0"
+
+[[projects]]
   digest = "1:664e1bc8d2f651e1e5234a7bd52d6bbc1704a90e7787d29c56aa212a46d860f0"
   name = "github.com/google/go-github"
   packages = ["github"]
@@ -1504,6 +1518,7 @@
     "github.com/giantswarm/statusresource",
     "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/versionbundle",
+    "github.com/google/go-cmp/cmp",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/spf13/afero",
     "github.com/spf13/viper",
