@@ -40,12 +40,14 @@ func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSCo
 
 	var azs []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
 	{
-		azsSubnets, err := network.Split(workerSubnet, uint(len(WorkerAvailabilityZones(cr))))
+		workerAZs := WorkerAvailabilityZones(cr)
+
+		azsSubnets, err := network.Split(workerSubnet, uint(len(workerAZs)))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		for i, s := range WorkerAvailabilityZones(cr) {
+		for i, s := range workerAZs {
 			subnets, err := network.Split(azsSubnets[i], 2)
 			if err != nil {
 				return nil, microerror.Mask(err)
