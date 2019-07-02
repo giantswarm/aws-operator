@@ -7,11 +7,12 @@ import (
 
 	g8sclusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	g8sproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/google/go-cmp/cmp"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
 
 func withg8sMachineDeploymentSpecToCMAMachineDeployment(cr v1alpha1.MachineDeployment, providerExtension g8sclusterv1alpha1.AWSMachineDeploymentSpec) v1alpha1.MachineDeployment {
