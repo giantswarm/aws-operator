@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v28"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 )
 
 type MachineDeploymentConfig struct {
@@ -120,9 +120,9 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
-	var v28ResourceSet *controller.ResourceSet
+	var v29ResourceSet *controller.ResourceSet
 	{
-		c := v28.MachineDeploymentResourceSetConfig{
+		c := v29.MachineDeploymentResourceSetConfig{
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
@@ -134,14 +134,14 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		v28ResourceSet, err = v28.NewMachineDeploymentResourceSet(c)
+		v29ResourceSet, err = v29.NewMachineDeploymentResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v28ResourceSet,
+		v29ResourceSet,
 	}
 
 	return resourceSets, nil

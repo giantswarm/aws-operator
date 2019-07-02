@@ -347,33 +347,33 @@ func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string
 
 // imageIDs returns our Container Linux AMIs for each active AWS region. Note
 // that AMIs should always be for HVM virtualisation, not PV. Current Release is
-// CoreOS Container Linux stable 2079.5.1. AMI IDs are copied from the following
+// CoreOS Container Linux stable 2135.4.0. AMI IDs are copied from the following
 // resource.
 //
-//     https://stable.release.core-os.net/amd64-usr/2079.5.1/coreos_production_ami_hvm.txt.
+//     https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.
 //
 func imageIDs() map[string]string {
 	return map[string]string{
-		"ap-northeast-1": "ami-036857bdeb5b3362c",
-		"ap-northeast-2": "ami-00f2ee0ba5c3954e9",
-		"ap-south-1":     "ami-060a95c11ed11c1bd",
-		"ap-southeast-1": "ami-0da0dfdf36db6e7e1",
-		"ap-southeast-2": "ami-0c245ecdf4720b5a2",
-		"ca-central-1":   "ami-0867c908d18a8c69e",
-		"cn-north-1":     "ami-0032227ab96e75a9f",
-		"cn-northwest-1": "ami-006bc343e8c9c9b22",
-		"eu-central-1":   "ami-0018c6ee88479b31e",
-		"eu-north-1":     "ami-00e03f7974618119a",
-		"eu-west-1":      "ami-018351c24af175181",
-		"eu-west-2":      "ami-0b91a753d4fa446b4",
-		"eu-west-3":      "ami-0719f5491f02f1874",
-		"sa-east-1":      "ami-08003539c64a2c6b9",
-		"us-east-1":      "ami-0a7247846b022222c",
-		"us-east-2":      "ami-0efcfe3a15d87beff",
-		"us-gov-east-1":  "ami-0229105a89981165a",
-		"us-gov-west-1":  "ami-22384043",
-		"us-west-1":      "ami-062f6abca7bac0908",
-		"us-west-2":      "ami-0e7d76904282e972b",
+		"ap-northeast-1": "ami-02e7b007b87514a38",
+		"ap-northeast-2": "ami-0b5d1f638fb771cc9",
+		"ap-south-1":     "ami-0db4916dd31b99465",
+		"ap-southeast-1": "ami-01f2de2186e97c395",
+		"ap-southeast-2": "ami-026d43721ef96eba8",
+		"ca-central-1":   "ami-07d5bae9b2c4c9df1",
+		"cn-north-1":     "ami-0dd65d250887524c1",
+		"cn-northwest-1": "ami-0c63b500c3173c90e",
+		"eu-central-1":   "ami-0eb0d9bb7ad1bd1e9",
+		"eu-north-1":     "ami-0e3eca3c62f4c6311",
+		"eu-west-1":      "ami-000307cf706ac9f94",
+		"eu-west-2":      "ami-0322cee7ff4e446ce",
+		"eu-west-3":      "ami-01c936a41649a8cda",
+		"sa-east-1":      "ami-0b4101a238b99a929",
+		"us-east-1":      "ami-00386353b49e325ba",
+		"us-east-2":      "ami-064fe7e0332ae6407",
+		"us-gov-east-1":  "ami-03e5a71feb2b7afd2",
+		"us-gov-west-1":  "ami-272d6846",
+		"us-west-1":      "ami-070bfb410b9f148c7",
+		"us-west-2":      "ami-0a7e0ff8d31da1836",
 	}
 }
 

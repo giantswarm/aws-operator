@@ -22,7 +22,7 @@ import (
 //     cluster:
 //       description: my fancy cluster
 //       dns:
-//         domain: k8s.gauss.eu-central-1.aws.gigantic.io
+//         domain: gauss.eu-central-1.aws.gigantic.io
 //       oidc:
 //         claims:
 //           username: email
