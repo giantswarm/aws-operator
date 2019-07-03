@@ -135,7 +135,12 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.Cluster) ([
 
 	var tenantPrivateSubnetCidrs []string
 	{
-		for _, az := range key.StatusAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment) {
+		azs, err := key.StatusAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, az := range azs {
 			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.Subnet.Private.CIDR)
 		}
 	}
@@ -200,7 +205,7 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster)
 	{
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                 key.ClusterBaseDomain(cr),
-			ClusterID:                  key.ClusterID(cr),
+			ClusterID:                  key.ClusterID(&cr),
 			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
 			Route53Enabled:             r.route53Enabled,
 		}

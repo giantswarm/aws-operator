@@ -23,7 +23,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 	baseDomain := key.ClusterBaseDomain(cr)
 	intermediateZone := "k8s." + baseDomain
-	finalZone := key.ClusterID(cr) + ".k8s." + baseDomain
+	finalZone := key.ClusterID(&cr) + ".k8s." + baseDomain
 
 	_, defaultGuest, err := r.route53Clients(ctx)
 	if err != nil {

@@ -18,9 +18,9 @@ type GuestNATGatewayAdapter struct {
 }
 
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
-	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
 		gw := Gateway{
-			ClusterID:             key.ClusterID(cfg.CustomObject),
+			ClusterID:             key.ClusterID(&cfg.CustomObject),
 			NATGWName:             key.NATGatewayName(i),
 			NATEIPName:            key.NATEIPName(i),
 			NATRouteName:          key.NATRouteName(i),

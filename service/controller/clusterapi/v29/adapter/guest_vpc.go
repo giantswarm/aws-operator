@@ -18,7 +18,7 @@ type GuestVPCAdapter struct {
 
 func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.CidrBlock = key.StatusClusterNetworkCIDR(cfg.CustomObject)
-	v.ClusterID = key.ClusterID(cfg.CustomObject)
+	v.ClusterID = key.ClusterID(&cfg.CustomObject)
 	v.InstallationName = cfg.InstallationName
 	v.HostAccountID = cfg.ControlPlaneAccountID
 	v.PeerVPCID = cfg.ControlPlaneVPCID
@@ -32,7 +32,7 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	}
 	v.RouteTableNames = append(v.RouteTableNames, PublicRouteTable)
 
-	for i := 0; i < len(key.StatusAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
 		rtName := RouteTableName{
 			ResourceName:        key.PrivateRouteTableName(i),
 			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),

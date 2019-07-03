@@ -7,10 +7,12 @@ import (
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 )
 
@@ -26,6 +28,11 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description: "basic match",
 			obj: &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
+					},
+				},
 				Spec: v1alpha1.ClusterSpec{
 					ProviderSpec: v1alpha1.ProviderSpec{
 						Value: &runtime.RawExtension{
@@ -41,25 +48,19 @@ func Test_CurrentState(t *testing.T) {
 						},
 					},
 				},
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "test-cluster"
-								}
-							}
-						`),
-					},
-				},
 			},
 			expectedKey:    "cloudconfig/myversion/worker",
-			expectedBucket: "myaccountid-g8s-test-cluster",
+			expectedBucket: "myaccountid-g8s-5xchu",
 			expectedBody:   "mybody",
 		},
 		{
 			description: "S3 error",
 			obj: &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
+					},
+				},
 				Spec: v1alpha1.ClusterSpec{
 					ProviderSpec: v1alpha1.ProviderSpec{
 						Value: &runtime.RawExtension{
@@ -73,17 +74,6 @@ func Test_CurrentState(t *testing.T) {
 								}
 							`),
 						},
-					},
-				},
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "test-cluster"
-								}
-							}
-						`),
 					},
 				},
 			},

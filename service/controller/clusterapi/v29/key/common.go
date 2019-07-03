@@ -6,6 +6,10 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+func ClusterID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.Cluster]
+}
+
 func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }

@@ -29,7 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		g := &errgroup.Group{}
 
 		g.Go(func() error {
-			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(cr))
+			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(&cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -39,7 +39,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(cr))
+			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(&cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}

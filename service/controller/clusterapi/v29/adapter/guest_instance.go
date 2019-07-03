@@ -56,7 +56,7 @@ type GuestInstanceAdapterMasterInstance struct {
 
 func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	{
-		i.Cluster.ID = key.ClusterID(config.CustomObject)
+		i.Cluster.ID = key.ClusterID(&config.CustomObject)
 	}
 
 	{
@@ -64,7 +64,11 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		zones := key.StatusAvailabilityZones(config.MachineDeployment)
+		zones, err := key.StatusAvailabilityZones(config.MachineDeployment)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		sort.Slice(zones, func(i, j int) bool {
 			return zones[i].Name < zones[j].Name
 		})
