@@ -17,17 +17,19 @@ type GuestRouteTablesAdapter struct {
 }
 
 func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
+	workerAZs := key.SortedWorkerAvailabilityZones(cfg.MachineDeployment)
+
 	r.HostClusterCIDR = cfg.ControlPlaneVPCCidr
 	r.PublicRouteTableName = RouteTableName{
 		ResourceName: "PublicRouteTable",
-		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),
+		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, workerAZs[0]),
 	}
 
-	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for _, az := range workerAZs {
 		rtName := RouteTableName{
-			ResourceName:        key.PrivateRouteTableName(i),
-			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),
-			VPCPeeringRouteName: key.VPCPeeringRouteName(i),
+			ResourceName:        key.PrivateRouteTableName(az),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, az),
+			VPCPeeringRouteName: key.VPCPeeringRouteName(az),
 		}
 		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)
 	}

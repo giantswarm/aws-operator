@@ -60,10 +60,10 @@ func TestStatusAvailabilityZones(t *testing.T) {
 					Name: "eu-central-1a",
 					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-							CIDR: "10.100.4.0/26",
+							CIDR: "10.100.4.0/27",
 						},
 						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-							CIDR: "10.100.4.64/26",
+							CIDR: "10.100.4.32/27",
 						},
 					},
 				},
@@ -71,10 +71,10 @@ func TestStatusAvailabilityZones(t *testing.T) {
 					Name: "eu-central-1b",
 					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-							CIDR: "10.100.4.128/26",
+							CIDR: "10.100.4.64/27",
 						},
 						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-							CIDR: "10.100.4.192/26",
+							CIDR: "10.100.4.96/27",
 						},
 					},
 				},
@@ -118,6 +118,48 @@ func TestStatusAvailabilityZones(t *testing.T) {
 						},
 						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
 							CIDR: "10.100.4.96/27",
+						},
+					},
+				},
+				{
+					Name: "eu-central-1c",
+					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+							CIDR: "10.100.4.128/27",
+						},
+						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+							CIDR: "10.100.4.160/27",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "case 2: Test with two non-consecutive AZs",
+			cr: v1alpha1.MachineDeployment{
+				ObjectMeta: v1.ObjectMeta{
+					Annotations: map[string]string{
+						annotation.MachineDeploymentSubnet: "10.100.4.0/24",
+					},
+				},
+			},
+			providerExtension: g8sclusterv1alpha1.AWSMachineDeploymentSpec{
+				Provider: g8sclusterv1alpha1.AWSMachineDeploymentSpecProvider{
+					AvailabilityZones: []string{
+						"eu-central-1a",
+						"eu-central-1c",
+					},
+				},
+			},
+			expectedZones: []g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZone{
+				{
+					Name: "eu-central-1a",
+					Subnet: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
+						Private: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
+							CIDR: "10.100.4.0/27",
+						},
+						Public: g8sproviderv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
+							CIDR: "10.100.4.32/27",
 						},
 					},
 				},

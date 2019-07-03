@@ -69,8 +69,8 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	for i, az := range azs {
-		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
+	for _, az := range azs {
+		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(az.Name))
 		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
 

@@ -77,8 +77,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 			return microerror.Maskf(notFoundError, "CustomObject has no availability zones")
 		}
 
-		i.Master.AZ = zones[0].Name
-		i.Master.PrivateSubnet = key.PrivateSubnetName(0)
+		i.Master.AZ = key.MasterAvailabilityZone(config.CustomObject)
+		i.Master.PrivateSubnet = key.PrivateSubnetName(i.Master.AZ)
 
 		c := SmallCloudconfigConfig{
 			InstanceRole: "master",

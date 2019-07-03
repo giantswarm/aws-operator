@@ -2,6 +2,7 @@ package key
 
 import (
 	"net"
+	"sort"
 	"strconv"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
@@ -13,12 +14,32 @@ import (
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
-func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
-	return cr.Labels[label.Cluster]
+// As a first version of Node Pools feature, the maximum number of distinct
+// Availability Zones is restricted to four due to current IPAM architecture &
+// implementation.
+const MaxNumberOfAZs = 4
+
+var AZLetters []byte
+
+func init() {
+	alphabets := "abcdefghijklmnopqrstuvwxyz"
+	for i := 0; i < MaxNumberOfAZs && i < len(alphabets); i++ {
+		AZLetters = append(AZLetters, alphabets[i])
+	}
 }
 
-func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
-	return cr.Annotations[annotation.MachineDeploymentSubnet]
+func SortedWorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
+	azs := WorkerAvailabilityZones(cr)
+
+	// No need to do deep copy for azs slice since above key function
+	// deserializes information from provider extension template that is JSON
+	// in CR object.
+
+	sort.Slice(azs, func(i, j int) bool {
+		return azs[i] < azs[j]
+	})
+
+	return azs
 }
 
 // TODO this method has to be properly implemented and renamed eventually.
@@ -40,21 +61,56 @@ func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSCo
 
 	var azs []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
 	{
-		workerAZs := WorkerAvailabilityZones(cr)
+		workerAZs := SortedWorkerAvailabilityZones(cr)
 
-		azsSubnets, err := network.Split(workerSubnet, uint(len(workerAZs)))
+		if len(workerAZs) > MaxNumberOfAZs {
+			return nil, microerror.Maskf(invalidParameterError, "too many availability zones defined: %d, max: %d", len(workerAZs), MaxNumberOfAZs)
+		}
+
+		// In order to have room for dynamically changing number of AZs we
+		// reserve always $MaxNumberOfAZs number of subnets from cluster
+		// network.
+		azsSubnets, err := network.Split(workerSubnet, MaxNumberOfAZs)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		for i, s := range workerAZs {
-			subnets, err := network.Split(azsSubnets[i], 2)
+		// For temporarily testing CloudFormation templates & adapters for
+		// dynamically changing AZs, we dedicate subnets from above to AZs in
+		// alphabetical order. This is only temporary solution to further test
+		// and develop changes for CloudFormation stack changes.
+		//
+		// In the final setting this will be changed so that whenever new AZ
+		// needs subnet, it's properly allocated by first gathering reserved
+		// subnets from corresponding cluster VPC.
+		azSubnets := make(map[string]net.IPNet)
+		{
+			var subnetList [MaxNumberOfAZs]net.IPNet
+
+			for i, s := range azsSubnets {
+				subnetList[i] = s
+			}
+
+			// Take last letter of AZ (i.e. a, b, c or d for now) and compute
+			// list index from it and dedicate corresponding subnet for it.
+			// This way we make subnet allocation for AZs deterministic even
+			// when selected AZs are not consecutive.
+			for _, az := range workerAZs {
+				zone := az[len(az)-1]
+				idx := zone - 'a'
+				azSubnets[az] = subnetList[idx]
+			}
+		}
+
+		// Finally split each AZ specific subnet into public and private part.
+		for _, az := range workerAZs {
+			subnets, err := network.Split(azSubnets[az], 2)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 
 			azs = append(azs, g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				Name: s,
+				Name: az,
 				Subnet: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
 					Private: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
 						CIDR: subnets[0].String(),
@@ -89,6 +145,10 @@ func WorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
 	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
 }
 
+func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
+	return cr.Labels[label.Cluster]
+}
+
 func WorkerDockerVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
 	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
 }
@@ -103,4 +163,8 @@ func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
 
 func WorkerScalingMin(cr v1alpha1.MachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
+}
+
+func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }

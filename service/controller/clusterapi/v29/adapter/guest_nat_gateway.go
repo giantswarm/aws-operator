@@ -18,14 +18,14 @@ type GuestNATGatewayAdapter struct {
 }
 
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
-	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for _, az := range key.WorkerAvailabilityZones(cfg.MachineDeployment) {
 		gw := Gateway{
 			ClusterID:             key.ClusterID(cfg.CustomObject),
-			NATGWName:             key.NATGatewayName(i),
-			NATEIPName:            key.NATEIPName(i),
-			NATRouteName:          key.NATRouteName(i),
-			PrivateRouteTableName: key.PrivateRouteTableName(i),
-			PublicSubnetName:      key.PublicSubnetName(i),
+			NATGWName:             key.NATGatewayName(az),
+			NATEIPName:            key.NATEIPName(az),
+			NATRouteName:          key.NATRouteName(az),
+			PrivateRouteTableName: key.PrivateRouteTableName(az),
+			PublicSubnetName:      key.PublicSubnetName(az),
 		}
 		a.Gateways = append(a.Gateways, gw)
 	}
