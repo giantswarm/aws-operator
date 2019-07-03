@@ -13,7 +13,7 @@ const InternetGateway = `
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
-      - PublicRouteTable
+      - {{ $v.PublicRouteTableName }}
       {{- range $rt := $v.PrivateRouteTables }}
       - {{ $rt }}
       {{- end }}
@@ -27,7 +27,7 @@ const InternetGateway = `
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref {{ $v.PublicRouteTableName }}
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
