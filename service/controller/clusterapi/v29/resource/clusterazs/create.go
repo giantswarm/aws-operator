@@ -50,7 +50,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var azs []string
 	{
-		var azsMap map[string]struct{}
+		azsMap := make(map[string]struct{})
 
 		// Include master's AZ.
 		azsMap[key.MasterAvailabilityZone(cr)] = struct{}{}
