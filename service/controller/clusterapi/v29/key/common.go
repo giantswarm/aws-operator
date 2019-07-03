@@ -54,6 +54,22 @@ func ReleaseVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ReleaseVersion]
 }
 
+// SanitizeCFResourceName filters out all non-ascii alphanumberics from input
+// string.
+//
+// Example: SanitizeCFResourceName("abc-123") == "abc123"
+// Example2: SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
+//
+func SanitizeCFResourceName(v string) string {
+	var bs []byte
+	for _, b := range []byte(v) {
+		if ('A' <= b && b <= 'Z') || ('a' <= b && b <= 'z') || ('0' <= b && b <= '9') {
+			bs = append(bs, b)
+		}
+	}
+	return string(bs)
+}
+
 func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
 }

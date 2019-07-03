@@ -78,7 +78,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		}
 
 		i.Master.AZ = key.MasterAvailabilityZone(config.CustomObject)
-		i.Master.PrivateSubnet = key.PrivateSubnetName(i.Master.AZ)
+		i.Master.PrivateSubnet = key.SanitizeCFResourceName(key.PrivateSubnetName(i.Master.AZ))
 
 		c := SmallCloudconfigConfig{
 			InstanceRole: "master",

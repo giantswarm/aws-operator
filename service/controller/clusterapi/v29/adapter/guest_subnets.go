@@ -45,29 +45,29 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 	}
 
 	for _, az := range zones {
-		snetName := key.PublicSubnetName(az.Name)
+		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Public.CIDR,
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PublicSubnetRouteTableAssociationName(az.Name),
+				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     snetName,
 			},
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
 
-		snetName = key.PrivateSubnetName(az.Name)
+		snetName = key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet = Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR,
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PrivateSubnetRouteTableAssociationName(az.Name),
-				RouteTableName: key.PrivateRouteTableName(az.Name),
+				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
 		}
