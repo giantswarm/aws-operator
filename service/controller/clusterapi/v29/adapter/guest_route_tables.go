@@ -19,7 +19,7 @@ type GuestRouteTablesAdapter struct {
 func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	r.HostClusterCIDR = cfg.ControlPlaneVPCCidr
 	r.PublicRouteTableName = RouteTableName{
-		ResourceName: "PublicRouteTable",
+		ResourceName: key.SanitizeCFResourceName(key.RouteTableName(cfg.CustomObject, suffixPublic, key.MasterAvailabilityZone(cfg.CustomObject))),
 		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, key.MasterAvailabilityZone(cfg.CustomObject)),
 	}
 

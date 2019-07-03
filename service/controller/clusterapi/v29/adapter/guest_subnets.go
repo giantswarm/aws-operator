@@ -53,7 +53,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
 				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: "PublicRouteTable",
+				RouteTableName: key.SanitizeCFResourceName(key.RouteTableName(cfg.CustomObject, suffixPublic, key.MasterAvailabilityZone(cfg.CustomObject)))
 				SubnetName:     snetName,
 			},
 		}
