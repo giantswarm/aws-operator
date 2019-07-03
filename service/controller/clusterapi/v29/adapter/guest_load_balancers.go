@@ -41,7 +41,7 @@ type GuestLoadBalancersAdapter struct {
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
-	workerAZs := key.WorkerAvailabilityZones(cfg.MachineDeployment)
+	workerAZs := cfg.TenantClusterAvailabilityZones
 	if len(workerAZs) < 1 {
 		return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 	}

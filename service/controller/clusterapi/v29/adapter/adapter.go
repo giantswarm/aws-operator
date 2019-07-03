@@ -48,6 +48,7 @@ type Config struct {
 	StackState                      StackState
 	TenantClusterAccountID          string
 	TenantClusterKMSKeyARN          string
+	TenantClusterAvailabilityZones  []string
 }
 
 type Adapter struct {

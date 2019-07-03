@@ -35,7 +35,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	}
 
 	{
-		numAZs := len(key.WorkerAvailabilityZones(cfg.MachineDeployment))
+		numAZs := len(cfg.TenantClusterAvailabilityZones)
 		if numAZs < 1 {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
@@ -64,14 +64,9 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.HealthCheckGracePeriod = gracePeriodSeconds
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
-	azs, err := key.StatusAvailabilityZones(cfg.MachineDeployment)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	for _, az := range azs {
-		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(az.Name))
-		a.WorkerAZs = append(a.WorkerAZs, az.Name)
+	for _, az := range cfg.TenantClusterAvailabilityZones {
+		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(az))
+		a.WorkerAZs = append(a.WorkerAZs, az)
 	}
 
 	return nil
