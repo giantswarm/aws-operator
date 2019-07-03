@@ -19,13 +19,13 @@ func newSecretAccessors(ctx context.Context, cr v1alpha1.Cluster) []secretAccess
 		// The secret accessors below are associated to the tenant's API
 		// certificate.
 		{
-			Name:      fmt.Sprintf("%s-api", key.ClusterID(cr)),
+			Name:      fmt.Sprintf("%s-api", key.ClusterID(&cr)),
 			Namespace: "default",
 		},
 		// The secret accessors below are associated to the tenant's BYOC
 		// credential.
 		{
-			Name:      fmt.Sprintf("credential-%s", key.ClusterID(cr)),
+			Name:      fmt.Sprintf("credential-%s", key.ClusterID(&cr)),
 			Namespace: "giantswarm",
 		},
 	}

@@ -621,8 +621,10 @@ func (e *Encrypter) postAuthAWSRole(name string, data *AWSAuthRole) error {
 	return nil
 }
 
-func (e *Encrypter) keyName(customObject v1alpha1.Cluster) string {
-	return key.ClusterID(customObject)
+// TODO the key function should simply be used. No reason for the pointer
+// receiver wrapper.
+func (e *Encrypter) keyName(cr v1alpha1.Cluster) string {
+	return key.ClusterID(&cr)
 }
 
 func authAWSRolePath(role string) string {

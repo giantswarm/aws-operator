@@ -49,7 +49,7 @@ const (
 )
 
 func BucketName(cluster v1alpha1.Cluster, accountID string) string {
-	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(cluster))
+	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(&cluster))
 }
 
 // BucketObjectName computes the S3 object path to the actual cloud config.
@@ -62,7 +62,7 @@ func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
 }
 
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
@@ -70,27 +70,23 @@ func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
 }
 
 func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(cluster))
+	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(&cluster))
 }
 
 func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterEtcdEndpointWithPort(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s:2379", ClusterEtcdEndpoint(cluster))
 }
 
-func ClusterID(cluster v1alpha1.Cluster) string {
-	return clusterProviderStatus(cluster).Cluster.ID
-}
-
 func ClusterKubeletEndpoint(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("worker.%s.k8s.%s", ClusterID(cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("worker.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
-	return ClusterID(cluster)
+	return ClusterID(&cluster)
 }
 
 func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]string {
@@ -98,7 +94,7 @@ func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]s
 
 	tags := map[string]string{
 		TagCloudProvider: "owned",
-		TagCluster:       ClusterID(cluster),
+		TagCluster:       ClusterID(&cluster),
 		TagInstallation:  installationName,
 		TagOrganization:  OrganizationID(cluster),
 	}
@@ -129,15 +125,15 @@ func EC2ServiceDomain(cluster v1alpha1.Cluster) string {
 }
 
 func ELBNameAPI(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-api", ClusterID(cluster))
+	return fmt.Sprintf("%s-api", ClusterID(&cluster))
 }
 
 func ELBNameEtcd(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-etcd", ClusterID(cluster))
+	return fmt.Sprintf("%s-etcd", ClusterID(&cluster))
 }
 
 func ELBNameIngress(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-ingress", ClusterID(cluster))
+	return fmt.Sprintf("%s-ingress", ClusterID(&cluster))
 }
 
 func ImageID(cluster v1alpha1.Cluster) string {
@@ -166,7 +162,7 @@ func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
 }
 
 func MasterInstanceName(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-master", ClusterID(cluster))
+	return fmt.Sprintf("%s-master", ClusterID(&cluster))
 }
 
 func MasterInstanceType(cluster v1alpha1.Cluster) string {
@@ -178,19 +174,19 @@ func OrganizationID(cluster v1alpha1.Cluster) string {
 }
 
 func PolicyNameMaster(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2PolicyK8s)
+	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2PolicyK8s)
 }
 
 func PolicyNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2PolicyK8s)
+	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2PolicyK8s)
 }
 
 func ProfileNameMaster(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func ProfileNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
+	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func Region(cluster v1alpha1.Cluster) string {
@@ -216,28 +212,28 @@ func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
 }
 
 func RoleNameMaster(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-master-%s", ClusterID(cluster), EC2RoleK8s)
+	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func RoleNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(cluster), EC2RoleK8s)
+	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func RolePeerAccess(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(cluster))
+	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(&cluster))
 }
 
 func RouteTableName(cluster v1alpha1.Cluster, suffix string, idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
 	if idx < 1 {
-		return fmt.Sprintf("%s-%s", ClusterID(cluster), suffix)
+		return fmt.Sprintf("%s-%s", ClusterID(&cluster), suffix)
 	}
-	return fmt.Sprintf("%s-%s%02d", ClusterID(cluster), suffix, idx)
+	return fmt.Sprintf("%s-%s%02d", ClusterID(&cluster), suffix, idx)
 }
 
 func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(cluster), groupName)
+	return fmt.Sprintf("%s-%s", ClusterID(&cluster), groupName)
 }
 
 func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
@@ -249,15 +245,15 @@ func SmallCloudConfigS3URL(cluster v1alpha1.Cluster, accountID string, role stri
 }
 
 func StackNameCPF(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-host-main", ClusterID(cluster))
+	return fmt.Sprintf("cluster-%s-host-main", ClusterID(&cluster))
 }
 
 func StackNameCPI(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(cluster))
+	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(&cluster))
 }
 
 func StackNameTCCP(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(cluster))
+	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(&cluster))
 }
 
 func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
@@ -265,7 +261,7 @@ func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
 }
 
 func TargetLogBucketName(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(cluster))
+	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
 }
 
 func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
@@ -284,19 +280,19 @@ func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 }
 
 func VolumeNameDocker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-docker", ClusterID(cluster))
+	return fmt.Sprintf("%s-docker", ClusterID(&cluster))
 }
 
 func VolumeNameEtcd(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-etcd", ClusterID(cluster))
+	return fmt.Sprintf("%s-etcd", ClusterID(&cluster))
 }
 
 func VolumeNameLog(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-log", ClusterID(cluster))
+	return fmt.Sprintf("%s-log", ClusterID(&cluster))
 }
 
 func baseRoleARN(cluster v1alpha1.Cluster, accountID string, kind string) string {
-	clusterID := ClusterID(cluster)
+	clusterID := ClusterID(&cluster)
 	partition := RegionARN(cluster)
 
 	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
@@ -337,7 +333,7 @@ func ensureLabel(labels string, key string, value string) string {
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a
 // time hash and a cluster ID.
 func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string {
-	id := strings.Replace(ClusterID(cluster), "-", "", -1)
+	id := strings.Replace(ClusterID(&cluster), "-", "", -1)
 
 	h := sha1.New()
 	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))

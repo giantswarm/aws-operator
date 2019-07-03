@@ -32,7 +32,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		l := metav1.AddLabelToSelector(
 			&v1.LabelSelector{},
 			label.Cluster,
-			key.ClusterID(cr),
+			key.ClusterID(&cr),
 		)
 		o := metav1.ListOptions{
 			LabelSelector: labels.Set(l.MatchLabels).String(),
