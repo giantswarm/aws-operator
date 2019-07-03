@@ -56,7 +56,7 @@ type GuestInstanceAdapterMasterInstance struct {
 
 func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	{
-		i.Cluster.ID = key.ClusterID(config.CustomObject)
+		i.Cluster.ID = key.ClusterID(&config.CustomObject)
 	}
 
 	{

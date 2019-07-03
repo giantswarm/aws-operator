@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"github.com/giantswarm/micrologger/microloggertest"
-	"k8s.io/apimachinery/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 func Test_Resource_S3Bucket_newCreate(t *testing.T) {
@@ -21,15 +23,9 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 		{
 			description: "current and desired state empty, expected empty",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},
@@ -40,15 +36,9 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 		{
 			description: "current state empty, desired state not empty, expected desired state",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},
@@ -67,15 +57,9 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 		{
 			description: "current state not empty, desired state not empty but different, expected desired state",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},

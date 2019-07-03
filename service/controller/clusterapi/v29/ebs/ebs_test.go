@@ -7,23 +7,19 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"k8s.io/apimachinery/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 func Test_ListVolumes(t *testing.T) {
 	t.Parallel()
 
 	customObject := v1alpha1.Cluster{
-		Status: v1alpha1.ClusterStatus{
-			ProviderStatus: &runtime.RawExtension{
-				Raw: []byte(`
-					{
-						"cluster": {
-							"id": "test-cluster"
-						}
-					}
-				`),
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				label.Cluster: "test-cluster",
 			},
 		},
 	}

@@ -205,7 +205,7 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster)
 	{
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                 key.ClusterBaseDomain(cr),
-			ClusterID:                  key.ClusterID(cr),
+			ClusterID:                  key.ClusterID(&cr),
 			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
 			Route53Enabled:             r.route53Enabled,
 		}

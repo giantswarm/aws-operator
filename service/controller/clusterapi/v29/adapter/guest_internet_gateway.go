@@ -10,7 +10,7 @@ type GuestInternetGatewayAdapter struct {
 }
 
 func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
+	a.ClusterID = key.ClusterID(&cfg.CustomObject)
 
 	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
 		a.PrivateRouteTables = append(a.PrivateRouteTables, key.PrivateRouteTableName(i))

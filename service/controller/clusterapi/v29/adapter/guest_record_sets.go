@@ -15,7 +15,7 @@ type GuestRecordSetsAdapter struct {
 func (a *GuestRecordSetsAdapter) Adapt(config Config) error {
 	a.BaseDomain = key.ClusterBaseDomain(config.CustomObject)
 	a.EtcdDomain = key.ClusterEtcdEndpoint(config.CustomObject)
-	a.ClusterID = key.ClusterID(config.CustomObject)
+	a.ClusterID = key.ClusterID(&config.CustomObject)
 	a.MasterInstanceResourceName = config.StackState.MasterInstanceResourceName
 	a.Route53Enabled = config.Route53Enabled
 

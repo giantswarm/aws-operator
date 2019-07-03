@@ -9,5 +9,5 @@ import (
 )
 
 func keyAlias(cr v1alpha1.Cluster) string {
-	return fmt.Sprintf("alias/%s", key.ClusterID(cr))
+	return fmt.Sprintf("alias/%s", key.ClusterID(&cr))
 }
