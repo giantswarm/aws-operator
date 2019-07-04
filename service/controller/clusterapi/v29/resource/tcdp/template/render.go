@@ -9,7 +9,13 @@ import (
 func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
-		TemplateMainIAMRoles,
+		TemplateMainAutoScalingGroup,
+		TemplateMainIAMPolicies,
+		TemplateMainLaunchConfiguration,
+		TemplateMainLifecycleHooks,
+		TemplateMainOutputs,
+		TemplateMainSecurityGroups,
+		TemplateMainSubnets,
 	}
 
 	s, err := templates.Render(l, v)
