@@ -14,6 +14,10 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
 
+func MachineDeploymentID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.MachineDeployment]
+}
+
 func NATEIPName(idx int) string {
 	// Since CloudFormation cannot recognize resource renaming, use non-indexed
 	// resource name for first AZ.
@@ -101,6 +105,10 @@ func PublicSubnetRouteTableAssociationName(idx int) string {
 
 func ReleaseVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ReleaseVersion]
+}
+
+func StackNameTCDP(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcdp", getter.GetLabels()[label.Cluster])
 }
 
 func VPCPeeringRouteName(idx int) string {
