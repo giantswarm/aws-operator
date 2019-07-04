@@ -162,15 +162,15 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineD
 	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(cr), key.WorkerScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		AvailabilityZones: key.StatusAvailabilityZoneNames(cr),
+		AvailabilityZones: key.WorkerAvailabilityZones(cr),
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
-			ID: key.ClusterID(cr),
+			ID: key.ClusterID(&cr),
 		},
 		DesiredCapacity:       minDesiredNodes,
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
-		MaxSize:               key.ScalingMax(cr),
+		MaxSize:               key.WorkerScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
-		MinSize:               key.ScalingMin(cr),
+		MinSize:               key.WorkerScalingMin(cr),
 		Name:                  asgName(cr),
 		Subnets:               key.PrivateSubnetNames(cr),
 	}
@@ -186,12 +186,12 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr v1alpha1.MachineDeploy
 
 	iamPolicies := &template.ParamsMainIAMPolicies{
 		Cluster: template.ParamsMainIAMPoliciesCluster{
-			ID: key.ClusterID(cr),
+			ID: key.ClusterID(&cr),
 		},
 		EC2ServiceDomain: key.EC2ServiceDomain(cr),
 		KMSKeyARN:        cc.Status.TenantCluster.KMS.KeyARN,
 		NodePool: template.ParamsMainIAMPoliciesNodePool{
-			ID: nodePoolID(cr),
+			ID: key.MachineDeploymentID(&cr),
 		},
 		RegionARN: key.RegionARN(cr),
 		S3Bucket:  key.BucketName(cr, cc.Status.TenantCluster.AWSAccountID),
@@ -314,7 +314,7 @@ func (r *Resource) newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment
 }
 
 func asgName(cr v1alpha1.MachineDeployment) string {
-	return fmt.Sprintf("asg-%s-tcdp", key.ClusterID(cr))
+	return fmt.Sprintf("asg-%s-tcdp", key.ClusterID(&cr))
 }
 
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
