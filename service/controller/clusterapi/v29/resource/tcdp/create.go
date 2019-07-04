@@ -221,7 +221,7 @@ func (r *Resource) newLaunchConfiguration(ctx context.Context, cr v1alpha1.Machi
 		},
 		Instance: template.ParamsMainLaunchConfigurationInstance{
 			Image:      imageID,
-			Monitoring: r.instanceMonitoring,
+			Monitoring: true,
 			Type:       key.WorkerInstanceType(cr),
 		},
 	}

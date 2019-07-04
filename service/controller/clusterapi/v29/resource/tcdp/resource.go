@@ -19,8 +19,7 @@ const (
 type Config struct {
 	Logger micrologger.Logger
 
-	InstallationName   string
-	InstanceMonitoring bool
+	InstallationName string
 }
 
 // Resource implements the TCDP resource, which stands for Tenant Cluster Data
@@ -28,8 +27,7 @@ type Config struct {
 type Resource struct {
 	logger micrologger.Logger
 
-	installationName   string
-	instanceMonitoring bool
+	installationName string
 }
 
 func New(config Config) (*Resource, error) {
@@ -44,8 +42,7 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		logger: config.Logger,
 
-		installationName:   config.InstallationName,
-		instanceMonitoring: config.InstanceMonitoring,
+		installationName: config.InstallationName,
 	}
 
 	return r, nil
