@@ -64,10 +64,10 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       RouteTableIds:
-        - !Ref PublicRouteTableeucentral1b
-        - !Ref PrivateRouteTableeucentral1a
-        - !Ref PrivateRouteTableeucentral1b
-        - !Ref PrivateRouteTableeucentral1c
+        - !Ref PublicRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1c
       ServiceName: 'com.amazonaws.eu-central-1.s3'
       PolicyDocument:
         Version: "2012-10-17"
@@ -463,14 +463,14 @@ Resources:
       CidrIp: 127.0.0.1/32
 
   
-  8y5ckpubliceucentral1b:
+  8y5ckPublicEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
         Value: 8y5ck-public-eu-central-1b
-  PrivateRouteTableeucentral1a:
+  PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
@@ -478,15 +478,15 @@ Resources:
       - Key: Name
         Value: 8y5ck-private-eu-central-1a
 
-  VPCPeeringRouteeucentral1a:
+  VPCPeeringRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
-  PrivateRouteTableeucentral1b:
+  PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
@@ -494,15 +494,15 @@ Resources:
       - Key: Name
         Value: 8y5ck-private-eu-central-1b
 
-  VPCPeeringRouteeucentral1b:
+  VPCPeeringRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
-  PrivateRouteTableeucentral1c:
+  PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
@@ -510,17 +510,17 @@ Resources:
       - Key: Name
         Value: 8y5ck-private-eu-central-1c
 
-  VPCPeeringRouteeucentral1c:
+  VPCPeeringRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1c
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
 
   
-  PublicSubneteucentral1a:
+  PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1a
@@ -528,19 +528,19 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PublicSubneteucentral1a
+        Value: PublicSubnetEuCentral1a
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociationeucentral1a:
+  PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref 8y5ckpubliceucentral1b
-      SubnetId: !Ref PublicSubneteucentral1a
+      RouteTableId: !Ref 8y5ckPublicEuCentral1b
+      SubnetId: !Ref PublicSubnetEuCentral1a
 
   
-  PublicSubneteucentral1c:
+  PublicSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1c
@@ -548,19 +548,19 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PublicSubneteucentral1c
+        Value: PublicSubnetEuCentral1c
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociationeucentral1c:
+  PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref 8y5ckpubliceucentral1b
-      SubnetId: !Ref PublicSubneteucentral1c
+      RouteTableId: !Ref 8y5ckPublicEuCentral1b
+      SubnetId: !Ref PublicSubnetEuCentral1c
 
   
-  PrivateSubneteucentral1a:
+  PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1a
@@ -568,18 +568,18 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubneteucentral1a
+        Value: PrivateSubnetEuCentral1a
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PrivateSubnetRouteTableAssociationeucentral1a:
+  PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1a
-      SubnetId: !Ref PrivateSubneteucentral1a
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      SubnetId: !Ref PrivateSubnetEuCentral1a
   
-  PrivateSubneteucentral1c:
+  PrivateSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1c
@@ -587,16 +587,16 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubneteucentral1c
+        Value: PrivateSubnetEuCentral1c
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PrivateSubnetRouteTableAssociationeucentral1c:
+  PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1c
-      SubnetId: !Ref PrivateSubneteucentral1c
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      SubnetId: !Ref PrivateSubnetEuCentral1c
   
 
   
@@ -610,9 +610,9 @@ Resources:
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
-      - PublicRouteTableeucentral1b
-      - PrivateRouteTableeucentral1a
-      - PrivateRouteTableeucentral1c
+      - PublicRouteTableEuCentral1b
+      - PrivateRouteTableEuCentral1a
+      - PrivateRouteTableEuCentral1c
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
@@ -623,86 +623,86 @@ Resources:
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref PublicRouteTableeucentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
 
   
-  NATGatewayeucentral1a:
+  NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIPeucentral1a
+        - NATEIPEuCentral1a
         - AllocationId
-      SubnetId: !Ref PublicSubneteucentral1a
+      SubnetId: !Ref PublicSubnetEuCentral1a
       Tags:
         - Key: Name
           Value: 8y5ck
-  NATEIPeucentral1a:
+  NATEIPEuCentral1a:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteeucentral1a:
+  NATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayeucentral1a"
+        Ref: "NATGatewayEuCentral1a"
 
-  NATGatewayeucentral1b:
+  NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIPeucentral1b
+        - NATEIPEuCentral1b
         - AllocationId
-      SubnetId: !Ref PublicSubneteucentral1b
+      SubnetId: !Ref PublicSubnetEuCentral1b
       Tags:
         - Key: Name
           Value: 8y5ck
-  NATEIPeucentral1b:
+  NATEIPEuCentral1b:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteeucentral1b:
+  NATRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayeucentral1b"
+        Ref: "NATGatewayEuCentral1b"
 
-  NATGatewayeucentral1c:
+  NATGatewayEuCentral1c:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIPeucentral1c
+        - NATEIPEuCentral1c
         - AllocationId
-      SubnetId: !Ref PublicSubneteucentral1c
+      SubnetId: !Ref PublicSubnetEuCentral1c
       Tags:
         - Key: Name
           Value: 8y5ck
-  NATEIPeucentral1c:
+  NATEIPEuCentral1c:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteeucentral1c:
+  NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1c
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayeucentral1c"
+        Ref: "NATGatewayEuCentral1c"
 
 
   
@@ -721,7 +721,7 @@ Resources:
       Monitoring: false
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
-      SubnetId: !Ref PrivateSubneteucentral1b
+      SubnetId: !Ref PrivateSubnetEuCentral1b
       UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL21hc3RlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGMiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJldGNkIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiBmYWxzZSwKICAgICAgICAgICJsYWJlbCI6ICJldGNkIiwKICAgICAgICAgICJmb3JtYXQiOiAiZXh0NCIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
       Tags:
       - Key: Name
@@ -809,11 +809,11 @@ Resources:
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PublicSubneteucentral1a
+        - !Ref PublicSubnetEuCentral1a
       
-        - !Ref PublicSubneteucentral1b
+        - !Ref PublicSubnetEuCentral1b
       
-        - !Ref PublicSubneteucentral1c
+        - !Ref PublicSubnetEuCentral1c
       
 
   EtcdLoadBalancer:
@@ -841,11 +841,11 @@ Resources:
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
-        - !Ref PrivateSubneteucentral1a
+        - !Ref PrivateSubnetEuCentral1a
       
-        - !Ref PrivateSubneteucentral1b
+        - !Ref PrivateSubnetEuCentral1b
       
-        - !Ref PrivateSubneteucentral1c
+        - !Ref PrivateSubnetEuCentral1c
       
 
   IngressLoadBalancer:
@@ -890,11 +890,11 @@ Resources:
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:
-        - !Ref PublicSubneteucentral1a
+        - !Ref PublicSubnetEuCentral1a
       
-        - !Ref PublicSubneteucentral1b
+        - !Ref PublicSubnetEuCentral1b
       
-        - !Ref PublicSubneteucentral1c
+        - !Ref PublicSubnetEuCentral1c
       
 
   
@@ -947,11 +947,11 @@ Resources:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubneteucentral1a
+        - !Ref PrivateSubnetEuCentral1a
       
-        - !Ref PrivateSubneteucentral1b
+        - !Ref PrivateSubnetEuCentral1b
       
-        - !Ref PrivateSubneteucentral1c
+        - !Ref PrivateSubnetEuCentral1c
       
       AvailabilityZones:
         - eu-central-1a
