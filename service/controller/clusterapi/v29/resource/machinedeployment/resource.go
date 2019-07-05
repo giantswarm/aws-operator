@@ -1,6 +1,6 @@
 // Package machinedeployment implements a temporary resource to fetch the single
 // MachineDeployment of a tenant cluster. Once we separate the tenant cluster's
-// data plane in the cloud formation structure, this resource here will be
+// node pool in the cloud formation structure, this resource here will be
 // deleted again, because the MachineDeployment will be reconciled with its own
 // controller and resources.
 package machinedeployment
