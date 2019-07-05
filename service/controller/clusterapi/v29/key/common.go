@@ -6,8 +6,33 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+func AWSTags(getter LabelsGetter, installationName string) map[string]string {
+	TagCloudProvider := ClusterCloudProviderTag(getter)
+
+	tags := map[string]string{
+		TagCloudProvider: "owned",
+		TagCluster:       ClusterID(getter),
+		TagInstallation:  installationName,
+		TagOrganization:  OrganizationID(getter),
+	}
+
+	return tags
+}
+
+func ClusterCloudProviderTag(getter LabelsGetter) string {
+	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(getter))
+}
+
+func ClusterID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.Cluster]
+}
+
 func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
+}
+
+func MachineDeploymentID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.MachineDeployment]
 }
 
 func NATEIPName(az string) string {
@@ -24,6 +49,10 @@ func NATRouteName(az string) string {
 
 func OperatorVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.OperatorVersion]
+}
+
+func OrganizationID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.Organization]
 }
 
 func PrivateRouteTableName(az string) string {
@@ -68,6 +97,10 @@ func SanitizeCFResourceName(v string) string {
 		}
 	}
 	return string(bs)
+}
+
+func StackNameTCDP(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcdp", getter.GetLabels()[label.Cluster])
 }
 
 func VPCPeeringRouteName(az string) string {

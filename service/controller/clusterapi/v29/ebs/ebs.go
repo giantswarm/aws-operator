@@ -146,7 +146,7 @@ func (e *EBS) ListVolumes(cr v1alpha1.Cluster, filterFuncs ...func(t *ec2.Tag) b
 	i := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String(fmt.Sprintf("tag:%s", key.ClusterCloudProviderTag(cr))),
+				Name: aws.String(fmt.Sprintf("tag:%s", key.ClusterCloudProviderTag(&cr))),
 				Values: []*string{
 					aws.String(cloudProviderClusterTagValue),
 				},

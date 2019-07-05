@@ -21,7 +21,7 @@ type SetConfig struct {
 }
 
 // Set is basically only a wrapper for the operator's collector implementations.
-// It eases the iniitialization and prevents some weird import mess so we do not
+// It eases the initialization and prevents some weird import mess so we do not
 // have to alias packages. There is also the benefit of the helper type kept
 // private so we do not need to expose this magic.
 type Set struct {

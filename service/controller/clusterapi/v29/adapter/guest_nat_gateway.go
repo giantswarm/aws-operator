@@ -20,7 +20,7 @@ type GuestNATGatewayAdapter struct {
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
 	for _, az := range cfg.TenantClusterAvailabilityZones {
 		gw := Gateway{
-			ClusterID:             key.ClusterID(cfg.CustomObject),
+			ClusterID:             key.ClusterID(&cfg.CustomObject),
 			NATGWName:             key.SanitizeCFResourceName(key.NATGatewayName(az)),
 			NATEIPName:            key.SanitizeCFResourceName(key.NATEIPName(az)),
 			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az)),

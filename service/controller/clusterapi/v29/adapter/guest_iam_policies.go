@@ -19,7 +19,7 @@ type GuestIAMPoliciesAdapter struct {
 }
 
 func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
-	clusterID := key.ClusterID(cfg.CustomObject)
+	clusterID := key.ClusterID(&cfg.CustomObject)
 
 	i.ClusterID = clusterID
 	i.EC2ServiceDomain = key.EC2ServiceDomain(cfg.CustomObject)

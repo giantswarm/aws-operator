@@ -128,7 +128,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr clusterv1alpha1.C
 				annotation.InstanceID: instanceID,
 			},
 			Labels: map[string]string{
-				label.Cluster: key.ClusterID(cr),
+				label.Cluster: key.ClusterID(&cr),
 			},
 			Name: privateDNS,
 		},
@@ -138,7 +138,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr clusterv1alpha1.C
 					API: corev1alpha1.DrainerConfigSpecGuestClusterAPI{
 						Endpoint: key.ClusterAPIEndpoint(cr),
 					},
-					ID: key.ClusterID(cr),
+					ID: key.ClusterID(&cr),
 				},
 				Node: corev1alpha1.DrainerConfigSpecGuestNode{
 					Name: privateDNS,

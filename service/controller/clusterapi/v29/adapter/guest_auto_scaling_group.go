@@ -48,7 +48,7 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.ASGMaxSize = maxWorkers
 	a.ASGMinSize = minWorkers
 	a.ASGType = "worker"
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
+	a.ClusterID = key.ClusterID(&cfg.CustomObject)
 	a.MaxBatchSize = strconv.Itoa(workerCountRatio(currentDesiredMinWorkers, asgMaxBatchSizeRatio))
 
 	minInstancesInService := workerCountRatio(currentDesiredMinWorkers, asgMinInstancesRatio)

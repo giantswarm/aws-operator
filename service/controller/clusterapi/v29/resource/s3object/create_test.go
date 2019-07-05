@@ -8,10 +8,11 @@ import (
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
-	"k8s.io/apimachinery/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 )
 
@@ -26,15 +27,9 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description: "current state empty, desired state empty, empty create change",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},
@@ -45,15 +40,9 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description: "current state empty, desired state not empty, create change == desired state",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},
@@ -76,15 +65,9 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description: "current state not empty, desired state not empty, create change == desired state",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},
@@ -113,15 +96,9 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description: "current state has 1 object, desired state has 2 objects, create change == missing object",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},
@@ -156,15 +133,9 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 		{
 			description: "current state matches desired state, empty create change",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},

@@ -79,7 +79,7 @@ func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string 
 }
 
 func containsClusterTag(tags []*elb.Tag, customObject v1alpha1.Cluster) bool {
-	tagKey := key.ClusterCloudProviderTag(customObject)
+	tagKey := key.ClusterCloudProviderTag(&customObject)
 
 	for _, tag := range tags {
 		if *tag.Key == tagKey && *tag.Value == cloudProviderClusterTagValue {

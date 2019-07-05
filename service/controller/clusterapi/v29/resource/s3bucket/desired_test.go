@@ -5,9 +5,10 @@ import (
 	"testing"
 
 	"github.com/giantswarm/micrologger/microloggertest"
-	"k8s.io/apimachinery/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 )
 
@@ -21,15 +22,9 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 		{
 			description: "Get bucket name from custom object.",
 			obj: &v1alpha1.Cluster{
-				Status: v1alpha1.ClusterStatus{
-					ProviderStatus: &runtime.RawExtension{
-						Raw: []byte(`
-							{
-								"cluster": {
-									"id": "5xchu"
-								}
-							}
-						`),
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						label.Cluster: "5xchu",
 					},
 				},
 			},

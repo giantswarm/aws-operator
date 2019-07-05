@@ -11,7 +11,7 @@ type GuestInternetGatewayAdapter struct {
 }
 
 func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
-	a.ClusterID = key.ClusterID(cfg.CustomObject)
+	a.ClusterID = key.ClusterID(&cfg.CustomObject)
 
 	a.PublicRouteTableName = key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject)))
 

@@ -24,7 +24,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	baseDomain := key.ClusterBaseDomain(cr)
 	intermediateZone := "k8s." + baseDomain
-	finalZone := key.ClusterID(cr) + ".k8s." + baseDomain
+	finalZone := key.ClusterID(&cr) + ".k8s." + baseDomain
 
 	guest, defaultGuest, err := r.route53Clients(ctx)
 	if err != nil {

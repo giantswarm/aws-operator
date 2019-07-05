@@ -26,16 +26,16 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "master",
-			Namespace: key.ClusterID(cr),
+			Namespace: key.ClusterID(&cr),
 			Labels: map[string]string{
 				label.App:           "master",
-				label.Cluster:       key.ClusterID(cr),
-				label.Organization:  key.OrganizationID(cr),
+				label.Cluster:       key.ClusterID(&cr),
+				label.Organization:  key.OrganizationID(&cr),
 				label.VersionBundle: key.OperatorVersion(&cr),
 			},
 			Annotations: map[string]string{
 				AnnotationEtcdDomain:        key.ClusterEtcdEndpointWithPort(cr),
-				AnnotationPrometheusCluster: key.ClusterID(cr),
+				AnnotationPrometheusCluster: key.ClusterID(&cr),
 			},
 		},
 		Spec: corev1.ServiceSpec{

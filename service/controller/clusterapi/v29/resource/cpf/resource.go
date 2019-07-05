@@ -59,6 +59,6 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
-	tags := key.ClusterTags(cr, r.installationName)
+	tags := key.AWSTags(&cr, r.installationName)
 	return awstags.NewCloudFormation(tags)
 }

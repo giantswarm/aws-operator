@@ -27,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding machine deployment for cluster")
 
 		in := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(cr)),
+			LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
 		}
 
 		out, err := r.cmaClient.ClusterV1alpha1().MachineDeployments(metav1.NamespaceAll).List(in)

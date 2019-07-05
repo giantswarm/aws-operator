@@ -41,11 +41,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	endpoints := &corev1.Endpoints{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      masterEndpointsName,
-			Namespace: key.ClusterID(cr),
+			Namespace: key.ClusterID(&cr),
 			Labels: map[string]string{
 				"app":      masterEndpointsName,
-				"cluster":  key.ClusterID(cr),
-				"customer": key.OrganizationID(cr),
+				"cluster":  key.ClusterID(&cr),
+				"customer": key.OrganizationID(&cr),
 			},
 		},
 		Subsets: []corev1.EndpointSubset{

@@ -95,7 +95,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.
 	{
 		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
 
-		tags := key.ClusterTags(cr, e.installationName)
+		tags := key.AWSTags(&cr, e.installationName)
 
 		// TODO already created case should be handled here. Otherwise there is a
 		// chance alias wasn't created yet and EncryptionKey will tell there is no
