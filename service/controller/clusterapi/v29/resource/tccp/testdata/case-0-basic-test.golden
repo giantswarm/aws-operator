@@ -46,7 +46,7 @@ Resources:
       EnableDnsHostnames: 'true'
       Tags:
       - Key: Name
-        Value: 
+        Value: 8y5ck
       - Key: Installation
         Value: 
   VPCPeeringConnection:
@@ -58,26 +58,25 @@ Resources:
       PeerRoleArn: imaginary-cp-peer-role-arn
       Tags:
         - Key: Name
-          Value: 
+          Value: 8y5ck
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
       VpcId: !Ref VPC
       RouteTableIds:
-        - !Ref PublicRouteTableeucentral1b
-        - !Ref PrivateRouteTableeucentral1a
-        - !Ref PrivateRouteTableeucentral1b
-        - !Ref PrivateRouteTableeucentral1c
+        - !Ref PublicRouteTable
+        - !Ref PrivateRouteTable
+        - !Ref PrivateRouteTable01
       ServiceName: 'com.amazonaws.eu-central-1.s3'
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: "-vpc-s3-endpoint-policy-bucket"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
             Principal : "*"
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:aws:s3:::*"
-          - Sid: "-vpc-s3-endpoint-policy-object"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
             Principal : "*"
             Effect: "Allow"
             Action: "s3:*"
@@ -87,7 +86,7 @@ Resources:
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: -master-EC2-K8S-Role
+      RoleName: 8y5ck-master-EC2-K8S-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -98,7 +97,7 @@ Resources:
   MasterRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: -master-EC2-K8S-Policy
+      PolicyName: 8y5ck-master-EC2-K8S-Policy
       Roles:
         - Ref: "MasterRole"
       PolicyDocument:
@@ -116,11 +115,11 @@ Resources:
 
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:aws:s3:::tenant-account-g8s-"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
 
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::tenant-account-g8s-/*"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
 
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
@@ -142,19 +141,19 @@ Resources:
             Resource: "*"
             Condition:
               StringEquals:
-                autoscaling:ResourceTag/giantswarm.io/cluster: ""
+                autoscaling:ResourceTag/giantswarm.io/cluster: "8y5ck"
 
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      InstanceProfileName: -master-EC2-K8S-Role
+      InstanceProfileName: 8y5ck-master-EC2-K8S-Role
       Roles:
         - Ref: "MasterRole"
 
   WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: -worker-EC2-K8S-Role
+      RoleName: 8y5ck-worker-EC2-K8S-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -165,7 +164,7 @@ Resources:
   WorkerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: -worker-EC2-K8S-Policy
+      PolicyName: 8y5ck-worker-EC2-K8S-Policy
       Roles:
         - Ref: "WorkerRole"
       PolicyDocument:
@@ -191,11 +190,11 @@ Resources:
 
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:aws:s3:::tenant-account-g8s-"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
 
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::tenant-account-g8s-/*"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
 
           - Effect: "Allow"
             Action:
@@ -211,7 +210,7 @@ Resources:
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
-      InstanceProfileName: -worker-EC2-K8S-Role
+      InstanceProfileName: 8y5ck-worker-EC2-K8S-Role
       Roles:
         - Ref: "WorkerRole"
 
@@ -219,7 +218,7 @@ Resources:
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: -master
+      GroupDescription: 8y5ck-master
       VpcId: !Ref VPC
       SecurityGroupIngress:
       
@@ -274,12 +273,12 @@ Resources:
       
       Tags:
         - Key: Name
-          Value:  -master
+          Value:  8y5ck-master
 
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: -worker
+      GroupDescription: 8y5ck-worker
       VpcId: !Ref VPC
       SecurityGroupIngress:
       
@@ -349,12 +348,12 @@ Resources:
       
       Tags:
         - Key: Name
-          Value:  -worker
+          Value:  8y5ck-worker
 
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: -ingress
+      GroupDescription: 8y5ck-ingress
       VpcId: !Ref VPC
       SecurityGroupIngress:
       
@@ -372,12 +371,12 @@ Resources:
       
       Tags:
         - Key: Name
-          Value: -ingress
+          Value: 8y5ck-ingress
 
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: -etcd-elb
+      GroupDescription: 8y5ck-etcd-elb
       VpcId: !Ref VPC
       SecurityGroupIngress:
       
@@ -395,7 +394,7 @@ Resources:
       
       Tags:
         - Key: Name
-          Value: -etcd-elb
+          Value: 8y5ck-etcd-elb
 
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
@@ -463,140 +462,124 @@ Resources:
       CidrIp: 127.0.0.1/32
 
   
-  publiceucentral1b:
+  PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: -public-eu-central-1b
-  PrivateRouteTableeucentral1a:
+        Value: 8y5ck-public
+  PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: -private-eu-central-1a
+        Value: 8y5ck-private
 
-  VPCPeeringRouteeucentral1a:
+  VPCPeeringRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
-  PrivateRouteTableeucentral1b:
+  PrivateRouteTable01:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: -private-eu-central-1b
+        Value: 8y5ck-private01
 
-  VPCPeeringRouteeucentral1b:
+  VPCPeeringRoute01:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1b
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
-  PrivateRouteTableeucentral1c:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: -private-eu-central-1c
-
-  VPCPeeringRouteeucentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1c
+      RouteTableId: !Ref PrivateRouteTable01
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
 
   
-  PublicSubneteucentral1a:
+  PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.8.32/27
+      CidrBlock: 10.100.8.64/26
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PublicSubneteucentral1a
+        Value: PublicSubnet
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociationeucentral1a:
+  PublicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref publiceucentral1b
-      SubnetId: !Ref PublicSubneteucentral1a
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
 
   
-  PublicSubneteucentral1c:
+  PublicSubnet01:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.8.160/27
+      CidrBlock: 10.100.8.192/26
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PublicSubneteucentral1c
+        Value: PublicSubnet01
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociationeucentral1c:
+  PublicSubnetRouteTableAssociation01:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref publiceucentral1b
-      SubnetId: !Ref PublicSubneteucentral1c
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet01
 
   
-  PrivateSubneteucentral1a:
+  PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.8.0/27
+      CidrBlock: 10.100.8.0/26
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubneteucentral1a
+        Value: PrivateSubnet
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PrivateSubnetRouteTableAssociationeucentral1a:
+  PrivateSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1a
-      SubnetId: !Ref PrivateSubneteucentral1a
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet
   
-  PrivateSubneteucentral1c:
+  PrivateSubnet01:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.8.128/27
+      CidrBlock: 10.100.8.128/26
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubneteucentral1c
+        Value: PrivateSubnet01
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
 
-  PrivateSubnetRouteTableAssociationeucentral1c:
+  PrivateSubnetRouteTableAssociation01:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1c
-      SubnetId: !Ref PrivateSubneteucentral1c
+      RouteTableId: !Ref PrivateRouteTable01
+      SubnetId: !Ref PrivateSubnet01
   
 
   
@@ -605,14 +588,14 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: 
+          Value: 8y5ck
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
-      - PublicRouteTableeucentral1b
-      - PrivateRouteTableeucentral1a
-      - PrivateRouteTableeucentral1c
+      - PublicRouteTable
+      - PrivateRouteTable
+      - PrivateRouteTable01
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
@@ -623,86 +606,61 @@ Resources:
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref PublicRouteTableeucentral1b
+      RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
 
   
-  NATGatewayeucentral1a:
+  NATGateway:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIPeucentral1a
+        - NATEIP
         - AllocationId
-      SubnetId: !Ref PublicSubneteucentral1a
+      SubnetId: !Ref PublicSubnet
       Tags:
         - Key: Name
-          Value: 
-  NATEIPeucentral1a:
+          Value: 8y5ck
+  NATEIP:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteeucentral1a:
+  NATRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayeucentral1a"
+        Ref: "NATGateway"
 
-  NATGatewayeucentral1b:
+  NATGateway01:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIPeucentral1b
+        - NATEIP01
         - AllocationId
-      SubnetId: !Ref PublicSubneteucentral1b
+      SubnetId: !Ref PublicSubnet01
       Tags:
         - Key: Name
-          Value: 
-  NATEIPeucentral1b:
+          Value: 8y5ck
+  NATEIP01:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteeucentral1b:
+  NATRoute01:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1b
+      RouteTableId: !Ref PrivateRouteTable01
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayeucentral1b"
-
-  NATGatewayeucentral1c:
-    Type: AWS::EC2::NatGateway
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      AllocationId:
-        Fn::GetAtt:
-        - NATEIPeucentral1c
-        - AllocationId
-      SubnetId: !Ref PublicSubneteucentral1c
-      Tags:
-        - Key: Name
-          Value: 
-  NATEIPeucentral1c:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-  NATRouteeucentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableeucentral1c
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayeucentral1c"
+        Ref: "NATGateway01"
 
 
   
@@ -713,7 +671,7 @@ Resources:
     - rsc-abbacd01
     - EtcdVolume
     Properties:
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1a
       DisableApiTermination: true
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: ami-0eb0d9bb7ad1bd1e9
@@ -721,11 +679,11 @@ Resources:
       Monitoring: false
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
-      SubnetId: !Ref PrivateSubneteucentral1b
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy0vdmVyc2lvbi8vY2xvdWRjb25maWcvdl80XzVfMC9tYXN0ZXIiCiAgICAgICAgfQogICAgICBdCiAgICB9CiAgfSwKICAic3RvcmFnZSI6IHsKICAgICJmaWxlc3lzdGVtcyI6IFsKICAgICAgeyAKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRjIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAiZXRjZCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogZmFsc2UsCiAgICAgICAgICAibGFiZWwiOiAiZXRjZCIsCiAgICAgICAgICAiZm9ybWF0IjogImV4dDQiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
+      SubnetId: !Ref PrivateSubnet
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL21hc3RlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGMiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJldGNkIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiBmYWxzZSwKICAgICAgICAgICJsYWJlbCI6ICJldGNkIiwKICAgICAgICAgICJmb3JtYXQiOiAiZXh0NCIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
       Tags:
       - Key: Name
-        Value: -master
+        Value: 8y5ck-master
   rsc-abbacd01:
     Type: AWS::EC2::Volume
     Properties:
@@ -734,10 +692,10 @@ Resources:
 
       Size: 50
       VolumeType: gp2
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1a
       Tags:
       - Key: Name
-        Value: -docker
+        Value: 8y5ck-docker
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -746,10 +704,10 @@ Resources:
 
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1a
       Tags:
       - Key: Name
-        Value: -etcd
+        Value: 8y5ck-etcd
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -758,10 +716,10 @@ Resources:
 
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1a
       Tags:
       - Key: Name
-        Value: -log
+        Value: 8y5ck-log
   rsc-ac0dc01DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
@@ -804,16 +762,14 @@ Resources:
         LoadBalancerPort: 443
         Protocol: TCP
       
-      LoadBalancerName: -api
+      LoadBalancerName: 8y5ck-api
       Scheme: internet-facing
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PublicSubneteucentral1a
+        - !Ref PublicSubnet
       
-        - !Ref PublicSubneteucentral1b
-      
-        - !Ref PublicSubneteucentral1c
+        - !Ref PublicSubnet01
       
 
   EtcdLoadBalancer:
@@ -836,16 +792,14 @@ Resources:
         LoadBalancerPort: 2379
         Protocol: TCP
       
-      LoadBalancerName: -etcd
+      LoadBalancerName: 8y5ck-etcd
       Scheme: internal
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
-        - !Ref PrivateSubneteucentral1a
+        - !Ref PrivateSubnet
       
-        - !Ref PrivateSubneteucentral1b
-      
-        - !Ref PrivateSubneteucentral1c
+        - !Ref PrivateSubnet01
       
 
   IngressLoadBalancer:
@@ -873,7 +827,7 @@ Resources:
         LoadBalancerPort: 80
         Protocol: TCP
       
-      LoadBalancerName: -ingress
+      LoadBalancerName: 8y5ck-ingress
       Policies:
       - PolicyName: "EnableProxyProtocol"
         PolicyType: "ProxyProtocolPolicyType"
@@ -890,11 +844,9 @@ Resources:
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:
-        - !Ref PublicSubneteucentral1a
+        - !Ref PublicSubnet
       
-        - !Ref PublicSubneteucentral1b
-      
-        - !Ref PublicSubneteucentral1c
+        - !Ref PublicSubnet01
       
 
   
@@ -929,7 +881,7 @@ Resources:
           VolumeType: gp2
       
       AssociatePublicIpAddress: false
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy0vdmVyc2lvbi8vY2xvdWRjb25maWcvdl80XzVfMC93b3JrZXIiCiAgICAgICAgfQogICAgICBdCiAgICB9CiAgfSwKICAic3RvcmFnZSI6IHsKICAgICJmaWxlc3lzdGVtcyI6IFsKICAgICAgeyAKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRoIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAia3ViZWxldCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGciLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJrdWJlbGV0IiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfQogICAgXQogIH0KfQo=
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL3dvcmtlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJrdWJlbGV0IiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImt1YmVsZXQiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
 
   
   NodeDrainerLifecycleHook:
@@ -947,16 +899,12 @@ Resources:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubneteucentral1a
+        - !Ref PrivateSubnet
       
-        - !Ref PrivateSubneteucentral1b
-      
-        - !Ref PrivateSubneteucentral1c
+        - !Ref PrivateSubnet01
       
       AvailabilityZones:
         - eu-central-1a
-      
-        - eu-central-1b
       
         - eu-central-1c
       
@@ -971,12 +919,12 @@ Resources:
         - Granularity: "1Minute"
       Tags:
         - Key: Name
-          Value: -worker
+          Value: 8y5ck-worker
           PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
-        - Key: k8s.io/cluster-autoscaler/
+        - Key: k8s.io/cluster-autoscaler/8y5ck
           Value: true
           PropagateAtLaunch: false
     UpdatePolicy:
