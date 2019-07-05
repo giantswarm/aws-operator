@@ -97,7 +97,7 @@ func Test_newTemplateBody(t *testing.T) {
 				t.Fatalf("error == %#v, want matching", err)
 			}
 
-			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")
+			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".yaml")
 			if *update {
 				ioutil.WriteFile(golden, []byte(actual), 0644)
 			}
