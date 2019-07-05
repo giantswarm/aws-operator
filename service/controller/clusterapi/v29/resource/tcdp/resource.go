@@ -17,7 +17,8 @@ const (
 )
 
 type Config struct {
-	Logger micrologger.Logger
+	Logger        micrologger.Logger
+	ToClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
 
 	InstallationName string
 }
@@ -25,7 +26,8 @@ type Config struct {
 // Resource implements the TCDP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
-	logger micrologger.Logger
+	logger        micrologger.Logger
+	toClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
 
 	installationName string
 }
@@ -34,13 +36,17 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.ToClusterFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
+	}
 
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
 	r := &Resource{
-		logger: config.Logger,
+		logger:        config.Logger,
+		toClusterFunc: config.ToClusterFunc,
 
 		installationName: config.InstallationName,
 	}
