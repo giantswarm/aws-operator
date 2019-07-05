@@ -1,0 +1,993 @@
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Control Plane Cloud Formation Stack.
+Outputs:
+  
+  DockerVolumeResourceName:
+    Value: rsc-abbacd01
+  
+  MasterImageID:
+    Value: ami-0eb0d9bb7ad1bd1e9
+  MasterInstanceResourceName:
+    Value: rsc-ac0dc01
+  MasterInstanceType:
+    Value: m5.xlarge
+  MasterCloudConfigVersion:
+    Value: v_4_5_0
+  VPCID:
+    Value: !Ref VPC
+  VPCPeeringConnectionID:
+    Value: !Ref VPCPeeringConnection
+  WorkerASGName:
+    Value: !Ref workerAutoScalingGroup
+  WorkerDockerVolumeSizeGB:
+    Value: 100
+  WorkerImageID:
+    Value: ami-0eb0d9bb7ad1bd1e9
+  WorkerInstanceType:
+    Value: m5.2xlarge
+  WorkerCloudConfigVersion:
+    Value: v_4_5_0
+  VersionBundleVersion:
+    Value:
+      Ref: VersionBundleVersionParameter
+
+Parameters:
+  VersionBundleVersionParameter:
+    Type: String
+    Description: Sets the VersionBundleVersion used to generate the template.
+Resources:
+  
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+      - Key: Name
+        Value: 
+      - Key: Installation
+        Value: 
+  VPCPeeringConnection:
+    Type: 'AWS::EC2::VPCPeeringConnection'
+    Properties:
+      VpcId: !Ref VPC
+      PeerVpcId: vpc-f8d0e10b
+      PeerOwnerId: 'control-plane-account'
+      PeerRoleArn: imaginary-cp-peer-role-arn
+      Tags:
+        - Key: Name
+          Value: 
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PublicRouteTableeucentral1b
+        - !Ref PrivateRouteTableeucentral1a
+        - !Ref PrivateRouteTableeucentral1b
+        - !Ref PrivateRouteTableeucentral1c
+      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*"
+          - Sid: "-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*/*"
+
+  
+  MasterRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: -master-EC2-K8S-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: "sts:AssumeRole"
+  MasterRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: -master-EC2-K8S-Policy
+      Roles:
+        - Ref: "MasterRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "ec2:*"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketLocation"
+              - "s3:ListAllMyBuckets"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::tenant-account-g8s-"
+
+          - Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::tenant-account-g8s-/*"
+
+          - Effect: "Allow"
+            Action: "elasticloadbalancing:*"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:DescribeAutoScalingGroups"
+              - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:DescribeTags"
+              - "autoscaling:DescribeLaunchConfigurations"
+              - "ec2:DescribeLaunchTemplateVersions"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:SetDesiredCapacity"
+              - "autoscaling:TerminateInstanceInAutoScalingGroup"
+            Resource: "*"
+            Condition:
+              StringEquals:
+                autoscaling:ResourceTag/giantswarm.io/cluster: ""
+
+  MasterInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: -master-EC2-K8S-Role
+      Roles:
+        - Ref: "MasterRole"
+
+  WorkerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: -worker-EC2-K8S-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: "sts:AssumeRole"
+  WorkerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: -worker-EC2-K8S-Policy
+      Roles:
+        - Ref: "WorkerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "ec2:Describe*"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action: "ec2:AttachVolume"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action: "ec2:DetachVolume"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketLocation"
+              - "s3:ListAllMyBuckets"
+            Resource: "*"
+
+          - Effect: "Allow"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::tenant-account-g8s-"
+
+          - Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::tenant-account-g8s-/*"
+
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
+
+  WorkerInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: -worker-EC2-K8S-Role
+      Roles:
+        - Ref: "WorkerRole"
+
+  
+  MasterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: -master
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        Description: Allow all traffic to the master instance.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      
+      -
+        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        CidrIp: 10.1.0.0/16
+      
+      -
+        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 10.1.0.0/16
+      
+      -
+        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        CidrIp: 10.1.0.0/16
+      
+      -
+        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        CidrIp: 10.1.0.0/16
+      
+      -
+        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        CidrIp: 10.1.0.0/16
+      
+      -
+        Description: Only allow ssh traffic from the control plane.
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.1.0.0/16
+      
+      Tags:
+        - Key: Name
+          Value:  -master
+
+  WorkerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: -worker
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        IpProtocol: tcp
+        FromPort: 30011
+        ToPort: 30011
+        
+        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 30010
+        ToPort: 30010
+        
+        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 30011
+        ToPort: 30011
+        
+        CidrIp: 10.1.0.0/16
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        
+        CidrIp: 10.1.0.0/16
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        
+        CidrIp: 10.1.0.0/16
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        
+        CidrIp: 10.1.0.0/16
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        
+        CidrIp: 10.1.0.0/16
+        
+      
+      -
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        
+        CidrIp: 10.1.0.0/16
+        
+      
+      Tags:
+        - Key: Name
+          Value:  -worker
+
+  IngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: -ingress
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      
+      -
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      
+      Tags:
+        - Key: Name
+          Value: -ingress
+
+  EtcdELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: -etcd-elb
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 0.0.0.0/0
+      
+      -
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 10.1.0.0/16
+      
+      Tags:
+        - Key: Name
+          Value: -etcd-elb
+
+  # Allow all access between masters and workers for calico. This is done after
+  # the other rules to avoid circular dependencies.
+  MasterAllowCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
+
+  MasterAllowWorkerCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref WorkerSecurityGroup
+
+  MasterAllowEtcdIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 2379
+      ToPort: 2379
+      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
+
+  WorkerAllowCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: WorkerSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref WorkerSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref WorkerSecurityGroup
+
+  WorkerAllowMasterCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: WorkerSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref WorkerSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
+
+  VPCDefaultSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt VPC.DefaultSecurityGroup
+      Description: "Allow outbound traffic from loopback address."
+      IpProtocol: -1
+      CidrIp: 127.0.0.1/32
+
+  
+  publiceucentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: -public-eu-central-1b
+  PrivateRouteTableeucentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: -private-eu-central-1a
+
+  VPCPeeringRouteeucentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
+  PrivateRouteTableeucentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: -private-eu-central-1b
+
+  VPCPeeringRouteeucentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1b
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
+  PrivateRouteTableeucentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: -private-eu-central-1c
+
+  VPCPeeringRouteeucentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1c
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
+
+  
+  PublicSubneteucentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.8.32/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PublicSubneteucentral1a
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PublicSubnetRouteTableAssociationeucentral1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref publiceucentral1b
+      SubnetId: !Ref PublicSubneteucentral1a
+
+  
+  PublicSubneteucentral1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1c
+      CidrBlock: 10.100.8.160/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PublicSubneteucentral1c
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PublicSubnetRouteTableAssociationeucentral1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref publiceucentral1b
+      SubnetId: !Ref PublicSubneteucentral1c
+
+  
+  PrivateSubneteucentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.8.0/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubneteucentral1a
+      - Key: "kubernetes.io/role/internal-elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PrivateSubnetRouteTableAssociationeucentral1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      SubnetId: !Ref PrivateSubneteucentral1a
+  
+  PrivateSubneteucentral1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1c
+      CidrBlock: 10.100.8.128/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubneteucentral1c
+      - Key: "kubernetes.io/role/internal-elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PrivateSubnetRouteTableAssociationeucentral1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1c
+      SubnetId: !Ref PrivateSubneteucentral1c
+  
+
+  
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: 
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn:
+      - PublicRouteTableeucentral1b
+      - PrivateRouteTableeucentral1a
+      - PrivateRouteTableeucentral1c
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId: !Ref VPC
+
+  InternetGatewayRoute:
+    Type: AWS::EC2::Route
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTableeucentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+
+  
+  NATGatewayeucentral1a:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPeucentral1a
+        - AllocationId
+      SubnetId: !Ref PublicSubneteucentral1a
+      Tags:
+        - Key: Name
+          Value: 
+  NATEIPeucentral1a:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteeucentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayeucentral1a"
+
+  NATGatewayeucentral1b:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPeucentral1b
+        - AllocationId
+      SubnetId: !Ref PublicSubneteucentral1b
+      Tags:
+        - Key: Name
+          Value: 
+  NATEIPeucentral1b:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteeucentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayeucentral1b"
+
+  NATGatewayeucentral1c:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPeucentral1c
+        - AllocationId
+      SubnetId: !Ref PublicSubneteucentral1c
+      Tags:
+        - Key: Name
+          Value: 
+  NATEIPeucentral1c:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteeucentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableeucentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayeucentral1c"
+
+
+  
+  rsc-ac0dc01:
+    Type: "AWS::EC2::Instance"
+    Description: Master instance
+    DependsOn:
+    - rsc-abbacd01
+    - EtcdVolume
+    Properties:
+      AvailabilityZone: eu-central-1b
+      DisableApiTermination: true
+      IamInstanceProfile: !Ref MasterInstanceProfile
+      ImageId: ami-0eb0d9bb7ad1bd1e9
+      InstanceType: m5.xlarge
+      Monitoring: false
+      SecurityGroupIds:
+      - !Ref MasterSecurityGroup
+      SubnetId: !Ref PrivateSubneteucentral1b
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy0vdmVyc2lvbi8vY2xvdWRjb25maWcvdl80XzVfMC9tYXN0ZXIiCiAgICAgICAgfQogICAgICBdCiAgICB9CiAgfSwKICAic3RvcmFnZSI6IHsKICAgICJmaWxlc3lzdGVtcyI6IFsKICAgICAgeyAKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRjIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAiZXRjZCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogZmFsc2UsCiAgICAgICAgICAibGFiZWwiOiAiZXRjZCIsCiAgICAgICAgICAiZm9ybWF0IjogImV4dDQiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
+      Tags:
+      - Key: Name
+        Value: -master
+  rsc-abbacd01:
+    Type: AWS::EC2::Volume
+    Properties:
+
+      Encrypted: true
+
+      Size: 50
+      VolumeType: gp2
+      AvailabilityZone: eu-central-1b
+      Tags:
+      - Key: Name
+        Value: -docker
+  EtcdVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+
+      Encrypted: true
+
+      Size: 100
+      VolumeType: gp2
+      AvailabilityZone: eu-central-1b
+      Tags:
+      - Key: Name
+        Value: -etcd
+  LogVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+
+      Encrypted: true
+
+      Size: 100
+      VolumeType: gp2
+      AvailabilityZone: eu-central-1b
+      Tags:
+      - Key: Name
+        Value: -log
+  rsc-ac0dc01DockerMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref rsc-ac0dc01
+      VolumeId: !Ref rsc-abbacd01
+      Device: /dev/xvdc
+  rsc-ac0dc01EtcdMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref rsc-ac0dc01
+      VolumeId: !Ref EtcdVolume
+      Device: /dev/xvdh
+  rsc-ac0dc01LogMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref rsc-ac0dc01
+      VolumeId: !Ref LogVolume
+      Device: /dev/xvdf
+
+  
+  ApiLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:443
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Instances:
+      - !Ref rsc-ac0dc01
+      Listeners:
+      
+      - InstancePort: 443
+        InstanceProtocol: TCP
+        LoadBalancerPort: 443
+        Protocol: TCP
+      
+      LoadBalancerName: -api
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref MasterSecurityGroup
+      Subnets:
+        - !Ref PublicSubneteucentral1a
+      
+        - !Ref PublicSubneteucentral1b
+      
+        - !Ref PublicSubneteucentral1c
+      
+
+  EtcdLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:2379
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Instances:
+      - !Ref rsc-ac0dc01
+      Listeners:
+      
+      - InstancePort: 2379
+        InstanceProtocol: TCP
+        LoadBalancerPort: 2379
+        Protocol: TCP
+      
+      LoadBalancerName: -etcd
+      Scheme: internal
+      SecurityGroups:
+        - !Ref EtcdELBSecurityGroup
+      Subnets:
+        - !Ref PrivateSubneteucentral1a
+      
+        - !Ref PrivateSubneteucentral1b
+      
+        - !Ref PrivateSubneteucentral1c
+      
+
+  IngressLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 60
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:30011
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Listeners:
+      
+      - InstancePort: 30011
+        InstanceProtocol: TCP
+        LoadBalancerPort: 443
+        Protocol: TCP
+      
+      - InstancePort: 30010
+        InstanceProtocol: TCP
+        LoadBalancerPort: 80
+        Protocol: TCP
+      
+      LoadBalancerName: -ingress
+      Policies:
+      - PolicyName: "EnableProxyProtocol"
+        PolicyType: "ProxyProtocolPolicyType"
+        Attributes:
+        - Name: "ProxyProtocol"
+          Value: "true"
+        InstancePorts:
+        
+        - 30011
+        
+        - 30010
+        
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref IngressSecurityGroup
+      Subnets:
+        - !Ref PublicSubneteucentral1a
+      
+        - !Ref PublicSubneteucentral1b
+      
+        - !Ref PublicSubneteucentral1c
+      
+
+  
+  workerLaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Description: worker launch configuration
+    Properties:
+      ImageId: ami-0eb0d9bb7ad1bd1e9
+      SecurityGroups:
+      - !Ref WorkerSecurityGroup
+      InstanceType: m5.2xlarge
+      InstanceMonitoring: false
+      IamInstanceProfile: !Ref WorkerInstanceProfile
+      BlockDeviceMappings:
+      
+      - DeviceName: "/dev/xvdh"
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      
+      - DeviceName: "/dev/xvdf"
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      
+      - DeviceName: "/dev/xvdg"
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      
+      AssociatePublicIpAddress: false
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy0vdmVyc2lvbi8vY2xvdWRjb25maWcvdl80XzVfMC93b3JrZXIiCiAgICAgICAgfQogICAgICBdCiAgICB9CiAgfSwKICAic3RvcmFnZSI6IHsKICAgICJmaWxlc3lzdGVtcyI6IFsKICAgICAgeyAKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRoIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAia3ViZWxldCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGciLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJrdWJlbGV0IiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfQogICAgXQogIH0KfQo=
+
+  
+  NodeDrainerLifecycleHook:
+    Type: "AWS::AutoScaling::LifecycleHook"
+    Properties:
+      AutoScalingGroupName:
+        Ref: workerAutoScalingGroup
+      DefaultResult: CONTINUE
+      HeartbeatTimeout: 3600
+      LifecycleHookName: NodeDrainer
+      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
+
+  
+  workerAutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PrivateSubneteucentral1a
+      
+        - !Ref PrivateSubneteucentral1b
+      
+        - !Ref PrivateSubneteucentral1c
+      
+      AvailabilityZones:
+        - eu-central-1a
+      
+        - eu-central-1b
+      
+        - eu-central-1c
+      
+      DesiredCapacity: 3
+      MinSize: 3
+      MaxSize: 5
+      LaunchConfigurationName: !Ref workerLaunchConfiguration
+      LoadBalancerNames:
+        - !Ref IngressLoadBalancer
+      HealthCheckGracePeriod: 10
+      MetricsCollection:
+        - Granularity: "1Minute"
+      Tags:
+        - Key: Name
+          Value: -worker
+          PropagateAtLaunch: true
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/
+          Value: true
+          PropagateAtLaunch: false
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        # minimum amount of instances that must always be running during a rolling update
+        MinInstancesInService: 2
+        # only do a rolling update of this amount of instances max
+        MaxBatchSize: 1
+        # after creating a new instance, pause operations on the ASG for this amount of time
+        PauseTime: PT15M
+
+  
+
+
