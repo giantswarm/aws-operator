@@ -4,12 +4,10 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}

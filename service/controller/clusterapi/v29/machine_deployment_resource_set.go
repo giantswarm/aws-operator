@@ -3,38 +3,47 @@ package v29
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentsubnet"
 )
 
-type MachineDeploymentResourceSetConfig struct {
-	CMAClient              clientset.Interface
-	ControlPlaneAWSClients aws.Clients
-	G8sClient              versioned.Interface
-	K8sClient              kubernetes.Interface
-	Logger                 micrologger.Logger
-
-	HostAWSConfig  aws.Config
-	ProjectName    string
-	Route53Enabled bool
-}
-
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
+
+	var encrypterObject encrypter.Interface
+	{
+		encrypterObject, err = newEncrypterObject(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var encryptionResource controller.Resource
+	{
+		c := encryption.Config{
+			Encrypter:     encrypterObject,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		}
+
+		encryptionResource, err = encryption.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var machineDeploymentSubnetResource controller.Resource
 	{
@@ -50,6 +59,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	resources := []controller.Resource{
+		encryptionResource,
 		machineDeploymentSubnetResource,
 	}
 
@@ -150,4 +160,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	return resourceSet, nil
+}
+
+func newMachineDeploymentToClusterFunc(cmaClient clientset.Interface) func(obj interface{}) (v1alpha1.Cluster, error) {
+	return func(obj interface{}) (v1alpha1.Cluster, error) {
+		cr, err := key.ToMachineDeployment(obj)
+		if err != nil {
+			return v1alpha1.Cluster{}, microerror.Mask(err)
+		}
+
+		m, err := cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
+		if err != nil {
+			return v1alpha1.Cluster{}, microerror.Mask(err)
+		}
+
+		return *m, nil
+	}
 }

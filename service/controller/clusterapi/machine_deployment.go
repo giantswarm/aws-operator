@@ -24,9 +24,12 @@ type MachineDeploymentConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	ProjectName    string
-	Route53Enabled bool
+	EncrypterBackend string
+	HostAWSConfig    aws.Config
+	InstallationName string
+	ProjectName      string
+	Route53Enabled   bool
+	VaultAddress     string
 }
 
 type MachineDeployment struct {
@@ -129,9 +132,12 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			K8sClient:              config.K8sClient,
 			Logger:                 config.Logger,
 
-			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
-			Route53Enabled: config.Route53Enabled,
+			EncrypterBackend: config.EncrypterBackend,
+			HostAWSConfig:    config.HostAWSConfig,
+			InstallationName: config.InstallationName,
+			ProjectName:      config.ProjectName,
+			Route53Enabled:   config.Route53Enabled,
+			VaultAddress:     config.VaultAddress,
 		}
 
 		v29ResourceSet, err = v29.NewMachineDeploymentResourceSet(c)

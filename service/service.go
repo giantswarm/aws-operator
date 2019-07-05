@@ -222,9 +222,12 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			HostAWSConfig:  awsConfig,
-			ProjectName:    config.ProjectName,
-			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			EncrypterBackend: config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
+			HostAWSConfig:    awsConfig,
+			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
+			ProjectName:      config.ProjectName,
+			Route53Enabled:   config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			VaultAddress:     config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
