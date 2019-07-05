@@ -216,8 +216,8 @@ func defaultMachineDeployment() v1alpha1.MachineDeployment {
 				annotation.MachineDeploymentSubnet: "10.100.8.0/24",
 			},
 			Labels: map[string]string{
-				label.Cluster: TestClusterID,
-				//label.MachineDeployment: TestMachineDeploymentID,
+				label.Cluster:           TestClusterID,
+				label.MachineDeployment: TestMachineDeploymentID,
 			},
 		},
 	}
