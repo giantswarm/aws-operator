@@ -2,6 +2,8 @@ package key
 
 import (
 	"fmt"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
@@ -90,13 +92,27 @@ func ReleaseVersion(getter LabelsGetter) string {
 // Example2: SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
 //
 func SanitizeCFResourceName(v string) string {
-	var bs []byte
-	for _, b := range []byte(v) {
-		if ('A' <= b && b <= 'Z') || ('a' <= b && b <= 'z') || ('0' <= b && b <= '9') {
-			bs = append(bs, b)
+	var rs []rune
+
+	// Start with true to capitalize first character.
+	previousWasSkipped := true
+
+	// Iterate over unicode characters and add numbers and ASCII letters title
+	// cased.
+	for _, r := range []rune(v) {
+		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
+			if previousWasSkipped {
+				rs = append(rs, unicode.ToTitle(r))
+			} else {
+				rs = append(rs, r)
+			}
+			previousWasSkipped = false
+		} else {
+			previousWasSkipped = true
 		}
 	}
-	return string(bs)
+
+	return string(rs)
 }
 
 func StackNameTCDP(getter LabelsGetter) string {

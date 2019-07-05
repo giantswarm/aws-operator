@@ -16,13 +16,17 @@ func TestSanitizeCFResourceName(t *testing.T) {
 		{
 			name:     "case 0: simple string with dash",
 			input:    "abc-123",
-			expected: "abc123",
+			expected: "Abc123",
 		},
-
 		{
 			name:     "case 1: unicode story",
 			input:    "Dear god why? щ（ﾟДﾟщ）",
-			expected: "Deargodwhy",
+			expected: "DearGodWhy",
+		},
+		{
+			name:     "case 2: AWS AZ",
+			input:    "foo-bar-eu-central-1b",
+			expected: "FooBarEuCentral1b",
 		},
 	}
 
