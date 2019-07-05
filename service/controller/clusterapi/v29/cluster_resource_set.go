@@ -2,29 +2,20 @@ package v29
 
 import (
 	"context"
-	"net"
 	"strings"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/randomkeys"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/kms"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
@@ -50,7 +41,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
-	"github.com/giantswarm/aws-operator/service/network"
 )
 
 const (
@@ -59,48 +49,6 @@ const (
 	// under 16 doesn't make sense in here.
 	minAllocatedSubnetMaskBits = 16
 )
-
-type ClusterResourceSetConfig struct {
-	CertsSearcher          certs.Interface
-	CMAClient              clientset.Interface
-	ControlPlaneAWSClients aws.Clients
-	G8sClient              versioned.Interface
-	HostAWSConfig          aws.Config
-	K8sClient              kubernetes.Interface
-	Logger                 micrologger.Logger
-	NetworkAllocator       network.Allocator
-	RandomKeysSearcher     randomkeys.Interface
-
-	AccessLogsExpiration       int
-	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.APIWhitelist
-	CalicoCIDR                 int
-	CalicoMTU                  int
-	CalicoSubnet               string
-	ClusterIPRange             string
-	DockerDaemonCIDR           string
-	EncrypterBackend           string
-	GuestAvailabilityZones     []string
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	GuestSubnetMaskBits        int
-	IncludeTags                bool
-	IgnitionPath               string
-	InstallationName           string
-	IPAMNetworkRange           net.IPNet
-	DeleteLoggingBucket        bool
-	NetworkSetupDockerImage    string
-	OIDC                       cloudconfig.ConfigOIDC
-	ProjectName                string
-	Route53Enabled             bool
-	RouteTables                string
-	PodInfraContainerImage     string
-	RegistryDomain             string
-	SSHUserList                string
-	SSOPublicKey               string
-	VaultAddress               string
-	VPCPeerID                  string
-}
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
@@ -135,33 +83,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	var encrypterObject encrypter.Interface
+	{
+		encrypterObject, err = newEncrypterObject(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encrypterRoleManager encrypter.RoleManager
-	switch config.EncrypterBackend {
-	case encrypter.VaultBackend:
-		c := &vault.EncrypterConfig{
-			Logger: config.Logger,
-
-			Address: config.VaultAddress,
-		}
-
-		encrypterObject, err = vault.NewEncrypter(c)
+	{
+		encrypterRoleManager, err = newEncrypterRoleManager(config)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		encrypterRoleManager = encrypterObject.(encrypter.RoleManager)
-	case encrypter.KMSBackend:
-		c := &kms.EncrypterConfig{
-			Logger: config.Logger,
-
-			InstallationName: config.InstallationName,
-		}
-
-		encrypterObject, err = kms.NewEncrypter(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	default:
-		return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", config.EncrypterBackend)
 	}
 
 	var cloudConfig *cloudconfig.CloudConfig
@@ -243,8 +177,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var encryptionResource controller.Resource
 	{
 		c := encryption.Config{
-			Encrypter: encrypterObject,
-			Logger:    config.Logger,
+			Encrypter:     encrypterObject,
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
 		}
 
 		encryptionResource, err = encryption.New(c)
