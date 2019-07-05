@@ -27,6 +27,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Update to 3.3.13. More info here: https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.3.md#v3313-2019-05-02",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "ignition",
+				Description: "Added name label for default and kube-system namespaces.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
