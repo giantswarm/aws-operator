@@ -69,10 +69,6 @@ func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Cluster.DNS.Domain
 }
 
-func ClusterCloudProviderTag(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(&cluster))
-}
-
 func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
@@ -87,19 +83,6 @@ func ClusterKubeletEndpoint(cluster v1alpha1.Cluster) string {
 
 func ClusterNamespace(cluster v1alpha1.Cluster) string {
 	return ClusterID(&cluster)
-}
-
-func ClusterTags(cluster v1alpha1.Cluster, installationName string) map[string]string {
-	TagCloudProvider := ClusterCloudProviderTag(cluster)
-
-	tags := map[string]string{
-		TagCloudProvider: "owned",
-		TagCluster:       ClusterID(&cluster),
-		TagInstallation:  installationName,
-		TagOrganization:  OrganizationID(cluster),
-	}
-
-	return tags
 }
 
 func CredentialName(cluster v1alpha1.Cluster) string {
@@ -167,10 +150,6 @@ func MasterInstanceName(cluster v1alpha1.Cluster) string {
 
 func MasterInstanceType(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.Master.InstanceType
-}
-
-func OrganizationID(cluster v1alpha1.Cluster) string {
-	return cluster.Labels[label.Organization]
 }
 
 func PolicyNameMaster(cluster v1alpha1.Cluster) string {

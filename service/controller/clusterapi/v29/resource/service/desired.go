@@ -30,7 +30,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Labels: map[string]string{
 				label.App:           "master",
 				label.Cluster:       key.ClusterID(&cr),
-				label.Organization:  key.OrganizationID(cr),
+				label.Organization:  key.OrganizationID(&cr),
 				label.VersionBundle: key.OperatorVersion(&cr),
 			},
 			Annotations: map[string]string{

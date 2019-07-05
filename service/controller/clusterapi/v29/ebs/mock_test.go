@@ -27,7 +27,7 @@ func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.D
 	output := &ec2.DescribeVolumesOutput{}
 	volumes := []*ec2.Volume{}
 
-	clusterTag := key.ClusterCloudProviderTag(e.customObject)
+	clusterTag := key.ClusterCloudProviderTag(&e.customObject)
 
 	for _, mock := range e.ebsVolumes {
 		vol := &ec2.Volume{

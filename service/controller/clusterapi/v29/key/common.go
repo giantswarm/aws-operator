@@ -6,6 +6,23 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+func AWSTags(getter LabelsGetter, installationName string) map[string]string {
+	TagCloudProvider := ClusterCloudProviderTag(getter)
+
+	tags := map[string]string{
+		TagCloudProvider: "owned",
+		TagCluster:       ClusterID(getter),
+		TagInstallation:  installationName,
+		TagOrganization:  OrganizationID(getter),
+	}
+
+	return tags
+}
+
+func ClusterCloudProviderTag(getter LabelsGetter) string {
+	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(getter))
+}
+
 func ClusterID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Cluster]
 }
@@ -47,6 +64,10 @@ func NATRouteName(idx int) string {
 
 func OperatorVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.OperatorVersion]
+}
+
+func OrganizationID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.Organization]
 }
 
 func PrivateRouteTableName(idx int) string {
