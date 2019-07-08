@@ -15,6 +15,13 @@ const (
 	Name = "ipamv29"
 )
 
+const (
+	// minAllocatedSubnetMaskBits is the maximum size of guest subnet i.e.
+	// smaller number here -> larger subnet per guest cluster. For now anything
+	// under 16 doesn't make sense in here.
+	minAllocatedSubnetMaskBits = 16
+)
+
 type Config struct {
 	CMAClient        clientset.Interface
 	G8sClient        versioned.Interface
@@ -24,6 +31,8 @@ type Config struct {
 	AllocatedSubnetMaskBits int
 	AvailabilityZones       []string
 	NetworkRange            net.IPNet
+	PrivateSubnetMaskBits   int
+	PublicSubnetMaskBits    int
 }
 
 type Resource struct {
@@ -51,11 +60,20 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkAllocator must not be empty", config)
 	}
 
+	if config.AllocatedSubnetMaskBits < minAllocatedSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AllocatedSubnetMaskBits (%d) must not be smaller than %d", config, config.AllocatedSubnetMaskBits, minAllocatedSubnetMaskBits)
+	}
 	if len(config.AvailabilityZones) == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AvailabilityZones must not be empty", config)
 	}
 	if reflect.DeepEqual(config.NetworkRange, net.IPNet{}) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkRange must not be empty", config)
+	}
+	if config.PrivateSubnetMaskBits <= config.AllocatedSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PrivateSubnetMaskBits (%d) must not be smaller or equal than %T.AllocatedSubnetMaskBits (%d)", config, config.PrivateSubnetMaskBits, config, config.AllocatedSubnetMaskBits)
+	}
+	if config.PublicSubnetMaskBits <= config.AllocatedSubnetMaskBits {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PublicSubnetMaskBits (%d) must not be smaller or equal than %T.AllocatedSubnetMaskBits (%d)", config, config.PublicSubnetMaskBits, config, config.AllocatedSubnetMaskBits)
 	}
 
 	r := &Resource{
