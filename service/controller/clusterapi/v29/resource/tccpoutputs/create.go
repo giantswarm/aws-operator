@@ -14,15 +14,12 @@ import (
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
 	HostedZoneNameServersKey      = "HostedZoneNameServers"
-	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	VersionBundleVersionKey       = "VersionBundleVersion"
 	VPCIDKey                      = "VPCID"
 	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
-	WorkerASGNameKey              = "WorkerASGName"
-	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
 	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
@@ -118,14 +115,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterCloudConfigVersionKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.CloudConfigVersion = v
-	}
-
-	{
 		v, err := cloudFormation.GetOutputValue(outputs, VersionBundleVersionKey)
 		if err != nil {
 			return microerror.Mask(err)
@@ -147,14 +136,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerCloudConfigVersionKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.CloudConfigVersion = v
 	}
 
 	{

@@ -22,7 +22,6 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
@@ -177,7 +176,6 @@ func defaultControllerContext() controllercontext.Context {
 				VersionBundleVersion: "6.3.0",
 				WorkerInstance: controllercontext.ContextStatusTenantClusterWorkerInstance{
 					DockerVolumeSizeGB: "100",
-					CloudConfigVersion: key.CloudConfigVersion,
 					Image:              "ami-0eb0d9bb7ad1bd1e9",
 					Type:               "m5.xlarge",
 				},
