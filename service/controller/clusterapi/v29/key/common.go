@@ -119,8 +119,8 @@ func SanitizeCFResourceName(v string) string {
 	return string(rs)
 }
 
-func StackNameTCDP(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcdp", getter.GetLabels()[label.Cluster])
+func StackNameTCNP(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcnp", getter.GetLabels()[label.Cluster])
 }
 
 func VPCPeeringRouteName(az string) string {
