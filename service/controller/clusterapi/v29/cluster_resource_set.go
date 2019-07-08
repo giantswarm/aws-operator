@@ -10,15 +10,14 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
-	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
@@ -156,6 +155,22 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var awsClientResource controller.Resource
+	{
+		c := awsclient.Config{
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+
+			CPAWSConfig: config.HostAWSConfig,
+		}
+
+		awsClientResource, err = awsclient.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -535,6 +550,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		awsClientResource,
 		machineDeploymentResource,
 		clusterAZsResource,
 		accountIDResource,
@@ -595,37 +611,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		cr, err := key.ToCluster(obj)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		var tenantClusterAWSClients aws.Clients
-		{
-			arn, err := credential.GetARN(config.K8sClient, cr)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			c := config.HostAWSConfig
-			c.RoleARN = arn
-
-			tenantClusterAWSClients, err = aws.NewClients(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		c := controllercontext.Context{
-			Client: controllercontext.ContextClient{
-				ControlPlane: controllercontext.ContextClientControlPlane{
-					AWS: config.ControlPlaneAWSClients,
-				},
-				TenantCluster: controllercontext.ContextClientTenantCluster{
-					AWS: tenantClusterAWSClients,
-				},
-			},
-		}
-		ctx = controllercontext.NewContext(ctx, c)
+		cc := controllercontext.Context{}
+		ctx = controllercontext.NewContext(ctx, cc)
 
 		return ctx, nil
 	}

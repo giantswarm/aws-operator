@@ -14,9 +14,9 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/drainfinisher"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
@@ -46,6 +46,22 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 
 		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var awsClientResource controller.Resource
+	{
+		c := awsclient.Config{
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+
+			CPAWSConfig: config.HostAWSConfig,
+		}
+
+		awsClientResource, err = awsclient.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -105,6 +121,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		awsClientResource,
 		machineDeploymentResource,
 		tccpOutputsResource,
 		asgStatusResource,
@@ -146,36 +163,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		cr, err := key.ToCluster(obj)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		var tenantClusterAWSClients aws.Clients
-		{
-			arn, err := credential.GetARN(config.K8sClient, cr)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			c := config.HostAWSConfig
-			c.RoleARN = arn
-
-			tenantClusterAWSClients, err = aws.NewClients(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		cc := controllercontext.Context{
-			Client: controllercontext.ContextClient{
-				ControlPlane: controllercontext.ContextClientControlPlane{
-					AWS: config.ControlPlaneAWSClients,
-				},
-				TenantCluster: controllercontext.ContextClientTenantCluster{
-					AWS: tenantClusterAWSClients,
-				},
-			},
-		}
+		cc := controllercontext.Context{}
 		ctx = controllercontext.NewContext(ctx, cc)
 
 		return ctx, nil
