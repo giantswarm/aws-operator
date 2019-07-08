@@ -463,13 +463,13 @@ Resources:
       CidrIp: 127.0.0.1/32
 
   
-  8y5ckPublicEuCentral1b:
+  PublicRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: 8y5ck-public-eu-central-1b
+        Value: PublicRouteTable-eu-central-1b
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -536,7 +536,7 @@ Resources:
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref 8y5ckPublicEuCentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
       SubnetId: !Ref PublicSubnetEuCentral1a
 
   
@@ -556,7 +556,7 @@ Resources:
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref 8y5ckPublicEuCentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
       SubnetId: !Ref PublicSubnetEuCentral1c
 
   
