@@ -183,6 +183,7 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 			NetworkSetupDockerImage: "quay.io/giantswarm/k8s-setup-network-environment",
 			RegistryDomain:          "quay.io",
 			SSHUserList:             "user:ssh-rsa base64==",
+			SSOPublicKey:            "user:ssh-rsa base64==",
 		}
 
 		ccService, err = New(c)

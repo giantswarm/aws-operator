@@ -47,7 +47,6 @@ type ClusterResourceSetConfig struct {
 	DeleteLoggingBucket        bool
 	NetworkSetupDockerImage    string
 	OIDC                       cloudconfig.ConfigOIDC
-	ProjectName                string
 	Route53Enabled             bool
 	RouteTables                string
 	PodInfraContainerImage     string

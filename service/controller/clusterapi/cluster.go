@@ -240,7 +240,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
 			RegistryDomain: config.RegistryDomain,
 			SSHUserList:    config.SSHUserList,
