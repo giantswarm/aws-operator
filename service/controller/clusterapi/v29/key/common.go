@@ -33,6 +33,10 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
 
+func MachineDeploymentASGName(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
 func MachineDeploymentID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.MachineDeployment]
 }
