@@ -23,8 +23,9 @@ const (
 )
 
 const (
+	// namedIAMCapability is the AWS specific capability necessary to work with
+	// our Cloud Formation templates.
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
-
 	// versionBundleVersionParameterKey is the key name of the Cloud Formation
 	// parameter that sets the version bundle version.
 	versionBundleVersionParameterKey = "VersionBundleVersionParameter"
@@ -33,29 +34,27 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	APIWhitelist adapter.APIWhitelist
 	// EncrypterRoleManager manages role encryption. This can be supported by
 	// different implementations and thus is optional.
 	EncrypterRoleManager encrypter.RoleManager
 	Logger               micrologger.Logger
 
-	Detection                  *detection.Detection
-	EncrypterBackend           string
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	InstallationName           string
-	InstanceMonitoring         bool
-	PublicRouteTables          string
-	Route53Enabled             bool
-	VPCPeerID                  string
+	APIWhitelist       adapter.APIWhitelist
+	Detection          *detection.Detection
+	EncrypterBackend   string
+	InstallationName   string
+	InstanceMonitoring bool
+	PublicRouteTables  string
+	Route53Enabled     bool
+	VPCPeerID          string
 }
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	apiWhiteList         adapter.APIWhitelist
 	encrypterRoleManager encrypter.RoleManager
 	logger               micrologger.Logger
 
+	apiWhiteList       adapter.APIWhitelist
 	encrypterBackend   string
 	detection          *detection.Detection
 	installationName   string
@@ -74,6 +73,9 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
+	}
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
 	}

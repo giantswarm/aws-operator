@@ -120,6 +120,9 @@ func New(config Config) (*CloudConfig, error) {
 	if config.SSHUserList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.SSHUserList must not be empty", config)
 	}
+	if config.SSOPublicKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
+	}
 
 	newCloudConfig := &CloudConfig{
 		encrypter: config.Encrypter,
