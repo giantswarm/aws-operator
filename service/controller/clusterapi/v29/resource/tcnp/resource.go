@@ -1,4 +1,4 @@
-package tcdp
+package tcnp
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -13,7 +13,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tcdpv29"
+	Name = "tcnpv29"
 )
 
 type Config struct {
@@ -23,7 +23,7 @@ type Config struct {
 	InstallationName string
 }
 
-// Resource implements the TCDP resource, which stands for Tenant Cluster Data
+// Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
 	logger        micrologger.Logger

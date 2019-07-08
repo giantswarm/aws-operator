@@ -1,6 +1,6 @@
 package template
 
-// ParamsMain is the data structure for the Tenant Cluster Data Plane template.
+// ParamsMain is the data structure for the Tenant Cluster Node Pool template.
 type ParamsMain struct {
 	AutoScalingGroup    *ParamsMainAutoScalingGroup
 	IAMPolicies         *ParamsMainIAMPolicies

@@ -1,4 +1,4 @@
-package tcdp
+package tcnp
 
 import (
 	"context"
@@ -23,16 +23,16 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's data plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(key.StackNameTCDP(&cr)),
+			StackName:                   aws.String(key.StackNameTCNP(&cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack is being deleted")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's node pool cloud formation stack is being deleted")
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
@@ -42,7 +42,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return nil
 
 		} else if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's node pool cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
@@ -51,19 +51,19 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's data plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's node pool cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's data plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.StackNameTCDP(&cr)),
+			StackName: aws.String(key.StackNameTCNP(&cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
 		if IsUpdateInProgress(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's data plane cloud formation stack is being updated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's node pool cloud formation stack is being updated")
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
@@ -76,7 +76,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's data plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's node pool cloud formation stack")
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)
