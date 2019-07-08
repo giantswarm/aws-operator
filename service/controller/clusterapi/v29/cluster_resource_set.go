@@ -42,44 +42,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
 )
 
-const (
-	// minAllocatedSubnetMaskBits is the maximum size of guest subnet i.e.
-	// smaller number here -> larger subnet per guest cluster. For now anything
-	// under 16 doesn't make sense in here.
-	minAllocatedSubnetMaskBits = 16
-)
-
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
-
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-
-	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestSubnetMaskBits (%d) must not be smaller than %d", config, config.GuestSubnetMaskBits, minAllocatedSubnetMaskBits)
-	}
-	if config.GuestPrivateSubnetMaskBits <= config.GuestSubnetMaskBits {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPrivateSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPrivateSubnetMaskBits, config, config.GuestSubnetMaskBits)
-	}
-	if config.GuestPublicSubnetMaskBits <= config.GuestSubnetMaskBits {
-		return nil, microerror.Maskf(invalidConfigError, "%T.GuestPublicSubnetMaskBits (%d) must not be smaller or equal than %T.GuestSubnetMaskBits (%d)", config, config.GuestPublicSubnetMaskBits, config, config.GuestSubnetMaskBits)
-	}
-	if config.IgnitionPath == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
-	}
-	if config.InstallationName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
-	}
-	if config.ProjectName == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
-	}
-	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
-	}
-	if config.SSOPublicKey == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
-	}
 
 	var encrypterObject encrypter.Interface
 	{
@@ -214,6 +178,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
 			AvailabilityZones:       config.GuestAvailabilityZones,
 			NetworkRange:            config.IPAMNetworkRange,
+			PrivateSubnetMaskBits:   config.GuestPrivateSubnetMaskBits,
+			PublicSubnetMaskBits:    config.GuestPublicSubnetMaskBits,
 		}
 
 		ipamResource, err = ipam.New(c)
