@@ -110,7 +110,7 @@ systemd:
       EnvironmentFile=/etc/network-environment
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
-      Environment="PATH=/opt/bin/:/usr/bin/:/usr/sbin:$PATH"
+      Environment="PATH=/opt/bin/:/usr/bin/:/usr/sbin:/sbin:$PATH"
       ExecStartPre=/usr/bin/docker pull $IMAGE
       ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
       ExecStartPre=-/usr/bin/docker rm -f $NAME

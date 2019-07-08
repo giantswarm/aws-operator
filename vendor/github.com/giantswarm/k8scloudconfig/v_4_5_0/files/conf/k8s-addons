@@ -13,13 +13,15 @@ while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /e
 NAMESPACES="default kube-system" 
 for namespace in ${NAMESPACES}
 do
-    while
-        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL label namespace ${namespace} name=${namespace}
-        [ "$?" -ne "0" ]
-    do
-        echo "failed to label namespace ${namespace}, retrying in 5 sec"
-        sleep 5s
-    done
+    if ! /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get namespaces -l name=${namespace} | grep ${namespace}; then
+        while
+            /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL label namespace ${namespace} name=${namespace}
+            [ "$?" -ne "0" ]
+        do
+            echo "failed to label namespace ${namespace}, retrying in 5 sec"
+            sleep 5s
+        done
+    fi
 done
 
 # apply Security bootstrap (RBAC and PSP)

@@ -11,11 +11,10 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentsubnet"
 )
@@ -26,6 +25,22 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var encrypterObject encrypter.Interface
 	{
 		encrypterObject, err = newEncrypterObject(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var awsClientResource controller.Resource
+	{
+		c := awsclient.Config{
+			K8sClient:     config.K8sClient,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+
+			CPAWSConfig: config.HostAWSConfig,
+		}
+
+		awsClientResource, err = awsclient.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -59,6 +74,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	resources := []controller.Resource{
+		awsClientResource,
 		encryptionResource,
 		machineDeploymentSubnetResource,
 	}
@@ -97,48 +113,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		var cr v1alpha1.Cluster
-		{
-			md, err := key.ToMachineDeployment(obj)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			id := key.WorkerClusterID(md)
-
-			m, err := config.CMAClient.ClusterV1alpha1().Clusters(md.Namespace).Get(id, metav1.GetOptions{})
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			cr = *m
-		}
-
-		var tenantClusterAWSClients aws.Clients
-		{
-			arn, err := credential.GetARN(config.K8sClient, cr)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			c := config.HostAWSConfig
-			c.RoleARN = arn
-
-			tenantClusterAWSClients, err = aws.NewClients(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-		}
-
-		cc := controllercontext.Context{
-			Client: controllercontext.ContextClient{
-				ControlPlane: controllercontext.ContextClientControlPlane{
-					AWS: config.ControlPlaneAWSClients,
-				},
-				TenantCluster: controllercontext.ContextClientTenantCluster{
-					AWS: tenantClusterAWSClients,
-				},
-			},
-		}
+		cc := controllercontext.Context{}
 		ctx = controllercontext.NewContext(ctx, cc)
 
 		return ctx, nil
