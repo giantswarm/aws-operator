@@ -57,7 +57,6 @@ type ContextStatusTenantClusterMasterInstance struct {
 	Image                    string
 	ResourceName             string
 	Type                     string
-	CloudConfigVersion       string
 }
 
 type ContextStatusTenantClusterTCCP struct {
@@ -76,7 +75,6 @@ type ContextStatusTenantClusterTCCPVPC struct {
 
 type ContextStatusTenantClusterWorkerInstance struct {
 	DockerVolumeSizeGB string
-	CloudConfigVersion string
 	Image              string
 	Type               string
 }

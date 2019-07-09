@@ -12,8 +12,6 @@ Outputs:
     Value: rsc-ac0dc01
   MasterInstanceType:
     Value: m5.xlarge
-  MasterCloudConfigVersion:
-    Value: v_4_5_0
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
@@ -26,8 +24,6 @@ Outputs:
     Value: ami-0eb0d9bb7ad1bd1e9
   WorkerInstanceType:
     Value: m5.2xlarge
-  WorkerCloudConfigVersion:
-    Value: v_4_5_0
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter
