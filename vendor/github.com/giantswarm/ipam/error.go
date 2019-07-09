@@ -59,3 +59,12 @@ var invalidConfigError = microerror.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
+
+var invalidParameterError = &microerror.Error{
+	Kind: "invalid parameter",
+}
+
+// IsInvalidParameter asserts invalidParameterError.
+func IsInvalidParameter(err error) bool {
+	return microerror.Cause(err) == invalidParameterError
+}
