@@ -33,7 +33,7 @@ func New(config Config) (Allocator, error) {
 	return r, nil
 }
 
-func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks AllocationCallbacks) (net.IPNet, error) {
+func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks Callbacks) (net.IPNet, error) {
 	i.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
 	i.mutex.Lock()
 	i.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
@@ -49,7 +49,7 @@ func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize n
 	{
 		i.logger.LogCtx(ctx, "level", "debug", "message", "getting allocated subnets")
 
-		reservedSubnets, err = callbacks.GetReservedNetworks(ctx)
+		reservedSubnets, err = callbacks.Collect(ctx)
 		if err != nil {
 			return net.IPNet{}, microerror.Mask(err)
 		}
@@ -72,7 +72,7 @@ func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize n
 	{
 		i.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("persisting allocation candidate: %q", subnet.String()))
 
-		err = callbacks.PersistAllocatedNetwork(ctx, subnet)
+		err = callbacks.Persist(ctx, subnet)
 		if err != nil {
 			return net.IPNet{}, microerror.Mask(err)
 		}
