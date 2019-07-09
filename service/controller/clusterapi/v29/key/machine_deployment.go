@@ -10,7 +10,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 )
 
 func WorkerClusterID(cr v1alpha1.MachineDeployment) string {

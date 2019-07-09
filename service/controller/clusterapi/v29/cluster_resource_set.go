@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
@@ -99,6 +100,17 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var networkAllocator network.Allocator
+	{
+		c := network.Config{
+			Logger: config.Logger,
+		}
+		networkAllocator, err = network.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var accountIDResource controller.Resource
 	{
 		c := accountid.Config{
@@ -173,7 +185,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			CMAClient:        config.CMAClient,
 			G8sClient:        config.G8sClient,
 			Logger:           config.Logger,
-			NetworkAllocator: config.NetworkAllocator,
+			NetworkAllocator: networkAllocator,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
 			AvailabilityZones:       config.GuestAvailabilityZones,
