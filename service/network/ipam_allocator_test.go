@@ -28,7 +28,7 @@ func mustParseCIDR(val string) net.IPNet {
 func Test_Allocator(t *testing.T) {
 	testCases := []struct {
 		name           string
-		callbacks      AllocationCallbacks
+		callbacks      Callbacks
 		networkRange   net.IPNet
 		subnetSize     net.IPMask
 		expectedSubnet net.IPNet
@@ -36,9 +36,9 @@ func Test_Allocator(t *testing.T) {
 	}{
 		{
 			name: "case 0: allocate first subnet",
-			callbacks: AllocationCallbacks{
-				GetReservedNetworks:     func(_ context.Context) ([]net.IPNet, error) { return []net.IPNet{}, nil },
-				PersistAllocatedNetwork: func(_ context.Context, _ net.IPNet) error { return nil },
+			callbacks: Callbacks{
+				Collect: func(_ context.Context) ([]net.IPNet, error) { return []net.IPNet{}, nil },
+				Persist: func(_ context.Context, _ net.IPNet) error { return nil },
 			},
 			networkRange:   mustParseCIDR("10.100.0.0/16"),
 			subnetSize:     net.CIDRMask(24, 32),
@@ -47,8 +47,8 @@ func Test_Allocator(t *testing.T) {
 		},
 		{
 			name: "case 1: allocate fourth subnet",
-			callbacks: AllocationCallbacks{
-				GetReservedNetworks: func(_ context.Context) ([]net.IPNet, error) {
+			callbacks: Callbacks{
+				Collect: func(_ context.Context) ([]net.IPNet, error) {
 					reservedNetworks := []net.IPNet{
 						mustParseCIDR("10.100.0.0/24"),
 						mustParseCIDR("10.100.1.0/24"),
@@ -56,7 +56,7 @@ func Test_Allocator(t *testing.T) {
 					}
 					return reservedNetworks, nil
 				},
-				PersistAllocatedNetwork: func(_ context.Context, _ net.IPNet) error { return nil },
+				Persist: func(_ context.Context, _ net.IPNet) error { return nil },
 			},
 			networkRange:   mustParseCIDR("10.100.0.0/16"),
 			subnetSize:     net.CIDRMask(24, 32),
@@ -65,9 +65,9 @@ func Test_Allocator(t *testing.T) {
 		},
 		{
 			name: "case 2: handle error from getting reserved networks",
-			callbacks: AllocationCallbacks{
-				GetReservedNetworks:     func(_ context.Context) ([]net.IPNet, error) { return nil, errArtificial },
-				PersistAllocatedNetwork: func(_ context.Context, _ net.IPNet) error { return nil },
+			callbacks: Callbacks{
+				Collect: func(_ context.Context) ([]net.IPNet, error) { return nil, errArtificial },
+				Persist: func(_ context.Context, _ net.IPNet) error { return nil },
 			},
 			networkRange:   mustParseCIDR("10.100.0.0/16"),
 			subnetSize:     net.CIDRMask(24, 32),
@@ -76,9 +76,9 @@ func Test_Allocator(t *testing.T) {
 		},
 		{
 			name: "case 3: handle error from persisting allocated network",
-			callbacks: AllocationCallbacks{
-				GetReservedNetworks:     func(_ context.Context) ([]net.IPNet, error) { return []net.IPNet{}, nil },
-				PersistAllocatedNetwork: func(_ context.Context, _ net.IPNet) error { return errArtificial },
+			callbacks: Callbacks{
+				Collect: func(_ context.Context) ([]net.IPNet, error) { return []net.IPNet{}, nil },
+				Persist: func(_ context.Context, _ net.IPNet) error { return errArtificial },
 			},
 			networkRange:   mustParseCIDR("10.100.0.0/16"),
 			subnetSize:     net.CIDRMask(24, 32),
@@ -156,8 +156,8 @@ func Test_Allocator_Locking(t *testing.T) {
 	go func() {
 		defer wg.Done()
 
-		callbacks := AllocationCallbacks{
-			GetReservedNetworks: func(_ context.Context) ([]net.IPNet, error) {
+		callbacks := Callbacks{
+			Collect: func(_ context.Context) ([]net.IPNet, error) {
 				// Allow second thread to call AllocateNetwork.
 				signal <- struct{}{}
 
@@ -169,7 +169,7 @@ func Test_Allocator_Locking(t *testing.T) {
 				reservedNetworksMutex.Unlock()
 				return networks, nil
 			},
-			PersistAllocatedNetwork: func(_ context.Context, n net.IPNet) error {
+			Persist: func(_ context.Context, n net.IPNet) error {
 				reservedNetworksMutex.Lock()
 				*reservedNetworks = append(*reservedNetworks, n)
 				reservedNetworksMutex.Unlock()
@@ -211,8 +211,8 @@ func Test_Allocator_Locking(t *testing.T) {
 	go func() {
 		defer wg.Done()
 
-		callbacks := AllocationCallbacks{
-			GetReservedNetworks: func(_ context.Context) ([]net.IPNet, error) {
+		callbacks := Callbacks{
+			Collect: func(_ context.Context) ([]net.IPNet, error) {
 				fmt.Printf("reservedNetworks: %#v\n", *reservedNetworks)
 
 				reservedNetworksMutex.Lock()
@@ -220,7 +220,7 @@ func Test_Allocator_Locking(t *testing.T) {
 				reservedNetworksMutex.Unlock()
 				return networks, nil
 			},
-			PersistAllocatedNetwork: func(_ context.Context, n net.IPNet) error {
+			Persist: func(_ context.Context, n net.IPNet) error {
 				reservedNetworksMutex.Lock()
 				*reservedNetworks = append(*reservedNetworks, n)
 				reservedNetworksMutex.Unlock()

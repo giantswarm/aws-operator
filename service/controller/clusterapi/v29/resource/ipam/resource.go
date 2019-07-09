@@ -24,10 +24,10 @@ const (
 )
 
 type Config struct {
-	CMAClient        clientset.Interface
-	G8sClient        versioned.Interface
-	Logger           micrologger.Logger
-	NetworkAllocator network.Allocator
+	Allocator network.Allocator
+	CMAClient clientset.Interface
+	G8sClient versioned.Interface
+	Logger    micrologger.Logger
 
 	AllocatedSubnetMaskBits int
 	AvailabilityZones       []string
@@ -36,11 +36,14 @@ type Config struct {
 	PublicSubnetMaskBits    int
 }
 
+// TODO
+// EnsureCreated allocates a tenant cluster subnet. It gathers existing subnets
+// from existing AWSConfig/Status objects and existing VPCs from AWS.
 type Resource struct {
-	cmaClient        clientset.Interface
-	g8sClient        versioned.Interface
-	logger           micrologger.Logger
-	networkAllocator network.Allocator
+	allocator network.Allocator
+	cmaClient clientset.Interface
+	g8sClient versioned.Interface
+	logger    micrologger.Logger
 
 	allocatedSubnetMask net.IPMask
 	availabilityZones   []string
@@ -48,6 +51,9 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
+	if config.Allocator == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Allocator must not be empty", config)
+	}
 	if config.CMAClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
 	}
@@ -56,9 +62,6 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-	if config.NetworkAllocator == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkAllocator must not be empty", config)
 	}
 
 	if config.AllocatedSubnetMaskBits < minAllocatedSubnetMaskBits {
@@ -78,10 +81,10 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		cmaClient:        config.CMAClient,
-		g8sClient:        config.G8sClient,
-		logger:           config.Logger,
-		networkAllocator: config.NetworkAllocator,
+		allocator: config.Allocator,
+		cmaClient: config.CMAClient,
+		g8sClient: config.G8sClient,
+		logger:    config.Logger,
 
 		allocatedSubnetMask: net.CIDRMask(config.AllocatedSubnetMaskBits, 32),
 		availabilityZones:   config.AvailabilityZones,
