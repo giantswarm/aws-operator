@@ -14,8 +14,6 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
     Value: {{ .Guest.Outputs.Master.Instance.Type }}
-  MasterCloudConfigVersion:
-    Value: {{ .Guest.Outputs.Master.CloudConfig.Version }}
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
@@ -28,8 +26,6 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Worker.ImageID }}
   WorkerInstanceType:
     Value: {{ .Guest.Outputs.Worker.InstanceType }}
-  WorkerCloudConfigVersion:
-    Value: {{ .Guest.Outputs.Worker.CloudConfig.Version }}
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter
