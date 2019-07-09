@@ -100,12 +100,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var networkAllocator network.Allocator
+	var subnetAllocator network.Allocator
 	{
-		c := network.Config{
+		c := network.SubnetAllocatorConfig{
 			Logger: config.Logger,
 		}
-		networkAllocator, err = network.New(c)
+
+		subnetAllocator, err = network.NewSubnetAllocator(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -185,7 +186,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			CMAClient:        config.CMAClient,
 			G8sClient:        config.G8sClient,
 			Logger:           config.Logger,
-			NetworkAllocator: networkAllocator,
+			NetworkAllocator: subnetAllocator,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
 			AvailabilityZones:       config.GuestAvailabilityZones,
