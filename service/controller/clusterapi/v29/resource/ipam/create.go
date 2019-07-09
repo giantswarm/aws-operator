@@ -53,9 +53,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
-			callbacks := network.AllocationCallbacks{
-				GetReservedNetworks:     r.getReservedNetworks,
-				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, key.WorkerAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment)),
+			callbacks := network.Callbacks{
+				Collect: r.getReservedNetworks,
+				Persist: r.persistAllocatedNetwork(cr, key.WorkerAvailabilityZones(cc.Status.TenantCluster.TCCP.MachineDeployment)),
 			}
 
 			subnetCIDR, err = r.networkAllocator.Allocate(ctx, r.networkRange, r.allocatedSubnetMask, callbacks)

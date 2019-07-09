@@ -62,7 +62,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		for az, _ := range azsMap {
+		for az := range azsMap {
 			azs = append(azs, az)
 		}
 	}
