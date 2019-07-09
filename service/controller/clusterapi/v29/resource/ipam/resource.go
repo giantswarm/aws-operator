@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 )
 
 const (

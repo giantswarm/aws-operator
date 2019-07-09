@@ -24,7 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/controller/legacy"
-	"github.com/giantswarm/aws-operator/service/network"
+	legacynetwork "github.com/giantswarm/aws-operator/service/network"
 )
 
 // Config represents the configuration used to create a new service.
@@ -121,12 +121,12 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var networkAllocator network.Allocator
+	var legacyNetworkAllocator legacynetwork.Allocator
 	{
-		c := network.Config{
+		c := legacynetwork.Config{
 			Logger: config.Logger,
 		}
-		networkAllocator, err = network.New(c)
+		legacyNetworkAllocator, err = legacynetwork.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -140,12 +140,11 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := clusterapi.ClusterConfig{
-			CMAClient:        cmaClient,
-			G8sClient:        g8sClient,
-			K8sClient:        k8sClient,
-			K8sExtClient:     k8sExtClient,
-			Logger:           config.Logger,
-			NetworkAllocator: networkAllocator,
+			CMAClient:    cmaClient,
+			G8sClient:    g8sClient,
+			K8sClient:    k8sClient,
+			K8sExtClient: k8sExtClient,
+			Logger:       config.Logger,
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
@@ -249,7 +248,7 @@ func New(config Config) (*Service, error) {
 			K8sClient:        k8sClient,
 			K8sExtClient:     k8sExtClient,
 			Logger:           config.Logger,
-			NetworkAllocator: networkAllocator,
+			NetworkAllocator: legacyNetworkAllocator,
 
 			APIWhitelist: legacy.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),

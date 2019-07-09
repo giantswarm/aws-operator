@@ -17,7 +17,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 )
 
 // EnsureCreated allocates guest cluster network segment. It gathers existing
