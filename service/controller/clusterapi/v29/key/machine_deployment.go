@@ -5,12 +5,12 @@ import (
 	"strconv"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 )
 
 func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
@@ -42,13 +42,13 @@ func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSCo
 	{
 		workerAZs := WorkerAvailabilityZones(cr)
 
-		azsSubnets, err := network.Split(workerSubnet, uint(len(workerAZs)))
+		azsSubnets, err := ipam.Split(workerSubnet, uint(len(workerAZs)))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		for i, s := range workerAZs {
-			subnets, err := network.Split(azsSubnets[i], 2)
+			subnets, err := ipam.Split(azsSubnets[i], 2)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}

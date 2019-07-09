@@ -25,7 +25,7 @@ func mustParseCIDR(val string) net.IPNet {
 	return *n
 }
 
-func Test_Allocator(t *testing.T) {
+func Test_SubnetAllocator(t *testing.T) {
 	testCases := []struct {
 		name           string
 		callbacks      Callbacks
@@ -87,7 +87,7 @@ func Test_Allocator(t *testing.T) {
 		},
 	}
 
-	svc, err := New(Config{Logger: microloggertest.New()})
+	svc, err := NewSubnetAllocator(SubnetAllocatorConfig{Logger: microloggertest.New()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,8 +114,8 @@ func Test_Allocator(t *testing.T) {
 	}
 }
 
-func Test_Allocator_Locking(t *testing.T) {
-	svc, err := New(Config{Logger: microloggertest.New()})
+func Test_SubnetAllocator_Locking(t *testing.T) {
+	svc, err := NewSubnetAllocator(SubnetAllocatorConfig{Logger: microloggertest.New()})
 	if err != nil {
 		t.Fatal(err)
 	}
