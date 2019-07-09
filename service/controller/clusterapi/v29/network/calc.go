@@ -2,8 +2,8 @@ package network
 
 import "net"
 
-// CalculateParent takes network as an input and returns one with 1 bit higher
-// mask.
+// CalculateParent takes network as an input and returns one with 1 bit smaller
+// mask (yielding therefore 1 bit larger network).
 func CalculateParent(n net.IPNet) net.IPNet {
 	ones, bits := n.Mask.Size()
 
