@@ -19,7 +19,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "containerlinux",
-				Description: "Update to 2079.5.1. https://github.com/coreos/manifest/releases/tag/v2079.5.1",
+				Description: "Update to 2135.4.0. https://github.com/coreos/manifest/releases/tag/v2135.4.0",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
@@ -40,7 +40,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "containerlinux",
-				Version: "2079.5.1",
+				Version: "2135.4.0",
 			},
 			{
 				Name:    "docker",
