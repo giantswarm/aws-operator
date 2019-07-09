@@ -70,6 +70,23 @@ const (
 	ClusterStatusConditionUpdating = "Updating"
 )
 
+var (
+	conditionPairs = [][]string{
+		[]string{
+			ClusterStatusConditionCreated,
+			ClusterStatusConditionCreating,
+		},
+		[]string{
+			ClusterStatusConditionDeleted,
+			ClusterStatusConditionDeleting,
+		},
+		[]string{
+			ClusterStatusConditionUpdated,
+			ClusterStatusConditionUpdating,
+		},
+	}
+)
+
 // CommonClusterStatus is shared type to contain provider independent cluster status
 // information.
 type CommonClusterStatus struct {
