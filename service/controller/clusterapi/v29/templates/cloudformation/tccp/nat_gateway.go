@@ -17,6 +17,8 @@ const NatGateway = `
       Tags:
         - Key: Name
           Value: {{ .ClusterID }}
+        - Key: giantswarm.io/tccp
+          Value: true
   {{ .NATEIPName }}:
     Type: AWS::EC2::EIP
     Properties:

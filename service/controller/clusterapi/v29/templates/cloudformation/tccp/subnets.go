@@ -13,6 +13,8 @@ const Subnets = `
       Tags:
       - Key: Name
         Value: {{ .Name }}
+      - Key: giantswarm.io/tccp
+        Value: true
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
@@ -35,6 +37,8 @@ const Subnets = `
       Tags:
       - Key: Name
         Value: {{ .Name }}
+      - Key: giantswarm.io/tccp
+        Value: true
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC

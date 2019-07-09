@@ -49,6 +49,8 @@ Resources:
         Value: 8y5ck
       - Key: Installation
         Value: 
+      - Key: giantswarm.io/tccp
+        Value: true
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
@@ -59,6 +61,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
@@ -274,6 +278,8 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-master
+        - Key: giantswarm.io/tccp
+          Value: true
 
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -349,6 +355,8 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-worker
+        - Key: giantswarm.io/tccp
+          Value: true
 
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -372,6 +380,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-ingress
+        - Key: giantswarm.io/tccp
+          Value: true
 
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -395,6 +405,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
+        - Key: giantswarm.io/tccp
+          Value: true
 
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
@@ -469,6 +481,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-public
+      - Key: giantswarm.io/tccp
+        Value: true
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -476,6 +490,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-private
+      - Key: giantswarm.io/tccp
+        Value: true
 
   VPCPeeringRoute:
     Type: AWS::EC2::Route
@@ -492,6 +508,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-private01
+      - Key: giantswarm.io/tccp
+        Value: true
 
   VPCPeeringRoute01:
     Type: AWS::EC2::Route
@@ -512,6 +530,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PublicSubnet
+      - Key: giantswarm.io/tccp
+        Value: true
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
@@ -532,6 +552,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PublicSubnet01
+      - Key: giantswarm.io/tccp
+        Value: true
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
@@ -552,6 +574,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnet
+      - Key: giantswarm.io/tccp
+        Value: true
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
@@ -571,6 +595,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnet01
+      - Key: giantswarm.io/tccp
+        Value: true
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
@@ -589,6 +615,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -625,6 +653,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
   NATEIP:
     Type: AWS::EC2::EIP
     Properties:
@@ -650,6 +680,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
   NATEIP01:
     Type: AWS::EC2::EIP
     Properties:
@@ -684,6 +716,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-master
+      - Key: giantswarm.io/tccp
+        Value: true
   rsc-abbacd01:
     Type: AWS::EC2::Volume
     Properties:
@@ -696,6 +730,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-docker
+      - Key: giantswarm.io/tccp
+        Value: true
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -708,6 +744,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-etcd
+      - Key: giantswarm.io/tccp
+        Value: true
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -720,6 +758,8 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-log
+      - Key: giantswarm.io/tccp
+        Value: true
   rsc-ac0dc01DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
@@ -920,6 +960,9 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-worker
+          PropagateAtLaunch: true
+        - Key: giantswarm.io/tccp
+          Value: true
           PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
