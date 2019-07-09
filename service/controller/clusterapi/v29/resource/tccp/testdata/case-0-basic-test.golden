@@ -526,6 +526,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PublicSubnet
+      - Key: giantswarm.io/subnet-type
+        Value: public
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/elb"
@@ -548,6 +550,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PublicSubnet01
+      - Key: giantswarm.io/subnet-type
+        Value: public
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/elb"
@@ -570,6 +574,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnet
+      - Key: giantswarm.io/subnet-type
+        Value: private
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/internal-elb"
@@ -591,6 +597,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnet01
+      - Key: giantswarm.io/subnet-type
+        Value: private
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/internal-elb"

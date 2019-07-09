@@ -13,6 +13,8 @@ const Subnets = `
       Tags:
       - Key: Name
         Value: {{ .Name }}
+      - Key: giantswarm.io/subnet-type
+        Value: {{ .Type }}
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/elb"
@@ -37,6 +39,8 @@ const Subnets = `
       Tags:
       - Key: Name
         Value: {{ .Name }}
+      - Key: giantswarm.io/subnet-type
+        Value: {{ .Type }}
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/internal-elb"
