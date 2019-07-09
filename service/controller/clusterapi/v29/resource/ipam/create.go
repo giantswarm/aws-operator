@@ -205,14 +205,14 @@ func (r *Resource) getSubnetsFromClusters(ctx context.Context) ([]net.IPNet, err
 }
 
 func (r *Resource) getSubnetsFromMachineDeployments(ctx context.Context) ([]net.IPNet, error) {
-	clusterList, err := r.cmaClient.Cluster().MachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
+	machineDeploymentList, err := r.cmaClient.Cluster().MachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	var results []net.IPNet
-	for _, c := range clusterList.Items {
-		cidr := key.WorkerSubnet(c)
+	for _, md := range machineDeploymentList.Items {
+		cidr := key.WorkerSubnet(md)
 		if cidr == "" {
 			continue
 		}
