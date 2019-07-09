@@ -14,6 +14,7 @@ type Subnet struct {
 	Name                  string
 	MapPublicIPOnLaunch   bool
 	RouteTableAssociation RouteTableAssociation
+	Type                  string
 }
 
 type RouteTableAssociation struct {
@@ -56,6 +57,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 				RouteTableName: "PublicRouteTable",
 				SubnetName:     snetName,
 			},
+			Type: "public",
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
 
@@ -70,6 +72,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 				RouteTableName: key.PrivateRouteTableName(i),
 				SubnetName:     snetName,
 			},
+			Type: "private",
 		}
 		s.PrivateSubnets = append(s.PrivateSubnets, snet)
 	}
