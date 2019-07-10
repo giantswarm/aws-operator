@@ -140,8 +140,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			subnet, exists := azMap[az]
 			if exists {
-				ccAZ.Public = subnet.public
-				ccAZ.Private = subnet.private
+				ccAZ.PublicSubnet = subnet.public
+				ccAZ.PrivateSubnet = subnet.private
 
 				parentNet := ipam.CalculateParent(subnet.public)
 
@@ -157,8 +157,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					}
 
 					clusterAZSubnets = clusterAZSubnets[1:]
-					ccAZ.Public = subnets[0]
-					ccAZ.Private = subnets[1]
+					ccAZ.PublicSubnet = subnets[0]
+					ccAZ.PrivateSubnet = subnets[1]
 				} else {
 					return microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
 				}

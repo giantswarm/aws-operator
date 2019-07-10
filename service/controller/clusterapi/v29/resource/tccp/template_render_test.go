@@ -163,19 +163,19 @@ func defaultControllerContext() controllercontext.Context {
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
 				AvailabilityZones: []controllercontext.ContextStatusTenantClusterAvailabilityZone{
 					{
-						Name:    "eu-central-1a",
-						Private: mustParseCIDR("10.100.3.0/27"),
-						Public:  mustParseCIDR("10.100.3.32/27"),
+						Name:          "eu-central-1a",
+						PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
 					},
 					{
-						Name:    "eu-central-1b",
-						Private: mustParseCIDR("10.100.3.64/27"),
-						Public:  mustParseCIDR("10.100.3.96/27"),
+						Name:          "eu-central-1b",
+						PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
 					},
 					{
-						Name:    "eu-central-1c",
-						Private: mustParseCIDR("10.100.3.128/27"),
-						Public:  mustParseCIDR("10.100.3.164/27"),
+						Name:          "eu-central-1c",
+						PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
 					},
 				},
 				AWSAccountID:          "tenant-account",

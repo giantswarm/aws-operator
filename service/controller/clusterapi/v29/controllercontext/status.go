@@ -51,9 +51,9 @@ type ContextStatusTenantCluster struct {
 }
 
 type ContextStatusTenantClusterAvailabilityZone struct {
-	Name    string
-	Private net.IPNet
-	Public  net.IPNet
+	Name          string
+	PrivateSubnet net.IPNet
+	PublicSubnet  net.IPNet
 }
 
 type ContextStatusTenantClusterEncryption struct {
