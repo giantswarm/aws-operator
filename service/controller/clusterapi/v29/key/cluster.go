@@ -36,6 +36,12 @@ const (
 	KubernetesSecurePort = 443
 )
 
+// MaximumNumberOfAZsInCluster defines the current limitation with Node Pools
+// implementation. Biggest limitation behind this is current IPAM
+// implementation that restricts network sizes. Another related problem is
+// restrictions in AWS resource structure.
+const MaximumNumberOfAZsInCluster = 4
+
 // AWS Tags used for cost analysis and general resource tagging.
 const (
 	TagCluster       = "giantswarm.io/cluster"

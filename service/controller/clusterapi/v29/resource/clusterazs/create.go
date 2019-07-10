@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +20,17 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
-const MaximumNumberOfAZsInCluster = 4
+// subnetPair is temporary type for mapping existing subnets from
+// controllercontext to AZs.
+type subnetPair struct {
+	public  net.IPNet
+	private net.IPNet
+}
+
+func (sp subnetPair) areEmpty() bool {
+	return (sp.public.IP == nil && sp.public.Mask == nil) && (sp.private.IP == nil && sp.private.Mask == nil)
+
+}
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCluster(obj)
@@ -54,109 +65,97 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d MachineDeployments for tenant cluster", len(machineDeployments)))
 	}
 
-	var azs []string
+	var azs map[string]subnetPair
 	{
-		var azsMap map[string]struct{}
-
-		// Include master's AZ.
-		azsMap[key.MasterAvailabilityZone(cr)] = struct{}{}
-
-		// Include worker AZs.
-		for _, md := range machineDeployments {
-			for _, az := range key.WorkerAvailabilityZones(md) {
-				azsMap[az] = struct{}{}
-			}
+		// Acquire AZs together with corresponding subnets from AWS EC2 API
+		// results.
+		azs, err = fromEC2SubnetsToMap(cc.Status.TenantCluster.TCCP.Subnets)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
-		for az := range azsMap {
-			azs = append(azs, az)
+		// Include master's AZ if missing.
+		if _, exists := azs[key.MasterAvailabilityZone(cr)]; !exists {
+			azs[key.MasterAvailabilityZone(cr)] = subnetPair{}
+		}
+
+		// Include worker AZs if missing.
+		for _, md := range machineDeployments {
+			for _, az := range key.WorkerAvailabilityZones(md) {
+				if _, exists := azs[az]; !exists {
+					azs[az] = subnetPair{}
+				}
+			}
+		}
+	}
+
+	var allocatedNetworks []net.IPNet
+	{
+		// Collect non-empty subnets from AZ-subnet -pairs.
+		for _, snetPair := range azs {
+			if !reflect.DeepEqual(net.IPNet{}, snetPair.public) {
+				allocatedNetworks = append(allocatedNetworks, snetPair.public)
+			}
+
+			if !reflect.DeepEqual(net.IPNet{}, snetPair.private) {
+				allocatedNetworks = append(allocatedNetworks, snetPair.private)
+			}
 		}
 	}
 
 	{
-		// Temporary type for mapping existing subnets from controllercontext to AZs.
-		type subnet struct {
-			public  net.IPNet
-			private net.IPNet
-		}
-
-		var allocatedNetworks []net.IPNet
-		azMap := make(map[string]subnet)
-
-		for _, s := range cc.Status.TenantCluster.TCCP.Subnets {
-			if s == nil || s.AvailabilityZone == nil || s.CidrBlock == nil || s.Tags == nil {
-				continue
-			}
-
-			mappedSubnet := azMap[*s.AvailabilityZone]
-
-			_, cidr, err := net.ParseCIDR(*s.CidrBlock)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			// Maintain list of existing network allocations for cluster
-			// network.
-			allocatedNetworks = append(allocatedNetworks, *cidr)
-
-			var subnetType string
-			for _, t := range s.Tags {
-				if t == nil || t.Key == nil || t.Value == nil {
-					continue
-				}
-
-				if *t.Key == key.TagEC2SubnetType {
-					subnetType = strings.TrimSpace(*t.Value)
-				}
-			}
-
-			switch subnetType {
-			case "public":
-				mappedSubnet.public = *cidr
-			case "private":
-				mappedSubnet.private = *cidr
-			default:
-				return microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagEC2SubnetType, subnetType)
-			}
-
-			azMap[*s.AvailabilityZone] = mappedSubnet
-		}
-
+		// Parse TCCP network CIDR.
 		_, clusterCIDR, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		clusterAZSubnets, err := ipam.Split(*clusterCIDR, MaximumNumberOfAZsInCluster)
+		// Split TCCP network between maximum number of AZs.
+		clusterAZSubnets, err := ipam.Split(*clusterCIDR, key.MaximumNumberOfAZsInCluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
+		// Convert collected availability zones into controllercontext types
+		// and allocate AZ level subnets when needed.
 		var ccAZs []controllercontext.ContextStatusTenantClusterAvailabilityZone
-		for _, az := range azs {
+		for az, subnets := range azs {
 			ccAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
 				Name: az,
 			}
 
-			subnet, exists := azMap[az]
-			if exists {
-				ccAZ.PublicSubnet = subnet.public
-				ccAZ.PrivateSubnet = subnet.private
+			// Check if subnets of given availability zone already contain
+			// value?
+			if !subnets.areEmpty() {
+				ccAZ.PublicSubnet = subnets.public
+				ccAZ.PrivateSubnet = subnets.private
 
-				parentNet := ipam.CalculateParent(subnet.public)
+				// Calculate the parent network from public subnet (always
+				// present for functional AZ).
+				parentNet := ipam.CalculateParent(subnets.public)
 
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
+
+				// Filter out already allocated AZ subnet from available AZ
+				// size networks.
 				clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
 					return !reflect.DeepEqual(n, parentNet)
 				})
 			} else {
 				if len(clusterAZSubnets) > 0 {
-
+					// Pick first available AZ subnet and split it to public
+					// and private.
 					subnets, err := ipam.Split(clusterAZSubnets[0], 2)
 					if err != nil {
 						return microerror.Mask(err)
 					}
 
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have subnet allocation - allocated: %q", az, clusterAZSubnets[0].String()))
+
+					// Update available AZ subnets.
 					clusterAZSubnets = clusterAZSubnets[1:]
+
+					// Persist allocated & split subnets.
 					ccAZ.PublicSubnet = subnets[0]
 					ccAZ.PrivateSubnet = subnets[1]
 				} else {
@@ -173,4 +172,48 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
+}
+
+// fromEC2SubnetsToMap extracts availability zones and public / private subnet
+// CIDRs from given EC2 subnet slice and returns respectively structured map or
+// error on invalid data.
+func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
+	azMap := make(map[string]subnetPair)
+
+	for _, s := range ss {
+		if s == nil || s.AvailabilityZone == nil || s.CidrBlock == nil || s.Tags == nil {
+			continue
+		}
+
+		mappedSubnet := azMap[*s.AvailabilityZone]
+
+		_, cidr, err := net.ParseCIDR(*s.CidrBlock)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		var subnetType string
+		for _, t := range s.Tags {
+			if t == nil || t.Key == nil || t.Value == nil {
+				continue
+			}
+
+			if *t.Key == key.TagEC2SubnetType {
+				subnetType = strings.TrimSpace(*t.Value)
+			}
+		}
+
+		switch subnetType {
+		case "public":
+			mappedSubnet.public = *cidr
+		case "private":
+			mappedSubnet.private = *cidr
+		default:
+			return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagEC2SubnetType, subnetType)
+		}
+
+		azMap[*s.AvailabilityZone] = mappedSubnet
+	}
+
+	return azMap, nil
 }
