@@ -38,9 +38,11 @@ const (
 
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagCluster      = "giantswarm.io/cluster"
-	TagInstallation = "giantswarm.io/installation"
-	TagOrganization = "giantswarm.io/organization"
+	TagCluster       = "giantswarm.io/cluster"
+	TagEC2SubnetType = "giantswarm.io/subnet-type"
+	TagInstallation  = "giantswarm.io/installation"
+	TagOrganization  = "giantswarm.io/organization"
+	TagTCCP          = "giantswarm.io/tccp"
 )
 
 const (

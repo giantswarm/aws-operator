@@ -531,7 +531,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		awsClientResource,
 		machineDeploymentResource,
-		clusterAZsResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
@@ -539,6 +538,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		vpcCIDRResource,
 		tccpOutputsResource,
 		tccpSubnetResource,
+		clusterAZsResource,
 		asgStatusResource,
 		ipamResource,
 		bridgeZoneResource,
