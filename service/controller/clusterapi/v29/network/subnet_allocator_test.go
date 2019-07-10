@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -125,10 +124,11 @@ func Test_SubnetAllocator_Locking(t *testing.T) {
 		  * Create a channel that is used to signal from thread #1 when it is
 		    inside a lock in Allocate().
 		  * In thread #2 wait for that signal before calling Allocate().
-		  * When thread #1 has sent signal, it sleeps for a little while so that it
-		    guarantees that thread #2 is waiting for mutex.
-		  * Each thread then performs subnet allocation and verifies that allocated
-		    subnet matches the expectation.
+		  * When thread #1 has sent signal to thread #2, it waits return signal
+		    from it that guarantees that thread #2 is inside Allocate() waiting
+		    for mutex.
+		  * Each thread then performs subnet allocation and verifies that
+		    allocated subnet matches the expectation.
 	*/
 
 	fullRange := mustParseCIDR("10.100.0.0/16")
@@ -143,9 +143,14 @@ func Test_SubnetAllocator_Locking(t *testing.T) {
 		reservedNetworks = &slice
 	}
 
-	// signal is the channel that is used from thread #2 to signal that thread
-	// #1 can call Allocate().
-	signal := make(chan struct{})
+	// signalThreadTwoToAllocate is a channel that is used from thread #1 to
+	// signal that thread #2 can call Allocate().
+	signalThreadTwoToAllocate := make(chan struct{})
+
+	// signalThreadOneToContinue is a channel that is used to synchronize
+	// between thread #1 and #2 the moment where thread #1 is inside Allocate()
+	// call and thread #2 has invoked it but not requested for a lock yet.
+	signalThreadOneToContinue := make(chan struct{})
 
 	// wg is a WaitGroup for this test to wait until both threads have
 	// executed.
@@ -159,10 +164,10 @@ func Test_SubnetAllocator_Locking(t *testing.T) {
 		callbacks := Callbacks{
 			Collect: func(_ context.Context) ([]net.IPNet, error) {
 				// Allow second thread to call AllocateNetwork.
-				signal <- struct{}{}
+				signalThreadTwoToAllocate <- struct{}{}
 
-				// Add a bit of delay to let it catch up.
-				time.Sleep(100 * time.Millisecond)
+				// Synchronize with thread #2 that it has invoked Allocate().
+				<-signalThreadOneToContinue
 
 				reservedNetworksMutex.Lock()
 				networks := *reservedNetworks
@@ -229,12 +234,20 @@ func Test_SubnetAllocator_Locking(t *testing.T) {
 		}
 
 		// Wait for signal from first thread before getting into allocation.
-		<-signal
+		<-signalThreadTwoToAllocate
+
+		// Set pre-allocation hook to send signal to thread #1 so that it can
+		// continue execution.
+		origPreAllocateHook := preAllocateHook
+		preAllocateHook = func() { signalThreadOneToContinue <- struct{}{} }
 
 		_, err := svc.Allocate(context.Background(), fullRange, netSize, callbacks)
 		if err != nil {
 			t.Error(err)
 		}
+
+		// Restore pre-allocation hook.
+		preAllocateHook = origPreAllocateHook
 
 		reservedNetworksMutex.Lock()
 		numReservedNetworks := len(*reservedNetworks)

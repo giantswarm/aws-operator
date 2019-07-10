@@ -11,6 +11,10 @@ import (
 	"github.com/giantswarm/micrologger"
 )
 
+// preAllocateHook is a callback function that can be used in unit-test for
+// pre-allocation actions before mutex lock is acquired.
+var preAllocateHook = func() {}
+
 type SubnetAllocatorConfig struct {
 	Logger micrologger.Logger
 }
@@ -36,6 +40,10 @@ func NewSubnetAllocator(config SubnetAllocatorConfig) (*SubnetAllocator, error) 
 }
 
 func (a *SubnetAllocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks Callbacks) (net.IPNet, error) {
+	// function call for pre-allocation hook that is need to write correct
+	// tests. NOP in non-test default setting.
+	preAllocateHook()
+
 	a.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
 	a.mutex.Lock()
 	a.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
