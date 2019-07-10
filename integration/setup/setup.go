@@ -43,10 +43,10 @@ func Setup(m *testing.M, config Config) {
 
 		g.Go(func() error {
 			o := func() error {
-				//err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
-				//if err != nil {
-				//	return microerror.Mask(err)
-				//}
+				err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 
 				return nil
 			}
@@ -89,10 +89,10 @@ func Setup(m *testing.M, config Config) {
 
 		g.Go(func() error {
 			o := func() error {
-				//err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
-				//if err != nil {
-				//	return microerror.Mask(err)
-				//}
+				err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 
 				return nil
 			}
