@@ -20,18 +20,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
-// subnetPair is temporary type for mapping existing subnets from
-// controllercontext to AZs.
-type subnetPair struct {
-	public  net.IPNet
-	private net.IPNet
-}
-
-func (sp subnetPair) areEmpty() bool {
-	return (sp.public.IP == nil && sp.public.Mask == nil) && (sp.private.IP == nil && sp.private.Mask == nil)
-
-}
-
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCluster(obj)
 	if err != nil {
