@@ -99,6 +99,48 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var clusterChecker *ipam.ClusterChecker
+	{
+		c := ipam.ClusterCheckerConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		clusterChecker, err = ipam.NewClusterChecker(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var subnetCollector *ipam.SubnetCollector
+	{
+		c := ipam.SubnetCollectorConfig{
+			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			NetworkRange: config.IPAMNetworkRange,
+		}
+
+		subnetCollector, err = ipam.NewSubnetCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterPersister *ipam.ClusterPersister
+	{
+		c := ipam.ClusterPersisterConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		clusterPersister, err = ipam.NewClusterPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var accountIDResource controller.Resource
 	{
 		c := accountid.Config{
@@ -170,7 +212,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
-			Logger: config.Logger,
+			Checker:   clusterChecker,
+			Collector: subnetCollector,
+			Logger:    config.Logger,
+			Persister: clusterPersister,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
 			NetworkRange:            config.IPAMNetworkRange,
