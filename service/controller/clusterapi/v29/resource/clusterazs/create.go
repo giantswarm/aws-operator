@@ -91,7 +91,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var allocatedNetworks []net.IPNet
 	{
-		// Collect non-empty subnets from AZ-subnet -pairs.
+		// Collect non-empty subnets from AZ-subnet -pairs that belong to this
+		// specific TCCP.
 		for _, snetPair := range azs {
 			if !reflect.DeepEqual(net.IPNet{}, snetPair.public) {
 				allocatedNetworks = append(allocatedNetworks, snetPair.public)
@@ -110,7 +111,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		// Split TCCP network between maximum number of AZs.
+		// Split TCCP network between maximum number of AZs. This is because of
+		// current limitation in IPAM design and AWS TCCP infrastructure
+		// design.
 		clusterAZSubnets, err := ipam.Split(*clusterCIDR, key.MaximumNumberOfAZsInCluster)
 		if err != nil {
 			return microerror.Mask(err)
