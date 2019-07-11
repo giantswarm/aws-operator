@@ -25,6 +25,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	if !proceed {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "subnet already allocated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
 	}
 
