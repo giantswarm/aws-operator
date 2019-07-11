@@ -15,7 +15,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
@@ -100,18 +99,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var subnetAllocator network.Allocator
-	{
-		c := network.SubnetAllocatorConfig{
-			Logger: config.Logger,
-		}
-
-		subnetAllocator, err = network.NewSubnetAllocator(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var accountIDResource controller.Resource
 	{
 		c := accountid.Config{
@@ -183,13 +170,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
-			CMAClient:        config.CMAClient,
-			G8sClient:        config.G8sClient,
-			Logger:           config.Logger,
-			NetworkAllocator: subnetAllocator,
+			Logger: config.Logger,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
-			AvailabilityZones:       config.GuestAvailabilityZones,
 			NetworkRange:            config.IPAMNetworkRange,
 			PrivateSubnetMaskBits:   config.GuestPrivateSubnetMaskBits,
 			PublicSubnetMaskBits:    config.GuestPublicSubnetMaskBits,
