@@ -12,9 +12,7 @@ import (
 
 func Test_SubnetAllocator(t *testing.T) {
 	testCases := []struct {
-		name         string
-		object       interface{}
-		errorMatcher func(error) bool
+		name string
 
 		checker   Checker
 		collector Collector
@@ -26,9 +24,7 @@ func Test_SubnetAllocator(t *testing.T) {
 		publicSubnetMaskBits    int
 	}{
 		{
-			name:         "case 0 allocate first subnet",
-			object:       &v1alpha1.Cluster{},
-			errorMatcher: nil,
+			name: "case 0 allocate first subnet",
 
 			checker:   NewTestChecker(true),
 			collector: NewTestCollector([]net.IPNet{}),
@@ -40,9 +36,7 @@ func Test_SubnetAllocator(t *testing.T) {
 			publicSubnetMaskBits:    25,
 		},
 		{
-			name:         "case 1 allocate fourth subnet",
-			object:       &v1alpha1.Cluster{},
-			errorMatcher: nil,
+			name: "case 1 allocate fourth subnet",
 
 			checker: NewTestChecker(true),
 			collector: NewTestCollector([]net.IPNet{
@@ -83,17 +77,9 @@ func Test_SubnetAllocator(t *testing.T) {
 				}
 			}
 
-			err = newResource.EnsureCreated(context.Background(), tc.object)
-
-			switch {
-			case err == nil && tc.errorMatcher == nil:
-				// correct; carry on
-			case err != nil && tc.errorMatcher == nil:
-				t.Fatalf("error == %#v, want nil", err)
-			case err == nil && tc.errorMatcher != nil:
-				t.Fatalf("error == nil, want non-nil")
-			case !tc.errorMatcher(err):
-				t.Fatalf("error == %#v, want matching", err)
+			err = newResource.EnsureCreated(context.Background(), &v1alpha1.Cluster{})
+			if err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
