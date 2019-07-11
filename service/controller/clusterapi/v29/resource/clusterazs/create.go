@@ -188,22 +188,33 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 			continue
 		}
 
-		mappedSubnet := azMap[*s.AvailabilityZone]
-
-		_, cidr, err := net.ParseCIDR(*s.CidrBlock)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
 		var subnetType string
+		var subnetBelongsToTCCP bool
 		for _, t := range s.Tags {
 			if t == nil || t.Key == nil || t.Value == nil {
 				continue
 			}
 
-			if *t.Key == key.TagEC2SubnetType {
+			switch *t.Key {
+			case key.TagTCCP:
+				subnetBelongsToTCCP = true
+			case key.TagSubnetType:
 				subnetType = strings.TrimSpace(*t.Value)
 			}
+		}
+
+		if !subnetBelongsToTCCP {
+			// VPC contains many subnets for various purposes in addition to
+			// TCCP, mainly for node pools. We are only interested in TCCP
+			// subnets in here.
+			continue
+		}
+
+		mappedSubnet := azMap[*s.AvailabilityZone]
+
+		_, cidr, err := net.ParseCIDR(*s.CidrBlock)
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
 
 		switch subnetType {
@@ -212,7 +223,7 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 		case "private":
 			mappedSubnet.private = *cidr
 		default:
-			return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagEC2SubnetType, subnetType)
+			return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagSubnetType, subnetType)
 		}
 
 		azMap[*s.AvailabilityZone] = mappedSubnet

@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
@@ -80,12 +79,6 @@ func (r *Resource) addSubnetsToContext(ctx context.Context) error {
 					Name: aws.String("vpc-id"),
 					Values: []*string{
 						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
-					},
-				},
-				{
-					Name: aws.String(key.TagTCCP),
-					Values: []*string{
-						aws.String("true"),
 					},
 				},
 			},
