@@ -26,6 +26,13 @@ type Allocator interface {
 	Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks Callbacks) (net.IPNet, error)
 }
 
+// Checker determines whether a subnet has to be allocated. This
+// decision is being made based on the status of the Kubernetes runtime object
+// defined by namespace and name.
+type Checker interface {
+	Check(ctx context.Context, namespace string, name string) (bool, error)
+}
+
 // Collector implementation must return all networks that are allocated on any
 // given moment. Failing to do that will result in overlapping allocations.
 type Collector func(context.Context) ([]net.IPNet, error)
