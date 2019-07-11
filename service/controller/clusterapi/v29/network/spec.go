@@ -26,7 +26,7 @@ type Allocator interface {
 	Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks Callbacks) (net.IPNet, error)
 }
 
-// Checker implementation determines whether a subnet has to be allocated. This
+// Checker determines whether a subnet has to be allocated. This
 // decision is being made based on the status of the Kubernetes runtime object
 // defined by namespace and name.
 type Checker interface {
