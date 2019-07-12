@@ -310,11 +310,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:69bc84de277fc071e63aa4178c05ec7ad596a8248596580f2bfebd94be983123"
+  digest = "1:d6d2cce96edd2e02c4dbb893587398d672fd564bf07269fb9263e86a4d6f68f8"
   name = "github.com/giantswarm/ipam"
   packages = ["."]
   pruneopts = "UT"
-  revision = "08246d06e03997122b3a54f73c0f0d8738c588aa"
+  revision = "ce634ba25306b7a1e7f590d1a672c9811d90d6f2"
 
 [[projects]]
   branch = "master"
