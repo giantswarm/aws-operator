@@ -191,22 +191,6 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, cr cluste
 	return azs, nil
 }
 
-func mapAZSubnetsToControllerContextTypes(azs map[string]subnetPair) []controllercontext.ContextStatusTenantClusterAvailabilityZone {
-	var results []controllercontext.ContextStatusTenantClusterAvailabilityZone
-
-	for az, subnet := range azs {
-		ccAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
-			Name:          az,
-			PublicSubnet:  subnet.Public,
-			PrivateSubnet: subnet.Private,
-		}
-
-		results = append(results, ccAZ)
-	}
-
-	return results
-}
-
 // fromEC2SubnetsToMap extracts availability zones and public / private subnet
 // CIDRs from given EC2 subnet slice and returns respectively structured map or
 // error on invalid data.
@@ -266,4 +250,20 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 	}
 
 	return azMap, nil
+}
+
+func mapAZSubnetsToControllerContextTypes(azs map[string]subnetPair) []controllercontext.ContextStatusTenantClusterAvailabilityZone {
+	var results []controllercontext.ContextStatusTenantClusterAvailabilityZone
+
+	for az, subnet := range azs {
+		ccAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
+			Name:          az,
+			PublicSubnet:  subnet.Public,
+			PrivateSubnet: subnet.Private,
+		}
+
+		results = append(results, ccAZ)
+	}
+
+	return results
 }
