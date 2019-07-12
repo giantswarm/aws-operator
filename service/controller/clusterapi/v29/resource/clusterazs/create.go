@@ -116,6 +116,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", azSubnetsToString(azs))
 
+		// TODO(marcel):
+		// Also maintain cc.Spec.TenantCluster.AvailabilityZones here to allow
+		// detection.ShouldUpdate() work. See also TODO in
+		// ensureAZsAreAssignedWithSubnet() below.
 		cc.Status.TenantCluster.AvailabilityZones = ccAZs
 	}
 
@@ -156,6 +160,9 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 			parentNet := ipam.CalculateParent(subnets.Public)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
+
+			// TODO(marcel): Append AZ here to separate map to gather existing
+			// AWS status vs. Spec below for desired state.
 
 			// Filter out already allocated AZ subnet from available AZ
 			// size networks.

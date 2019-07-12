@@ -14,6 +14,9 @@ type Context struct {
 	// Client holds the client implementations used for several tenant cluster
 	// specific actions.
 	Client ContextClient
+
+	// TODO(marcel): Add Spec here with tenant cluster AZ spec.
+
 	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as
 	// a pointer within context.Context.
