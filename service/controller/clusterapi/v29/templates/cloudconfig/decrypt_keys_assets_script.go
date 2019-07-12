@@ -54,7 +54,7 @@ rkt run \
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
       /usr/bin/aws \
-        --region {{.AWS.Region}} kms decrypt \
+        --region {{.AWSRegion}} kms decrypt \
         --ciphertext-blob fileb://$encKey \
         --output text \
         --query Plaintext \
@@ -72,6 +72,8 @@ main() {
 {{ else }}
   kms_keys_assets_decrypt
 {{ end }}
+
+chown -R etcd:etcd /etc/kubernetes/ssl/etcd
 }
 
 main
