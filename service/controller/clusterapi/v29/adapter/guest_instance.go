@@ -64,10 +64,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		zones, err := key.StatusAvailabilityZones(config.MachineDeployment)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		zones := config.TenantClusterAvailabilityZones
 
 		sort.Slice(zones, func(i, j int) bool {
 			return zones[i].Name < zones[j].Name

@@ -29,10 +29,7 @@ type GuestSubnetsAdapter struct {
 }
 
 func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
-	zones, err := key.StatusAvailabilityZones(cfg.MachineDeployment)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	zones := cfg.TenantClusterAvailabilityZones
 
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
@@ -49,7 +46,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := Subnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Public.CIDR,
+			CIDR:                az.PublicSubnet.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
@@ -64,7 +61,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		snetName = key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet = Subnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Private.CIDR,
+			CIDR:                az.PrivateSubnet.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{

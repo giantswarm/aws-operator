@@ -274,15 +274,15 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, m
 func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSubnets, error) {
 	var subnets *template.ParamsMainSubnets
 
-	azs, err := key.StatusAvailabilityZones(md)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	for _, a := range azs {
+	for _, a := range cc.Status.TenantCluster.AvailabilityZones {
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
-			CIDR:             a.Subnet.Public.CIDR, // TODO we need to figure out if this is correct
+			CIDR:             a.PublicSubnet.String(), // TODO we need to figure out if this is correct
 			NameSuffix:       strings.ToUpper(a.Name),
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
 				NameSuffix: strings.ToUpper(a.Name),
