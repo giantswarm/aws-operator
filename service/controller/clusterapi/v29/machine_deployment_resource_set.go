@@ -139,8 +139,8 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	resources := []controller.Resource{
 		awsClientResource,
 		encryptionResource,
-		ipamResource,
 		machineDeploymentSubnetResource,
+		ipamResource,
 	}
 
 	{
