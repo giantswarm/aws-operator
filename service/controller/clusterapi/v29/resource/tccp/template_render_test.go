@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"net"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -22,7 +23,6 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
@@ -161,7 +161,23 @@ func defaultControllerContext() controllercontext.Context {
 				},
 			},
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
-				AvailabilityZones:     []string{"eu-central-1a", "eu-central-1b", "eu-central-1c"},
+				AvailabilityZones: []controllercontext.ContextStatusTenantClusterAvailabilityZone{
+					{
+						Name:          "eu-central-1a",
+						PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
+					},
+					{
+						Name:          "eu-central-1b",
+						PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
+					},
+					{
+						Name:          "eu-central-1c",
+						PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
+					},
+				},
 				AWSAccountID:          "tenant-account",
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
@@ -177,7 +193,6 @@ func defaultControllerContext() controllercontext.Context {
 				VersionBundleVersion: "6.3.0",
 				WorkerInstance: controllercontext.ContextStatusTenantClusterWorkerInstance{
 					DockerVolumeSizeGB: "100",
-					CloudConfigVersion: key.CloudConfigVersion,
 					Image:              "ami-0eb0d9bb7ad1bd1e9",
 					Type:               "m5.xlarge",
 				},
@@ -223,6 +238,14 @@ func defaultMachineDeployment() v1alpha1.MachineDeployment {
 	}
 
 	return withG8sMachineDeploymentSpec(cr, g8sSpec)
+}
+
+func mustParseCIDR(s string) net.IPNet {
+	_, n, err := net.ParseCIDR(s)
+	if err != nil {
+		panic(err)
+	}
+	return *n
 }
 
 // normalizeToFileName converts all non-digit, non-letter runes in input string

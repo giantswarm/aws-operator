@@ -27,6 +27,9 @@ const AutoScalingGroup = `
         - Key: Name
           Value: {{ $v.ClusterID }}-{{ $v.ASGType }}
           PropagateAtLaunch: true
+        - Key: giantswarm.io/tccp
+          Value: true
+          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false

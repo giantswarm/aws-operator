@@ -65,8 +65,8 @@ func (a *GuestAutoScalingGroupAdapter) Adapt(cfg Config) error {
 	a.RollingUpdatePauseTime = rollingUpdatePauseTime
 
 	for _, az := range cfg.TenantClusterAvailabilityZones {
-		a.PrivateSubnets = append(a.PrivateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az)))
-		a.WorkerAZs = append(a.WorkerAZs, az)
+		a.PrivateSubnets = append(a.PrivateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
+		a.WorkerAZs = append(a.WorkerAZs, az.Name)
 	}
 
 	return nil

@@ -14,6 +14,8 @@ const VPC = `
         Value: {{ $v.ClusterID }}
       - Key: Installation
         Value: {{ $v.InstallationName }}
+      - Key: giantswarm.io/tccp
+        Value: true
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
@@ -24,6 +26,8 @@ const VPC = `
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}
+        - Key: giantswarm.io/tccp
+          Value: true
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:

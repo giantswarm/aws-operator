@@ -13,7 +13,6 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/network"
 )
 
 type ClusterResourceSetConfig struct {
@@ -24,7 +23,6 @@ type ClusterResourceSetConfig struct {
 	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface
 	Logger                 micrologger.Logger
-	NetworkAllocator       network.Allocator
 	RandomKeysSearcher     randomkeys.Interface
 
 	AccessLogsExpiration       int

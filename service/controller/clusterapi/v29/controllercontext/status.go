@@ -1,6 +1,8 @@
 package controllercontext
 
 import (
+	"net"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
@@ -38,7 +40,7 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	AvailabilityZones     []string
+	AvailabilityZones     []ContextStatusTenantClusterAvailabilityZone
 	AWSAccountID          string
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
@@ -46,6 +48,12 @@ type ContextStatusTenantCluster struct {
 	TCCP                  ContextStatusTenantClusterTCCP
 	VersionBundleVersion  string
 	WorkerInstance        ContextStatusTenantClusterWorkerInstance
+}
+
+type ContextStatusTenantClusterAvailabilityZone struct {
+	Name          string
+	PrivateSubnet net.IPNet
+	PublicSubnet  net.IPNet
 }
 
 type ContextStatusTenantClusterEncryption struct {
@@ -57,7 +65,6 @@ type ContextStatusTenantClusterMasterInstance struct {
 	Image                    string
 	ResourceName             string
 	Type                     string
-	CloudConfigVersion       string
 }
 
 type ContextStatusTenantClusterTCCP struct {
@@ -76,7 +83,6 @@ type ContextStatusTenantClusterTCCPVPC struct {
 
 type ContextStatusTenantClusterWorkerInstance struct {
 	DockerVolumeSizeGB string
-	CloudConfigVersion string
 	Image              string
 	Type               string
 }

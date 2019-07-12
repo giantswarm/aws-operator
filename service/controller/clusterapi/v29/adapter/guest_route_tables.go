@@ -25,9 +25,9 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 
 	for _, az := range cfg.TenantClusterAvailabilityZones {
 		rtName := RouteTableName{
-			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az)),
-			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, az),
-			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az)),
+			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, az.Name),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
 		}
 		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)
 	}

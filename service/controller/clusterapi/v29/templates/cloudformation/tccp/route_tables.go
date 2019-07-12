@@ -10,6 +10,8 @@ const RouteTables = `
       Tags:
       - Key: Name
         Value: {{ $v.PublicRouteTableName.TagName }}
+      - Key: giantswarm.io/tccp
+        Value: true
 
   {{- range $v.PrivateRouteTableNames }}
   {{ .ResourceName }}:
@@ -19,6 +21,8 @@ const RouteTables = `
       Tags:
       - Key: Name
         Value: {{ .TagName }}
+      - Key: giantswarm.io/tccp
+        Value: true
 
   {{ .VPCPeeringRouteName }}:
     Type: AWS::EC2::Route

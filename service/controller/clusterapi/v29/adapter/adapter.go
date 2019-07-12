@@ -29,6 +29,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 )
 
 type Config struct {
@@ -48,7 +50,7 @@ type Config struct {
 	StackState                      StackState
 	TenantClusterAccountID          string
 	TenantClusterKMSKeyARN          string
-	TenantClusterAvailabilityZones  []string
+	TenantClusterAvailabilityZones  []controllercontext.ContextStatusTenantClusterAvailabilityZone
 }
 
 type Adapter struct {

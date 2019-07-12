@@ -21,16 +21,14 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/network"
 )
 
 type ClusterConfig struct {
-	CMAClient        clientset.Interface
-	G8sClient        versioned.Interface
-	K8sClient        kubernetes.Interface
-	K8sExtClient     apiextensionsclient.Interface
-	Logger           micrologger.Logger
-	NetworkAllocator network.Allocator
+	CMAClient    clientset.Interface
+	G8sClient    versioned.Interface
+	K8sClient    kubernetes.Interface
+	K8sExtClient apiextensionsclient.Interface
+	Logger       micrologger.Logger
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -207,7 +205,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			HostAWSConfig:          config.HostAWSConfig,
 			K8sClient:              config.K8sClient,
 			Logger:                 config.Logger,
-			NetworkAllocator:       config.NetworkAllocator,
 			RandomKeysSearcher:     randomKeysSearcher,
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,

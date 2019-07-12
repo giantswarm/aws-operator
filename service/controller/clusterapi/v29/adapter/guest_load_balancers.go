@@ -92,8 +92,8 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
 	for _, az := range clusterAZs {
-		a.PublicSubnets = append(a.PublicSubnets, key.SanitizeCFResourceName(key.PublicSubnetName(az)))
-		a.PrivateSubnets = append(a.PrivateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az)))
+		a.PublicSubnets = append(a.PublicSubnets, key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)))
+		a.PrivateSubnets = append(a.PrivateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
 	return nil

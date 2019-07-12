@@ -24,7 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/controller/legacy"
-	"github.com/giantswarm/aws-operator/service/network"
+	legacynetwork "github.com/giantswarm/aws-operator/service/network"
 )
 
 // Config represents the configuration used to create a new service.
@@ -121,31 +121,35 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var networkAllocator network.Allocator
+	var legacyNetworkAllocator legacynetwork.Allocator
 	{
-		c := network.Config{
+		c := legacynetwork.Config{
 			Logger: config.Logger,
 		}
-		networkAllocator, err = network.New(c)
+		legacyNetworkAllocator, err = legacynetwork.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var clusterapiClusterController *clusterapi.Cluster
+	var ipamNetworkRange net.IPNet
 	{
-		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
+		_, ipnet, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		ipamNetworkRange = *ipnet
+	}
+
+	var clusterapiClusterController *clusterapi.Cluster
+	{
 
 		c := clusterapi.ClusterConfig{
-			CMAClient:        cmaClient,
-			G8sClient:        g8sClient,
-			K8sClient:        k8sClient,
-			K8sExtClient:     k8sExtClient,
-			Logger:           config.Logger,
-			NetworkAllocator: networkAllocator,
+			CMAClient:    cmaClient,
+			G8sClient:    g8sClient,
+			K8sClient:    k8sClient,
+			K8sExtClient: k8sExtClient,
+			Logger:       config.Logger,
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
@@ -168,7 +172,7 @@ func New(config Config) (*Service, error) {
 			IgnitionPath:               config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
-			IPAMNetworkRange:           *ipamNetworkRange,
+			IPAMNetworkRange:           ipamNetworkRange,
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			OIDC: clusterapi.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
@@ -222,12 +226,16 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			EncrypterBackend: config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
-			HostAWSConfig:    awsConfig,
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
-			ProjectName:      config.ProjectName,
-			Route53Enabled:   config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			VaultAddress:     config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
+			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
+			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
+			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
+			HostAWSConfig:              awsConfig,
+			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
+			IPAMNetworkRange:           ipamNetworkRange,
+			ProjectName:                config.ProjectName,
+			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
@@ -249,7 +257,7 @@ func New(config Config) (*Service, error) {
 			K8sClient:        k8sClient,
 			K8sExtClient:     k8sExtClient,
 			Logger:           config.Logger,
-			NetworkAllocator: networkAllocator,
+			NetworkAllocator: legacyNetworkAllocator,
 
 			APIWhitelist: legacy.FrameworkConfigAPIWhitelistConfig{
 				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Enabled),
