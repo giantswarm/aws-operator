@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 )
 
@@ -46,6 +47,10 @@ func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namesp
 
 	var providerStatus v1alpha1.AWSClusterStatus
 	{
+		if cr.Status.ProviderStatus == nil {
+			cr.Status.ProviderStatus = &runtime.RawExtension{}
+		}
+
 		err := json.Unmarshal(cr.Status.ProviderStatus.Raw, &providerStatus)
 		if err != nil {
 			return microerror.Mask(err)
