@@ -132,12 +132,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var clusterapiClusterController *clusterapi.Cluster
+	var ipamNetworkRange net.IPNet
 	{
-		_, ipamNetworkRange, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
+		_, ipnet, err := net.ParseCIDR(config.Viper.GetString(config.Flag.Service.Installation.Guest.IPAM.Network.CIDR))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		ipamNetworkRange = *ipnet
+	}
+
+	var clusterapiClusterController *clusterapi.Cluster
+	{
 
 		c := clusterapi.ClusterConfig{
 			CMAClient:    cmaClient,
@@ -167,7 +172,7 @@ func New(config Config) (*Service, error) {
 			IgnitionPath:               config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
-			IPAMNetworkRange:           *ipamNetworkRange,
+			IPAMNetworkRange:           ipamNetworkRange,
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			OIDC: clusterapi.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
@@ -221,12 +226,16 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			EncrypterBackend: config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
-			HostAWSConfig:    awsConfig,
-			InstallationName: config.Viper.GetString(config.Flag.Service.Installation.Name),
-			ProjectName:      config.ProjectName,
-			Route53Enabled:   config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			VaultAddress:     config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
+			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
+			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
+			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
+			HostAWSConfig:              awsConfig,
+			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
+			IPAMNetworkRange:           ipamNetworkRange,
+			ProjectName:                config.ProjectName,
+			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
