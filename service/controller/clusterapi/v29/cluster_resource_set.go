@@ -15,7 +15,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/network"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
@@ -100,13 +99,43 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var subnetAllocator network.Allocator
+	var clusterChecker *ipam.ClusterChecker
 	{
-		c := network.SubnetAllocatorConfig{
-			Logger: config.Logger,
+		c := ipam.ClusterCheckerConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
 		}
 
-		subnetAllocator, err = network.NewSubnetAllocator(c)
+		clusterChecker, err = ipam.NewClusterChecker(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var subnetCollector *ipam.SubnetCollector
+	{
+		c := ipam.SubnetCollectorConfig{
+			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			NetworkRange: config.IPAMNetworkRange,
+		}
+
+		subnetCollector, err = ipam.NewSubnetCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterPersister *ipam.ClusterPersister
+	{
+		c := ipam.ClusterPersisterConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		clusterPersister, err = ipam.NewClusterPersister(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -183,13 +212,12 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
-			CMAClient:        config.CMAClient,
-			G8sClient:        config.G8sClient,
-			Logger:           config.Logger,
-			NetworkAllocator: subnetAllocator,
+			Checker:   clusterChecker,
+			Collector: subnetCollector,
+			Logger:    config.Logger,
+			Persister: clusterPersister,
 
 			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
-			AvailabilityZones:       config.GuestAvailabilityZones,
 			NetworkRange:            config.IPAMNetworkRange,
 			PrivateSubnetMaskBits:   config.GuestPrivateSubnetMaskBits,
 			PublicSubnetMaskBits:    config.GuestPublicSubnetMaskBits,
@@ -531,7 +559,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	resources := []controller.Resource{
 		awsClientResource,
 		machineDeploymentResource,
-		clusterAZsResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
@@ -541,6 +568,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpSubnetResource,
 		asgStatusResource,
 		ipamResource,
+		clusterAZsResource,
 		bridgeZoneResource,
 		encryptionResource,
 		s3BucketResource,
