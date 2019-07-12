@@ -114,7 +114,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		ccAZs := mapAZSubnetsToControllerContextTypes(azs)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", ccAZs))
+		r.logger.LogCtx(ctx, "level", "debug", "message", azSubnetsToString(azs))
 
 		cc.Status.TenantCluster.AvailabilityZones = ccAZs
 	}
@@ -273,4 +273,20 @@ func mapAZSubnetsToControllerContextTypes(azs map[string]subnetPair) []controlle
 	}
 
 	return results
+}
+
+func azSubnetsToString(azs map[string]subnetPair) string {
+	var result strings.Builder
+	result.WriteString("availability zone subnet allocations: {")
+	for az, subnet := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, subnet.Public.String(), subnet.Private.String()))
+	}
+
+	if len(azs) > 0 {
+		result.WriteString("\n}")
+	} else {
+		result.WriteString("}")
+	}
+
+	return result.String()
 }
