@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -82,87 +83,128 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// Collect non-empty subnets from AZ-subnet -pairs that belong to this
 		// specific TCCP.
 		for _, snetPair := range azs {
-			if !reflect.DeepEqual(net.IPNet{}, snetPair.public) {
-				allocatedNetworks = append(allocatedNetworks, snetPair.public)
+			if !reflect.DeepEqual(net.IPNet{}, snetPair.Public) {
+				allocatedNetworks = append(allocatedNetworks, snetPair.Public)
 			}
 
-			if !reflect.DeepEqual(net.IPNet{}, snetPair.private) {
-				allocatedNetworks = append(allocatedNetworks, snetPair.private)
+			if !reflect.DeepEqual(net.IPNet{}, snetPair.Private) {
+				allocatedNetworks = append(allocatedNetworks, snetPair.Private)
 			}
 		}
 	}
 
 	{
-		// Parse TCCP network CIDR.
-		_, clusterCIDR, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
+		azs, err = r.ensureAZsAreAssignedWithSubnet(ctx, cr, azs)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		// Split TCCP network between maximum number of AZs. This is because of
-		// current limitation in IPAM design and AWS TCCP infrastructure
-		// design.
-		clusterAZSubnets, err := ipam.Split(*clusterCIDR, key.MaximumNumberOfAZsInCluster)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		ccAZs := mapAZSubnetsToControllerContextTypes(azs)
 
-		// Convert collected availability zones into controllercontext types
-		// and allocate AZ level subnets when needed.
-		var ccAZs []controllercontext.ContextStatusTenantClusterAvailabilityZone
-		for az, subnets := range azs {
-			ccAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
-				Name: az,
-			}
-
-			// Check if subnets of given availability zone already contain
-			// value?
-			if !subnets.areEmpty() {
-				ccAZ.PublicSubnet = subnets.public
-				ccAZ.PrivateSubnet = subnets.private
-
-				// Calculate the parent network from public subnet (always
-				// present for functional AZ).
-				parentNet := ipam.CalculateParent(subnets.public)
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
-
-				// Filter out already allocated AZ subnet from available AZ
-				// size networks.
-				clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
-					return !reflect.DeepEqual(n, parentNet)
-				})
-			} else {
-				if len(clusterAZSubnets) > 0 {
-					// Pick first available AZ subnet and split it to public
-					// and private.
-					subnets, err := ipam.Split(clusterAZSubnets[0], 2)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have subnet allocation - allocated: %q", az, clusterAZSubnets[0].String()))
-
-					// Update available AZ subnets.
-					clusterAZSubnets = clusterAZSubnets[1:]
-
-					// Persist allocated & split subnets.
-					ccAZ.PublicSubnet = subnets[0]
-					ccAZ.PrivateSubnet = subnets[1]
-				} else {
-					return microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
-				}
-			}
-
-			ccAZs = append(ccAZs, ccAZ)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", azs))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", ccAZs))
 
 		cc.Status.TenantCluster.AvailabilityZones = ccAZs
 	}
 
 	return nil
+}
+
+// ensureAZsAreAssignedWithSubnet iterates over AZ-subnetPair map, removes
+// subnets that are already in use from available subnets' list and then
+// assigns one to AZs that don't have subnet assigned yet.
+func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, cr clusterv1alpha1.Cluster, azs map[string]subnetPair) (map[string]subnetPair, error) {
+	// Parse TCCP network CIDR.
+	_, clusterCIDR, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	// Split TCCP network between maximum number of AZs. This is because of
+	// current limitation in IPAM design and AWS TCCP infrastructure
+	// design.
+	clusterAZSubnets, err := ipam.Split(*clusterCIDR, key.MaximumNumberOfAZsInCluster)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var azNames []string
+	{
+		for az, _ := range azs {
+			azNames = append(azNames, az)
+		}
+
+		sort.Strings(azNames)
+	}
+
+	// Remove already allocated networks from clusterAZSubnets before assigning
+	// remaining subnets to AZs without themout them.
+	for _, az := range azNames {
+		subnets := azs[az]
+
+		// Check if subnets of given availability zone already contain
+		// value?
+		if !subnets.areEmpty() {
+			// Calculate the parent network from public subnet (always
+			// present for functional AZ).
+			parentNet := ipam.CalculateParent(subnets.Public)
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
+
+			// Filter out already allocated AZ subnet from available AZ
+			// size networks.
+			clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
+				return !reflect.DeepEqual(n, parentNet)
+			})
+		}
+	}
+
+	// Assign subnet to AZs that don't it yet.
+	for _, az := range azNames {
+		subnets := azs[az]
+
+		// Only proceed with AZs that don't have subnet allocated yet.
+		if subnets.areEmpty() {
+			if len(clusterAZSubnets) > 0 {
+				// Pick first available AZ subnet and split it to public
+				// and private.
+				ss, err := ipam.Split(clusterAZSubnets[0], 2)
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have subnet allocation - allocated: %q", az, clusterAZSubnets[0].String()))
+
+				// Update available AZ subnets.
+				clusterAZSubnets = clusterAZSubnets[1:]
+
+				subnets.Public = ss[0]
+				subnets.Private = ss[1]
+				azs[az] = subnets
+			} else {
+				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
+			}
+		}
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", azs))
+
+	return azs, nil
+}
+
+func mapAZSubnetsToControllerContextTypes(azs map[string]subnetPair) []controllercontext.ContextStatusTenantClusterAvailabilityZone {
+	var results []controllercontext.ContextStatusTenantClusterAvailabilityZone
+
+	for az, subnet := range azs {
+		ccAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
+			Name:          az,
+			PublicSubnet:  subnet.Public,
+			PrivateSubnet: subnet.Private,
+		}
+
+		results = append(results, ccAZ)
+	}
+
+	return results
 }
 
 // fromEC2SubnetsToMap extracts availability zones and public / private subnet
@@ -173,13 +215,19 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 
 	for _, s := range ss {
 		if s == nil || s.AvailabilityZone == nil || s.CidrBlock == nil || s.Tags == nil {
-			continue
+			return nil, microerror.Maskf(executionFailedError, "invalid subnet entry in controllercontext.Status.TenantCluster.TCCP.Subnets: %#v", s)
 		}
 
 		var subnetType string
 		var subnetBelongsToTCCP bool
 		for _, t := range s.Tags {
-			if t == nil || t.Key == nil || t.Value == nil {
+			if t == nil || t.Key == nil {
+				return nil, microerror.Maskf(executionFailedError, "invalid tag in ec2.Subnet: %#v", s)
+			}
+
+			if t.Value == nil {
+				// It's ok that tag doesn't have value. It's just not the one
+				// we care about here.
 				continue
 			}
 
@@ -207,9 +255,9 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 
 		switch subnetType {
 		case "public":
-			mappedSubnet.public = *cidr
+			mappedSubnet.Public = *cidr
 		case "private":
-			mappedSubnet.private = *cidr
+			mappedSubnet.Private = *cidr
 		default:
 			return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagSubnetType, subnetType)
 		}

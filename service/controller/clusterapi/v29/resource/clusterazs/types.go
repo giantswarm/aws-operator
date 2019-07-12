@@ -5,10 +5,12 @@ import "net"
 // subnetPair is temporary type for mapping existing subnets from
 // controllercontext to AZs.
 type subnetPair struct {
-	public  net.IPNet
-	private net.IPNet
+	// These members are exported so that go-cmp can make a diff for unit test
+	// results.
+	Public  net.IPNet
+	Private net.IPNet
 }
 
 func (sp subnetPair) areEmpty() bool {
-	return (sp.public.IP == nil && sp.public.Mask == nil) && (sp.private.IP == nil && sp.private.Mask == nil)
+	return (sp.Public.IP == nil && sp.Public.Mask == nil) && (sp.Private.IP == nil && sp.Private.Mask == nil)
 }
