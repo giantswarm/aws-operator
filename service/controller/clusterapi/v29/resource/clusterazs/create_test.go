@@ -2,19 +2,15 @@ package clusterazs
 
 import (
 	"context"
-	"encoding/json"
 	"net"
 	"strconv"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
@@ -24,14 +20,14 @@ import (
 func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 	testCases := []struct {
 		name         string
-		cr           v1alpha1.Cluster
+		tccpSubnet   net.IPNet
 		inputAZs     map[string]subnetPair
 		expectedAZs  map[string]subnetPair
 		errorMatcher func(error) bool
 	}{
 		{
-			name: "case 0: three AZs without subnets",
-			cr:   clusterCRWithSubnet("10.100.8.0/24"),
+			name:       "case 0: three AZs without subnets",
+			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{},
 				"eu-central-1b": subnetPair{},
@@ -54,8 +50,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			errorMatcher: nil,
 		},
 		{
-			name: "case 1: three AZs, one without subnets",
-			cr:   clusterCRWithSubnet("10.100.8.0/24"),
+			name:       "case 1: three AZs, one without subnets",
+			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
 					Public:  mustParseCIDR("10.100.8.0/27"),
@@ -84,8 +80,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			errorMatcher: nil,
 		},
 		{
-			name: "case 2: three AZs, two without subnets",
-			cr:   clusterCRWithSubnet("10.100.8.0/24"),
+			name:       "case 2: three AZs, two without subnets",
+			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{},
 				"eu-central-1b": subnetPair{},
@@ -111,8 +107,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			errorMatcher: nil,
 		},
 		{
-			name: "case 3: four AZs, one without subnets",
-			cr:   clusterCRWithSubnet("10.100.8.0/24"),
+			name:       "case 3: four AZs, one without subnets",
+			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
 					Public:  mustParseCIDR("10.100.8.0/27"),
@@ -149,8 +145,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			errorMatcher: nil,
 		},
 		{
-			name: "case 4: five AZs, one without subnets",
-			cr:   clusterCRWithSubnet("10.100.8.0/24"),
+			name:       "case 4: five AZs, one without subnets",
+			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
 					Public:  mustParseCIDR("10.100.8.0/27"),
@@ -193,7 +189,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			ctx := controllercontext.NewContext(context.Background(), controllercontext.Context{})
-			azs, err := r.ensureAZsAreAssignedWithSubnet(ctx, tc.cr, tc.inputAZs)
+			azs, err := r.ensureAZsAreAssignedWithSubnet(ctx, tc.tccpSubnet, tc.inputAZs)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -561,19 +557,6 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 
 }
 
-func clusterCRWithSubnet(cidr string) v1alpha1.Cluster {
-	cr := v1alpha1.Cluster{}
-	providerExtension := g8sv1alpha1.AWSClusterStatus{
-		Provider: g8sv1alpha1.AWSClusterStatusProvider{
-			Network: g8sv1alpha1.AWSClusterStatusProviderNetwork{
-				CIDR: cidr,
-			},
-		},
-	}
-
-	return withG8sClusterStatus(cr, providerExtension)
-}
-
 func isExecutionFailed(err error) bool {
 	return microerror.Cause(err) == executionFailedError
 }
@@ -584,19 +567,4 @@ func mustParseCIDR(v string) net.IPNet {
 		panic(err)
 	}
 	return *n
-}
-
-func withG8sClusterStatus(cr v1alpha1.Cluster, providerExtension g8sv1alpha1.AWSClusterStatus) v1alpha1.Cluster {
-	var err error
-
-	if cr.Status.ProviderStatus == nil {
-		cr.Status.ProviderStatus = &runtime.RawExtension{}
-	}
-
-	cr.Status.ProviderStatus.Raw, err = json.Marshal(&providerExtension)
-	if err != nil {
-		panic(err)
-	}
-
-	return cr
 }

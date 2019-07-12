@@ -94,7 +94,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		azs, err = r.ensureAZsAreAssignedWithSubnet(ctx, cr, azs)
+		clusterCIDR := key.StatusClusterNetworkCIDR(cr)
+		if clusterCIDR == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster network not yet allocated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		// Parse TCCP network CIDR.
+		_, tccpSubnet, err := net.ParseCIDR(clusterCIDR)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		azs, err = r.ensureAZsAreAssignedWithSubnet(ctx, *tccpSubnet, azs)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -112,17 +125,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 // ensureAZsAreAssignedWithSubnet iterates over AZ-subnetPair map, removes
 // subnets that are already in use from available subnets' list and then
 // assigns one to AZs that don't have subnet assigned yet.
-func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, cr clusterv1alpha1.Cluster, azs map[string]subnetPair) (map[string]subnetPair, error) {
-	// Parse TCCP network CIDR.
-	_, clusterCIDR, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
+func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubnet net.IPNet, azs map[string]subnetPair) (map[string]subnetPair, error) {
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
-	clusterAZSubnets, err := ipam.Split(*clusterCIDR, key.MaximumNumberOfAZsInCluster)
+	clusterAZSubnets, err := ipam.Split(tccpSubnet, key.MaximumNumberOfAZsInCluster)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
