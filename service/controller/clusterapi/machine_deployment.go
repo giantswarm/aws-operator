@@ -1,6 +1,8 @@
 package clusterapi
 
 import (
+	"net"
+
 	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
@@ -24,12 +26,16 @@ type MachineDeploymentConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	EncrypterBackend string
-	HostAWSConfig    aws.Config
-	InstallationName string
-	ProjectName      string
-	Route53Enabled   bool
-	VaultAddress     string
+	EncrypterBackend           string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	HostAWSConfig              aws.Config
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	ProjectName                string
+	Route53Enabled             bool
+	VaultAddress               string
 }
 
 type MachineDeployment struct {
@@ -132,12 +138,16 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			K8sClient:              config.K8sClient,
 			Logger:                 config.Logger,
 
-			EncrypterBackend: config.EncrypterBackend,
-			HostAWSConfig:    config.HostAWSConfig,
-			InstallationName: config.InstallationName,
-			ProjectName:      config.ProjectName,
-			Route53Enabled:   config.Route53Enabled,
-			VaultAddress:     config.VaultAddress,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			HostAWSConfig:              config.HostAWSConfig,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			ProjectName:                config.ProjectName,
+			Route53Enabled:             config.Route53Enabled,
+			VaultAddress:               config.VaultAddress,
 		}
 
 		v29ResourceSet, err = v29.NewMachineDeploymentResourceSet(c)
