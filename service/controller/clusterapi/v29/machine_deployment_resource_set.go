@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentsubnet"
 )
 
@@ -25,6 +26,48 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var encrypterObject encrypter.Interface
 	{
 		encrypterObject, err = newEncrypterObject(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var machineDeploymentChecker *ipam.MachineDeploymentChecker
+	{
+		c := ipam.MachineDeploymentCheckerConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentChecker, err = ipam.NewMachineDeploymentChecker(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var subnetCollector *ipam.SubnetCollector
+	{
+		c := ipam.SubnetCollectorConfig{
+			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			NetworkRange: config.IPAMNetworkRange,
+		}
+
+		subnetCollector, err = ipam.NewSubnetCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var machineDeploymentPersister *ipam.MachineDeploymentPersister
+	{
+		c := ipam.MachineDeploymentPersisterConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -60,6 +103,26 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var ipamResource controller.Resource
+	{
+		c := ipam.Config{
+			Checker:   machineDeploymentChecker,
+			Collector: subnetCollector,
+			Logger:    config.Logger,
+			Persister: machineDeploymentPersister,
+
+			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
+			NetworkRange:            config.IPAMNetworkRange,
+			PrivateSubnetMaskBits:   config.GuestPrivateSubnetMaskBits,
+			PublicSubnetMaskBits:    config.GuestPublicSubnetMaskBits,
+		}
+
+		ipamResource, err = ipam.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var machineDeploymentSubnetResource controller.Resource
 	{
 		c := machinedeploymentsubnet.Config{
@@ -77,6 +140,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		awsClientResource,
 		encryptionResource,
 		machineDeploymentSubnetResource,
+		ipamResource,
 	}
 
 	{
