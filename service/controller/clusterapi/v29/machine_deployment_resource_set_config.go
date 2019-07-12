@@ -1,6 +1,8 @@
 package v29
 
 import (
+	"net"
+
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
@@ -16,12 +18,16 @@ type MachineDeploymentResourceSetConfig struct {
 	K8sClient              kubernetes.Interface
 	Logger                 micrologger.Logger
 
-	EncrypterBackend string
-	HostAWSConfig    aws.Config
-	InstallationName string
-	ProjectName      string
-	Route53Enabled   bool
-	VaultAddress     string
+	EncrypterBackend           string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	HostAWSConfig              aws.Config
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	ProjectName                string
+	Route53Enabled             bool
+	VaultAddress               string
 }
 
 func (c MachineDeploymentResourceSetConfig) GetEncrypterBackend() string {
