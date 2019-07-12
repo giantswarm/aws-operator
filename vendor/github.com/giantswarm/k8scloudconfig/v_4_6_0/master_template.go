@@ -113,7 +113,7 @@ systemd:
     contents: |
       [Unit]
       Description=etcd3
-      Requires=k8s-setup-network-env.service
+      Wants=k8s-setup-network-env.service
       After=k8s-setup-network-env.service
       Conflicts=etcd.service etcd2.service
       StartLimitIntervalSec=0
