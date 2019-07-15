@@ -24,6 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/controller/legacy"
+	"github.com/giantswarm/aws-operator/service/locker"
 	legacynetwork "github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -121,11 +122,25 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var mutexLocker locker.Interface
+	{
+		c := locker.MutexLockerConfig{
+			Logger: config.Logger,
+		}
+
+		mutexLocker, err = locker.NewMutexLocker(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var legacyNetworkAllocator legacynetwork.Allocator
 	{
 		c := legacynetwork.Config{
+			Locker: mutexLocker,
 			Logger: config.Logger,
 		}
+
 		legacyNetworkAllocator, err = legacynetwork.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -149,6 +164,7 @@ func New(config Config) (*Service, error) {
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
+			Locker:       mutexLocker,
 			Logger:       config.Logger,
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
@@ -224,6 +240,7 @@ func New(config Config) (*Service, error) {
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
+			Locker:       mutexLocker,
 			Logger:       config.Logger,
 
 			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),

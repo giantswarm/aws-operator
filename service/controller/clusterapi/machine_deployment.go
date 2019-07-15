@@ -17,6 +17,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	"github.com/giantswarm/aws-operator/service/locker"
 )
 
 type MachineDeploymentConfig struct {
@@ -24,6 +25,7 @@ type MachineDeploymentConfig struct {
 	G8sClient    versioned.Interface
 	K8sClient    kubernetes.Interface
 	K8sExtClient apiextensionsclient.Interface
+	Locker       locker.Interface
 	Logger       micrologger.Logger
 
 	EncrypterBackend           string
@@ -136,6 +138,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			K8sClient:              config.K8sClient,
+			Locker:                 config.Locker,
 			Logger:                 config.Logger,
 
 			EncrypterBackend:           config.EncrypterBackend,

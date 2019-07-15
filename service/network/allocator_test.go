@@ -3,13 +3,11 @@ package network
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"reflect"
-	"sync"
 	"testing"
-	"time"
 
+	"github.com/giantswarm/aws-operator/service/locker"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
@@ -87,14 +85,36 @@ func Test_Allocator(t *testing.T) {
 		},
 	}
 
-	svc, err := New(Config{Logger: microloggertest.New()})
-	if err != nil {
-		t.Fatal(err)
+	var err error
+
+	var mutexLocker locker.Interface
+	{
+		c := locker.MutexLockerConfig{
+			Logger: microloggertest.New(),
+		}
+
+		mutexLocker, err = locker.NewMutexLocker(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var a Allocator
+	{
+		c := Config{
+			Locker: mutexLocker,
+			Logger: microloggertest.New(),
+		}
+
+		a, err = New(c)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			net, err := svc.Allocate(context.Background(), tc.networkRange, tc.subnetSize, tc.callbacks)
+			net, err := a.Allocate(context.Background(), tc.networkRange, tc.subnetSize, tc.callbacks)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -112,146 +132,4 @@ func Test_Allocator(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test_Allocator_Locking(t *testing.T) {
-	svc, err := New(Config{Logger: microloggertest.New()})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	/*
-		This is how this test is expected to execute:
-		  * Create a channel that is used to signal from thread #1 when it is
-		    inside a lock in Allocate().
-		  * In thread #2 wait for that signal before calling Allocate().
-		  * When thread #1 has sent signal, it sleeps for a little while so that it
-		    guarantees that thread #2 is waiting for mutex.
-		  * Each thread then performs subnet allocation and verifies that allocated
-		    subnet matches the expectation.
-	*/
-
-	fullRange := mustParseCIDR("10.100.0.0/16")
-	netSize := net.CIDRMask(24, 32)
-
-	reservedNetworksMutex := &sync.Mutex{}
-	var reservedNetworks *[]net.IPNet
-	{
-		// Take a pointer to slice so that behaviour is correct between
-		// goroutines during re-allocations in slice.
-		slice := make([]net.IPNet, 0)
-		reservedNetworks = &slice
-	}
-
-	// signal is the channel that is used from thread #2 to signal that thread
-	// #1 can call Allocate().
-	signal := make(chan struct{})
-
-	// wg is a WaitGroup for this test to wait until both threads have
-	// executed.
-	wg := &sync.WaitGroup{}
-
-	// Thread #1
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		callbacks := AllocationCallbacks{
-			GetReservedNetworks: func(_ context.Context) ([]net.IPNet, error) {
-				// Allow second thread to call AllocateNetwork.
-				signal <- struct{}{}
-
-				// Add a bit of delay to let it catch up.
-				time.Sleep(100 * time.Millisecond)
-
-				reservedNetworksMutex.Lock()
-				networks := *reservedNetworks
-				reservedNetworksMutex.Unlock()
-				return networks, nil
-			},
-			PersistAllocatedNetwork: func(_ context.Context, n net.IPNet) error {
-				reservedNetworksMutex.Lock()
-				*reservedNetworks = append(*reservedNetworks, n)
-				reservedNetworksMutex.Unlock()
-				return nil
-			},
-		}
-
-		reservedNetworksMutex.Lock()
-		numReservedNetworks := len(*reservedNetworks)
-		reservedNetworksMutex.Unlock()
-		numExpectedReservedNetworks := 0
-		if numReservedNetworks != numExpectedReservedNetworks {
-			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
-		}
-		_, err := svc.Allocate(context.Background(), fullRange, netSize, callbacks)
-		if err != nil {
-			t.Error(err)
-		}
-
-		reservedNetworksMutex.Lock()
-		numReservedNetworks = len(*reservedNetworks)
-		reservedNetworksMutex.Unlock()
-		numExpectedReservedNetworks = 1
-		if numReservedNetworks != numExpectedReservedNetworks {
-			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
-		}
-
-		expectedNetwork := mustParseCIDR("10.100.0.0/24")
-		reservedNetworksMutex.Lock()
-		gotNetwork := (*reservedNetworks)[0]
-		reservedNetworksMutex.Unlock()
-		if !reflect.DeepEqual(gotNetwork, expectedNetwork) {
-			t.Errorf("expected subnet %q to be allocated, got %q", expectedNetwork.String(), gotNetwork.String())
-		}
-	}()
-
-	// Thread #2
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		callbacks := AllocationCallbacks{
-			GetReservedNetworks: func(_ context.Context) ([]net.IPNet, error) {
-				fmt.Printf("reservedNetworks: %#v\n", *reservedNetworks)
-
-				reservedNetworksMutex.Lock()
-				networks := *reservedNetworks
-				reservedNetworksMutex.Unlock()
-				return networks, nil
-			},
-			PersistAllocatedNetwork: func(_ context.Context, n net.IPNet) error {
-				reservedNetworksMutex.Lock()
-				*reservedNetworks = append(*reservedNetworks, n)
-				reservedNetworksMutex.Unlock()
-				return nil
-			},
-		}
-
-		// Wait for signal from first thread before getting into allocation.
-		<-signal
-
-		_, err := svc.Allocate(context.Background(), fullRange, netSize, callbacks)
-		if err != nil {
-			t.Error(err)
-		}
-
-		reservedNetworksMutex.Lock()
-		numReservedNetworks := len(*reservedNetworks)
-		reservedNetworksMutex.Unlock()
-		numExpectedReservedNetworks := 2
-		if numReservedNetworks != numExpectedReservedNetworks {
-			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
-		}
-
-		expectedNetwork := mustParseCIDR("10.100.1.0/24")
-		reservedNetworksMutex.Lock()
-		gotNetwork := (*reservedNetworks)[1]
-		reservedNetworksMutex.Unlock()
-		if !reflect.DeepEqual(gotNetwork, expectedNetwork) {
-			t.Errorf("expected subnet %q to be allocated, got %q", expectedNetwork.String(), gotNetwork.String())
-		}
-	}()
-
-	wg.Wait()
 }

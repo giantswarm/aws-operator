@@ -6,6 +6,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/locker"
 )
 
 const (
@@ -22,6 +24,7 @@ const (
 type Config struct {
 	Checker   Checker
 	Collector Collector
+	Locker    locker.Interface
 	Logger    micrologger.Logger
 	Persister Persister
 
@@ -34,6 +37,7 @@ type Config struct {
 type Resource struct {
 	checker   Checker
 	collector Collector
+	locker    locker.Interface
 	logger    micrologger.Logger
 	persister Persister
 
@@ -47,6 +51,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Collector == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Collector must not be empty", config)
+	}
+	if config.Locker == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Locker must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -71,6 +78,7 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		checker:   config.Checker,
 		collector: config.Collector,
+		locker:    config.Locker,
 		logger:    config.Logger,
 		persister: config.Persister,
 
