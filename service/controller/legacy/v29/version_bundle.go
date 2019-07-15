@@ -12,6 +12,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add name label for default and kube-system namespaces.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "ignition",
+				Description: "Use v1 stable for giantswarm-critical priority class.",
+				Kind:        versionbundle.KindFixed,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
