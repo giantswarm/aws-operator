@@ -4,45 +4,58 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"sync"
 
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/locker"
 )
 
 type Config struct {
+	Locker locker.Interface
 	Logger micrologger.Logger
 }
 
 type allocator struct {
+	locker locker.Interface
 	logger micrologger.Logger
-	mutex  *sync.Mutex
 }
 
 func New(config Config) (Allocator, error) {
+	if config.Locker == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Locker must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &allocator{
+		locker: config.Locker,
 		logger: config.Logger,
-		mutex:  &sync.Mutex{},
 	}
 
 	return r, nil
 }
 
 func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize net.IPMask, callbacks AllocationCallbacks) (net.IPNet, error) {
-	i.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
-	i.mutex.Lock()
-	i.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
+	{
+		i.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
+		err := i.locker.Lock(ctx)
+		if err != nil {
+			return net.IPNet{}, microerror.Mask(err)
+		}
+		i.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
 
-	defer func() {
-		i.logger.LogCtx(ctx, "level", "debug", "message", "releasing lock for IPAM")
-		i.mutex.Unlock()
-		i.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
-	}()
+		defer func() {
+			i.logger.LogCtx(ctx, "level", "debug", "message", "releasing lock for IPAM")
+			err := i.locker.Unlock(ctx)
+			if err != nil {
+				i.logger.LogCtx(ctx, "level", "error", "message", "failed to release lock for IPAM", "stack", fmt.Sprintf("%#v", err))
+			}
+			i.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
+		}()
+	}
 
 	var err error
 	var reservedSubnets []net.IPNet

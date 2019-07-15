@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/giantswarm/aws-operator/service/locker"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
@@ -87,14 +88,36 @@ func Test_Allocator(t *testing.T) {
 		},
 	}
 
-	svc, err := New(Config{Logger: microloggertest.New()})
-	if err != nil {
-		t.Fatal(err)
+	var err error
+
+	var mutexLocker locker.Interface
+	{
+		c := locker.MutexLockerConfig{
+			Logger: microloggertest.New(),
+		}
+
+		mutexLocker, err = locker.NewMutexLocker(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var a Allocator
+	{
+		c := Config{
+			Locker: mutexLocker,
+			Logger: microloggertest.New(),
+		}
+
+		a, err = New(c)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			net, err := svc.Allocate(context.Background(), tc.networkRange, tc.subnetSize, tc.callbacks)
+			net, err := a.Allocate(context.Background(), tc.networkRange, tc.subnetSize, tc.callbacks)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -115,9 +138,31 @@ func Test_Allocator(t *testing.T) {
 }
 
 func Test_Allocator_Locking(t *testing.T) {
-	svc, err := New(Config{Logger: microloggertest.New()})
-	if err != nil {
-		t.Fatal(err)
+	var err error
+
+	var mutexLocker locker.Interface
+	{
+		c := locker.MutexLockerConfig{
+			Logger: microloggertest.New(),
+		}
+
+		mutexLocker, err = locker.NewMutexLocker(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var a Allocator
+	{
+		c := Config{
+			Locker: mutexLocker,
+			Logger: microloggertest.New(),
+		}
+
+		a, err = New(c)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	/*
@@ -184,7 +229,7 @@ func Test_Allocator_Locking(t *testing.T) {
 		if numReservedNetworks != numExpectedReservedNetworks {
 			t.Errorf("expected len(reservedNetworks) == %d, got %d", numExpectedReservedNetworks, numReservedNetworks)
 		}
-		_, err := svc.Allocate(context.Background(), fullRange, netSize, callbacks)
+		_, err := a.Allocate(context.Background(), fullRange, netSize, callbacks)
 		if err != nil {
 			t.Error(err)
 		}
@@ -231,7 +276,7 @@ func Test_Allocator_Locking(t *testing.T) {
 		// Wait for signal from first thread before getting into allocation.
 		<-signal
 
-		_, err := svc.Allocate(context.Background(), fullRange, netSize, callbacks)
+		_, err := a.Allocate(context.Background(), fullRange, netSize, callbacks)
 		if err != nil {
 			t.Error(err)
 		}

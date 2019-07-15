@@ -214,6 +214,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		c := ipam.Config{
 			Checker:   clusterChecker,
 			Collector: subnetCollector,
+			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: clusterPersister,
 

@@ -9,6 +9,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/locker"
 )
 
 type MachineDeploymentResourceSetConfig struct {
@@ -16,6 +17,7 @@ type MachineDeploymentResourceSetConfig struct {
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	K8sClient              kubernetes.Interface
+	Locker                 locker.Interface
 	Logger                 micrologger.Logger
 
 	EncrypterBackend           string

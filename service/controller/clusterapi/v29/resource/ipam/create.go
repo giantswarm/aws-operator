@@ -18,15 +18,35 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	proceed, err := r.checker.Check(ctx, m.GetNamespace(), m.GetName())
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
+		err := r.locker.Lock(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
+
+		defer func() {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "releasing lock for IPAM")
+			err := r.locker.Unlock(ctx)
+			if err != nil {
+				r.logger.LogCtx(ctx, "level", "error", "message", "failed to release lock for IPAM", "stack", fmt.Sprintf("%#v", err))
+			}
+			r.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
+		}()
 	}
 
-	if !proceed {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "subnet already allocated")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		return nil
+	{
+		proceed, err := r.checker.Check(ctx, m.GetNamespace(), m.GetName())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if !proceed {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "subnet already allocated")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
 	}
 
 	var allocatedSubnets []net.IPNet
