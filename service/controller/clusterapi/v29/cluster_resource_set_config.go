@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/locker"
 )
 
 type ClusterResourceSetConfig struct {
@@ -22,6 +23,7 @@ type ClusterResourceSetConfig struct {
 	G8sClient              versioned.Interface
 	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface
+	Locker                 locker.Interface
 	Logger                 micrologger.Logger
 	RandomKeysSearcher     randomkeys.Interface
 

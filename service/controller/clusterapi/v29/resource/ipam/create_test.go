@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/giantswarm/aws-operator/service/locker"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
@@ -57,11 +58,24 @@ func Test_SubnetAllocator(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var err error
 
+			var mutexLocker locker.Interface
+			{
+				c := locker.MutexLockerConfig{
+					Logger: microloggertest.New(),
+				}
+
+				mutexLocker, err = locker.NewMutexLocker(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var newResource *Resource
 			{
 				c := Config{
 					Checker:   tc.checker,
 					Collector: tc.collector,
+					Locker:    mutexLocker,
 					Logger:    microloggertest.New(),
 					Persister: tc.persister,
 
