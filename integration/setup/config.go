@@ -76,8 +76,7 @@ func NewConfig() (Config, error) {
 		c := framework.HostConfig{
 			Logger: logger,
 
-			ClusterID:  env.ClusterID(),
-			VaultToken: env.VaultToken(),
+			ClusterID: env.ClusterID(),
 		}
 
 		host, err = framework.NewHost(c)

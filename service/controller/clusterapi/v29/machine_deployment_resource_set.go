@@ -30,6 +30,51 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	/*
+		var machineDeploymentChecker *ipam.MachineDeploymentChecker
+		{
+			c := ipam.MachineDeploymentCheckerConfig{
+				CMAClient: config.CMAClient,
+				Logger:    config.Logger,
+			}
+
+			machineDeploymentChecker, err = ipam.NewMachineDeploymentChecker(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+
+		var subnetCollector *ipam.SubnetCollector
+		{
+			c := ipam.SubnetCollectorConfig{
+				CMAClient: config.CMAClient,
+				G8sClient: config.G8sClient,
+				Logger:    config.Logger,
+
+				NetworkRange: config.IPAMNetworkRange,
+			}
+
+			subnetCollector, err = ipam.NewSubnetCollector(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+		var machineDeploymentPersister *ipam.MachineDeploymentPersister
+		{
+			c := ipam.MachineDeploymentPersisterConfig{
+				CMAClient: config.CMAClient,
+				Logger:    config.Logger,
+			}
+
+			machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+	*/
+
 	var awsClientResource controller.Resource
 	{
 		c := awsclient.Config{
@@ -60,6 +105,28 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	/* TODO: Resume ipamResource once machineDeploymentSubnetResource can be deleted.
+	var ipamResource controller.Resource
+	{
+		c := ipam.Config{
+			Checker:   machineDeploymentChecker,
+			Collector: subnetCollector,
+			Logger:    config.Logger,
+			Persister: machineDeploymentPersister,
+
+			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
+			NetworkRange:            config.IPAMNetworkRange,
+			PrivateSubnetMaskBits:   config.GuestPrivateSubnetMaskBits,
+			PublicSubnetMaskBits:    config.GuestPublicSubnetMaskBits,
+		}
+
+		ipamResource, err = ipam.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+	*/
+
 	var machineDeploymentSubnetResource controller.Resource
 	{
 		c := machinedeploymentsubnet.Config{
@@ -77,6 +144,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		awsClientResource,
 		encryptionResource,
 		machineDeploymentSubnetResource,
+		//ipamResource,
 	}
 
 	{

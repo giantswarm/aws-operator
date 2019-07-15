@@ -30,6 +30,15 @@ EOF
 }
 
 kms_keys_assets_decrypt() {
+AWS_CLI_IMAGE="quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
+
+while ! rkt fetch --trust-keys-from-https=true ${AWS_CLI_IMAGE};
+do
+        echo "Failed to fetch rkt image ${AWS_CLI_IMAGE}, retrying in 5 sec."
+        sleep 5s
+done
+echo "Successfully fetched rkt image ${AWS_CLI_IMAGE}."
+
 rkt run \
   --volume=keys,kind=host,source=/etc/kubernetes/encryption,readOnly=false \
   --mount=volume=keys,target=/etc/kubernetes/encryption \
@@ -37,7 +46,7 @@ rkt run \
   --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
   --net=host \
   --trust-keys-from-https \
-  quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600 --exec=/bin/bash -- \
+  ${AWS_CLI_IMAGE} --exec=/bin/bash -- \
     -ec \
     'echo decrypting keys assets
     shopt -s nullglob
