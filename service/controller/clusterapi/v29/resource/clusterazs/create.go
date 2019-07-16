@@ -89,6 +89,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		status := newAZStatus(ctx, azs)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetsToString(azs)))
 
 		// Add the current AZ state from AWS to the cc status.
 		cc.Status.TenantCluster.AvailabilityZones = status
@@ -108,7 +109,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		spec := newAZSpec(azs)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", azSubnetsToString(azs))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetsToString(azs)))
 
 		// Add the desired AZ state to the controllercontext spec.
 		cc.Spec.TenantCluster.AvailabilityZones = spec
