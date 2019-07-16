@@ -198,6 +198,27 @@ func defaultControllerContext() controllercontext.Context {
 				},
 			},
 		},
+		Spec: controllercontext.ContextSpec{
+			TenantCluster: controllercontext.ContextSpecTenantCluster{
+				AvailabilityZones: []controllercontext.ContextSpecTenantClusterAvailabilityZone{
+					{
+						Name:          "eu-central-1a",
+						PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
+					},
+					{
+						Name:          "eu-central-1b",
+						PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
+					},
+					{
+						Name:          "eu-central-1c",
+						PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
+						PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
+					},
+				},
+			},
+		},
 	}
 }
 

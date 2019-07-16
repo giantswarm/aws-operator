@@ -50,7 +50,7 @@ type Config struct {
 	StackState                      StackState
 	TenantClusterAccountID          string
 	TenantClusterKMSKeyARN          string
-	TenantClusterAvailabilityZones  []controllercontext.ContextStatusTenantClusterAvailabilityZone
+	TenantClusterAvailabilityZones  []controllercontext.ContextSpecTenantClusterAvailabilityZone
 }
 
 type Adapter struct {
