@@ -3,6 +3,7 @@ package detection
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -72,13 +73,10 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 		return false, microerror.Mask(err)
 	}
 
-	// TODO(marcel):
-	/*
-		if cc.Spec.TenantCluster.AvailabilityZones != cc.Status.TenantCluster.AvailabilityZones {
-			// Add suitable logging
-			return true, nil
-		}
-	*/
+	if !reflect.DeepEqual(cc.Spec.TenantCluster.AvailabilityZones, cc.Status.TenantCluster.AvailabilityZones) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the availability zones should update due to a change in the desired state of the machine deployments."))
+		return true, nil
+	}
 
 	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cl) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cl) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cl)))

@@ -15,7 +15,9 @@ type Context struct {
 	// specific actions.
 	Client ContextClient
 
-	// TODO(marcel): Add Spec here with tenant cluster AZ spec.
+	// Spec holds the data of the unmodified current state and is used
+	// to compare against the Status to detect changes in the Context.
+	Spec ContextSpec
 
 	// Status holds the data used to communicate between controller's
 	// resources. It can be edited in place as Context is stored as
