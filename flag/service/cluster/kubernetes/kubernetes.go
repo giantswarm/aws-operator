@@ -9,7 +9,7 @@ import (
 
 type Kubernetes struct {
 	API          api.API
-	kubelet		kubelet.Kubelet
+	kubelet      kubelet.Kubelet
 	NetworkSetup networksetup.NetworkSetup
 	SSH          ssh.SSH
 }
