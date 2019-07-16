@@ -44,9 +44,9 @@ func init() {
 
 	{
 		c := clusterstate.Config{
-			GuestFramework: config.Guest,
-			Logger:         config.Logger,
-			Provider:       p,
+			LegacyFramework: config.Guest,
+			Logger:          config.Logger,
+			Provider:        p,
 		}
 
 		clusterStateTest, err = clusterstate.New(c)

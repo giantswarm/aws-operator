@@ -111,6 +111,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		c := ipam.Config{
 			Checker:   machineDeploymentChecker,
 			Collector: subnetCollector,
+			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: machineDeploymentPersister,
 

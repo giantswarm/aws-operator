@@ -12,9 +12,8 @@ import (
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	clusterv1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
@@ -31,12 +30,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var machineDeployments []clusterv1alpha1.MachineDeployment
+	// We need to cancel the resource early in case the ipam resource did not yet
+	// allocate a subnet for the tenant cluster.
+	if key.StatusClusterNetworkCIDR(cr) == "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect subnets for availability zones")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster network not yet allocated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
+	}
+
+	var machineDeployments []v1alpha1.MachineDeployment
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding MachineDeployments for tenant cluster")
 
 		l := metav1.AddLabelToSelector(
-			&v1.LabelSelector{},
+			&metav1.LabelSelector{},
 			label.Cluster,
 			key.ClusterID(&cr),
 		)
@@ -94,15 +103,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		clusterCIDR := key.StatusClusterNetworkCIDR(cr)
-		if clusterCIDR == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster network not yet allocated")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
 		// Parse TCCP network CIDR.
-		_, tccpSubnet, err := net.ParseCIDR(clusterCIDR)
+		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -127,8 +129,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 }
 
 // ensureAZsAreAssignedWithSubnet iterates over AZ-subnetPair map, removes
-// subnets that are already in use from available subnets' list and then
-// assigns one to AZs that don't have subnet assigned yet.
+// subnets that are already in use from available subnets' list and then assigns
+// one to AZs that doesn't have subnet assigned yet.
 func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubnet net.IPNet, azs map[string]subnetPair) (map[string]subnetPair, error) {
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure

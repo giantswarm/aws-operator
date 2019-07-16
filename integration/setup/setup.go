@@ -292,19 +292,11 @@ func newSSHUserList(ctx context.Context, config Config) (string, error) {
 			return "", microerror.Mask(err)
 		}
 
-		fmt.Printf("\n")
-		fmt.Printf("%#v\n", content)
-		fmt.Printf("\n")
-
 		sshUserList, err = privaterepo.ContentToSSHUserList(content)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
 	}
-
-	fmt.Printf("\n")
-	fmt.Printf("%#v\n", sshUserList)
-	fmt.Printf("\n")
 
 	return sshUserList, nil
 }
