@@ -169,6 +169,7 @@ systemd:
       --enable-server \
       --logtostderr=true \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
+      --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
       --network-plugin=cni \
       --register-node=true \
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \

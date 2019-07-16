@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	defaultRegistryDomain = "quay.io"
-	kubernetesImage       = "giantswarm/hyperkube:v1.14.3"
-	etcdImage             = "giantswarm/etcd:v3.3.13"
-	etcdPort              = 443
+	defaultRegistryDomain            = "quay.io"
+	defaultImagePullProgressDeadline = "1m"
+	kubernetesImage                  = "giantswarm/hyperkube:v1.14.3"
+	etcdImage                        = "giantswarm/etcd:v3.3.13"
+	etcdPort                         = 443
 )
 
 type CloudConfigConfig struct {
@@ -37,6 +38,7 @@ func DefaultParams() Params {
 			Kubernetes: kubernetesImage,
 			Etcd:       etcdImage,
 		},
+		ImagePullProgressDeadline: defaultImagePullProgressDeadline,
 	}
 }
 
