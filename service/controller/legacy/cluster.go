@@ -67,6 +67,7 @@ type ClusterConfig struct {
 	GuestUpdateEnabled         bool
 	HostAWSConfig              ClusterConfigAWSConfig
 	IgnitionPath               string
+	ImagePullProgressDeadline  string
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
