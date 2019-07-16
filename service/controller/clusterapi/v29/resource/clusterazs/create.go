@@ -85,21 +85,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cc.Status.TenantCluster.AvailabilityZones = status
 	}
 
-	var allocatedNetworks []net.IPNet
-	{
-		// Collect non-empty subnets from AZ-subnet -pairs that belong to this
-		// specific TCCP.
-		for _, snetPair := range azs {
-			if !reflect.DeepEqual(net.IPNet{}, snetPair.Public) {
-				allocatedNetworks = append(allocatedNetworks, snetPair.Public)
-			}
-
-			if !reflect.DeepEqual(net.IPNet{}, snetPair.Private) {
-				allocatedNetworks = append(allocatedNetworks, snetPair.Private)
-			}
-		}
-	}
-
 	{
 		clusterCIDR := key.StatusClusterNetworkCIDR(cr)
 		if clusterCIDR == "" {
