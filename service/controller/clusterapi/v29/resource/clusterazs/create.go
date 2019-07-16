@@ -271,11 +271,11 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 	return azMap, nil
 }
 
-func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextSpecTenantClusterAvailabilityZone {
-	var spec []controllercontext.ContextSpecTenantClusterAvailabilityZone
+func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextTenantClusterAvailabilityZone {
+	var spec []controllercontext.ContextTenantClusterAvailabilityZone
 
 	for az, subnets := range azs {
-		ccAZ := controllercontext.ContextSpecTenantClusterAvailabilityZone{
+		ccAZ := controllercontext.ContextTenantClusterAvailabilityZone{
 			Name:          az,
 			PublicSubnet:  subnets.Public,
 			PrivateSubnet: subnets.Private,
@@ -287,7 +287,7 @@ func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextSpecTenantC
 	return spec
 }
 
-func newAZStatus(ctx context.Context, azs map[string]subnetPair) []controllercontext.ContextStatusTenantClusterAvailabilityZone {
+func newAZStatus(ctx context.Context, azs map[string]subnetPair) []controllercontext.ContextTenantClusterAvailabilityZone {
 	var azNames []string
 	{
 		for az := range azs {
@@ -297,7 +297,7 @@ func newAZStatus(ctx context.Context, azs map[string]subnetPair) []controllercon
 		sort.Strings(azNames)
 	}
 
-	var status []controllercontext.ContextStatusTenantClusterAvailabilityZone
+	var status []controllercontext.ContextTenantClusterAvailabilityZone
 
 	for _, az := range azNames {
 		subnets := azs[az]
@@ -309,7 +309,7 @@ func newAZStatus(ctx context.Context, azs map[string]subnetPair) []controllercon
 		}
 
 		// Collect currently used AZ information to store it inside the cc status.
-		statusAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
+		statusAZ := controllercontext.ContextTenantClusterAvailabilityZone{
 			Name:          az,
 			PublicSubnet:  subnets.Public,
 			PrivateSubnet: subnets.Private,
