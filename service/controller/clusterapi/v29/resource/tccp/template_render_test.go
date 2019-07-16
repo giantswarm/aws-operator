@@ -161,7 +161,7 @@ func defaultControllerContext() controllercontext.Context {
 				},
 			},
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
-				AvailabilityZones: []controllercontext.ContextStatusTenantClusterAvailabilityZone{
+				AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
 					{
 						Name:          "eu-central-1a",
 						PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
@@ -200,7 +200,7 @@ func defaultControllerContext() controllercontext.Context {
 		},
 		Spec: controllercontext.ContextSpec{
 			TenantCluster: controllercontext.ContextSpecTenantCluster{
-				AvailabilityZones: []controllercontext.ContextSpecTenantClusterAvailabilityZone{
+				AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
 					{
 						Name:          "eu-central-1a",
 						PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
