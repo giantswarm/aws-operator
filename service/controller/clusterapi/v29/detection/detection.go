@@ -74,7 +74,7 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 	}
 
 	if !reflect.DeepEqual(cc.Spec.TenantCluster.AvailabilityZones, cc.Status.TenantCluster.AvailabilityZones) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the availability zones should update due to a change in the desired state of the machine deployments."))
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the tenant cluster should update due to availability zone changes"))
 		return true, nil
 	}
 
