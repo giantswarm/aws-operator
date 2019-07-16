@@ -185,8 +185,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var clusterAZsResource controller.Resource
 	{
 		c := clusterazs.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
+			CMAClient:     config.CMAClient,
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
 		}
 
 		clusterAZsResource, err = clusterazs.New(c)
