@@ -176,8 +176,9 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 		var err error
 
 		c := Config{
-			CMAClient: fake.NewSimpleClientset(),
-			Logger:    microloggertest.New(),
+			CMAClient:     fake.NewSimpleClientset(),
+			Logger:        microloggertest.New(),
+			ToClusterFunc: key.ToCluster,
 		}
 
 		r, err = New(c)
