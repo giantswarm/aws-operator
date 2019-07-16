@@ -1,5 +1,5 @@
 // Package clusterazs implements a resource to gather all distinct availability
-// zones for a tenant cluster cluster.
+// zones for a tenant cluster.
 package clusterazs
 
 import (
