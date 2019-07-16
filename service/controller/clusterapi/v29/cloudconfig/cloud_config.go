@@ -20,18 +20,19 @@ type Config struct {
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 
-	CalicoCIDR              int
-	CalicoMTU               int
-	CalicoSubnet            string
-	ClusterIPRange          string
-	DockerDaemonCIDR        string
-	IgnitionPath            string
-	NetworkSetupDockerImage string
-	OIDC                    ConfigOIDC
-	PodInfraContainerImage  string
-	RegistryDomain          string
-	SSHUserList             string
-	SSOPublicKey            string
+	CalicoCIDR                int
+	CalicoMTU                 int
+	CalicoSubnet              string
+	ClusterIPRange            string
+	DockerDaemonCIDR          string
+	IgnitionPath              string
+	ImagePullProgressDeadline string
+	NetworkSetupDockerImage   string
+	OIDC                      ConfigOIDC
+	PodInfraContainerImage    string
+	RegistryDomain            string
+	SSHUserList               string
+	SSOPublicKey              string
 }
 
 type ConfigOIDC struct {
@@ -49,16 +50,17 @@ type CloudConfig struct {
 	k8sAPIExtraArgs     []string
 	k8sKubeletExtraArgs []string
 
-	calicoCIDR              int
-	calicoMTU               int
-	calicoSubnet            string
-	clusterIPRange          string
-	dockerDaemonCIDR        string
-	ignitionPath            string
-	networkSetupDockerImage string
-	registryDomain          string
-	sshUserList             string
-	ssoPublicKey            string
+	calicoCIDR                int
+	calicoMTU                 int
+	calicoSubnet              string
+	clusterIPRange            string
+	dockerDaemonCIDR          string
+	ignitionPath              string
+	imagePullProgressDeadline string
+	networkSetupDockerImage   string
+	registryDomain            string
+	sshUserList               string
+	ssoPublicKey              string
 }
 
 // New creates a new configured cloud config service.
@@ -111,6 +113,9 @@ func New(config Config) (*CloudConfig, error) {
 	if config.IgnitionPath == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
 	}
+	if config.ImagePullProgressDeadline == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ImagePullProgressDeadline must not be empty", config)
+	}
 	if config.NetworkSetupDockerImage == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkSetupDockerImage must not be empty", config)
 	}
@@ -131,16 +136,17 @@ func New(config Config) (*CloudConfig, error) {
 		k8sAPIExtraArgs:     k8sAPIExtraArgs,
 		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
 
-		calicoCIDR:              config.CalicoCIDR,
-		calicoMTU:               config.CalicoMTU,
-		calicoSubnet:            config.CalicoSubnet,
-		clusterIPRange:          config.ClusterIPRange,
-		dockerDaemonCIDR:        config.DockerDaemonCIDR,
-		ignitionPath:            config.IgnitionPath,
-		networkSetupDockerImage: config.NetworkSetupDockerImage,
-		registryDomain:          config.RegistryDomain,
-		sshUserList:             config.SSHUserList,
-		ssoPublicKey:            config.SSOPublicKey,
+		calicoCIDR:                config.CalicoCIDR,
+		calicoMTU:                 config.CalicoMTU,
+		calicoSubnet:              config.CalicoSubnet,
+		clusterIPRange:            config.ClusterIPRange,
+		dockerDaemonCIDR:          config.DockerDaemonCIDR,
+		ignitionPath:              config.IgnitionPath,
+		imagePullProgressDeadline: config.ImagePullProgressDeadline,
+		networkSetupDockerImage:   config.NetworkSetupDockerImage,
+		registryDomain:            config.RegistryDomain,
+		sshUserList:               config.SSHUserList,
+		ssoPublicKey:              config.SSOPublicKey,
 	}
 
 	return newCloudConfig, nil
