@@ -33,8 +33,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// We need to cancel the resource early in case the ipam resource did not yet
 	// allocate a subnet for the tenant cluster.
 	if key.StatusClusterNetworkCIDR(cr) == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect subnets for availability zones")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster network not yet allocated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect private and public subnets for availability zones")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster subnet not yet allocated")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 		return nil
@@ -92,7 +92,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetsToString(azs)))
 
 		// Add the current AZ state from AWS to the cc status.
-		cc.Status.TenantCluster.AvailabilityZones = status
+		cc.Status.TenantCluster.TCCP.AvailabilityZones = status
 	}
 
 	{
@@ -112,7 +112,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetsToString(azs)))
 
 		// Add the desired AZ state to the controllercontext spec.
-		cc.Spec.TenantCluster.AvailabilityZones = spec
+		cc.Spec.TenantCluster.TCCP.AvailabilityZones = spec
 	}
 
 	return nil

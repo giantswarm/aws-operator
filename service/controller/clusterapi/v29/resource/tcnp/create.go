@@ -170,8 +170,8 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster,
 	}
 
 	var subnets []string
-	for _, a := range cc.Status.TenantCluster.AvailabilityZones {
-		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)))
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(a.AvailabilityZone)))
 	}
 
 	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(md), key.WorkerScalingMax(md), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
@@ -291,20 +291,20 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 		return nil, microerror.Mask(err)
 	}
 
-	for _, a := range cc.Status.TenantCluster.AvailabilityZones {
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
-			AvailabilityZone: a.Name,
-			CIDR:             "", // TODO: Use Private Subnet CIDR allocated to the nodepool in the AZ.
-			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)),
+			AvailabilityZone: a.AvailabilityZone,
+			CIDR:             a.PrivateSubnet.String(),
+			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.AvailabilityZone)),
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.Name)),
+				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.AvailabilityZone)),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					Name: key.SanitizeCFResourceName(key.PublicSubnetName(a.Name)),
+					Name: key.SanitizeCFResourceName(key.PublicSubnetName(a.AvailabilityZone)),
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.Name)),
+						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.AvailabilityZone)),
 					},
 				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{

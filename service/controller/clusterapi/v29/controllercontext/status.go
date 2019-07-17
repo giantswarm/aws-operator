@@ -38,7 +38,6 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	AvailabilityZones     []ContextTenantClusterAvailabilityZone
 	AWSAccountID          string
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
@@ -61,6 +60,7 @@ type ContextStatusTenantClusterMasterInstance struct {
 
 type ContextStatusTenantClusterTCCP struct {
 	ASG               ContextStatusTenantClusterTCCPASG
+	AvailabilityZones []ContextTenantClusterAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
 	RouteTables       []*ec2.RouteTable
