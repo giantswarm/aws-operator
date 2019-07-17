@@ -290,9 +290,9 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					ID: key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)),
+					ID: key.SanitizeCFResourceName(key.PublicSubnetName(a.Name)),
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						ID: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+						ID: key.SanitizeCFResourceName(key.PublicRouteTableName(a.Name)),
 					},
 				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
