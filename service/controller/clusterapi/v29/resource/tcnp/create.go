@@ -280,32 +280,7 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 	}
 
 	for _, a := range cc.Status.TenantCluster.AvailabilityZones {
-		// public
-		{
-			s := template.ParamsMainSubnetsListItem{
-				AvailabilityZone: a.Name,
-				CIDR:             a.PublicSubnet.String(),
-				NameSuffix:       strings.ToUpper(a.Name),
-				RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-					NameSuffix: strings.ToUpper(a.Name),
-				},
-				TCCP: template.ParamsMainSubnetsListItemTCCP{
-					Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-						ID: "", // TODO
-						RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-							ID: "", // TODO
-						},
-					},
-					VPC: template.ParamsMainSubnetsListItemTCCPVPC{
-						ID: "", // TODO
-					},
-				},
-			}
-
-			subnets.List = append(subnets.List, s)
-		}
-
-		// private
+		// Create private subnet per
 		{
 			s := template.ParamsMainSubnetsListItem{
 				AvailabilityZone: a.Name,
@@ -316,13 +291,13 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 				},
 				TCCP: template.ParamsMainSubnetsListItemTCCP{
 					Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-						ID: "", // TODO
+						ID: key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)),
 						RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-							ID: "", // TODO
+							ID: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 						},
 					},
 					VPC: template.ParamsMainSubnetsListItemTCCPVPC{
-						ID: "", // TODO
+						ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 					},
 				},
 			}
