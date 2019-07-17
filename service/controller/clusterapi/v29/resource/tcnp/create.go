@@ -216,6 +216,11 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v
 }
 
 func (r *Resource) newLaunchConfiguration(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainLaunchConfiguration, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	launchConfiguration := &template.ParamsMainLaunchConfiguration{
 		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
 			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
@@ -233,6 +238,9 @@ func (r *Resource) newLaunchConfiguration(ctx context.Context, cl v1alpha1.Clust
 			Image:      key.ImageID(cl),
 			Monitoring: true,
 			Type:       key.WorkerInstanceType(md),
+		},
+		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
+			S3URL: key.SmallCloudConfigS3URL(cl, cc.Status.TenantCluster.AWSAccountID, "worker"),
 		},
 	}
 
