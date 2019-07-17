@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -138,11 +139,27 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpResource controller.Resource
+	{
+		c := tcnp.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		tcnpResource, err = tcnp.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		awsClientResource,
 		encryptionResource,
 		ipamResource,
 		clusterAZsResource,
+		tcnpResource,
 	}
 
 	{
