@@ -16,13 +16,13 @@ const TemplateMainLaunchConfiguration = `
       - DeviceName: /dev/xvdh
         Ebs:
           DeleteOnTermination: true
-          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMappings.Docker.Volume.Size }}
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Docker.Volume.Size }}
           VolumeType: gp2
 
       - DeviceName: /dev/xvdf
         Ebs:
           DeleteOnTermination: true
-          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMappings.Logging.Volume.Size }}
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
           VolumeType: gp2
 
       AssociatePublicIpAddress: false
