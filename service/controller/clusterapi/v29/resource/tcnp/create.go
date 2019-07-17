@@ -280,27 +280,55 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 	}
 
 	for _, a := range cc.Status.TenantCluster.AvailabilityZones {
-		s := template.ParamsMainSubnetsListItem{
-			AvailabilityZone: a.Name,
-			CIDR:             a.PublicSubnet.String(), // TODO we need to figure out if this is correct
-			NameSuffix:       strings.ToUpper(a.Name),
-			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-				NameSuffix: strings.ToUpper(a.Name),
-			},
-			TCCP: template.ParamsMainSubnetsListItemTCCP{
-				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					ID: "", // TODO
-					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
+		// public
+		{
+			s := template.ParamsMainSubnetsListItem{
+				AvailabilityZone: a.Name,
+				CIDR:             a.PublicSubnet.String(),
+				NameSuffix:       strings.ToUpper(a.Name),
+				RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
+					NameSuffix: strings.ToUpper(a.Name),
+				},
+				TCCP: template.ParamsMainSubnetsListItemTCCP{
+					Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
+						ID: "", // TODO
+						RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
+							ID: "", // TODO
+						},
+					},
+					VPC: template.ParamsMainSubnetsListItemTCCPVPC{
 						ID: "", // TODO
 					},
 				},
-				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
-					ID: "", // TODO
-				},
-			},
+			}
+
+			subnets.List = append(subnets.List, s)
 		}
 
-		subnets.List = append(subnets.List, s)
+		// private
+		{
+			s := template.ParamsMainSubnetsListItem{
+				AvailabilityZone: a.Name,
+				CIDR:             a.PrivateSubnet.String(),
+				NameSuffix:       strings.ToUpper(a.Name),
+				RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
+					NameSuffix: strings.ToUpper(a.Name),
+				},
+				TCCP: template.ParamsMainSubnetsListItemTCCP{
+					Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
+						ID: "", // TODO
+						RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
+							ID: "", // TODO
+						},
+					},
+					VPC: template.ParamsMainSubnetsListItemTCCPVPC{
+						ID: "", // TODO
+					},
+				},
+			}
+
+			subnets.List = append(subnets.List, s)
+		}
 	}
 
 	return subnets, nil
