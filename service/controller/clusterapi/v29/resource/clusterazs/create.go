@@ -87,19 +87,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	var allocatedNetworks []net.IPNet
 	{
-		// Collect non-empty subnets from AZ-subnet -pairs that belong to this
-		// specific TCCP.
-		for _, snetPair := range azs {
-			if !reflect.DeepEqual(net.IPNet{}, snetPair.Public) {
-				allocatedNetworks = append(allocatedNetworks, snetPair.Public)
-			}
+		status := newAZStatus(azs)
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetsToString(azs)))
 
-			if !reflect.DeepEqual(net.IPNet{}, snetPair.Private) {
-				allocatedNetworks = append(allocatedNetworks, snetPair.Private)
-			}
-		}
+		// Add the current AZ state from AWS to the cc status.
+		cc.Status.TenantCluster.AvailabilityZones = status
 	}
 
 	{
@@ -114,11 +107,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		ccAZs := mapAZSubnetsToControllerContextTypes(azs)
+		spec := newAZSpec(azs)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", azSubnetsToString(azs))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetsToString(azs)))
 
-		cc.Status.TenantCluster.AvailabilityZones = ccAZs
+		// Add the desired AZ state to the controllercontext spec.
+		cc.Spec.TenantCluster.AvailabilityZones = spec
 	}
 
 	return nil
@@ -138,7 +132,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 
 	var azNames []string
 	{
-		for az, _ := range azs {
+		for az := range azs {
 			azNames = append(azNames, az)
 		}
 
@@ -198,6 +192,22 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", azs))
 
 	return azs, nil
+}
+
+func azSubnetsToString(azs map[string]subnetPair) string {
+	var result strings.Builder
+	result.WriteString("availability zone subnet allocations: {")
+	for az, subnet := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, subnet.Public.String(), subnet.Private.String()))
+	}
+
+	if len(azs) > 0 {
+		result.WriteString("\n}")
+	} else {
+		result.WriteString("}")
+	}
+
+	return result.String()
 }
 
 // fromEC2SubnetsToMap extracts availability zones and public / private subnet
@@ -261,34 +271,61 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 	return azMap, nil
 }
 
-func mapAZSubnetsToControllerContextTypes(azs map[string]subnetPair) []controllercontext.ContextStatusTenantClusterAvailabilityZone {
-	var results []controllercontext.ContextStatusTenantClusterAvailabilityZone
-
-	for az, subnet := range azs {
-		ccAZ := controllercontext.ContextStatusTenantClusterAvailabilityZone{
-			Name:          az,
-			PublicSubnet:  subnet.Public,
-			PrivateSubnet: subnet.Private,
+func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextTenantClusterAvailabilityZone {
+	var azNames []string
+	{
+		for az := range azs {
+			azNames = append(azNames, az)
 		}
 
-		results = append(results, ccAZ)
+		sort.Strings(azNames)
 	}
 
-	return results
+	var spec []controllercontext.ContextTenantClusterAvailabilityZone
+
+	for _, az := range azNames {
+		subnets := azs[az]
+		ccAZ := controllercontext.ContextTenantClusterAvailabilityZone{
+			Name:          az,
+			PublicSubnet:  subnets.Public,
+			PrivateSubnet: subnets.Private,
+		}
+
+		spec = append(spec, ccAZ)
+	}
+
+	return spec
 }
 
-func azSubnetsToString(azs map[string]subnetPair) string {
-	var result strings.Builder
-	result.WriteString("availability zone subnet allocations: {")
-	for az, subnet := range azs {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, subnet.Public.String(), subnet.Private.String()))
+func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextTenantClusterAvailabilityZone {
+	var azNames []string
+	{
+		for az := range azs {
+			azNames = append(azNames, az)
+		}
+
+		sort.Strings(azNames)
 	}
 
-	if len(azs) > 0 {
-		result.WriteString("\n}")
-	} else {
-		result.WriteString("}")
+	var status []controllercontext.ContextTenantClusterAvailabilityZone
+
+	for _, az := range azNames {
+		subnets := azs[az]
+
+		// Skip empty subnets as they are not allocated in AWS
+		// and therefor not in the current state.
+		if subnets.areEmpty() {
+			continue
+		}
+
+		// Collect currently used AZ information to store it inside the cc status.
+		ccAZ := controllercontext.ContextTenantClusterAvailabilityZone{
+			Name:          az,
+			PublicSubnet:  subnets.Public,
+			PrivateSubnet: subnets.Private,
+		}
+		status = append(status, ccAZ)
 	}
 
-	return result.String()
+	return status
 }

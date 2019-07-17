@@ -64,10 +64,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	}
 
 	{
-		zones, err := key.StatusAvailabilityZones(config.MachineDeployment)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		zones := config.TenantClusterAvailabilityZones
 
 		sort.Slice(zones, func(i, j int) bool {
 			return zones[i].Name < zones[j].Name
@@ -77,8 +74,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 			return microerror.Maskf(notFoundError, "CustomObject has no availability zones")
 		}
 
-		i.Master.AZ = zones[0].Name
-		i.Master.PrivateSubnet = key.PrivateSubnetName(0)
+		i.Master.AZ = key.MasterAvailabilityZone(config.CustomObject)
+		i.Master.PrivateSubnet = key.SanitizeCFResourceName(key.PrivateSubnetName(i.Master.AZ))
 
 		c := SmallCloudconfigConfig{
 			InstanceRole: "master",

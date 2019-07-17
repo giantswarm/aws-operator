@@ -29,10 +29,7 @@ type GuestSubnetsAdapter struct {
 }
 
 func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
-	zones, err := key.StatusAvailabilityZones(cfg.MachineDeployment)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	zones := cfg.TenantClusterAvailabilityZones
 
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
@@ -45,31 +42,31 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		}
 	}
 
-	for i, az := range zones {
-		snetName := key.PublicSubnetName(i)
+	for _, az := range zones {
+		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := Subnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Public.CIDR,
+			CIDR:                az.PublicSubnet.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PublicSubnetRouteTableAssociationName(i),
-				RouteTableName: "PublicRouteTable",
+				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject))),
 				SubnetName:     snetName,
 			},
 			Type: "public",
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
 
-		snetName = key.PrivateSubnetName(i)
+		snetName = key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet = Subnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Private.CIDR,
+			CIDR:                az.PrivateSubnet.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
-				Name:           key.PrivateSubnetRouteTableAssociationName(i),
-				RouteTableName: key.PrivateRouteTableName(i),
+				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
 			Type: "private",

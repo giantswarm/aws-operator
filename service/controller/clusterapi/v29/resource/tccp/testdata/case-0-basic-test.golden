@@ -64,9 +64,10 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       RouteTableIds:
-        - !Ref PublicRouteTable
-        - !Ref PrivateRouteTable
-        - !Ref PrivateRouteTable01
+        - !Ref PublicRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1c
       ServiceName: 'com.amazonaws.eu-central-1.s3'
       PolicyDocument:
         Version: "2012-10-17"
@@ -470,62 +471,80 @@ Resources:
       CidrIp: 127.0.0.1/32
 
   
-  PublicRouteTable:
+  PublicRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: 8y5ck-public
+        Value: PublicRouteTable-eu-central-1b
       - Key: giantswarm.io/tccp
         Value: true
-  PrivateRouteTable:
+  PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: 8y5ck-private
+        Value: 8y5ck-private-eu-central-1a
       - Key: giantswarm.io/tccp
         Value: true
 
-  VPCPeeringRoute:
+  VPCPeeringRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
-  PrivateRouteTable01:
+  PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: 8y5ck-private01
+        Value: 8y5ck-private-eu-central-1b
       - Key: giantswarm.io/tccp
         Value: true
 
-  VPCPeeringRoute01:
+  VPCPeeringRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable01
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
+  PrivateRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-eu-central-1c
+      - Key: giantswarm.io/tccp
+        Value: true
+
+  VPCPeeringRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
 
   
-  PublicSubnet:
+  PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.8.64/26
+      CidrBlock: 10.100.3.32/27
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PublicSubnet
+        Value: PublicSubnetEuCentral1a
       - Key: giantswarm.io/subnet-type
         Value: public
       - Key: giantswarm.io/tccp
@@ -534,22 +553,22 @@ Resources:
         Value: "1"
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociation:
+  PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      SubnetId: !Ref PublicSubnetEuCentral1a
 
   
-  PublicSubnet01:
+  PublicSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.8.192/26
+      AvailabilityZone: eu-central-1b
+      CidrBlock: 10.100.3.96/27
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PublicSubnet01
+        Value: PublicSubnetEuCentral1b
       - Key: giantswarm.io/subnet-type
         Value: public
       - Key: giantswarm.io/tccp
@@ -558,45 +577,46 @@ Resources:
         Value: "1"
       VpcId: !Ref VPC
 
-  PublicSubnetRouteTableAssociation01:
+  PublicSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet01
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      SubnetId: !Ref PublicSubnetEuCentral1b
 
   
-  PrivateSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.8.0/26
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnet
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
-      VpcId: !Ref VPC
-
-  PrivateSubnetRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      SubnetId: !Ref PrivateSubnet
-  
-  PrivateSubnet01:
+  PublicSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.8.128/26
+      CidrBlock: 10.100.3.160/27
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubnet01
+        Value: PublicSubnetEuCentral1c
+      - Key: giantswarm.io/subnet-type
+        Value: public
+      - Key: giantswarm.io/tccp
+        Value: true
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PublicSubnetRouteTableAssociationEuCentral1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      SubnetId: !Ref PublicSubnetEuCentral1c
+
+  
+  PrivateSubnetEuCentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.3.0/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1a
       - Key: giantswarm.io/subnet-type
         Value: private
       - Key: giantswarm.io/tccp
@@ -605,11 +625,57 @@ Resources:
         Value: "1"
       VpcId: !Ref VPC
 
-  PrivateSubnetRouteTableAssociation01:
+  PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTable01
-      SubnetId: !Ref PrivateSubnet01
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      SubnetId: !Ref PrivateSubnetEuCentral1a
+  
+  PrivateSubnetEuCentral1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1b
+      CidrBlock: 10.100.3.64/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1b
+      - Key: giantswarm.io/subnet-type
+        Value: private
+      - Key: giantswarm.io/tccp
+        Value: true
+      - Key: "kubernetes.io/role/internal-elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PrivateSubnetRouteTableAssociationEuCentral1b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      SubnetId: !Ref PrivateSubnetEuCentral1b
+  
+  PrivateSubnetEuCentral1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1c
+      CidrBlock: 10.100.3.128/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1c
+      - Key: giantswarm.io/subnet-type
+        Value: private
+      - Key: giantswarm.io/tccp
+        Value: true
+      - Key: "kubernetes.io/role/internal-elb"
+        Value: "1"
+      VpcId: !Ref VPC
+
+  PrivateSubnetRouteTableAssociationEuCentral1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      SubnetId: !Ref PrivateSubnetEuCentral1c
   
 
   
@@ -625,9 +691,9 @@ Resources:
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
-      - PublicRouteTable
-      - PrivateRouteTable
-      - PrivateRouteTable01
+      - PublicRouteTableEuCentral1b
+      - PrivateRouteTableEuCentral1a
+      - PrivateRouteTableEuCentral1c
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
@@ -638,65 +704,92 @@ Resources:
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
 
   
-  NATGateway:
+  NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIP
+        - NATEIPEuCentral1a
         - AllocationId
-      SubnetId: !Ref PublicSubnet
+      SubnetId: !Ref PublicSubnetEuCentral1a
       Tags:
         - Key: Name
           Value: 8y5ck
         - Key: giantswarm.io/tccp
           Value: true
-  NATEIP:
+  NATEIPEuCentral1a:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRoute:
+  NATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGateway"
+        Ref: "NATGatewayEuCentral1a"
 
-  NATGateway01:
+  NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - NATEIP01
+        - NATEIPEuCentral1b
         - AllocationId
-      SubnetId: !Ref PublicSubnet01
+      SubnetId: !Ref PublicSubnetEuCentral1b
       Tags:
         - Key: Name
           Value: 8y5ck
         - Key: giantswarm.io/tccp
           Value: true
-  NATEIP01:
+  NATEIPEuCentral1b:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRoute01:
+  NATRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable01
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGateway01"
+        Ref: "NATGatewayEuCentral1b"
+
+  NATGatewayEuCentral1c:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPEuCentral1c
+        - AllocationId
+      SubnetId: !Ref PublicSubnetEuCentral1c
+      Tags:
+        - Key: Name
+          Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
+  NATEIPEuCentral1c:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayEuCentral1c"
 
 
   
@@ -707,7 +800,7 @@ Resources:
     - rsc-abbacd01
     - EtcdVolume
     Properties:
-      AvailabilityZone: eu-central-1a
+      AvailabilityZone: eu-central-1b
       DisableApiTermination: true
       IamInstanceProfile: !Ref MasterInstanceProfile
       ImageId: ami-0eb0d9bb7ad1bd1e9
@@ -715,7 +808,7 @@ Resources:
       Monitoring: false
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
-      SubnetId: !Ref PrivateSubnet
+      SubnetId: !Ref PrivateSubnetEuCentral1b
       UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL21hc3RlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGMiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJldGNkIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiBmYWxzZSwKICAgICAgICAgICJsYWJlbCI6ICJldGNkIiwKICAgICAgICAgICJmb3JtYXQiOiAiZXh0NCIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
       Tags:
       - Key: Name
@@ -730,7 +823,7 @@ Resources:
 
       Size: 50
       VolumeType: gp2
-      AvailabilityZone: eu-central-1a
+      AvailabilityZone: eu-central-1b
       Tags:
       - Key: Name
         Value: 8y5ck-docker
@@ -744,7 +837,7 @@ Resources:
 
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: eu-central-1a
+      AvailabilityZone: eu-central-1b
       Tags:
       - Key: Name
         Value: 8y5ck-etcd
@@ -758,7 +851,7 @@ Resources:
 
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: eu-central-1a
+      AvailabilityZone: eu-central-1b
       Tags:
       - Key: Name
         Value: 8y5ck-log
@@ -811,9 +904,11 @@ Resources:
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PublicSubnet
+        - !Ref PublicSubnetEuCentral1a
       
-        - !Ref PublicSubnet01
+        - !Ref PublicSubnetEuCentral1b
+      
+        - !Ref PublicSubnetEuCentral1c
       
 
   EtcdLoadBalancer:
@@ -841,9 +936,11 @@ Resources:
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
-        - !Ref PrivateSubnet
+        - !Ref PrivateSubnetEuCentral1a
       
-        - !Ref PrivateSubnet01
+        - !Ref PrivateSubnetEuCentral1b
+      
+        - !Ref PrivateSubnetEuCentral1c
       
 
   IngressLoadBalancer:
@@ -888,9 +985,11 @@ Resources:
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:
-        - !Ref PublicSubnet
+        - !Ref PublicSubnetEuCentral1a
       
-        - !Ref PublicSubnet01
+        - !Ref PublicSubnetEuCentral1b
+      
+        - !Ref PublicSubnetEuCentral1c
       
 
   
@@ -943,12 +1042,16 @@ Resources:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubnet
+        - !Ref PrivateSubnetEuCentral1a
       
-        - !Ref PrivateSubnet01
+        - !Ref PrivateSubnetEuCentral1b
+      
+        - !Ref PrivateSubnetEuCentral1c
       
       AvailabilityZones:
         - eu-central-1a
+      
+        - eu-central-1b
       
         - eu-central-1c
       
