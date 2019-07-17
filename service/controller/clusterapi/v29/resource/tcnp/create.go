@@ -292,7 +292,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, m
 }
 
 func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSubnets, error) {
-	var subnets *template.ParamsMainSubnets
+	var subnets template.ParamsMainSubnets
 
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -324,7 +324,7 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 		subnets.List = append(subnets.List, s)
 	}
 
-	return subnets, nil
+	return &subnets, nil
 }
 
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
