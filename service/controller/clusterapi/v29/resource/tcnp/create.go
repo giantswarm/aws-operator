@@ -3,7 +3,6 @@ package tcnp
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -162,6 +161,11 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster,
 		return nil, microerror.Mask(err)
 	}
 
+	var subnets []string
+	for _, a := range cc.Status.TenantCluster.AvailabilityZones {
+		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)))
+	}
+
 	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(md), key.WorkerScalingMax(md), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
@@ -175,7 +179,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster,
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
 		MinSize:               key.WorkerScalingMin(md),
 		Name:                  key.MachineDeploymentASGName(&md),
-		Subnets:               nil, // TODO
+		Subnets:               subnets,
 	}
 
 	return autoScalingGroup, nil
@@ -263,7 +267,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, m
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
-				ID: "", // TODO
+				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},
 		},
 	}
@@ -283,10 +287,10 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
-			CIDR:             a.PrivateSubnet.String(),
-			NameSuffix:       strings.ToUpper(a.Name),
+			CIDR:             "", // TODO: Use Private Subnet CIDR allocated to the nodepool in the AZ.
+			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)),
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-				NameSuffix: strings.ToUpper(a.Name),
+				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.Name)),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
