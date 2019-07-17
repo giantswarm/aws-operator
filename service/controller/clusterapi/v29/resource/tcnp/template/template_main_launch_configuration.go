@@ -71,4 +71,5 @@ const TemplateMainLaunchConfiguration = `
 							]
 						}
 					}
+{{ end }}
 `
