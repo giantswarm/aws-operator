@@ -17,7 +17,11 @@ Resources:
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      VPCZoneIdentifier:AvailabilityZones:- eu-central-1a- eu-central-1cDesiredCapacity: 3
+      VPCZoneIdentifier:
+      AvailabilityZones:
+        - eu-central-1a
+        - eu-central-1c
+      DesiredCapacity: 3
       MinSize: 3
       MaxSize: 5
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration

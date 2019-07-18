@@ -2,7 +2,7 @@ package template
 
 const TemplateMainSubnets = `
 {{- define "subnets" -}}
-  {{- range .Subnets.List -}}
+  {{- range .Subnets.List }}
   {{ .Name }}:
     Type: AWS::EC2::Subnet
     Properties:
@@ -21,6 +21,6 @@ const TemplateMainSubnets = `
     Properties:
       RouteTableId: {{ .TCCP.Subnet.RouteTable.Name }}
       SubnetId: {{ .TCCP.Subnet.Name }}
-  {{- end -}}
+  {{- end }}
 {{- end -}}
 `

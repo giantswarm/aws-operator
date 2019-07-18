@@ -6,13 +6,13 @@ const TemplateMainAutoScalingGroup = `
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-      {{- range $s := .AutoScalingGroup.Subnets -}}
+      {{- range $s := .AutoScalingGroup.Subnets }}
         - !Ref {{ $s }}
-      {{- end -}}
+      {{- end }}
       AvailabilityZones:
-      {{- range $az := .AutoScalingGroup.AvailabilityZones -}}
+      {{- range $az := .AutoScalingGroup.AvailabilityZones }}
         - {{ $az }}
-      {{- end -}}
+      {{- end }}
       DesiredCapacity: {{ .AutoScalingGroup.DesiredCapacity }}
       MinSize: {{ .AutoScalingGroup.MinSize }}
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
