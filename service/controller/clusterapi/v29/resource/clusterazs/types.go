@@ -7,8 +7,8 @@ import "net"
 type subnetPair struct {
 	// These members are exported so that go-cmp can make a diff for unit test
 	// results.
-	Private subnet
 	Public  subnet
+	Private subnet
 }
 type subnet struct {
 	CIDR net.IPNet
