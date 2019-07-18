@@ -240,7 +240,7 @@ func newLaunchConfiguration(ctx context.Context, cl v1alpha1.Cluster, md v1alpha
 			Type:       key.WorkerInstanceType(md),
 		},
 		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
-			S3URL: key.SmallCloudConfigS3URL(cl, cc.Status.TenantCluster.AWSAccountID, "worker"),
+			S3URL: key.SmallCloudConfigS3URL(&md, cc.Status.TenantCluster.AWSAccountID, "worker"),
 		},
 	}
 
