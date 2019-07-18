@@ -191,7 +191,7 @@ Resources:
     Type: AWS::EC2::SecurityGroups
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
-      VpcId: 
+      VpcId: imagenary-vpc-id
       SecurityGroupIngress:
 
       # Allow traffic from control plane CIDR to 22 for SSH access.
