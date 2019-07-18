@@ -261,7 +261,7 @@ Resources:
         Value: PrivateSubnetEuCentral1a
       - Key: "kubernetes.io/role/elb"
         Value: "1"
-      VpcId: 
+      VpcId: imagenary-vpc-id
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -278,7 +278,7 @@ Resources:
         Value: PrivateSubnetEuCentral1b
       - Key: "kubernetes.io/role/elb"
         Value: "1"
-      VpcId: 
+      VpcId: imagenary-vpc-id
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -295,7 +295,7 @@ Resources:
         Value: PrivateSubnetEuCentral1c
       - Key: "kubernetes.io/role/elb"
         Value: "1"
-      VpcId: 
+      VpcId: imagenary-vpc-id
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
