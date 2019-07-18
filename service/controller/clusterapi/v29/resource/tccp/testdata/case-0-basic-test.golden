@@ -29,55 +29,47 @@ Parameters:
     Type: String
     Description: Sets the VersionBundleVersion used to generate the template.
 Resources:
-  
-  VPC:
-    Type: AWS::EC2::VPC
+  workerAutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
-      CidrBlock: 
-      EnableDnsSupport: 'true'
-      EnableDnsHostnames: 'true'
-      Tags:
-      - Key: Name
-        Value: 8y5ck
-      - Key: Installation
-        Value: 
-      - Key: giantswarm.io/tccp
-        Value: true
-  VPCPeeringConnection:
-    Type: 'AWS::EC2::VPCPeeringConnection'
-    Properties:
-      VpcId: !Ref VPC
-      PeerVpcId: vpc-f8d0e10b
-      PeerOwnerId: 'control-plane-account'
-      PeerRoleArn: imaginary-cp-peer-role-arn
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnetEuCentral1a
+        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PrivateSubnetEuCentral1c
+      AvailabilityZones:
+        - eu-central-1a
+        - eu-central-1b
+        - eu-central-1c
+      DesiredCapacity: 3
+      MinSize: 3
+      MaxSize: 5
+      LaunchConfigurationName: !Ref workerLaunchConfiguration
+      LoadBalancerNames:
+        - !Ref IngressLoadBalancer
+      HealthCheckGracePeriod: 10
+      MetricsCollection:
+        - Granularity: "1Minute"
       Tags:
         - Key: Name
-          Value: 8y5ck
+          Value: 8y5ck-worker
+          PropagateAtLaunch: true
         - Key: giantswarm.io/tccp
           Value: true
-  VPCS3Endpoint:
-    Type: 'AWS::EC2::VPCEndpoint'
-    Properties:
-      VpcId: !Ref VPC
-      RouteTableIds:
-        - !Ref PublicRouteTableEuCentral1b
-        - !Ref PrivateRouteTableEuCentral1a
-        - !Ref PrivateRouteTableEuCentral1b
-        - !Ref PrivateRouteTableEuCentral1c
-      ServiceName: 'com.amazonaws.eu-central-1.s3'
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
-            Principal : "*"
-            Effect: "Allow"
-            Action: "s3:*"
-            Resource: "arn:aws:s3:::*"
-          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
-            Principal : "*"
-            Effect: "Allow"
-            Action: "s3:*"
-            Resource: "arn:aws:s3:::*/*"
+          PropagateAtLaunch: true
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/8y5ck
+          Value: true
+          PropagateAtLaunch: false
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        # minimum amount of instances that must always be running during a rolling update
+        MinInstancesInService: 2
+        # only do a rolling update of this amount of instances max
+        MaxBatchSize: 1
+        # after creating a new instance, pause operations on the ASG for this amount of time
+        PauseTime: PT15M
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -193,6 +185,411 @@ Resources:
       InstanceProfileName: 8y5ck-worker-EC2-K8S-Role
       Roles:
         - Ref: "WorkerRole"
+  rsc-ac0dc01:
+    Type: "AWS::EC2::Instance"
+    Description: Master instance
+    DependsOn:
+    - rsc-abbacd01
+    - EtcdVolume
+    Properties:
+      AvailabilityZone: eu-central-1b
+      DisableApiTermination: true
+      IamInstanceProfile: !Ref MasterInstanceProfile
+      ImageId: ami-0eb0d9bb7ad1bd1e9
+      InstanceType: m5.xlarge
+      Monitoring: false
+      SecurityGroupIds:
+      - !Ref MasterSecurityGroup
+      SubnetId: !Ref PrivateSubnetEuCentral1b
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL21hc3RlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGMiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJldGNkIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiBmYWxzZSwKICAgICAgICAgICJsYWJlbCI6ICJldGNkIiwKICAgICAgICAgICJmb3JtYXQiOiAiZXh0NCIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
+      Tags:
+      - Key: Name
+        Value: 8y5ck-master
+      - Key: giantswarm.io/tccp
+        Value: true
+  rsc-abbacd01:
+    Type: AWS::EC2::Volume
+    Properties:
+
+      Encrypted: true
+
+      Size: 50
+      VolumeType: gp2
+      AvailabilityZone: eu-central-1b
+      Tags:
+      - Key: Name
+        Value: 8y5ck-docker
+      - Key: giantswarm.io/tccp
+        Value: true
+  EtcdVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+
+      Encrypted: true
+
+      Size: 100
+      VolumeType: gp2
+      AvailabilityZone: eu-central-1b
+      Tags:
+      - Key: Name
+        Value: 8y5ck-etcd
+      - Key: giantswarm.io/tccp
+        Value: true
+  LogVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+
+      Encrypted: true
+
+      Size: 100
+      VolumeType: gp2
+      AvailabilityZone: eu-central-1b
+      Tags:
+      - Key: Name
+        Value: 8y5ck-log
+      - Key: giantswarm.io/tccp
+        Value: true
+  rsc-ac0dc01DockerMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref rsc-ac0dc01
+      VolumeId: !Ref rsc-abbacd01
+      Device: /dev/xvdc
+  rsc-ac0dc01EtcdMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref rsc-ac0dc01
+      VolumeId: !Ref EtcdVolume
+      Device: /dev/xvdh
+  rsc-ac0dc01LogMountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref rsc-ac0dc01
+      VolumeId: !Ref LogVolume
+      Device: /dev/xvdf
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn:
+      - PublicRouteTableEuCentral1b
+      - PrivateRouteTableEuCentral1a
+      - PrivateRouteTableEuCentral1c
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId: !Ref VPC
+  InternetGatewayRoute:
+    Type: AWS::EC2::Route
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  workerLaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Description: worker launch configuration
+    Properties:
+      ImageId: ami-0eb0d9bb7ad1bd1e9
+      SecurityGroups:
+      - !Ref WorkerSecurityGroup
+      InstanceType: m5.2xlarge
+      InstanceMonitoring: false
+      IamInstanceProfile: !Ref WorkerInstanceProfile
+      BlockDeviceMappings:
+      
+      - DeviceName: "/dev/xvdh"
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      
+      - DeviceName: "/dev/xvdf"
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      
+      - DeviceName: "/dev/xvdg"
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      
+      AssociatePublicIpAddress: false
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL3dvcmtlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJrdWJlbGV0IiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImt1YmVsZXQiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
+  NodeDrainerLifecycleHook:
+    Type: "AWS::AutoScaling::LifecycleHook"
+    Properties:
+      AutoScalingGroupName:
+        Ref: workerAutoScalingGroup
+      DefaultResult: CONTINUE
+      HeartbeatTimeout: 3600
+      LifecycleHookName: NodeDrainer
+      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
+  
+  ApiLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:443
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Instances:
+      - !Ref rsc-ac0dc01
+      Listeners:
+      
+      - InstancePort: 443
+        InstanceProtocol: TCP
+        LoadBalancerPort: 443
+        Protocol: TCP
+      
+      LoadBalancerName: 8y5ck-api
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref MasterSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetEuCentral1a
+      
+        - !Ref PublicSubnetEuCentral1b
+      
+        - !Ref PublicSubnetEuCentral1c
+      
+
+  EtcdLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:2379
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Instances:
+      - !Ref rsc-ac0dc01
+      Listeners:
+      
+      - InstancePort: 2379
+        InstanceProtocol: TCP
+        LoadBalancerPort: 2379
+        Protocol: TCP
+      
+      LoadBalancerName: 8y5ck-etcd
+      Scheme: internal
+      SecurityGroups:
+        - !Ref EtcdELBSecurityGroup
+      Subnets:
+        - !Ref PrivateSubnetEuCentral1a
+      
+        - !Ref PrivateSubnetEuCentral1b
+      
+        - !Ref PrivateSubnetEuCentral1c
+      
+
+  IngressLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 60
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:30011
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Listeners:
+      
+      - InstancePort: 30011
+        InstanceProtocol: TCP
+        LoadBalancerPort: 443
+        Protocol: TCP
+      
+      - InstancePort: 30010
+        InstanceProtocol: TCP
+        LoadBalancerPort: 80
+        Protocol: TCP
+      
+      LoadBalancerName: 8y5ck-ingress
+      Policies:
+      - PolicyName: "EnableProxyProtocol"
+        PolicyType: "ProxyProtocolPolicyType"
+        Attributes:
+        - Name: "ProxyProtocol"
+          Value: "true"
+        InstancePorts:
+        
+        - 30011
+        
+        - 30010
+        
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref IngressSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetEuCentral1a
+      
+        - !Ref PublicSubnetEuCentral1b
+      
+        - !Ref PublicSubnetEuCentral1c
+      
+  
+  NATGatewayEuCentral1a:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPEuCentral1a
+        - AllocationId
+      SubnetId: !Ref PublicSubnetEuCentral1a
+      Tags:
+        - Key: Name
+          Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
+  NATEIPEuCentral1a:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayEuCentral1a"
+  NATGatewayEuCentral1b:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPEuCentral1b
+        - AllocationId
+      SubnetId: !Ref PublicSubnetEuCentral1b
+      Tags:
+        - Key: Name
+          Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
+  NATEIPEuCentral1b:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteEuCentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayEuCentral1b"
+  NATGatewayEuCentral1c:
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATEIPEuCentral1c
+        - AllocationId
+      SubnetId: !Ref PublicSubnetEuCentral1c
+      Tags:
+        - Key: Name
+          Value: 8y5ck
+        - Key: giantswarm.io/tccp
+          Value: true
+  NATEIPEuCentral1c:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: "NATGatewayEuCentral1c"
+  
+  PublicRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: PublicRouteTable-eu-central-1b
+      - Key: giantswarm.io/tccp
+        Value: true
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-eu-central-1a
+      - Key: giantswarm.io/tccp
+        Value: true
+  VPCPeeringRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
+  PrivateRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-eu-central-1b
+      - Key: giantswarm.io/tccp
+        Value: true
+  VPCPeeringRouteEuCentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
+  PrivateRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-eu-central-1c
+      - Key: giantswarm.io/tccp
+        Value: true
+  VPCPeeringRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: "VPCPeeringConnection"
+  
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -421,66 +818,6 @@ Resources:
       Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
-  PublicRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: PublicRouteTable-eu-central-1b
-      - Key: giantswarm.io/tccp
-        Value: true
-  PrivateRouteTableEuCentral1a:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1a
-      - Key: giantswarm.io/tccp
-        Value: true
-  VPCPeeringRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
-  PrivateRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1b
-      - Key: giantswarm.io/tccp
-        Value: true
-  VPCPeeringRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
-  PrivateRouteTableEuCentral1c:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1c
-      - Key: giantswarm.io/tccp
-        Value: true
-  VPCPeeringRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
   
   PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
@@ -608,389 +945,52 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       SubnetId: !Ref PrivateSubnetEuCentral1c
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
+  
+  VPC:
+    Type: AWS::EC2::VPC
     Properties:
+      CidrBlock: 
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
       Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
-  VPCGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    DependsOn:
-      - PublicRouteTableEuCentral1b
-      - PrivateRouteTableEuCentral1a
-      - PrivateRouteTableEuCentral1c
+      - Key: Name
+        Value: 8y5ck
+      - Key: Installation
+        Value: 
+      - Key: giantswarm.io/tccp
+        Value: true
+  VPCPeeringConnection:
+    Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
-      InternetGatewayId:
-        Ref: InternetGateway
       VpcId: !Ref VPC
-  InternetGatewayRoute:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: InternetGateway
-  
-  NATGatewayEuCentral1a:
-    Type: AWS::EC2::NatGateway
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      AllocationId:
-        Fn::GetAtt:
-        - NATEIPEuCentral1a
-        - AllocationId
-      SubnetId: !Ref PublicSubnetEuCentral1a
+      PeerVpcId: vpc-f8d0e10b
+      PeerOwnerId: 'control-plane-account'
+      PeerRoleArn: imaginary-cp-peer-role-arn
       Tags:
         - Key: Name
           Value: 8y5ck
         - Key: giantswarm.io/tccp
           Value: true
-  NATEIPEuCentral1a:
-    Type: AWS::EC2::EIP
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
     Properties:
-      Domain: vpc
-  NATRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayEuCentral1a"
-  NATGatewayEuCentral1b:
-    Type: AWS::EC2::NatGateway
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      AllocationId:
-        Fn::GetAtt:
-        - NATEIPEuCentral1b
-        - AllocationId
-      SubnetId: !Ref PublicSubnetEuCentral1b
-      Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
-  NATEIPEuCentral1b:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-  NATRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayEuCentral1b"
-  NATGatewayEuCentral1c:
-    Type: AWS::EC2::NatGateway
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      AllocationId:
-        Fn::GetAtt:
-        - NATEIPEuCentral1c
-        - AllocationId
-      SubnetId: !Ref PublicSubnetEuCentral1c
-      Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
-  NATEIPEuCentral1c:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-  NATRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayEuCentral1c"
-  rsc-ac0dc01:
-    Type: "AWS::EC2::Instance"
-    Description: Master instance
-    DependsOn:
-    - rsc-abbacd01
-    - EtcdVolume
-    Properties:
-      AvailabilityZone: eu-central-1b
-      DisableApiTermination: true
-      IamInstanceProfile: !Ref MasterInstanceProfile
-      ImageId: ami-0eb0d9bb7ad1bd1e9
-      InstanceType: m5.xlarge
-      Monitoring: false
-      SecurityGroupIds:
-      - !Ref MasterSecurityGroup
-      SubnetId: !Ref PrivateSubnetEuCentral1b
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL21hc3RlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGMiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJldGNkIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiBmYWxzZSwKICAgICAgICAgICJsYWJlbCI6ICJldGNkIiwKICAgICAgICAgICJmb3JtYXQiOiAiZXh0NCIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
-      Tags:
-      - Key: Name
-        Value: 8y5ck-master
-      - Key: giantswarm.io/tccp
-        Value: true
-  rsc-abbacd01:
-    Type: AWS::EC2::Volume
-    Properties:
-
-      Encrypted: true
-
-      Size: 50
-      VolumeType: gp2
-      AvailabilityZone: eu-central-1b
-      Tags:
-      - Key: Name
-        Value: 8y5ck-docker
-      - Key: giantswarm.io/tccp
-        Value: true
-  EtcdVolume:
-    Type: AWS::EC2::Volume
-    Properties:
-
-      Encrypted: true
-
-      Size: 100
-      VolumeType: gp2
-      AvailabilityZone: eu-central-1b
-      Tags:
-      - Key: Name
-        Value: 8y5ck-etcd
-      - Key: giantswarm.io/tccp
-        Value: true
-  LogVolume:
-    Type: AWS::EC2::Volume
-    Properties:
-
-      Encrypted: true
-
-      Size: 100
-      VolumeType: gp2
-      AvailabilityZone: eu-central-1b
-      Tags:
-      - Key: Name
-        Value: 8y5ck-log
-      - Key: giantswarm.io/tccp
-        Value: true
-  rsc-ac0dc01DockerMountPoint:
-    Type: AWS::EC2::VolumeAttachment
-    Properties:
-      InstanceId: !Ref rsc-ac0dc01
-      VolumeId: !Ref rsc-abbacd01
-      Device: /dev/xvdc
-  rsc-ac0dc01EtcdMountPoint:
-    Type: AWS::EC2::VolumeAttachment
-    Properties:
-      InstanceId: !Ref rsc-ac0dc01
-      VolumeId: !Ref EtcdVolume
-      Device: /dev/xvdh
-  rsc-ac0dc01LogMountPoint:
-    Type: AWS::EC2::VolumeAttachment
-    Properties:
-      InstanceId: !Ref rsc-ac0dc01
-      VolumeId: !Ref LogVolume
-      Device: /dev/xvdf
-  
-  ApiLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 1200
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:443
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Instances:
-      - !Ref rsc-ac0dc01
-      Listeners:
-      
-      - InstancePort: 443
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-api
-      Scheme: internet-facing
-      SecurityGroups:
-        - !Ref MasterSecurityGroup
-      Subnets:
-        - !Ref PublicSubnetEuCentral1a
-      
-        - !Ref PublicSubnetEuCentral1b
-      
-        - !Ref PublicSubnetEuCentral1c
-      
-
-  EtcdLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 1200
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:2379
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Instances:
-      - !Ref rsc-ac0dc01
-      Listeners:
-      
-      - InstancePort: 2379
-        InstanceProtocol: TCP
-        LoadBalancerPort: 2379
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-etcd
-      Scheme: internal
-      SecurityGroups:
-        - !Ref EtcdELBSecurityGroup
-      Subnets:
-        - !Ref PrivateSubnetEuCentral1a
-      
-        - !Ref PrivateSubnetEuCentral1b
-      
-        - !Ref PrivateSubnetEuCentral1c
-      
-
-  IngressLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 60
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:30011
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Listeners:
-      
-      - InstancePort: 30011
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      - InstancePort: 30010
-        InstanceProtocol: TCP
-        LoadBalancerPort: 80
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-ingress
-      Policies:
-      - PolicyName: "EnableProxyProtocol"
-        PolicyType: "ProxyProtocolPolicyType"
-        Attributes:
-        - Name: "ProxyProtocol"
-          Value: "true"
-        InstancePorts:
-        
-        - 30011
-        
-        - 30010
-        
-      Scheme: internet-facing
-      SecurityGroups:
-        - !Ref IngressSecurityGroup
-      Subnets:
-        - !Ref PublicSubnetEuCentral1a
-      
-        - !Ref PublicSubnetEuCentral1b
-      
-        - !Ref PublicSubnetEuCentral1c
-      
-  workerLaunchConfiguration:
-    Type: "AWS::AutoScaling::LaunchConfiguration"
-    Description: worker launch configuration
-    Properties:
-      ImageId: ami-0eb0d9bb7ad1bd1e9
-      SecurityGroups:
-      - !Ref WorkerSecurityGroup
-      InstanceType: m5.2xlarge
-      InstanceMonitoring: false
-      IamInstanceProfile: !Ref WorkerInstanceProfile
-      BlockDeviceMappings:
-      
-      - DeviceName: "/dev/xvdh"
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      
-      - DeviceName: "/dev/xvdf"
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      
-      - DeviceName: "/dev/xvdg"
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      
-      AssociatePublicIpAddress: false
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL3dvcmtlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJrdWJlbGV0IiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImt1YmVsZXQiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
-  NodeDrainerLifecycleHook:
-    Type: "AWS::AutoScaling::LifecycleHook"
-    Properties:
-      AutoScalingGroupName:
-        Ref: workerAutoScalingGroup
-      DefaultResult: CONTINUE
-      HeartbeatTimeout: 3600
-      LifecycleHookName: NodeDrainer
-      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
-  workerAutoScalingGroup:
-    Type: "AWS::AutoScaling::AutoScalingGroup"
-    Properties:
-      VPCZoneIdentifier:
-        - !Ref PrivateSubnetEuCentral1a
-        - !Ref PrivateSubnetEuCentral1b
-        - !Ref PrivateSubnetEuCentral1c
-      AvailabilityZones:
-        - eu-central-1a
-        - eu-central-1b
-        - eu-central-1c
-      DesiredCapacity: 3
-      MinSize: 3
-      MaxSize: 5
-      LaunchConfigurationName: !Ref workerLaunchConfiguration
-      LoadBalancerNames:
-        - !Ref IngressLoadBalancer
-      HealthCheckGracePeriod: 10
-      MetricsCollection:
-        - Granularity: "1Minute"
-      Tags:
-        - Key: Name
-          Value: 8y5ck-worker
-          PropagateAtLaunch: true
-        - Key: giantswarm.io/tccp
-          Value: true
-          PropagateAtLaunch: true
-        - Key: k8s.io/cluster-autoscaler/enabled
-          Value: true
-          PropagateAtLaunch: false
-        - Key: k8s.io/cluster-autoscaler/8y5ck
-          Value: true
-          PropagateAtLaunch: false
-    UpdatePolicy:
-      AutoScalingRollingUpdate:
-        # minimum amount of instances that must always be running during a rolling update
-        MinInstancesInService: 2
-        # only do a rolling update of this amount of instances max
-        MaxBatchSize: 1
-        # after creating a new instance, pause operations on the ASG for this amount of time
-        PauseTime: PT15M
-  
+      VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PublicRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1c
+      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*/*"
