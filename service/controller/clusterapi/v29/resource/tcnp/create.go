@@ -74,46 +74,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		var params *template.ParamsMain
-		{
-			autoScalingGroup, err := r.newAutoScalingGroup(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			iamPolicies, err := r.newIAMPolicies(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			launchConfiguration, err := r.newLaunchConfiguration(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			lifecycleHooks, err := r.newLifecycleHooks(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			outputs, err := r.newOutputs(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			securityGroups, err := r.newSecurityGroups(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			subnets, err := r.newSubnets(ctx, cl, md)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			params = &template.ParamsMain{
-				AutoScalingGroup:    autoScalingGroup,
-				IAMPolicies:         iamPolicies,
-				LaunchConfiguration: launchConfiguration,
-				LifecycleHooks:      lifecycleHooks,
-				Outputs:             outputs,
-				SecurityGroups:      securityGroups,
-				Subnets:             subnets,
-			}
+		params, err := newTemplateParams(ctx, cl, md)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		templateBody, err = template.Render(params)
@@ -163,7 +126,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
+func newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -193,7 +156,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster,
 	return autoScalingGroup, nil
 }
 
-func (r *Resource) newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainIAMPolicies, error) {
+func newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -215,7 +178,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v
 	return iamPolicies, nil
 }
 
-func (r *Resource) newLaunchConfiguration(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainLaunchConfiguration, error) {
+func newLaunchConfiguration(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainLaunchConfiguration, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -247,11 +210,11 @@ func (r *Resource) newLaunchConfiguration(ctx context.Context, cl v1alpha1.Clust
 	return launchConfiguration, nil
 }
 
-func (r *Resource) newLifecycleHooks(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainLifecycleHooks, error) {
+func newLifecycleHooks(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainLifecycleHooks, error) {
 	return &template.ParamsMainLifecycleHooks{}, nil
 }
 
-func (r *Resource) newOutputs(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainOutputs, error) {
+func newOutputs(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainOutputs, error) {
 	outputs := &template.ParamsMainOutputs{
 		CloudConfig: template.ParamsMainOutputsCloudConfig{
 			Version: key.CloudConfigVersion,
@@ -269,7 +232,7 @@ func (r *Resource) newOutputs(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 	return outputs, nil
 }
 
-func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSecurityGroups, error) {
+func newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -291,7 +254,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, m
 	return securityGroups, nil
 }
 
-func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSubnets, error) {
+func newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSubnets, error) {
 	var subnets template.ParamsMainSubnets
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -325,6 +288,52 @@ func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alp
 	}
 
 	return &subnets, nil
+}
+
+func newTemplateParams(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMain, error) {
+	var params *template.ParamsMain
+	{
+		autoScalingGroup, err := newAutoScalingGroup(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		iamPolicies, err := newIAMPolicies(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		launchConfiguration, err := newLaunchConfiguration(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		lifecycleHooks, err := newLifecycleHooks(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		outputs, err := newOutputs(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		securityGroups, err := newSecurityGroups(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		subnets, err := newSubnets(ctx, cl, md)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		params = &template.ParamsMain{
+			AutoScalingGroup:    autoScalingGroup,
+			IAMPolicies:         iamPolicies,
+			LaunchConfiguration: launchConfiguration,
+			LifecycleHooks:      lifecycleHooks,
+			Outputs:             outputs,
+			SecurityGroups:      securityGroups,
+			Subnets:             subnets,
+		}
+	}
+
+	return params, nil
 }
 
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG

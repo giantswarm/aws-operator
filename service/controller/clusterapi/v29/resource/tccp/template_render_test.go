@@ -3,31 +3,18 @@ package tccp
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"io/ioutil"
-	"net"
 	"path/filepath"
 	"strconv"
 	"testing"
-	"unicode"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
-)
-
-const (
-	TestClusterID           = "8y5ck"
-	TestMachineDeploymentID = "al9qy"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
@@ -45,14 +32,14 @@ func Test_newTemplateBody(t *testing.T) {
 	testCases := []struct {
 		name         string
 		cr           v1alpha1.Cluster
-		ctx          controllercontext.Context
+		ctx          context.Context
 		tp           templateParams
 		errorMatcher func(error) bool
 	}{
 		{
 			name: "case 0: basic test",
-			cr:   defaultCluster(),
-			ctx:  defaultControllerContext(),
+			cr:   unittest.DefaultCluster(),
+			ctx:  unittest.DefaultContext(),
 			tp: templateParams{
 				DockerVolumeResourceName:   "rsc-abbacd01",
 				MasterInstanceResourceName: "rsc-ac0dc01",
@@ -61,16 +48,27 @@ func Test_newTemplateBody(t *testing.T) {
 		},
 	}
 
-	var r *Resource
+	var err error
+
+	var d *detection.Detection
 	{
-		d, err := detection.New(detection.Config{Logger: microloggertest.New()})
+		c := detection.Config{
+			Logger: microloggertest.New(),
+		}
+
+		d, err = detection.New(c)
 		if err != nil {
 			t.Fatal(err)
 		}
+	}
+
+	var r *Resource
+	{
 
 		c := Config{
-			Detection:        d,
-			Logger:           microloggertest.New(),
+			Detection: d,
+			Logger:    microloggertest.New(),
+
 			EncrypterBackend: "kms",
 			VPCPeerID:        "vpc-f8d0e10b",
 		}
@@ -83,8 +81,7 @@ func Test_newTemplateBody(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			ctx := controllercontext.NewContext(context.Background(), tc.ctx)
-			actual, err := r.newTemplateBody(ctx, tc.cr, tc.tp)
+			templateBody, err := r.newTemplateBody(tc.ctx, tc.cr, tc.tp)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -97,223 +94,23 @@ func Test_newTemplateBody(t *testing.T) {
 				t.Fatalf("error == %#v, want matching", err)
 			}
 
-			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")
+			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
+
 			if *update {
-				ioutil.WriteFile(golden, []byte(actual), 0644)
+				err := ioutil.WriteFile(p, []byte(templateBody), 0644)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
-			expected, err := ioutil.ReadFile(golden)
+			goldenFile, err := ioutil.ReadFile(p)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if !bytes.Equal([]byte(actual), expected) {
-				t.Fatalf("\n\n%s\n", cmp.Diff(actual, string(expected)))
+			if !bytes.Equal([]byte(templateBody), goldenFile) {
+				t.Fatalf("\n\n%s\n", cmp.Diff(templateBody, string(goldenFile)))
 			}
 		})
 	}
-}
-
-func defaultCluster() v1alpha1.Cluster {
-	g8sSpec := g8sv1alpha1.AWSClusterSpec{
-		Cluster: g8sv1alpha1.AWSClusterSpecCluster{
-			Description: "Test cluster for template rendering unit test.",
-			DNS: g8sv1alpha1.AWSClusterSpecClusterDNS{
-				Domain: "guux.eu-central-1.aws.gigantic.io",
-			},
-		},
-		Provider: g8sv1alpha1.AWSClusterSpecProvider{
-			CredentialSecret: g8sv1alpha1.AWSClusterSpecProviderCredentialSecret{
-				Name:      "default-credential-secret",
-				Namespace: "default",
-			},
-			Master: g8sv1alpha1.AWSClusterSpecProviderMaster{
-				AvailabilityZone: "eu-central-1b",
-				InstanceType:     "m5.xlarge",
-			},
-			Region: "eu-central-1",
-		},
-	}
-
-	cr := v1alpha1.Cluster{
-		ObjectMeta: v1.ObjectMeta{
-			Labels: map[string]string{
-				label.Cluster: TestClusterID,
-			},
-		},
-	}
-
-	return withG8sClusterSpec(cr, g8sSpec)
-}
-
-func defaultControllerContext() controllercontext.Context {
-	return controllercontext.Context{
-		Status: controllercontext.ContextStatus{
-			ControlPlane: controllercontext.ContextStatusControlPlane{
-				AWSAccountID: "control-plane-account",
-				NATGateway:   controllercontext.ContextStatusControlPlaneNATGateway{},
-				RouteTable:   controllercontext.ContextStatusControlPlaneRouteTable{},
-				PeerRole: controllercontext.ContextStatusControlPlanePeerRole{
-					ARN: "imaginary-cp-peer-role-arn",
-				},
-				VPC: controllercontext.ContextStatusControlPlaneVPC{
-					CIDR: "10.1.0.0/16",
-				},
-			},
-			TenantCluster: controllercontext.ContextStatusTenantCluster{
-				AWSAccountID:          "tenant-account",
-				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
-				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
-				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
-				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
-					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
-					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
-						{
-							Name:          "eu-central-1a",
-							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
-						},
-						{
-							Name:          "eu-central-1b",
-							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
-						},
-						{
-							Name:          "eu-central-1c",
-							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
-						},
-					},
-					IsTransitioning:   false,
-					MachineDeployment: defaultMachineDeployment(),
-					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
-						PeeringConnectionID: "imagenary-peering-connection-id",
-					},
-				},
-				VersionBundleVersion: "6.3.0",
-				WorkerInstance: controllercontext.ContextStatusTenantClusterWorkerInstance{
-					DockerVolumeSizeGB: "100",
-					Image:              "ami-0eb0d9bb7ad1bd1e9",
-					Type:               "m5.xlarge",
-				},
-			},
-		},
-		Spec: controllercontext.ContextSpec{
-			TenantCluster: controllercontext.ContextSpecTenantCluster{
-				TCCP: controllercontext.ContextSpecTenantClusterTCCP{
-					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
-						{
-							Name:          "eu-central-1a",
-							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
-						},
-						{
-							Name:          "eu-central-1b",
-							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
-						},
-						{
-							Name:          "eu-central-1c",
-							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func defaultMachineDeployment() v1alpha1.MachineDeployment {
-	g8sSpec := g8sv1alpha1.AWSMachineDeploymentSpec{
-		NodePool: g8sv1alpha1.AWSMachineDeploymentSpecNodePool{
-			Description: "Test node pool for cluster in template rendering unit test.",
-			Machine: g8sv1alpha1.AWSMachineDeploymentSpecNodePoolMachine{
-				DockerVolumeSizeGB:  100,
-				KubeletVolumeSizeGB: 100,
-			},
-			Scaling: g8sv1alpha1.AWSMachineDeploymentSpecNodePoolScaling{
-				Max: 5,
-				Min: 3,
-			},
-		},
-		Provider: g8sv1alpha1.AWSMachineDeploymentSpecProvider{
-			AvailabilityZones: []string{
-				"eu-central-1a",
-				"eu-central-1c",
-			},
-			Worker: g8sv1alpha1.AWSMachineDeploymentSpecProviderWorker{
-				InstanceType: "m5.2xlarge",
-			},
-		},
-	}
-
-	cr := v1alpha1.MachineDeployment{
-		ObjectMeta: v1.ObjectMeta{
-			Annotations: map[string]string{
-				annotation.MachineDeploymentSubnet: "10.100.8.0/24",
-			},
-			Labels: map[string]string{
-				label.Cluster:           TestClusterID,
-				label.MachineDeployment: TestMachineDeploymentID,
-			},
-		},
-	}
-
-	return withG8sMachineDeploymentSpec(cr, g8sSpec)
-}
-
-func mustParseCIDR(s string) net.IPNet {
-	_, n, err := net.ParseCIDR(s)
-	if err != nil {
-		panic(err)
-	}
-	return *n
-}
-
-// normalizeToFileName converts all non-digit, non-letter runes in input string
-// to dash ('-'). Coalesces multiple dashes into one.
-func normalizeToFileName(s string) string {
-	var result []rune
-	for _, r := range []rune(s) {
-		if unicode.IsDigit(r) || unicode.IsLetter(r) {
-			result = append(result, r)
-		} else {
-			l := len(result)
-			if l > 0 && result[l-1] != '-' {
-				result = append(result, rune('-'))
-			}
-		}
-	}
-	return string(result)
-}
-
-func withG8sClusterSpec(cr v1alpha1.Cluster, providerExtension g8sv1alpha1.AWSClusterSpec) v1alpha1.Cluster {
-	var err error
-
-	if cr.Spec.ProviderSpec.Value == nil {
-		cr.Spec.ProviderSpec.Value = &runtime.RawExtension{}
-	}
-
-	cr.Spec.ProviderSpec.Value.Raw, err = json.Marshal(&providerExtension)
-	if err != nil {
-		panic(err)
-	}
-
-	return cr
-}
-
-func withG8sMachineDeploymentSpec(cr v1alpha1.MachineDeployment, providerExtension g8sv1alpha1.AWSMachineDeploymentSpec) v1alpha1.MachineDeployment {
-	var err error
-
-	if cr.Spec.Template.Spec.ProviderSpec.Value == nil {
-		cr.Spec.Template.Spec.ProviderSpec.Value = &runtime.RawExtension{}
-	}
-
-	cr.Spec.Template.Spec.ProviderSpec.Value.Raw, err = json.Marshal(&providerExtension)
-	if err != nil {
-		panic(err)
-	}
-
-	return cr
 }
