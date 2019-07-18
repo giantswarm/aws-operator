@@ -136,7 +136,7 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.Cluster) ([
 	var tenantPrivateSubnetCidrs []string
 	{
 		for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
-			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.PrivateSubnet.String())
+			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.PrivateSubnet.CIDR.String())
 		}
 	}
 

@@ -35,16 +35,28 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			},
 			expectedAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{
-					Public:  mustParseCIDR("10.100.8.64/27"),
-					Private: mustParseCIDR("10.100.8.96/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.96/27"),
+					},
 				},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -54,27 +66,47 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 			},
 			expectedAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{
-					Public:  mustParseCIDR("10.100.8.64/27"),
-					Private: mustParseCIDR("10.100.8.96/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.96/27"),
+					},
 				},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -86,22 +118,38 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 				"eu-central-1a": subnetPair{},
 				"eu-central-1b": subnetPair{},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 			},
 			expectedAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{
-					Public:  mustParseCIDR("10.100.8.64/27"),
-					Private: mustParseCIDR("10.100.8.96/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.96/27"),
+					},
 				},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -111,35 +159,63 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{
-					Public:  mustParseCIDR("10.100.8.64/27"),
-					Private: mustParseCIDR("10.100.8.96/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.96/27"),
+					},
 				},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 				"eu-central-1d": subnetPair{},
 			},
 			expectedAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{
-					Public:  mustParseCIDR("10.100.8.64/27"),
-					Private: mustParseCIDR("10.100.8.96/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.96/27"),
+					},
 				},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 				"eu-central-1d": subnetPair{
-					Public:  mustParseCIDR("10.100.8.192/27"),
-					Private: mustParseCIDR("10.100.8.224/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.192/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.224/27"),
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -149,20 +225,36 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+					},
 				},
 				"eu-central-1b": subnetPair{
-					Public:  mustParseCIDR("10.100.8.64/27"),
-					Private: mustParseCIDR("10.100.8.96/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.96/27"),
+					},
 				},
 				"eu-central-1c": subnetPair{
-					Public:  mustParseCIDR("10.100.8.128/27"),
-					Private: mustParseCIDR("10.100.8.160/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.128/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.160/27"),
+					},
 				},
 				"eu-central-1d": subnetPair{
-					Public:  mustParseCIDR("10.100.8.192/27"),
-					Private: mustParseCIDR("10.100.8.224/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.192/27"),
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.224/27"),
+					},
 				},
 				"eu-central-1e": subnetPair{},
 			},
@@ -246,8 +338,10 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					ID:     "validID",
-					Public: mustParseCIDR("10.100.8.0/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+						ID:   "validID",
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -273,8 +367,10 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					ID:     "validID",
-					Public: mustParseCIDR("10.100.8.0/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+						ID:   "validID",
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -330,13 +426,20 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					ID:      "validID",
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+						ID:   "validID",
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+						ID:   "validID",
+					},
 				},
 				"eu-central-1b": subnetPair{
-					ID:     "validID",
-					Public: mustParseCIDR("10.100.8.64/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+						ID:   "validID",
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -383,9 +486,14 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					ID:      "validID",
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+						ID:   "validID",
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+						ID:   "validID",
+					},
 				},
 			},
 			errorMatcher: nil,
@@ -543,13 +651,20 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
-					ID:      "validID",
-					Public:  mustParseCIDR("10.100.8.0/27"),
-					Private: mustParseCIDR("10.100.8.32/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.0/27"),
+						ID:   "validID",
+					},
+					Private: subnet{
+						CIDR: mustParseCIDR("10.100.8.32/27"),
+						ID:   "validID",
+					},
 				},
 				"eu-central-1b": subnetPair{
-					ID:     "validID",
-					Public: mustParseCIDR("10.100.8.64/27"),
+					Public: subnet{
+						CIDR: mustParseCIDR("10.100.8.64/27"),
+						ID:   "validID",
+					},
 				},
 			},
 			errorMatcher: nil,

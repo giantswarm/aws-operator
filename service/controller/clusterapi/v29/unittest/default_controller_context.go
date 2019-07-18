@@ -30,22 +30,37 @@ func DefaultContext() context.Context {
 					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
 					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
 						{
-							ID:            "validSubnetID-1a",
-							Name:          "eu-central-1a",
-							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
+							Name: "eu-central-1a",
+							PrivateSubnet: controllercontext.ContextTenantClusterAvailabilityZonePrivateSubnet{
+								CIDR: mustParseCIDR("10.100.3.0/27"),
+								ID:   "validPrivateSubnetID-1a",
+							},
+							PublicSubnet: controllercontext.ContextTenantClusterAvailabilityZonePublicSubnet{
+								CIDR: mustParseCIDR("10.100.3.32/27"),
+								ID:   "validPublicSubnetID-1a",
+							},
 						},
 						{
-							ID:            "validSubnetID-1b",
-							Name:          "eu-central-1b",
-							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
+							Name: "eu-central-1b",
+							PrivateSubnet: controllercontext.ContextTenantClusterAvailabilityZonePrivateSubnet{
+								CIDR: mustParseCIDR("10.100.3.64/27"),
+								ID:   "validPrivateSubnetID-1b",
+							},
+							PublicSubnet: controllercontext.ContextTenantClusterAvailabilityZonePublicSubnet{
+								CIDR: mustParseCIDR("10.100.3.96/27"),
+								ID:   "validPublicSubnetID-1b",
+							},
 						},
 						{
-							ID:            "validSubnetID-1c",
-							Name:          "eu-central-1c",
-							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
+							Name: "eu-central-1c",
+							PrivateSubnet: controllercontext.ContextTenantClusterAvailabilityZonePrivateSubnet{
+								CIDR: mustParseCIDR("10.100.3.128/27"),
+								ID:   "validPrivateSubnetID-1c",
+							},
+							PublicSubnet: controllercontext.ContextTenantClusterAvailabilityZonePublicSubnet{
+								CIDR: mustParseCIDR("10.100.3.164/27"),
+								ID:   "validPublicSubnetID-1c",
+							},
 						},
 					},
 					IsTransitioning:   false,
@@ -68,22 +83,37 @@ func DefaultContext() context.Context {
 				TCCP: controllercontext.ContextSpecTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
 						{
-							ID:            "validSubnetID-1a",
-							Name:          "eu-central-1a",
-							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
+							Name: "eu-central-1a",
+							PrivateSubnet: controllercontext.ContextTenantClusterAvailabilityZonePrivateSubnet{
+								CIDR: mustParseCIDR("10.100.3.0/27"),
+								ID:   "validPrivateSubnetID-1a",
+							},
+							PublicSubnet: controllercontext.ContextTenantClusterAvailabilityZonePublicSubnet{
+								CIDR: mustParseCIDR("10.100.3.32/27"),
+								ID:   "validPublicSubnetID-1a",
+							},
 						},
 						{
-							ID:            "validSubnetID-1b",
-							Name:          "eu-central-1b",
-							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
+							Name: "eu-central-1b",
+							PrivateSubnet: controllercontext.ContextTenantClusterAvailabilityZonePrivateSubnet{
+								CIDR: mustParseCIDR("10.100.3.64/27"),
+								ID:   "validPrivateSubnetID-1b",
+							},
+							PublicSubnet: controllercontext.ContextTenantClusterAvailabilityZonePublicSubnet{
+								CIDR: mustParseCIDR("10.100.3.96/27"),
+								ID:   "validPublicSubnetID-1b",
+							},
 						},
 						{
-							ID:            "validSubnetID-1c",
-							Name:          "eu-central-1c",
-							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
+							Name: "eu-central-1c",
+							PrivateSubnet: controllercontext.ContextTenantClusterAvailabilityZonePrivateSubnet{
+								CIDR: mustParseCIDR("10.100.3.128/27"),
+								ID:   "validPrivateSubnetID-1c",
+							},
+							PublicSubnet: controllercontext.ContextTenantClusterAvailabilityZonePublicSubnet{
+								CIDR: mustParseCIDR("10.100.3.164/27"),
+								ID:   "validPublicSubnetID-1c",
+							},
 						},
 					},
 				},

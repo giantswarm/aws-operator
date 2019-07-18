@@ -265,7 +265,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: PublicRouteTableEuCentral1a
-      SubnetId: validSubnetID-1a
+      SubnetId: validPublicSubnetID-1a
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -282,4 +282,4 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: PublicRouteTableEuCentral1b
-      SubnetId: validSubnetID-1b
+      SubnetId: validPublicSubnetID-1b
