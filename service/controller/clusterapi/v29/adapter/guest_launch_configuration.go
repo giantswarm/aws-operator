@@ -116,7 +116,7 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 	// small cloud config field.
 	c := SmallCloudconfigConfig{
 		InstanceRole: "worker",
-		S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, "worker"),
+		S3URL:        key.SmallCloudConfigS3URL(&config.CustomObject, config.TenantClusterAccountID, "worker"),
 	}
 	rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
