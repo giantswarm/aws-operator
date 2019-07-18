@@ -326,7 +326,8 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 
 				VersionBundleVersion: key.OperatorVersion(&cr),
 			},
-			TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
+			TenantClusterAccountID:         cc.Status.TenantCluster.AWSAccountID,
+			TenantClusterAvailabilityZones: cc.Spec.TenantCluster.TCCP.AvailabilityZones,
 		}
 
 		if r.encrypterBackend == encrypter.KMSBackend {

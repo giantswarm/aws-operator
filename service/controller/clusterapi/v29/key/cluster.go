@@ -61,19 +61,6 @@ const (
 	RefWorkerASG   = "workerAutoScalingGroup"
 )
 
-func BucketName(cluster v1alpha1.Cluster, accountID string) string {
-	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(&cluster))
-}
-
-// BucketObjectName computes the S3 object path to the actual cloud config.
-//
-//     /version/3.4.0/cloudconfig/v_3_2_5/master
-//     /version/3.4.0/cloudconfig/v_3_2_5/worker
-//
-func BucketObjectName(cluster v1alpha1.Cluster, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(&cluster), CloudConfigVersion, role)
-}
-
 func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
@@ -215,25 +202,12 @@ func RolePeerAccess(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(&cluster))
 }
 
-func RouteTableName(cluster v1alpha1.Cluster, suffix string, idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return fmt.Sprintf("%s-%s", ClusterID(&cluster), suffix)
-	}
-	return fmt.Sprintf("%s-%s%02d", ClusterID(&cluster), suffix, idx)
+func RouteTableName(cluster v1alpha1.Cluster, suffix, az string) string {
+	return fmt.Sprintf("%s-%s-%s", ClusterID(&cluster), suffix, az)
 }
 
 func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(&cluster), groupName)
-}
-
-func SmallCloudConfigPath(cluster v1alpha1.Cluster, accountID string, role string) string {
-	return fmt.Sprintf("%s/%s", BucketName(cluster, accountID), BucketObjectName(cluster, role))
-}
-
-func SmallCloudConfigS3URL(cluster v1alpha1.Cluster, accountID string, role string) string {
-	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(cluster, accountID, role))
 }
 
 func StackNameCPF(cluster v1alpha1.Cluster) string {

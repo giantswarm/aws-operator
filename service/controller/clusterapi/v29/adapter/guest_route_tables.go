@@ -19,15 +19,15 @@ type GuestRouteTablesAdapter struct {
 func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	r.HostClusterCIDR = cfg.ControlPlaneVPCCidr
 	r.PublicRouteTableName = RouteTableName{
-		ResourceName: "PublicRouteTable",
-		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),
+		ResourceName: key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject))),
+		TagName:      key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject)),
 	}
 
-	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for _, az := range cfg.TenantClusterAvailabilityZones {
 		rtName := RouteTableName{
-			ResourceName:        key.PrivateRouteTableName(i),
-			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),
-			VPCPeeringRouteName: key.VPCPeeringRouteName(i),
+			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, az.Name),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
 		}
 		r.PrivateRouteTableNames = append(r.PrivateRouteTableNames, rtName)
 	}

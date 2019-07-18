@@ -1,11 +1,9 @@
 package key
 
 import (
-	"net"
+	"sort"
 	"strconv"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
@@ -13,61 +11,32 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
-	return cr.Labels[label.Cluster]
+// As a first version of Node Pools feature, the maximum number of distinct
+// Availability Zones is restricted to four due to current IPAM architecture &
+// implementation.
+const MaxNumberOfAZs = 4
+
+var AZLetters []byte
+
+func init() {
+	alphabets := "abcdefghijklmnopqrstuvwxyz"
+	for i := 0; i < MaxNumberOfAZs && i < len(alphabets); i++ {
+		AZLetters = append(AZLetters, alphabets[i])
+	}
 }
 
-func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
-	return cr.Annotations[annotation.MachineDeploymentSubnet]
-}
+func SortedWorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
+	azs := WorkerAvailabilityZones(cr)
 
-// TODO this method has to be properly implemented and renamed eventually.
-func StatusAvailabilityZones(cr v1alpha1.MachineDeployment) ([]g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone, error) {
-	var workerSubnet net.IPNet
-	{
-		s := WorkerSubnet(cr)
-		if s == "" {
-			return nil, microerror.Maskf(notFoundError, "MachineDeployment is missing subnet allocation")
-		}
+	// No need to do deep copy for azs slice since above key function
+	// deserializes information from provider extension template that is JSON
+	// in CR object.
 
-		_, n, err := net.ParseCIDR(s)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+	sort.Slice(azs, func(i, j int) bool {
+		return azs[i] < azs[j]
+	})
 
-		workerSubnet = *n
-	}
-
-	var azs []g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone
-	{
-		workerAZs := WorkerAvailabilityZones(cr)
-
-		azsSubnets, err := ipam.Split(workerSubnet, uint(len(workerAZs)))
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		for i, s := range workerAZs {
-			subnets, err := ipam.Split(azsSubnets[i], 2)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			azs = append(azs, g8sv1alpha1.AWSConfigStatusAWSAvailabilityZone{
-				Name: s,
-				Subnet: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnet{
-					Private: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPrivate{
-						CIDR: subnets[0].String(),
-					},
-					Public: g8sv1alpha1.AWSConfigStatusAWSAvailabilityZoneSubnetPublic{
-						CIDR: subnets[1].String(),
-					},
-				},
-			})
-		}
-	}
-
-	return azs, nil
+	return azs
 }
 
 func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {
@@ -89,6 +58,10 @@ func WorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
 	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
 }
 
+func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
+	return cr.Labels[label.Cluster]
+}
+
 func WorkerDockerVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
 	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
 }
@@ -103,4 +76,8 @@ func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
 
 func WorkerScalingMin(cr v1alpha1.MachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
+}
+
+func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }

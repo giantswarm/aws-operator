@@ -1,8 +1,6 @@
 package controllercontext
 
 import (
-	"net"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
@@ -40,7 +38,6 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	AvailabilityZones     []ContextStatusTenantClusterAvailabilityZone
 	AWSAccountID          string
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
@@ -48,12 +45,6 @@ type ContextStatusTenantCluster struct {
 	TCCP                  ContextStatusTenantClusterTCCP
 	VersionBundleVersion  string
 	WorkerInstance        ContextStatusTenantClusterWorkerInstance
-}
-
-type ContextStatusTenantClusterAvailabilityZone struct {
-	Name          string
-	PrivateSubnet net.IPNet
-	PublicSubnet  net.IPNet
 }
 
 type ContextStatusTenantClusterEncryption struct {
@@ -69,6 +60,7 @@ type ContextStatusTenantClusterMasterInstance struct {
 
 type ContextStatusTenantClusterTCCP struct {
 	ASG               ContextStatusTenantClusterTCCPASG
+	AvailabilityZones []ContextTenantClusterAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
 	RouteTables       []*ec2.RouteTable

@@ -2,6 +2,8 @@ package key
 
 import (
 	"fmt"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
@@ -17,6 +19,19 @@ func AWSTags(getter LabelsGetter, installationName string) map[string]string {
 	}
 
 	return tags
+}
+
+func BucketName(getter LabelsGetter, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(getter))
+}
+
+// BucketObjectName computes the S3 object path to the actual cloud config.
+//
+//     /version/3.4.0/cloudconfig/v_3_2_5/master
+//     /version/3.4.0/cloudconfig/v_3_2_5/worker
+//
+func BucketObjectName(getter LabelsGetter, role string) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, role)
 }
 
 func ClusterCloudProviderTag(getter LabelsGetter) string {
@@ -39,31 +54,16 @@ func MachineDeploymentID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.MachineDeployment]
 }
 
-func NATEIPName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "NATEIP"
-	}
-	return fmt.Sprintf("NATEIP%02d", idx)
+func NATEIPName(az string) string {
+	return fmt.Sprintf("NATEIP-%s", az)
 }
 
-func NATGatewayName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "NATGateway"
-	}
-	return fmt.Sprintf("NATGateway%02d", idx)
+func NATGatewayName(az string) string {
+	return fmt.Sprintf("NATGateway-%s", az)
 }
 
-func NATRouteName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "NATRoute"
-	}
-	return fmt.Sprintf("NATRoute%02d", idx)
+func NATRouteName(az string) string {
+	return fmt.Sprintf("NATRoute-%s", az)
 }
 
 func OperatorVersion(getter LabelsGetter) string {
@@ -74,73 +74,76 @@ func OrganizationID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Organization]
 }
 
-func PrivateRouteTableName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "PrivateRouteTable"
-	}
-	return fmt.Sprintf("PrivateRouteTable%02d", idx)
+func PrivateRouteTableName(az string) string {
+	return fmt.Sprintf("PrivateRouteTable-%s", az)
 }
 
-func PrivateSubnetName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "PrivateSubnet"
-	}
-	return fmt.Sprintf("PrivateSubnet%02d", idx)
+func PrivateSubnetName(az string) string {
+	return fmt.Sprintf("PrivateSubnet-%s", az)
 }
 
-func PrivateSubnetRouteTableAssociationName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "PrivateSubnetRouteTableAssociation"
-	}
-	return fmt.Sprintf("PrivateSubnetRouteTableAssociation%02d", idx)
+func PrivateSubnetRouteTableAssociationName(az string) string {
+	return fmt.Sprintf("PrivateSubnetRouteTableAssociation-%s", az)
 }
 
-func PublicSubnetName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "PublicSubnet"
-	}
-	return fmt.Sprintf("PublicSubnet%02d", idx)
+func PublicSubnetName(az string) string {
+	return fmt.Sprintf("PublicSubnet-%s", az)
 }
 
-func PublicRouteTableName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "PublicRouteTable"
-	}
-	return fmt.Sprintf("PublicRouteTable%02d", idx)
+func PublicRouteTableName(az string) string {
+	return fmt.Sprintf("PublicRouteTable-%s", az)
 }
 
-func PublicSubnetRouteTableAssociationName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "PublicSubnetRouteTableAssociation"
-	}
-	return fmt.Sprintf("PublicSubnetRouteTableAssociation%02d", idx)
+func PublicSubnetRouteTableAssociationName(az string) string {
+	return fmt.Sprintf("PublicSubnetRouteTableAssociation-%s", az)
 }
 
 func ReleaseVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ReleaseVersion]
 }
 
+// SanitizeCFResourceName filters out all non-ascii alphanumberics from input
+// string.
+//
+// Example: SanitizeCFResourceName("abc-123") == "abc123"
+// Example2: SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
+//
+func SanitizeCFResourceName(v string) string {
+	var rs []rune
+
+	// Start with true to capitalize first character.
+	previousWasSkipped := true
+
+	// Iterate over unicode characters and add numbers and ASCII letters title
+	// cased.
+	for _, r := range []rune(v) {
+		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
+			if previousWasSkipped {
+				rs = append(rs, unicode.ToTitle(r))
+			} else {
+				rs = append(rs, r)
+			}
+			previousWasSkipped = false
+		} else {
+			previousWasSkipped = true
+		}
+	}
+
+	return string(rs)
+}
+
+func SmallCloudConfigPath(getter LabelsGetter, accountID string, role string) string {
+	return fmt.Sprintf("%s/%s", BucketName(getter, accountID), BucketObjectName(getter, role))
+}
+
+func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) string {
+	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
+}
+
 func StackNameTCNP(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnp", getter.GetLabels()[label.Cluster])
 }
 
-func VPCPeeringRouteName(idx int) string {
-	// Since CloudFormation cannot recognize resource renaming, use non-indexed
-	// resource name for first AZ.
-	if idx < 1 {
-		return "VPCPeeringRoute"
-	}
-	return fmt.Sprintf("VPCPeeringRoute%02d", idx)
+func VPCPeeringRouteName(az string) string {
+	return fmt.Sprintf("VPCPeeringRoute-%s", az)
 }

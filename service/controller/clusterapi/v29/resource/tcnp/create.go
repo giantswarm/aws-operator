@@ -3,11 +3,11 @@ package tcnp
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
@@ -20,10 +20,6 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cl, err := r.toClusterFunc(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	md, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
@@ -31,6 +27,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	// Fetch the cluster for region information and the like.
+	var cl v1alpha1.Cluster
+	{
+		m, err := r.cmaClient.ClusterV1alpha1().Clusters(md.Namespace).Get(key.ClusterID(&md), metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		cl = *m
 	}
 
 	{
@@ -162,6 +169,11 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster,
 		return nil, microerror.Mask(err)
 	}
 
+	var subnets []string
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(a.AvailabilityZone)))
+	}
+
 	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(md), key.WorkerScalingMax(md), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
@@ -175,7 +187,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster,
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
 		MinSize:               key.WorkerScalingMin(md),
 		Name:                  key.MachineDeploymentASGName(&md),
-		Subnets:               nil, // TODO
+		Subnets:               subnets,
 	}
 
 	return autoScalingGroup, nil
@@ -197,7 +209,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v
 			ID: key.MachineDeploymentID(&md),
 		},
 		RegionARN: key.RegionARN(cl),
-		S3Bucket:  key.BucketName(cl, cc.Status.TenantCluster.AWSAccountID),
+		S3Bucket:  key.BucketName(&md, cc.Status.TenantCluster.AWSAccountID),
 	}
 
 	return iamPolicies, nil
@@ -263,7 +275,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, m
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
-				ID: "", // TODO
+				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},
 		},
 	}
@@ -274,28 +286,29 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, m
 func (r *Resource) newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainSubnets, error) {
 	var subnets *template.ParamsMainSubnets
 
-	azs, err := key.StatusAvailabilityZones(md)
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	for _, a := range azs {
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
-			AvailabilityZone: a.Name,
-			CIDR:             a.Subnet.Public.CIDR, // TODO we need to figure out if this is correct
-			NameSuffix:       strings.ToUpper(a.Name),
+			AvailabilityZone: a.AvailabilityZone,
+			CIDR:             a.PrivateSubnet.String(),
+			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.AvailabilityZone)),
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-				NameSuffix: strings.ToUpper(a.Name),
+				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.AvailabilityZone)),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					ID: "", // TODO
+					Name: key.SanitizeCFResourceName(key.PublicSubnetName(a.AvailabilityZone)),
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						ID: "", // TODO
+						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.AvailabilityZone)),
 					},
 				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
-					ID: "", // TODO
+					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 				},
 			},
 		}

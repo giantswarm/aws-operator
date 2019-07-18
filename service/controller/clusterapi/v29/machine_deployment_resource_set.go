@@ -15,8 +15,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentsubnet"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -30,50 +32,47 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	/*
-		var machineDeploymentChecker *ipam.MachineDeploymentChecker
-		{
-			c := ipam.MachineDeploymentCheckerConfig{
-				CMAClient: config.CMAClient,
-				Logger:    config.Logger,
-			}
-
-			machineDeploymentChecker, err = ipam.NewMachineDeploymentChecker(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
+	var machineDeploymentChecker *ipam.MachineDeploymentChecker
+	{
+		c := ipam.MachineDeploymentCheckerConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
 		}
 
+		machineDeploymentChecker, err = ipam.NewMachineDeploymentChecker(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
-		var subnetCollector *ipam.SubnetCollector
-		{
-			c := ipam.SubnetCollectorConfig{
-				CMAClient: config.CMAClient,
-				G8sClient: config.G8sClient,
-				Logger:    config.Logger,
+	var subnetCollector *ipam.SubnetCollector
+	{
+		c := ipam.SubnetCollectorConfig{
+			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
 
-				NetworkRange: config.IPAMNetworkRange,
-			}
-
-			subnetCollector, err = ipam.NewSubnetCollector(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
+			NetworkRange: config.IPAMNetworkRange,
 		}
 
-		var machineDeploymentPersister *ipam.MachineDeploymentPersister
-		{
-			c := ipam.MachineDeploymentPersisterConfig{
-				CMAClient: config.CMAClient,
-				Logger:    config.Logger,
-			}
-
-			machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
+		subnetCollector, err = ipam.NewSubnetCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
-	*/
+	}
+
+	var machineDeploymentPersister *ipam.MachineDeploymentPersister
+	{
+		c := ipam.MachineDeploymentPersisterConfig{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var awsClientResource controller.Resource
 	{
@@ -86,6 +85,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterAZsResource controller.Resource
+	{
+		c := clusterazs.Config{
+			CMAClient:     config.CMAClient,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		}
+
+		clusterAZsResource, err = clusterazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -105,7 +118,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	/* TODO: Resume ipamResource once machineDeploymentSubnetResource can be deleted.
 	var ipamResource controller.Resource
 	{
 		c := ipam.Config{
@@ -126,16 +138,17 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			return nil, microerror.Mask(err)
 		}
 	}
-	*/
 
-	var machineDeploymentSubnetResource controller.Resource
+	var tcnpResource controller.Resource
 	{
-		c := machinedeploymentsubnet.Config{
+		c := tcnp.Config{
 			CMAClient: config.CMAClient,
 			Logger:    config.Logger,
+
+			InstallationName: config.InstallationName,
 		}
 
-		machineDeploymentSubnetResource, err = machinedeploymentsubnet.New(c)
+		tcnpResource, err = tcnp.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -144,8 +157,9 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	resources := []controller.Resource{
 		awsClientResource,
 		encryptionResource,
-		machineDeploymentSubnetResource,
-		//ipamResource,
+		ipamResource,
+		clusterAZsResource,
+		tcnpResource,
 	}
 
 	{

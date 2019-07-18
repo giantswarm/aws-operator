@@ -41,11 +41,9 @@ type GuestLoadBalancersAdapter struct {
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
-	{
-		numAZs := len(key.WorkerAvailabilityZones(cfg.MachineDeployment))
-		if numAZs < 1 {
-			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
-		}
+	clusterAZs := cfg.TenantClusterAvailabilityZones
+	if len(clusterAZs) < 1 {
+		return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 	}
 
 	// API load balancer settings.
@@ -93,9 +91,9 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.ELBHealthCheckUnhealthyThreshold = healthCheckUnhealthyThreshold
 	a.MasterInstanceResourceName = cfg.StackState.MasterInstanceResourceName
 
-	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
-		a.PublicSubnets = append(a.PublicSubnets, key.PublicSubnetName(i))
-		a.PrivateSubnets = append(a.PrivateSubnets, key.PrivateSubnetName(i))
+	for _, az := range clusterAZs {
+		a.PublicSubnets = append(a.PublicSubnets, key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)))
+		a.PrivateSubnets = append(a.PrivateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
 	return nil

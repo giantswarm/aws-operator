@@ -27,16 +27,16 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.PeerRoleArn = cfg.ControlPlanePeerRoleARN
 
 	PublicRouteTable := RouteTableName{
-		ResourceName: key.PublicRouteTableName(0),
-		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, 0),
+		ResourceName: key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject))),
+		TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, key.MasterAvailabilityZone(cfg.CustomObject)),
 	}
 	v.RouteTableNames = append(v.RouteTableNames, PublicRouteTable)
 
-	for i := 0; i < len(key.WorkerAvailabilityZones(cfg.MachineDeployment)); i++ {
+	for _, az := range cfg.TenantClusterAvailabilityZones {
 		rtName := RouteTableName{
-			ResourceName:        key.PrivateRouteTableName(i),
-			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, i),
-			VPCPeeringRouteName: key.VPCPeeringRouteName(i),
+			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+			TagName:             key.RouteTableName(cfg.CustomObject, suffixPrivate, az.Name),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
 		}
 		v.RouteTableNames = append(v.RouteTableNames, rtName)
 	}

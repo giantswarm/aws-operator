@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -17,8 +18,8 @@ const (
 )
 
 type Config struct {
-	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
+	CMAClient clientset.Interface
+	Logger    micrologger.Logger
 
 	InstallationName string
 }
@@ -26,18 +27,18 @@ type Config struct {
 // Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
-	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
+	cmaClient clientset.Interface
+	logger    micrologger.Logger
 
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CMAClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
-	}
-	if config.ToClusterFunc == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 	}
 
 	if config.InstallationName == "" {
@@ -45,8 +46,8 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		logger:        config.Logger,
-		toClusterFunc: config.ToClusterFunc,
+		cmaClient: config.CMAClient,
+		logger:    config.Logger,
 
 		installationName: config.InstallationName,
 	}

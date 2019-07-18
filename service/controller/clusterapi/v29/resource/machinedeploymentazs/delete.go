@@ -1,4 +1,4 @@
-package machinedeploymentsubnet
+package machinedeploymentazs
 
 import (
 	"context"

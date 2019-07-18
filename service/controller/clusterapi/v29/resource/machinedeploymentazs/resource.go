@@ -1,7 +1,13 @@
-// Package machinedeploymentsubnet implements a temporary resource to fetch the
-// cluster's subnet from the Cluster CR status, to put it into the
-// MachineDeployment's annotations.
-package machinedeploymentsubnet
+// Package machinedeploymentazs implements a resource to gather all private
+// subnets for the configured availability zones of a node pool. Like the
+// clusterazs resource, we need logic to take the node pool subnet allocated by
+// the ipam resource and split it according to the configured availability
+// zones. We then have 1, 2 or 4 private subnet CIDRs we put into the controller
+// context for further use in the tcnp resource. Note that the availability
+// zones of a node pool cannot be updated upon creation due to the network
+// splitting. In order to change availability zones one must delete and create
+// node pools accordingly.
+package machinedeploymentazs
 
 import (
 	"github.com/giantswarm/microerror"
@@ -10,7 +16,7 @@ import (
 )
 
 const (
-	Name = "machinedeploymentsubnetv29"
+	Name = "machinedeploymentazsv29"
 )
 
 type Config struct {
