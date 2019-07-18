@@ -1,11 +1,8 @@
-
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
-  
   DockerVolumeResourceName:
     Value: rsc-abbacd01
-  
   MasterImageID:
     Value: ami-0eb0d9bb7ad1bd1e9
   MasterInstanceResourceName:
@@ -27,7 +24,6 @@ Outputs:
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter
-
 Parameters:
   VersionBundleVersionParameter:
     Type: String
@@ -82,8 +78,6 @@ Resources:
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:aws:s3:::*/*"
-
-  
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -107,25 +101,20 @@ Resources:
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
-
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "s3:ListBucket"
             Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
-
           - Effect: "Allow"
             Action: "s3:GetObject"
             Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
-
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
             Resource: "*"
-
           - Effect: "Allow"
             Action:
               - "autoscaling:DescribeAutoScalingGroups"
@@ -134,7 +123,6 @@ Resources:
               - "autoscaling:DescribeLaunchConfigurations"
               - "ec2:DescribeLaunchTemplateVersions"
             Resource: "*"
-
           - Effect: "Allow"
             Action:
               - "autoscaling:SetDesiredCapacity"
@@ -143,14 +131,12 @@ Resources:
             Condition:
               StringEquals:
                 autoscaling:ResourceTag/giantswarm.io/cluster: "8y5ck"
-
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: 8y5ck-master-EC2-K8S-Role
       Roles:
         - Ref: "MasterRole"
-
   WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -174,29 +160,23 @@ Resources:
           - Effect: "Allow"
             Action: "ec2:Describe*"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "ec2:AttachVolume"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "s3:ListBucket"
             Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
-
           - Effect: "Allow"
             Action: "s3:GetObject"
             Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
-
           - Effect: "Allow"
             Action:
               - "ecr:GetAuthorizationToken"
@@ -207,15 +187,12 @@ Resources:
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: 8y5ck-worker-EC2-K8S-Role
       Roles:
         - Ref: "WorkerRole"
-
-  
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -229,62 +206,53 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: 0.0.0.0/0
-      
       -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
         CidrIp: 10.1.0.0/16
-      
       -
         Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
         CidrIp: 10.1.0.0/16
-      
       -
         Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
         CidrIp: 10.1.0.0/16
-      
       -
         Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
         CidrIp: 10.1.0.0/16
-      
       -
         Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
         CidrIp: 10.1.0.0/16
-      
       -
         Description: Only allow ssh traffic from the control plane.
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
         CidrIp: 10.1.0.0/16
-      
       Tags:
         - Key: Name
           Value:  8y5ck-master
         - Key: giantswarm.io/tccp
           Value: true
-
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: 8y5ck-worker
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
       -
         IpProtocol: tcp
         FromPort: 30011
@@ -292,7 +260,6 @@ Resources:
         
         SourceSecurityGroupId: !Ref IngressSecurityGroup
         
-      
       -
         IpProtocol: tcp
         FromPort: 30010
@@ -300,7 +267,6 @@ Resources:
         
         SourceSecurityGroupId: !Ref IngressSecurityGroup
         
-      
       -
         IpProtocol: tcp
         FromPort: 30011
@@ -308,7 +274,6 @@ Resources:
         
         CidrIp: 10.1.0.0/16
         
-      
       -
         IpProtocol: tcp
         FromPort: 4194
@@ -316,7 +281,6 @@ Resources:
         
         CidrIp: 10.1.0.0/16
         
-      
       -
         IpProtocol: tcp
         FromPort: 10250
@@ -324,7 +288,6 @@ Resources:
         
         CidrIp: 10.1.0.0/16
         
-      
       -
         IpProtocol: tcp
         FromPort: 10300
@@ -332,7 +295,6 @@ Resources:
         
         CidrIp: 10.1.0.0/16
         
-      
       -
         IpProtocol: tcp
         FromPort: 10301
@@ -340,7 +302,6 @@ Resources:
         
         CidrIp: 10.1.0.0/16
         
-      
       -
         IpProtocol: tcp
         FromPort: 22
@@ -348,13 +309,11 @@ Resources:
         
         CidrIp: 10.1.0.0/16
         
-      
       Tags:
         - Key: Name
           Value:  8y5ck-worker
         - Key: giantswarm.io/tccp
           Value: true
-
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -379,7 +338,6 @@ Resources:
           Value: 8y5ck-ingress
         - Key: giantswarm.io/tccp
           Value: true
-
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -404,7 +362,6 @@ Resources:
           Value: 8y5ck-etcd-elb
         - Key: giantswarm.io/tccp
           Value: true
-
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:
@@ -417,7 +374,6 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
-
   MasterAllowWorkerCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -428,7 +384,6 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref WorkerSecurityGroup
-
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -439,7 +394,6 @@ Resources:
       FromPort: 2379
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
-
   WorkerAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: WorkerSecurityGroup
@@ -450,7 +404,6 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref WorkerSecurityGroup
-
   WorkerAllowMasterCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: WorkerSecurityGroup
@@ -461,7 +414,6 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
-
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
@@ -469,8 +421,6 @@ Resources:
       Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
-
-  
   PublicRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -489,7 +439,6 @@ Resources:
         Value: 8y5ck-private-eu-central-1a
       - Key: giantswarm.io/tccp
         Value: true
-
   VPCPeeringRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
@@ -507,7 +456,6 @@ Resources:
         Value: 8y5ck-private-eu-central-1b
       - Key: giantswarm.io/tccp
         Value: true
-
   VPCPeeringRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
@@ -525,7 +473,6 @@ Resources:
         Value: 8y5ck-private-eu-central-1c
       - Key: giantswarm.io/tccp
         Value: true
-
   VPCPeeringRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
@@ -534,7 +481,6 @@ Resources:
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   
-
   
   PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
@@ -552,14 +498,11 @@ Resources:
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
-
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1b
       SubnetId: !Ref PublicSubnetEuCentral1a
-
-  
   PublicSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -576,14 +519,11 @@ Resources:
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
-
   PublicSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1b
       SubnetId: !Ref PublicSubnetEuCentral1b
-
-  
   PublicSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
@@ -600,14 +540,11 @@ Resources:
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: !Ref VPC
-
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1b
       SubnetId: !Ref PublicSubnetEuCentral1c
-
-  
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -624,13 +561,11 @@ Resources:
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
-
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       SubnetId: !Ref PrivateSubnetEuCentral1a
-  
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -647,13 +582,11 @@ Resources:
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
-
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       SubnetId: !Ref PrivateSubnetEuCentral1b
-  
   PrivateSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
@@ -670,15 +603,11 @@ Resources:
       - Key: "kubernetes.io/role/internal-elb"
         Value: "1"
       VpcId: !Ref VPC
-
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       SubnetId: !Ref PrivateSubnetEuCentral1c
-  
-
-  
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -687,7 +616,6 @@ Resources:
           Value: 8y5ck
         - Key: giantswarm.io/tccp
           Value: true
-
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
@@ -698,7 +626,6 @@ Resources:
       InternetGatewayId:
         Ref: InternetGateway
       VpcId: !Ref VPC
-
   InternetGatewayRoute:
     Type: AWS::EC2::Route
     DependsOn:
@@ -708,7 +635,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
-
   
   NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
@@ -736,7 +662,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: "NATGatewayEuCentral1a"
-
   NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -763,7 +688,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: "NATGatewayEuCentral1b"
-
   NATGatewayEuCentral1c:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -790,9 +714,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: "NATGatewayEuCentral1c"
-
-
-  
   rsc-ac0dc01:
     Type: "AWS::EC2::Instance"
     Description: Master instance
@@ -875,7 +796,6 @@ Resources:
       InstanceId: !Ref rsc-ac0dc01
       VolumeId: !Ref LogVolume
       Device: /dev/xvdf
-
   
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -991,8 +911,6 @@ Resources:
       
         - !Ref PublicSubnetEuCentral1c
       
-
-  
   workerLaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: worker launch configuration
@@ -1025,8 +943,6 @@ Resources:
       
       AssociatePublicIpAddress: false
       UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL3dvcmtlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJrdWJlbGV0IiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImt1YmVsZXQiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
-
-  
   NodeDrainerLifecycleHook:
     Type: "AWS::AutoScaling::LifecycleHook"
     Properties:
@@ -1036,25 +952,17 @@ Resources:
       HeartbeatTimeout: 3600
       LifecycleHookName: NodeDrainer
       LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
-
-  
   workerAutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier:
         - !Ref PrivateSubnetEuCentral1a
-      
         - !Ref PrivateSubnetEuCentral1b
-      
         - !Ref PrivateSubnetEuCentral1c
-      
       AvailabilityZones:
         - eu-central-1a
-      
         - eu-central-1b
-      
         - eu-central-1c
-      
       DesiredCapacity: 3
       MinSize: 3
       MaxSize: 5
@@ -1085,7 +993,4 @@ Resources:
         MaxBatchSize: 1
         # after creating a new instance, pause operations on the ASG for this amount of time
         PauseTime: PT15M
-
   
-
-

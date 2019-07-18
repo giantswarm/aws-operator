@@ -1,13 +1,13 @@
 package tccp
 
 const Outputs = `
-{{define "outputs"}}
+{{- define "outputs" -}}
   DockerVolumeResourceName:
     Value: {{ .Guest.Outputs.Master.DockerVolume.ResourceName }}
-  {{ if .Guest.Outputs.Route53Enabled }}
+  {{- if .Guest.Outputs.Route53Enabled }}
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
-  {{ end }}
+  {{- end }}
   MasterImageID:
     Value: {{ .Guest.Outputs.Master.ImageID }}
   MasterInstanceResourceName:
@@ -29,5 +29,5 @@ const Outputs = `
   VersionBundleVersion:
     Value:
       Ref: VersionBundleVersionParameter
-{{end}}
+{{- end -}}
 `

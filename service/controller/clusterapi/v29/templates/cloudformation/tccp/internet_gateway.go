@@ -1,8 +1,8 @@
 package tccp
 
 const InternetGateway = `
-{{define "internet_gateway"}}
-{{- $v := .Guest.InternetGateway }}
+{{- define "internet_gateway" -}}
+{{- $v := .Guest.InternetGateway -}}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -11,7 +11,6 @@ const InternetGateway = `
           Value: {{ $v.ClusterID }}
         - Key: giantswarm.io/tccp
           Value: true
-
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
@@ -23,7 +22,6 @@ const InternetGateway = `
       InternetGatewayId:
         Ref: InternetGateway
       VpcId: !Ref VPC
-
   InternetGatewayRoute:
     Type: AWS::EC2::Route
     DependsOn:
@@ -33,5 +31,5 @@ const InternetGateway = `
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
-{{end}}
+{{- end -}}
 `
