@@ -48,6 +48,7 @@ func DefaultContext() context.Context {
 					IsTransitioning:   false,
 					MachineDeployment: DefaultMachineDeployment(),
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
+						ID:                  "imagenary-vpc-id",
 						PeeringConnectionID: "imagenary-peering-connection-id",
 					},
 				},
