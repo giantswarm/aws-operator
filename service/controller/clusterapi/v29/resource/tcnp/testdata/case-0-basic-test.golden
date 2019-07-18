@@ -18,6 +18,9 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
+        - !Ref PrivateSubnetEuCentral1a
+        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PrivateSubnetEuCentral1c
       AvailabilityZones:
         - eu-central-1a
         - eu-central-1c
@@ -247,3 +250,54 @@ Resources:
         - Key: Name
           Value: NodePoolSecurityGroup
   
+  PrivateSubnetEuCentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.3.0/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1a
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: 
+  PrivateSubnetRouteTableAssociationEuCentral1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1a
+      SubnetId: PublicSubnetEuCentral1a
+  PrivateSubnetEuCentral1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1b
+      CidrBlock: 10.100.3.64/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1b
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: 
+  PrivateSubnetRouteTableAssociationEuCentral1b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1b
+      SubnetId: PublicSubnetEuCentral1b
+  PrivateSubnetEuCentral1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1c
+      CidrBlock: 10.100.3.128/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1c
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: 
+  PrivateSubnetRouteTableAssociationEuCentral1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1c
+      SubnetId: PublicSubnetEuCentral1c

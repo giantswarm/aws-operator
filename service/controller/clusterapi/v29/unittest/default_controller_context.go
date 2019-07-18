@@ -80,6 +80,22 @@ func DefaultContext() context.Context {
 						},
 					},
 				},
+				TCNP: controllercontext.ContextSpecTenantClusterTCNP{
+					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCNPAvailabilityZone{
+						{
+							AvailabilityZone: "eu-central-1a",
+							PrivateSubnet:    mustParseCIDR("10.100.3.0/27"),
+						},
+						{
+							AvailabilityZone: "eu-central-1b",
+							PrivateSubnet:    mustParseCIDR("10.100.3.64/27"),
+						},
+						{
+							AvailabilityZone: "eu-central-1c",
+							PrivateSubnet:    mustParseCIDR("10.100.3.128/27"),
+						},
+					},
+				},
 			},
 		},
 	}
