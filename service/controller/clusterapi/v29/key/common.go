@@ -21,6 +21,19 @@ func AWSTags(getter LabelsGetter, installationName string) map[string]string {
 	return tags
 }
 
+func BucketName(getter LabelsGetter, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(getter))
+}
+
+// BucketObjectName computes the S3 object path to the actual cloud config.
+//
+//     /version/3.4.0/cloudconfig/v_3_2_5/master
+//     /version/3.4.0/cloudconfig/v_3_2_5/worker
+//
+func BucketObjectName(getter LabelsGetter, role string) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, role)
+}
+
 func ClusterCloudProviderTag(getter LabelsGetter) string {
 	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(getter))
 }
@@ -117,6 +130,14 @@ func SanitizeCFResourceName(v string) string {
 	}
 
 	return string(rs)
+}
+
+func SmallCloudConfigPath(getter LabelsGetter, accountID string, role string) string {
+	return fmt.Sprintf("%s/%s", BucketName(getter, accountID), BucketObjectName(getter, role))
+}
+
+func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) string {
+	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
 }
 
 func StackNameTCNP(getter LabelsGetter) string {

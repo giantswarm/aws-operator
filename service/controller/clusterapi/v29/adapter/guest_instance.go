@@ -79,7 +79,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 
 		c := SmallCloudconfigConfig{
 			InstanceRole: "master",
-			S3URL:        key.SmallCloudConfigS3URL(config.CustomObject, config.TenantClusterAccountID, "master"),
+			S3URL:        key.SmallCloudConfigS3URL(&config.CustomObject, config.TenantClusterAccountID, "master"),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {

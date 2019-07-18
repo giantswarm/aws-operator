@@ -209,7 +209,7 @@ func newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.Machin
 			ID: key.MachineDeploymentID(&md),
 		},
 		RegionARN: key.RegionARN(cl),
-		S3Bucket:  key.BucketName(cl, cc.Status.TenantCluster.AWSAccountID),
+		S3Bucket:  key.BucketName(&md, cc.Status.TenantCluster.AWSAccountID),
 	}
 
 	return iamPolicies, nil
