@@ -19,7 +19,7 @@ const TemplateMainSubnets = `
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: {{ .TCCP.Subnet.RouteTable.Name }}
-      SubnetId: {{ .TCCP.Subnet.Name }}
+      SubnetId: {{ .TCCP.Subnet.ID }}
   {{- end }}
 {{- end -}}
 `

@@ -22,7 +22,7 @@ type ParamsMainSubnetsListItemTCCP struct {
 }
 
 type ParamsMainSubnetsListItemTCCPSubnet struct {
-	Name       string
+	ID         string
 	RouteTable ParamsMainSubnetsListItemTCCPSubnetRouteTable
 }
 

@@ -320,7 +320,7 @@ func newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDep
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					Name: azMap[a.AvailabilityZone],
+					ID: azMap[a.AvailabilityZone],
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
 						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.AvailabilityZone)),
 					},
