@@ -1,8 +1,8 @@
 package tccp
 
 const IAMPolicies = `
-{{define "iam_policies"}}
-{{- $v := .Guest.IAMPolicies }}
+{{- define "iam_policies" -}}
+{{- $v := .Guest.IAMPolicies -}}
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -26,29 +26,25 @@ const IAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
-{{ if $v.KMSKeyARN }}
+          {{- if $v.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
             Resource: "{{ $v.KMSKeyARN }}"
-{{ end }}
+          {{- end }}
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "s3:ListBucket"
             Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}"
-
           - Effect: "Allow"
             Action: "s3:GetObject"
             Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}/*"
-
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
             Resource: "*"
-
           - Effect: "Allow"
             Action:
               - "autoscaling:DescribeAutoScalingGroups"
@@ -57,7 +53,6 @@ const IAMPolicies = `
               - "autoscaling:DescribeLaunchConfigurations"
               - "ec2:DescribeLaunchTemplateVersions"
             Resource: "*"
-
           - Effect: "Allow"
             Action:
               - "autoscaling:SetDesiredCapacity"
@@ -66,14 +61,12 @@ const IAMPolicies = `
             Condition:
               StringEquals:
                 autoscaling:ResourceTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
-
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: {{ $v.MasterProfileName }}
       Roles:
         - Ref: "MasterRole"
-
   WorkerRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -97,33 +90,28 @@ const IAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:Describe*"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "ec2:AttachVolume"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-{{ if $v.KMSKeyARN }}
+          {{- if $v.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
             Resource: "{{ $v.KMSKeyARN }}"
-{{ end }}
+          {{- end }}
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
             Resource: "*"
-
           - Effect: "Allow"
             Action: "s3:ListBucket"
             Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}"
-
           - Effect: "Allow"
             Action: "s3:GetObject"
             Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}/*"
-
           - Effect: "Allow"
             Action:
               - "ecr:GetAuthorizationToken"
@@ -134,12 +122,11 @@ const IAMPolicies = `
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-
   WorkerInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: {{ $v.WorkerProfileName }}
       Roles:
         - Ref: "WorkerRole"
-{{ end }}
+{{- end -}}
 `

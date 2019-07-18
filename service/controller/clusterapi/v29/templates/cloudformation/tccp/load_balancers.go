@@ -1,7 +1,7 @@
 package tccp
 
 const LoadBalancers = `
-{{define "load_balancers"}}
+{{- define "load_balancers" -}}
 {{- $v := .Guest.LoadBalancers }}
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -101,5 +101,5 @@ const LoadBalancers = `
       {{- range $s := $v.PublicSubnets }}
         - !Ref {{ $s }}
       {{end}}
-{{end}}
+{{- end -}}
 `
