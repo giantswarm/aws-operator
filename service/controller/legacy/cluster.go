@@ -694,6 +694,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			Route53Enabled:             config.Route53Enabled,
 			IgnitionPath:               config.IgnitionPath,
+			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
