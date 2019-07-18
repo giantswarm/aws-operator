@@ -250,6 +250,7 @@ func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
 		}
 
 		mappedSubnet := azMap[*s.AvailabilityZone]
+		mappedSubnet.ID = *s.SubnetId
 
 		_, cidr, err := net.ParseCIDR(*s.CidrBlock)
 		if err != nil {
@@ -286,6 +287,7 @@ func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextTenantClust
 	for _, az := range azNames {
 		subnets := azs[az]
 		ccAZ := controllercontext.ContextTenantClusterAvailabilityZone{
+			ID:            subnets.ID,
 			Name:          az,
 			PublicSubnet:  subnets.Public,
 			PrivateSubnet: subnets.Private,
@@ -320,6 +322,7 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextTenantClu
 
 		// Collect currently used AZ information to store it inside the cc status.
 		ccAZ := controllercontext.ContextTenantClusterAvailabilityZone{
+			ID:            subnets.ID,
 			Name:          az,
 			PublicSubnet:  subnets.Public,
 			PrivateSubnet: subnets.Private,

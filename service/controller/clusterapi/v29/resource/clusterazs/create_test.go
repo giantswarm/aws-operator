@@ -231,6 +231,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -245,6 +246,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
+					ID:     "validID",
 					Public: mustParseCIDR("10.100.8.0/27"),
 				},
 			},
@@ -256,6 +258,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -270,6 +273,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
+					ID:     "validID",
 					Public: mustParseCIDR("10.100.8.0/27"),
 				},
 			},
@@ -281,6 +285,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -295,6 +300,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.32/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -309,6 +315,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.8.64/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -323,10 +330,12 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
+					ID:      "validID",
 					Public:  mustParseCIDR("10.100.8.0/27"),
 					Private: mustParseCIDR("10.100.8.32/27"),
 				},
 				"eu-central-1b": subnetPair{
+					ID:     "validID",
 					Public: mustParseCIDR("10.100.8.64/27"),
 				},
 			},
@@ -338,6 +347,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -352,6 +362,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.32/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -366,11 +377,13 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.4.64/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags:             []*ec2.Tag{},
 				},
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
+					ID:      "validID",
 					Public:  mustParseCIDR("10.100.8.0/27"),
 					Private: mustParseCIDR("10.100.8.32/27"),
 				},
@@ -391,6 +404,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: nil,
 					CidrBlock:        to.StringP("10.100.4.64/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -412,6 +426,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        nil,
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -433,6 +448,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.4.64/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags:             nil,
 				},
 			},
@@ -445,6 +461,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        nil,
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						nil,
 					},
@@ -459,6 +476,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        nil,
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   nil,
@@ -476,6 +494,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -494,6 +513,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.32/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -508,6 +528,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				&ec2.Subnet{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.8.64/27"),
+					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						&ec2.Tag{
 							Key:   to.StringP(key.TagTCCP),
@@ -522,10 +543,12 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 			},
 			expected: map[string]subnetPair{
 				"eu-central-1a": subnetPair{
+					ID:      "validID",
 					Public:  mustParseCIDR("10.100.8.0/27"),
 					Private: mustParseCIDR("10.100.8.32/27"),
 				},
 				"eu-central-1b": subnetPair{
+					ID:     "validID",
 					Public: mustParseCIDR("10.100.8.64/27"),
 				},
 			},

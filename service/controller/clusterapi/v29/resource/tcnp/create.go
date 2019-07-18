@@ -126,6 +126,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
+func fromContextAZsToIDMap(azs []controllercontext.ContextTenantClusterAvailabilityZone) map[string]string {
+	m := make(map[string]string)
+	for _, az := range azs {
+		m[az.Name] = az.ID
+	}
+	return m
+}
+
 // minDesiredWorkers calculates appropriate minimum value to be set for ASG
 // Desired value and to be used for computation of workerCountRatio.
 //
@@ -299,6 +307,8 @@ func newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDep
 		return nil, microerror.Mask(err)
 	}
 
+	azMap := fromContextAZsToIDMap(cc.Status.TenantCluster.TCCP.AvailabilityZones)
+
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
@@ -310,7 +320,7 @@ func newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDep
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					Name: key.SanitizeCFResourceName(key.PublicSubnetName(a.AvailabilityZone)),
+					Name: azMap[a.AvailabilityZone],
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
 						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.AvailabilityZone)),
 					},

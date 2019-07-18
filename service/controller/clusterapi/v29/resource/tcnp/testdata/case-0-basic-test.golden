@@ -20,7 +20,6 @@ Resources:
       VPCZoneIdentifier:
         - !Ref PrivateSubnetEuCentral1a
         - !Ref PrivateSubnetEuCentral1b
-        - !Ref PrivateSubnetEuCentral1c
       AvailabilityZones:
         - eu-central-1a
         - eu-central-1c
@@ -266,7 +265,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: PublicRouteTableEuCentral1a
-      SubnetId: PublicSubnetEuCentral1a
+      SubnetId: validSubnetID-1a
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -283,21 +282,4 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: PublicRouteTableEuCentral1b
-      SubnetId: PublicSubnetEuCentral1b
-  PrivateSubnetEuCentral1c:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.3.128/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1c
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
-      VpcId: imagenary-vpc-id
-  PrivateSubnetRouteTableAssociationEuCentral1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: PublicRouteTableEuCentral1c
-      SubnetId: PublicSubnetEuCentral1c
+      SubnetId: validSubnetID-1b

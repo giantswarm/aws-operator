@@ -7,6 +7,7 @@ import "net"
 type subnetPair struct {
 	// These members are exported so that go-cmp can make a diff for unit test
 	// results.
+	ID      string
 	Public  net.IPNet
 	Private net.IPNet
 }

@@ -30,16 +30,19 @@ func DefaultContext() context.Context {
 					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
 					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
 						{
+							ID:            "validSubnetID-1a",
 							Name:          "eu-central-1a",
 							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
 							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
 						},
 						{
+							ID:            "validSubnetID-1b",
 							Name:          "eu-central-1b",
 							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
 							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
 						},
 						{
+							ID:            "validSubnetID-1c",
 							Name:          "eu-central-1c",
 							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
 							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
@@ -65,16 +68,19 @@ func DefaultContext() context.Context {
 				TCCP: controllercontext.ContextSpecTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
 						{
+							ID:            "validSubnetID-1a",
 							Name:          "eu-central-1a",
 							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
 							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
 						},
 						{
+							ID:            "validSubnetID-1b",
 							Name:          "eu-central-1b",
 							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
 							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
 						},
 						{
+							ID:            "validSubnetID-1c",
 							Name:          "eu-central-1c",
 							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
 							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
@@ -90,10 +96,6 @@ func DefaultContext() context.Context {
 						{
 							AvailabilityZone: "eu-central-1b",
 							PrivateSubnet:    mustParseCIDR("10.100.3.64/27"),
-						},
-						{
-							AvailabilityZone: "eu-central-1c",
-							PrivateSubnet:    mustParseCIDR("10.100.3.128/27"),
 						},
 					},
 				},
