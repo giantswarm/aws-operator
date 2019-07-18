@@ -31,7 +31,7 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	i.WorkerRoleName = key.RoleNameWorker(cfg.CustomObject)
 	i.RegionARN = key.RegionARN(cfg.CustomObject)
 	i.KMSKeyARN = cfg.TenantClusterKMSKeyARN
-	i.S3Bucket = key.BucketName(cfg.CustomObject, cfg.TenantClusterAccountID)
+	i.S3Bucket = key.BucketName(&cfg.CustomObject, cfg.TenantClusterAccountID)
 
 	return nil
 }

@@ -29,7 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			IsLoggingEnabled: true,
 		},
 		{
-			Name:             key.BucketName(cr, cc.Status.TenantCluster.AWSAccountID),
+			Name:             key.BucketName(&cr, cc.Status.TenantCluster.AWSAccountID),
 			IsLoggingBucket:  false,
 			IsLoggingEnabled: true,
 		},
