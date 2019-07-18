@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainSecurityGroups = `
-{{ define "security_groups" }}
+{{- define "security_groups" -}}
   NodePoolSecurityGroup:
     Type: AWS::EC2::SecurityGroups
     Properties:
@@ -61,5 +61,5 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: NodePoolSecurityGroup
-{{ end }}
+{{- end -}}
 `

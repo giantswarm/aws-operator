@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainLaunchConfiguration = `
-{{ define "launch_configuration" }}
+{{- define "launch_configuration" -}}
   NodePoolLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -12,19 +12,16 @@ const TemplateMainLaunchConfiguration = `
       InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
       IamInstanceProfile: !Ref NodePoolInstanceProfile
       BlockDeviceMappings:
-
       - DeviceName: /dev/xvdh
         Ebs:
           DeleteOnTermination: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Docker.Volume.Size }}
           VolumeType: gp2
-
       - DeviceName: /dev/xvdf
         Ebs:
           DeleteOnTermination: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
           VolumeType: gp2
-
       AssociatePublicIpAddress: false
       UserData:
         Fn::Base64: |
@@ -71,5 +68,5 @@ const TemplateMainLaunchConfiguration = `
               ]
             }
           }
-{{ end }}
+{{- end -}}
 `

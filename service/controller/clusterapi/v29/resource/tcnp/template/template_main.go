@@ -1,7 +1,7 @@
 package template
 
 const TemplateMain = `
-{{ define "main" }}
+{{- define "main" -}}
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Node Pool Cloud Formation Stack.
 Outputs:
@@ -13,5 +13,5 @@ Resources:
   {{ template "lifecycle_hooks" . }}
   {{ template "security_groups" . }}
   {{ template "subnets" . }}
-{{ end }}
+{{- end -}}
 `
