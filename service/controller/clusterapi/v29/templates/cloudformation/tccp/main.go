@@ -11,18 +11,18 @@ Parameters:
     Type: String
     Description: Sets the VersionBundleVersion used to generate the template.
 Resources:
-  {{ template "vpc" .}}
+  {{ template "autoscaling_group" . }}
   {{ template "iam_policies" . }}
-  {{ template "security_groups" . }}
-  {{ template "route_tables" . }}
-  {{ template "subnets" . }}
-  {{ template "internet_gateway" . }}
-  {{ template "nat_gateway" . }}
   {{ template "instance" . }}
-  {{ template "load_balancers" . }}
+  {{ template "internet_gateway" . }}
   {{ template "launch_configuration" . }}
   {{ template "lifecycle_hooks" . }}
-  {{ template "autoscaling_group" . }}
+  {{ template "load_balancers" . }}
+  {{ template "nat_gateway" . }}
   {{ template "record_sets" . }}
+  {{ template "route_tables" . }}
+  {{ template "security_groups" . }}
+  {{ template "subnets" . }}
+  {{ template "vpc" .}}
 {{- end -}}
 `
