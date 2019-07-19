@@ -78,7 +78,9 @@ func testContextWithAccountID(id string) controllercontext.Context {
 	return controllercontext.Context{
 		Status: controllercontext.ContextStatus{
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
-				AWSAccountID: id,
+				AWS: controllercontext.ContextStatusTenantClusterAWS{
+					AccountID: id,
+				},
 			},
 		},
 	}

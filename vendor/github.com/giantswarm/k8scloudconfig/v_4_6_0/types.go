@@ -37,7 +37,10 @@ type Params struct {
 	// then apply the manifest by adding it to ExtraManifests.
 	ExtraManifests []string
 	Files          Files
-	Node           v1alpha1.ClusterNode
+	// ImagePullProgressDeadline is the duration after which image pulling is
+	// cancelled if no progress has been made.
+	ImagePullProgressDeadline string
+	Node                      v1alpha1.ClusterNode
 	// RegistryDomain is the host of the docker image registry to use.
 	RegistryDomain string
 	SSOPublicKey   string

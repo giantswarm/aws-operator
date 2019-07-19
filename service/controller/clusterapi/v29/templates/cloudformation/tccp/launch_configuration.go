@@ -1,8 +1,8 @@
 package tccp
 
 const LaunchConfiguration = `
-{{define "launch_configuration"}}
-{{- $v := .Guest.LaunchConfiguration }}
+{{- define "launch_configuration" -}}
+{{- $v := .Guest.LaunchConfiguration -}}
   {{ $v.ASGType }}LaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: {{ $v.ASGType }} launch configuration
@@ -23,5 +23,5 @@ const LaunchConfiguration = `
       {{ end }}
       AssociatePublicIpAddress: {{ $v.WorkerAssociatePublicIPAddress }}
       UserData: {{ $v.WorkerSmallCloudConfig }}
-{{end}}
+{{- end -}}
 `

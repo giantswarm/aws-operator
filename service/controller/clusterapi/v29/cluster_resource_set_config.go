@@ -42,6 +42,7 @@ type ClusterResourceSetConfig struct {
 	GuestSubnetMaskBits        int
 	IncludeTags                bool
 	IgnitionPath               string
+	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	DeleteLoggingBucket        bool

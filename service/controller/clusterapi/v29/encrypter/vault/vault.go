@@ -160,8 +160,8 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWS.AccountID)
+		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWS.AccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -262,8 +262,8 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWSAccountID)
-		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWSAccountID)
+		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWS.AccountID)
+		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWS.AccountID)
 	}
 
 	var roleData *AWSAuthRole

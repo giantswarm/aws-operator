@@ -131,7 +131,7 @@ func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.Cluster) (
 		Tenant: template.ParamsMainIAMRolesTenant{
 			AWS: template.ParamsMainIAMRolesTenantAWS{
 				Account: template.ParamsMainIAMRolesTenantAWSAccount{
-					ID: cc.Status.TenantCluster.AWSAccountID,
+					ID: cc.Status.TenantCluster.AWS.AccountID,
 				},
 			},
 		},

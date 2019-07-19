@@ -20,11 +20,12 @@ type Config struct {
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 
-	IgnitionPath           string
-	OIDC                   OIDCConfig
-	PodInfraContainerImage string
-	RegistryDomain         string
-	SSOPublicKey           string
+	IgnitionPath              string
+	ImagePullProgressDeadline string
+	OIDC                      OIDCConfig
+	PodInfraContainerImage    string
+	RegistryDomain            string
+	SSOPublicKey              string
 }
 
 // CloudConfig implements the cloud config service interface.
@@ -32,11 +33,12 @@ type CloudConfig struct {
 	encrypter encrypter.Interface
 	logger    micrologger.Logger
 
-	ignitionPath        string
-	k8sAPIExtraArgs     []string
-	k8sKubeletExtraArgs []string
-	registryDomain      string
-	SSOPublicKey        string
+	ignitionPath              string
+	imagePullProgressDeadline string
+	k8sAPIExtraArgs           []string
+	k8sKubeletExtraArgs       []string
+	registryDomain            string
+	SSOPublicKey              string
 }
 
 // OIDCConfig represents the configuration of the OIDC authorization provider
@@ -57,6 +59,9 @@ func New(config Config) (*CloudConfig, error) {
 	}
 	if config.IgnitionPath == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", config)
+	}
+	if config.ImagePullProgressDeadline == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ImagePullProgressDeadline must not be empty", config)
 	}
 	if config.RegistryDomain == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
@@ -89,11 +94,12 @@ func New(config Config) (*CloudConfig, error) {
 		encrypter: config.Encrypter,
 		logger:    config.Logger,
 
-		ignitionPath:        config.IgnitionPath,
-		k8sAPIExtraArgs:     k8sAPIExtraArgs,
-		k8sKubeletExtraArgs: k8sKubeletExtraArgs,
-		registryDomain:      config.RegistryDomain,
-		SSOPublicKey:        config.SSOPublicKey,
+		ignitionPath:              config.IgnitionPath,
+		imagePullProgressDeadline: config.ImagePullProgressDeadline,
+		k8sAPIExtraArgs:           k8sAPIExtraArgs,
+		k8sKubeletExtraArgs:       k8sKubeletExtraArgs,
+		registryDomain:            config.RegistryDomain,
+		SSOPublicKey:              config.SSOPublicKey,
 	}
 
 	return newCloudConfig, nil

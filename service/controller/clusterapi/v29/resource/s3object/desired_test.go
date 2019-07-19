@@ -95,7 +95,9 @@ func Test_DesiredState(t *testing.T) {
 				},
 				Status: controllercontext.ContextStatus{
 					TenantCluster: controllercontext.ContextStatusTenantCluster{
-						AWSAccountID: "myaccountid",
+						AWS: controllercontext.ContextStatusTenantClusterAWS{
+							AccountID: "myaccountid",
+						},
 					},
 				},
 			})
