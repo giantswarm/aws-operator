@@ -18,7 +18,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/locker"
@@ -49,6 +49,7 @@ type ClusterConfig struct {
 	GuestUpdateEnabled         bool
 	HostAWSConfig              aws.Config
 	IgnitionPath               string
+	ImagePullProgressDeadline  string
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
@@ -230,6 +231,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			Route53Enabled:             config.Route53Enabled,
 			IgnitionPath:               config.IgnitionPath,
+			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,

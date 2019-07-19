@@ -131,10 +131,11 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 		}
 
 		c := Config{
-			Encrypter:      &encrypter.EncrypterMock{},
-			Logger:         microloggertest.New(),
-			IgnitionPath:   packagePath,
-			RegistryDomain: "quay.io",
+			Encrypter:                 &encrypter.EncrypterMock{},
+			Logger:                    microloggertest.New(),
+			IgnitionPath:              packagePath,
+			ImagePullProgressDeadline: "1m",
+			RegistryDomain:            "quay.io",
 		}
 
 		ccService, err = New(c)

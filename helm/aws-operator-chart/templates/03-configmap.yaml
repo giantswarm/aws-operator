@@ -40,6 +40,8 @@ data:
         kubernetes:
           api:
             clusterIPRange: '{{ .Values.Installation.V1.Guest.Kubernetes.API.ClusterIPRange }}'
+          kubelet:
+            imagePullProgressDeadline: '{{ .Values.Installation.V1.Guest.Kubernetes.Kubelet.ImagePullProgressDeadline }}'
           networkSetup:
             docker:
               image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
