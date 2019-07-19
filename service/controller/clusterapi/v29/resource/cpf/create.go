@@ -133,22 +133,15 @@ func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.Cluster) ([
 		return nil, microerror.Mask(err)
 	}
 
-	var tenantPrivateSubnetCidrs []string
-	{
-		for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
-			tenantPrivateSubnetCidrs = append(tenantPrivateSubnetCidrs, az.PrivateSubnet.CIDR.String())
-		}
-	}
-
 	var routes []template.ParamsMainRouteTablesRoute
 
 	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
-		for _, cidrBlock := range tenantPrivateSubnetCidrs {
+		for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
 			route := template.ParamsMainRouteTablesRoute{
 				RouteTableID: id,
 				// Requester CIDR block, we create the peering connection from the
 				// tenant's private subnets.
-				CidrBlock: cidrBlock,
+				CidrBlock: az.Subnet.Private.CIDR.String(),
 				// The peer connection id is fetched from the cloud formation stack
 				// outputs in the stackoutput resource.
 				PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
