@@ -3,7 +3,6 @@ package detection
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -73,79 +72,7 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 		return false, microerror.Mask(err)
 	}
 
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("spec\n")
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		fmt.Printf("\n")
-		fmt.Printf("%#v\n", az.Name)
-		fmt.Printf("    %#v\n", az.Subnet.Private.CIDR.String())
-		fmt.Printf("    %#v\n", az.Subnet.Private.ID)
-		fmt.Printf("    %#v\n", az.Subnet.Public.CIDR.String())
-		fmt.Printf("    %#v\n", az.Subnet.Public.ID)
-		fmt.Printf("\n")
-	}
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("status\n")
-	for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
-		fmt.Printf("\n")
-		fmt.Printf("%#v\n", az.Name)
-		fmt.Printf("    %#v\n", az.Subnet.Private.CIDR.String())
-		fmt.Printf("    %#v\n", az.Subnet.Private.ID)
-		fmt.Printf("    %#v\n", az.Subnet.Public.CIDR.String())
-		fmt.Printf("    %#v\n", az.Subnet.Public.ID)
-		fmt.Printf("\n")
-	}
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-
-	// TODO: Need to check if this always works right now as the Spec might now have the subnet IDs which are in the AvailabilityZones struct here.
-
-	//     spec
-	//
-	//     "eu-central-1a"
-	//         "10.1.4.32/27"
-	//         "subnet-0854f0e4c66e3ef10"
-	//         "10.1.4.0/27"
-	//         "subnet-03a9819d8e65dce94"
-	//
-	//
-	//     "eu-central-1b"
-	//         "10.1.4.96/27"
-	//         "subnet-0934681f126016726"
-	//         "10.1.4.64/27"
-	//         "subnet-0debe88c7b8120cb4"
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//     status
-	//
-	//     "eu-central-1a"
-	//         "10.1.4.32/27"
-	//         "subnet-0854f0e4c66e3ef10"
-	//         "10.1.4.0/27"
-	//         "subnet-03a9819d8e65dce94"
-	//
-	//
-	//     "eu-central-1b"
-	//         "10.1.4.96/27"
-	//         "subnet-0934681f126016726"
-	//         "10.1.4.64/27"
-	//         "subnet-0debe88c7b8120cb4"
-
-	if !reflect.DeepEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones) {
+	if !availabilityZonesEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the tenant cluster should update due to availability zone changes"))
 		return true, nil
 	}
@@ -168,4 +95,50 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 	}
 
 	return false, nil
+}
+
+func availabilityZonesEqual(spec []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone, status []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) bool {
+	if spec == nil && status != nil {
+		return false
+	}
+
+	if spec != nil && status == nil {
+		return false
+	}
+
+	if len(spec) != len(status) {
+		return false
+	}
+
+	for i, az := range spec {
+		if !availabilityZoneEqual(az, status[i]) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func availabilityZoneEqual(spec controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone, status controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) bool {
+	if spec.Name != status.Name {
+		return false
+	}
+
+	if spec.Subnet.Private.CIDR.String() != status.Subnet.Private.CIDR.String() {
+		return false
+	}
+
+	if spec.Subnet.Private.ID != status.Subnet.Private.ID {
+		return false
+	}
+
+	if spec.Subnet.Public.CIDR.String() != status.Subnet.Public.CIDR.String() {
+		return false
+	}
+
+	if spec.Subnet.Public.ID != status.Subnet.Public.ID {
+		return false
+	}
+
+	return true
 }
