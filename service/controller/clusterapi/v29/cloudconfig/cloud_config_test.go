@@ -174,16 +174,17 @@ func testNewCloudConfigService() (*CloudConfig, error) {
 			Encrypter: &encrypter.EncrypterMock{},
 			Logger:    microloggertest.New(),
 
-			CalicoCIDR:              18,
-			CalicoMTU:               1430,
-			CalicoSubnet:            "172.18.128.0",
-			ClusterIPRange:          "172.18.192.0/22",
-			DockerDaemonCIDR:        "172.18.224.1/19",
-			IgnitionPath:            packagePath,
-			NetworkSetupDockerImage: "quay.io/giantswarm/k8s-setup-network-environment",
-			RegistryDomain:          "quay.io",
-			SSHUserList:             "user:ssh-rsa base64==",
-			SSOPublicKey:            "user:ssh-rsa base64==",
+			CalicoCIDR:                18,
+			CalicoMTU:                 1430,
+			CalicoSubnet:              "172.18.128.0",
+			ClusterIPRange:            "172.18.192.0/22",
+			DockerDaemonCIDR:          "172.18.224.1/19",
+			IgnitionPath:              packagePath,
+			ImagePullProgressDeadline: "1m",
+			NetworkSetupDockerImage:   "quay.io/giantswarm/k8s-setup-network-environment",
+			RegistryDomain:            "quay.io",
+			SSHUserList:               "user:ssh-rsa base64==",
+			SSOPublicKey:              "user:ssh-rsa base64==",
 		}
 
 		ccService, err = New(c)
