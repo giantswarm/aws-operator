@@ -42,7 +42,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	bucketName := key.BucketName(&cr, cc.Status.TenantCluster.AWSAccountID)
+	bucketName := key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID)
 
 	var objects []*s3.Object
 	{

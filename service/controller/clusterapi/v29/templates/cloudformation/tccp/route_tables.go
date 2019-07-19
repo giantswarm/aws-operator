@@ -1,8 +1,8 @@
 package tccp
 
 const RouteTables = `
-{{ define "route_tables" }}
-{{- $v := .Guest.RouteTables }}
+{{- define "route_tables" -}}
+{{- $v := .Guest.RouteTables -}}
   {{ $v.PublicRouteTableName.ResourceName }}:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -12,7 +12,6 @@ const RouteTables = `
         Value: {{ $v.PublicRouteTableName.TagName }}
       - Key: giantswarm.io/tccp
         Value: true
-
   {{- range $v.PrivateRouteTableNames }}
   {{ .ResourceName }}:
     Type: AWS::EC2::RouteTable
@@ -23,7 +22,6 @@ const RouteTables = `
         Value: {{ .TagName }}
       - Key: giantswarm.io/tccp
         Value: true
-
   {{ .VPCPeeringRouteName }}:
     Type: AWS::EC2::Route
     Properties:
@@ -32,5 +30,5 @@ const RouteTables = `
       VpcPeeringConnectionId:
         Ref: "VPCPeeringConnection"
   {{ end }}
-{{ end }}
+{{- end -}}
 `

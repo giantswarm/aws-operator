@@ -1,9 +1,9 @@
 package tccp
 
 const RecordSets = `
-{{define "record_sets"}}
+{{- define "record_sets" -}}
 {{- $v := .Guest.RecordSets }}
-{{ if $v.Route53Enabled }}
+{{- if $v.Route53Enabled -}}
   HostedZone:
     Type: 'AWS::Route53::HostedZone'
     Properties:
@@ -47,6 +47,6 @@ const RecordSets = `
       Type: CNAME
       ResourceRecords:
         - !Ref 'IngressRecordSet'
-{{end}}
-{{end}}
+{{- end -}}
+{{- end -}}
 `

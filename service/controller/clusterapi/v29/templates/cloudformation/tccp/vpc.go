@@ -1,7 +1,7 @@
 package tccp
 
 const VPC = `
-{{define "vpc"}}
+{{- define "vpc" -}}
 {{- $v := .Guest.VPC }}
   VPC:
     Type: AWS::EC2::VPC
@@ -50,5 +50,5 @@ const VPC = `
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:{{ $v.RegionARN }}:s3:::*/*"
-{{end}}
+{{- end -}}
 `

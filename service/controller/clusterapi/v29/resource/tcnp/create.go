@@ -209,7 +209,7 @@ func newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.Machin
 			ID: key.MachineDeploymentID(&md),
 		},
 		RegionARN: key.RegionARN(cl),
-		S3Bucket:  key.BucketName(&md, cc.Status.TenantCluster.AWSAccountID),
+		S3Bucket:  key.BucketName(&md, cc.Status.TenantCluster.AWS.AccountID),
 	}
 
 	return iamPolicies, nil
@@ -240,7 +240,7 @@ func newLaunchConfiguration(ctx context.Context, cl v1alpha1.Cluster, md v1alpha
 			Type:       key.WorkerInstanceType(md),
 		},
 		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
-			S3URL: key.SmallCloudConfigS3URL(&md, cc.Status.TenantCluster.AWSAccountID, "worker"),
+			S3URL: key.SmallCloudConfigS3URL(&md, cc.Status.TenantCluster.AWS.AccountID, "worker"),
 		},
 	}
 
