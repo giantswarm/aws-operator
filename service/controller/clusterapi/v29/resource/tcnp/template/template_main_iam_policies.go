@@ -18,7 +18,7 @@ const TemplateMainIAMPolicies = `
     Properties:
       PolicyName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-policy-{{ .IAMPolicies.NodePool.ID }}
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -57,11 +57,11 @@ const TemplateMainIAMPolicies = `
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-  NodePoolInstanceProfile
+  NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-profile-{{ .IAMPolicies.NodePool.ID }}
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
 {{- end -}}
 `

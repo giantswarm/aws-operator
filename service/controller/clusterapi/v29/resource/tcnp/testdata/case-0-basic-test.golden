@@ -75,7 +75,7 @@ Resources:
     Properties:
       PolicyName: gs-cluster-8y5ck-policy-al9qy
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -109,12 +109,12 @@ Resources:
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-  NodePoolInstanceProfile
+  NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: gs-cluster-8y5ck-profile-al9qy
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
   NodePoolLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
