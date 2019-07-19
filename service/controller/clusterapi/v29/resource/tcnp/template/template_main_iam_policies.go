@@ -31,11 +31,11 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-          {{- if .IAMPolicies.KMSKeyARN -}}
+          {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
             Resource: "{{ .IAMPolicies.KMSKeyARN }}"
-          {{- end -}}
+          {{- end }}
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
