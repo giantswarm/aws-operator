@@ -46,7 +46,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := Subnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.PublicSubnet.String(),
+			CIDR:                az.Subnet.Public.CIDR.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
@@ -61,7 +61,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 		snetName = key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet = Subnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.PrivateSubnet.String(),
+			CIDR:                az.Subnet.Private.CIDR.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{

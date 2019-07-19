@@ -30,21 +30,45 @@ func DefaultContext() context.Context {
 				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
-					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
+					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
-							Name:          "eu-central-1a",
-							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
+							Name: "eu-central-1a",
+							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.0/27"),
+									ID:   "validPrivateSubnetID-1a",
+								},
+								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic{
+									CIDR: mustParseCIDR("10.100.3.32/27"),
+									ID:   "validPublicSubnetID-1a",
+								},
+							},
 						},
 						{
-							Name:          "eu-central-1b",
-							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
+							Name: "eu-central-1b",
+							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.64/27"),
+									ID:   "validPrivateSubnetID-1b",
+								},
+								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic{
+									CIDR: mustParseCIDR("10.100.3.96/27"),
+									ID:   "validPublicSubnetID-1b",
+								},
+							},
 						},
 						{
-							Name:          "eu-central-1c",
-							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
+							Name: "eu-central-1c",
+							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.128/27"),
+									ID:   "validPrivateSubnetID-1c",
+								},
+								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic{
+									CIDR: mustParseCIDR("10.100.3.164/27"),
+									ID:   "validPublicSubnetID-1c",
+								},
+							},
 						},
 					},
 					IsTransitioning:   false,
@@ -65,21 +89,65 @@ func DefaultContext() context.Context {
 		Spec: controllercontext.ContextSpec{
 			TenantCluster: controllercontext.ContextSpecTenantCluster{
 				TCCP: controllercontext.ContextSpecTenantClusterTCCP{
-					AvailabilityZones: []controllercontext.ContextTenantClusterAvailabilityZone{
+					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 						{
-							Name:          "eu-central-1a",
-							PrivateSubnet: mustParseCIDR("10.100.3.0/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.32/27"),
+							Name: "eu-central-1a",
+							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.0/27"),
+									ID:   "validPrivateSubnetID-1a",
+								},
+								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
+									CIDR: mustParseCIDR("10.100.3.32/27"),
+									ID:   "validPublicSubnetID-1a",
+								},
+							},
 						},
 						{
-							Name:          "eu-central-1b",
-							PrivateSubnet: mustParseCIDR("10.100.3.64/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.96/27"),
+							Name: "eu-central-1b",
+							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.64/27"),
+									ID:   "validPrivateSubnetID-1b",
+								},
+								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
+									CIDR: mustParseCIDR("10.100.3.96/27"),
+									ID:   "validPublicSubnetID-1b",
+								},
+							},
 						},
 						{
-							Name:          "eu-central-1c",
-							PrivateSubnet: mustParseCIDR("10.100.3.128/27"),
-							PublicSubnet:  mustParseCIDR("10.100.3.164/27"),
+							Name: "eu-central-1c",
+							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.128/27"),
+									ID:   "validPrivateSubnetID-1c",
+								},
+								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
+									CIDR: mustParseCIDR("10.100.3.164/27"),
+									ID:   "validPublicSubnetID-1c",
+								},
+							},
+						},
+					},
+				},
+				TCNP: controllercontext.ContextSpecTenantClusterTCNP{
+					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCNPAvailabilityZone{
+						{
+							Name: "eu-central-1a",
+							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.0/27"),
+								},
+							},
+						},
+						{
+							Name: "eu-central-1b",
+							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
+								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
+									CIDR: mustParseCIDR("10.100.3.64/27"),
+								},
+							},
 						},
 					},
 				},

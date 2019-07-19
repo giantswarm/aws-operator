@@ -18,6 +18,8 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
+        - !Ref PrivateSubnetEuCentral1a
+        - !Ref PrivateSubnetEuCentral1b
       AvailabilityZones:
         - eu-central-1a
         - eu-central-1c
@@ -73,7 +75,7 @@ Resources:
     Properties:
       PolicyName: gs-cluster-8y5ck-policy-al9qy
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -85,7 +87,8 @@ Resources:
             Resource: "*"
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
-            Resource: "*"- Effect: "Allow"
+            Resource: "*"
+          - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
@@ -106,12 +109,12 @@ Resources:
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-  NodePoolInstanceProfile
+  NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: gs-cluster-8y5ck-profile-al9qy
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
   NodePoolLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -247,3 +250,37 @@ Resources:
         - Key: Name
           Value: NodePoolSecurityGroup
   
+  PrivateSubnetEuCentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.3.0/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1a
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: imagenary-vpc-id
+  PrivateSubnetRouteTableAssociationEuCentral1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1a
+      SubnetId: validPublicSubnetID-1a
+  PrivateSubnetEuCentral1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1b
+      CidrBlock: 10.100.3.64/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1b
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: imagenary-vpc-id
+  PrivateSubnetRouteTableAssociationEuCentral1b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1b
+      SubnetId: validPublicSubnetID-1b

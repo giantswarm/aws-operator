@@ -18,7 +18,7 @@ const TemplateMainIAMPolicies = `
     Properties:
       PolicyName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-policy-{{ .IAMPolicies.NodePool.ID }}
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -31,11 +31,11 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-          {{- if .IAMPolicies.KMSKeyARN -}}
+          {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
             Resource: "{{ .IAMPolicies.KMSKeyARN }}"
-          {{- end -}}
+          {{- end }}
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
@@ -57,11 +57,11 @@ const TemplateMainIAMPolicies = `
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
-  NodePoolInstanceProfile
+  NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
       InstanceProfileName: gs-cluster-{{ .IAMPolicies.Cluster.ID }}-profile-{{ .IAMPolicies.NodePool.ID }}
       Roles:
-        - Ref: "NodePoolRole"
+        - Ref: NodePoolRole
 {{- end -}}
 `

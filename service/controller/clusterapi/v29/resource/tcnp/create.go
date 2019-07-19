@@ -170,8 +170,8 @@ func newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.M
 	}
 
 	var subnets []string
-	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(a.AvailabilityZone)))
+	for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
 	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(md), key.WorkerScalingMax(md), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
@@ -299,20 +299,22 @@ func newSubnets(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDep
 		return nil, microerror.Mask(err)
 	}
 
+	azMap := statusAZsToPublicSubnetIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
+
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
-			AvailabilityZone: a.AvailabilityZone,
-			CIDR:             a.PrivateSubnet.String(),
-			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.AvailabilityZone)),
+			AvailabilityZone: a.Name,
+			CIDR:             a.Subnet.Private.CIDR.String(),
+			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)),
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
-				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.AvailabilityZone)),
+				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.Name)),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					Name: key.SanitizeCFResourceName(key.PublicSubnetName(a.AvailabilityZone)),
+					ID: azMap[a.Name],
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.AvailabilityZone)),
+						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.Name)),
 					},
 				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
@@ -371,6 +373,14 @@ func newTemplateParams(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.Mac
 	}
 
 	return params, nil
+}
+
+func statusAZsToPublicSubnetIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
+	m := make(map[string]string)
+	for _, az := range azs {
+		m[az.Name] = az.Subnet.Public.ID
+	}
+	return m
 }
 
 func workerCountRatio(workers int, ratio float32) string {

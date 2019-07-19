@@ -45,6 +45,10 @@ func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPN
 	}
 
 	{
+		if cr.Annotations == nil {
+			cr.Annotations = map[string]string{}
+		}
+
 		cr.Annotations[annotation.MachineDeploymentSubnet] = subnet.String()
 	}
 
