@@ -161,7 +161,9 @@ func defaultControllerContext() controllercontext.Context {
 				},
 			},
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
-				AWSAccountID:          "tenant-account",
+				AWS: controllercontext.ContextStatusTenantClusterAWS{
+					AccountID: "tenant-account",
+				},
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},

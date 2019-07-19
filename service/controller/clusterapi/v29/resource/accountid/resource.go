@@ -89,7 +89,7 @@ func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 			return microerror.Mask(err)
 		}
 
-		cc.Status.TenantCluster.AWSAccountID = accountID
+		cc.Status.TenantCluster.AWS.AccountID = accountID
 	}
 
 	return nil
