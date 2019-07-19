@@ -108,6 +108,43 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 	fmt.Printf("\n")
 
 	// TODO: Need to check if this always works right now as the Spec might now have the subnet IDs which are in the AvailabilityZones struct here.
+
+	//     spec
+	//
+	//     "eu-central-1a"
+	//         "10.1.4.32/27"
+	//         "subnet-0854f0e4c66e3ef10"
+	//         "10.1.4.0/27"
+	//         "subnet-03a9819d8e65dce94"
+	//
+	//
+	//     "eu-central-1b"
+	//         "10.1.4.96/27"
+	//         "subnet-0934681f126016726"
+	//         "10.1.4.64/27"
+	//         "subnet-0debe88c7b8120cb4"
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//     status
+	//
+	//     "eu-central-1a"
+	//         "10.1.4.32/27"
+	//         "subnet-0854f0e4c66e3ef10"
+	//         "10.1.4.0/27"
+	//         "subnet-03a9819d8e65dce94"
+	//
+	//
+	//     "eu-central-1b"
+	//         "10.1.4.96/27"
+	//         "subnet-0934681f126016726"
+	//         "10.1.4.64/27"
+	//         "subnet-0debe88c7b8120cb4"
+
 	if !reflect.DeepEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the tenant cluster should update due to availability zone changes"))
 		return true, nil
