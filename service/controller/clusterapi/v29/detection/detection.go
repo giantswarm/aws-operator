@@ -73,6 +73,40 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1
 		return false, microerror.Mask(err)
 	}
 
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("spec\n")
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		fmt.Printf("\n")
+		fmt.Printf("%#v\n", az.Name)
+		fmt.Printf("    %#v\n", az.Subnet.Private.CIDR.String())
+		fmt.Printf("    %#v\n", az.Subnet.Private.ID)
+		fmt.Printf("    %#v\n", az.Subnet.Public.CIDR.String())
+		fmt.Printf("    %#v\n", az.Subnet.Public.ID)
+		fmt.Printf("\n")
+	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("status\n")
+	for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
+		fmt.Printf("\n")
+		fmt.Printf("%#v\n", az.Name)
+		fmt.Printf("    %#v\n", az.Subnet.Private.CIDR.String())
+		fmt.Printf("    %#v\n", az.Subnet.Private.ID)
+		fmt.Printf("    %#v\n", az.Subnet.Public.CIDR.String())
+		fmt.Printf("    %#v\n", az.Subnet.Public.ID)
+		fmt.Printf("\n")
+	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+
 	// TODO: Need to check if this always works right now as the Spec might now have the subnet IDs which are in the AvailabilityZones struct here.
 	if !reflect.DeepEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the tenant cluster should update due to availability zone changes"))
