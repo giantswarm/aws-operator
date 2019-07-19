@@ -50,5 +50,4 @@ type ContextSpecTenantClusterTCNPAvailabilityZoneSubnet struct {
 
 type ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate struct {
 	CIDR net.IPNet
-	ID   string
 }

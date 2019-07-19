@@ -10,6 +10,7 @@ type subnetPair struct {
 	Public  subnet
 	Private subnet
 }
+
 type subnet struct {
 	CIDR net.IPNet
 	ID   string
