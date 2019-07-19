@@ -27,6 +27,18 @@ passwd:
 
 systemd:
   units:
+  # Start - manual management for cgroup structure
+  - name: kubereserved.slice
+    path: /etc/systemd/system/kubereserved.slice
+    content: |
+      [Unit]
+      Description=Limited resources slice for Kubernetes services
+      Documentation=man:systemd.special(7)
+      DefaultDependencies=no
+      Before=slices.target
+      Requires=-.slice
+      After=-.slice
+  # End - manual management for cgroup structure
   - name: audit-rules.service
     enabled: true
     dropins:
@@ -89,6 +101,16 @@ systemd:
       ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet.yaml.tmpl >/etc/kubernetes/config/kubelet.yaml'
       [Install]
       WantedBy=multi-user.target
+  - name: containerd.service
+    enabled: true
+    contents: |
+    dropins:
+      - name: 10-change-cgroup.conf
+        contents: |
+          [Service]
+          CPUAccounting=true
+          MemoryAccounting=true
+          Slice=kubereserved.slice
   - name: docker.service
     enabled: true
     contents: |
@@ -96,7 +118,10 @@ systemd:
       - name: 10-giantswarm-extra-args.conf
         contents: |
           [Service]
-          Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
+          CPUAccounting=true
+          MemoryAccounting=true
+          Slice=kubereserved.slice
+          Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
           Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
           Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
@@ -134,6 +159,9 @@ systemd:
       RestartSec=0
       TimeoutStopSec=10
       LimitNOFILE=40000
+      CPUAccounting=true
+      MemoryAccounting=true
+      Slice=kubereserved.slice
       Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
@@ -225,6 +253,9 @@ systemd:
       Restart=always
       RestartSec=0
       TimeoutStopSec=10
+      CPUAccounting=true
+      MemoryAccounting=true
+      Slice=kubereserved.slice
       EnvironmentFile=/etc/network-environment
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"

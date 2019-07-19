@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Use v1 stable for giantswarm-critical priority class.",
 				Kind:        versionbundle.KindFixed,
 			},
+			{
+				Component:   "ignition",
+				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

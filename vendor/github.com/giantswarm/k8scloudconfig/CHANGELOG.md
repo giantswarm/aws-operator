@@ -17,7 +17,8 @@ version directory, and  then changes are introduced.
 
 ### Changed
 
-- Mount relevant directories so that the command `docker` can run in `Kubelet`. This is needed for `rbd` to mount `Ceph` volumes on the nodes.
+- Mount relevant directories so that the command `docker` can run in `Kubelet`. This is needed for `rbd` to mount `Ceph` volumes on the nodes.h
+- Add explicit cgroups for better grained resources management over operating system components and container runtime.
 - Make --image-pull-progress-deadline configurable for kubelets so a longer
 duration can be used in AWS China regions to mitigate slow image pulls.
 
