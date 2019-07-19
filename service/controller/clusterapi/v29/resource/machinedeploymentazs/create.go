@@ -66,8 +66,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		for i, az := range azs {
 			item := controllercontext.ContextSpecTenantClusterTCNPAvailabilityZone{
-				AvailabilityZone: az,
-				PrivateSubnet:    subnets[i],
+				Name: az,
+				Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
+					Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
+						CIDR: subnets[i],
+					},
+				},
 			}
 
 			list = append(list, item)

@@ -29,12 +29,12 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 0: three AZs without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{},
-				"eu-central-1b": subnetPair{},
-				"eu-central-1c": subnetPair{},
+				"eu-central-1a": {},
+				"eu-central-1b": {},
+				"eu-central-1c": {},
 			},
 			expectedAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -42,7 +42,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 					},
@@ -50,7 +50,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.96/27"),
 					},
 				},
-				"eu-central-1c": subnetPair{
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -65,7 +65,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 1: three AZs, one without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -73,8 +73,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{},
-				"eu-central-1c": subnetPair{
+				"eu-central-1b": {},
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -84,7 +84,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 				},
 			},
 			expectedAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -92,7 +92,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 					},
@@ -100,7 +100,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.96/27"),
 					},
 				},
-				"eu-central-1c": subnetPair{
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -115,9 +115,9 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 2: three AZs, two without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{},
-				"eu-central-1b": subnetPair{},
-				"eu-central-1c": subnetPair{
+				"eu-central-1a": {},
+				"eu-central-1b": {},
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -127,7 +127,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 				},
 			},
 			expectedAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -135,7 +135,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 					},
@@ -143,7 +143,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.96/27"),
 					},
 				},
-				"eu-central-1c": subnetPair{
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -158,7 +158,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 3: four AZs, one without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -166,7 +166,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 					},
@@ -174,7 +174,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.96/27"),
 					},
 				},
-				"eu-central-1c": subnetPair{
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -182,10 +182,10 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.160/27"),
 					},
 				},
-				"eu-central-1d": subnetPair{},
+				"eu-central-1d": {},
 			},
 			expectedAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -193,7 +193,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 					},
@@ -201,7 +201,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.96/27"),
 					},
 				},
-				"eu-central-1c": subnetPair{
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -209,7 +209,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.160/27"),
 					},
 				},
-				"eu-central-1d": subnetPair{
+				"eu-central-1d": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.192/27"),
 					},
@@ -224,7 +224,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 4: five AZs, one without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 					},
@@ -232,7 +232,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.32/27"),
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 					},
@@ -240,7 +240,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.96/27"),
 					},
 				},
-				"eu-central-1c": subnetPair{
+				"eu-central-1c": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.128/27"),
 					},
@@ -248,7 +248,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.160/27"),
 					},
 				},
-				"eu-central-1d": subnetPair{
+				"eu-central-1d": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.192/27"),
 					},
@@ -256,7 +256,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 						CIDR: mustParseCIDR("10.100.8.224/27"),
 					},
 				},
-				"eu-central-1e": subnetPair{},
+				"eu-central-1e": {},
 			},
 			expectedAZs:  nil,
 			errorMatcher: IsInvalidConfig,
@@ -320,16 +320,16 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 1: subnet list with one value",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
@@ -337,7 +337,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				},
 			},
 			expected: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 						ID:   "validID",
@@ -349,16 +349,16 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 1: subnet list with one value",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
@@ -366,7 +366,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				},
 			},
 			expected: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 						ID:   "validID",
@@ -378,46 +378,46 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 2: subnet list with three values",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
 					},
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.32/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("private"),
 						},
 					},
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.8.64/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
@@ -425,7 +425,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				},
 			},
 			expected: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 						ID:   "validID",
@@ -435,7 +435,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 						ID:   "validID",
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 						ID:   "validID",
@@ -447,37 +447,37 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 3: subnet list with irrelevant values",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
 					},
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.32/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("private"),
 						},
 					},
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.4.64/27"),
 					SubnetId:         to.StringP("validID"),
@@ -485,7 +485,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				},
 			},
 			expected: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 						ID:   "validID",
@@ -509,16 +509,16 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 5: subnet list with subnet that has AvailabilityZone nil",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: nil,
 					CidrBlock:        to.StringP("10.100.4.64/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
@@ -531,16 +531,16 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 6: subnet list with subnet that has CidrBlock nil",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        nil,
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
@@ -553,7 +553,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 7: subnet list with subnet that has tags nil",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.4.64/27"),
 					SubnetId:         to.StringP("validID"),
@@ -566,7 +566,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 8: subnet list with subnet that has Tag that is nil",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        nil,
 					SubnetId:         to.StringP("validID"),
@@ -581,12 +581,12 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 9: subnet list with subnet that has Tag that has nil Key",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        nil,
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   nil,
 							Value: to.StringP("orphaned value"),
 						},
@@ -599,50 +599,50 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 		{
 			name: "case 10: subnet list with three values and one that has Tag that has nil Value",
 			input: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.0/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP("uninteresting-tag"),
 							Value: nil,
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
 					},
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1a"),
 					CidrBlock:        to.StringP("10.100.8.32/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("private"),
 						},
 					},
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: to.StringP("eu-central-1b"),
 					CidrBlock:        to.StringP("10.100.8.64/27"),
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagTCCP),
 							Value: to.StringP("true"),
 						},
-						&ec2.Tag{
+						{
 							Key:   to.StringP(key.TagSubnetType),
 							Value: to.StringP("public"),
 						},
@@ -650,7 +650,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 				},
 			},
 			expected: map[string]subnetPair{
-				"eu-central-1a": subnetPair{
+				"eu-central-1a": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.0/27"),
 						ID:   "validID",
@@ -660,7 +660,7 @@ func Test_fromEC2SubnetsToMap(t *testing.T) {
 						ID:   "validID",
 					},
 				},
-				"eu-central-1b": subnetPair{
+				"eu-central-1b": {
 					Public: subnet{
 						CIDR: mustParseCIDR("10.100.8.64/27"),
 						ID:   "validID",

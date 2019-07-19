@@ -12,7 +12,27 @@ type ContextSpecTenantCluster struct {
 }
 
 type ContextSpecTenantClusterTCCP struct {
-	AvailabilityZones []ContextTenantClusterAvailabilityZone
+	AvailabilityZones []ContextSpecTenantClusterTCCPAvailabilityZone
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZone struct {
+	Name   string
+	Subnet ContextSpecTenantClusterTCCPAvailabilityZoneSubnet
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneSubnet struct {
+	Private ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate
+	Public  ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {
+	CIDR net.IPNet
+	ID   string
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
+	CIDR net.IPNet
+	ID   string
 }
 
 type ContextSpecTenantClusterTCNP struct {
@@ -20,6 +40,15 @@ type ContextSpecTenantClusterTCNP struct {
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZone struct {
-	AvailabilityZone string
-	PrivateSubnet    net.IPNet
+	Name   string
+	Subnet ContextSpecTenantClusterTCNPAvailabilityZoneSubnet
+}
+
+type ContextSpecTenantClusterTCNPAvailabilityZoneSubnet struct {
+	Private ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate
+}
+
+type ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate struct {
+	CIDR net.IPNet
+	ID   string
 }
