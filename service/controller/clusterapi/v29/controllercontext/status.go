@@ -38,13 +38,18 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	AWSAccountID          string
+	AWS                   ContextStatusTenantClusterAWS
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	VersionBundleVersion  string
 	WorkerInstance        ContextStatusTenantClusterWorkerInstance
+}
+
+type ContextStatusTenantClusterAWS struct {
+	AccountID string
+	Region    string
 }
 
 type ContextStatusTenantClusterEncryption struct {
