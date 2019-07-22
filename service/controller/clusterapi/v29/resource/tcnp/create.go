@@ -29,6 +29,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot ensure the tenant cluster's node pool cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
+	}
+
 	// Fetch the cluster for region information and the like.
 	var cl v1alpha1.Cluster
 	{
