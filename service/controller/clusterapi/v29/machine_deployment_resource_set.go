@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 )
@@ -140,6 +141,19 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var machineDeploymentAZsResource controller.Resource
+	{
+		c := machinedeploymentazs.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentAZsResource, err = machinedeploymentazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var regionResource controller.Resource
 	{
 		c := region.Config{
@@ -174,6 +188,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		encryptionResource,
 		ipamResource,
 		clusterAZsResource,
+		machineDeploymentAZsResource,
 		tcnpResource,
 	}
 
