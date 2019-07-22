@@ -59,6 +59,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newResource := &Resource{
+		cmaClient:        config.CMAClient,
 		g8sClient:        config.G8sClient,
 		logger:           config.Logger,
 		networkAllocator: config.NetworkAllocator,
