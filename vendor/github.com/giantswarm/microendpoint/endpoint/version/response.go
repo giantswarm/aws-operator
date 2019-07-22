@@ -10,18 +10,6 @@ type Response struct {
 	Name           string                 `json:"name"`
 	OSArch         string                 `json:"os_arch"`
 	Source         string                 `json:"source"`
+	Version        string                 `json:"version"`
 	VersionBundles []versionbundle.Bundle `json:"version_bundles"`
-}
-
-// DefaultResponse provides a default response object by best effort.
-func DefaultResponse() *Response {
-	return &Response{
-		Description:    "",
-		GitCommit:      "",
-		GoVersion:      "",
-		Name:           "",
-		OSArch:         "",
-		Source:         "",
-		VersionBundles: nil,
-	}
 }
