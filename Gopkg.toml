@@ -97,7 +97,7 @@ required = [
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
-  branch = "master"
+  branch = "add-version"
   name = "github.com/giantswarm/microkit"
 
 [[constraint]]

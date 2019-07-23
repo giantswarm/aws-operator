@@ -366,8 +366,8 @@
   revision = "f446cc816a48d6626ddce3ecd966c8b6be3a1985"
 
 [[projects]]
-  branch = "master"
-  digest = "1:83013eaf386dd720e63ab59999d7ea22390fae720bc7c7d3fa31a8c07efb9894"
+  branch = "add-version"
+  digest = "1:b393d8caf081af7db00cac06afe4e3c162ef90c10999d05fad689f88c2124084"
   name = "github.com/giantswarm/microkit"
   packages = [
     "command",
@@ -386,7 +386,7 @@
     "tls",
   ]
   pruneopts = "UT"
-  revision = "d6fac43ca97d8630b27d70810b1e1df7b7c1e775"
+  revision = "3ba752ebe63e3be2244483af93867d0e08f81caf"
 
 [[projects]]
   branch = "master"
