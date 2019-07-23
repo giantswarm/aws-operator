@@ -28,7 +28,7 @@ Resources:
       MaxSize: 5
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
       LoadBalancerNames:
-        - !Ref IngressLoadBalancer
+        - 8y5ck-ingress
 
       # 10 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
