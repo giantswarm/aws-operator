@@ -226,7 +226,10 @@ workflows:
   version: 2
   build_e2e:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
       - architect/push-to-app-catalog:
           name: "build and push aws-operator chart"
           app_catalog: "control-plane-catalog"
