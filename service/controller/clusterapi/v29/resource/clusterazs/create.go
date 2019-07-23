@@ -318,6 +318,17 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTen
 		sort.Strings(azNames)
 	}
 
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("status tccp\n")
+	for k, v := range azs {
+		fmt.Printf("    %#v\n", k)
+		fmt.Printf("    %#v\n", v)
+	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+
 	var status []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone
 
 	for _, name := range azNames {
@@ -326,6 +337,7 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTen
 		// Skip empty subnets as they are not allocated in AWS and therefor not in
 		// the current state.
 		if sp.areEmpty() {
+			fmt.Printf("subnet pair is empty\n")
 			continue
 		}
 
@@ -346,6 +358,17 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTen
 
 		status = append(status, az)
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("spec tcnp\n")
+	for _, a := range status {
+		fmt.Printf("    %#v\n", a.Name)
+		fmt.Printf("    %#v\n", a.Subnet.Public.ID)
+	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 
 	return status
 }
