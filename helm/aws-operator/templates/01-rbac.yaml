@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: aws-operator
+  name: aws-operator.v[[ .Version ]]
 rules:
   - apiGroups:
       - cluster.giantswarm.io
@@ -103,20 +103,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aws-operator
+  name: aws-operator.v[[ .Version ]]
 subjects:
   - kind: ServiceAccount
-    name: aws-operator
+    name: aws-operator.v[[ .Version ]]
     namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
-  name: aws-operator
+  name: aws-operator.v[[ .Version ]]
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: aws-operator-psp
+  name: aws-operator-psp.v[[ .Version ]]
 rules:
   - apiGroups:
       - extensions
@@ -130,12 +130,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aws-operator-psp
+  name: aws-operator-psp.v[[ .Version ]]
 subjects:
   - kind: ServiceAccount
-    name: aws-operator
+    name: aws-operator.v[[ .Version ]]
     namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
-  name: aws-operator-psp
+  name: aws-operator-psp.v[[ .Version ]]
   apiGroup: rbac.authorization.k8s.io
