@@ -97,6 +97,7 @@ func mainE(ctx context.Context) error {
 			GitCommit:      project.GitSHA(),
 			Name:           project.Name(),
 			Source:         project.Source(),
+			Version:        project.Version(),
 			VersionBundles: service.NewVersionBundles(),
 		}
 
