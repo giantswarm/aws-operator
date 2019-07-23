@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Name = "clusterazsv29"
+	Name = "vpcidv29"
 )
 
 type Config struct {
