@@ -199,7 +199,10 @@ func newAutoScalingGroup(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.M
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&md),
 		},
-		DesiredCapacity:       minDesiredNodes,
+		DesiredCapacity: minDesiredNodes,
+		LoadBalancer: template.ParamsMainAutoScalingGroupLoadBalancer{
+			Name: key.ELBNameIngress(&md),
+		},
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.WorkerScalingMax(md),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),

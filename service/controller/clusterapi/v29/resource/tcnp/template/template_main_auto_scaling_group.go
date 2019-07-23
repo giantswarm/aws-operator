@@ -18,7 +18,7 @@ const TemplateMainAutoScalingGroup = `
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
       LoadBalancerNames:
-        - !Ref IngressLoadBalancer
+        - {{ .AutoScalingGroup.LoadBalancer.Name }}
 
       # 10 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
