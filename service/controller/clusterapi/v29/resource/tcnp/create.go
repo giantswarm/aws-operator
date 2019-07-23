@@ -2,6 +2,7 @@ package tcnp
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -28,6 +29,27 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("status tccp\n")
+	for _, a := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
+		fmt.Printf("    %#v\n", a.Name)
+		fmt.Printf("    %#v\n", a.Subnet.Public.ID)
+	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("spec tcnp\n")
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		fmt.Printf("    %#v\n", a.Name)
+	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
