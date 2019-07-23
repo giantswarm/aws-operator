@@ -38,6 +38,7 @@ type MachineDeploymentConfig struct {
 	ProjectName                string
 	Route53Enabled             bool
 	VaultAddress               string
+	VPCPeerID                  string
 }
 
 type MachineDeployment struct {
@@ -151,6 +152,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			ProjectName:                config.ProjectName,
 			Route53Enabled:             config.Route53Enabled,
 			VaultAddress:               config.VaultAddress,
+			VPCPeerID:                  config.VPCPeerID,
 		}
 
 		v29ResourceSet, err = v29.NewMachineDeploymentResourceSet(c)
