@@ -22,18 +22,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(&cr)
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc id for %s", clusterID))
-
 	var vpcs []*ec2.Vpc
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding vpcs")
+
 		i := &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(clusterID),
+						aws.String(key.ClusterID(&cr)),
 					},
 				},
 			},
@@ -42,25 +40,29 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
 		vpcs = o.Vpcs
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found vpcs")
 	}
 
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc id for tenant cluster %#q", key.ClusterID(&cr)))
+
 		if len(vpcs) > 1 {
-			return microerror.Maskf(tooManyResultsError, "expected one vpc, got %d", len(vpcs))
+			return microerror.Maskf(executionFailedError, "expected one vpc, got %d", len(vpcs))
 		}
 
 		if len(vpcs) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find vpc id for %s", clusterID))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find vpc id for tenant cluster %#q", key.ClusterID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
 		}
 
-		if len(vpcs) == 1 {
-			if vpcs[0].VpcId != nil {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc id %s for %s", *vpcs[0].VpcId, clusterID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc id %#q for tenant cluster %#q", *vpcs[0].VpcId, key.ClusterID(&cr)))
 
-				cc.Status.TenantCluster.TCCP.VPC.ID = *vpcs[0].VpcId
-			}
-		}
+		cc.Status.TenantCluster.TCCP.VPC.ID = *vpcs[0].VpcId
 	}
 
 	return nil
