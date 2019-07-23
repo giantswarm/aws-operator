@@ -11,16 +11,13 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/server"
 	"github.com/giantswarm/aws-operator/service"
 )
 
 var (
-	description string     = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
-	f           *flag.Flag = flag.New()
-	gitCommit   string     = "n/a"
-	name        string     = "aws-operator"
-	source      string     = "https://github.com/giantswarm/aws-operator"
+	f *flag.Flag = flag.New()
 )
 
 func main() {
@@ -54,10 +51,11 @@ func mainE(ctx context.Context) error {
 				Logger: logger,
 				Viper:  v,
 
-				Description: description,
-				GitCommit:   gitCommit,
-				ProjectName: name,
-				Source:      source,
+				Description: project.Description(),
+				GitCommit:   project.GitSHA(),
+				ProjectName: project.Name(),
+				Source:      project.Source(),
+				Version:     project.Version(),
 			}
 
 			newService, err = service.New(c)
@@ -76,7 +74,7 @@ func mainE(ctx context.Context) error {
 				Service: newService,
 				Viper:   v,
 
-				ProjectName: name,
+				ProjectName: project.Name(),
 			}
 
 			newServer, err = server.New(c)
@@ -95,10 +93,10 @@ func mainE(ctx context.Context) error {
 			Logger:        logger,
 			ServerFactory: serverFactory,
 
-			Description:    description,
-			GitCommit:      gitCommit,
-			Name:           name,
-			Source:         source,
+			Description:    project.Description(),
+			GitCommit:      project.GitSHA(),
+			Name:           project.Name(),
+			Source:         project.Source(),
 			VersionBundles: service.NewVersionBundles(),
 		}
 
