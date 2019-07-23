@@ -21,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpcid"
 )
 
@@ -183,6 +184,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var vpcCIDRResource controller.Resource
+	{
+		c := vpccidr.Config{
+			Logger: config.Logger,
+
+			VPCPeerID: config.VPCPeerID,
+		}
+
+		vpcCIDRResource, err = vpccidr.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var vpcidResource controller.Resource
 	{
 		c := vpcid.Config{
@@ -200,6 +215,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	resources := []controller.Resource{
 		awsClientResource,
 		vpcidResource,
+		vpcCIDRResource,
 		regionResource,
 		encryptionResource,
 		ipamResource,
