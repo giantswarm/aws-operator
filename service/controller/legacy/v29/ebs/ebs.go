@@ -131,57 +131,39 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 	}
 
 	{
-		o := func() error {
-			i := &ec2.DescribeVolumesInput{
-				VolumeIds: []*string{
-					aws.String(volumeID),
-				},
-			}
-
-			v, err := e.client.DescribeVolumes(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			if len(v.Volumes) == 0 {
-				// Fall through.
-				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("volume %#q not found", volumeID))
-				return nil
-			}
-
-			if len(v.Volumes) > 1 {
-				// Fall through.
-				e.logger.LogCtx(ctx, "level", "debug", "message", "multiple volumes found")
-				return nil
-			}
-
-			d := v.Volumes[0]
-			if len(d.Attachments) > 1 {
-				// Shouldn't happen; log so we know if it is
-				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found multiple attachment for volume %#q", volumeID))
-			}
-
-			for _, a := range d.Attachments {
-				if a.State != nil {
-					attachmentStatus := *a.State
-					if attachmentStatus != "detached" {
-						return microerror.New(fmt.Sprintf("the volume %#q is still attached", volumeID))
-					}
-				} else {
-					// Shouldn't happen; log so we know if it is
-					e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("nil attachment state for volume %#q", volumeID))
-				}
-			}
-
-			return nil
+		i := &ec2.DescribeVolumesInput{
+			VolumeIds: []*string{
+				aws.String(volumeID),
+			},
 		}
 
-		b := backoff.NewExponential(30*time.Second, 5*time.Second)
-		n := backoff.NewNotifier(e.logger, context.Background())
-
-		err := backoff.RetryNotify(o, b, n)
+		v, err := e.client.DescribeVolumes(i)
 		if err != nil {
 			return microerror.Mask(err)
+		}
+
+		if len(v.Volumes) == 0 {
+			// Fall through.
+			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("volume %#q not found", volumeID))
+			return microerror.Maskf(executionFailedError, "no volume found")
+		}
+
+		d := v.Volumes[0]
+		if len(d.Attachments) > 1 {
+			// Shouldn't happen; log so we know if it is
+			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found multiple attachment for volume %#q", volumeID))
+		}
+
+		for _, a := range d.Attachments {
+			if a.State != nil {
+				attachmentStatus := *a.State
+				if attachmentStatus != "detached" {
+					return microerror.Maskf(volumeAttachedError, "volume %#q still attached", volumeID)
+				}
+			} else {
+				// Shouldn't happen; log so we know if it is
+				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("nil attachment state for volume %#q", volumeID))
+			}
 		}
 
 		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
