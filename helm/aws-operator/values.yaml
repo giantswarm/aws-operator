@@ -1,4 +1,11 @@
 namespace: giantswarm
 
-userID: 1000
-groupID: 1000
+docker:
+  image:
+    tag: [[ .DockerTag ]]
+pod:
+  user:
+    id: 1000
+  group:
+    id: 1000
+version: [[ .Version ]]

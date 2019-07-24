@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: aws-operator.v[[ .Version ]]
+  name: aws-operator.v{{ .Values.version }}
   namespace: {{ .Values.namespace }}
   labels:
     app: aws-operator
@@ -20,13 +20,13 @@ spec:
       volumes:
       - name: aws-operator-configmap
         configMap:
-          name: aws-operator-configmap.v[[ .Version ]]
+          name: aws-operator-configmap.v{{ .Values.version }}
           items:
           - key: config.yaml
             path: config.yaml
       - name: aws-operator-secret
         secret:
-          secretName: aws-operator-secret.v[[ .Version ]]
+          secretName: aws-operator-secret.v{{ .Values.version }}
           items:
           - key: secret.yaml
             path: secret.yaml
@@ -35,11 +35,11 @@ spec:
           path: /etc/ssl/certs/ca-certificates.crt
       serviceAccountName: aws-operator
       securityContext:
-        runAsUser: {{ .Values.userID }}
-        runAsGroup: {{ .Values.groupID }}
+        runAsUser: {{ .Values.pod.user.id }}
+        runAsGroup: {{ .Values.pod.group.id }}
       containers:
       - name: aws-operator
-        image: quay.io/giantswarm/aws-operator:[[ .DockerTag ]]
+        image: quay.io/giantswarm/aws-operator:{{ .Values.docker.image.tag }}
         volumeMounts:
         - name: aws-operator-configmap
           mountPath: /var/run/aws-operator/configmap/
@@ -77,4 +77,4 @@ spec:
             cpu: 250m
             memory: 250Mi
       imagePullSecrets:
-      - name: aws-operator-pull-secret.v[[ .Version ]]
+      - name: aws-operator-pull-secret.v{{ .Values.version }}
