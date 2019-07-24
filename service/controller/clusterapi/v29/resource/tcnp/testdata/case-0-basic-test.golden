@@ -237,14 +237,14 @@ Resources:
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: ingressSCID
 
       # Allow traffic from the ingress security group to 80 for ingress-controller.
       -
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: ingressSCID
 
       Tags:
         - Key: Name
