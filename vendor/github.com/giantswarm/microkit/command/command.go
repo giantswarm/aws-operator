@@ -21,6 +21,7 @@ type Config struct {
 	GitCommit      string
 	Name           string
 	Source         string
+	Version        string
 	VersionBundles []versionbundle.Bundle
 	Viper          *viper.Viper
 }
@@ -54,6 +55,7 @@ func New(config Config) (Command, error) {
 			GitCommit:      config.GitCommit,
 			Name:           config.Name,
 			Source:         config.Source,
+			Version:        config.Version,
 			VersionBundles: config.VersionBundles,
 		}
 

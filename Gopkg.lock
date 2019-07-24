@@ -346,7 +346,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b7f7982da706514dcb15a2d9211d932efb654c33d4ac105d552ae1981702dad4"
+  digest = "1:a2122f2c0fae0df1c4225df3c18e624d712566cb43eabc38c6f0914231cae2bb"
   name = "github.com/giantswarm/microendpoint"
   packages = [
     "endpoint/healthz",
@@ -355,7 +355,7 @@
     "service/version",
   ]
   pruneopts = "UT"
-  revision = "f77c569259aef9cea5e38d0d7d94bf1d7d07d136"
+  revision = "2c0b54e888d682445c698d2b2b3544b2001e84ac"
 
 [[projects]]
   branch = "master"
@@ -367,7 +367,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:83013eaf386dd720e63ab59999d7ea22390fae720bc7c7d3fa31a8c07efb9894"
+  digest = "1:5a83c09d3255d3a9311f988a46068e99f537de547899fa3956ec4c51b439d0b2"
   name = "github.com/giantswarm/microkit"
   packages = [
     "command",
@@ -386,7 +386,7 @@
     "tls",
   ]
   pruneopts = "UT"
-  revision = "d6fac43ca97d8630b27d70810b1e1df7b7c1e775"
+  revision = "4eef9bd9640621debcdfa90dee993cb6898d18cf"
 
 [[projects]]
   branch = "master"
