@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroupid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
@@ -170,6 +171,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tccpSecurityGroupIDResource controller.Resource
+	{
+		c := tccpsecuritygroupid.Config{
+			CMAClient:     config.CMAClient,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		}
+
+		tccpSecurityGroupIDResource, err = tccpsecuritygroupid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpSubnetResource controller.Resource
 	{
 		c := tccpsubnet.Config{
@@ -229,6 +244,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		awsClientResource,
 		vpcidResource,
 		vpcCIDRResource,
+		tccpSecurityGroupIDResource,
 		tccpSubnetResource,
 		regionResource,
 		encryptionResource,

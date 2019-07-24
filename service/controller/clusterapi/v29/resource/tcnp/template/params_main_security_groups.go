@@ -6,11 +6,16 @@ type ParamsMainSecurityGroups struct {
 }
 
 type ParamsMainSecurityGroupsControlPlane struct {
-	VPC ParamsMainSecurityGroupsControlPlaneVPC
+	VPC     ParamsMainSecurityGroupsControlPlaneVPC
+	Ingress ParamsMainSecurityGroupsControlPlaneIngress
 }
 
 type ParamsMainSecurityGroupsControlPlaneVPC struct {
 	CIDR string
+}
+
+type ParamsMainSecurityGroupsControlPlaneIngress struct {
+	ID string
 }
 
 type ParamsMainSecurityGroupsTenantCluster struct {

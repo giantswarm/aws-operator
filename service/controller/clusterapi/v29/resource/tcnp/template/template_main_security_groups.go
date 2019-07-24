@@ -49,14 +49,14 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: {{ .SecurityGroups.ControlPlane.Ingress.ID }}
 
       # Allow traffic from the ingress security group to 80 for ingress-controller.
       -
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: {{ .SecurityGroups.ControlPlane.Ingress.ID }}
 
       Tags:
         - Key: Name

@@ -71,6 +71,7 @@ type ContextStatusTenantClusterTCCP struct {
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
 	RouteTables       []*ec2.RouteTable
+	SecurityGroups    ContextStatusTenantClusterTCCPSecurityGroups
 	Subnets           []*ec2.Subnet
 	VPC               ContextStatusTenantClusterTCCPVPC
 }
@@ -100,6 +101,14 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	CIDR net.IPNet
 	ID   string
+}
+
+type ContextStatusTenantClusterTCCPSecurityGroups struct {
+	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
+}
+
+type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
+	ID string
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
