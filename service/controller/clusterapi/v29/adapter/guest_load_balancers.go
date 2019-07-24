@@ -48,7 +48,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	// API load balancer settings.
 	a.APIElbHealthCheckTarget = heathCheckTarget(key.KubernetesSecurePort)
-	a.APIElbName = key.ELBNameAPI(cfg.CustomObject)
+	a.APIElbName = key.ELBNameAPI(&cfg.CustomObject)
 	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.KubernetesSecurePort,
@@ -59,7 +59,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	// etcd load balancer settings.
 	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort)
-	a.EtcdElbName = key.ELBNameEtcd(cfg.CustomObject)
+	a.EtcdElbName = key.ELBNameEtcd(&cfg.CustomObject)
 	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.EtcdPort,
@@ -70,7 +70,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	// Ingress load balancer settings.
 	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort)
-	a.IngressElbName = key.ELBNameIngress(cfg.CustomObject)
+	a.IngressElbName = key.ELBNameIngress(&cfg.CustomObject)
 	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB: httpsPort,

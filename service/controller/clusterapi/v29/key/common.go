@@ -42,6 +42,18 @@ func ClusterID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Cluster]
 }
 
+func ELBNameAPI(getter LabelsGetter) string {
+	return fmt.Sprintf("%s-api", ClusterID(getter))
+}
+
+func ELBNameEtcd(getter LabelsGetter) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(getter))
+}
+
+func ELBNameIngress(getter LabelsGetter) string {
+	return fmt.Sprintf("%s-ingress", ClusterID(getter))
+}
+
 func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
