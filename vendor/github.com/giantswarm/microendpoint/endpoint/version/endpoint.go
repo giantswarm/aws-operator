@@ -66,7 +66,7 @@ func (e *Endpoint) Encoder() kithttp.EncodeResponseFunc {
 
 func (e *Endpoint) Endpoint() kitendpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		serviceResponse, err := e.Service.Get(ctx, version.DefaultRequest())
+		serviceResponse, err := e.Service.Get(ctx, version.Request{})
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

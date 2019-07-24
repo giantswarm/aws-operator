@@ -89,7 +89,7 @@ required = [
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
-  branch = "add-version"
+  branch = "master"
   name = "github.com/giantswarm/microendpoint"
 
 [[constraint]]
@@ -97,7 +97,7 @@ required = [
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
-  branch = "add-version"
+  branch = "master"
   name = "github.com/giantswarm/microkit"
 
 [[constraint]]

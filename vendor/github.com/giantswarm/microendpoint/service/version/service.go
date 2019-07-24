@@ -71,6 +71,7 @@ func New(config Config) (*Service, error) {
 
 // Get returns the version response.
 func (s *Service) Get(ctx context.Context, request Request) (*Response, error) {
+
 	response := &Response{
 		Description:    s.description,
 		GitCommit:      s.gitCommit,
