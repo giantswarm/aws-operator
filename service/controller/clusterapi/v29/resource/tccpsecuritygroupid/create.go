@@ -54,7 +54,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(groups) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ingress security group for tenant cluster %#q", key.ClusterID(&md)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ingress security group for tenant cluster %#q yet", key.ClusterID(&md)))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
