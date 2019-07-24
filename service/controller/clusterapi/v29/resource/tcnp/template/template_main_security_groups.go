@@ -3,7 +3,7 @@ package template
 const TemplateMainSecurityGroups = `
 {{- define "security_groups" -}}
   NodePoolSecurityGroup:
-    Type: AWS::EC2::SecurityGroups
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}

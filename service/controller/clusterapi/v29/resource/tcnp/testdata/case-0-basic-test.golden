@@ -191,7 +191,7 @@ Resources:
       LifecycleHookName: NodePool
       LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
   NodePoolSecurityGroup:
-    Type: AWS::EC2::SecurityGroups
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
       VpcId: imagenary-vpc-id
