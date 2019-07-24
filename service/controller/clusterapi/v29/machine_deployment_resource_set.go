@@ -174,9 +174,8 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var tccpSecurityGroupIDResource controller.Resource
 	{
 		c := tccpsecuritygroupid.Config{
-			CMAClient:     config.CMAClient,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
 		}
 
 		tccpSecurityGroupIDResource, err = tccpsecuritygroupid.New(c)

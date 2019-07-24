@@ -71,7 +71,7 @@ type ContextStatusTenantClusterTCCP struct {
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
 	RouteTables       []*ec2.RouteTable
-	SecurityGroups    ContextStatusTenantClusterTCCPSecurityGroups
+	SecurityGroup     ContextStatusTenantClusterTCCPSecurityGroup
 	Subnets           []*ec2.Subnet
 	VPC               ContextStatusTenantClusterTCCPVPC
 }
@@ -103,7 +103,7 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	ID   string
 }
 
-type ContextStatusTenantClusterTCCPSecurityGroups struct {
+type ContextStatusTenantClusterTCCPSecurityGroup struct {
 	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
 }
 

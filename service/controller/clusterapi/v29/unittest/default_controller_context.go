@@ -77,9 +77,9 @@ func DefaultContext() context.Context {
 						ID:                  "imagenary-vpc-id",
 						PeeringConnectionID: "imagenary-peering-connection-id",
 					},
-					SecurityGroups: controllercontext.ContextStatusTenantClusterTCCPSecurityGroups{
+					SecurityGroup: controllercontext.ContextStatusTenantClusterTCCPSecurityGroup{
 						Ingress: controllercontext.ContextStatusTenantClusterTCCPSecurityGroupIngress{
-							ID: "ingressSCID",
+							ID: "ingressSecurityGroupID",
 						},
 					},
 				},

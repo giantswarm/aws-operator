@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := r.toClusterFunc(obj)
+	md, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -31,7 +31,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
-						aws.String(key.SecurityGroupName(cr, "ingress")),
+						aws.String(key.SecurityGroupName(&md, "ingress")),
 					},
 				},
 			},
@@ -47,22 +47,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ingress security group id for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ingress security group id for tenant cluster %#q", key.ClusterID(&md)))
 
 		if len(groups) > 1 {
 			return microerror.Maskf(executionFailedError, "expected one security group, got %d", len(groups))
 		}
 
 		if len(groups) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ingress security group for tenant cluster %#q", key.ClusterID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ingress security group for tenant cluster %#q", key.ClusterID(&md)))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found ingress security group id %#q for tenant cluster %#q", *groups[0].GroupId, key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found ingress security group id %#q for tenant cluster %#q", *groups[0].GroupId, key.ClusterID(&md)))
 
-		cc.Status.TenantCluster.TCCP.SecurityGroups.Ingress.ID = *groups[0].GroupId
+		cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID = *groups[0].GroupId
 	}
 
 	return nil
