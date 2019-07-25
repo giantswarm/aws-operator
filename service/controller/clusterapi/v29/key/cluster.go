@@ -107,18 +107,6 @@ func EC2ServiceDomain(cluster v1alpha1.Cluster) string {
 	return domain
 }
 
-func ELBNameAPI(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-api", ClusterID(&cluster))
-}
-
-func ELBNameEtcd(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-etcd", ClusterID(&cluster))
-}
-
-func ELBNameIngress(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-ingress", ClusterID(&cluster))
-}
-
 func ImageID(cluster v1alpha1.Cluster) string {
 	return imageIDs()[Region(cluster)]
 }
