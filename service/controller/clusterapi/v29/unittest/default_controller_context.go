@@ -24,6 +24,7 @@ func DefaultContext() context.Context {
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
 				AWS: controllercontext.ContextStatusTenantClusterAWS{
 					AccountID: "tenant-account",
+					Region:    "eu-central-1",
 				},
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
