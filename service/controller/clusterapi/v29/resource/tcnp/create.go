@@ -224,12 +224,12 @@ func newIAMPolicies(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.Machin
 		Cluster: template.ParamsMainIAMPoliciesCluster{
 			ID: key.ClusterID(&md),
 		},
-		EC2ServiceDomain: key.EC2ServiceDomain(cl),
+		EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 		KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
 		NodePool: template.ParamsMainIAMPoliciesNodePool{
 			ID: key.MachineDeploymentID(&md),
 		},
-		RegionARN: key.RegionARN(cl),
+		RegionARN: key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 		S3Bucket:  key.BucketName(&md, cc.Status.TenantCluster.AWS.AccountID),
 	}
 
@@ -256,7 +256,7 @@ func newLaunchConfiguration(ctx context.Context, cl v1alpha1.Cluster, md v1alpha
 			},
 		},
 		Instance: template.ParamsMainLaunchConfigurationInstance{
-			Image:      key.ImageID(cl),
+			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Monitoring: true,
 			Type:       key.WorkerInstanceType(md),
 		},
@@ -273,13 +273,18 @@ func newLifecycleHooks(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.Mac
 }
 
 func newOutputs(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (*template.ParamsMainOutputs, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	outputs := &template.ParamsMainOutputs{
 		CloudConfig: template.ParamsMainOutputsCloudConfig{
 			Version: key.CloudConfigVersion,
 		},
 		DockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(md),
 		Instance: template.ParamsMainOutputsInstance{
-			Image: key.ImageID(cl),
+			Image: key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Type:  key.WorkerInstanceType(md),
 		},
 		VersionBundle: template.ParamsMainOutputsVersionBundle{

@@ -35,6 +35,7 @@ import (
 
 type Config struct {
 	APIWhitelist                    APIWhitelist
+	AWSRegion                       string
 	ControlPlaneAccountID           string
 	ControlPlaneNATGatewayAddresses []*ec2.Address
 	ControlPlanePeerRoleARN         string
