@@ -59,7 +59,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				shutdown := true
 				wait := false
 				err := ebsService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
-				if isVolumeAttached(err) {
+				if ebs.IsVolumeAttached(err) {
 					r.logger.LogCtx(ctx, "level", "debug", "message", "volume is still attached")
 					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 					return nil
@@ -77,7 +77,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				shutdown := false
 				wait := false
 				err := ebsService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
-				if isVolumeAttached(err) {
+				if ebs.IsVolumeAttached(err) {
 					r.logger.LogCtx(ctx, "level", "debug", "message", "volume is still attached")
 					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 					return nil

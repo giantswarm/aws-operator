@@ -57,7 +57,7 @@ var volumeAttachedError = &microerror.Error{
 	Kind: "volumeAttachedError",
 }
 
-// isVolumeAttached asserts volumeAttachedError.
-func isVolumeAttached(err error) bool {
+// IsVolumeAttached asserts volumeAttachedError.
+func IsVolumeAttached(err error) bool {
 	return microerror.Cause(err) == volumeAttachedError
 }
