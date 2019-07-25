@@ -19,7 +19,7 @@ e2eTest: &e2eTest
         when: always
 
 orbs:
-  architect: giantswarm/architect@0.1.1
+  architect: giantswarm/architect@dev:3d0cc86
 
 version: 2.1
 jobs:
@@ -230,6 +230,15 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+      - architect/push-to-docker:
+          username: "${QUAY_USERNAME}"
+          password: "${QUAY_PASSWORD}"
+          registry: "quay.io"
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
       - architect/push-to-app-catalog:
           name: "build and push aws-operator chart"
           app_catalog: "control-plane-catalog"
@@ -237,7 +246,7 @@ workflows:
           chart: "aws-operator"
           # Make sure docker image is successfully built.
           requires:
-            - build
+            - architect/push-to-docker
           # Needed to trigger job on git tag.
           filters:
             tags:
