@@ -231,10 +231,10 @@ workflows:
             tags:
               only: /^v.*/
       - architect/push-to-docker:
+          image: "quay.io/giantswarm/aws-operator"
           username: "${QUAY_USERNAME}"
           password: "${QUAY_PASSWORD}"
           registry: "quay.io"
-          image: "quay.io/giantswarm/aws-operator"
           requires:
             - build
           filters:
