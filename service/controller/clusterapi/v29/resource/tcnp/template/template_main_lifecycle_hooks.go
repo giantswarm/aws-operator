@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainLifecycleHooks = `
-{{ define "lifecycle_hooks" }}
+{{- define "lifecycle_hooks" -}}
   NodePoolLifecycleHook:
     Type: AWS::AutoScaling::LifecycleHook
     Properties:
@@ -11,5 +11,5 @@ const TemplateMainLifecycleHooks = `
       HeartbeatTimeout: 3600
       LifecycleHookName: NodePool
       LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
-{{ end }}
+{{- end -}}
 `

@@ -194,10 +194,6 @@ func RouteTableName(cluster v1alpha1.Cluster, suffix, az string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(&cluster), suffix, az)
 }
 
-func SecurityGroupName(cluster v1alpha1.Cluster, groupName string) string {
-	return fmt.Sprintf("%s-%s", ClusterID(&cluster), groupName)
-}
-
 func StackNameCPF(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("cluster-%s-host-main", ClusterID(&cluster))
 }

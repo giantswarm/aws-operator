@@ -1,6 +1,8 @@
 package controllercontext
 
 import (
+	"net"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
@@ -65,12 +67,48 @@ type ContextStatusTenantClusterMasterInstance struct {
 
 type ContextStatusTenantClusterTCCP struct {
 	ASG               ContextStatusTenantClusterTCCPASG
-	AvailabilityZones []ContextTenantClusterAvailabilityZone
+	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
 	RouteTables       []*ec2.RouteTable
+	SecurityGroup     ContextStatusTenantClusterTCCPSecurityGroup
 	Subnets           []*ec2.Subnet
 	VPC               ContextStatusTenantClusterTCCPVPC
+}
+
+type ContextStatusTenantClusterTCCPASG struct {
+	DesiredCapacity int
+	MaxSize         int
+	MinSize         int
+	Name            string
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZone struct {
+	Name   string
+	Subnet ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
+	Private ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate
+	Public  ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {
+	CIDR net.IPNet
+	ID   string
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
+	CIDR net.IPNet
+	ID   string
+}
+
+type ContextStatusTenantClusterTCCPSecurityGroup struct {
+	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
+}
+
+type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
+	ID string
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
