@@ -39,6 +39,7 @@ type Config struct {
 	GitCommit   string
 	ProjectName string
 	Source      string
+	Version     string
 }
 
 type Service struct {
@@ -399,6 +400,7 @@ func New(config Config) (*Service, error) {
 			GitCommit:      config.GitCommit,
 			Name:           config.ProjectName,
 			Source:         config.Source,
+			Version:        config.Version,
 			VersionBundles: NewVersionBundles(),
 		}
 
