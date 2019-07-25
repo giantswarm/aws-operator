@@ -4,7 +4,7 @@ Outputs:
   DockerVolumeResourceName:
     Value: rsc-abbacd01
   MasterImageID:
-    Value: ami-0eb0d9bb7ad1bd1e9
+    Value: 
   MasterInstanceResourceName:
     Value: rsc-ac0dc01
   MasterInstanceType:
@@ -18,7 +18,7 @@ Outputs:
   WorkerDockerVolumeSizeGB:
     Value: 100
   WorkerImageID:
-    Value: ami-0eb0d9bb7ad1bd1e9
+    Value: 
   WorkerInstanceType:
     Value: m5.2xlarge
   VersionBundleVersion:
@@ -195,7 +195,7 @@ Resources:
       AvailabilityZone: eu-central-1b
       DisableApiTermination: true
       IamInstanceProfile: !Ref MasterInstanceProfile
-      ImageId: ami-0eb0d9bb7ad1bd1e9
+      ImageId: 
       InstanceType: m5.xlarge
       Monitoring: false
       SecurityGroupIds:
@@ -298,7 +298,7 @@ Resources:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: worker launch configuration
     Properties:
-      ImageId: ami-0eb0d9bb7ad1bd1e9
+      ImageId: 
       SecurityGroups:
       - !Ref WorkerSecurityGroup
       InstanceType: m5.2xlarge

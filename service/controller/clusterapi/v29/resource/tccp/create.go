@@ -291,6 +291,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 	{
 		c := adapter.Config{
 			APIWhitelist:                    r.apiWhiteList,
+			AWSRegion:                       cc.Status.TenantCluster.AWS.Region,
 			ControlPlaneAccountID:           cc.Status.ControlPlane.AWSAccountID,
 			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
 			ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
@@ -306,7 +307,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 				Name: key.StackNameTCCP(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
-				MasterImageID:              key.ImageID(cr),
+				MasterImageID:              key.ImageID(cc.Status.TenantCluster.AWS.Region),
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         key.MasterInstanceType(cr),
 				MasterCloudConfigVersion:   key.CloudConfigVersion,
@@ -318,7 +319,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
 				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
 				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cc.Status.TenantCluster.TCCP.MachineDeployment),
-				WorkerImageID:             key.ImageID(cr),
+				WorkerImageID:             key.ImageID(cc.Status.TenantCluster.AWS.Region),
 				WorkerInstanceMonitoring:  r.instanceMonitoring,
 				WorkerInstanceType:        key.WorkerInstanceType(cc.Status.TenantCluster.TCCP.MachineDeployment),
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,

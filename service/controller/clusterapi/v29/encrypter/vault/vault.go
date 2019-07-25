@@ -146,13 +146,13 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return ciphertext, nil
 }
 
-func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.Cluster) error {
-	err := e.ensureToken()
+func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, cr v1alpha1.Cluster) error {
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	cc, err := controllercontext.FromContext(ctx)
+	err = e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -160,8 +160,8 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWS.AccountID)
-		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWS.AccountID)
+		masterRoleARN = key.RoleARNMaster(&cr, cc.Status.TenantCluster.AWS.Region, cc.Status.TenantCluster.AWS.AccountID)
+		workerRoleARN = key.RoleARNWorker(&cr, cc.Status.TenantCluster.AWS.Region, cc.Status.TenantCluster.AWS.AccountID)
 	}
 
 	var roleData *AWSAuthRole
@@ -253,7 +253,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customObject v1alpha1.Cluster) error {
+func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -262,8 +262,8 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, customO
 	var masterRoleARN string
 	var workerRoleARN string
 	{
-		masterRoleARN = key.RoleARNMaster(customObject, cc.Status.TenantCluster.AWS.AccountID)
-		workerRoleARN = key.RoleARNWorker(customObject, cc.Status.TenantCluster.AWS.AccountID)
+		masterRoleARN = key.RoleARNMaster(&cr, cc.Status.TenantCluster.AWS.Region, cc.Status.TenantCluster.AWS.AccountID)
+		workerRoleARN = key.RoleARNWorker(&cr, cc.Status.TenantCluster.AWS.Region, cc.Status.TenantCluster.AWS.AccountID)
 	}
 
 	var roleData *AWSAuthRole
