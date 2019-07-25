@@ -19,7 +19,7 @@ e2eTest: &e2eTest
         when: always
 
 orbs:
-  architect: giantswarm/architect@dev:7b7ac48
+  architect: giantswarm/architect@dev:10634d9
 
 version: 2.1
 jobs:
@@ -234,6 +234,7 @@ workflows:
           username: "${QUAY_USERNAME}"
           password: "${QUAY_PASSWORD}"
           registry: "quay.io"
+          image: "quay.io/giantswarm/aws-operator"
           requires:
             - build
           filters:
