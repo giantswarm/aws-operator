@@ -191,7 +191,7 @@ Resources:
       LifecycleHookName: NodePool
       LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
   NodePoolSecurityGroup:
-    Type: AWS::EC2::SecurityGroups
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
       VpcId: imagenary-vpc-id
@@ -237,14 +237,14 @@ Resources:
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: ingressSecurityGroupID
 
       # Allow traffic from the ingress security group to 80 for ingress-controller.
       -
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: ingressSecurityGroupID
 
       Tags:
         - Key: Name

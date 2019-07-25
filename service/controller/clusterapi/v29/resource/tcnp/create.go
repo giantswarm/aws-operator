@@ -303,6 +303,9 @@ func newSecurityGroups(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.Mac
 			},
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
+			Ingress: template.ParamsMainSecurityGroupsTenantClusterIngress{
+				ID: cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID,
+			},
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},

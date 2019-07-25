@@ -3,7 +3,7 @@ package template
 const TemplateMainSecurityGroups = `
 {{- define "security_groups" -}}
   NodePoolSecurityGroup:
-    Type: AWS::EC2::SecurityGroups
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
@@ -49,14 +49,14 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Ingress.ID }}
 
       # Allow traffic from the ingress security group to 80 for ingress-controller.
       -
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
+        SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Ingress.ID }}
 
       Tags:
         - Key: Name
