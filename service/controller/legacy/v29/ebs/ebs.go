@@ -144,7 +144,10 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 
 		if len(v.Volumes) == 0 {
 			// Fall through.
-			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("volume %#q not found", volumeID))
+			return microerror.Maskf(executionFailedError, "no volume found")
+		}
+
+		if len(v.Volumes) > 1 {
 			return microerror.Maskf(executionFailedError, "no volume found")
 		}
 
