@@ -3,6 +3,7 @@ package template
 type ParamsMainLaunchConfiguration struct {
 	BlockDeviceMapping ParamsMainLaunchConfigurationBlockDeviceMapping
 	Instance           ParamsMainLaunchConfigurationInstance
+	SmallCloudConfig   ParamsMainLaunchConfigurationSmallCloudConfig
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMapping struct {
@@ -30,4 +31,8 @@ type ParamsMainLaunchConfigurationBlockDeviceMappingLogging struct {
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume struct {
 	Size int
+}
+
+type ParamsMainLaunchConfigurationSmallCloudConfig struct {
+	S3URL string
 }

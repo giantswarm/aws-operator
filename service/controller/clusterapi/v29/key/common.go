@@ -144,6 +144,10 @@ func SanitizeCFResourceName(v string) string {
 	return string(rs)
 }
 
+func SecurityGroupName(getter LabelsGetter, groupName string) string {
+	return fmt.Sprintf("%s-%s", ClusterID(getter), groupName)
+}
+
 func SmallCloudConfigPath(getter LabelsGetter, accountID string, role string) string {
 	return fmt.Sprintf("%s/%s", BucketName(getter, accountID), BucketObjectName(getter, role))
 }
