@@ -148,7 +148,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 		}
 
 		if len(v.Volumes) > 1 {
-			return microerror.Maskf(executionFailedError, "no volume found")
+			return microerror.Maskf(executionFailedError, "more than one volume has been found")
 		}
 
 		d := v.Volumes[0]
