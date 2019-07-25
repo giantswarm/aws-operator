@@ -56,3 +56,8 @@ func IsVolumeNotFound(err error) bool {
 var volumeAttachedError = &microerror.Error{
 	Kind: "volumeAttachedError",
 }
+
+// isVolumeAttached asserts volumeAttachedError.
+func isVolumeAttached(err error) bool {
+	return microerror.Cause(err) == volumeAttachedError
+}
