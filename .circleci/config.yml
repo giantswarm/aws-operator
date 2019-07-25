@@ -19,7 +19,7 @@ e2eTest: &e2eTest
         when: always
 
 orbs:
-  architect: giantswarm/architect@dev:3d0cc86
+  architect: giantswarm/architect@dev:6f9978b
 
 version: 2.1
 jobs:
