@@ -29,16 +29,6 @@ type Config struct {
 	Service *version.Service
 }
 
-// DefaultConfig provides a default configuration to create a new version
-// endpoint by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		Logger:  nil,
-		Service: nil,
-	}
-}
-
 // New creates a new configured version endpoint.
 func New(config Config) (*Endpoint, error) {
 	// Dependencies.
@@ -76,19 +66,21 @@ func (e *Endpoint) Encoder() kithttp.EncodeResponseFunc {
 
 func (e *Endpoint) Endpoint() kitendpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		serviceResponse, err := e.Service.Get(ctx, version.DefaultRequest())
+		serviceResponse, err := e.Service.Get(ctx, version.Request{})
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		response := DefaultResponse()
-		response.Description = serviceResponse.Description
-		response.GitCommit = serviceResponse.GitCommit
-		response.GoVersion = serviceResponse.GoVersion
-		response.Name = serviceResponse.Name
-		response.OSArch = serviceResponse.OSArch
-		response.Source = serviceResponse.Source
-		response.VersionBundles = serviceResponse.VersionBundles
+		response := &Response{
+			Description:    serviceResponse.Description,
+			GitCommit:      serviceResponse.GitCommit,
+			GoVersion:      serviceResponse.GoVersion,
+			Name:           serviceResponse.Name,
+			OSArch:         serviceResponse.OSArch,
+			Source:         serviceResponse.Source,
+			Version:        serviceResponse.Version,
+			VersionBundles: serviceResponse.VersionBundles,
+		}
 
 		return response, nil
 	}

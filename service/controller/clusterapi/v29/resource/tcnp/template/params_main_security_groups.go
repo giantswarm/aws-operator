@@ -14,7 +14,12 @@ type ParamsMainSecurityGroupsControlPlaneVPC struct {
 }
 
 type ParamsMainSecurityGroupsTenantCluster struct {
-	VPC ParamsMainSecurityGroupsTenantClusterVPC
+	Ingress ParamsMainSecurityGroupsTenantClusterIngress
+	VPC     ParamsMainSecurityGroupsTenantClusterVPC
+}
+
+type ParamsMainSecurityGroupsTenantClusterIngress struct {
+	ID string
 }
 
 type ParamsMainSecurityGroupsTenantClusterVPC struct {

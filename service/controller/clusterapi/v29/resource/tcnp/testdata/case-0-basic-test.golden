@@ -1,0 +1,286 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Node Pool Cloud Formation Stack.
+Outputs:
+  AutoScalingGroupName:
+    Value: !Ref NodePoolAutoScalingGroup
+  CloudConfigVersion:
+    Value: v_4_5_0
+  DockerVolumeSizeGB:
+    Value: 100
+  InstanceImage:
+    Value: ami-0eb0d9bb7ad1bd1e9
+  InstanceType:
+    Value: m5.2xlarge
+  VersionBundleVersion:
+    Value: 
+Resources:
+  NodePoolAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnetEuCentral1a
+        - !Ref PrivateSubnetEuCentral1b
+      AvailabilityZones:
+        - eu-central-1a
+        - eu-central-1c
+      DesiredCapacity: 3
+      MinSize: 3
+      MaxSize: 5
+      LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
+      LoadBalancerNames:
+        - 8y5ck-ingress
+
+      # 10 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 10
+
+      MetricsCollection:
+        - Granularity: "1Minute"
+      Tags:
+        - Key: Name
+          Value: cluster-8y5ck-tcnp-al9qy
+          PropagateAtLaunch: true
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/8y5ck
+          Value: true
+          PropagateAtLaunch: false
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
+        MinInstancesInService: 2
+
+        # Maximum amount of nodes being rolled at the same time.
+        MaxBatchSize: 1
+
+        # After creating a new instance, pause the rolling update on the ASG for
+        # 15 minutes.
+        PauseTime: PT15M
+  NodePoolRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: gs-cluster-8y5ck-role-al9qy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: "sts:AssumeRole"
+  NodePoolRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: gs-cluster-8y5ck-policy-al9qy
+      Roles:
+        - Ref: NodePoolRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "ec2:Describe*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "ec2:AttachVolume"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "ec2:DetachVolume"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketLocation"
+              - "s3:ListAllMyBuckets"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
+          - Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
+  NodePoolInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: gs-cluster-8y5ck-profile-al9qy
+      Roles:
+        - Ref: NodePoolRole
+  NodePoolLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: ami-0eb0d9bb7ad1bd1e9
+      SecurityGroups:
+      - !Ref NodePoolSecurityGroup
+      InstanceType: m5.2xlarge
+      InstanceMonitoring: true
+      IamInstanceProfile: !Ref NodePoolInstanceProfile
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvdh
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      - DeviceName: /dev/xvdf
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      AssociatePublicIpAddress: false
+      UserData:
+        Fn::Base64: |
+          {
+            "ignition": {
+              "version": "2.2.0",
+              "config": {
+                "append": [
+                  {
+                    "source": "s3://tenant-account-g8s-8y5ck/version//cloudconfig/v_4_5_0/worker"
+                  }
+                ]
+              }
+            },
+            "storage": {
+              "filesystems": [
+                {
+                  "name": "docker",
+                  "mount": {
+                    "device": "/dev/xvdh",
+                    "wipeFilesystem": true,
+                    "label": "docker",
+                    "format": "xfs"
+                  }
+                },
+                {
+                  "name": "log",
+                  "mount": {
+                    "device": "/dev/xvdf",
+                    "wipeFilesystem": true,
+                    "label": "log",
+                    "format": "xfs"
+                  }
+                },
+                {
+                  "name": "kubelet",
+                  "mount": {
+                    "device": "/dev/xvdg",
+                    "wipeFilesystem": true,
+                    "label": "kubelet",
+                    "format": "xfs"
+                  }
+                }
+              ]
+            }
+          }
+  NodePoolLifecycleHook:
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties:
+      AutoScalingGroupName:
+        Ref: NodePoolAutoScalingGroup
+      DefaultResult: CONTINUE
+      HeartbeatTimeout: 3600
+      LifecycleHookName: NodePool
+      LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+  NodePoolSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
+      VpcId: imagenary-vpc-id
+      SecurityGroupIngress:
+
+      # Allow traffic from control plane CIDR to 22 for SSH access.
+      -
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.1.0.0/16
+
+      # Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
+      -
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        CidrIp: 10.1.0.0/16
+
+      # Allow traffic from control plane CIDR to 10250 for kubelet scraping.
+      -
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        CidrIp: 10.1.0.0/16
+
+      # Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
+      -
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        CidrIp: 10.1.0.0/16
+
+      # Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
+      -
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        CidrIp: 10.1.0.0/16
+
+      # Allow traffic from the ingress security group to 443 for ingress-controller.
+      -
+        IpProtocol: tcp
+        FromPort: 30011
+        ToPort: 30011
+        SourceSecurityGroupId: ingressSecurityGroupID
+
+      # Allow traffic from the ingress security group to 80 for ingress-controller.
+      -
+        IpProtocol: tcp
+        FromPort: 30010
+        ToPort: 30010
+        SourceSecurityGroupId: ingressSecurityGroupID
+
+      Tags:
+        - Key: Name
+          Value: NodePoolSecurityGroup
+  
+  PrivateSubnetEuCentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.3.0/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1a
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: imagenary-vpc-id
+  PrivateSubnetRouteTableAssociationEuCentral1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1a
+      SubnetId: validPublicSubnetID-1a
+  PrivateSubnetEuCentral1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1b
+      CidrBlock: 10.100.3.64/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1b
+      - Key: "kubernetes.io/role/elb"
+        Value: "1"
+      VpcId: imagenary-vpc-id
+  PrivateSubnetRouteTableAssociationEuCentral1b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: PublicRouteTableEuCentral1b
+      SubnetId: validPublicSubnetID-1b

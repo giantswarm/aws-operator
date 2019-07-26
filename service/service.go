@@ -39,6 +39,7 @@ type Config struct {
 	GitCommit   string
 	ProjectName string
 	Source      string
+	Version     string
 }
 
 type Service struct {
@@ -254,6 +255,7 @@ func New(config Config) (*Service, error) {
 			ProjectName:                config.ProjectName,
 			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			VPCPeerID:                  config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
@@ -398,6 +400,7 @@ func New(config Config) (*Service, error) {
 			GitCommit:      config.GitCommit,
 			Name:           config.ProjectName,
 			Source:         config.Source,
+			Version:        config.Version,
 			VersionBundles: NewVersionBundles(),
 		}
 

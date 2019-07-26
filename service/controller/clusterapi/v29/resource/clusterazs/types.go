@@ -7,10 +7,15 @@ import "net"
 type subnetPair struct {
 	// These members are exported so that go-cmp can make a diff for unit test
 	// results.
-	Public  net.IPNet
-	Private net.IPNet
+	Public  subnet
+	Private subnet
+}
+
+type subnet struct {
+	CIDR net.IPNet
+	ID   string
 }
 
 func (sp subnetPair) areEmpty() bool {
-	return (sp.Public.IP == nil && sp.Public.Mask == nil) && (sp.Private.IP == nil && sp.Private.Mask == nil)
+	return (sp.Public.CIDR.IP == nil && sp.Public.CIDR.Mask == nil) && (sp.Private.CIDR.IP == nil && sp.Private.CIDR.Mask == nil)
 }

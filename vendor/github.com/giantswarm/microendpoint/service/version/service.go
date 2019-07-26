@@ -15,20 +15,8 @@ type Config struct {
 	GitCommit      string
 	Name           string
 	Source         string
+	Version        string
 	VersionBundles []versionbundle.Bundle
-}
-
-// DefaultConfig provides a default configuration to create a new version service
-// by best effort.
-func DefaultConfig() Config {
-	return Config{
-		// Settings.
-		Description:    "",
-		GitCommit:      "",
-		Name:           "",
-		Source:         "",
-		VersionBundles: nil,
-	}
 }
 
 // Service implements the version service interface.
@@ -37,6 +25,7 @@ type Service struct {
 	gitCommit      string
 	name           string
 	source         string
+	version        string
 	versionBundles []versionbundle.Bundle
 }
 
@@ -55,6 +44,9 @@ func New(config Config) (*Service, error) {
 	if config.Source == "" {
 		return nil, microerror.Maskf(invalidConfigError, "config.Source must not be empty")
 	}
+	if config.Version == "" {
+		return nil, microerror.Maskf(invalidConfigError, "config.Version must not be empty")
+	}
 
 	if len(config.VersionBundles) != 0 {
 		err := versionbundle.Bundles(config.VersionBundles).Validate()
@@ -68,6 +60,7 @@ func New(config Config) (*Service, error) {
 		gitCommit:      config.GitCommit,
 		name:           config.Name,
 		source:         config.Source,
+		version:        config.Version,
 		versionBundles: config.VersionBundles,
 	}
 
@@ -78,15 +71,17 @@ func New(config Config) (*Service, error) {
 
 // Get returns the version response.
 func (s *Service) Get(ctx context.Context, request Request) (*Response, error) {
-	response := DefaultResponse()
 
-	response.Description = s.description
-	response.GitCommit = s.gitCommit
-	response.GoVersion = runtime.Version()
-	response.Name = s.name
-	response.OSArch = runtime.GOOS + "/" + runtime.GOARCH
-	response.Source = s.source
-	response.VersionBundles = s.versionBundles
+	response := &Response{
+		Description:    s.description,
+		GitCommit:      s.gitCommit,
+		GoVersion:      runtime.Version(),
+		Name:           s.name,
+		OSArch:         runtime.GOOS + "/" + runtime.GOARCH,
+		Source:         s.source,
+		Version:        s.version,
+		VersionBundles: s.versionBundles,
+	}
 
 	return response, nil
 }

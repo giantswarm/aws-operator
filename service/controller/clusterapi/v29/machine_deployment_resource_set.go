@@ -18,8 +18,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeploymentazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroupid"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpcid"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -140,6 +145,19 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var machineDeploymentAZsResource controller.Resource
+	{
+		c := machinedeploymentazs.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		machineDeploymentAZsResource, err = machinedeploymentazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var regionResource controller.Resource
 	{
 		c := region.Config{
@@ -148,6 +166,31 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		regionResource, err = region.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSecurityGroupIDResource controller.Resource
+	{
+		c := tccpsecuritygroupid.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		tccpSecurityGroupIDResource, err = tccpsecuritygroupid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetResource controller.Resource
+	{
+		c := tccpsubnet.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetResource, err = tccpsubnet.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -168,12 +211,45 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var vpcCIDRResource controller.Resource
+	{
+		c := vpccidr.Config{
+			Logger: config.Logger,
+
+			VPCPeerID: config.VPCPeerID,
+		}
+
+		vpcCIDRResource, err = vpccidr.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var vpcidResource controller.Resource
+	{
+		c := vpcid.Config{
+			CMAClient:     config.CMAClient,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		}
+
+		vpcidResource, err = vpcid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		awsClientResource,
+		vpcidResource,
+		vpcCIDRResource,
+		tccpSecurityGroupIDResource,
+		tccpSubnetResource,
 		regionResource,
 		encryptionResource,
 		ipamResource,
 		clusterAZsResource,
+		machineDeploymentAZsResource,
 		tcnpResource,
 	}
 
