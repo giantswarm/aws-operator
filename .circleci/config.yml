@@ -19,7 +19,7 @@ e2eTest: &e2eTest
         when: always
 
 orbs:
-  architect: giantswarm/architect@dev:03e9f3b
+  architect: giantswarm/architect@dev:84282b9
 
 version: 2.1
 jobs:
@@ -231,8 +231,7 @@ workflows:
             tags:
               only: /^v.*/
       - architect/push-to-docker:
-          image: "giantswarm/aws-operator"
-          registry: "quay.io"
+          image: "quay.io/giantswarm/aws-operator"
           username_var: "QUAY_USERNAME"
           password_var: "QUAY_PASSWORD"
           requires:
