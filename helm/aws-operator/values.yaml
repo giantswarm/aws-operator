@@ -11,6 +11,6 @@ resource:
   default:
     name: "aws-operator.v[[ .Version ]]"
     namespace: "giantswarm"
-  pull-secret:
+  pullSecret:
     name: "aws-operator-pull-secret.v[[ .Version ]]"
     namespace: "giantswarm"
