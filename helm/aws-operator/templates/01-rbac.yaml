@@ -107,7 +107,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.resource.default.name }}
-    namespace: {{ .Values.namespace }}
+    namespace: {{ .Values.resource.default.namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ .Values.resource.default.name }}
@@ -133,8 +133,8 @@ metadata:
   name: {{ .Values.resource.psp.name }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.resource.psp.name }}
-    namespace: {{ .Values.namespace }}
+    name: {{ .Values.resource.default.name }}
+    namespace: {{ .Values.resource.default.namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ .Values.resource.psp.name }}
