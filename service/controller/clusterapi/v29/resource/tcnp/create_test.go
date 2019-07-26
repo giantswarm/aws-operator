@@ -31,20 +31,18 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
-		cl   v1alpha1.Cluster
 		md   v1alpha1.MachineDeployment
 	}{
 		{
 			name: "case 0: basic test",
 			ctx:  unittest.DefaultContext(),
-			cl:   unittest.DefaultCluster(),
 			md:   unittest.DefaultMachineDeployment(),
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cl, tc.md)
+			params, err := newTemplateParams(tc.ctx, tc.md)
 			if err != nil {
 				t.Fatal(err)
 			}
