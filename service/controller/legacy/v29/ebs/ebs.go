@@ -128,6 +128,46 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 		if err != nil {
 			return microerror.Mask(err)
 		}
+	}
+
+	{
+		i := &ec2.DescribeVolumesInput{
+			VolumeIds: []*string{
+				aws.String(volumeID),
+			},
+		}
+
+		v, err := e.client.DescribeVolumes(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(v.Volumes) == 0 {
+			// Fall through.
+			return microerror.Maskf(executionFailedError, "no volume found")
+		}
+
+		if len(v.Volumes) > 1 {
+			return microerror.Maskf(executionFailedError, "more than one volume has been found")
+		}
+
+		d := v.Volumes[0]
+		if len(d.Attachments) > 1 {
+			// Shouldn't happen; log so we know if it is
+			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found multiple attachment for volume %#q", volumeID))
+		}
+
+		for _, a := range d.Attachments {
+			if a.State != nil {
+				attachmentStatus := *a.State
+				if attachmentStatus != "detached" {
+					return microerror.Maskf(volumeAttachedError, "volume %#q still attached", volumeID)
+				}
+			} else {
+				// Shouldn't happen; log so we know if it is
+				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("nil attachment state for volume %#q", volumeID))
+			}
+		}
 
 		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
 	}
