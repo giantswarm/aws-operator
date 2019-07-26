@@ -1,11 +1,14 @@
-namespace: giantswarm
-
 docker:
-  image:
-    tag: [[ .DockerTag ]]
+  image: "quay.io/giantswarm/aws-operator:[[ .DockerTag ]]"
 pod:
   user:
     id: 1000
   group:
     id: 1000
-version: [[ .Version ]]
+resource:
+  default:
+    name: "aws-operator.v[[ .Version ]]"
+    namespace: "giantswarm"
+  pull-secret:
+    name: "aws-operator-pull-secret.v[[ .Version ]]"
+    namespace: "giantswarm"
