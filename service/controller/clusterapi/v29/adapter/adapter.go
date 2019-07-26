@@ -35,6 +35,7 @@ import (
 
 type Config struct {
 	APIWhitelist                    APIWhitelist
+	AWSRegion                       string
 	ControlPlaneAccountID           string
 	ControlPlaneNATGatewayAddresses []*ec2.Address
 	ControlPlanePeerRoleARN         string
@@ -50,7 +51,7 @@ type Config struct {
 	StackState                      StackState
 	TenantClusterAccountID          string
 	TenantClusterKMSKeyARN          string
-	TenantClusterAvailabilityZones  []controllercontext.ContextTenantClusterAvailabilityZone
+	TenantClusterAvailabilityZones  []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone
 }
 
 type Adapter struct {

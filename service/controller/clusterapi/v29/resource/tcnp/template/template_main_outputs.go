@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainOutputs = `
-{{ define "outputs" }}
+{{- define "outputs" -}}
   AutoScalingGroupName:
     Value: !Ref NodePoolAutoScalingGroup
   CloudConfigVersion:
@@ -14,5 +14,5 @@ const TemplateMainOutputs = `
     Value: {{ .Outputs.Instance.Type }}
   VersionBundleVersion:
     Value: {{ .Outputs.VersionBundle.Version }}
-{{ end }}
+{{- end -}}
 `

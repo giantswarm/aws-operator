@@ -30,6 +30,7 @@ type MachineDeploymentResourceSetConfig struct {
 	ProjectName                string
 	Route53Enabled             bool
 	VaultAddress               string
+	VPCPeerID                  string
 }
 
 func (c MachineDeploymentResourceSetConfig) GetEncrypterBackend() string {

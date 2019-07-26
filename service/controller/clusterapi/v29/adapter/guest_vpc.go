@@ -23,7 +23,7 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	v.HostAccountID = cfg.ControlPlaneAccountID
 	v.PeerVPCID = cfg.ControlPlaneVPCID
 	v.Region = key.Region(cfg.CustomObject)
-	v.RegionARN = key.RegionARN(cfg.CustomObject)
+	v.RegionARN = key.RegionARN(cfg.AWSRegion)
 	v.PeerRoleArn = cfg.ControlPlanePeerRoleARN
 
 	PublicRouteTable := RouteTableName{
