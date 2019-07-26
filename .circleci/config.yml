@@ -232,8 +232,8 @@ workflows:
               only: /^v.*/
       - architect/push-to-docker:
           image: "quay.io/giantswarm/aws-operator"
-          username_var: "QUAY_USERNAME"
-          password_var: "QUAY_PASSWORD"
+          username_envar: "QUAY_USERNAME"
+          password_envar: "QUAY_PASSWORD"
           requires:
             - build
           filters:
