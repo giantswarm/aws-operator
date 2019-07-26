@@ -18,13 +18,13 @@ spec:
         app: {{ .Values.resource.default.name }}
     spec:
       volumes:
-      - name: aws-operator-configmap
+      - name: {{ .Values.project.name }}-configmap
         configMap:
           name: {{ .Values.resource.default.name }}
           items:
           - key: config.yaml
             path: config.yaml
-      - name: aws-operator-secret
+      - name: {{ .Values.project.name }}-secret
         secret:
           secretName: {{ .Values.resource.default.name }}
           items:
@@ -38,13 +38,13 @@ spec:
         runAsUser: {{ .Values.pod.user.id }}
         runAsGroup: {{ .Values.pod.group.id }}
       containers:
-      - name: aws-operator
+      - name: {{ .Values.project.name }}
         image: {{ .Values.docker.image }}
         volumeMounts:
-        - name: aws-operator-configmap
-          mountPath: /var/run/aws-operator/configmap/
-        - name: aws-operator-secret
-          mountPath: /var/run/aws-operator/secret/
+        - name: {{ .Values.project.name }}-configmap
+          mountPath: /var/run/{{ .Values.project.name }}/configmap/
+        - name: {{ .Values.project.name }}-secret
+          mountPath: /var/run/{{ .Values.project.name }}/secret/
           readOnly: true
         - name: certs
           mountPath: /etc/ssl/certs/ca-certificates.crt
@@ -53,8 +53,8 @@ spec:
           containerPort: 8000
         args:
         - daemon
-        - --config.dirs=/var/run/aws-operator/configmap/
-        - --config.dirs=/var/run/aws-operator/secret/
+        - --config.dirs=/var/run/{{ .Values.project.name }}/configmap/
+        - --config.dirs=/var/run/{{ .Values.project.name }}/secret/
         - --config.files=config
         - --config.files=secret
         livenessProbe:

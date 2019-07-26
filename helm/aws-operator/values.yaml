@@ -5,6 +5,8 @@ pod:
     id: 1000
   group:
     id: 1000
+project:
+  name: "aws-operator"
 resource:
   default:
     name: "aws-operator.v[[ .Version ]]"
