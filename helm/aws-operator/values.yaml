@@ -9,10 +9,10 @@ project:
   name: "aws-operator"
 resource:
   default:
-    name: "aws-operator.v[[ .Version ]]"
+    name: {{ "aws-operator-v[[ .Version ]]" | replace "." "-" }}
     namespace: "giantswarm"
   psp:
-    name: "aws-operator-psp.v[[ .Version ]]"
+    name: {{ "aws-operator-psp-v[[ .Version ]]" | replace "." "-" }}
   pullSecret:
-    name: "aws-operator-pull-secret.v[[ .Version ]]"
+    name: {{ "aws-operator-pull-secret-v[[ .Version ]]" | replace "." "-" }}
     namespace: "giantswarm"
