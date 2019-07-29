@@ -31,6 +31,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/s3object"
@@ -327,6 +328,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var regionResource controller.Resource
+	{
+		c := region.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+		}
+
+		regionResource, err = region.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpResource controller.Resource
 	{
 		c := tccp.Config{
@@ -569,6 +583,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		vpcCIDRResource,
 		tccpOutputsResource,
 		tccpSubnetResource,
+		regionResource,
 		asgStatusResource,
 		ipamResource,
 		clusterAZsResource,
