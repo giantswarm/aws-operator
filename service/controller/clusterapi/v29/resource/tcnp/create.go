@@ -346,6 +346,26 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	return &subnets, nil
 }
 
+func newVPCCIDR(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainVPCCIDR, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	vpcCIDR := &template.ParamsMainVPCCIDR{
+		TCCP: template.ParamsMainVPCCIDRTCCP{
+			VPC: template.ParamsMainVPCCIDRTCCPVPC{
+				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+			},
+		},
+		TCNP: template.ParamsMainVPCCIDRTCNP{
+			CIDR: key.WorkerSubnet(cr),
+		},
+	}
+
+	return vpcCIDR, nil
+}
+
 func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
@@ -377,6 +397,10 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		vpcCIDR, err := newVPCCIDR(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 
 		params = &template.ParamsMain{
 			AutoScalingGroup:    autoScalingGroup,
@@ -386,6 +410,7 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 			Outputs:             outputs,
 			SecurityGroups:      securityGroups,
 			Subnets:             subnets,
+			VPCCIDR:             vpcCIDR,
 		}
 	}
 

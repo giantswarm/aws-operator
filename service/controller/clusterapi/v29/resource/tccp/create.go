@@ -72,7 +72,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameTCCP(cr)),
+			StackName: aws.String(key.StackNameTCCP(&cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -175,7 +175,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 					ParameterValue: aws.String(key.OperatorVersion(&cr)),
 				},
 			},
-			StackName:    aws.String(key.StackNameTCCP(cr)),
+			StackName:    aws.String(key.StackNameTCCP(&cr)),
 			Tags:         r.getCloudFormationTags(cr),
 			TemplateBody: aws.String(templateBody),
 		}
@@ -261,7 +261,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.Cluster, templat
 					ParameterValue: aws.String(key.OperatorVersion(&cr)),
 				},
 			},
-			StackName:    aws.String(key.StackNameTCCP(cr)),
+			StackName:    aws.String(key.StackNameTCCP(&cr)),
 			TemplateBody: aws.String(templateBody),
 		}
 
@@ -304,7 +304,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 			PublicRouteTables:               r.publicRouteTables,
 			Route53Enabled:                  r.route53Enabled,
 			StackState: adapter.StackState{
-				Name: key.StackNameTCCP(cr),
+				Name: key.StackNameTCCP(&cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
 				MasterImageID:              key.ImageID(cc.Status.TenantCluster.AWS.Region),

@@ -284,3 +284,8 @@ Resources:
     Properties:
       RouteTableId: PublicRouteTableEuCentral1b
       SubnetId: validPublicSubnetID-1b
+  VpcCidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      VpcId: imagenary-vpc-id
+      CidrBlock: 10.100.8.0/24
