@@ -1,5 +1,5 @@
 docker:
-  image: "quay.io/giantswarm/aws-operator:[[ .DockerTag ]]"
+  image: "quay.io/giantswarm/aws-operator:[[ .Version ]]"
 pod:
   user:
     id: 1000
