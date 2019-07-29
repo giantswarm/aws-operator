@@ -33,7 +33,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(key.StackNameTCCP(cr)),
+			StackName:                   aws.String(key.StackNameTCCP(&cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
@@ -64,7 +64,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.StackNameTCCP(cr)),
+			StackName: aws.String(key.StackNameTCCP(&cr)),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)

@@ -27,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		i := &cloudformation.DescribeStackResourceInput{
 			LogicalResourceId: aws.String(key.RefWorkerASG),
-			StackName:         aws.String(key.StackNameTCCP(cr)),
+			StackName:         aws.String(key.StackNameTCCP(&cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStackResource(i)

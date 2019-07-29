@@ -162,18 +162,6 @@ func RouteTableName(cluster v1alpha1.Cluster, suffix, az string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(&cluster), suffix, az)
 }
 
-func StackNameCPF(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-host-main", ClusterID(&cluster))
-}
-
-func StackNameCPI(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(&cluster))
-}
-
-func StackNameTCCP(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(&cluster))
-}
-
 func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
 	return clusterProviderStatus(cluster).Provider.Network.CIDR
 }
