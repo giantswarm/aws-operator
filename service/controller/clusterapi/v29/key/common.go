@@ -189,6 +189,18 @@ func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) s
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
 }
 
+func StackNameCPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-cpf", ClusterID(getter))
+}
+
+func StackNameCPI(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-cpi", ClusterID(getter))
+}
+
+func StackNameTCCP(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccp", ClusterID(getter))
+}
+
 func StackNameTCNP(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnp", getter.GetLabels()[label.Cluster])
 }
