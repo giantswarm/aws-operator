@@ -1,5 +1,7 @@
-docker:
-  image: "quay.io/giantswarm/aws-operator:[[ .Version ]]"
+image:
+  registry: "quay.io"
+  repository: "giantswarm/aws-operator"
+  tag: "[[ .Version ]]"
 pod:
   user:
     id: 1000
