@@ -1,20 +1,24 @@
 image:
   registry: "quay.io"
-  repository: "giantswarm/aws-operator"
-  tag: "[[ .Version ]]"
+  repository: "giantswarm/{{ .Chart.Name }}"
+  tag: "{{ .Chart.Version }}"
 pod:
   user:
     id: 1000
   group:
     id: 1000
 project:
-  name: "aws-operator"
+  name: "{{ .Chart.Name }}"
+# Resource names are trimmed to 47 characters. Kubernetes allows 63 characters
+# limit for resource names. When pods for deployments are created they have
+# additional 16 characters suffix, e.g. "-957c9d6ff-pkzgw" and we want to have
+# room for those suffixes.
 resource:
   default:
-    name:  aws-operator-v[[ .Version | replace "." "-" ]]
+    name:  "{{ .Release.Name | trim 47 }}"
     namespace: "giantswarm"
   psp:
-    name: aws-operator-psp-v[[ .Version | replace "." "-" ]]
+    name: "{{ .Release.Name | trim 47 }}-psp"
   pullSecret:
-    name: aws-operator-pull-secret-v[[ .Version | replace "." "-" ]]
+    name: "{{ .Release.Name | trim 47 }}-pull-secret"
     namespace: "giantswarm"
