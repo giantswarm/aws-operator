@@ -331,8 +331,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var regionResource controller.Resource
 	{
 		c := region.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
 		}
 
 		regionResource, err = region.New(c)

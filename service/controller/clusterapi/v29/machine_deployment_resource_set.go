@@ -161,8 +161,8 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var regionResource controller.Resource
 	{
 		c := region.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
 		regionResource, err = region.New(c)
