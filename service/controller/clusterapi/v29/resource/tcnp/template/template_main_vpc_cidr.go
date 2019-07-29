@@ -5,7 +5,7 @@ const TemplateMainVPCCIDR = `
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
-      VpcId: {{ .TCCP.VPC.ID }}
-      CidrBlock: {{ .TCNP.CIDR }}
+      VpcId: {{ .VPCCIDR.TCCP.VPC.ID }}
+      CidrBlock: {{ .VPCCIDR.TCNP.CIDR }}
 {{- end -}}
 `
