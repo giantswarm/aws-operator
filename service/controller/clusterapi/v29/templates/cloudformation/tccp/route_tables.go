@@ -3,15 +3,17 @@ package tccp
 const RouteTables = `
 {{- define "route_tables" -}}
 {{- $v := .Guest.RouteTables -}}
-  {{ $v.PublicRouteTableName.ResourceName }}:
+  {{- range $v.PrivateRouteTableNames }}
+  {{ .ResourceName }}:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.PublicRouteTableName.TagName }}
+        Value: {{ .TagName }}
       - Key: giantswarm.io/tccp
         Value: true
+  {{ end }}
   {{- range $v.PrivateRouteTableNames }}
   {{ .ResourceName }}:
     Type: AWS::EC2::RouteTable

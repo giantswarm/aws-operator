@@ -65,13 +65,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var azs map[string]subnetPair
 	{
-		// Acquire AZs together with corresponding subnets from AWS EC2 API
-		// results.
-		azs, err = fromEC2SubnetsToMap(cc.Status.TenantCluster.TCCP.Subnets)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		// Include master's AZ if missing.
 		if _, exists := azs[key.MasterAvailabilityZone(cr)]; !exists {
 			azs[key.MasterAvailabilityZone(cr)] = subnetPair{}
@@ -84,6 +77,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					azs[az] = subnetPair{}
 				}
 			}
+		}
+	}
+
+	{
+		// Acquire AZs together with corresponding subnets from AWS EC2 API
+		// results.
+		azs, err = fromEC2SubnetsToMap(cc.Status.TenantCluster.TCCP.Subnets)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		// Acquire AZs together with corresponding subnets from AWS EC2 API
+		// results.
+		azs, err = fromEC2RouteTablesToMap(cc.Status.TenantCluster.TCCP.RouteTables)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 	}
 
