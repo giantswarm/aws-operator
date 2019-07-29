@@ -1,4 +1,20 @@
-namespace: giantswarm
-
-userID: 1000
-groupID: 1000
+image:
+  registry: "quay.io"
+  repository: "giantswarm/aws-operator"
+  tag: "[[ .Version ]]"
+pod:
+  user:
+    id: 1000
+  group:
+    id: 1000
+project:
+  name: "aws-operator"
+resource:
+  default:
+    name:  aws-operator-v[[ .Version | replace "." "-" ]]
+    namespace: "giantswarm"
+  psp:
+    name: aws-operator-psp-v[[ .Version | replace "." "-" ]]
+  pullSecret:
+    name: aws-operator-pull-secret-v[[ .Version | replace "." "-" ]]
+    namespace: "giantswarm"
