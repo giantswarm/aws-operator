@@ -13,5 +13,6 @@ Resources:
   {{ template "lifecycle_hooks" . }}
   {{ template "security_groups" . }}
   {{ template "subnets" . }}
+  {{ template "vpc_cidr" . }}
 {{- end -}}
 `
