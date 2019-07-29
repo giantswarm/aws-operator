@@ -49,11 +49,13 @@ const MaximumNumberOfAZsInCluster = 4
 
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagCluster      = "giantswarm.io/cluster"
-	TagSubnetType   = "giantswarm.io/subnet-type"
-	TagInstallation = "giantswarm.io/installation"
-	TagOrganization = "giantswarm.io/organization"
-	TagTCCP         = "giantswarm.io/tccp"
+	TagAvailabilityZone = "giantswarm.io/availability-zone"
+	TagCluster          = "giantswarm.io/cluster"
+	TagRouteTableType   = "giantswarm.io/route-table-type"
+	TagSubnetType       = "giantswarm.io/subnet-type"
+	TagInstallation     = "giantswarm.io/installation"
+	TagOrganization     = "giantswarm.io/organization"
+	TagTCCP             = "giantswarm.io/tccp"
 )
 
 const (

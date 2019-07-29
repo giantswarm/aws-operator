@@ -530,13 +530,44 @@ Resources:
       NatGatewayId:
         Ref: "NATGatewayEuCentral1c"
   
+  
+  PublicRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-public-eu-central-1a
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: public
+      - Key: giantswarm.io/tccp
+        Value: true
   PublicRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: PublicRouteTable-eu-central-1b
+        Value: 8y5ck-public-eu-central-1b
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: public
+      - Key: giantswarm.io/tccp
+        Value: true
+  PublicRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-public-eu-central-1c
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: public
       - Key: giantswarm.io/tccp
         Value: true
   PrivateRouteTableEuCentral1a:
@@ -546,6 +577,10 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-private-eu-central-1a
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
       - Key: giantswarm.io/tccp
         Value: true
   VPCPeeringRouteEuCentral1a:
@@ -554,8 +589,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
+        Ref: VPCPeeringConnection
   PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -563,6 +597,10 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-private-eu-central-1b
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: private
       - Key: giantswarm.io/tccp
         Value: true
   VPCPeeringRouteEuCentral1b:
@@ -571,8 +609,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
+        Ref: VPCPeeringConnection
   PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -580,6 +617,10 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-private-eu-central-1c
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: private
       - Key: giantswarm.io/tccp
         Value: true
   VPCPeeringRouteEuCentral1c:
@@ -588,8 +629,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
+        Ref: VPCPeeringConnection
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

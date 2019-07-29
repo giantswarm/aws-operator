@@ -14,7 +14,7 @@ const Subnets = `
       - Key: Name
         Value: {{ .Name }}
       - Key: giantswarm.io/subnet-type
-        Value: {{ .Type }}
+        Value: public
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/elb"
@@ -37,7 +37,7 @@ const Subnets = `
       - Key: Name
         Value: {{ .Name }}
       - Key: giantswarm.io/subnet-type
-        Value: {{ .Type }}
+        Value: private
       - Key: giantswarm.io/tccp
         Value: true
       - Key: "kubernetes.io/role/internal-elb"

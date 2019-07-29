@@ -63,18 +63,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d MachineDeployments for tenant cluster", len(machineDeployments)))
 	}
 
-	var azs map[string]subnetPair
+	var azs map[string]mapping
 	{
 		// Include master's AZ if missing.
 		if _, exists := azs[key.MasterAvailabilityZone(cr)]; !exists {
-			azs[key.MasterAvailabilityZone(cr)] = subnetPair{}
+			azs[key.MasterAvailabilityZone(cr)] = mapping{}
 		}
 
 		// Include worker AZs if missing.
 		for _, md := range machineDeployments {
 			for _, az := range key.WorkerAvailabilityZones(md) {
 				if _, exists := azs[az]; !exists {
-					azs[az] = subnetPair{}
+					azs[az] = mapping{}
 				}
 			}
 		}
@@ -83,16 +83,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Acquire AZs together with corresponding subnets from AWS EC2 API
 		// results.
-		azs, err = fromEC2SubnetsToMap(cc.Status.TenantCluster.TCCP.Subnets)
+		azs, err = mapSubnets(azs, cc.Status.TenantCluster.TCCP.Subnets)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
 
-	{
 		// Acquire AZs together with corresponding subnets from AWS EC2 API
 		// results.
-		azs, err = expandMapwithRouteTables(azs, cc.Status.TenantCluster.TCCP.RouteTables)
+		azs, err = mapRouteTables(azs, cc.Status.TenantCluster.TCCP.RouteTables)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -129,10 +127,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-// ensureAZsAreAssignedWithSubnet iterates over AZ-subnetPair map, removes
+// ensureAZsAreAssignedWithSubnet iterates over AZ-mapping map, removes
 // subnets that are already in use from available subnets' list and then assigns
 // one to AZs that doesn't have subnet assigned yet.
-func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubnet net.IPNet, azs map[string]subnetPair) (map[string]subnetPair, error) {
+func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubnet net.IPNet, azs map[string]mapping) (map[string]mapping, error) {
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
@@ -157,10 +155,10 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 
 		// Check if subnets of given availability zone already contain
 		// value?
-		if !subnets.areEmpty() {
+		if !subnets.subnetsEmpty() {
 			// Calculate the parent network from public subnet (always
 			// present for functional AZ).
-			parentNet := ipam.CalculateParent(subnets.Public.CIDR)
+			parentNet := ipam.CalculateParent(subnets.Public.Subnet.CIDR)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
 
@@ -174,10 +172,10 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 
 	// Assign subnet to AZs that don't it yet.
 	for _, az := range azNames {
-		subnets := azs[az]
+		mapping := azs[az]
 
 		// Only proceed with AZs that don't have subnet allocated yet.
-		if subnets.areEmpty() {
+		if mapping.subnetsEmpty() {
 			if len(clusterAZSubnets) > 0 {
 				// Pick first available AZ subnet and split it to public
 				// and private.
@@ -188,12 +186,12 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have subnet allocation - allocated: %q", az, clusterAZSubnets[0].String()))
 
-				// Update available AZ subnets.
+				// Update available AZ mapping.
 				clusterAZSubnets = clusterAZSubnets[1:]
 
-				subnets.Public.CIDR = ss[0]
-				subnets.Private.CIDR = ss[1]
-				azs[az] = subnets
+				mapping.Public.Subnet.CIDR = ss[0]
+				mapping.Private.Subnet.CIDR = ss[1]
+				azs[az] = mapping
 			} else {
 				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
 			}
@@ -205,11 +203,11 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 	return azs, nil
 }
 
-func azSubnetsToString(azs map[string]subnetPair) string {
+func azSubnetsToString(azs map[string]mapping) string {
 	var result strings.Builder
 	result.WriteString("availability zone subnet allocations: {")
-	for az, subnet := range azs {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, subnet.Public.CIDR.String(), subnet.Private.CIDR.String()))
+	for az, mapping := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, mapping.Public.Subnet.CIDR.String(), mapping.Private.Subnet.CIDR.String()))
 	}
 
 	if len(azs) > 0 {
@@ -221,110 +219,99 @@ func azSubnetsToString(azs map[string]subnetPair) string {
 	return result.String()
 }
 
-func expandMapwithRouteTables(azs map[string]subnetPair, rtts []*ec2.RouteTable) (map[string]subnetPair, error) {
-
-	// Loop over all rtts and create a map with rtt name and rtt ID
-	for _, rtt := range rtts {
-
-		var routeTableBelongsToTCCP bool
-		var routeTableName string
-		for _, t := range rtt.Tags {
-			if t == nil || t.Key == nil {
-				return nil, microerror.Maskf(executionFailedError, "invalid tag in ec2.RouteTable: %#v", t)
-			}
-
-			if t.Value == nil {
-				// It's ok that tag doesn't have value. It's just not the one
-				// we care about here.
-				continue
-			}
-
-			switch *t.Key {
-			case key.TagTCCP:
-				routeTableBelongsToTCCP = true
-			case "Name":
-				routeTableName = strings.TrimSpace(*t.Value)
-			}
+func hasTag(tags []*ec2.Tag, key string) bool {
+	for _, t := range tags {
+		if *t.Key == key {
+			return true
 		}
+	}
 
-		if !routeTableBelongsToTCCP {
+	return false
+}
+
+func hasTags(tags []*ec2.Tag, keys ...string) bool {
+	for _, k := range keys {
+		if !hasTag(tags, k) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func mapRouteTables(azs map[string]mapping, routeTables []*ec2.RouteTable) (map[string]mapping, error) {
+	for _, rt := range routeTables {
+		if !hasTags(rt.Tags, key.TagTCCP, key.TagRouteTableType) {
 			continue
 		}
 
+		for az, m := range azs {
+			if valueForKey(rt.Tags, key.TagAvailabilityZone) != az {
+				continue
+			}
+
+			switch t := valueForKey(rt.Tags, key.TagRouteTableType); {
+			case t == "public":
+				m.Public.RouteTable.ID = *rt.RouteTableId
+			case t == "private":
+				m.Private.RouteTable.ID = *rt.RouteTableId
+			default:
+				return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagSubnetType, t)
+			}
+		}
 	}
 
-	for az, pair := range azs {
-		// Here we need to match the rtt to the correct subnet.
-		// We can use the map with the ID we have through the key function.
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("xh3b4sd\n")
+	for az, m := range azs {
+		fmt.Printf("%#v %#v\n", az, m)
 	}
+	fmt.Printf("\n")
+	fmt.Printf("\n")
+	fmt.Printf("\n")
 
 	return nil, nil
 }
 
-// fromEC2SubnetsToMap extracts availability zones and public / private subnet
-// CIDRs from given EC2 subnet slice and returns respectively structured map or
-// error on invalid data.
-func fromEC2SubnetsToMap(ss []*ec2.Subnet) (map[string]subnetPair, error) {
-	azMap := make(map[string]subnetPair)
-
-	for _, s := range ss {
-		if s == nil || s.AvailabilityZone == nil || s.CidrBlock == nil || s.Tags == nil {
-			return nil, microerror.Maskf(executionFailedError, "invalid subnet entry in controllercontext.Status.TenantCluster.TCCP.Subnets: %#v", s)
-		}
-
-		var subnetType string
-		var subnetBelongsToTCCP bool
-		for _, t := range s.Tags {
-			if t == nil || t.Key == nil {
-				return nil, microerror.Maskf(executionFailedError, "invalid tag in ec2.Subnet: %#v", s)
-			}
-
-			if t.Value == nil {
-				// It's ok that tag doesn't have value. It's just not the one
-				// we care about here.
-				continue
-			}
-
-			switch *t.Key {
-			case key.TagTCCP:
-				subnetBelongsToTCCP = true
-			case key.TagSubnetType:
-				subnetType = strings.TrimSpace(*t.Value)
-			}
-		}
-
-		if !subnetBelongsToTCCP {
-			// VPC contains many subnets for various purposes in addition to
-			// TCCP, mainly for node pools. We are only interested in TCCP
-			// subnets in here.
+func mapSubnets(azs map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
+	for _, s := range subnets {
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("%#v\n", s)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		if !hasTags(s.Tags, key.TagTCCP, key.TagSubnetType) {
 			continue
 		}
-
-		mappedSubnet := azMap[*s.AvailabilityZone]
 
 		_, cidr, err := net.ParseCIDR(*s.CidrBlock)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		switch subnetType {
-		case "public":
-			mappedSubnet.Public.ID = *s.SubnetId
-			mappedSubnet.Public.CIDR = *cidr
-		case "private":
-			mappedSubnet.Private.ID = *s.SubnetId
-			mappedSubnet.Private.CIDR = *cidr
+		m := azs[*s.AvailabilityZone]
+
+		switch t := valueForKey(s.Tags, key.TagSubnetType); {
+		case t == "public":
+			m.Public.Subnet.ID = *s.SubnetId
+			m.Public.Subnet.CIDR = *cidr
+		case t == "private":
+			m.Private.Subnet.ID = *s.SubnetId
+			m.Private.Subnet.CIDR = *cidr
 		default:
-			return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagSubnetType, subnetType)
+			return nil, microerror.Maskf(invalidConfigError, "invalid subnet type in ec2.Subnet tag: %q: %q", key.TagSubnetType, t)
 		}
 
-		azMap[*s.AvailabilityZone] = mappedSubnet
+		azs[*s.AvailabilityZone] = m
 	}
 
-	return azMap, nil
+	return azs, nil
 }
 
-func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone {
+func newAZSpec(azs map[string]mapping) []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone {
 	var azNames []string
 	{
 		for az := range azs {
@@ -343,12 +330,12 @@ func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextSpecTenantC
 			Name: name,
 			Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 				Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
-					CIDR: sp.Private.CIDR,
-					ID:   sp.Private.ID,
+					CIDR: sp.Private.Subnet.CIDR,
+					ID:   sp.Private.Subnet.ID,
 				},
 				Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
-					CIDR: sp.Public.CIDR,
-					ID:   sp.Public.ID,
+					CIDR: sp.Public.Subnet.CIDR,
+					ID:   sp.Public.Subnet.ID,
 				},
 			},
 		}
@@ -359,7 +346,7 @@ func newAZSpec(azs map[string]subnetPair) []controllercontext.ContextSpecTenantC
 	return spec
 }
 
-func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone {
+func newAZStatus(azs map[string]mapping) []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone {
 	var azNames []string
 	{
 		for az := range azs {
@@ -376,7 +363,7 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTen
 
 		// Skip empty subnets as they are not allocated in AWS and therefor not in
 		// the current state.
-		if sp.areEmpty() {
+		if sp.subnetsEmpty() {
 			continue
 		}
 
@@ -385,12 +372,12 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTen
 			Name: name,
 			Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 				Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
-					CIDR: sp.Private.CIDR,
-					ID:   sp.Private.ID,
+					CIDR: sp.Private.Subnet.CIDR,
+					ID:   sp.Private.Subnet.ID,
 				},
 				Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic{
-					CIDR: sp.Public.CIDR,
-					ID:   sp.Public.ID,
+					CIDR: sp.Public.Subnet.CIDR,
+					ID:   sp.Public.Subnet.ID,
 				},
 			},
 		}
@@ -399,4 +386,14 @@ func newAZStatus(azs map[string]subnetPair) []controllercontext.ContextStatusTen
 	}
 
 	return status
+}
+
+func valueForKey(tags []*ec2.Tag, key string) string {
+	for _, t := range tags {
+		if *t.Key == key {
+			return *t.Value
+		}
+	}
+
+	return ""
 }

@@ -16,8 +16,9 @@ type ContextSpecTenantClusterTCCP struct {
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZone struct {
-	Name   string
-	Subnet ContextSpecTenantClusterTCCPAvailabilityZoneSubnet
+	Name       string
+	Subnet     ContextSpecTenantClusterTCCPAvailabilityZoneSubnet
+	RouteTable ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -33,6 +34,19 @@ type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	CIDR net.IPNet
 	ID   string
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable struct {
+	Private ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePrivate
+	Public  ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePrivate struct {
+	ID string
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
+	ID string
 }
 
 type ContextSpecTenantClusterTCNP struct {
