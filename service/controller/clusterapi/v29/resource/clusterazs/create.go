@@ -152,14 +152,13 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 	// Remove already allocated networks from clusterAZSubnets before assigning
 	// remaining subnets to AZs without themout them.
 	for _, az := range azNames {
-		subnets := azMapping[az]
+		mapping := azMapping[az]
 
-		// Check if subnets of given availability zone already contain
-		// value?
-		if !subnets.subnetsEmpty() {
+		// Check if mapping of given availability zone already contain value.
+		if !mapping.subnetsEmpty() {
 			// Calculate the parent network from public subnet (always
 			// present for functional AZ).
-			parentNet := ipam.CalculateParent(subnets.Public.Subnet.CIDR)
+			parentNet := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
 
