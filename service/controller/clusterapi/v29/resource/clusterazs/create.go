@@ -282,7 +282,7 @@ func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable)
 	fmt.Printf("\n")
 	fmt.Printf("\n")
 
-	return nil, nil
+	return azMapping, nil
 }
 
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {

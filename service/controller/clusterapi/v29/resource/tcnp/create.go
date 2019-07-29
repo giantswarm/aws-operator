@@ -316,7 +316,8 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 		return nil, microerror.Mask(err)
 	}
 
-	azMap := statusAZsToPublicSubnetIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
+	routeTableMapping := statusAZsToPublicRouteTableIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
+	subnetMapping := statusAZsToPublicSubnetIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
 
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		// Create private subnet per AZ
@@ -329,9 +330,9 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					ID: azMap[a.Name],
+					ID: subnetMapping[a.Name],
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.Name)),
+						ID: routeTableMapping[a.Name],
 					},
 				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
@@ -415,6 +416,14 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 	}
 
 	return params, nil
+}
+
+func statusAZsToPublicRouteTableIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
+	m := make(map[string]string)
+	for _, az := range azs {
+		m[az.Name] = az.RouteTable.Public.ID
+	}
+	return m
 }
 
 func statusAZsToPublicSubnetIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {

@@ -34,6 +34,11 @@ func DefaultContext() context.Context {
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
+							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
+								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
+									ID: "validPublicRouteTableID-1a",
+								},
+							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -47,6 +52,11 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1b",
+							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
+								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
+									ID: "validPublicRouteTableID-1b",
+								},
+							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -60,6 +70,11 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1c",
+							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
+								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
+									ID: "validPublicRouteTableID-1c",
+								},
+							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.128/27"),
@@ -98,6 +113,11 @@ func DefaultContext() context.Context {
 					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
+							RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
+								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
+									ID: "validPublicRouteTableID-1a",
+								},
+							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -111,6 +131,11 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1b",
+							RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
+								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
+									ID: "validPublicRouteTableID-1b",
+								},
+							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -124,6 +149,11 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1c",
+							RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
+								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
+									ID: "validPublicRouteTableID-1c",
+								},
+							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.128/27"),
