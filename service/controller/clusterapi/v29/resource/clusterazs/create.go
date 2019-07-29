@@ -63,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d MachineDeployments for tenant cluster", len(machineDeployments)))
 	}
 
-	var azs map[string]mapping
+	azs := map[string]mapping{}
 	{
 		// Include master's AZ if missing.
 		if _, exists := azs[key.MasterAvailabilityZone(cr)]; !exists {
