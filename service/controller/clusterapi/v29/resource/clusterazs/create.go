@@ -92,7 +92,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Acquire AZs together with corresponding subnets from AWS EC2 API
 		// results.
-		azs, err = fromEC2RouteTablesToMap(cc.Status.TenantCluster.TCCP.RouteTables)
+		azs, err = expandMapwithRouteTables(azs, cc.Status.TenantCluster.TCCP.RouteTables)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -219,6 +219,46 @@ func azSubnetsToString(azs map[string]subnetPair) string {
 	}
 
 	return result.String()
+}
+
+func expandMapwithRouteTables(azs map[string]subnetPair, rtts []*ec2.RouteTable) (map[string]subnetPair, error) {
+
+	// Loop over all rtts and create a map with rtt name and rtt ID
+	for _, rtt := range rtts {
+
+		var routeTableBelongsToTCCP bool
+		var routeTableName string
+		for _, t := range rtt.Tags {
+			if t == nil || t.Key == nil {
+				return nil, microerror.Maskf(executionFailedError, "invalid tag in ec2.RouteTable: %#v", t)
+			}
+
+			if t.Value == nil {
+				// It's ok that tag doesn't have value. It's just not the one
+				// we care about here.
+				continue
+			}
+
+			switch *t.Key {
+			case key.TagTCCP:
+				routeTableBelongsToTCCP = true
+			case "Name":
+				routeTableName = strings.TrimSpace(*t.Value)
+			}
+		}
+
+		if !routeTableBelongsToTCCP {
+			continue
+		}
+
+	}
+
+	for az, pair := range azs {
+		// Here we need to match the rtt to the correct subnet.
+		// We can use the map with the ID we have through the key function.
+	}
+
+	return nil, nil
 }
 
 // fromEC2SubnetsToMap extracts availability zones and public / private subnet
