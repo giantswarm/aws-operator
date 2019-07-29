@@ -9,4 +9,5 @@ type ParamsMain struct {
 	Outputs             *ParamsMainOutputs
 	SecurityGroups      *ParamsMainSecurityGroups
 	Subnets             *ParamsMainSubnets
+	VPCCIDR             *ParamsMainVPCCIDR
 }

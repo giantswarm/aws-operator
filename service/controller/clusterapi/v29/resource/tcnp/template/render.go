@@ -16,6 +16,7 @@ func Render(v interface{}) (string, error) {
 		TemplateMainOutputs,
 		TemplateMainSecurityGroups,
 		TemplateMainSubnets,
+		TemplateMainVPCCIDR,
 	}
 
 	s, err := templates.Render(l, v)
