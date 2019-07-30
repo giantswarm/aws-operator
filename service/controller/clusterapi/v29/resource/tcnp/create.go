@@ -317,7 +317,6 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	}
 
 	routeTableMapping := statusAZsToPublicRouteTableIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
-	subnetMapping := statusAZsToPublicSubnetIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
 
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		// Create private subnet per AZ
@@ -330,7 +329,6 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					ID: subnetMapping[a.Name],
 					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
 						ID: routeTableMapping[a.Name],
 					},
@@ -422,14 +420,6 @@ func statusAZsToPublicRouteTableIDs(azs []controllercontext.ContextStatusTenantC
 	m := make(map[string]string)
 	for _, az := range azs {
 		m[az.Name] = az.RouteTable.Public.ID
-	}
-	return m
-}
-
-func statusAZsToPublicSubnetIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
-	m := make(map[string]string)
-	for _, az := range azs {
-		m[az.Name] = az.Subnet.Public.ID
 	}
 	return m
 }

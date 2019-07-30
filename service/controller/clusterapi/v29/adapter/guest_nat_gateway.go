@@ -10,6 +10,7 @@ type Gateway struct {
 	NATEIPName            string
 	NATRouteName          string
 	PrivateRouteTableName string
+	PublicRouteTableName  string
 	PublicSubnetName      string
 }
 
@@ -25,6 +26,7 @@ func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
 			NATEIPName:            key.SanitizeCFResourceName(key.NATEIPName(az.Name)),
 			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
 			PrivateRouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+			PublicRouteTableName:  key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 			PublicSubnetName:      key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)),
 		}
 		a.Gateways = append(a.Gateways, gw)
