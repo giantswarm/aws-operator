@@ -878,7 +878,7 @@ Resources:
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1a
       SubnetId: !Ref PublicSubnetEuCentral1a
   PublicSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
@@ -920,7 +920,7 @@ Resources:
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1c
       SubnetId: !Ref PublicSubnetEuCentral1c
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet

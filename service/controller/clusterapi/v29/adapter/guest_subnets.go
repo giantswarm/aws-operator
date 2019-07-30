@@ -50,7 +50,7 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
 				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject))),
+				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
 		}
