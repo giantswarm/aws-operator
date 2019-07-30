@@ -344,10 +344,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpResource controller.Resource
 	{
 		c := tccp.Config{
-			APIWhitelist:         config.APIWhitelist,
+			CMAClient:            config.CMAClient,
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
+			APIWhitelist:       config.APIWhitelist,
 			Detection:          detectionService,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,

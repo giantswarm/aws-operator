@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
@@ -66,6 +67,7 @@ func Test_newTemplateBody(t *testing.T) {
 	{
 
 		c := Config{
+			CMAClient: fake.NewSimpleClientset(),
 			Detection: d,
 			Logger:    microloggertest.New(),
 
