@@ -15,6 +15,7 @@ const TemplateMainSubnets = `
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: {{ .TCCP.VPC.ID }}
+    DependsOn: VpcCidrBlock
   {{ .RouteTableAssociation.Name }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
