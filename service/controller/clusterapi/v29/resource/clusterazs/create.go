@@ -268,6 +268,7 @@ func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable)
 			default:
 				return nil, microerror.Maskf(invalidConfigError, "invalid route table type %#q", t)
 			}
+			azMapping[az] = m
 		}
 	}
 
