@@ -23,20 +23,13 @@ const NatGateway = `
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  Private{{ .NATRouteName }}:
+  {{ .NATRouteName }}:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref {{ .PrivateRouteTableName }}
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "{{ .NATGWName }}"
-  Public{{ .NATRouteName }}:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref {{ .PublicRouteTableName }}
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "{{ .NATGWName }}"
+        Ref: {{ .NATGWName }}
   {{- end -}}
 {{- end -}}
 `
