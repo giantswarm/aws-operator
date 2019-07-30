@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: aws-operator
+  name: {{ .Values.resource.default.name }}
 rules:
   - apiGroups:
       - cluster.giantswarm.io
@@ -91,7 +91,7 @@ rules:
     resources:
       - configmaps
     resourceNames:
-      - aws-operator-configmap
+      - {{ .Values.resource.default.name }}
     verbs:
       - get
   - nonResourceURLs:
@@ -103,20 +103,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aws-operator
+  name: {{ .Values.resource.default.name }}
 subjects:
   - kind: ServiceAccount
-    name: aws-operator
-    namespace: {{ .Values.namespace }}
+    name: {{ .Values.resource.default.name }}
+    namespace: {{ .Values.resource.default.namespace }}
 roleRef:
   kind: ClusterRole
-  name: aws-operator
+  name: {{ .Values.resource.default.name }}
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: aws-operator-psp
+  name: {{ .Values.resource.psp.name }}
 rules:
   - apiGroups:
       - extensions
@@ -125,17 +125,17 @@ rules:
     verbs:
       - use
     resourceNames:
-      - aws-operator-psp
+      - {{ .Values.resource.psp.name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aws-operator-psp
+  name: {{ .Values.resource.psp.name }}
 subjects:
   - kind: ServiceAccount
-    name: aws-operator
-    namespace: {{ .Values.namespace }}
+    name: {{ .Values.resource.default.name }}
+    namespace: {{ .Values.resource.default.namespace }}
 roleRef:
   kind: ClusterRole
-  name: aws-operator-psp
+  name: {{ .Values.resource.psp.name }}
   apiGroup: rbac.authorization.k8s.io
