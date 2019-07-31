@@ -1,4 +1,4 @@
-package vpcid
+package tccpvpcid
 
 import (
 	"context"

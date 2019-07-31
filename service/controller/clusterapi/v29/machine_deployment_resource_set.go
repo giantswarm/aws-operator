@@ -24,9 +24,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroupid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpcid"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -238,7 +238,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var vpcCIDRResource controller.Resource
+	var cpVPCCIDRResource controller.Resource
 	{
 		c := cpvpccidr.Config{
 			Logger: config.Logger,
@@ -246,21 +246,21 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			VPCPeerID: config.VPCPeerID,
 		}
 
-		vpcCIDRResource, err = cpvpccidr.New(c)
+		cpVPCCIDRResource, err = cpvpccidr.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var vpcidResource controller.Resource
+	var tccpVPCIDResource controller.Resource
 	{
-		c := vpcid.Config{
+		c := tccpvpcid.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
-		vpcidResource, err = vpcid.New(c)
+		tccpVPCIDResource, err = tccpvpcid.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -269,8 +269,8 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	resources := []controller.Resource{
 		awsClientResource,
 		accountIDResource,
-		vpcidResource,
-		vpcCIDRResource,
+		tccpVPCIDResource,
+		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupIDResource,
 		tccpSubnetResource,
