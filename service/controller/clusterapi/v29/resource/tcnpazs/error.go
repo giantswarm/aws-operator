@@ -1,4 +1,4 @@
-package machinedeploymentazs
+package tcnpazs
 
 import "github.com/giantswarm/microerror"
 
