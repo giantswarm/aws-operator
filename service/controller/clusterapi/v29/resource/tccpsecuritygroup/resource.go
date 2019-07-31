@@ -1,4 +1,4 @@
-package tccpsecuritygroupid
+package tccpsecuritygroup
 
 import (
 	"context"
@@ -7,16 +7,42 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
-func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
-	if err != nil {
-		return microerror.Mask(err)
+const (
+	Name = "tccpsecuritygroupv29"
+)
+
+type Config struct {
+	Logger micrologger.Logger
+}
+
+type Resource struct {
+	logger micrologger.Logger
+}
+
+func New(config Config) (*Resource, error) {
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
+	r := &Resource{
+		logger: config.Logger,
+	}
+
+	return r, nil
+}
+
+func (r *Resource) Name() string {
+	return Name
+}
+
+func (r *Resource) addInfoToCtx(ctx context.Context, cr v1alpha1.MachineDeployment) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -66,7 +92,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "ingress"))
+
 		cc.Status.TenantCluster.TCCP.SecurityGroup.Master.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "master"))
+		cc.Status.TenantCluster.TCCP.SecurityGroup.Master.Permissions = permissionsFromGroups(groups, key.SecurityGroupName(&cr, "master"))
 	}
 
 	return nil
@@ -80,6 +108,16 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	}
 
 	return ""
+}
+
+func permissionsFromGroups(groups []*ec2.SecurityGroup, name string) []*ec2.IpPermission {
+	for _, g := range groups {
+		if valueForKey(g.Tags, "Name") == name {
+			return g.IpPermissions
+		}
+	}
+
+	return nil
 }
 
 func valueForKey(tags []*ec2.Tag, key string) string {

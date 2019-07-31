@@ -22,11 +22,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroupid"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroup"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpsecuritygroup"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -198,14 +199,13 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSecurityGroupIDResource controller.Resource
+	var tccpSecurityGroupResource controller.Resource
 	{
-		c := tccpsecuritygroupid.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
+		c := tccpsecuritygroup.Config{
+			Logger: config.Logger,
 		}
 
-		tccpSecurityGroupIDResource, err = tccpsecuritygroupid.New(c)
+		tccpSecurityGroupResource, err = tccpsecuritygroup.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -233,6 +233,18 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		tcnpResource, err = tcnp.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tcnpSecurityGroupResource controller.Resource
+	{
+		c := tcnpsecuritygroup.Config{
+			Logger: config.Logger,
+		}
+
+		tcnpSecurityGroupResource, err = tcnpsecuritygroup.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -272,13 +284,14 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tccpVPCIDResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
-		tccpSecurityGroupIDResource,
+		tccpSecurityGroupResource,
 		tccpSubnetResource,
 		regionResource,
 		encryptionResource,
 		ipamResource,
 		clusterAZsResource,
 		tcnpAZsResource,
+		tcnpSecurityGroupResource,
 		tcnpResource,
 	}
 

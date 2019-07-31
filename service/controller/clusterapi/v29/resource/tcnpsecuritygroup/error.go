@@ -1,4 +1,4 @@
-package tccpsecuritygroupid
+package tcnpsecuritygroup
 
 import "github.com/giantswarm/microerror"
 
