@@ -54,7 +54,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d vpc natgateways for tenant cluster %#q", len(natgateways), key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d natgateways for tenant cluster %#q", len(natgateways), key.ClusterID(&cr)))
 
 		cc.Status.TenantCluster.TCCP.NATGateways = natgateways
 	}
