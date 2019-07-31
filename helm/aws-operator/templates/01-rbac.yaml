@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Values.resource.default.name }}
+  name: {{ .Values.resource.default.name | tpl }}
 rules:
   - apiGroups:
       - cluster.giantswarm.io
@@ -91,7 +91,7 @@ rules:
     resources:
       - configmaps
     resourceNames:
-      - {{ .Values.resource.default.name }}
+      - {{ .Values.resource.default.name | tpl }}
     verbs:
       - get
   - nonResourceURLs:
@@ -103,20 +103,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.resource.default.name }}
+  name: {{ .Values.resource.default.name | tpl }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.resource.default.name }}
-    namespace: {{ .Values.resource.default.namespace }}
+    name: {{ .Values.resource.default.name | tpl }}
+    namespace: {{ .Values.resource.default.namespace | tpl }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Values.resource.default.name }}
+  name: {{ .Values.resource.default.name | tpl }}
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Values.resource.psp.name }}
+  name: {{ .Values.resource.psp.name | tpl }}
 rules:
   - apiGroups:
       - extensions
@@ -125,17 +125,17 @@ rules:
     verbs:
       - use
     resourceNames:
-      - {{ .Values.resource.psp.name }}
+      - {{ .Values.resource.psp.name | tpl }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.resource.psp.name }}
+  name: {{ .Values.resource.psp.name | tpl }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.resource.default.name }}
-    namespace: {{ .Values.resource.default.namespace }}
+    name: {{ .Values.resource.default.name | tpl }}
+    namespace: {{ .Values.resource.default.namespace | tpl }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Values.resource.psp.name }}
+  name: {{ .Values.resource.psp.name | tpl }}
   apiGroup: rbac.authorization.k8s.io

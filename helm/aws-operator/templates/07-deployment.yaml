@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Values.resource.default.name }}
-  namespace: {{ .Values.resource.default.namespace }}
+  name: {{ .Values.resource.default.name | tpl }}
+  namespace: {{ .Values.resource.default.namespace | tpl }}
   labels:
-    app: {{ .Values.resource.default.name }}
+    app: {{ .Values.resource.default.name | tpl }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -15,25 +15,25 @@ spec:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        app: {{ .Values.resource.default.name }}
+        app: {{ .Values.resource.default.name | tpl }}
     spec:
       volumes:
       - name: {{ .Values.project.name }}-configmap
         configMap:
-          name: {{ .Values.resource.default.name }}
+          name: {{ .Values.resource.default.name | tpl }}
           items:
           - key: config.yaml
             path: config.yaml
       - name: {{ .Values.project.name }}-secret
         secret:
-          secretName: {{ .Values.resource.default.name }}
+          secretName: {{ .Values.resource.default.name | tpl }}
           items:
           - key: secret.yaml
             path: secret.yaml
       - name: certs
         hostPath:
           path: /etc/ssl/certs/ca-certificates.crt
-      serviceAccountName: {{ .Values.resource.default.name }}
+      serviceAccountName: {{ .Values.resource.default.name | tpl }}
       securityContext:
         runAsUser: {{ .Values.pod.user.id }}
         runAsGroup: {{ .Values.pod.group.id }}
@@ -77,4 +77,4 @@ spec:
             cpu: 250m
             memory: 250Mi
       imagePullSecrets:
-      - name: {{ .Values.resource.pullSecret.name }}
+      - name: {{ .Values.resource.pullSecret.name | tpl }}

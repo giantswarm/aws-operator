@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.resource.default.name }}
-  namespace: {{ .Values.resource.default.namespace }}
+  name: {{ .Values.resource.default.name | tpl }}
+  namespace: {{ .Values.resource.default.namespace | tpl }}
 data:
   config.yaml: |
     server:
