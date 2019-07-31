@@ -1,4 +1,4 @@
-package vpccidr
+package cpvpccidr
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "vpccidrv29"
+	Name = "cpvpccidrv29"
 )
 
 type Config struct {
