@@ -457,14 +457,6 @@ func statusAZsToNATGatewayIDs(azs []controllercontext.ContextStatusTenantCluster
 	return m
 }
 
-func statusAZsToPublicRouteTableIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
-	m := make(map[string]string)
-	for _, az := range azs {
-		m[az.Name] = az.RouteTable.Public.ID
-	}
-	return m
-}
-
 func workerCountRatio(workers int, ratio float32) string {
 	value := float32(workers) * ratio
 	rounded := int(value + 0.5)

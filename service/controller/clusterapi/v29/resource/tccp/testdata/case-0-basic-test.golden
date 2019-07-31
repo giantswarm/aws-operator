@@ -464,8 +464,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
-				- Key: giantswarm.io/availability-zone
-        	Value: eu-central-1a
+        - Key: giantswarm.io/availability-zone
+          Value: eu-central-1a
         - Key: giantswarm.io/tccp
           Value: true
   NATEIPEuCentral1a:
@@ -492,8 +492,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
-				- Key: giantswarm.io/availability-zone
-        	Value: eu-central-1b
+        - Key: giantswarm.io/availability-zone
+          Value: eu-central-1b
         - Key: giantswarm.io/tccp
           Value: true
   NATEIPEuCentral1b:
@@ -520,8 +520,8 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
-				- Key: giantswarm.io/availability-zone
-        	Value: eu-central-1c
+        - Key: giantswarm.io/availability-zone
+          Value: eu-central-1c
         - Key: giantswarm.io/tccp
           Value: true
   NATEIPEuCentral1c:

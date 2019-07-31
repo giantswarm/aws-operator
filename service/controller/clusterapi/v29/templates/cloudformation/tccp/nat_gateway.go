@@ -17,8 +17,8 @@ const NatGateway = `
       Tags:
         - Key: Name
           Value: {{ .ClusterID }}
-				- Key: giantswarm.io/availability-zone
-        	Value: {{ .AvailabilityZone }}
+        - Key: giantswarm.io/availability-zone
+          Value: {{ .AvailabilityZone }}
         - Key: giantswarm.io/tccp
           Value: true
   {{ .NATEIPName }}:

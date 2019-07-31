@@ -249,6 +249,7 @@ Resources:
       Tags:
         - Key: Name
           Value: NodePoolSecurityGroup
+  
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -266,7 +267,8 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      SubnetId: !Ref PrivateSubnetEuCentral1aPrivateSubnetEuCentral1b:
+      SubnetId: !Ref PrivateSubnetEuCentral1a
+  PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-central-1b
@@ -284,7 +286,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       SubnetId: !Ref PrivateSubnetEuCentral1b
-	PrivateRouteTableEuCentral1a:
+  PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: imagenary-vpc-id
