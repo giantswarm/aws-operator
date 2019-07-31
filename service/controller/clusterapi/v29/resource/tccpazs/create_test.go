@@ -1,4 +1,4 @@
-package clusterazs
+package tccpazs
 
 import (
 	"context"
@@ -396,7 +396,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 	}
 }
 
-func Test_fromEC2SubnetsToMap(t *testing.T) {
+func Test_mapSubnets(t *testing.T) {
 	testCases := []struct {
 		name         string
 		input        []*ec2.Subnet

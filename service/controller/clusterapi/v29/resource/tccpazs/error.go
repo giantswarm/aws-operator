@@ -1,4 +1,4 @@
-package clusterazs
+package tccpazs
 
 import "github.com/giantswarm/microerror"
 

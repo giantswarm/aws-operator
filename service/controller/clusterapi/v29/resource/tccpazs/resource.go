@@ -1,6 +1,6 @@
-// Package clusterazs implements a resource to gather all distinct availability
+// Package tccpazs implements a resource to gather all distinct availability
 // zones for a tenant cluster.
-package clusterazs
+package tccpazs
 
 import (
 	"github.com/giantswarm/microerror"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	Name = "clusterazsv29"
+	Name = "tccpazsv29"
 )
 
 type Config struct {

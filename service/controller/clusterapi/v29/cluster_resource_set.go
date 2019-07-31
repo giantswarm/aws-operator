@@ -19,7 +19,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
@@ -39,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 )
@@ -184,15 +184,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var clusterAZsResource controller.Resource
+	var tccpAZsResource controller.Resource
 	{
-		c := clusterazs.Config{
+		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
 		}
 
-		clusterAZsResource, err = clusterazs.New(c)
+		tccpAZsResource, err = tccpazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -587,7 +587,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		regionResource,
 		asgStatusResource,
 		ipamResource,
-		clusterAZsResource,
 		bridgeZoneResource,
 		encryptionResource,
 		s3BucketResource,
@@ -595,6 +594,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		loadBalancerResource,
 		ebsVolumeResource,
 		cpiResource,
+		tccpAZsResource,
 		tccpResource,
 		cpfResource,
 		namespaceResource,
