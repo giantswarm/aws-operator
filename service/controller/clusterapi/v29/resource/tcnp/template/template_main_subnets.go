@@ -2,7 +2,7 @@ package template
 
 const TemplateMainSubnets = `
 {{- define "subnets" -}}
-  {{- range .Subnets.List }}
+  {{- range .Subnets.List -}}
   {{ .Name }}:
     Type: AWS::EC2::Subnet
     Properties:

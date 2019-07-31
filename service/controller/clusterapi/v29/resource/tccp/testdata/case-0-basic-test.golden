@@ -305,25 +305,25 @@ Resources:
       InstanceMonitoring: false
       IamInstanceProfile: !Ref WorkerInstanceProfile
       BlockDeviceMappings:
-      
+
       - DeviceName: "/dev/xvdh"
         Ebs:
           DeleteOnTermination: true
           VolumeSize: 100
           VolumeType: gp2
-      
+
       - DeviceName: "/dev/xvdf"
         Ebs:
           DeleteOnTermination: true
           VolumeSize: 100
           VolumeType: gp2
-      
+
       - DeviceName: "/dev/xvdg"
         Ebs:
           DeleteOnTermination: true
           VolumeSize: 100
           VolumeType: gp2
-      
+
       AssociatePublicIpAddress: false
       UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL3dvcmtlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJrdWJlbGV0IiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImt1YmVsZXQiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
   NodeDrainerLifecycleHook:
@@ -335,7 +335,7 @@ Resources:
       HeartbeatTimeout: 3600
       LifecycleHookName: NodeDrainer
       LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
-  
+
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
@@ -352,23 +352,23 @@ Resources:
       Instances:
       - !Ref rsc-ac0dc01
       Listeners:
-      
+
       - InstancePort: 443
         InstanceProtocol: TCP
         LoadBalancerPort: 443
         Protocol: TCP
-      
+
       LoadBalancerName: 8y5ck-api
       Scheme: internet-facing
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
         - !Ref PublicSubnetEuCentral1a
-      
+
         - !Ref PublicSubnetEuCentral1b
-      
+
         - !Ref PublicSubnetEuCentral1c
-      
+
 
   EtcdLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -384,23 +384,23 @@ Resources:
       Instances:
       - !Ref rsc-ac0dc01
       Listeners:
-      
+
       - InstancePort: 2379
         InstanceProtocol: TCP
         LoadBalancerPort: 2379
         Protocol: TCP
-      
+
       LoadBalancerName: 8y5ck-etcd
       Scheme: internal
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1a
-      
+
         - !Ref PrivateSubnetEuCentral1b
-      
+
         - !Ref PrivateSubnetEuCentral1c
-      
+
 
   IngressLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -416,17 +416,17 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
-      
+
       - InstancePort: 30011
         InstanceProtocol: TCP
         LoadBalancerPort: 443
         Protocol: TCP
-      
+
       - InstancePort: 30010
         InstanceProtocol: TCP
         LoadBalancerPort: 80
         Protocol: TCP
-      
+
       LoadBalancerName: 8y5ck-ingress
       Policies:
       - PolicyName: "EnableProxyProtocol"
@@ -435,22 +435,22 @@ Resources:
         - Name: "ProxyProtocol"
           Value: "true"
         InstancePorts:
-        
+
         - 30011
-        
+
         - 30010
-        
+
       Scheme: internet-facing
       SecurityGroups:
         - !Ref IngressSecurityGroup
       Subnets:
         - !Ref PublicSubnetEuCentral1a
-      
+
         - !Ref PublicSubnetEuCentral1b
-      
+
         - !Ref PublicSubnetEuCentral1c
-      
-  
+
+
   NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -464,26 +464,21 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+				- Key: giantswarm.io/availability-zone
+        	Value: eu-central-1a
         - Key: giantswarm.io/tccp
           Value: true
   NATEIPEuCentral1a:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  PrivateNATRouteEuCentral1a:
+  NATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayEuCentral1a"
-  PublicNATRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1a
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayEuCentral1a"
+        Ref: !Ref NATGatewayEuCentral1a
   NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -497,26 +492,21 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+				- Key: giantswarm.io/availability-zone
+        	Value: eu-central-1b
         - Key: giantswarm.io/tccp
           Value: true
   NATEIPEuCentral1b:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  PrivateNATRouteEuCentral1b:
+  NATRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayEuCentral1b"
-  PublicNATRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayEuCentral1b"
+        Ref: !Ref NATGatewayEuCentral1b
   NATGatewayEuCentral1c:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -530,28 +520,23 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
+				- Key: giantswarm.io/availability-zone
+        	Value: eu-central-1c
         - Key: giantswarm.io/tccp
           Value: true
   NATEIPEuCentral1c:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  PrivateNATRouteEuCentral1c:
+  NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayEuCentral1c"
-  PublicNATRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1c
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: "NATGatewayEuCentral1c"
-  
-  
+        Ref: !Ref NATGatewayEuCentral1c
+
+
   PublicRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -657,7 +642,7 @@ Resources:
       GroupDescription: 8y5ck-master
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
+
       -
         Description: Allow all traffic to the master instance.
         IpProtocol: tcp
@@ -715,58 +700,58 @@ Resources:
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        
+
         SourceSecurityGroupId: !Ref IngressSecurityGroup
-        
+
       -
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        
+
         SourceSecurityGroupId: !Ref IngressSecurityGroup
-        
+
       -
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        
+
         CidrIp: 10.1.0.0/16
-        
+
       -
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
-        
+
         CidrIp: 10.1.0.0/16
-        
+
       -
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
-        
+
         CidrIp: 10.1.0.0/16
-        
+
       -
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
-        
+
         CidrIp: 10.1.0.0/16
-        
+
       -
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
-        
+
         CidrIp: 10.1.0.0/16
-        
+
       -
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        
+
         CidrIp: 10.1.0.0/16
-        
+
       Tags:
         - Key: Name
           Value:  8y5ck-worker
@@ -778,19 +763,19 @@ Resources:
       GroupDescription: 8y5ck-ingress
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
+
       -
         IpProtocol: tcp
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
-      
+
       -
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
         CidrIp: 0.0.0.0/0
-      
+
       Tags:
         - Key: Name
           Value: 8y5ck-ingress
@@ -802,19 +787,19 @@ Resources:
       GroupDescription: 8y5ck-etcd-elb
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
+
       -
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
         CidrIp: 0.0.0.0/0
-      
+
       -
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
         CidrIp: 10.1.0.0/16
-      
+
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
@@ -879,7 +864,7 @@ Resources:
       Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
-  
+
   PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -1006,18 +991,18 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       SubnetId: !Ref PrivateSubnetEuCentral1c
-  
+
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 
+      CidrBlock:
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
       - Key: Name
         Value: 8y5ck
       - Key: Installation
-        Value: 
+        Value:
       - Key: giantswarm.io/tccp
         Value: true
   VPCPeeringConnection:

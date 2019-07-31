@@ -70,6 +70,7 @@ type ContextStatusTenantClusterTCCP struct {
 	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
+	NATGateways       []*ec2.NatGateway
 	RouteTables       []*ec2.RouteTable
 	SecurityGroup     ContextStatusTenantClusterTCCPSecurityGroup
 	Subnets           []*ec2.Subnet
@@ -85,8 +86,13 @@ type ContextStatusTenantClusterTCCPASG struct {
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
 	Name       string
+	NATGateway ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway
 	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
 	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway struct {
+	ID string
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {

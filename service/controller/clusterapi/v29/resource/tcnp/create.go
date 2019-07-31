@@ -283,6 +283,38 @@ func newOutputs(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	return outputs, nil
 }
 
+func newRouteTables(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainRouteTables, error) {
+	var routeTables template.ParamsMainRouteTables
+
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	natGatewayMapping := statusAZsToNATGatewayIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
+
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		r := template.ParamsMainRouteTablesListItem{
+			AvailabilityZone: a.Name,
+			Name:             key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			Route: template.ParamsMainRouteTablesListItemRoute{
+				Name: key.SanitizeCFResourceName(key.NATRouteName(a.Name)),
+			},
+			TCCP: template.ParamsMainRouteTablesListItemTCCP{
+				NATGateway: template.ParamsMainRouteTablesListItemTCCPNATGateway{
+					ID: natGatewayMapping[a.Name],
+				},
+				VPC: template.ParamsMainRouteTablesListItemTCCPVPC{
+					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+				},
+			},
+		}
+		routeTables.List = append(routeTables.List, r)
+	}
+
+	return &routeTables, nil
+}
+
 func newSecurityGroups(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -316,23 +348,19 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 		return nil, microerror.Mask(err)
 	}
 
-	routeTableMapping := statusAZsToPublicRouteTableIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
-
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.Private.CIDR.String(),
 			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)),
+			RouteTable: template.ParamsMainSubnetsListItemRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
 				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.Name)),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
-				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						ID: routeTableMapping[a.Name],
-					},
-				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
 					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 				},
@@ -388,6 +416,10 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		routeTables, err := newRouteTables(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		securityGroups, err := newSecurityGroups(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -407,6 +439,7 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 			LaunchConfiguration: launchConfiguration,
 			LifecycleHooks:      lifecycleHooks,
 			Outputs:             outputs,
+			RouteTables:         routeTables,
 			SecurityGroups:      securityGroups,
 			Subnets:             subnets,
 			VPCCIDR:             vpcCIDR,
@@ -414,6 +447,14 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 	}
 
 	return params, nil
+}
+
+func statusAZsToNATGatewayIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
+	m := make(map[string]string)
+	for _, az := range azs {
+		m[az.Name] = az.NATGateway.ID
+	}
+	return m
 }
 
 func statusAZsToPublicRouteTableIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {

@@ -1,26 +1,27 @@
 package template
 
-const TemplateMainRouteTable = `
+const TemplateMainRouteTables = `
 {{- define "routetables" -}}
-  {{- range .RouteTable.List }}
+  {{- range .RouteTables.List -}}
   {{ .Name }}:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: {{ .VPC.ID }}
+      VpcId: {{ .TCCP.VPC.ID }}
       Tags:
       - Key: Name
-        Value: {{ .TagName }}
+        Value: {{ .Name }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
         Value: private
       - Key: giantswarm.io/tccp
         Value: true
-  {{ .NATRouteName }}:
+  {{ .Route.Name }}:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref {{ .PrivateRouteTableName }}
+      RouteTableId: !Ref {{ .Name }}
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: {{ .NATGW.ID }}
+      NatGatewayId: {{ .TCCP.NATGateway.ID }}
+	{{- end }}
 {{- end -}}
 `
