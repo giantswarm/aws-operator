@@ -272,16 +272,6 @@ func mapNATGateways(azMapping map[string]mapping, natGateways []*ec2.NatGateway)
 		}
 	}
 
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("xh3b4sd\n")
-	for az, m := range azMapping {
-		fmt.Printf("%#v %#v\n", az, m)
-	}
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-
 	return azMapping, nil
 }
 

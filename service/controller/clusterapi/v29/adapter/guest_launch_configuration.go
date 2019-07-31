@@ -2,7 +2,6 @@ package adapter
 
 import (
 	"encoding/base64"
-	"fmt"
 	"strconv"
 
 	"github.com/giantswarm/microerror"
@@ -113,14 +112,6 @@ func (l *GuestLaunchConfigAdapter) Adapt(config Config) error {
 		},
 	}
 	l.WorkerInstanceMonitoring = config.StackState.WorkerInstanceMonitoring
-
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("config.TenantClusterAccountID: %#v\n", config.TenantClusterAccountID)
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
 
 	// small cloud config field.
 	c := SmallCloudconfigConfig{
