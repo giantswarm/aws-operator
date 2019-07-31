@@ -22,10 +22,10 @@ project:
 #
 resource:
   default:
-    name:  "{{ .Release.Name | trim 47 }}"
+    name:  "{{ .Release.Name | replace "." "-" | trim 47 }}"
     namespace: "giantswarm"
   psp:
-    name: "{{ .Release.Name | trim 47 }}-psp"
+    name: "{{ .Release.Name | replace "." "-" | trim 47 }}-psp"
   pullSecret:
-    name: "{{ .Release.Name | trim 47 }}-pull-secret"
+    name: "{{ .Release.Name | replace "." "-" | trim 47 }}-pull-secret"
     namespace: "giantswarm"
