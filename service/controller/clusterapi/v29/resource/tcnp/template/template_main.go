@@ -11,6 +11,7 @@ Resources:
   {{ template "iam_policies" . }}
   {{ template "launch_configuration" . }}
   {{ template "lifecycle_hooks" . }}
+  {{ template "route_tables" . }}
   {{ template "security_groups" . }}
   {{ template "subnets" . }}
   {{ template "vpc_cidr" . }}

@@ -12,7 +12,7 @@ Outputs:
   InstanceType:
     Value: m5.2xlarge
   VersionBundleVersion:
-    Value: 
+    Value: 7.3.0
 Resources:
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -144,7 +144,7 @@ Resources:
               "config": {
                 "append": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version//cloudconfig/v_4_5_0/worker"
+                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_5_0/worker"
                   }
                 ]
               }
@@ -190,6 +190,45 @@ Resources:
       HeartbeatTimeout: 3600
       LifecycleHookName: NodePool
       LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+  
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: imagenary-vpc-id
+      Tags:
+      - Key: Name
+        Value: PrivateRouteTableEuCentral1a
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
+      - Key: giantswarm.io/tccp
+        Value: true
+  NATRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: na-eu-central-1a
+  PrivateRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: imagenary-vpc-id
+      Tags:
+      - Key: Name
+        Value: PrivateRouteTableEuCentral1b
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: private
+      - Key: giantswarm.io/tccp
+        Value: true
+  NATRouteEuCentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: na-eu-central-1b
   NodePoolSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -197,54 +236,70 @@ Resources:
       VpcId: imagenary-vpc-id
       SecurityGroupIngress:
 
-      # Allow traffic from control plane CIDR to 22 for SSH access.
       -
+        Description: Allow traffic from control plane CIDR to 22 for SSH access.
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
         CidrIp: 10.1.0.0/16
 
-      # Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
       -
+        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
         CidrIp: 10.1.0.0/16
 
-      # Allow traffic from control plane CIDR to 10250 for kubelet scraping.
       -
+        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
         CidrIp: 10.1.0.0/16
 
-      # Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
       -
+        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
         CidrIp: 10.1.0.0/16
 
-      # Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
       -
+        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
         CidrIp: 10.1.0.0/16
 
-      # Allow traffic from the ingress security group to 443 for ingress-controller.
       -
+        Description: Allow traffic from the ingress security group to 443 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
         SourceSecurityGroupId: ingressSecurityGroupID
 
-      # Allow traffic from the ingress security group to 80 for ingress-controller.
       -
+        Description: Allow traffic from the ingress security group to 80 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
         SourceSecurityGroupId: ingressSecurityGroupID
+
+      -
+        Description: Allow traffic between workloads within the Node Pool.
+        GroupId: !Ref NodePoolSecurityGroup
+        IpProtocol: -1
+        FromPort: -1
+        ToPort: -1
+        SourceSecurityGroupId: masterSecurityGroupID
+
+      -
+        Description: Allow traffic between workloads within the Node Pool.
+        GroupId: !Ref NodePoolSecurityGroup
+        IpProtocol: -1
+        FromPort: -1
+        ToPort: -1
+        SourceSecurityGroupId: !Ref NodePoolSecurityGroup
 
       Tags:
         - Key: Name
@@ -262,11 +317,12 @@ Resources:
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: imagenary-vpc-id
+    DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: PublicRouteTableEuCentral1a
-      SubnetId: validPublicSubnetID-1a
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      SubnetId: !Ref PrivateSubnetEuCentral1a
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -279,11 +335,12 @@ Resources:
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: imagenary-vpc-id
+    DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: PublicRouteTableEuCentral1b
-      SubnetId: validPublicSubnetID-1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      SubnetId: !Ref PrivateSubnetEuCentral1b
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:

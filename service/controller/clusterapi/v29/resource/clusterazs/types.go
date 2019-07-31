@@ -2,13 +2,25 @@ package clusterazs
 
 import "net"
 
-// subnetPair is temporary type for mapping existing subnets from
-// controllercontext to AZs.
-type subnetPair struct {
-	// These members are exported so that go-cmp can make a diff for unit test
-	// results.
-	Public  subnet
-	Private subnet
+// mapping is temporary type for mapping existing subnets from controllercontext
+// to AZs.
+type mapping struct {
+	Public  network
+	Private network
+}
+
+type network struct {
+	NATGateway natgateway
+	RouteTable routetable
+	Subnet     subnet
+}
+
+type natgateway struct {
+	ID string
+}
+
+type routetable struct {
+	ID string
 }
 
 type subnet struct {
@@ -16,6 +28,6 @@ type subnet struct {
 	ID   string
 }
 
-func (sp subnetPair) areEmpty() bool {
-	return (sp.Public.CIDR.IP == nil && sp.Public.CIDR.Mask == nil) && (sp.Private.CIDR.IP == nil && sp.Private.CIDR.Mask == nil)
+func (m mapping) subnetsEmpty() bool {
+	return (m.Public.Subnet.CIDR.IP == nil && m.Public.Subnet.CIDR.Mask == nil) && (m.Private.Subnet.CIDR.IP == nil && m.Private.Subnet.CIDR.Mask == nil)
 }
