@@ -478,7 +478,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: !Ref NATGatewayEuCentral1a
+        Ref: NATGatewayEuCentral1a
   NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -506,7 +506,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: !Ref NATGatewayEuCentral1b
+        Ref: NATGatewayEuCentral1b
   NATGatewayEuCentral1c:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -534,7 +534,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: !Ref NATGatewayEuCentral1c
+        Ref: NATGatewayEuCentral1c
   
   
   PublicRouteTableEuCentral1a:

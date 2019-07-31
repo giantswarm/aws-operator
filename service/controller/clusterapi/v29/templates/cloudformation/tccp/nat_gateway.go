@@ -31,7 +31,7 @@ const NatGateway = `
       RouteTableId: !Ref {{ .PrivateRouteTableName }}
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: !Ref {{ .NATGWName }}
+        Ref: {{ .NATGWName }}
   {{- end -}}
 {{- end -}}
 `
