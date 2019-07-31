@@ -331,6 +331,9 @@ func newSecurityGroups(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 			Ingress: template.ParamsMainSecurityGroupsTenantClusterIngress{
 				ID: cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID,
 			},
+			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
+				ID: cc.Status.TenantCluster.TCCP.SecurityGroup.Master.ID,
+			},
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},

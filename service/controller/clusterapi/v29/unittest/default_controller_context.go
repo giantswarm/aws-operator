@@ -106,6 +106,9 @@ func DefaultContext() context.Context {
 						Ingress: controllercontext.ContextStatusTenantClusterTCCPSecurityGroupIngress{
 							ID: "ingressSecurityGroupID",
 						},
+						Master: controllercontext.ContextStatusTenantClusterTCCPSecurityGroupMaster{
+							ID: "masterSecurityGroupID",
+						},
 					},
 				},
 				VersionBundleVersion: "6.3.0",

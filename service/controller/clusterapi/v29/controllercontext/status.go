@@ -120,9 +120,14 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 
 type ContextStatusTenantClusterTCCPSecurityGroup struct {
 	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
+	Master  ContextStatusTenantClusterTCCPSecurityGroupMaster
 }
 
 type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
+	ID string
+}
+
+type ContextStatusTenantClusterTCCPSecurityGroupMaster struct {
 	ID string
 }
 

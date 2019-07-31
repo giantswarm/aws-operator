@@ -2,7 +2,6 @@ package tccp
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -287,14 +286,6 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("cc.Status.TenantCluster.AWS.AccountID: %#v\n", cc.Status.TenantCluster.AWS.AccountID)
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
 
 	var templateBody string
 	{
