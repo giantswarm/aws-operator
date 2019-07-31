@@ -21,6 +21,7 @@ func DefaultMachineDeployment() cmav1alpha1.MachineDeployment {
 			Labels: map[string]string{
 				label.Cluster:           "8y5ck",
 				label.MachineDeployment: "al9qy",
+				label.OperatorVersion:   "7.3.0",
 			},
 		},
 	}

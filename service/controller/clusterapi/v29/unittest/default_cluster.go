@@ -15,7 +15,8 @@ func DefaultCluster() cmav1alpha1.Cluster {
 	cr := cmav1alpha1.Cluster{
 		ObjectMeta: v1.ObjectMeta{
 			Labels: map[string]string{
-				label.Cluster: "8y5ck",
+				label.Cluster:         "8y5ck",
+				label.OperatorVersion: "7.3.0",
 			},
 		},
 	}
