@@ -22,12 +22,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroup"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpsecuritygroup"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -199,13 +198,13 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSecurityGroupResource controller.Resource
+	var tccpSecurityGroupsResource controller.Resource
 	{
-		c := tccpsecuritygroup.Config{
+		c := tccpsecuritygroups.Config{
 			Logger: config.Logger,
 		}
 
-		tccpSecurityGroupResource, err = tccpsecuritygroup.New(c)
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -233,18 +232,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		tcnpResource, err = tcnp.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var tcnpSecurityGroupResource controller.Resource
-	{
-		c := tcnpsecuritygroup.Config{
-			Logger: config.Logger,
-		}
-
-		tcnpSecurityGroupResource, err = tcnpsecuritygroup.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -284,14 +271,13 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tccpVPCIDResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
-		tccpSecurityGroupResource,
+		tccpSecurityGroupsResource,
 		tccpSubnetResource,
 		regionResource,
 		encryptionResource,
 		ipamResource,
 		clusterAZsResource,
 		tcnpAZsResource,
-		tcnpSecurityGroupResource,
 		tcnpResource,
 	}
 

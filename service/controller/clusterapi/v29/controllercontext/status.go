@@ -128,8 +128,7 @@ type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
 }
 
 type ContextStatusTenantClusterTCCPSecurityGroupMaster struct {
-	ID          string
-	Permissions []*ec2.IpPermission
+	ID string
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {

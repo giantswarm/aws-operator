@@ -1,4 +1,4 @@
-package tccpsecuritygroup
+package tccpsecuritygroups
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Name = "tccpsecuritygroupv29"
+	Name = "tccpsecuritygroupsv29"
 )
 
 type Config struct {
@@ -92,9 +92,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr v1alpha1.MachineDeployme
 
 	{
 		cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "ingress"))
-
 		cc.Status.TenantCluster.TCCP.SecurityGroup.Master.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "master"))
-		cc.Status.TenantCluster.TCCP.SecurityGroup.Master.Permissions = permissionsFromGroups(groups, key.SecurityGroupName(&cr, "master"))
 	}
 
 	return nil
@@ -108,16 +106,6 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	}
 
 	return ""
-}
-
-func permissionsFromGroups(groups []*ec2.SecurityGroup, name string) []*ec2.IpPermission {
-	for _, g := range groups {
-		if valueForKey(g.Tags, "Name") == name {
-			return g.IpPermissions
-		}
-	}
-
-	return nil
 }
 
 func valueForKey(tags []*ec2.Tag, key string) string {

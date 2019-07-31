@@ -1,4 +1,4 @@
-package tcnpsecuritygroup
+package tccpsecuritygroups
 
 import (
 	"context"
