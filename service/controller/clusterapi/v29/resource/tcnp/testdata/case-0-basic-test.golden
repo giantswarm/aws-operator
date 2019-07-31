@@ -12,7 +12,7 @@ Outputs:
   InstanceType:
     Value: m5.2xlarge
   VersionBundleVersion:
-    Value: 
+    Value: 7.3.0
 Resources:
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -144,7 +144,7 @@ Resources:
               "config": {
                 "append": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version//cloudconfig/v_4_5_0/worker"
+                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_5_0/worker"
                   }
                 ]
               }
@@ -190,6 +190,43 @@ Resources:
       HeartbeatTimeout: 3600
       LifecycleHookName: NodePool
       LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: imagenary-vpc-id
+      Tags:
+      - Key: Name
+        Value: PrivateRouteTableEuCentral1a
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
+      - Key: giantswarm.io/tccp
+        Value: true
+  NATRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: na-eu-central-1aPrivateRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: imagenary-vpc-id
+      Tags:
+      - Key: Name
+        Value: PrivateRouteTableEuCentral1b
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: private
+      - Key: giantswarm.io/tccp
+        Value: true
+  NATRouteEuCentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: na-eu-central-1b
   NodePoolSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -286,45 +323,6 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       SubnetId: !Ref PrivateSubnetEuCentral1b
-  
-  PrivateRouteTableEuCentral1a:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: imagenary-vpc-id
-      Tags:
-      - Key: Name
-        Value: PrivateRouteTableEuCentral1a
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1a
-      - Key: giantswarm.io/route-table-type
-        Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-  NATRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: na-eu-central-1a
-  PrivateRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: imagenary-vpc-id
-      Tags:
-      - Key: Name
-        Value: PrivateRouteTableEuCentral1b
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-  NATRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: na-eu-central-1b
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:

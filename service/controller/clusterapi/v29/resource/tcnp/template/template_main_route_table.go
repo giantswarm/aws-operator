@@ -2,7 +2,7 @@ package template
 
 const TemplateMainRouteTables = `
 {{- define "route_tables" -}}
-  {{- range .RouteTables.List }}
+  {{- range .RouteTables.List -}}
   {{ .Name }}:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -23,5 +23,5 @@ const TemplateMainRouteTables = `
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: {{ .TCCP.NATGateway.ID }}
   {{- end }}
-{{- end }}
+{{- end -}}
 `

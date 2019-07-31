@@ -22,5 +22,5 @@ const TemplateMainSubnets = `
       RouteTableId: !Ref {{ .RouteTable.Name }}
       SubnetId: !Ref {{ .Name }}
   {{- end }}
-{{- end }}
+{{- end -}}
 `
