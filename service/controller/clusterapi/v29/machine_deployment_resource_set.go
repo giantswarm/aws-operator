@@ -16,11 +16,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
@@ -110,15 +110,15 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var clusterAZsResource controller.Resource
+	var tccpAZsResource controller.Resource
 	{
-		c := clusterazs.Config{
+		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
-		clusterAZsResource, err = clusterazs.New(c)
+		tccpAZsResource, err = tccpazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -276,7 +276,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		regionResource,
 		encryptionResource,
 		ipamResource,
-		clusterAZsResource,
+		tccpAZsResource,
 		tcnpAZsResource,
 		tcnpResource,
 	}
