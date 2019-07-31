@@ -1,4 +1,4 @@
-package vpcid
+package tccpvpcid
 
 import "github.com/giantswarm/microerror"
 
