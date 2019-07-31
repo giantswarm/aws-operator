@@ -39,13 +39,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if len(cc.Status.TenantCluster.TCCP.NATGateways) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "nat gateway information not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-			return nil
-		}
-
 		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
