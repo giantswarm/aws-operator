@@ -4,6 +4,8 @@ import (
 	"context"
 	"net"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 )
 
@@ -98,17 +100,29 @@ func DefaultContext() context.Context {
 					},
 					IsTransitioning:   false,
 					MachineDeployment: DefaultMachineDeployment(),
+					SecurityGroups: []*ec2.SecurityGroup{
+						{
+							GroupId: aws.String("ingressSecurityGroupID"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("8y5ck-ingress"),
+								},
+							},
+						},
+						{
+							GroupId: aws.String("masterSecurityGroupID"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("8y5ck-master"),
+								},
+							},
+						},
+					},
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
 						ID:                  "imagenary-vpc-id",
 						PeeringConnectionID: "imagenary-peering-connection-id",
-					},
-					SecurityGroup: controllercontext.ContextStatusTenantClusterTCCPSecurityGroup{
-						Ingress: controllercontext.ContextStatusTenantClusterTCCPSecurityGroupIngress{
-							ID: "ingressSecurityGroupID",
-						},
-						Master: controllercontext.ContextStatusTenantClusterTCCPSecurityGroupMaster{
-							ID: "masterSecurityGroupID",
-						},
 					},
 				},
 				VersionBundleVersion: "6.3.0",

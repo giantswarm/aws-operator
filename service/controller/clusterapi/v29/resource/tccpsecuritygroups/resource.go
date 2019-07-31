@@ -58,11 +58,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr v1alpha1.MachineDeployme
 					Name: aws.String("tag:Name"),
 					Values: []*string{
 						aws.String(key.SecurityGroupName(&cr, "ingress")),
-					},
-				},
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
 						aws.String(key.SecurityGroupName(&cr, "master")),
 					},
 				},
@@ -91,29 +86,8 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr v1alpha1.MachineDeployme
 	}
 
 	{
-		cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "ingress"))
-		cc.Status.TenantCluster.TCCP.SecurityGroup.Master.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "master"))
+		cc.Status.TenantCluster.TCCP.SecurityGroups = groups
 	}
 
 	return nil
-}
-
-func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
-	for _, g := range groups {
-		if valueForKey(g.Tags, "Name") == name {
-			return *g.GroupId
-		}
-	}
-
-	return ""
-}
-
-func valueForKey(tags []*ec2.Tag, key string) string {
-	for _, t := range tags {
-		if *t.Key == key {
-			return *t.Value
-		}
-	}
-
-	return ""
 }
