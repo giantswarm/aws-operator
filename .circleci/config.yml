@@ -224,30 +224,31 @@ jobs:
 
 workflows:
   version: 2
-  build_e2e:
+  build:
     jobs:
       - build:
           filters:
             tags:
               only: /^v.*/
       - architect/push-to-docker:
+          name: push-aws-operator-to-docker
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           requires:
             - build
+          # Needed to trigger job also on git tag.
           filters:
             tags:
               only: /^v.*/
       - architect/push-to-app-catalog:
-          name: "build and push aws-operator chart"
+          name: push-aws-operator-to-app-catalog
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
-          # Make sure docker image is successfully built.
           requires:
-            - architect/push-to-docker
-          # Needed to trigger job on git tag.
+            - push-aws-operator-to-docker
+          # Needed to trigger job also on git tag.
           filters:
             tags:
               only: /^v.*/
