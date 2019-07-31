@@ -7,7 +7,7 @@ const TemplateMainLaunchConfiguration = `
     Properties:
       ImageId: {{ .LaunchConfiguration.Instance.Image }}
       SecurityGroups:
-      - !Ref NodePoolSecurityGroup
+      - !Ref GeneralSecurityGroup
       InstanceType: {{ .LaunchConfiguration.Instance.Type }}
       InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
       IamInstanceProfile: !Ref NodePoolInstanceProfile

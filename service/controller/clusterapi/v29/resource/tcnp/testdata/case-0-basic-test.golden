@@ -120,7 +120,7 @@ Resources:
     Properties:
       ImageId: ami-0eb0d9bb7ad1bd1e9
       SecurityGroups:
-      - !Ref NodePoolSecurityGroup
+      - !Ref GeneralSecurityGroup
       InstanceType: m5.2xlarge
       InstanceMonitoring: true
       IamInstanceProfile: !Ref NodePoolInstanceProfile
@@ -229,7 +229,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: na-eu-central-1b
-  NodePoolSecurityGroup:
+  GeneralSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
@@ -276,34 +276,40 @@ Resources:
         FromPort: 30010
         ToPort: 30010
         SourceSecurityGroupId: ingressSecurityGroupID
-      -
-        Description: Allow traffic between workloads within the Node Pool.
-        GroupId: !Ref NodePoolSecurityGroup
-        IpProtocol: -1
-        FromPort: -1
-        ToPort: -1
-        SourceSecurityGroupId: masterSecurityGroupID
-      -
-        Description: Allow traffic between workloads within the Node Pool.
-        GroupId: !Ref NodePoolSecurityGroup
-        IpProtocol: -1
-        FromPort: -1
-        ToPort: -1
-        SourceSecurityGroupId: !Ref NodePoolSecurityGroup
       Tags:
         - Key: Name
-          Value: NodePoolSecurityGroup
+          Value: GeneralSecurityGroup
       VpcId: imagenary-vpc-id
-  MasterIngressRule:
+  GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: NodePoolSecurityGroup
+    DependsOn: GeneralSecurityGroup
     Properties:
-      Description: Allow traffic from the TCNP Node Pool Security Group to the TCCP Master Security Group.
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Master Security Group.
       GroupId: masterSecurityGroupID
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
-      SourceSecurityGroupId: !Ref NodePoolSecurityGroup
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  InternalIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic between workloads within the Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  MasterGeneralIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCCP Master Security Group to the TCNP General Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: masterSecurityGroupID
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
