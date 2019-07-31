@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
@@ -23,7 +24,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpcid"
 )
 
@@ -213,13 +213,13 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 
 	var vpcCIDRResource controller.Resource
 	{
-		c := vpccidr.Config{
+		c := cpvpccidr.Config{
 			Logger: config.Logger,
 
 			VPCPeerID: config.VPCPeerID,
 		}
 
-		vpcCIDRResource, err = vpccidr.New(c)
+		vpcCIDRResource, err = cpvpccidr.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
