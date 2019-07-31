@@ -231,7 +231,7 @@ workflows:
             tags:
               only: /^v.*/
       - architect/push-to-docker:
-          name: "build and push aws-operator docker image"
+          name: push-aws-operator-to-docker
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
@@ -242,12 +242,12 @@ workflows:
             tags:
               only: /^v.*/
       - architect/push-to-app-catalog:
-          name: "build and push aws-operator helm chart"
+          name: push-aws-operator-to-app-catalog
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
-            - architect/push-to-docker
+            - push-aws-operator-to-docker
           # Needed to trigger job also on git tag.
           filters:
             tags:
