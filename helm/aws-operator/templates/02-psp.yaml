@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ .Values.resource.psp.name }}
+  name: {{ tpl .Values.resource.psp.name . }}
 spec:
   privileged: false
   fsGroup:
