@@ -19,7 +19,7 @@ Resources:
     Properties:
       VPCZoneIdentifier:
         - !Ref PrivateSubnetEuCentral1a
-        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PrivateSubnetEuCentral1c
       AvailabilityZones:
         - eu-central-1a
         - eu-central-1c
@@ -215,25 +215,25 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: na-eu-central-1a
-  PrivateRouteTableEuCentral1b:
+  PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: imagenary-vpc-id
       Tags:
       - Key: Name
-        Value: PrivateRouteTableEuCentral1b
+        Value: PrivateRouteTableEuCentral1c
       - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
+        Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: private
       - Key: giantswarm.io/tccp
         Value: true
-  NATRouteEuCentral1b:
+  NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: na-eu-central-1b
+      NatGatewayId: na-eu-central-1c
   GeneralSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -334,26 +334,47 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       SubnetId: !Ref PrivateSubnetEuCentral1a
-  PrivateSubnetEuCentral1b:
+  PrivateSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1c
       CidrBlock: 10.100.3.64/27
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubnetEuCentral1b
+        Value: PrivateSubnetEuCentral1c
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: imagenary-vpc-id
     DependsOn: VpcCidrBlock
-  PrivateSubnetRouteTableAssociationEuCentral1b:
+  PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      SubnetId: !Ref PrivateSubnetEuCentral1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      SubnetId: !Ref PrivateSubnetEuCentral1c
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
       VpcId: imagenary-vpc-id
       CidrBlock: 10.100.8.0/24
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcId: imagenary-vpc-id
+      RouteTableIds:
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1c
+      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*/*"
