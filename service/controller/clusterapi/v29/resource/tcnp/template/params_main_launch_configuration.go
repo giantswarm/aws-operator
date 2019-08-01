@@ -9,6 +9,7 @@ type ParamsMainLaunchConfiguration struct {
 type ParamsMainLaunchConfigurationBlockDeviceMapping struct {
 	Docker  ParamsMainLaunchConfigurationBlockDeviceMappingDocker
 	Logging ParamsMainLaunchConfigurationBlockDeviceMappingLogging
+	Kubelet ParamsMainLaunchConfigurationBlockDeviceMappingKubelet
 }
 
 type ParamsMainLaunchConfigurationInstance struct {
@@ -31,6 +32,14 @@ type ParamsMainLaunchConfigurationBlockDeviceMappingLogging struct {
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume struct {
 	Size int
+}
+
+type ParamsMainLaunchConfigurationBlockDeviceMappingKubelet struct {
+	Volume ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume
+}
+
+type ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume struct {
+	Size string
 }
 
 type ParamsMainLaunchConfigurationSmallCloudConfig struct {

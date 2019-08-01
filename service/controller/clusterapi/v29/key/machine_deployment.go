@@ -70,6 +70,10 @@ func WorkerInstanceType(cr v1alpha1.MachineDeployment) string {
 	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
 }
 
+func WorkerKubeletVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
+	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.KubeletVolumeSizeGB)
+}
+
 func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Max
 }

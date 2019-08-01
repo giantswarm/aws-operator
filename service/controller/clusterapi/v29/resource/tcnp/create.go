@@ -250,6 +250,11 @@ func newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) 
 					Size: 100,
 				},
 			},
+			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
+				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
+					Size: key.WorkerKubeletVolumeSizeGB(cr),
+				},
+			},
 		},
 		Instance: template.ParamsMainLaunchConfigurationInstance{
 			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),

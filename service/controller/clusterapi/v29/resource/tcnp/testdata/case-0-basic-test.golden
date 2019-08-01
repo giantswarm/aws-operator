@@ -135,6 +135,11 @@ Resources:
           DeleteOnTermination: true
           VolumeSize: 100
           VolumeType: gp2
+      - DeviceName: /dev/xvdg
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
       AssociatePublicIpAddress: false
       UserData:
         Fn::Base64: |

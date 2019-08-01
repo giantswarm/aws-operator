@@ -22,6 +22,11 @@ const TemplateMainLaunchConfiguration = `
           DeleteOnTermination: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
           VolumeType: gp2
+      - DeviceName: /dev/xvdg
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Kubelet.Volume.Size }}
+          VolumeType: gp2
       AssociatePublicIpAddress: false
       UserData:
         Fn::Base64: |
