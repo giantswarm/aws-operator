@@ -245,14 +245,14 @@ func newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) 
 					Size: key.WorkerDockerVolumeSizeGB(cr),
 				},
 			},
-			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume{
-					Size: 100,
-				},
-			},
 			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
 					Size: key.WorkerKubeletVolumeSizeGB(cr),
+				},
+			},
+			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
+				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume{
+					Size: 100,
 				},
 			},
 		},
