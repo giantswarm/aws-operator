@@ -136,8 +136,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v25ResourceSet *controller.ResourceSet
 	{
 		c := v25.DrainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
+			ControlPlaneAWSClients:        controlPlaneAWSClients,
+			DisableVersionBundleSelection: config.DisableVersionBundleSelection,
+			G8sClient:                     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
@@ -160,8 +161,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v26ResourceSet *controller.ResourceSet
 	{
 		c := v26.DrainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
+			ControlPlaneAWSClients:        controlPlaneAWSClients,
+			DisableVersionBundleSelection: config.DisableVersionBundleSelection,
+			G8sClient:                     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
@@ -184,8 +186,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v27ResourceSet *controller.ResourceSet
 	{
 		c := v27.DrainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
+			ControlPlaneAWSClients:        controlPlaneAWSClients,
+			DisableVersionBundleSelection: config.DisableVersionBundleSelection,
+			G8sClient:                     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
@@ -208,8 +211,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v28ResourceSet *controller.ResourceSet
 	{
 		c := v28.DrainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
+			ControlPlaneAWSClients:        controlPlaneAWSClients,
+			DisableVersionBundleSelection: config.DisableVersionBundleSelection,
+			G8sClient:                     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
@@ -232,8 +236,9 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v29ResourceSet *controller.ResourceSet
 	{
 		c := v29.DrainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
+			ControlPlaneAWSClients:        controlPlaneAWSClients,
+			DisableVersionBundleSelection: config.DisableVersionBundleSelection,
+			G8sClient:                     config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,

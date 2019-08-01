@@ -30,9 +30,10 @@ type DrainerResourceSetConfig struct {
 	K8sClient              kubernetes.Interface
 	Logger                 micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	ProjectName    string
-	Route53Enabled bool
+	DisableVersionBundleSelection bool
+	HostAWSConfig                 aws.Config
+	ProjectName                   string
+	Route53Enabled                bool
 }
 
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {

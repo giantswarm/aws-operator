@@ -27,35 +27,36 @@ type ClusterResourceSetConfig struct {
 	Logger                 micrologger.Logger
 	RandomKeysSearcher     randomkeys.Interface
 
-	AccessLogsExpiration       int
-	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.APIWhitelist
-	CalicoCIDR                 int
-	CalicoMTU                  int
-	CalicoSubnet               string
-	ClusterIPRange             string
-	DockerDaemonCIDR           string
-	EncrypterBackend           string
-	GuestAvailabilityZones     []string
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	GuestSubnetMaskBits        int
-	IncludeTags                bool
-	IgnitionPath               string
-	ImagePullProgressDeadline  string
-	InstallationName           string
-	IPAMNetworkRange           net.IPNet
-	DeleteLoggingBucket        bool
-	NetworkSetupDockerImage    string
-	OIDC                       cloudconfig.ConfigOIDC
-	Route53Enabled             bool
-	RouteTables                string
-	PodInfraContainerImage     string
-	RegistryDomain             string
-	SSHUserList                string
-	SSOPublicKey               string
-	VaultAddress               string
-	VPCPeerID                  string
+	AccessLogsExpiration          int
+	AdvancedMonitoringEC2         bool
+	APIWhitelist                  adapter.APIWhitelist
+	CalicoCIDR                    int
+	CalicoMTU                     int
+	CalicoSubnet                  string
+	ClusterIPRange                string
+	DisableVersionBundleSelection bool
+	DockerDaemonCIDR              string
+	EncrypterBackend              string
+	GuestAvailabilityZones        []string
+	GuestPrivateSubnetMaskBits    int
+	GuestPublicSubnetMaskBits     int
+	GuestSubnetMaskBits           int
+	IncludeTags                   bool
+	IgnitionPath                  string
+	ImagePullProgressDeadline     string
+	InstallationName              string
+	IPAMNetworkRange              net.IPNet
+	DeleteLoggingBucket           bool
+	NetworkSetupDockerImage       string
+	OIDC                          cloudconfig.ConfigOIDC
+	Route53Enabled                bool
+	RouteTables                   string
+	PodInfraContainerImage        string
+	RegistryDomain                string
+	SSHUserList                   string
+	SSOPublicKey                  string
+	VaultAddress                  string
+	VPCPeerID                     string
 }
 
 func (c ClusterResourceSetConfig) GetEncrypterBackend() string {

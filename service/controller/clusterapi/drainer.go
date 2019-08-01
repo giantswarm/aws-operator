@@ -126,11 +126,12 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	var v29ResourceSet *controller.ResourceSet
 	{
 		c := v29.DrainerResourceSetConfig{
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			K8sClient:              config.K8sClient,
-			Logger:                 config.Logger,
+			CMAClient:                     config.CMAClient,
+			ControlPlaneAWSClients:        controlPlaneAWSClients,
+			DisableVersionBundleSelection: config.DisableVersionBundleSelection,
+			G8sClient:                     config.G8sClient,
+			K8sClient:                     config.K8sClient,
+			Logger:                        config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
 			ProjectName:    config.ProjectName,

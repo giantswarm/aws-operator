@@ -73,28 +73,29 @@ type ClusterResourceSetConfig struct {
 	NetworkAllocator       network.Allocator
 	RandomKeysSearcher     randomkeys.Interface
 
-	AccessLogsExpiration       int
-	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.APIWhitelist
-	EncrypterBackend           string
-	GuestAvailabilityZones     []string
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	GuestSubnetMaskBits        int
-	IncludeTags                bool
-	IgnitionPath               string
-	InstallationName           string
-	IPAMNetworkRange           net.IPNet
-	DeleteLoggingBucket        bool
-	OIDC                       cloudconfig.OIDCConfig
-	ProjectName                string
-	Route53Enabled             bool
-	RouteTables                string
-	PodInfraContainerImage     string
-	RegistryDomain             string
-	SSOPublicKey               string
-	VaultAddress               string
-	VPCPeerID                  string
+	AccessLogsExpiration          int
+	AdvancedMonitoringEC2         bool
+	APIWhitelist                  adapter.APIWhitelist
+	DisableVersionBundleSelection bool
+	EncrypterBackend              string
+	GuestAvailabilityZones        []string
+	GuestPrivateSubnetMaskBits    int
+	GuestPublicSubnetMaskBits     int
+	GuestSubnetMaskBits           int
+	IncludeTags                   bool
+	IgnitionPath                  string
+	InstallationName              string
+	IPAMNetworkRange              net.IPNet
+	DeleteLoggingBucket           bool
+	OIDC                          cloudconfig.OIDCConfig
+	ProjectName                   string
+	Route53Enabled                bool
+	RouteTables                   string
+	PodInfraContainerImage        string
+	RegistryDomain                string
+	SSOPublicKey                  string
+	VaultAddress                  string
+	VPCPeerID                     string
 }
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
