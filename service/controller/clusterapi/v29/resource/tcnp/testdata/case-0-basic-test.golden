@@ -378,3 +378,51 @@ Resources:
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:aws:s3:::*/*"
+  VPCPeeringRouteEuCentral1aGaussPrivate1Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.0/27
+      RouteTableId: gauss-private-1-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1cGaussPrivate1Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.64/27
+      RouteTableId: gauss-private-1-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1aGaussPrivate2Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.0/27
+      RouteTableId: gauss-private-2-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1cGaussPrivate2Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.64/27
+      RouteTableId: gauss-private-2-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1aGaussPublic1Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.0/27
+      RouteTableId: gauss-public-1-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1cGaussPublic1Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.64/27
+      RouteTableId: gauss-public-1-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1aGaussPublic2Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.0/27
+      RouteTableId: gauss-public-2-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  VPCPeeringRouteEuCentral1cGaussPublic2Name:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.100.3.64/27
+      RouteTableId: gauss-public-2-id
+      VpcPeeringConnectionId: imagenary-peering-connection-id
