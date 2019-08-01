@@ -70,6 +70,7 @@ type ContextStatusTenantClusterTCCP struct {
 	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
+	NATGateways       []*ec2.NatGateway
 	RouteTables       []*ec2.RouteTable
 	SecurityGroup     ContextStatusTenantClusterTCCPSecurityGroup
 	Subnets           []*ec2.Subnet
@@ -84,8 +85,14 @@ type ContextStatusTenantClusterTCCPASG struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
-	Name   string
-	Subnet ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
+	Name       string
+	NATGateway ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway
+	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
+	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway struct {
+	ID string
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -103,11 +110,24 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	ID   string
 }
 
+type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable struct {
+	Public ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
+	ID string
+}
+
 type ContextStatusTenantClusterTCCPSecurityGroup struct {
 	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
+	Master  ContextStatusTenantClusterTCCPSecurityGroupMaster
 }
 
 type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
+	ID string
+}
+
+type ContextStatusTenantClusterTCCPSecurityGroupMaster struct {
 	ID string
 }
 

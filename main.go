@@ -123,6 +123,7 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VPCPeerID, "", "Control Plane VPC ID to peer Tenant Clusters with.")
 
 	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
+	daemonCommand.PersistentFlags().Bool(f.Service.DisableVersionBundleSelection, false, "If enabled AWSConfig CRs are selected based on label instead of spec.versionBundle.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")

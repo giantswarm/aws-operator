@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
@@ -34,6 +35,7 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
+	CMAClient clientset.Interface
 	// EncrypterRoleManager manages role encryption. This can be supported by
 	// different implementations and thus is optional.
 	EncrypterRoleManager encrypter.RoleManager
@@ -51,6 +53,7 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
+	cmaClient            clientset.Interface
 	encrypterRoleManager encrypter.RoleManager
 	logger               micrologger.Logger
 
@@ -66,6 +69,9 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
+	if config.CMAClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -84,11 +90,12 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		apiWhiteList:         config.APIWhitelist,
+		cmaClient:            config.CMAClient,
 		detection:            config.Detection,
 		encrypterRoleManager: config.EncrypterRoleManager,
 		logger:               config.Logger,
 
+		apiWhiteList:       config.APIWhitelist,
 		encrypterBackend:   config.EncrypterBackend,
 		installationName:   config.InstallationName,
 		instanceMonitoring: config.InstanceMonitoring,

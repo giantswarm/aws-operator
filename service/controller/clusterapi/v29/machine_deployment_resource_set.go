@@ -14,17 +14,19 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroupid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpcid"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -80,6 +82,18 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var accountIDResource controller.Resource
+	{
+		c := accountid.Config{
+			Logger: config.Logger,
+		}
+
+		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var awsClientResource controller.Resource
 	{
 		c := awsclient.Config{
@@ -96,15 +110,15 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var clusterAZsResource controller.Resource
+	var tccpAZsResource controller.Resource
 	{
-		c := clusterazs.Config{
+		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
-		clusterAZsResource, err = clusterazs.New(c)
+		tccpAZsResource, err = tccpazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -153,6 +167,19 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		tcnpAZsResource, err = tcnpazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpNATGatewaysResource controller.Resource
+	{
+		c := tccpnatgateways.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		}
+
+		tccpNATGatewaysResource, err = tccpnatgateways.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -211,29 +238,29 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var vpcCIDRResource controller.Resource
+	var cpVPCCIDRResource controller.Resource
 	{
-		c := vpccidr.Config{
+		c := cpvpccidr.Config{
 			Logger: config.Logger,
 
 			VPCPeerID: config.VPCPeerID,
 		}
 
-		vpcCIDRResource, err = vpccidr.New(c)
+		cpVPCCIDRResource, err = cpvpccidr.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var vpcidResource controller.Resource
+	var tccpVPCIDResource controller.Resource
 	{
-		c := vpcid.Config{
+		c := tccpvpcid.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
-		vpcidResource, err = vpcid.New(c)
+		tccpVPCIDResource, err = tccpvpcid.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -241,14 +268,16 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 
 	resources := []controller.Resource{
 		awsClientResource,
-		vpcidResource,
-		vpcCIDRResource,
+		accountIDResource,
+		tccpVPCIDResource,
+		cpVPCCIDRResource,
+		tccpNATGatewaysResource,
 		tccpSecurityGroupIDResource,
 		tccpSubnetResource,
 		regionResource,
 		encryptionResource,
 		ipamResource,
-		clusterAZsResource,
+		tccpAZsResource,
 		tcnpAZsResource,
 		tcnpResource,
 	}

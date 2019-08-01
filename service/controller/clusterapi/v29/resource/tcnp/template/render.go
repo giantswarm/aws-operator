@@ -14,6 +14,7 @@ func Render(v interface{}) (string, error) {
 		TemplateMainLaunchConfiguration,
 		TemplateMainLifecycleHooks,
 		TemplateMainOutputs,
+		TemplateMainRouteTables,
 		TemplateMainSecurityGroups,
 		TemplateMainSubnets,
 		TemplateMainVPCCIDR,

@@ -14,7 +14,6 @@ type Subnet struct {
 	Name                  string
 	MapPublicIPOnLaunch   bool
 	RouteTableAssociation RouteTableAssociation
-	Type                  string
 }
 
 type RouteTableAssociation struct {
@@ -51,10 +50,9 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: RouteTableAssociation{
 				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject))),
+				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
-			Type: "public",
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
 
@@ -69,7 +67,6 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
-			Type: "private",
 		}
 		s.PrivateSubnets = append(s.PrivateSubnets, snet)
 	}

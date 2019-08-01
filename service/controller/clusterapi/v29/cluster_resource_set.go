@@ -19,9 +19,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
@@ -38,9 +38,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
 )
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -184,15 +184,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var clusterAZsResource controller.Resource
+	var tccpAZsResource controller.Resource
 	{
-		c := clusterazs.Config{
+		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
 		}
 
-		clusterAZsResource, err = clusterazs.New(c)
+		tccpAZsResource, err = tccpazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -344,10 +344,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpResource controller.Resource
 	{
 		c := tccp.Config{
-			APIWhitelist:         config.APIWhitelist,
+			CMAClient:            config.CMAClient,
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
+			APIWhitelist:       config.APIWhitelist,
 			Detection:          detectionService,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
@@ -561,13 +562,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	var vpcCIDRResource controller.Resource
 	{
-		c := vpccidr.Config{
+		c := cpvpccidr.Config{
 			Logger: config.Logger,
 
 			VPCPeerID: config.VPCPeerID,
 		}
 
-		vpcCIDRResource, err = vpccidr.New(c)
+		vpcCIDRResource, err = cpvpccidr.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -586,7 +587,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		regionResource,
 		asgStatusResource,
 		ipamResource,
-		clusterAZsResource,
 		bridgeZoneResource,
 		encryptionResource,
 		s3BucketResource,
@@ -594,6 +594,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		loadBalancerResource,
 		ebsVolumeResource,
 		cpiResource,
+		tccpAZsResource,
 		tccpResource,
 		cpfResource,
 		namespaceResource,
