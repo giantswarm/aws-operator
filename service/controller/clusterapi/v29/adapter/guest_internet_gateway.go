@@ -19,15 +19,6 @@ func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
 
 	for _, az := range cfg.TenantClusterAvailabilityZones {
 		ig := GuestInternetGatewayAdapterInternetGateway{
-			InternetGatewayRoute: key.SanitizeCFResourceName(key.PrivateInternetGatewayRouteName(az.Name)),
-			RouteTable:           key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-		}
-
-		a.InternetGateways = append(a.InternetGateways, ig)
-	}
-
-	for _, az := range cfg.TenantClusterAvailabilityZones {
-		ig := GuestInternetGatewayAdapterInternetGateway{
 			InternetGatewayRoute: key.SanitizeCFResourceName(key.PublicInternetGatewayRouteName(az.Name)),
 			RouteTable:           key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 		}

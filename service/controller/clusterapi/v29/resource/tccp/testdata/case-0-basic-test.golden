@@ -278,9 +278,6 @@ Resources:
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
-      - PrivateRouteTableEuCentral1a
-      - PrivateRouteTableEuCentral1b
-      - PrivateRouteTableEuCentral1c
       - PublicRouteTableEuCentral1a
       - PublicRouteTableEuCentral1b
       - PublicRouteTableEuCentral1c
@@ -288,33 +285,6 @@ Resources:
       InternetGatewayId:
         Ref: InternetGateway
       VpcId: !Ref VPC
-  PrivateInternetGatewayRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: InternetGateway
-  PrivateInternetGatewayRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: InternetGateway
-  PrivateInternetGatewayRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: InternetGateway
   PublicInternetGatewayRouteEuCentral1a:
     Type: AWS::EC2::Route
     DependsOn:
