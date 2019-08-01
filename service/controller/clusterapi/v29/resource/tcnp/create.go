@@ -46,6 +46,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
 		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -396,6 +402,7 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 	}
 
 	var peeringConnections []template.ParamsMainVPCPeeringConnection
+	// TODO fix map iteration order issue
 	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
 		for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 			pc := template.ParamsMainVPCPeeringConnection{

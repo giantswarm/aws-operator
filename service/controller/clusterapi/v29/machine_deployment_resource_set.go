@@ -2,6 +2,7 @@ package v29
 
 import (
 	"context"
+	"strings"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
@@ -20,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
@@ -105,6 +107,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cpRouteTableResource controller.Resource
+	{
+		c := routetable.Config{
+			Logger: config.Logger,
+
+			Names: strings.Split(config.RouteTables, ","),
+		}
+
+		cpRouteTableResource, err = routetable.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -269,6 +285,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		awsClientResource,
 		accountIDResource,
 		tccpVPCIDResource,
+		cpRouteTableResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
