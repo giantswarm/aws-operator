@@ -26,9 +26,10 @@ type DrainerConfig struct {
 	K8sExtClient apiextensionsclient.Interface
 	Logger       micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	ProjectName    string
-	Route53Enabled bool
+	DisableVersionBundleSelection bool
+	HostAWSConfig                 aws.Config
+	ProjectName                   string
+	Route53Enabled                bool
 }
 
 type Drainer struct {

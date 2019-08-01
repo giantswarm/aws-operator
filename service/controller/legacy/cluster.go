@@ -43,31 +43,32 @@ type ClusterConfig struct {
 	Logger           micrologger.Logger
 	NetworkAllocator network.Allocator
 
-	AccessLogsExpiration       int
-	AdvancedMonitoringEC2      bool
-	APIWhitelist               FrameworkConfigAPIWhitelistConfig
-	DeleteLoggingBucket        bool
-	EncrypterBackend           string
-	GuestAWSConfig             ClusterConfigAWSConfig
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	GuestSubnetMaskBits        int
-	GuestUpdateEnabled         bool
-	HostAWSConfig              ClusterConfigAWSConfig
-	IgnitionPath               string
-	ImagePullProgressDeadline  string
-	IncludeTags                bool
-	InstallationName           string
-	IPAMNetworkRange           net.IPNet
-	OIDC                       ClusterConfigOIDC
-	PodInfraContainerImage     string
-	ProjectName                string
-	RegistryDomain             string
-	Route53Enabled             bool
-	RouteTables                string
-	SSOPublicKey               string
-	VaultAddress               string
-	VPCPeerID                  string
+	APIWhitelist                  FrameworkConfigAPIWhitelistConfig
+	AccessLogsExpiration          int
+	AdvancedMonitoringEC2         bool
+	DeleteLoggingBucket           bool
+	DisableVersionBundleSelection bool
+	EncrypterBackend              string
+	GuestAWSConfig                ClusterConfigAWSConfig
+	GuestPrivateSubnetMaskBits    int
+	GuestPublicSubnetMaskBits     int
+	GuestSubnetMaskBits           int
+	GuestUpdateEnabled            bool
+	HostAWSConfig                 ClusterConfigAWSConfig
+	IPAMNetworkRange              net.IPNet
+	IgnitionPath                  string
+	ImagePullProgressDeadline     string
+	IncludeTags                   bool
+	InstallationName              string
+	OIDC                          ClusterConfigOIDC
+	PodInfraContainerImage        string
+	ProjectName                   string
+	RegistryDomain                string
+	Route53Enabled                bool
+	RouteTables                   string
+	SSOPublicKey                  string
+	VPCPeerID                     string
+	VaultAddress                  string
 }
 
 type ClusterConfigAWSConfig struct {

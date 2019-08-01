@@ -32,38 +32,39 @@ type ClusterConfig struct {
 	Locker       locker.Interface
 	Logger       micrologger.Logger
 
-	AccessLogsExpiration       int
-	AdvancedMonitoringEC2      bool
-	APIWhitelist               FrameworkConfigAPIWhitelistConfig
-	CalicoCIDR                 int
-	CalicoMTU                  int
-	CalicoSubnet               string
-	ClusterIPRange             string
-	DeleteLoggingBucket        bool
-	DockerDaemonCIDR           string
-	EncrypterBackend           string
-	GuestAvailabilityZones     []string
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	GuestSubnetMaskBits        int
-	GuestUpdateEnabled         bool
-	HostAWSConfig              aws.Config
-	IgnitionPath               string
-	ImagePullProgressDeadline  string
-	IncludeTags                bool
-	InstallationName           string
-	IPAMNetworkRange           net.IPNet
-	NetworkSetupDockerImage    string
-	OIDC                       ClusterConfigOIDC
-	PodInfraContainerImage     string
-	ProjectName                string
-	RegistryDomain             string
-	Route53Enabled             bool
-	RouteTables                string
-	SSHUserList                string
-	SSOPublicKey               string
-	VaultAddress               string
-	VPCPeerID                  string
+	APIWhitelist                  FrameworkConfigAPIWhitelistConfig
+	AccessLogsExpiration          int
+	AdvancedMonitoringEC2         bool
+	CalicoCIDR                    int
+	CalicoMTU                     int
+	CalicoSubnet                  string
+	ClusterIPRange                string
+	DeleteLoggingBucket           bool
+	DisableVersionBundleSelection bool
+	DockerDaemonCIDR              string
+	EncrypterBackend              string
+	GuestAvailabilityZones        []string
+	GuestPrivateSubnetMaskBits    int
+	GuestPublicSubnetMaskBits     int
+	GuestSubnetMaskBits           int
+	GuestUpdateEnabled            bool
+	HostAWSConfig                 aws.Config
+	IPAMNetworkRange              net.IPNet
+	IgnitionPath                  string
+	ImagePullProgressDeadline     string
+	IncludeTags                   bool
+	InstallationName              string
+	NetworkSetupDockerImage       string
+	OIDC                          ClusterConfigOIDC
+	PodInfraContainerImage        string
+	ProjectName                   string
+	RegistryDomain                string
+	Route53Enabled                bool
+	RouteTables                   string
+	SSHUserList                   string
+	SSOPublicKey                  string
+	VPCPeerID                     string
+	VaultAddress                  string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization

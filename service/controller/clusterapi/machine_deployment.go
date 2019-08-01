@@ -28,17 +28,18 @@ type MachineDeploymentConfig struct {
 	Locker       locker.Interface
 	Logger       micrologger.Logger
 
-	EncrypterBackend           string
-	GuestPrivateSubnetMaskBits int
-	GuestPublicSubnetMaskBits  int
-	GuestSubnetMaskBits        int
-	HostAWSConfig              aws.Config
-	InstallationName           string
-	IPAMNetworkRange           net.IPNet
-	ProjectName                string
-	Route53Enabled             bool
-	VaultAddress               string
-	VPCPeerID                  string
+	DisableVersionBundleSelection bool
+	EncrypterBackend              string
+	GuestPrivateSubnetMaskBits    int
+	GuestPublicSubnetMaskBits     int
+	GuestSubnetMaskBits           int
+	HostAWSConfig                 aws.Config
+	IPAMNetworkRange              net.IPNet
+	InstallationName              string
+	ProjectName                   string
+	Route53Enabled                bool
+	VPCPeerID                     string
+	VaultAddress                  string
 }
 
 type MachineDeployment struct {
