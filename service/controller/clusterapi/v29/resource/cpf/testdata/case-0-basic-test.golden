@@ -1,3 +1,4 @@
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Control Plane Finalizer Cloud Formation Stack.
 Resources:
@@ -15,75 +16,91 @@ Resources:
 
 
   
+  
   PrivateRoute0:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-public-2-id
+      RouteTableId: gauss-private-1-id
       DestinationCidrBlock: 10.100.3.0/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute1:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-public-2-id
+      RouteTableId: gauss-private-1-id
       DestinationCidrBlock: 10.100.3.64/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute2:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-public-2-id
+      RouteTableId: gauss-private-1-id
       DestinationCidrBlock: 10.100.3.128/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute3:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-private-1-id
+      RouteTableId: gauss-private-2-id
       DestinationCidrBlock: 10.100.3.0/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute4:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-private-1-id
+      RouteTableId: gauss-private-2-id
       DestinationCidrBlock: 10.100.3.64/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute5:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-private-1-id
+      RouteTableId: gauss-private-2-id
       DestinationCidrBlock: 10.100.3.128/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute6:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-private-2-id
+      RouteTableId: gauss-public-1-id
       DestinationCidrBlock: 10.100.3.0/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute7:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-private-2-id
+      RouteTableId: gauss-public-1-id
       DestinationCidrBlock: 10.100.3.64/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute8:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-private-2-id
+      RouteTableId: gauss-public-1-id
       DestinationCidrBlock: 10.100.3.128/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute9:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-public-1-id
+      RouteTableId: gauss-public-2-id
       DestinationCidrBlock: 10.100.3.0/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute10:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-public-1-id
+      RouteTableId: gauss-public-2-id
       DestinationCidrBlock: 10.100.3.64/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
   PrivateRoute11:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: gauss-public-1-id
+      RouteTableId: gauss-public-2-id
       DestinationCidrBlock: 10.100.3.128/27
       VpcPeeringConnectionId: imagenary-peering-connection-id
+  
+
+  
+

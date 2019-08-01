@@ -9,16 +9,18 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
 
-// Test_Controller_Resource_TCNP_Template_Render tests tenant cluster
+// Test_Controller_Resource_CPF_Template_Render tests tenant cluster
 // CloudFormation template rendering. It is meant to be used as a tool to easily
 // check resulting CF template and prevent from accidental CF template changes.
 //
@@ -42,10 +44,40 @@ func Test_Controller_Resource_CPF_Template_Render(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cl, "kms", true)
-			if err != nil {
-				t.Fatal(err)
+			var err error
+
+			var r *Resource
+			{
+				c := Config{
+					Logger: microloggertest.New(),
+
+					EncrypterBackend: encrypter.KMSBackend,
+					Route53Enabled:   true,
+				}
+
+				r, err = New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
+
+			var params *template.ParamsMain
+			{
+				recordSets, err := r.newRecordSetsParams(tc.ctx, tc.cl)
+				if err != nil {
+					t.Fatal(err)
+				}
+				routeTables, err := r.newRouteTablesParams(tc.ctx, tc.cl)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				params = &template.ParamsMain{
+					RecordSets:  recordSets,
+					RouteTables: routeTables,
+				}
+			}
+
 			templateBody, err := template.Render(params)
 			if err != nil {
 				t.Fatal(err)
