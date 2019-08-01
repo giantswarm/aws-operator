@@ -191,7 +191,11 @@ func New(config Config) (*Service, error) {
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			LabelSelector: clusterapi.ClusterConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
+			},
+			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			OIDC: clusterapi.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
@@ -224,7 +228,11 @@ func New(config Config) (*Service, error) {
 			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
-			HostAWSConfig:  awsConfig,
+			HostAWSConfig: awsConfig,
+			LabelSelector: clusterapi.DrainerConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
+			},
 			ProjectName:    config.ProjectName,
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
@@ -252,10 +260,14 @@ func New(config Config) (*Service, error) {
 			HostAWSConfig:              awsConfig,
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			ProjectName:                config.ProjectName,
-			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
-			VPCPeerID:                  config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
+			LabelSelector: clusterapi.MachineDeploymentConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
+			},
+			ProjectName:    config.ProjectName,
+			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			VaultAddress:   config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			VPCPeerID:      config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
@@ -309,6 +321,10 @@ func New(config Config) (*Service, error) {
 			IncludeTags:               config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:          config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:          *ipamNetworkRange,
+			LabelSelector: legacy.ClusterConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
+			},
 			OIDC: legacy.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
@@ -351,6 +367,10 @@ func New(config Config) (*Service, error) {
 				AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 				SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 				Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			},
+			LabelSelector: legacy.DrainerConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
 			ProjectName:    config.ProjectName,
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),

@@ -12,11 +12,13 @@ import (
 	"github.com/giantswarm/operatorkit/informer"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
 
@@ -35,10 +37,16 @@ type MachineDeploymentConfig struct {
 	HostAWSConfig              aws.Config
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	LabelSelector              MachineDeploymentConfigLabelSelector
 	ProjectName                string
 	Route53Enabled             bool
 	VaultAddress               string
 	VPCPeerID                  string
+}
+
+type MachineDeploymentConfigLabelSelector struct {
+	Enabled          bool
+	OverridenVersion string
 }
 
 type MachineDeployment struct {
@@ -71,6 +79,9 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 			Logger:  config.Logger,
 			Watcher: config.CMAClient.ClusterV1alpha1().MachineDeployments(corev1.NamespaceAll),
 
+			ListOptions: metav1.ListOptions{
+				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
+			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: informer.DefaultResyncPeriod,
 		}
