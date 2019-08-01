@@ -1,6 +1,7 @@
 package key
 
 import (
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
@@ -14,5 +15,5 @@ func VersionLabelSelector(enable bool, overrideVersion string) string {
 		version = overrideVersion
 	}
 
-	return project.Name() + ".giantswarm.io/version=" + version
+	return label.OperatorVersion + "=" + version
 }
