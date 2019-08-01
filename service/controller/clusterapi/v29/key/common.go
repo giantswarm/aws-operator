@@ -101,6 +101,10 @@ func OrganizationID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Organization]
 }
 
+func PrivateInternetGatewayRouteName(az string) string {
+	return fmt.Sprintf("PrivateInternetGatewayRoute-%s", az)
+}
+
 func PrivateRouteTableName(az string) string {
 	return fmt.Sprintf("PrivateRouteTable-%s", az)
 }
@@ -111,6 +115,10 @@ func PrivateSubnetName(az string) string {
 
 func PrivateSubnetRouteTableAssociationName(az string) string {
 	return fmt.Sprintf("PrivateSubnetRouteTableAssociation-%s", az)
+}
+
+func PublicInternetGatewayRouteName(az string) string {
+	return fmt.Sprintf("PublicInternetGatewayRoute-%s", az)
 }
 
 func PublicSubnetName(az string) string {
@@ -202,7 +210,7 @@ func StackNameTCCP(getter LabelsGetter) string {
 }
 
 func StackNameTCNP(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp", getter.GetLabels()[label.Cluster])
+	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
 }
 
 func VPCPeeringRouteName(az string) string {

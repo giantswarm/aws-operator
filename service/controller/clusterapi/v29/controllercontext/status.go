@@ -72,7 +72,7 @@ type ContextStatusTenantClusterTCCP struct {
 	MachineDeployment v1alpha1.MachineDeployment
 	NATGateways       []*ec2.NatGateway
 	RouteTables       []*ec2.RouteTable
-	SecurityGroup     ContextStatusTenantClusterTCCPSecurityGroup
+	SecurityGroups    []*ec2.SecurityGroup
 	Subnets           []*ec2.Subnet
 	VPC               ContextStatusTenantClusterTCCPVPC
 }
@@ -115,19 +115,6 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
-	ID string
-}
-
-type ContextStatusTenantClusterTCCPSecurityGroup struct {
-	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
-	Master  ContextStatusTenantClusterTCCPSecurityGroupMaster
-}
-
-type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
-	ID string
-}
-
-type ContextStatusTenantClusterTCCPSecurityGroupMaster struct {
 	ID string
 }
 

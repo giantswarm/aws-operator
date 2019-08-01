@@ -22,7 +22,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroupid"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
@@ -198,14 +198,13 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSecurityGroupIDResource controller.Resource
+	var tccpSecurityGroupsResource controller.Resource
 	{
-		c := tccpsecuritygroupid.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
+		c := tccpsecuritygroups.Config{
+			Logger: config.Logger,
 		}
 
-		tccpSecurityGroupIDResource, err = tccpsecuritygroupid.New(c)
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -272,7 +271,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tccpVPCIDResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
-		tccpSecurityGroupIDResource,
+		tccpSecurityGroupsResource,
 		tccpSubnetResource,
 		regionResource,
 		encryptionResource,

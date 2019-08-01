@@ -1,4 +1,4 @@
-package tccpsecuritygroupid
+package tccpsecuritygroups
 
 import (
 	"context"
@@ -7,16 +7,42 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
-func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
-	if err != nil {
-		return microerror.Mask(err)
+const (
+	Name = "tccpsecuritygroupsv29"
+)
+
+type Config struct {
+	Logger micrologger.Logger
+}
+
+type Resource struct {
+	logger micrologger.Logger
+}
+
+func New(config Config) (*Resource, error) {
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
+	r := &Resource{
+		logger: config.Logger,
+	}
+
+	return r, nil
+}
+
+func (r *Resource) Name() string {
+	return Name
+}
+
+func (r *Resource) addInfoToCtx(ctx context.Context, cr v1alpha1.MachineDeployment) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -32,11 +58,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					Name: aws.String("tag:Name"),
 					Values: []*string{
 						aws.String(key.SecurityGroupName(&cr, "ingress")),
-					},
-				},
-				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
 						aws.String(key.SecurityGroupName(&cr, "master")),
 					},
 				},
@@ -65,29 +86,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "ingress"))
-		cc.Status.TenantCluster.TCCP.SecurityGroup.Master.ID = idFromGroups(groups, key.SecurityGroupName(&cr, "master"))
+		cc.Status.TenantCluster.TCCP.SecurityGroups = groups
 	}
 
 	return nil
-}
-
-func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
-	for _, g := range groups {
-		if valueForKey(g.Tags, "Name") == name {
-			return *g.GroupId
-		}
-	}
-
-	return ""
-}
-
-func valueForKey(tags []*ec2.Tag, key string) string {
-	for _, t := range tags {
-		if *t.Key == key {
-			return *t.Value
-		}
-	}
-
-	return ""
 }

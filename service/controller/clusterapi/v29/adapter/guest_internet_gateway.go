@@ -5,18 +5,25 @@ import (
 )
 
 type GuestInternetGatewayAdapter struct {
-	ClusterID            string
-	PublicRouteTableName string
-	PrivateRouteTables   []string
+	ClusterID        string
+	InternetGateways []GuestInternetGatewayAdapterInternetGateway
+}
+
+type GuestInternetGatewayAdapterInternetGateway struct {
+	InternetGatewayRoute string
+	RouteTable           string
 }
 
 func (a *GuestInternetGatewayAdapter) Adapt(cfg Config) error {
 	a.ClusterID = key.ClusterID(&cfg.CustomObject)
 
-	a.PublicRouteTableName = key.SanitizeCFResourceName(key.PublicRouteTableName(key.MasterAvailabilityZone(cfg.CustomObject)))
+	for _, az := range cfg.TenantClusterAvailabilityZones {
+		ig := GuestInternetGatewayAdapterInternetGateway{
+			InternetGatewayRoute: key.SanitizeCFResourceName(key.PublicInternetGatewayRouteName(az.Name)),
+			RouteTable:           key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+		}
 
-	for _, az := range key.WorkerAvailabilityZones(cfg.MachineDeployment) {
-		a.PrivateRouteTables = append(a.PrivateRouteTables, key.SanitizeCFResourceName(key.PrivateRouteTableName(az)))
+		a.InternetGateways = append(a.InternetGateways, ig)
 	}
 
 	return nil

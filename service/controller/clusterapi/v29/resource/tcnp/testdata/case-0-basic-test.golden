@@ -19,7 +19,7 @@ Resources:
     Properties:
       VPCZoneIdentifier:
         - !Ref PrivateSubnetEuCentral1a
-        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PrivateSubnetEuCentral1c
       AvailabilityZones:
         - eu-central-1a
         - eu-central-1c
@@ -120,7 +120,7 @@ Resources:
     Properties:
       ImageId: ami-0eb0d9bb7ad1bd1e9
       SecurityGroups:
-      - !Ref NodePoolSecurityGroup
+      - !Ref GeneralSecurityGroup
       InstanceType: m5.2xlarge
       InstanceMonitoring: true
       IamInstanceProfile: !Ref NodePoolInstanceProfile
@@ -131,6 +131,11 @@ Resources:
           VolumeSize: 100
           VolumeType: gp2
       - DeviceName: /dev/xvdf
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      - DeviceName: /dev/xvdg
         Ebs:
           DeleteOnTermination: true
           VolumeSize: 100
@@ -210,100 +215,106 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: na-eu-central-1a
-  PrivateRouteTableEuCentral1b:
+  PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: imagenary-vpc-id
       Tags:
       - Key: Name
-        Value: PrivateRouteTableEuCentral1b
+        Value: PrivateRouteTableEuCentral1c
       - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
+        Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: private
       - Key: giantswarm.io/tccp
         Value: true
-  NATRouteEuCentral1b:
+  NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: na-eu-central-1b
-  NodePoolSecurityGroup:
+      NatGatewayId: na-eu-central-1c
+  GeneralSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
-      VpcId: imagenary-vpc-id
       SecurityGroupIngress:
-
       -
         Description: Allow traffic from control plane CIDR to 22 for SSH access.
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
         CidrIp: 10.1.0.0/16
-
       -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
         CidrIp: 10.1.0.0/16
-
       -
         Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
         CidrIp: 10.1.0.0/16
-
       -
         Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
         CidrIp: 10.1.0.0/16
-
       -
         Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
         CidrIp: 10.1.0.0/16
-
       -
         Description: Allow traffic from the ingress security group to 443 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
         SourceSecurityGroupId: ingressSecurityGroupID
-
       -
         Description: Allow traffic from the ingress security group to 80 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
         SourceSecurityGroupId: ingressSecurityGroupID
-
-      -
-        Description: Allow traffic between workloads within the Node Pool.
-        GroupId: !Ref NodePoolSecurityGroup
-        IpProtocol: -1
-        FromPort: -1
-        ToPort: -1
-        SourceSecurityGroupId: masterSecurityGroupID
-
-      -
-        Description: Allow traffic between workloads within the Node Pool.
-        GroupId: !Ref NodePoolSecurityGroup
-        IpProtocol: -1
-        FromPort: -1
-        ToPort: -1
-        SourceSecurityGroupId: !Ref NodePoolSecurityGroup
-
       Tags:
         - Key: Name
-          Value: NodePoolSecurityGroup
+          Value: GeneralSecurityGroup
+      VpcId: imagenary-vpc-id
+  GeneralMasterIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Master Security Group.
+      GroupId: masterSecurityGroupID
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  InternalIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic between workloads within the Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  MasterGeneralIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCCP Master Security Group to the TCNP General Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: masterSecurityGroupID
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
@@ -323,26 +334,47 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       SubnetId: !Ref PrivateSubnetEuCentral1a
-  PrivateSubnetEuCentral1b:
+  PrivateSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1c
       CidrBlock: 10.100.3.64/27
       MapPublicIpOnLaunch: false
       Tags:
       - Key: Name
-        Value: PrivateSubnetEuCentral1b
+        Value: PrivateSubnetEuCentral1c
       - Key: "kubernetes.io/role/elb"
         Value: "1"
       VpcId: imagenary-vpc-id
     DependsOn: VpcCidrBlock
-  PrivateSubnetRouteTableAssociationEuCentral1b:
+  PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      SubnetId: !Ref PrivateSubnetEuCentral1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      SubnetId: !Ref PrivateSubnetEuCentral1c
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
       VpcId: imagenary-vpc-id
       CidrBlock: 10.100.8.0/24
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcId: imagenary-vpc-id
+      RouteTableIds:
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1c
+      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*/*"
