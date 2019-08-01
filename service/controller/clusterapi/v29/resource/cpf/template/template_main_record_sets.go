@@ -2,6 +2,7 @@ package template
 
 const TemplateMainRecordSets = `
 {{- define "record_sets" -}}
+{{- if .RecordSets.Route53Enabled -}}
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'
     Properties:
@@ -10,5 +11,6 @@ const TemplateMainRecordSets = `
       Type: 'NS'
       TTL: '300'
       ResourceRecords: !Split [ ',', '{{ .RecordSets.GuestHostedZoneNameServers }}' ]
+{{- end -}}
 {{- end -}}
 `
