@@ -4,10 +4,6 @@ import (
 	"github.com/giantswarm/versionbundle"
 
 	clusterapiv29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v22"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v23"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v24"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27"
@@ -22,10 +18,6 @@ func NewVersionBundles() []versionbundle.Bundle {
 
 	versionBundles = append(versionBundles, clusterapiv29.VersionBundle())
 
-	versionBundles = append(versionBundles, v22.VersionBundle())
-	versionBundles = append(versionBundles, v22patch1.VersionBundle())
-	versionBundles = append(versionBundles, v23.VersionBundle())
-	versionBundles = append(versionBundles, v24.VersionBundle())
 	versionBundles = append(versionBundles, v25.VersionBundle())
 	versionBundles = append(versionBundles, v26.VersionBundle())
 	versionBundles = append(versionBundles, v27.VersionBundle())
