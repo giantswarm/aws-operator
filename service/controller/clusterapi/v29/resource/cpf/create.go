@@ -66,21 +66,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
 
-		var params *template.ParamsMain
-		{
-			recordSets, err := r.newRecordSetsParams(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			routeTables, err := r.newRouteTablesParams(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			params = &template.ParamsMain{
-				RecordSets:  recordSets,
-				RouteTables: routeTables,
-			}
+		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.route53Enabled)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		templateBody, err = template.Render(params)
@@ -127,63 +115,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newPrivateRoutes(ctx context.Context, cr v1alpha1.Cluster) ([]template.ParamsMainRouteTablesRoute, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var routes []template.ParamsMainRouteTablesRoute
-
-	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
-		for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
-			route := template.ParamsMainRouteTablesRoute{
-				RouteTableID: id,
-				// Requester CIDR block, we create the peering connection from the
-				// tenant's private subnets.
-				CidrBlock: az.Subnet.Private.CIDR.String(),
-				// The peer connection id is fetched from the cloud formation stack
-				// outputs in the stackoutput resource.
-				PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-			}
-
-			routes = append(routes, route)
-		}
-	}
-
-	return routes, nil
-}
-
-func (r *Resource) newPublicRoutes(ctx context.Context, cr v1alpha1.Cluster) ([]template.ParamsMainRouteTablesRoute, error) {
-	if r.encrypterBackend != encrypter.VaultBackend {
-		return nil, nil
-	}
-
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var routes []template.ParamsMainRouteTablesRoute
-
-	for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
-		route := template.ParamsMainRouteTablesRoute{
-			RouteTableID: id,
-			// Requester CIDR block, we create the peering connection from the
-			// tenant's CIDR for being able to access Vault's ELB.
-			CidrBlock: key.StatusClusterNetworkCIDR(cr),
-			// The peer connection id is fetched from the cloud formation stack
-			// outputs in the stackoutput resource.
-			PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-		}
-
-		routes = append(routes, route)
-	}
-
-	return routes, nil
-}
-
-func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainRecordSets, error) {
+func newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster, route53Enabled bool) (*template.ParamsMainRecordSets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -195,22 +127,53 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster)
 			BaseDomain:                 key.ClusterBaseDomain(cr),
 			ClusterID:                  key.ClusterID(&cr),
 			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
-			Route53Enabled:             r.route53Enabled,
+			Route53Enabled:             route53Enabled,
 		}
 	}
 
 	return recordSets, nil
 }
 
-func (r *Resource) newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainRouteTables, error) {
-	privateRoutes, err := r.newPrivateRoutes(ctx, cr)
+func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBackend string) (*template.ParamsMainRouteTables, error) {
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	publicRoutes, err := r.newPublicRoutes(ctx, cr)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var privateRoutes []template.ParamsMainRouteTablesRoute
+	{
+		for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+			for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
+				route := template.ParamsMainRouteTablesRoute{
+					RouteTableID: id,
+					// Requester CIDR block, we create the peering connection from the
+					// tenant's private subnets.
+					CidrBlock: az.Subnet.Private.CIDR.String(),
+					// The peer connection id is fetched from the cloud formation stack
+					// outputs in the stackoutput resource.
+					PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+				}
+
+				privateRoutes = append(privateRoutes, route)
+			}
+		}
+	}
+
+	var publicRoutes []template.ParamsMainRouteTablesRoute
+	if encrypterBackend == encrypter.VaultBackend {
+		for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+			route := template.ParamsMainRouteTablesRoute{
+				RouteTableID: id,
+				// Requester CIDR block, we create the peering connection from the
+				// tenant's CIDR for being able to access Vault's ELB.
+				CidrBlock: key.StatusClusterNetworkCIDR(cr),
+				// The peer connection id is fetched from the cloud formation stack
+				// outputs in the stackoutput resource.
+				PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+			}
+
+			publicRoutes = append(publicRoutes, route)
+		}
 	}
 
 	var routeTables *template.ParamsMainRouteTables
@@ -222,4 +185,25 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster
 	}
 
 	return routeTables, nil
+}
+
+func newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBackend string, route53Enabled bool) (*template.ParamsMain, error) {
+	var params *template.ParamsMain
+	{
+		recordSets, err := newRecordSetsParams(ctx, cr, route53Enabled)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		routeTables, err := newRouteTablesParams(ctx, cr, encrypterBackend)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		params = &template.ParamsMain{
+			RecordSets:  recordSets,
+			RouteTables: routeTables,
+		}
+	}
+
+	return params, nil
 }
