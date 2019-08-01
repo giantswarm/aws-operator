@@ -97,7 +97,14 @@ func DefaultContext() context.Context {
 			ControlPlane: controllercontext.ContextStatusControlPlane{
 				AWSAccountID: "control-plane-account",
 				NATGateway:   controllercontext.ContextStatusControlPlaneNATGateway{},
-				RouteTable:   controllercontext.ContextStatusControlPlaneRouteTable{},
+				RouteTable: controllercontext.ContextStatusControlPlaneRouteTable{
+					Mappings: map[string]string{
+						"gauss-private-1-name": "gauss-private-1-id",
+						"gauss-private-2-name": "gauss-private-2-id",
+						"gauss-public-1-name":  "gauss-public-1-id",
+						"gauss-public-2-name":  "gauss-public-2-id",
+					},
+				},
 				PeerRole: controllercontext.ContextStatusControlPlanePeerRole{
 					ARN: "imaginary-cp-peer-role-arn",
 				},
