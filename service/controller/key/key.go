@@ -5,14 +5,14 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
-func VersionLabelSelector(enabled bool, overridedVersion string) string {
+func VersionLabelSelector(enabled bool, overridenVersion string) string {
 	if !enabled {
 		return ""
 	}
 
 	version := project.Version()
-	if overridedVersion != "" {
-		version = overridedVersion
+	if overridenVersion != "" {
+		version = overridenVersion
 	}
 
 	return label.OperatorVersion + "=" + version
