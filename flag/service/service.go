@@ -16,5 +16,5 @@ type Service struct {
 	Installation                  installation.Installation
 	Kubernetes                    kubernetes.Kubernetes
 	RegistryDomain                string
-	DisableVersionBundleSelection bool
+	DisableVersionBundleSelection string
 }
