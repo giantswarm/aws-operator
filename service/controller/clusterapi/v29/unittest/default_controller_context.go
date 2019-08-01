@@ -82,7 +82,7 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
-							Name: "eu-central-1b",
+							Name: "eu-central-1c",
 							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
