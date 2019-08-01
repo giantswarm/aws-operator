@@ -14,6 +14,6 @@ Resources:
   {{ template "route_tables" . }}
   {{ template "security_groups" . }}
   {{ template "subnets" . }}
-  {{ template "vpc_cidr" . }}
+  {{ template "vpc" . }}
 {{ end }}
 `
