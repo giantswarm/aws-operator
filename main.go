@@ -121,11 +121,6 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.RouteTables, "", "Names of the public route tables in control plane separated by commas, required for accessing public ELBs from tenant nodes.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VPCPeerID, "", "Control Plane VPC ID to peer Tenant Clusters with.")
-
-	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
-
-	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
-	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.AdvancedMonitoringEC2, false, "Advanced EC2 monitoring.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.LoggingBucket.Delete, false, "Should be logging bucket deleted.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.Route53.Enabled, true, "Should Route53 be enabled.")
@@ -142,6 +137,9 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline, "1m", "If no progress is made before this deadline image pulling is cancelled.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image, "", "Full docker image of networksetup.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.SSH.UserList, "", "Comma separated list of ssh users and their public key in format `username:publickey`, being installed in the guest cluster nodes.")
+
+	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
+	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Name, "", "Installation name for tagging AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.Installation.Guest.IPAM.Network.CIDR, "", "Guest cluster network segment from which IPAM allocates subnets.")
@@ -161,6 +159,8 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CAFile, "", "Certificate authority file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
+
+	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
 
 	newCommand.CobraCommand().Execute()
 
