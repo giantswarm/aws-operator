@@ -10,7 +10,6 @@ const TemplateMainRouteTables = `
       DestinationCidrBlock: {{$r.CidrBlock}}
       VpcPeeringConnectionId: {{$r.PeerConnectionID}}
   {{- end }}
-
   {{- range $i, $r := .RouteTables.PublicRoutes }}
   PublicRoute{{$i}}:
     Type: AWS::EC2::Route
