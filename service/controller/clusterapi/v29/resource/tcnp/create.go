@@ -304,8 +304,6 @@ func newRouteTables(ctx context.Context, cr v1alpha1.MachineDeployment) (*templa
 		return nil, microerror.Mask(err)
 	}
 
-	natGatewayMapping := statusAZsToNATGatewayIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
-
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainRouteTablesListItem{
 			AvailabilityZone: a.Name,
@@ -315,7 +313,7 @@ func newRouteTables(ctx context.Context, cr v1alpha1.MachineDeployment) (*templa
 			},
 			TCCP: template.ParamsMainRouteTablesListItemTCCP{
 				NATGateway: template.ParamsMainRouteTablesListItemTCCPNATGateway{
-					ID: natGatewayMapping[a.Name],
+					ID: a.NATGateway.ID,
 				},
 				VPC: template.ParamsMainRouteTablesListItemTCCPVPC{
 					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
@@ -481,25 +479,6 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 	return params, nil
 }
 
-func statusAZsToNATGatewayIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
-	m := make(map[string]string)
-	for _, az := range azs {
-		m[az.Name] = az.NATGateway.ID
-	}
-	return m
-}
-
-func workerCountRatio(workers int, ratio float32) string {
-	value := float32(workers) * ratio
-	rounded := int(value + 0.5)
-
-	if rounded == 0 {
-		rounded = 1
-	}
-
-	return strconv.Itoa(rounded)
-}
-
 func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	for _, g := range groups {
 		if valueForKey(g.Tags, "Name") == name {
@@ -518,4 +497,15 @@ func valueForKey(tags []*ec2.Tag, key string) string {
 	}
 
 	return ""
+}
+
+func workerCountRatio(workers int, ratio float32) string {
+	value := float32(workers) * ratio
+	rounded := int(value + 0.5)
+
+	if rounded == 0 {
+		rounded = 1
+	}
+
+	return strconv.Itoa(rounded)
 }

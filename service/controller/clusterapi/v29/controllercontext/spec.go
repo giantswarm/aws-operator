@@ -54,8 +54,13 @@ type ContextSpecTenantClusterTCNP struct {
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZone struct {
-	Name   string
-	Subnet ContextSpecTenantClusterTCNPAvailabilityZoneSubnet
+	Name       string
+	NATGateway ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway
+	Subnet     ContextSpecTenantClusterTCNPAvailabilityZoneSubnet
+}
+
+type ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway struct {
+	ID string
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZoneSubnet struct {
