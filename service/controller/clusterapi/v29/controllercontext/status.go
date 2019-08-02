@@ -46,7 +46,6 @@ type ContextStatusTenantCluster struct {
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	VersionBundleVersion  string
-	WorkerInstance        ContextStatusTenantClusterWorkerInstance
 }
 
 type ContextStatusTenantClusterAWS struct {
@@ -121,10 +120,4 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 type ContextStatusTenantClusterTCCPVPC struct {
 	ID                  string
 	PeeringConnectionID string
-}
-
-type ContextStatusTenantClusterWorkerInstance struct {
-	DockerVolumeSizeGB string
-	Image              string
-	Type               string
 }
