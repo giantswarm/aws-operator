@@ -31,8 +31,6 @@ type GuestSecurityGroupsAdapter struct {
 	APIWhitelistEnabled       bool
 	MasterSecurityGroupName   string
 	MasterSecurityGroupRules  []securityGroupRule
-	WorkerSecurityGroupName   string
-	WorkerSecurityGroupRules  []securityGroupRule
 	IngressSecurityGroupName  string
 	IngressSecurityGroupRules []securityGroupRule
 	EtcdELBSecurityGroupName  string
@@ -49,9 +47,6 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.MasterSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "master")
 	s.MasterSecurityGroupRules = masterRules
-
-	s.WorkerSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "worker")
-	s.WorkerSecurityGroupRules = s.getWorkerRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
 	s.IngressSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "ingress")
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)

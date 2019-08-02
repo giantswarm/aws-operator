@@ -69,6 +69,28 @@ const SecurityGroups = `
           Value: {{ $v.EtcdELBSecurityGroupName }}
         - Key: giantswarm.io/tccp
           Value: true
+  # Allow all access between masters and workers for calico. This is done after
+  # the other rules to avoid circular dependencies.
+  MasterAllowCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowEtcdIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      # Allow access between masters and workers for calico.
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 2379
+      ToPort: 2379
+      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
