@@ -40,6 +40,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 )
 
@@ -378,6 +379,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tccpRouteTablesResource controller.Resource
+	{
+		c := tccproutetables.Config{
+			Logger: config.Logger,
+		}
+
+		tccpRouteTablesResource, err = tccproutetables.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpSubnetsResource controller.Resource
 	{
 		c := tccpsubnets.Config{
@@ -583,6 +596,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		routeTableResource,
 		vpcCIDRResource,
 		tccpOutputsResource,
+		tccpRouteTablesResource,
 		tccpSubnetsResource,
 		regionResource,
 		asgStatusResource,
