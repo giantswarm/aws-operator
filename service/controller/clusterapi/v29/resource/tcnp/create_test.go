@@ -65,7 +65,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			}
 
 			if !bytes.Equal([]byte(templateBody), goldenFile) {
-				t.Fatalf("\n\n%s\n", cmp.Diff(templateBody, string(goldenFile)))
+				t.Fatalf("\n\n%s\n", cmp.Diff(string(goldenFile), templateBody))
 			}
 		})
 	}
