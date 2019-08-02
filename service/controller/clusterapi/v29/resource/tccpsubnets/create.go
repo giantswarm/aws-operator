@@ -1,4 +1,4 @@
-package tccpsubnet
+package tccpsubnets
 
 import (
 	"context"
@@ -8,18 +8,19 @@ import (
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's tccp subnets")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane subnets")
 
 		err := r.addSubnetsToContext(ctx)
 		if IsVPCNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's tccp vpc")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane vpc id is not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's tccp subnets")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane subnets")
 	}
 
 	return nil

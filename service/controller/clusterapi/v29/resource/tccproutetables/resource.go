@@ -1,4 +1,4 @@
-package tccpsubnet
+package tccproutetables
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Name = "tccpsubnetv29"
+	Name = "tccproutetablev29"
 )
 
 type Config struct {
@@ -39,15 +39,15 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addSubnetsToContext(ctx context.Context) error {
+func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	// The tenant cluster VPC is a requirement to find its associated subnets and
-	// route tables. In case the VPC ID is not yet tracked in the controller
-	// context we return an error and cause the resource to be canceled.
+	// The tenant cluster VPC is a requirement to find its associated route
+	// tables. In case the VPC ID is not yet tracked in the controller context we
+	// return an error and cause the resource to be canceled.
 	if cc.Status.TenantCluster.TCCP.VPC.ID == "" {
 		return microerror.Mask(vpcNotFoundError)
 	}
@@ -70,26 +70,6 @@ func (r *Resource) addSubnetsToContext(ctx context.Context) error {
 		}
 
 		cc.Status.TenantCluster.TCCP.RouteTables = o.RouteTables
-	}
-
-	{
-		i := &ec2.DescribeSubnetsInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("vpc-id"),
-					Values: []*string{
-						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
-					},
-				},
-			},
-		}
-
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSubnets(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		cc.Status.TenantCluster.TCCP.Subnets = o.Subnets
 	}
 
 	return nil

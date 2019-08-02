@@ -1,4 +1,4 @@
-package tccpsubnet
+package tccproutetables
 
 import (
 	"github.com/giantswarm/microerror"
