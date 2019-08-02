@@ -417,8 +417,7 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 			ARN:  key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			Name: cc.Status.TenantCluster.AWS.Region,
 		},
-		PeeringConnections: peeringConnections,
-		RouteTables:        routeTables,
+		RouteTables: routeTables,
 		TCCP: template.ParamsMainVPCTCCP{
 			VPC: template.ParamsMainVPCTCCPVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,

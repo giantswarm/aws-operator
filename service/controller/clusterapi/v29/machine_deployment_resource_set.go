@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpf"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -267,6 +268,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpfResource controller.Resource
+	{
+		c := tcnpf.Config{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		tcnpfResource, err = tcnpf.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpVPCCIDRResource controller.Resource
 	{
 		c := cpvpccidr.Config{
@@ -315,6 +330,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		encryptionResource,
 		ipamResource,
 		tcnpResource,
+		tcnpfResource,
 	}
 
 	{

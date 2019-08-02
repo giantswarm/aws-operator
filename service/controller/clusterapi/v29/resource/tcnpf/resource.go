@@ -1,4 +1,4 @@
-package cpf
+package tcnpf
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -12,26 +12,23 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cpfv29"
+	Name = "tcnpfv29"
 )
 
 type Config struct {
 	Logger micrologger.Logger
 
-	EncrypterBackend string
 	InstallationName string
-	Route53Enabled   bool
 }
 
-// Resource implements the CPF resource, which stands for Control Plane
-// Finalizer. This was formerly known as the host post stack. We manage a
-// dedicated CF stack for the record sets and routing tables setup.
+// Resource implements the TCNPF resource, which stands for Tenant Cluster Node
+// Pool Finalizer. We manage a dedicated CF stack for the VPC Peering
+// Connections made between the AWS Control Plane Accounts and the AWS Tenant
+// Cluster Accounts.
 type Resource struct {
 	logger micrologger.Logger
 
-	encrypterBackend string
 	installationName string
-	route53Enabled   bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -39,16 +36,10 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
-	}
-
 	r := &Resource{
 		logger: config.Logger,
 
-		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
-		route53Enabled:   config.Route53Enabled,
 	}
 
 	return r, nil

@@ -1,4 +1,4 @@
-package cpf
+package tcnpf
 
 import (
 	"bytes"
@@ -12,23 +12,22 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpf/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
 
-// Test_Controller_Resource_CPF_Template_Render tests tenant cluster
+// Test_Controller_Resource_TCNPF_Template_Render tests tenant cluster
 // CloudFormation template rendering. It is meant to be used as a tool to easily
 // check resulting CF template and prevent from accidental CF template changes.
 //
 // It uses golden file as reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
-//  go test ./service/controller/clusterapi/v29/resource/cpf -run Test_Controller_Resource_CPF_Template_Render -update
+//  go test ./service/controller/clusterapi/v29/resource/cpf -run Test_Controller_Resource_TCNPF_Template_Render -update
 //
-func Test_Controller_Resource_CPF_Template_Render(t *testing.T) {
+func Test_Controller_Resource_TCNPF_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
@@ -43,7 +42,7 @@ func Test_Controller_Resource_CPF_Template_Render(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, encrypter.KMSBackend, true)
+			params, err := newTemplateParams(tc.ctx, tc.cr)
 			if err != nil {
 				if err != nil {
 					t.Fatal(err)
@@ -69,7 +68,7 @@ func Test_Controller_Resource_CPF_Template_Render(t *testing.T) {
 			}
 
 			if !bytes.Equal([]byte(templateBody), goldenFile) {
-				t.Fatalf("\n\n%s\n", cmp.Diff(templateBody, string(goldenFile)))
+				t.Fatalf("\n\n%s\n", cmp.Diff(string(goldenFile), templateBody))
 			}
 		})
 	}

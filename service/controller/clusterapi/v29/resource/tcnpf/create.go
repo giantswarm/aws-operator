@@ -1,4 +1,4 @@
-package cpf
+package tcnpf
 
 import (
 	"context"
@@ -8,9 +8,10 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpf/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -32,7 +33,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's node pool finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameCPF(&cr)),
@@ -52,20 +53,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
 
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane finalizer cloud formation stack already exists")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool finalizer cloud formation stack already exists")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's node pool finalizer cloud formation stack")
 	}
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool finalizer cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.route53Enabled)
+		params, err := newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -75,11 +76,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's node pool finalizer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's node pool finalizer cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			EnableTerminationProtection: aws.Bool(true),
@@ -93,11 +94,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's node pool finalizer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's node pool finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameCPF(&cr)),
@@ -108,7 +109,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's node pool finalizer cloud formation stack")
 	}
 
 	return nil
@@ -125,7 +126,7 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.P
 		for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 			pc := template.ParamsMainVPCPeeringConnection{
 				ID:   cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name), valueForKey(rt.Tags, "Name")),
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name), awstags.ValueForKey(rt.Tags, "Name")),
 				RouteTable: template.ParamsMainVPCPeeringConnectionRouteTable{
 					ID: *rt.RouteTableId,
 				},

@@ -1,4 +1,4 @@
-package cpf
+package tcnpf
 
 import (
 	"strings"

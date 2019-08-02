@@ -1,12 +1,20 @@
 package template
 
 type ParamsMainRouteTables struct {
-	PrivateRoutes []ParamsMainRouteTablesRoute
-	PublicRoutes  []ParamsMainRouteTablesRoute
+	PeeringConnections []ParamsMainVPCPeeringConnection
 }
 
-type ParamsMainRouteTablesRoute struct {
-	RouteTableID     string
-	CidrBlock        string
-	PeerConnectionID string
+type ParamsMainVPCPeeringConnection struct {
+	ID         string
+	Name       string
+	RouteTable ParamsMainVPCPeeringConnectionRouteTable
+	Subnet     ParamsMainVPCPeeringConnectionSubnet
+}
+
+type ParamsMainVPCPeeringConnectionRouteTable struct {
+	ID string
+}
+
+type ParamsMainVPCPeeringConnectionSubnet struct {
+	CIDR string
 }
