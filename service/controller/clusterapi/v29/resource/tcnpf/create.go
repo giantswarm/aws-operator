@@ -15,7 +15,7 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -115,7 +115,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainRouteTables, error) {
+func newRouteTablesParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -149,7 +149,7 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.P
 	return routeTables, nil
 }
 
-func newTemplateParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		routeTables, err := newRouteTablesParams(ctx, cr)

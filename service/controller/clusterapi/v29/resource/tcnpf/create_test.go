@@ -31,12 +31,12 @@ func Test_Controller_Resource_TCNPF_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
-		cr   v1alpha1.Cluster
+		cr   v1alpha1.MachineDeployment
 	}{
 		{
 			name: "case 0: basic test",
 			ctx:  unittest.DefaultContext(),
-			cr:   unittest.DefaultCluster(),
+			cr:   unittest.DefaultMachineDeployment(),
 		},
 	}
 
