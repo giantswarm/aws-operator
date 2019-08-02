@@ -303,17 +303,17 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
-		tccpSubnetResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
+		tccpSubnetResource,
+		tccpAZsResource,
+		tcnpAZsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		regionResource,
 		encryptionResource,
 		ipamResource,
-		tccpAZsResource,
-		tcnpAZsResource,
 		tcnpResource,
 	}
 
