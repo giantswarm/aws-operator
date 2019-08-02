@@ -1,4 +1,4 @@
-package routetable
+package cproutetables
 
 import (
 	"context"
