@@ -1,3 +1,11 @@
+flag:
+  service:
+    feature:
+      labelselector:
+        enabled: false
+    test:
+      labelselector:
+        version: ""
 image:
   registry: "quay.io"
   repository: "giantswarm/aws-operator"

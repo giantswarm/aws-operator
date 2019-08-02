@@ -46,39 +46,3 @@ Resources:
       RouteTableId: gauss-private-2-id
       DestinationCidrBlock: 10.100.3.128/27
       VpcPeeringConnectionId: peering-connection-id
-  PrivateRoute6:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: gauss-public-1-id
-      DestinationCidrBlock: 10.100.3.0/27
-      VpcPeeringConnectionId: peering-connection-id
-  PrivateRoute7:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: gauss-public-1-id
-      DestinationCidrBlock: 10.100.3.64/27
-      VpcPeeringConnectionId: peering-connection-id
-  PrivateRoute8:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: gauss-public-1-id
-      DestinationCidrBlock: 10.100.3.128/27
-      VpcPeeringConnectionId: peering-connection-id
-  PrivateRoute9:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: gauss-public-2-id
-      DestinationCidrBlock: 10.100.3.0/27
-      VpcPeeringConnectionId: peering-connection-id
-  PrivateRoute10:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: gauss-public-2-id
-      DestinationCidrBlock: 10.100.3.64/27
-      VpcPeeringConnectionId: peering-connection-id
-  PrivateRoute11:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: gauss-public-2-id
-      DestinationCidrBlock: 10.100.3.128/27
-      VpcPeeringConnectionId: peering-connection-id

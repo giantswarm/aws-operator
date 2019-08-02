@@ -46,6 +46,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
 		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -395,24 +401,6 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 		return nil, microerror.Mask(err)
 	}
 
-	var peeringConnections []template.ParamsMainVPCPeeringConnection
-	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
-		for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-			pc := template.ParamsMainVPCPeeringConnection{
-				ID:   cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name), name),
-				RouteTable: template.ParamsMainVPCPeeringConnectionRouteTable{
-					ID: id,
-				},
-				Subnet: template.ParamsMainVPCPeeringConnectionSubnet{
-					CIDR: az.Subnet.Private.CIDR.String(),
-				},
-			}
-
-			peeringConnections = append(peeringConnections, pc)
-		}
-	}
-
 	var routeTables []template.ParamsMainVPCRouteTable
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainVPCRouteTable{
@@ -429,8 +417,7 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 			ARN:  key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			Name: cc.Status.TenantCluster.AWS.Region,
 		},
-		PeeringConnections: peeringConnections,
-		RouteTables:        routeTables,
+		RouteTables: routeTables,
 		TCCP: template.ParamsMainVPCTCCP{
 			VPC: template.ParamsMainVPCTCCPVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,

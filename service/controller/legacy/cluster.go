@@ -13,10 +13,12 @@ import (
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	v25 "github.com/giantswarm/aws-operator/service/controller/legacy/v25"
 	v25adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v25/adapter"
 	v25cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v25/cloudconfig"
@@ -59,6 +61,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	LabelSelector              ClusterConfigLabelSelector
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
 	ProjectName                string
@@ -76,6 +79,11 @@ type ClusterConfigAWSConfig struct {
 	AvailabilityZones []string
 	Region            string
 	SessionToken      string
+}
+
+type ClusterConfigLabelSelector struct {
+	Enabled          bool
+	OverridenVersion string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -123,6 +131,9 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			Logger:  config.Logger,
 			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
 
+			ListOptions: metav1.ListOptions{
+				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
+			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: informer.DefaultResyncPeriod,
 		}
