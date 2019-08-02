@@ -10,7 +10,7 @@ import (
 func VersionLabelSelector(enabled bool, overridenVersion string) string {
 	s := pawelVersionLabelSelector(enabled, overridenVersion)
 
-	fmt.Printf("pawel ******* enabled=%#v overridenVersion=%#v\n out=%#v", enabled, overridenVersion, s)
+	fmt.Printf("pawel ******* enabled=%#v overridenVersion=%#v out=%#v\n", enabled, overridenVersion, s)
 
 	return s
 }
