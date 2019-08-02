@@ -227,11 +227,6 @@ func DefaultContext() context.Context {
 					},
 				},
 				VersionBundleVersion: "6.3.0",
-				WorkerInstance: controllercontext.ContextStatusTenantClusterWorkerInstance{
-					DockerVolumeSizeGB: "100",
-					Image:              "ami-0eb0d9bb7ad1bd1e9",
-					Type:               "m5.xlarge",
-				},
 			},
 		},
 	}
