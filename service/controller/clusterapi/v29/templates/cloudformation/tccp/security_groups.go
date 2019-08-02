@@ -33,28 +33,6 @@ const SecurityGroups = `
           Value:  {{ $v.MasterSecurityGroupName }}
         - Key: giantswarm.io/tccp
           Value: true
-  WorkerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: {{ $v.WorkerSecurityGroupName }}
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      {{- range $v.WorkerSecurityGroupRules }}
-      -
-        IpProtocol: {{ .Protocol }}
-        FromPort: {{ .Port }}
-        ToPort: {{ .Port }}
-        {{ if .SourceCIDR }}
-        CidrIp: {{ .SourceCIDR }}
-        {{ else }}
-        SourceSecurityGroupId: !Ref {{ .SourceSecurityGroup }}
-        {{ end }}
-      {{- end }}
-      Tags:
-        - Key: Name
-          Value:  {{ $v.WorkerSecurityGroupName }}
-        - Key: giantswarm.io/tccp
-          Value: true
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -91,58 +69,6 @@ const SecurityGroups = `
           Value: {{ $v.EtcdELBSecurityGroupName }}
         - Key: giantswarm.io/tccp
           Value: true
-  # Allow all access between masters and workers for calico. This is done after
-  # the other rules to avoid circular dependencies.
-  MasterAllowCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref MasterSecurityGroup
-  MasterAllowWorkerCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref WorkerSecurityGroup
-  MasterAllowEtcdIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: "tcp"
-      FromPort: 2379
-      ToPort: 2379
-      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
-  WorkerAllowCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: WorkerSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref WorkerSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref WorkerSecurityGroup
-  WorkerAllowMasterCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: WorkerSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref WorkerSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref MasterSecurityGroup
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:

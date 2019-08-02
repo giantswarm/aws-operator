@@ -16,15 +16,12 @@ func CloudConfigSmallTemplates() []string {
 
 func CloudFormationGuestTemplates() []string {
 	return []string{
-		tccp.AutoScalingGroup,
 		tccp.IAMPolicies,
 		tccp.Instance,
 		tccp.InternetGateway,
-		tccp.LaunchConfiguration,
 		tccp.LoadBalancers,
 		tccp.Main,
 		tccp.NatGateway,
-		tccp.LifecycleHooks,
 		tccp.Outputs,
 		tccp.RecordSets,
 		tccp.RouteTables,

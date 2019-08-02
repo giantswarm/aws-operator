@@ -5,31 +5,47 @@ import (
 )
 
 type Gateway struct {
-	AvailabilityZone      string
-	ClusterID             string
-	NATGWName             string
-	NATEIPName            string
-	NATRouteName          string
-	PrivateRouteTableName string
-	PublicSubnetName      string
+	AvailabilityZone string
+	ClusterID        string
+	NATGWName        string
+	NATEIPName       string
+	PublicSubnetName string
 }
 
 type GuestNATGatewayAdapter struct {
-	Gateways []Gateway
+	Gateways  []Gateway
+	NATRoutes []NATRoute
+}
+
+type NATRoute struct {
+	NATGWName             string
+	NATRouteName          string
+	PrivateRouteTableName string
 }
 
 func (a *GuestNATGatewayAdapter) Adapt(cfg Config) error {
 	for _, az := range cfg.TenantClusterAvailabilityZones {
 		gw := Gateway{
-			AvailabilityZone:      az.Name,
-			ClusterID:             key.ClusterID(&cfg.CustomObject),
-			NATGWName:             key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
-			NATEIPName:            key.SanitizeCFResourceName(key.NATEIPName(az.Name)),
-			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
-			PrivateRouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-			PublicSubnetName:      key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)),
+			AvailabilityZone: az.Name,
+			ClusterID:        key.ClusterID(&cfg.CustomObject),
+			NATGWName:        key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+			NATEIPName:       key.SanitizeCFResourceName(key.NATEIPName(az.Name)),
+			PublicSubnetName: key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)),
 		}
 		a.Gateways = append(a.Gateways, gw)
+	}
+
+	for _, az := range cfg.TenantClusterAvailabilityZones {
+		if az.Name != key.MasterAvailabilityZone(cfg.CustomObject) {
+			continue
+		}
+
+		nr := NATRoute{
+			NATGWName:             key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
+			PrivateRouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+		}
+		a.NATRoutes = append(a.NATRoutes, nr)
 	}
 
 	return nil

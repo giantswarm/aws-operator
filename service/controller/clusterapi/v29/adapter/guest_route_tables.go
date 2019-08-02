@@ -31,6 +31,10 @@ func (r *GuestRouteTablesAdapter) Adapt(cfg Config) error {
 	}
 
 	for _, az := range cfg.TenantClusterAvailabilityZones {
+		if az.Name != key.MasterAvailabilityZone(cfg.CustomObject) {
+			continue
+		}
+
 		rtName := RouteTableName{
 			AvailabilityZone:    az.Name,
 			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),

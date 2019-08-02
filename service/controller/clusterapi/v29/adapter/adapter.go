@@ -62,12 +62,9 @@ func NewGuest(cfg Config) (Adapter, error) {
 	a := Adapter{}
 
 	hydraters := []Hydrater{
-		a.Guest.AutoScalingGroup.Adapt,
 		a.Guest.IAMPolicies.Adapt,
 		a.Guest.InternetGateway.Adapt,
 		a.Guest.Instance.Adapt,
-		a.Guest.LaunchConfiguration.Adapt,
-		a.Guest.LifecycleHooks.Adapt,
 		a.Guest.LoadBalancers.Adapt,
 		a.Guest.NATGateway.Adapt,
 		a.Guest.Outputs.Adapt,
@@ -88,18 +85,15 @@ func NewGuest(cfg Config) (Adapter, error) {
 }
 
 type GuestAdapter struct {
-	AutoScalingGroup    GuestAutoScalingGroupAdapter
-	IAMPolicies         GuestIAMPoliciesAdapter
-	InternetGateway     GuestInternetGatewayAdapter
-	Instance            GuestInstanceAdapter
-	LaunchConfiguration GuestLaunchConfigAdapter
-	LifecycleHooks      GuestLifecycleHooksAdapter
-	LoadBalancers       GuestLoadBalancersAdapter
-	NATGateway          GuestNATGatewayAdapter
-	Outputs             GuestOutputsAdapter
-	RecordSets          GuestRecordSetsAdapter
-	RouteTables         GuestRouteTablesAdapter
-	SecurityGroups      GuestSecurityGroupsAdapter
-	Subnets             GuestSubnetsAdapter
-	VPC                 GuestVPCAdapter
+	IAMPolicies     GuestIAMPoliciesAdapter
+	InternetGateway GuestInternetGatewayAdapter
+	Instance        GuestInstanceAdapter
+	LoadBalancers   GuestLoadBalancersAdapter
+	NATGateway      GuestNATGatewayAdapter
+	Outputs         GuestOutputsAdapter
+	RecordSets      GuestRecordSetsAdapter
+	RouteTables     GuestRouteTablesAdapter
+	SecurityGroups  GuestSecurityGroupsAdapter
+	Subnets         GuestSubnetsAdapter
+	VPC             GuestVPCAdapter
 }

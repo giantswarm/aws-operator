@@ -25,6 +25,8 @@ const NatGateway = `
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
+  {{- end -}}
+  {{- range $v.NATRoutes }}
   {{ .NATRouteName }}:
     Type: AWS::EC2::Route
     Properties:
