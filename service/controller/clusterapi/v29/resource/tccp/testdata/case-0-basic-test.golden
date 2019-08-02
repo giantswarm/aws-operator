@@ -1029,7 +1029,7 @@ Resources:
       VpcId: !Ref VPC
       PeerVpcId: vpc-f8d0e10b
       PeerOwnerId: 'control-plane-account'
-      PeerRoleArn: imaginary-cp-peer-role-arn
+      PeerRoleArn: peer-role-arn
       Tags:
         - Key: Name
           Value: 8y5ck
