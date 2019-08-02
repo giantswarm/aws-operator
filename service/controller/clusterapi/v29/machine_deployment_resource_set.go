@@ -24,10 +24,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
 )
@@ -215,15 +215,14 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpOutputsResource controller.Resource
+	var tccpVPCPCXResource controller.Resource
 	{
-		c := tccpoutputs.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
+		c := tccpvpcpcx.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
-		tccpOutputsResource, err = tccpoutputs.New(c)
+		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -285,7 +284,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var tccpVPCIDResource controller.Resource
 	{
 		c := tccpvpcid.Config{
-			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
@@ -297,15 +295,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	resources := []controller.Resource{
+		// All these resources only fetch information from remote APIs and put them
+		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		tccpVPCIDResource,
 		cpRouteTableResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
-		tccpOutputsResource,
 		tccpSecurityGroupsResource,
 		tccpSubnetResource,
+		tccpVPCIDResource,
+		tccpVPCPCXResource,
+
+		// All these resources implement certain business logic and operate based on
+		// the information given in the controller context.
 		regionResource,
 		encryptionResource,
 		ipamResource,
@@ -348,10 +351,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		cc := controllercontext.Context{}
-		ctx = controllercontext.NewContext(ctx, cc)
-
-		return ctx, nil
+		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
 
 	var resourceSet *controller.ResourceSet
