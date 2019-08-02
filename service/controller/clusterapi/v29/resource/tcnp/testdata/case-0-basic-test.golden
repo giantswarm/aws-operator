@@ -214,7 +214,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: na-eu-central-1a
+      NatGatewayId: nat-gateway-id-eu-central-1a
   PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -233,7 +233,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: na-eu-central-1c
+      NatGatewayId: nat-gateway-id-eu-central-1c
   GeneralSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
