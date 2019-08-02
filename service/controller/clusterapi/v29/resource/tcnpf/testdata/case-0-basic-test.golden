@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Control Plane Finalizer Cloud Formation Stack.
+Resources:
+  GuestNSRecordSet:
+    Type: 'AWS::Route53::RecordSet'
+    Properties:
+      HostedZoneName: 'guux.eu-central-1.aws.gigantic.io.'
+      Name: '8y5ck.k8s.guux.eu-central-1.aws.gigantic.io.'
+      Type: 'NS'
+      TTL: '300'
+      ResourceRecords: !Split [ ',', '1.1.1.1,8.8.8.8' ]
+  
+  PrivateRoute0:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-1-id
+      DestinationCidrBlock: 10.100.3.0/27
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  PrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-1-id
+      DestinationCidrBlock: 10.100.3.64/27
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-1-id
+      DestinationCidrBlock: 10.100.3.128/27
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  PrivateRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-2-id
+      DestinationCidrBlock: 10.100.3.0/27
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  PrivateRoute4:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-2-id
+      DestinationCidrBlock: 10.100.3.64/27
+      VpcPeeringConnectionId: imagenary-peering-connection-id
+  PrivateRoute5:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-2-id
+      DestinationCidrBlock: 10.100.3.128/27
+      VpcPeeringConnectionId: imagenary-peering-connection-id

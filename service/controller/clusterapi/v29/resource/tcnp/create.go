@@ -401,24 +401,6 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 		return nil, microerror.Mask(err)
 	}
 
-	var peeringConnections []template.ParamsMainVPCPeeringConnection
-	for _, rt := range cc.Status.ControlPlane.RouteTables {
-		for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-			pc := template.ParamsMainVPCPeeringConnection{
-				ID:   cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name), valueForKey(rt.Tags, "Name")),
-				RouteTable: template.ParamsMainVPCPeeringConnectionRouteTable{
-					ID: *rt.RouteTableId,
-				},
-				Subnet: template.ParamsMainVPCPeeringConnectionSubnet{
-					CIDR: az.Subnet.Private.CIDR.String(),
-				},
-			}
-
-			peeringConnections = append(peeringConnections, pc)
-		}
-	}
-
 	var routeTables []template.ParamsMainVPCRouteTable
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainVPCRouteTable{

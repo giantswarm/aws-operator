@@ -29,13 +29,5 @@ const TemplateMainVPC = `
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:{{ .VPC.Region.ARN }}:s3:::*/*"
-  {{- range .VPC.PeeringConnections }}
-  {{ .Name }}:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: {{ .Subnet.CIDR }}
-      RouteTableId: {{ .RouteTable.ID }}
-      VpcPeeringConnectionId: {{ .ID }}
-  {{- end }}
 {{- end -}}
 `
