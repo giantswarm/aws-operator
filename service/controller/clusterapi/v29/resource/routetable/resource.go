@@ -26,10 +26,8 @@ type Config struct {
 type Resource struct {
 	logger micrologger.Logger
 
-	// mappings is a mapping of route table names and IDs, where the key is the
-	// name and the value is the ID.
-	mappings map[string]string
-	mutex    sync.Mutex
+	mutex       sync.Mutex
+	routeTables []*ec2.RouteTable
 
 	names []string
 }
@@ -39,15 +37,15 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.Names == nil {
+	if len(config.Names) == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Names must not be empty", config)
 	}
 
 	r := &Resource{
 		logger: config.Logger,
 
-		mappings: map[string]string{},
-		mutex:    sync.Mutex{},
+		routeTables: []*ec2.RouteTable{},
+		mutex:       sync.Mutex{},
 
 		names: config.Names,
 	}
@@ -68,46 +66,43 @@ func (r *Resource) addRouteTableMappingsToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	// We check if we have all mappings cached for the configured route table
+	// We check if we have all route tables cached for the configured route table
 	// names. If we find all information, we return them.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route table mappings")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route tables")
 
-		if len(r.mappings) == len(r.names) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route table mappings")
-			cc.Status.ControlPlane.RouteTable.Mappings = r.mappings
+		if len(r.routeTables) == len(r.names) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route tables")
+			cc.Status.ControlPlane.RouteTables = r.routeTables
 
 			return nil
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached route table mappings")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached route tables")
 		}
 	}
 
-	// We do not have the cached mappings, so we look them up.
-	mappings := map[string]string{}
-	for _, name := range r.names {
-		id, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, name)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		mappings[name] = id
-	}
-
-	// At this point we found all route table mappings and can cache them
-	// internally.
+	// We do not have the cached route tables, so we look them up.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "caching route table mappings")
-		r.mappings = mappings
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cached route table mappings")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "caching route tables")
+
+		for _, name := range r.names {
+			rt, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, name)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.routeTables = append(r.routeTables, rt)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cached route tables")
 	}
 
-	cc.Status.ControlPlane.RouteTable.Mappings = mappings
+	cc.Status.ControlPlane.RouteTables = r.routeTables
 
 	return nil
 }
 
-func (r *Resource) lookup(ctx context.Context, client EC2, name string) (string, error) {
+func (r *Resource) lookup(ctx context.Context, client EC2, name string) (*ec2.RouteTable, error) {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route table ID for %#q", name))
 
 	i := &ec2.DescribeRouteTablesInput{
@@ -123,15 +118,15 @@ func (r *Resource) lookup(ctx context.Context, client EC2, name string) (string,
 
 	o, err := client.DescribeRouteTables(i)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 	if len(o.RouteTables) != 1 {
-		return "", microerror.Maskf(executionFailedError, "expected one route table, got %d", len(o.RouteTables))
+		return nil, microerror.Maskf(executionFailedError, "expected one route table, got %d", len(o.RouteTables))
 	}
 
-	id := *o.RouteTables[0].RouteTableId
+	rt := o.RouteTables[0]
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found route table ID %#q for %#q", id, name))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found route table for %#q", name))
 
-	return id, nil
+	return rt, nil
 }

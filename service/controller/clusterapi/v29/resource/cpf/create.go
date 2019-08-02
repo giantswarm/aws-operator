@@ -142,10 +142,10 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBac
 
 	var privateRoutes []template.ParamsMainRouteTablesRoute
 	{
-		for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+		for _, rt := range cc.Status.ControlPlane.RouteTables {
 			for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
 				route := template.ParamsMainRouteTablesRoute{
-					RouteTableID: id,
+					RouteTableID: *rt.RouteTableId,
 					// Requester CIDR block, we create the peering connection from the
 					// tenant's private subnets.
 					CidrBlock: az.Subnet.Private.CIDR.String(),
@@ -161,9 +161,9 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBac
 
 	var publicRoutes []template.ParamsMainRouteTablesRoute
 	if encrypterBackend == encrypter.VaultBackend {
-		for _, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+		for _, rt := range cc.Status.ControlPlane.RouteTables {
 			route := template.ParamsMainRouteTablesRoute{
-				RouteTableID: id,
+				RouteTableID: *rt.RouteTableId,
 				// Requester CIDR block, we create the peering connection from the
 				// tenant's CIDR for being able to access Vault's ELB.
 				CidrBlock: key.StatusClusterNetworkCIDR(cr),
