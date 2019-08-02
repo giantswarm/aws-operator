@@ -214,6 +214,10 @@ func StackNameTCNP(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
 }
 
+func StackNameTCNPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
 func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
 }

@@ -27,7 +27,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
-			StackName:                   aws.String(key.StackNameCPF(&cr)),
+			StackName:                   aws.String(key.StackNameTCNPF(&cr)),
 		}
 
 		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateTerminationProtection(i)
@@ -58,7 +58,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's node pool finalizer cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.StackNameCPF(&cr)),
+			StackName: aws.String(key.StackNameTCNPF(&cr)),
 		}
 
 		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DeleteStack(i)

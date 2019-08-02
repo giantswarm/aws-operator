@@ -36,7 +36,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's node pool finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameCPF(&cr)),
+			StackName: aws.String(key.StackNameTCNPF(&cr)),
 		}
 
 		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
@@ -84,7 +84,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		i := &cloudformation.CreateStackInput{
 			EnableTerminationProtection: aws.Bool(true),
-			StackName:                   aws.String(key.StackNameCPF(&cr)),
+			StackName:                   aws.String(key.StackNameTCNPF(&cr)),
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
@@ -101,7 +101,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's node pool finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameCPF(&cr)),
+			StackName: aws.String(key.StackNameTCNPF(&cr)),
 		}
 
 		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
