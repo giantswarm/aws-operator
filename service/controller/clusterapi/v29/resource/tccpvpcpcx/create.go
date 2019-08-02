@@ -38,7 +38,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &ec2.DescribeVpcPeeringConnectionsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("tag:requester-vpc-info.vpc-id"),
+					Name: aws.String("requester-vpc-info.vpc-id"),
 					Values: []*string{
 						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
 					},
