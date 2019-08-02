@@ -1,4 +1,4 @@
-package routetable
+package cproutetables
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 

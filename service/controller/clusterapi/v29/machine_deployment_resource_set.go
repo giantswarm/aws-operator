@@ -17,11 +17,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
@@ -113,15 +113,15 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var cpRouteTableResource controller.Resource
+	var cpRouteTablesResource controller.Resource
 	{
-		c := routetable.Config{
+		c := cproutetables.Config{
 			Logger: config.Logger,
 
 			Names: strings.Split(config.RouteTables, ","),
 		}
 
-		cpRouteTableResource, err = routetable.New(c)
+		cpRouteTablesResource, err = cproutetables.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -299,7 +299,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		cpRouteTableResource,
+		cpRouteTablesResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
