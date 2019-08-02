@@ -23,7 +23,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
@@ -210,13 +210,13 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSubnetResource controller.Resource
+	var tccpSubnetsResource controller.Resource
 	{
-		c := tccpsubnet.Config{
+		c := tccpsubnets.Config{
 			Logger: config.Logger,
 		}
 
-		tccpSubnetResource, err = tccpsubnet.New(c)
+		tccpSubnetsResource, err = tccpsubnets.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -272,7 +272,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
-		tccpSubnetResource,
+		tccpSubnetsResource,
 		regionResource,
 		encryptionResource,
 		ipamResource,

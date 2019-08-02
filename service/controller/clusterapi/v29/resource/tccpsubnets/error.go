@@ -1,4 +1,4 @@
-package tccpsubnet
+package tccpsubnets
 
 import (
 	"github.com/giantswarm/microerror"
