@@ -402,14 +402,13 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 	}
 
 	var peeringConnections []template.ParamsMainVPCPeeringConnection
-	// TODO fix map iteration order issue
-	for name, id := range cc.Status.ControlPlane.RouteTable.Mappings {
+	for _, rt := range cc.Status.ControlPlane.RouteTables {
 		for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 			pc := template.ParamsMainVPCPeeringConnection{
 				ID:   cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name), name),
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name), valueForKey(rt.Tags, "Name")),
 				RouteTable: template.ParamsMainVPCPeeringConnectionRouteTable{
-					ID: id,
+					ID: *rt.RouteTableId,
 				},
 				Subnet: template.ParamsMainVPCPeeringConnectionSubnet{
 					CIDR: az.Subnet.Private.CIDR.String(),
