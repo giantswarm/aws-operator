@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
@@ -21,6 +22,7 @@ import (
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
 
@@ -53,6 +55,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	LabelSelector              ClusterConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
@@ -64,6 +67,11 @@ type ClusterConfig struct {
 	SSOPublicKey               string
 	VaultAddress               string
 	VPCPeerID                  string
+}
+
+type ClusterConfigLabelSelector struct {
+	Enabled          bool
+	OverridenVersion string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -111,6 +119,9 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			Logger:  config.Logger,
 			Watcher: config.CMAClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll),
 
+			ListOptions: metav1.ListOptions{
+				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
+			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: informer.DefaultResyncPeriod,
 		}
