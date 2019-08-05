@@ -14,13 +14,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	fmt.Printf("\n")
 	fmt.Printf("\n")
 	fmt.Printf("\n")
-	fmt.Printf("    err:  %#v\n", err)
-	fmt.Printf("    ReasonForError(err): %#v\n", errors.ReasonForError(err))
+	fmt.Printf("    err:  %#v\n", microerror.Cause(err))
+	fmt.Printf("    ReasonForError(err): %#v\n", errors.ReasonForError(microerror.Cause(err)))
 	fmt.Printf("    metav1.StatusReasonNotFound: %#v\n", metav1.StatusReasonNotFound)
 	fmt.Printf("\n")
 	fmt.Printf("\n")
 	fmt.Printf("\n")
-	if errors.IsNotFound(err) {
+	if IsNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
