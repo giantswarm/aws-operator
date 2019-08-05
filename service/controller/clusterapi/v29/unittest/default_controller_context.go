@@ -76,6 +76,9 @@ func DefaultContext() context.Context {
 					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCNPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
+							NATGateway: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway{
+								ID: "nat-gateway-id-eu-central-1a",
+							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -84,6 +87,9 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1c",
+							NATGateway: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway{
+								ID: "nat-gateway-id-eu-central-1c",
+							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -138,9 +144,6 @@ func DefaultContext() context.Context {
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
-							NATGateway: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway{
-								ID: "na-eu-central-1a",
-							},
 							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 									ID: "public-route-table-id-1a",
@@ -159,9 +162,6 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1b",
-							NATGateway: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway{
-								ID: "na-eu-central-1b",
-							},
 							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 									ID: "public-route-table-id-1b",
@@ -180,9 +180,6 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1c",
-							NATGateway: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway{
-								ID: "na-eu-central-1c",
-							},
 							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 									ID: "public-route-table-id-1c",
