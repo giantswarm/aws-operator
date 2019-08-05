@@ -40,6 +40,7 @@ type MachineDeploymentConfig struct {
 	LabelSelector              MachineDeploymentConfigLabelSelector
 	ProjectName                string
 	Route53Enabled             bool
+	RouteTables                string
 	VaultAddress               string
 	VPCPeerID                  string
 }
@@ -162,6 +163,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			IPAMNetworkRange:           config.IPAMNetworkRange,
 			ProjectName:                config.ProjectName,
 			Route53Enabled:             config.Route53Enabled,
+			RouteTables:                config.RouteTables,
 			VaultAddress:               config.VaultAddress,
 			VPCPeerID:                  config.VPCPeerID,
 		}

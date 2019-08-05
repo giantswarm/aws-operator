@@ -1,8 +1,6 @@
-package routetable
+package tccpvpcpcx
 
-import (
-	"github.com/giantswarm/microerror"
-)
+import "github.com/giantswarm/microerror"
 
 // executionFailedError is an error type for situations where Resource execution
 // cannot continue and must always fall back to operatorkit.
@@ -20,7 +18,7 @@ var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
 
-// IsInvalidConfig asserts invalidConfigError.
+// IsInsserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }

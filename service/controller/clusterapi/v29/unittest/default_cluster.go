@@ -25,7 +25,7 @@ func DefaultCluster() cmav1alpha1.Cluster {
 		Cluster: g8sv1alpha1.AWSClusterSpecCluster{
 			Description: "Test cluster for template rendering unit test.",
 			DNS: g8sv1alpha1.AWSClusterSpecClusterDNS{
-				Domain: "guux.eu-central-1.aws.gigantic.io",
+				Domain: "gauss.eu-central-1.aws.gigantic.io",
 			},
 		},
 		Provider: g8sv1alpha1.AWSClusterSpecProvider{

@@ -1,4 +1,4 @@
-package tccpvpcid
+package tccpvpcpcx
 
 import (
 	"github.com/giantswarm/microerror"
@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "tccpvpcidv29"
+	Name = "tccpvpcpcxv29"
 )
 
 type Config struct {

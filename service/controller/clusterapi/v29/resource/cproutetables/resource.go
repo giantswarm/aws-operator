@@ -1,4 +1,4 @@
-package routetable
+package cproutetables
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "routetablev29"
+	Name = "cproutetablesv29"
 )
 
 type Config struct {
@@ -57,7 +57,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addRouteTableMappingsToContext(ctx context.Context) error {
+func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 

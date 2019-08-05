@@ -266,6 +266,7 @@ func New(config Config) (*Service, error) {
 			},
 			ProjectName:    config.ProjectName,
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RouteTables:    config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			VaultAddress:   config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 			VPCPeerID:      config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
