@@ -430,15 +430,6 @@ func NewGenericServerResponse(code int, verb string, qualifiedResource schema.Gr
 
 // IsNotFound returns true if the specified error was created by NewNotFound.
 func IsNotFound(err error) bool {
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("    err:  %#v\n", err)
-	fmt.Printf("    ReasonForError(err): %#v\n", ReasonForError(err))
-	fmt.Printf("    metav1.StatusReasonNotFound: %#v\n", metav1.StatusReasonNotFound)
-	fmt.Printf("\n")
-	fmt.Printf("\n")
-	fmt.Printf("\n")
 	return ReasonForError(err) == metav1.StatusReasonNotFound
 }
 
@@ -584,11 +575,8 @@ func SuggestsClientDelay(err error) (int, bool) {
 func ReasonForError(err error) metav1.StatusReason {
 	switch t := err.(type) {
 	case APIStatus:
-		fmt.Printf("    t.Status(): %#v\n", t.Status())
-		fmt.Printf("    t.Status().Reason: %#v\n", t.Status().Reason)
 		return t.Status().Reason
 	default:
-		fmt.Printf("    t: %#v\n", t)
 	}
 	return metav1.StatusReasonUnknown
 }

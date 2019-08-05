@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
@@ -12,7 +11,7 @@ import (
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := r.toClusterFunc(obj)
-	if errors.IsNotFound(err) {
+	if IsNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
