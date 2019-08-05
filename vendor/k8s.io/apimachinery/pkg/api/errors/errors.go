@@ -576,7 +576,6 @@ func ReasonForError(err error) metav1.StatusReason {
 	switch t := err.(type) {
 	case APIStatus:
 		return t.Status().Reason
-	default:
 	}
 	return metav1.StatusReasonUnknown
 }
