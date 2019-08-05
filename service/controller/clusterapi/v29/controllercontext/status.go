@@ -78,13 +78,8 @@ type ContextStatusTenantClusterTCCPASG struct {
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
 	Name       string
-	NATGateway ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway
 	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
 	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
-}
-
-type ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway struct {
-	ID string
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {

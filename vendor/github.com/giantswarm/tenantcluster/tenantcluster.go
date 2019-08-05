@@ -2,6 +2,7 @@ package tenantcluster
 
 import (
 	"context"
+	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
@@ -19,8 +20,9 @@ type Config struct {
 	CertsSearcher certs.Interface
 	Logger        micrologger.Logger
 
-	CertID          certs.Cert
-	TillerNamespace string
+	CertID                       certs.Cert
+	EnsureTillerInstalledMaxWait time.Duration
+	TillerNamespace              string
 }
 
 // TenantCluster provides functionality for connecting to tenant clusters.
@@ -28,8 +30,9 @@ type TenantCluster struct {
 	certsSearcher certs.Interface
 	logger        micrologger.Logger
 
-	certID          certs.Cert
-	tillerNamespace string
+	certID                       certs.Cert
+	ensureTillerInstalledMaxWait time.Duration
+	tillerNamespace              string
 }
 
 // New creates a new tenant cluster service.
@@ -52,8 +55,9 @@ func New(config Config) (*TenantCluster, error) {
 		certsSearcher: config.CertsSearcher,
 		logger:        config.Logger,
 
-		certID:          config.CertID,
-		tillerNamespace: config.TillerNamespace,
+		certID:                       config.CertID,
+		ensureTillerInstalledMaxWait: config.EnsureTillerInstalledMaxWait,
+		tillerNamespace:              config.TillerNamespace,
 	}
 
 	return g, nil
@@ -96,8 +100,9 @@ func (g *TenantCluster) NewHelmClient(ctx context.Context, clusterID, apiDomain 
 		K8sClient: k8sClient,
 		Logger:    g.logger,
 
-		RestConfig:      restConfig,
-		TillerNamespace: g.tillerNamespace,
+		EnsureTillerInstalledMaxWait: g.ensureTillerInstalledMaxWait,
+		RestConfig:                   restConfig,
+		TillerNamespace:              g.tillerNamespace,
 	}
 	helmClient, err := helmclient.New(c)
 	if err != nil {

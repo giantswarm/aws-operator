@@ -2,6 +2,7 @@ package v29
 
 import (
 	"context"
+	"strings"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
@@ -16,17 +17,21 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpf"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -105,6 +110,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cpRouteTablesResource controller.Resource
+	{
+		c := cproutetables.Config{
+			Logger: config.Logger,
+
+			Names: strings.Split(config.RouteTables, ","),
+		}
+
+		cpRouteTablesResource, err = cproutetables.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -198,6 +217,19 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tccpVPCPCXResource controller.Resource
+	{
+		c := tccpvpcpcx.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		}
+
+		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpSecurityGroupsResource controller.Resource
 	{
 		c := tccpsecuritygroups.Config{
@@ -210,13 +242,25 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSubnetResource controller.Resource
+	var tccpRouteTablesResource controller.Resource
 	{
-		c := tccpsubnet.Config{
+		c := tccproutetables.Config{
 			Logger: config.Logger,
 		}
 
-		tccpSubnetResource, err = tccpsubnet.New(c)
+		tccpRouteTablesResource, err = tccproutetables.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetsResource controller.Resource
+	{
+		c := tccpsubnets.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetsResource, err = tccpsubnets.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -232,6 +276,20 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		tcnpResource, err = tcnp.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tcnpfResource controller.Resource
+	{
+		c := tcnpf.Config{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		tcnpfResource, err = tcnpf.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -254,7 +312,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var tccpVPCIDResource controller.Resource
 	{
 		c := tccpvpcid.Config{
-			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
@@ -266,19 +323,28 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	resources := []controller.Resource{
+		// All these resources only fetch information from remote APIs and put them
+		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		tccpVPCIDResource,
+		cpRouteTablesResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
-		tccpSubnetResource,
+		tccpVPCIDResource,
+		tccpVPCPCXResource,
+		tccpRouteTablesResource,
+		tccpSubnetsResource,
+		tccpAZsResource,
+		tcnpAZsResource,
+
+		// All these resources implement certain business logic and operate based on
+		// the information given in the controller context.
 		regionResource,
 		encryptionResource,
 		ipamResource,
-		tccpAZsResource,
-		tcnpAZsResource,
 		tcnpResource,
+		tcnpfResource,
 	}
 
 	{
@@ -315,10 +381,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		cc := controllercontext.Context{}
-		ctx = controllercontext.NewContext(ctx, cc)
-
-		return ctx, nil
+		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
 
 	var resourceSet *controller.ResourceSet

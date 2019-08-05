@@ -32,6 +32,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
+		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
+
 		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -46,10 +53,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
 			return nil
 		}
 	}
@@ -304,8 +310,6 @@ func newRouteTables(ctx context.Context, cr v1alpha1.MachineDeployment) (*templa
 		return nil, microerror.Mask(err)
 	}
 
-	natGatewayMapping := statusAZsToNATGatewayIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
-
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainRouteTablesListItem{
 			AvailabilityZone: a.Name,
@@ -315,7 +319,7 @@ func newRouteTables(ctx context.Context, cr v1alpha1.MachineDeployment) (*templa
 			},
 			TCCP: template.ParamsMainRouteTablesListItemTCCP{
 				NATGateway: template.ParamsMainRouteTablesListItemTCCPNATGateway{
-					ID: natGatewayMapping[a.Name],
+					ID: a.NATGateway.ID,
 				},
 				VPC: template.ParamsMainRouteTablesListItemTCCPVPC{
 					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
@@ -398,7 +402,20 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 	var routeTables []template.ParamsMainVPCRouteTable
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainVPCRouteTable{
-			Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
+				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
+					CIDR: cc.Status.ControlPlane.VPC.CIDR,
+				},
+			},
+			Route: template.ParamsMainVPCRouteTableRoute{
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
+			},
+			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
+			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
+				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+			},
 		}
 		routeTables = append(routeTables, r)
 	}
@@ -481,25 +498,6 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 	return params, nil
 }
 
-func statusAZsToNATGatewayIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
-	m := make(map[string]string)
-	for _, az := range azs {
-		m[az.Name] = az.NATGateway.ID
-	}
-	return m
-}
-
-func workerCountRatio(workers int, ratio float32) string {
-	value := float32(workers) * ratio
-	rounded := int(value + 0.5)
-
-	if rounded == 0 {
-		rounded = 1
-	}
-
-	return strconv.Itoa(rounded)
-}
-
 func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	for _, g := range groups {
 		if valueForKey(g.Tags, "Name") == name {
@@ -518,4 +516,15 @@ func valueForKey(tags []*ec2.Tag, key string) string {
 	}
 
 	return ""
+}
+
+func workerCountRatio(workers int, ratio float32) string {
+	value := float32(workers) * ratio
+	rounded := int(value + 0.5)
+
+	if rounded == 0 {
+		rounded = 1
+	}
+
+	return strconv.Itoa(rounded)
 }

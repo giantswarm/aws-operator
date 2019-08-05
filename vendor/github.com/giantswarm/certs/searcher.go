@@ -306,7 +306,7 @@ func (s *Searcher) search(tls *TLS, clusterID string, cert Cert) (*corev1.Secret
 		select {
 		case event, ok := <-watcher.ResultChan():
 			if !ok {
-				return nil, microerror.Maskf(executionError, "watching secrets, selector = %q: unexpected closed channel", selector)
+				return nil, microerror.Maskf(executionFailedError, "watching secrets, selector = %q: unexpected closed channel", selector)
 			}
 
 			switch event.Type {
@@ -321,7 +321,7 @@ func (s *Searcher) search(tls *TLS, clusterID string, cert Cert) (*corev1.Secret
 				// Noop. Ignore deleted events. These are
 				// handled by the certificate operator.
 			case watch.Error:
-				return nil, microerror.Maskf(executionError, "watching secrets, selector = %q: %v", selector, apierrors.FromObject(event.Object))
+				return nil, microerror.Maskf(executionFailedError, "watching secrets, selector = %q: %v", selector, apierrors.FromObject(event.Object))
 			}
 		case <-time.After(s.watchTimeout):
 			return nil, microerror.Maskf(timeoutError, "waiting secrets, selector = %q", selector)

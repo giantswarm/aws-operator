@@ -158,10 +158,11 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 // SanitizeCFResourceName filters out all non-ascii alphanumberics from input
 // string.
 //
-// Example: SanitizeCFResourceName("abc-123") == "abc123"
-// Example2: SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
+//     SanitizeCFResourceName("abc-123") == "abc123"
+//     SanitizeCFResourceName("abc", "123") == "abc123"
+//     SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
 //
-func SanitizeCFResourceName(v string) string {
+func SanitizeCFResourceName(l ...string) string {
 	var rs []rune
 
 	// Start with true to capitalize first character.
@@ -169,7 +170,7 @@ func SanitizeCFResourceName(v string) string {
 
 	// Iterate over unicode characters and add numbers and ASCII letters title
 	// cased.
-	for _, r := range []rune(v) {
+	for _, r := range []rune(strings.Join(l, "-")) {
 		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
 			if previousWasSkipped {
 				rs = append(rs, unicode.ToTitle(r))
@@ -211,6 +212,10 @@ func StackNameTCCP(getter LabelsGetter) string {
 
 func StackNameTCNP(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func StackNameTCNPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
 }
 
 func VPCPeeringRouteName(az string) string {

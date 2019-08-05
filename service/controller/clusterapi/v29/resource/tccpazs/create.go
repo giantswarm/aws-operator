@@ -22,7 +22,12 @@ import (
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := r.toClusterFunc(obj)
-	if err != nil {
+	if IsNotFound(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
@@ -86,11 +91,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Map subnet, route table and natgateway information to their corresponding availability
 	// zones based on the AWS API results.
 	{
-		azMapping, err = mapNATGateways(azMapping, cc.Status.TenantCluster.TCCP.NATGateways)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		azMapping, err = mapRouteTables(azMapping, cc.Status.TenantCluster.TCCP.RouteTables)
 		if err != nil {
 			return microerror.Mask(err)
@@ -254,27 +254,6 @@ func hasTags(tags []*ec2.Tag, keys ...string) bool {
 	return true
 }
 
-func mapNATGateways(azMapping map[string]mapping, natGateways []*ec2.NatGateway) (map[string]mapping, error) {
-	for _, gw := range natGateways {
-		if !hasTags(gw.Tags, key.TagTCCP) {
-			continue
-		}
-
-		for az, m := range azMapping {
-			if valueForKey(gw.Tags, key.TagAvailabilityZone) != az {
-				continue
-			}
-
-			m.Public.NATGateway.ID = *gw.NatGatewayId
-			m.Private.NATGateway.ID = *gw.NatGatewayId
-
-			azMapping[az] = m
-		}
-	}
-
-	return azMapping, nil
-}
-
 func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable) (map[string]mapping, error) {
 	for _, rt := range routeTables {
 		if !hasTags(rt.Tags, key.TagTCCP, key.TagRouteTableType) {
@@ -398,9 +377,6 @@ func newAZStatus(azMapping map[string]mapping) []controllercontext.ContextStatus
 		// Collect currently used AZ information to store it inside the cc status.
 		az := controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 			Name: name,
-			NATGateway: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneNATGateway{
-				ID: sp.Public.NATGateway.ID,
-			},
 			RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 				Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 					ID: sp.Public.RouteTable.ID,

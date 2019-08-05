@@ -47,7 +47,12 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d with body %s", resp.StatusCode, buf.String()))
+			// Github pages 404 produces full HTML page which
+			// obscures the logs.
+			if resp.StatusCode == http.StatusNotFound {
+				return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String()))
+			}
+			return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q with body %s", resp.StatusCode, req.URL.String(), buf.String()))
 		}
 
 		tmpfile, err := afero.TempFile(c.fs, "", "chart-tarball")
