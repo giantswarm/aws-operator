@@ -407,11 +407,11 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 					CIDR: cc.Status.ControlPlane.VPC.CIDR,
 				},
 			},
-			Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
-			Peering: template.ParamsMainVPCRouteTablePeering{
-				Route: template.ParamsMainVPCRouteTablePeeringRoute{
-					Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
-				},
+			Route: template.ParamsMainVPCRouteTableRoute{
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
+			},
+			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
 			},
 			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
 				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
