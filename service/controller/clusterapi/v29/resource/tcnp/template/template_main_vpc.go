@@ -5,8 +5,16 @@ const TemplateMainVPC = `
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
-      VpcId: {{ .VPC.TCCP.VPC.ID }}
       CidrBlock: {{ .VPC.TCNP.CIDR }}
+      VpcId: {{ .VPC.TCCP.VPC.ID }}
+  {{- range .VPC.RouteTables }}
+  {{ .Peering.Route.Name }}:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: {{ .ControlPlane.VPC.CIDR }}
+      RouteTableId: !Ref {{ .Name }}
+      VpcPeeringConnectionId: {{ .TenantCluster.PeeringConnectionID }}
+  {{- end }}
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:

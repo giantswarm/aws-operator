@@ -18,7 +18,30 @@ type ParamsMainVPCRegion struct {
 }
 
 type ParamsMainVPCRouteTable struct {
+	ControlPlane  ParamsMainVPCRouteTableControlPlane
+	Name          string
+	Peering       ParamsMainVPCRouteTablePeering
+	TenantCluster ParamsMainVPCRouteTableTenantCluster
+}
+
+type ParamsMainVPCRouteTableControlPlane struct {
+	VPC ParamsMainVPCRouteTableControlPlaneVPC
+}
+
+type ParamsMainVPCRouteTableControlPlaneVPC struct {
+	CIDR string
+}
+
+type ParamsMainVPCRouteTablePeering struct {
+	Route ParamsMainVPCRouteTablePeeringRoute
+}
+
+type ParamsMainVPCRouteTablePeeringRoute struct {
 	Name string
+}
+
+type ParamsMainVPCRouteTableTenantCluster struct {
+	PeeringConnectionID string
 }
 
 type ParamsMainVPCTCCP struct {
