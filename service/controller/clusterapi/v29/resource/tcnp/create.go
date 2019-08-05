@@ -32,6 +32,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
+		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
+
 		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -49,13 +56,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
-		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
 			return nil
 		}
 	}
