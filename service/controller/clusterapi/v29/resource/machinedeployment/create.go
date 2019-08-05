@@ -35,8 +35,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		if len(out.Items) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find machine deployment for cluster")
-
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find machine deployments for cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
 
