@@ -402,7 +402,20 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 	var routeTables []template.ParamsMainVPCRouteTable
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainVPCRouteTable{
-			Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
+				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
+					CIDR: cc.Status.ControlPlane.VPC.CIDR,
+				},
+			},
+			Route: template.ParamsMainVPCRouteTableRoute{
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
+			},
+			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
+			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
+				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+			},
 		}
 		routeTables = append(routeTables, r)
 	}

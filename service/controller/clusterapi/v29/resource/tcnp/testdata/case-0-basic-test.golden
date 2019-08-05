@@ -355,8 +355,20 @@ Resources:
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
-      VpcId: vpc-id
       CidrBlock: 10.100.8.0/24
+      VpcId: vpc-id
+  VPCPeeringRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.1.0.0/16
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      VpcPeeringConnectionId: peering-connection-id
+  VPCPeeringRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.1.0.0/16
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      VpcPeeringConnectionId: peering-connection-id
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
