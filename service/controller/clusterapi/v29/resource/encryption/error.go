@@ -3,6 +3,7 @@ package encryption
 import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 var invalidConfigError = &microerror.Error{
@@ -30,6 +31,10 @@ func IsNotFound(err error) bool {
 	}
 
 	if c == notFoundError {
+		return true
+	}
+
+	if errors.IsNotFound(c) {
 		return true
 	}
 

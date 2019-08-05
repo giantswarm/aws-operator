@@ -1,6 +1,9 @@
 package tccpazs
 
-import "github.com/giantswarm/microerror"
+import (
+	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/errors"
+)
 
 // executionFailedError is an error type for situations where Resource
 // execution cannot continue and must always fall back to operatorkit.
@@ -21,4 +24,14 @@ var invalidConfigError = &microerror.Error{
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
+}
+
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
+}
+
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	c := microerror.Cause(err)
+	return c == notFoundError || errors.IsNotFound(c)
 }
