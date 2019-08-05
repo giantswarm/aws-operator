@@ -21,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
@@ -32,7 +33,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/secretfinalizer"
@@ -40,7 +40,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 )
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -378,13 +379,25 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpSubnetResource controller.Resource
+	var tccpRouteTablesResource controller.Resource
 	{
-		c := tccpsubnet.Config{
+		c := tccproutetables.Config{
 			Logger: config.Logger,
 		}
 
-		tccpSubnetResource, err = tccpsubnet.New(c)
+		tccpRouteTablesResource, err = tccproutetables.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetsResource controller.Resource
+	{
+		c := tccpsubnets.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetsResource, err = tccpsubnets.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -464,15 +477,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var routeTableResource controller.Resource
+	var cpRouteTablesResource controller.Resource
 	{
-		c := routetable.Config{
+		c := cproutetables.Config{
 			Logger: config.Logger,
 
 			Names: strings.Split(config.RouteTables, ","),
 		}
 
-		routeTableResource, err = routetable.New(c)
+		cpRouteTablesResource, err = cproutetables.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -580,10 +593,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
-		routeTableResource,
+		cpRouteTablesResource,
 		vpcCIDRResource,
 		tccpOutputsResource,
-		tccpSubnetResource,
+		tccpRouteTablesResource,
+		tccpSubnetsResource,
 		regionResource,
 		asgStatusResource,
 		ipamResource,

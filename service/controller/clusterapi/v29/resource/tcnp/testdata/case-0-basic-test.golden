@@ -199,7 +199,7 @@ Resources:
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
       Tags:
       - Key: Name
         Value: PrivateRouteTableEuCentral1a
@@ -218,7 +218,7 @@ Resources:
   PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
       Tags:
       - Key: Name
         Value: PrivateRouteTableEuCentral1c
@@ -274,23 +274,23 @@ Resources:
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        SourceSecurityGroupId: ingressSecurityGroupID
+        SourceSecurityGroupId: ingress-security-group-id
       -
         Description: Allow traffic from the ingress security group to 80 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        SourceSecurityGroupId: ingressSecurityGroupID
+        SourceSecurityGroupId: ingress-security-group-id
       Tags:
         - Key: Name
           Value: GeneralSecurityGroup
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
     Properties:
       Description: Allow traffic from the TCNP General Security Group to the TCCP Master Security Group.
-      GroupId: masterSecurityGroupID
+      GroupId: master-security-group-id
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
@@ -314,7 +314,7 @@ Resources:
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
-      SourceSecurityGroupId: masterSecurityGroupID
+      SourceSecurityGroupId: master-security-group-id
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
@@ -327,7 +327,7 @@ Resources:
         Value: PrivateSubnetEuCentral1a
       - Key: "kubernetes.io/role/elb"
         Value: "1"
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -345,7 +345,7 @@ Resources:
         Value: PrivateSubnetEuCentral1c
       - Key: "kubernetes.io/role/elb"
         Value: "1"
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -355,12 +355,12 @@ Resources:
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
       CidrBlock: 10.100.8.0/24
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
-      VpcId: imagenary-vpc-id
+      VpcId: vpc-id
       RouteTableIds:
         - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1c

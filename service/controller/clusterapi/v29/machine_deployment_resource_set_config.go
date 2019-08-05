@@ -29,6 +29,7 @@ type MachineDeploymentResourceSetConfig struct {
 	IPAMNetworkRange           net.IPNet
 	ProjectName                string
 	Route53Enabled             bool
+	RouteTables                string
 	VaultAddress               string
 	VPCPeerID                  string
 }

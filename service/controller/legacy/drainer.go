@@ -11,14 +11,16 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v25"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v27"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29"
+	"github.com/giantswarm/aws-operator/service/controller/key"
+	v25 "github.com/giantswarm/aws-operator/service/controller/legacy/v25"
+	v26 "github.com/giantswarm/aws-operator/service/controller/legacy/v26"
+	v27 "github.com/giantswarm/aws-operator/service/controller/legacy/v27"
+	v28 "github.com/giantswarm/aws-operator/service/controller/legacy/v28"
+	v29 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 )
 
 type DrainerConfig struct {
@@ -30,6 +32,7 @@ type DrainerConfig struct {
 	GuestAWSConfig     DrainerConfigAWS
 	GuestUpdateEnabled bool
 	HostAWSConfig      DrainerConfigAWS
+	LabelSelector      DrainerConfigLabelSelector
 	ProjectName        string
 	Route53Enabled     bool
 }
@@ -39,6 +42,11 @@ type DrainerConfigAWS struct {
 	AccessKeySecret string
 	Region          string
 	SessionToken    string
+}
+
+type DrainerConfigLabelSelector struct {
+	Enabled          bool
+	OverridenVersion string
 }
 
 type Drainer struct {
@@ -71,6 +79,9 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			Logger:  config.Logger,
 			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
 
+			ListOptions: metav1.ListOptions{
+				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
+			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: 30 * time.Second,
 		}
