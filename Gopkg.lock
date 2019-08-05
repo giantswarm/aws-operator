@@ -208,14 +208,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dcfaf4cfe8fa35db5d0a21d8c49e2cf9df7a640fae6d3b0c29682aaf3de2b4ff"
+  digest = "1:74c6d660f315b1b825aa719e8aa9668705713d13f82a3e63fa4ddaae1e2b2e45"
   name = "github.com/giantswarm/certs"
   packages = [
     ".",
     "certstest",
   ]
   pruneopts = "UT"
-  revision = "ef12e78114374a154e8264615664255fd28949a7"
+  revision = "645efb99af631627de84ed3a5e6ed4572d3004fa"
 
 [[projects]]
   branch = "master"
@@ -425,14 +425,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:09d4702e03cfa59eb4f9171ca51948cd24809b33a06ff3ab254e91b606bcec13"
+  digest = "1:8f7bf3d00b0e4c6ab5499ec00e96a7cac0f1e13673dc04e034a57457db76ad0e"
   name = "github.com/giantswarm/randomkeys"
   packages = [
     ".",
     "randomkeystest",
   ]
   pruneopts = "UT"
-  revision = "7ce5c5accc2e7896575fac81721e1218a966a380"
+  revision = "ade67414406dbdf333012fe7f67ebbb747615fa9"
 
 [[projects]]
   branch = "master"
