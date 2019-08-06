@@ -20,16 +20,16 @@ import (
 
 var update = flag.Bool("update", false, "update .golden CF template file")
 
-// Test_newTemplateBody tests tenant cluster CloudFormation template rendering.
-// It is meant to be used as a tool to easily check resulting CF template and
-// prevent from accidental CF template changes.
+// Test_Controller_Resource_TCCP_Template_Render tests tenant cluster
+// CloudFormation template rendering. It is meant to be used as a tool to easily
+// check resulting CF template and prevent from accidental CF template changes.
 //
 // It uses golden file as reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
-//  go test ./service/controller/clusterapi/v29/resource/tccp -run Test_newTemplateBody -update
+//  go test ./service/controller/clusterapi/v29/resource/tccp -run Test_Controller_Resource_TCCP_Template_Render -update
 //
-func Test_newTemplateBody(t *testing.T) {
+func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name         string
 		cr           v1alpha1.Cluster
