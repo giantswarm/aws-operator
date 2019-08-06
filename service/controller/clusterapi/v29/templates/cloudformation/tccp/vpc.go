@@ -14,20 +14,16 @@ const VPC = `
         Value: {{ $v.ClusterID }}
       - Key: Installation
         Value: {{ $v.InstallationName }}
-      - Key: giantswarm.io/tccp
-        Value: true
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: {{ $v.PeerVPCID }}
-      PeerOwnerId: '{{ $v.HostAccountID }}'
+      PeerOwnerId: {{ $v.HostAccountID }}
       PeerRoleArn: {{ $v.PeerRoleArn }}
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}
-        - Key: giantswarm.io/tccp
-          Value: true
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
@@ -41,7 +37,7 @@ const VPC = `
         Version: "2012-10-17"
         Statement:
           - Sid: "{{ $v.ClusterID }}-vpc-s3-endpoint-policy-bucket"
-            Principal : "*"
+            Principal: "*"
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:{{ $v.RegionARN }}:s3:::*"

@@ -15,8 +15,6 @@ const RouteTables = `
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
   {{- end }}
   {{- range $v.PrivateRouteTableNames }}
   {{ .ResourceName }}:
@@ -30,8 +28,6 @@ const RouteTables = `
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   {{ .VPCPeeringRouteName }}:
     Type: AWS::EC2::Route
     Properties:

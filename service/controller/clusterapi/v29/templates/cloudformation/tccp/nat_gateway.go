@@ -19,8 +19,6 @@ const NatGateway = `
           Value: {{ .ClusterID }}
         - Key: giantswarm.io/availability-zone
           Value: {{ .AvailabilityZone }}
-        - Key: giantswarm.io/tccp
-          Value: true
   {{ .NATEIPName }}:
     Type: AWS::EC2::EIP
     Properties:
