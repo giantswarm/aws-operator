@@ -327,6 +327,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
+		regionResource,
 		cpRouteTablesResource,
 		cpVPCCIDRResource,
 		tccpNATGatewaysResource,
@@ -340,7 +341,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
-		regionResource,
 		encryptionResource,
 		ipamResource,
 		tcnpResource,

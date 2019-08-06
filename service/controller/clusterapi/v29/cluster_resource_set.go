@@ -19,7 +19,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
@@ -39,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpf"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
@@ -419,15 +419,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cpiResource controller.Resource
+	var tccpiResource controller.Resource
 	{
-		c := cpi.Config{
+		c := tccpi.Config{
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
 
-		cpiResource, err = cpi.New(c)
+		tccpiResource, err = tccpi.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -588,6 +588,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	resources := []controller.Resource{
+		// All these resources only fetch information from remote APIs and put them
+		// into the controller context.
 		awsClientResource,
 		machineDeploymentResource,
 		accountIDResource,
@@ -600,6 +602,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpSubnetsResource,
 		regionResource,
 		asgStatusResource,
+
+		// All these resources implement certain business logic and operate based on
+		// the information given in the controller context.
 		ipamResource,
 		bridgeZoneResource,
 		encryptionResource,
@@ -607,8 +612,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		s3ObjectResource,
 		loadBalancerResource,
 		ebsVolumeResource,
-		cpiResource,
 		tccpAZsResource,
+		tccpiResource,
 		tccpResource,
 		tccpfResource,
 		namespaceResource,

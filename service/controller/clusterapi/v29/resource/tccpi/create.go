@@ -1,4 +1,4 @@
-package cpi
+package tccpi
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpi/template"
 )
 
 const (
@@ -31,7 +31,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameCPI(&cr)),
+			StackName: aws.String(key.StackNameTCCPI(&cr)),
 		}
 
 		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
@@ -89,7 +89,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(true),
-			StackName:                   aws.String(key.StackNameCPI(&cr)),
+			StackName:                   aws.String(key.StackNameTCCPI(&cr)),
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
@@ -106,7 +106,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane initializer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameCPI(&cr)),
+			StackName: aws.String(key.StackNameTCCPI(&cr)),
 		}
 
 		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
