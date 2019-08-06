@@ -21,6 +21,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
+// MaxAZs is the maximum number of availability zones allowed for a tenant
+// cluster. The major factor causing this limitation is the current IPAM
+// implementation. It restricts network sizes in a certain way. Another related
+// problem is restrictions in AWS resource structure.
+const MaxAZs = 4
+
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := r.toClusterFunc(obj)
 	if IsNotFound(err) {
@@ -141,7 +147,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
-	clusterAZSubnets, err := ipam.Split(tccpSubnet, key.MaximumNumberOfAZsInCluster)
+	clusterAZSubnets, err := ipam.Split(tccpSubnet, MaxAZs)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
