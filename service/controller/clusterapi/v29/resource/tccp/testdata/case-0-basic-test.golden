@@ -978,7 +978,11 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: vpc-f8d0e10b
-      PeerOwnerId: control-plane-account
+      # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
+      # to properly deal with that by its own so the configured value must be
+      # quoted in order to ensure the peer owner id is properly handled as
+      # string. Otherwise stack creation fails.
+      PeerOwnerId: "control-plane-account"
       PeerRoleArn: peer-role-arn
       Tags:
         - Key: Name
@@ -994,7 +998,7 @@ Resources:
         - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
         - !Ref PrivateRouteTableEuCentral1c
-      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"
         Statement:

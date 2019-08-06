@@ -19,7 +19,11 @@ const VPC = `
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: {{ $v.PeerVPCID }}
-      PeerOwnerId: {{ $v.HostAccountID }}
+      # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
+      # to properly deal with that by its own so the configured value must be
+      # quoted in order to ensure the peer owner id is properly handled as
+      # string. Otherwise stack creation fails.
+      PeerOwnerId: "{{ $v.HostAccountID }}"
       PeerRoleArn: {{ $v.PeerRoleArn }}
       Tags:
         - Key: Name
@@ -32,7 +36,7 @@ const VPC = `
         {{- range $v.RouteTableNames }}
         - !Ref {{ .ResourceName }}
         {{- end}}
-      ServiceName: 'com.amazonaws.{{ $v.Region }}.s3'
+      ServiceName: com.amazonaws.{{ $v.Region }}.s3
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
