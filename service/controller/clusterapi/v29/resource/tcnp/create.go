@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp/template"
@@ -499,18 +500,8 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 
 func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	for _, g := range groups {
-		if valueForKey(g.Tags, "Name") == name {
+		if awstags.ValueForKey(g.Tags, "Name") == name {
 			return *g.GroupId
-		}
-	}
-
-	return ""
-}
-
-func valueForKey(tags []*ec2.Tag, key string) string {
-	for _, t := range tags {
-		if *t.Key == key {
-			return *t.Value
 		}
 	}
 

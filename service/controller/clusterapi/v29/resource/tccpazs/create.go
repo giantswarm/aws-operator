@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
@@ -234,41 +235,21 @@ func azSubnetsToString(azMapping map[string]mapping) string {
 	return result.String()
 }
 
-func hasTag(tags []*ec2.Tag, key string) bool {
-	for _, t := range tags {
-		if *t.Key == key {
-			return true
-		}
-	}
-
-	return false
-}
-
-func hasTags(tags []*ec2.Tag, keys ...string) bool {
-	for _, k := range keys {
-		if !hasTag(tags, k) {
-			return false
-		}
-	}
-
-	return true
-}
-
 func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable) (map[string]mapping, error) {
 	for _, rt := range routeTables {
-		if !hasTags(rt.Tags, key.TagRouteTableType) {
+		if !awstags.HasTags(rt.Tags, key.TagRouteTableType) {
 			continue
 		}
-		if valueForKey(rt.Tags, key.TagStack) != key.StackTCCP {
+		if awstags.ValueForKey(rt.Tags, key.TagStack) != key.StackTCCP {
 			continue
 		}
 
 		for az, m := range azMapping {
-			if valueForKey(rt.Tags, key.TagAvailabilityZone) != az {
+			if awstags.ValueForKey(rt.Tags, key.TagAvailabilityZone) != az {
 				continue
 			}
 
-			switch t := valueForKey(rt.Tags, key.TagRouteTableType); {
+			switch t := awstags.ValueForKey(rt.Tags, key.TagRouteTableType); {
 			case t == "public":
 				m.Public.RouteTable.ID = *rt.RouteTableId
 			case t == "private":
@@ -285,10 +266,10 @@ func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable)
 
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
 	for _, s := range subnets {
-		if !hasTags(s.Tags, key.TagSubnetType) {
+		if !awstags.HasTags(s.Tags, key.TagSubnetType) {
 			continue
 		}
-		if valueForKey(s.Tags, key.TagStack) != key.StackTCCP {
+		if awstags.ValueForKey(s.Tags, key.TagStack) != key.StackTCCP {
 			continue
 		}
 
@@ -299,7 +280,7 @@ func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string
 
 		m := azMapping[*s.AvailabilityZone]
 
-		switch t := valueForKey(s.Tags, key.TagSubnetType); {
+		switch t := awstags.ValueForKey(s.Tags, key.TagSubnetType); {
 		case t == "public":
 			m.Public.Subnet.ID = *s.SubnetId
 			m.Public.Subnet.CIDR = *cidr
@@ -404,14 +385,4 @@ func newAZStatus(azMapping map[string]mapping) []controllercontext.ContextStatus
 	}
 
 	return status
-}
-
-func valueForKey(tags []*ec2.Tag, key string) string {
-	for _, t := range tags {
-		if *t.Key == key {
-			return *t.Value
-		}
-	}
-
-	return ""
 }
