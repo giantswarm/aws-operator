@@ -117,10 +117,9 @@ func hasTags(tags []*ec2.Tag, keys ...string) bool {
 
 func natGatewayForAvailabilityZone(natGateways []*ec2.NatGateway, availabilityZone string) *ec2.NatGateway {
 	for _, ng := range natGateways {
-		if !hasTags(ng.Tags, key.TagTCCP) {
+		if valueForKey(ng.Tags, key.TagStack) != key.StackTCCP {
 			continue
 		}
-
 		if valueForKey(ng.Tags, key.TagAvailabilityZone) != availabilityZone {
 			continue
 		}

@@ -52,10 +52,18 @@ const (
 	TagAvailabilityZone = "giantswarm.io/availability-zone"
 	TagCluster          = "giantswarm.io/cluster"
 	TagRouteTableType   = "giantswarm.io/route-table-type"
+	TagStack            = "giantswarm.io/stack"
 	TagSubnetType       = "giantswarm.io/subnet-type"
 	TagInstallation     = "giantswarm.io/installation"
 	TagOrganization     = "giantswarm.io/organization"
-	TagTCCP             = "giantswarm.io/tccp"
+)
+
+const (
+	StackCPI   = "cpi"
+	StackCPF   = "cpf"
+	StackTCCP  = "tccp"
+	StackTCNP  = "tcnp"
+	StackTCNPF = "tcnpf"
 )
 
 const (

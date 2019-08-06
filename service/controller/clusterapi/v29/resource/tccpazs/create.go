@@ -256,7 +256,10 @@ func hasTags(tags []*ec2.Tag, keys ...string) bool {
 
 func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable) (map[string]mapping, error) {
 	for _, rt := range routeTables {
-		if !hasTags(rt.Tags, key.TagTCCP, key.TagRouteTableType) {
+		if !hasTags(rt.Tags, key.TagRouteTableType) {
+			continue
+		}
+		if valueForKey(rt.Tags, key.TagStack) != key.StackTCCP {
 			continue
 		}
 
@@ -282,7 +285,10 @@ func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable)
 
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
 	for _, s := range subnets {
-		if !hasTags(s.Tags, key.TagTCCP, key.TagSubnetType) {
+		if !hasTags(s.Tags, key.TagSubnetType) {
+			continue
+		}
+		if valueForKey(s.Tags, key.TagStack) != key.StackTCCP {
 			continue
 		}
 

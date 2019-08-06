@@ -209,7 +209,6 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		MaxSize:               key.WorkerScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
 		MinSize:               key.WorkerScalingMin(cr),
-		Name:                  key.MachineDeploymentASGName(&cr),
 		Subnets:               subnets,
 	}
 

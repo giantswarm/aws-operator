@@ -16,15 +16,6 @@ import (
 // implementation.
 const MaxNumberOfAZs = 4
 
-var AZLetters []byte
-
-func init() {
-	alphabets := "abcdefghijklmnopqrstuvwxyz"
-	for i := 0; i < MaxNumberOfAZs && i < len(alphabets); i++ {
-		AZLetters = append(AZLetters, alphabets[i])
-	}
-}
-
 func SortedWorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
 	azs := WorkerAvailabilityZones(cr)
 

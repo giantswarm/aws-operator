@@ -31,8 +31,6 @@ const SecurityGroups = `
       Tags:
         - Key: Name
           Value:  {{ $v.MasterSecurityGroupName }}
-        - Key: giantswarm.io/tccp
-          Value: true
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -53,8 +51,6 @@ const SecurityGroups = `
       Tags:
         - Key: Name
           Value:  {{ $v.WorkerSecurityGroupName }}
-        - Key: giantswarm.io/tccp
-          Value: true
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -71,8 +67,6 @@ const SecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.IngressSecurityGroupName }}
-        - Key: giantswarm.io/tccp
-          Value: true
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -89,8 +83,6 @@ const SecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.EtcdELBSecurityGroupName }}
-        - Key: giantswarm.io/tccp
-          Value: true
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:
