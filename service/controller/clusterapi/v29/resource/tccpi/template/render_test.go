@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_Controller_Resource_CPI_Template_Render(t *testing.T) {
+func Test_Controller_Resource_TCCPI_Template_Render(t *testing.T) {
 	var err error
 
 	var params *ParamsMain

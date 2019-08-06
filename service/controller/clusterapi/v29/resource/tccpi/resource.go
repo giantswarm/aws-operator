@@ -1,4 +1,4 @@
-package cpi
+package tccpi
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -12,7 +12,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cpiv29"
+	Name = "tccpiv29"
 )
 
 type Config struct {
@@ -50,6 +50,6 @@ func (r *Resource) Name() string {
 
 func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
-	tags[key.TagStack] = key.StackCPI
+	tags[key.TagStack] = key.StackTCCPI
 	return awstags.NewCloudFormation(tags)
 }
