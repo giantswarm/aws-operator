@@ -50,12 +50,6 @@ Resources:
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: 8y5ck-worker
-          PropagateAtLaunch: true
-        - Key: giantswarm.io/tccp
-          Value: true
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -261,10 +255,6 @@ Resources:
       Device: /dev/xvdf
   InternetGateway:
     Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: 8y5ck
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
@@ -470,8 +460,6 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1a
       Tags:
-        - Key: Name
-          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1a
   NATEIPEuCentral1a:
@@ -496,8 +484,6 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1b
       Tags:
-        - Key: Name
-          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1b
   NATEIPEuCentral1b:
@@ -522,8 +508,6 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1c
       Tags:
-        - Key: Name
-          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1c
   NATEIPEuCentral1c:
@@ -544,8 +528,6 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-public-eu-central-1a
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
@@ -555,8 +537,6 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-public-eu-central-1b
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1b
       - Key: giantswarm.io/route-table-type
@@ -566,8 +546,6 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-public-eu-central-1c
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
@@ -577,8 +555,6 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1a
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
@@ -595,8 +571,6 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1b
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1b
       - Key: giantswarm.io/route-table-type
@@ -613,8 +587,6 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1c
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type

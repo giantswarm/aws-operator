@@ -37,9 +37,6 @@ Resources:
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: cluster-8y5ck-tcnp-al9qy
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -201,8 +198,6 @@ Resources:
     Properties:
       VpcId: vpc-id
       Tags:
-      - Key: Name
-        Value: PrivateRouteTableEuCentral1a
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
@@ -218,8 +213,6 @@ Resources:
     Properties:
       VpcId: vpc-id
       Tags:
-      - Key: Name
-        Value: PrivateRouteTableEuCentral1c
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
@@ -316,8 +309,6 @@ Resources:
       CidrBlock: 10.100.3.0/27
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1a
       - Key: kubernetes.io/role/elb
         Value: 1
       VpcId: vpc-id
@@ -334,8 +325,6 @@ Resources:
       CidrBlock: 10.100.3.64/27
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1c
       - Key: kubernetes.io/role/elb
         Value: 1
       VpcId: vpc-id

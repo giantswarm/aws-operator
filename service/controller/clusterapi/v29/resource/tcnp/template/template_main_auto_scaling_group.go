@@ -27,9 +27,6 @@ const TemplateMainAutoScalingGroup = `
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: {{ .AutoScalingGroup.Name }}
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false

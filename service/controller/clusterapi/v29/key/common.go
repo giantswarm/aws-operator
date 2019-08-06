@@ -73,10 +73,6 @@ func ImageID(region string) string {
 	return imageIDs()[region]
 }
 
-func MachineDeploymentASGName(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
-}
-
 func MachineDeploymentID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.MachineDeployment]
 }

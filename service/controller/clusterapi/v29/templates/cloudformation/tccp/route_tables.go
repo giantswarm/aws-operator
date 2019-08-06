@@ -9,8 +9,6 @@ const RouteTables = `
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: {{ .TagName }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
@@ -22,8 +20,6 @@ const RouteTables = `
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: {{ .TagName }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
