@@ -49,8 +49,8 @@ const (
 
 const (
 	StackCPI   = "cpi"
-	StackCPF   = "cpf"
 	StackTCCP  = "tccp"
+	StackTCCPF = "tccpf"
 	StackTCNP  = "tcnp"
 	StackTCNPF = "tcnpf"
 )
