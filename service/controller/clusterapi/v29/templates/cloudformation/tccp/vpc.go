@@ -9,11 +9,6 @@ const VPC = `
       CidrBlock: {{ $v.CidrBlock }}
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
-      Tags:
-      - Key: Name
-        Value: {{ $v.ClusterID }}
-      - Key: Installation
-        Value: {{ $v.InstallationName }}
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
@@ -25,9 +20,6 @@ const VPC = `
       # string. Otherwise stack creation fails.
       PeerOwnerId: "{{ $v.HostAccountID }}"
       PeerRoleArn: {{ $v.PeerRoleArn }}
-      Tags:
-        - Key: Name
-          Value: {{ $v.ClusterID }}
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:

@@ -34,9 +34,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("tag:Name"),
+					Name: aws.String(key.TagCluster),
 					Values: []*string{
 						aws.String(key.ClusterID(&cr)),
+					},
+				},
+				{
+					Name: aws.String(key.TagStack),
+					Values: []*string{
+						aws.String(key.StackTCCP),
 					},
 				},
 			},
