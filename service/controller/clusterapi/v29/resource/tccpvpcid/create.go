@@ -40,7 +40,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					},
 				},
 				{
-					Name: aws.String(key.TagStack),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
 					Values: []*string{
 						aws.String(key.StackTCCP),
 					},
