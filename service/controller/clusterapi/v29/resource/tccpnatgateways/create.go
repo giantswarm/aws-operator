@@ -34,7 +34,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &ec2.DescribeNatGatewaysInput{
 			Filter: []*ec2.Filter{
 				{
-					Name: aws.String(key.TagCluster),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
 						aws.String(key.ClusterID(&cr)),
 					},
