@@ -19,7 +19,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
@@ -39,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
@@ -403,9 +403,9 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cpfResource controller.Resource
+	var tccpfResource controller.Resource
 	{
-		c := cpf.Config{
+		c := tccpf.Config{
 			Logger: config.Logger,
 
 			EncrypterBackend: config.EncrypterBackend,
@@ -413,7 +413,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Route53Enabled:   config.Route53Enabled,
 		}
 
-		cpfResource, err = cpf.New(c)
+		tccpfResource, err = tccpf.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -610,7 +610,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		cpiResource,
 		tccpAZsResource,
 		tccpResource,
-		cpfResource,
+		tccpfResource,
 		namespaceResource,
 		serviceResource,
 		endpointsResource,

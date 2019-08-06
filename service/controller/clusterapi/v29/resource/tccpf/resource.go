@@ -1,4 +1,4 @@
-package cpf
+package tccpf
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -12,7 +12,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "cpfv29"
+	Name = "tccpfv29"
 )
 
 type Config struct {
@@ -23,9 +23,9 @@ type Config struct {
 	Route53Enabled   bool
 }
 
-// Resource implements the CPF resource, which stands for Control Plane
-// Finalizer. This was formerly known as the host post stack. We manage a
-// dedicated CF stack for the record sets and routing tables setup.
+// Resource implements the TCCPF resource, which stands for Tenant Cluster
+// Control Plane Finalizer. This was formerly known as the host main stack. We
+// manage a dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
 	logger micrologger.Logger
 
@@ -60,6 +60,6 @@ func (r *Resource) Name() string {
 
 func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
-	tags[key.TagStack] = key.StackCPF
+	tags[key.TagStack] = key.StackTCCPF
 	return awstags.NewCloudFormation(tags)
 }

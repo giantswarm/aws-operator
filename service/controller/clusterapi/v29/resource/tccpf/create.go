@@ -1,4 +1,4 @@
-package cpf
+package tccpf
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpf/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

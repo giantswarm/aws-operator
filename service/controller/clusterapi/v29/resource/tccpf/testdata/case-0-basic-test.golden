@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Control Plane Finalizer Cloud Formation Stack.
+Description: Tenant Cluster Control Plane Finalizer Cloud Formation Stack.
 Resources:
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'
