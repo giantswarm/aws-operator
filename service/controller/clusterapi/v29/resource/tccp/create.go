@@ -278,6 +278,7 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.Cluster, templat
 
 func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
+	tags[key.TagStack] = key.StackTCCP
 	return awstags.NewCloudFormation(tags)
 }
 

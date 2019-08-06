@@ -207,8 +207,6 @@ Resources:
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   NATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
@@ -226,8 +224,6 @@ Resources:
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
@@ -281,9 +277,6 @@ Resources:
         FromPort: 30010
         ToPort: 30010
         SourceSecurityGroupId: ingress-security-group-id
-      Tags:
-        - Key: Name
-          Value: GeneralSecurityGroup
       VpcId: vpc-id
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -325,8 +318,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnetEuCentral1a
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
@@ -343,8 +336,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnetEuCentral1c
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1c:

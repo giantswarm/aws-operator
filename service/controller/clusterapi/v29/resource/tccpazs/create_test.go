@@ -418,8 +418,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),
@@ -449,8 +449,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),
@@ -480,8 +480,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),
@@ -495,8 +495,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),
@@ -510,8 +510,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),
@@ -555,8 +555,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),
@@ -570,8 +570,8 @@ func Test_mapSubnets(t *testing.T) {
 					SubnetId:         to.StringP("validID"),
 					Tags: []*ec2.Tag{
 						{
-							Key:   to.StringP(key.TagTCCP),
-							Value: to.StringP("true"),
+							Key:   to.StringP(key.TagStack),
+							Value: to.StringP(key.StackTCCP),
 						},
 						{
 							Key:   to.StringP(key.TagSubnetType),

@@ -49,9 +49,6 @@ const TemplateMainSecurityGroups = `
         FromPort: 30010
         ToPort: 30010
         SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Ingress.ID }}
-      Tags:
-        - Key: Name
-          Value: GeneralSecurityGroup
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
