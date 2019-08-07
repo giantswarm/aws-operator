@@ -393,55 +393,6 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	return &subnets, nil
 }
 
-func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainVPC, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var routeTables []template.ParamsMainVPCRouteTable
-	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-		r := template.ParamsMainVPCRouteTable{
-			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
-				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
-					CIDR: cc.Status.ControlPlane.VPC.CIDR,
-				},
-			},
-			Route: template.ParamsMainVPCRouteTableRoute{
-				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
-			},
-			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
-				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
-			},
-			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
-				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-			},
-		}
-		routeTables = append(routeTables, r)
-	}
-
-	vpc := &template.ParamsMainVPC{
-		Cluster: template.ParamsMainVPCCluster{
-			ID: key.ClusterID(&cr),
-		},
-		Region: template.ParamsMainVPCRegion{
-			ARN:  key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			Name: cc.Status.TenantCluster.AWS.Region,
-		},
-		RouteTables: routeTables,
-		TCCP: template.ParamsMainVPCTCCP{
-			VPC: template.ParamsMainVPCTCCPVPC{
-				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
-			},
-		},
-		TCNP: template.ParamsMainVPCTCNP{
-			CIDR: key.WorkerSubnet(cr),
-		},
-	}
-
-	return vpc, nil
-}
-
 func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
@@ -496,6 +447,55 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 	}
 
 	return params, nil
+}
+
+func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainVPC, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var routeTables []template.ParamsMainVPCRouteTable
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		r := template.ParamsMainVPCRouteTable{
+			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
+				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
+					CIDR: cc.Status.ControlPlane.VPC.CIDR,
+				},
+			},
+			Route: template.ParamsMainVPCRouteTableRoute{
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
+			},
+			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
+			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
+				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+			},
+		}
+		routeTables = append(routeTables, r)
+	}
+
+	vpc := &template.ParamsMainVPC{
+		Cluster: template.ParamsMainVPCCluster{
+			ID: key.ClusterID(&cr),
+		},
+		Region: template.ParamsMainVPCRegion{
+			ARN:  key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			Name: cc.Status.TenantCluster.AWS.Region,
+		},
+		RouteTables: routeTables,
+		TCCP: template.ParamsMainVPCTCCP{
+			VPC: template.ParamsMainVPCTCCPVPC{
+				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+			},
+		},
+		TCNP: template.ParamsMainVPCTCNP{
+			CIDR: key.WorkerSubnet(cr),
+		},
+	}
+
+	return vpc, nil
 }
 
 func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
