@@ -354,7 +354,6 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	}
 
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.Private.CIDR.String(),
