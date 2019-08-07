@@ -5,15 +5,23 @@ const TemplateMainVPC = `
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
-      VpcId: {{ .VPC.TCCP.VPC.ID }}
       CidrBlock: {{ .VPC.TCNP.CIDR }}
+      VpcId: {{ .VPC.TCCP.VPC.ID }}
+  {{- range .VPC.RouteTables }}
+  {{ .Route.Name }}:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: {{ .ControlPlane.VPC.CIDR }}
+      RouteTableId: !Ref {{ .RouteTable.Name }}
+      VpcPeeringConnectionId: {{ .TenantCluster.PeeringConnectionID }}
+  {{- end }}
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
       VpcId: {{ .VPC.TCCP.VPC.ID }}
       RouteTableIds:
         {{- range .VPC.RouteTables }}
-        - !Ref {{ .Name }}
+        - !Ref {{ .RouteTable.Name }}
         {{- end}}
       ServiceName: 'com.amazonaws.{{ .VPC.Region.Name }}.s3'
       PolicyDocument:

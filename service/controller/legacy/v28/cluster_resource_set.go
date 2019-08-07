@@ -32,6 +32,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/cpf"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/cpi"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/ebsvolume"
@@ -210,6 +211,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupSecurityGroups controller.Resource
+	{
+		c := cleanupsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupSecurityGroups, err = cleanupsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -615,6 +628,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
+		cleanupSecurityGroups,
 	}
 
 	{

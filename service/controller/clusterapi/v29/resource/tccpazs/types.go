@@ -10,13 +10,8 @@ type mapping struct {
 }
 
 type network struct {
-	NATGateway natgateway
 	RouteTable routetable
 	Subnet     subnet
-}
-
-type natgateway struct {
-	ID string
 }
 
 type routetable struct {

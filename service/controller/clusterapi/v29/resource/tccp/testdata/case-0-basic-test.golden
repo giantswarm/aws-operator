@@ -50,12 +50,6 @@ Resources:
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: 8y5ck-worker
-          PropagateAtLaunch: true
-        - Key: giantswarm.io/tccp
-          Value: true
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -205,8 +199,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-master
-      - Key: giantswarm.io/tccp
-        Value: true
   rsc-abbacd01:
     Type: AWS::EC2::Volume
     Properties:
@@ -219,8 +211,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-docker
-      - Key: giantswarm.io/tccp
-        Value: true
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -233,8 +223,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-etcd
-      - Key: giantswarm.io/tccp
-        Value: true
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -247,8 +235,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-log
-      - Key: giantswarm.io/tccp
-        Value: true
   rsc-ac0dc01DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
@@ -269,12 +255,6 @@ Resources:
       Device: /dev/xvdf
   InternetGateway:
     Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
@@ -480,12 +460,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1a
       Tags:
-        - Key: Name
-          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1a
-        - Key: giantswarm.io/tccp
-          Value: true
   NATEIPEuCentral1a:
     Type: AWS::EC2::EIP
     Properties:
@@ -508,12 +484,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1b
       Tags:
-        - Key: Name
-          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1b
-        - Key: giantswarm.io/tccp
-          Value: true
   NATEIPEuCentral1b:
     Type: AWS::EC2::EIP
     Properties:
@@ -536,12 +508,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1c
       Tags:
-        - Key: Name
-          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1c
-        - Key: giantswarm.io/tccp
-          Value: true
   NATEIPEuCentral1c:
     Type: AWS::EC2::EIP
     Properties:
@@ -560,53 +528,37 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-public-eu-central-1a
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
   PublicRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-public-eu-central-1b
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1b
       - Key: giantswarm.io/route-table-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
   PublicRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-public-eu-central-1c
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1a
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   VPCPeeringRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
@@ -619,14 +571,10 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1b
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1b
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   VPCPeeringRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
@@ -639,14 +587,10 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1c
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   VPCPeeringRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
@@ -706,8 +650,6 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-master
-        - Key: giantswarm.io/tccp
-          Value: true
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -773,8 +715,6 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-worker
-        - Key: giantswarm.io/tccp
-          Value: true
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -797,8 +737,6 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-ingress
-        - Key: giantswarm.io/tccp
-          Value: true
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -821,8 +759,6 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
-        - Key: giantswarm.io/tccp
-          Value: true
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:
@@ -894,10 +830,8 @@ Resources:
         Value: PublicSubnetEuCentral1a
       - Key: giantswarm.io/subnet-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -915,10 +849,8 @@ Resources:
         Value: PublicSubnetEuCentral1b
       - Key: giantswarm.io/subnet-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -936,10 +868,8 @@ Resources:
         Value: PublicSubnetEuCentral1c
       - Key: giantswarm.io/subnet-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -957,10 +887,8 @@ Resources:
         Value: PrivateSubnetEuCentral1a
       - Key: giantswarm.io/subnet-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -978,10 +906,8 @@ Resources:
         Value: PrivateSubnetEuCentral1b
       - Key: giantswarm.io/subnet-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -999,10 +925,8 @@ Resources:
         Value: PrivateSubnetEuCentral1c
       - Key: giantswarm.io/subnet-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -1016,25 +940,17 @@ Resources:
       CidrBlock: 
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
-      Tags:
-      - Key: Name
-        Value: 8y5ck
-      - Key: Installation
-        Value: 
-      - Key: giantswarm.io/tccp
-        Value: true
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: vpc-f8d0e10b
-      PeerOwnerId: 'control-plane-account'
+      # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
+      # to properly deal with that by its own so the configured value must be
+      # quoted in order to ensure the peer owner id is properly handled as
+      # string. Otherwise stack creation fails.
+      PeerOwnerId: "control-plane-account"
       PeerRoleArn: peer-role-arn
-      Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
@@ -1046,12 +962,12 @@ Resources:
         - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
         - !Ref PrivateRouteTableEuCentral1c
-      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
-            Principal : "*"
+            Principal: "*"
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:aws:s3:::*"
