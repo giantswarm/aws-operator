@@ -140,7 +140,7 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.Clust
 					},
 				},
 				{
-					Name: aws.String("tag:giantswarm.io/cluster"),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
 						aws.String(key.ClusterID(&cr)),
 					},

@@ -8,14 +8,10 @@ const TemplateMainRouteTables = `
     Properties:
       VpcId: {{ .TCCP.VPC.ID }}
       Tags:
-      - Key: Name
-        Value: {{ .Name }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   {{ .Route.Name }}:
     Type: AWS::EC2::Route
     Properties:

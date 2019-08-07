@@ -29,7 +29,6 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 	for _, az := range cfg.TenantClusterAvailabilityZones {
 		rtName := RouteTableName{
 			ResourceName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-			TagName:      key.RouteTableName(cfg.CustomObject, suffixPublic, az.Name),
 		}
 		v.RouteTableNames = append(v.RouteTableNames, rtName)
 	}
@@ -41,7 +40,6 @@ func (v *GuestVPCAdapter) Adapt(cfg Config) error {
 
 		rtName := RouteTableName{
 			ResourceName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-			TagName:      key.RouteTableName(cfg.CustomObject, suffixPrivate, az.Name),
 		}
 		v.RouteTableNames = append(v.RouteTableNames, rtName)
 	}

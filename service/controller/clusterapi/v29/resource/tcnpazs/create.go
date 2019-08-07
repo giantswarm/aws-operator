@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
@@ -95,33 +96,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func hasTag(tags []*ec2.Tag, key string) bool {
-	for _, t := range tags {
-		if *t.Key == key {
-			return true
-		}
-	}
-
-	return false
-}
-
-func hasTags(tags []*ec2.Tag, keys ...string) bool {
-	for _, k := range keys {
-		if !hasTag(tags, k) {
-			return false
-		}
-	}
-
-	return true
-}
-
 func natGatewayForAvailabilityZone(natGateways []*ec2.NatGateway, availabilityZone string) *ec2.NatGateway {
 	for _, ng := range natGateways {
-		if !hasTags(ng.Tags, key.TagTCCP) {
+		if awstags.ValueForKey(ng.Tags, key.TagStack) != key.StackTCCP {
 			continue
 		}
-
-		if valueForKey(ng.Tags, key.TagAvailabilityZone) != availabilityZone {
+		if awstags.ValueForKey(ng.Tags, key.TagAvailabilityZone) != availabilityZone {
 			continue
 		}
 
@@ -129,14 +109,4 @@ func natGatewayForAvailabilityZone(natGateways []*ec2.NatGateway, availabilityZo
 	}
 
 	return nil
-}
-
-func valueForKey(tags []*ec2.Tag, key string) string {
-	for _, t := range tags {
-		if *t.Key == key {
-			return *t.Value
-		}
-	}
-
-	return ""
 }

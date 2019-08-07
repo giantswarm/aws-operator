@@ -36,26 +36,23 @@ const (
 	KubernetesSecurePort = 443
 )
 
-// MaximumNumberOfAZsInCluster defines the current limitation with Node Pools
-// implementation. Biggest limitation behind this is current IPAM
-// implementation that restricts network sizes. Another related problem is
-// restrictions in AWS resource structure.
-//
-// NOTE: This is currently used in several places such as clusterazs resource &
-// adapter. Move this to clusterazs resource when it's not needed elsewhere
-// anymore. This restriction on its whole will be removed when IPAM design gets
-// overhaul and TCCP infrastructure improved.
-const MaximumNumberOfAZsInCluster = 4
-
 // AWS Tags used for cost analysis and general resource tagging.
 const (
 	TagAvailabilityZone = "giantswarm.io/availability-zone"
 	TagCluster          = "giantswarm.io/cluster"
 	TagRouteTableType   = "giantswarm.io/route-table-type"
+	TagStack            = "giantswarm.io/stack"
 	TagSubnetType       = "giantswarm.io/subnet-type"
 	TagInstallation     = "giantswarm.io/installation"
 	TagOrganization     = "giantswarm.io/organization"
-	TagTCCP             = "giantswarm.io/tccp"
+)
+
+const (
+	StackTCCP  = "tccp"
+	StackTCCPF = "tccpf"
+	StackTCCPI = "tccpi"
+	StackTCNP  = "tcnp"
+	StackTCNPF = "tcnpf"
 )
 
 const (

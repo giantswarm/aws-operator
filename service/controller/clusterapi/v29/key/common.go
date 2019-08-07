@@ -73,10 +73,6 @@ func ImageID(region string) string {
 	return imageIDs()[region]
 }
 
-func MachineDeploymentASGName(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
-}
-
 func MachineDeploymentID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.MachineDeployment]
 }
@@ -198,16 +194,16 @@ func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) s
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
 }
 
-func StackNameCPF(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-cpf", ClusterID(getter))
-}
-
-func StackNameCPI(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-cpi", ClusterID(getter))
-}
-
 func StackNameTCCP(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tccp", ClusterID(getter))
+}
+
+func StackNameTCCPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpf", ClusterID(getter))
+}
+
+func StackNameTCCPI(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpi", ClusterID(getter))
 }
 
 func StackNameTCNP(getter LabelsGetter) string {

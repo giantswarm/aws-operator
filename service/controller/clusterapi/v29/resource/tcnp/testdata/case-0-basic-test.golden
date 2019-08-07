@@ -37,9 +37,6 @@ Resources:
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: cluster-8y5ck-tcnp-al9qy
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -201,14 +198,10 @@ Resources:
     Properties:
       VpcId: vpc-id
       Tags:
-      - Key: Name
-        Value: PrivateRouteTableEuCentral1a
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   NATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
@@ -220,14 +213,10 @@ Resources:
     Properties:
       VpcId: vpc-id
       Tags:
-      - Key: Name
-        Value: PrivateRouteTableEuCentral1c
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
   NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
@@ -281,9 +270,6 @@ Resources:
         FromPort: 30010
         ToPort: 30010
         SourceSecurityGroupId: ingress-security-group-id
-      Tags:
-        - Key: Name
-          Value: GeneralSecurityGroup
       VpcId: vpc-id
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -323,10 +309,8 @@ Resources:
       CidrBlock: 10.100.3.0/27
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1a
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
@@ -341,10 +325,8 @@ Resources:
       CidrBlock: 10.100.3.64/27
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1c
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1c:
