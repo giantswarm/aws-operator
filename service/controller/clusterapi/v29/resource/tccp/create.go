@@ -28,44 +28,36 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// When a tenant cluster is created, the CPI resource creates a peer role and
-	// with it an ARN for it. As long as the peer role ARN is not present, we have
-	// to cancel the resource to prevent further TCCP resource actions.
 	{
+		// When a tenant cluster is created, the CPI resource creates a peer role and
+		// with it an ARN for it. As long as the peer role ARN is not present, we have
+		// to cancel the resource to prevent further TCCP resource actions.
 		if cc.Status.ControlPlane.PeerRole.ARN == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane peer role arn is not yet set up")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-	}
 
-	// When the TCCP cloud formation stack is transitioning, it means it is
-	// updating in most cases. We do not want to interfere with the current
-	// process and stop here. We will then check on the next reconciliation loop
-	// and continue eventually.
-	{
+		// When the TCCP cloud formation stack is transitioning, it means it is
+		// updating in most cases. We do not want to interfere with the current
+		// process and stop here. We will then check on the next reconciliation loop
+		// and continue eventually.
 		if cc.Status.TenantCluster.TCCP.IsTransitioning {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is in transitioning state")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-	}
 
-	// The IPAM resource is executed before the CloudFormation resource in order
-	// to allocate a free IP range for the tenant subnet. This CIDR is put into
-	// the CR status. In case it is missing, the IPAM resource did not yet
-	// allocate it and the CloudFormation resource cannot proceed. We cancel here
-	// and wait for the CIDR to be available in the CR status.
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane network cidr")
-
+		// The IPAM resource is executed before the CloudFormation resource in order
+		// to allocate a free IP range for the tenant subnet. This CIDR is put into
+		// the CR status. In case it is missing, the IPAM resource did not yet
+		// allocate it and the CloudFormation resource cannot proceed. We cancel here
+		// and wait for the CIDR to be available in the CR status.
 		if key.StatusClusterNetworkCIDR(cr) == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane network cidr")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane network cidr")
 	}
 
 	{
