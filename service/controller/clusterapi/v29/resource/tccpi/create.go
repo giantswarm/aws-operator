@@ -61,16 +61,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane initializer cloud formation stack")
 
-		var params *template.ParamsMain
-		{
-			iamRoles, err := r.newIAMRolesParams(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			params = &template.ParamsMain{
-				IAMRoles: iamRoles,
-			}
+		params, err := newTemplateParams(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
 		}
 
 		templateBody, err = template.Render(params)
@@ -120,7 +113,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainIAMRoles, error) {
+func newIAMRolesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainIAMRoles, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -138,4 +131,20 @@ func (r *Resource) newIAMRolesParams(ctx context.Context, cr v1alpha1.Cluster) (
 	}
 
 	return iamRoles, nil
+}
+
+func newTemplateParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMain, error) {
+	var params *template.ParamsMain
+	{
+		iamRoles, err := newIAMRolesParams(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		params = &template.ParamsMain{
+			IAMRoles: iamRoles,
+		}
+	}
+
+	return params, nil
 }
