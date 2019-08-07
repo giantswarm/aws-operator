@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
@@ -180,6 +181,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupSecurityGroups controller.Resource
+	{
+		c := cleanupsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupSecurityGroups, err = cleanupsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -610,7 +623,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		encryptionResource,
 		s3BucketResource,
 		s3ObjectResource,
-		loadBalancerResource,
 		ebsVolumeResource,
 		tccpAZsResource,
 		tccpiResource,
@@ -620,6 +632,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
+		loadBalancerResource,
+		cleanupSecurityGroups,
 	}
 
 	{
