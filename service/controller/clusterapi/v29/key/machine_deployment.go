@@ -1,33 +1,40 @@
 package key
 
 import (
-	"sort"
 	"strconv"
 
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-// As a first version of Node Pools feature, the maximum number of distinct
-// Availability Zones is restricted to four due to current IPAM architecture &
-// implementation.
-const MaxNumberOfAZs = 4
+func MachineDeploymentAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
+	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
+}
 
-func SortedWorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
-	azs := WorkerAvailabilityZones(cr)
+func MachineDeploymentDockerVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
+	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
+}
 
-	// No need to do deep copy for azs slice since above key function
-	// deserializes information from provider extension template that is JSON
-	// in CR object.
+func MachineDeploymentInstanceType(cr v1alpha1.MachineDeployment) string {
+	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
+}
 
-	sort.Slice(azs, func(i, j int) bool {
-		return azs[i] < azs[j]
-	})
+func MachineDeploymentKubeletVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
+	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.KubeletVolumeSizeGB)
+}
 
-	return azs
+func MachineDeploymentScalingMax(cr v1alpha1.MachineDeployment) int {
+	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Max
+}
+
+func MachineDeploymentScalingMin(cr v1alpha1.MachineDeployment) int {
+	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
+}
+
+func MachineDeploymentSubnet(cr v1alpha1.MachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
 func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {
@@ -43,36 +50,4 @@ func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {
 	c := p.DeepCopy()
 
 	return *c, nil
-}
-
-func WorkerAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
-	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
-}
-
-func WorkerClusterID(cr v1alpha1.MachineDeployment) string {
-	return cr.Labels[label.Cluster]
-}
-
-func WorkerDockerVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
-	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
-}
-
-func WorkerInstanceType(cr v1alpha1.MachineDeployment) string {
-	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
-}
-
-func WorkerKubeletVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
-	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.KubeletVolumeSizeGB)
-}
-
-func WorkerScalingMax(cr v1alpha1.MachineDeployment) int {
-	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Max
-}
-
-func WorkerScalingMin(cr v1alpha1.MachineDeployment) int {
-	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
-}
-
-func WorkerSubnet(cr v1alpha1.MachineDeployment) string {
-	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
