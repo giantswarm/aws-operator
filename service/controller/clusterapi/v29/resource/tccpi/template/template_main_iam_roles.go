@@ -1,7 +1,7 @@
 package template
 
 const TemplateMainIAMRoles = `
-{{ define "iam_roles" }}
+{{- define "iam_roles" -}}
   PeerRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -22,5 +22,5 @@ const TemplateMainIAMRoles = `
               - Effect: Allow
                 Action: 'ec2:AcceptVpcPeeringConnection'
                 Resource: '*'
-{{end}}
+{{- end -}}
 `
