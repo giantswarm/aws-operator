@@ -7,7 +7,7 @@ const TemplateMainLaunchConfiguration = `
     Properties:
       ImageId: {{ .LaunchConfiguration.Instance.Image }}
       SecurityGroups:
-      - !Ref NodePoolSecurityGroup
+      - !Ref GeneralSecurityGroup
       InstanceType: {{ .LaunchConfiguration.Instance.Type }}
       InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
       IamInstanceProfile: !Ref NodePoolInstanceProfile
@@ -21,6 +21,11 @@ const TemplateMainLaunchConfiguration = `
         Ebs:
           DeleteOnTermination: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
+          VolumeType: gp2
+      - DeviceName: /dev/xvdg
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Kubelet.Volume.Size }}
           VolumeType: gp2
       AssociatePublicIpAddress: false
       UserData:

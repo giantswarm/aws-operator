@@ -50,12 +50,6 @@ Resources:
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: 8y5ck-worker
-          PropagateAtLaunch: true
-        - Key: giantswarm.io/tccp
-          Value: true
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -201,12 +195,10 @@ Resources:
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnetEuCentral1b
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL21hc3RlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGMiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJldGNkIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiBmYWxzZSwKICAgICAgICAgICJsYWJlbCI6ICJldGNkIiwKICAgICAgICAgICJmb3JtYXQiOiAiZXh0NCIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNF81XzAvbWFzdGVyIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsgCiAgICAgICAgIm5hbWUiOiAiZG9ja2VyIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkYyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImRvY2tlciIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJsb2ciLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRmIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAibG9nIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImV0Y2QiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRoIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IGZhbHNlLAogICAgICAgICAgImxhYmVsIjogImV0Y2QiLAogICAgICAgICAgImZvcm1hdCI6ICJleHQ0IgogICAgICAgIH0KICAgICAgfQogICAgXQogIH0KfQo=
       Tags:
       - Key: Name
         Value: 8y5ck-master
-      - Key: giantswarm.io/tccp
-        Value: true
   rsc-abbacd01:
     Type: AWS::EC2::Volume
     Properties:
@@ -219,8 +211,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-docker
-      - Key: giantswarm.io/tccp
-        Value: true
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -233,8 +223,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-etcd
-      - Key: giantswarm.io/tccp
-        Value: true
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -247,8 +235,6 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-log
-      - Key: giantswarm.io/tccp
-        Value: true
   rsc-ac0dc01DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
@@ -269,28 +255,40 @@ Resources:
       Device: /dev/xvdf
   InternetGateway:
     Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
+      - PublicRouteTableEuCentral1a
       - PublicRouteTableEuCentral1b
-      - PrivateRouteTableEuCentral1a
-      - PrivateRouteTableEuCentral1c
+      - PublicRouteTableEuCentral1c
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
       VpcId: !Ref VPC
-  InternetGatewayRoute:
+  PublicInternetGatewayRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  PublicInternetGatewayRouteEuCentral1b:
     Type: AWS::EC2::Route
     DependsOn:
       - VPCGatewayAttachment
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  PublicInternetGatewayRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
@@ -325,7 +323,7 @@ Resources:
           VolumeType: gp2
       
       AssociatePublicIpAddress: false
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLy9jbG91ZGNvbmZpZy92XzRfNV8wL3dvcmtlciIKICAgICAgICB9CiAgICAgIF0KICAgIH0KICB9LAogICJzdG9yYWdlIjogewogICAgImZpbGVzeXN0ZW1zIjogWwogICAgICB7IAogICAgICAgICJuYW1lIjogImRvY2tlciIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJkb2NrZXIiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAibG9nIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZiIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImxvZyIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJrdWJlbGV0IiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkZyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImt1YmVsZXQiLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNF81XzAvd29ya2VyIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsgCiAgICAgICAgIm5hbWUiOiAiZG9ja2VyIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImRvY2tlciIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJsb2ciLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRmIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAibG9nIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImt1YmVsZXQiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRnIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAia3ViZWxldCIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
   NodeDrainerLifecycleHook:
     Type: "AWS::AutoScaling::LifecycleHook"
     Properties:
@@ -462,10 +460,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1a
       Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
+        - Key: giantswarm.io/availability-zone
+          Value: eu-central-1a
   NATEIPEuCentral1a:
     Type: AWS::EC2::EIP
     Properties:
@@ -476,7 +472,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayEuCentral1a"
+        Ref: NATGatewayEuCentral1a
   NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -488,10 +484,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1b
       Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
+        - Key: giantswarm.io/availability-zone
+          Value: eu-central-1b
   NATEIPEuCentral1b:
     Type: AWS::EC2::EIP
     Properties:
@@ -502,7 +496,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayEuCentral1b"
+        Ref: NATGatewayEuCentral1b
   NATGatewayEuCentral1c:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -514,10 +508,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1c
       Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
+        - Key: giantswarm.io/availability-zone
+          Value: eu-central-1c
   NATEIPEuCentral1c:
     Type: AWS::EC2::EIP
     Properties:
@@ -528,68 +520,84 @@ Resources:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "NATGatewayEuCentral1c"
+        Ref: NATGatewayEuCentral1c
   
+  
+  PublicRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: public
   PublicRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: PublicRouteTable-eu-central-1b
-      - Key: giantswarm.io/tccp
-        Value: true
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: public
+  PublicRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: public
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1a
-      - Key: giantswarm.io/tccp
-        Value: true
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
   VPCPeeringRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1a
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
+        Ref: VPCPeeringConnection
   PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1b
-      - Key: giantswarm.io/tccp
-        Value: true
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: private
   VPCPeeringRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
+        Ref: VPCPeeringConnection
   PrivateRouteTableEuCentral1c:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-      - Key: Name
-        Value: 8y5ck-private-eu-central-1c
-      - Key: giantswarm.io/tccp
-        Value: true
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: private
   VPCPeeringRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
-        Ref: "VPCPeeringConnection"
-  
+        Ref: VPCPeeringConnection
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -642,8 +650,6 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-master
-        - Key: giantswarm.io/tccp
-          Value: true
   WorkerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -709,8 +715,6 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-worker
-        - Key: giantswarm.io/tccp
-          Value: true
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -733,8 +737,6 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-ingress
-        - Key: giantswarm.io/tccp
-          Value: true
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -757,8 +759,6 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
-        - Key: giantswarm.io/tccp
-          Value: true
   # Allow all access between masters and workers for calico. This is done after
   # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:
@@ -830,15 +830,13 @@ Resources:
         Value: PublicSubnetEuCentral1a
       - Key: giantswarm.io/subnet-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1a
       SubnetId: !Ref PublicSubnetEuCentral1a
   PublicSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
@@ -851,10 +849,8 @@ Resources:
         Value: PublicSubnetEuCentral1b
       - Key: giantswarm.io/subnet-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -872,15 +868,13 @@ Resources:
         Value: PublicSubnetEuCentral1c
       - Key: giantswarm.io/subnet-type
         Value: public
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
+      RouteTableId: !Ref PublicRouteTableEuCentral1c
       SubnetId: !Ref PublicSubnetEuCentral1c
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
@@ -893,10 +887,8 @@ Resources:
         Value: PrivateSubnetEuCentral1a
       - Key: giantswarm.io/subnet-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -914,10 +906,8 @@ Resources:
         Value: PrivateSubnetEuCentral1b
       - Key: giantswarm.io/subnet-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -935,10 +925,8 @@ Resources:
         Value: PrivateSubnetEuCentral1c
       - Key: giantswarm.io/subnet-type
         Value: private
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -952,40 +940,34 @@ Resources:
       CidrBlock: 
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
-      Tags:
-      - Key: Name
-        Value: 8y5ck
-      - Key: Installation
-        Value: 
-      - Key: giantswarm.io/tccp
-        Value: true
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: vpc-f8d0e10b
-      PeerOwnerId: 'control-plane-account'
-      PeerRoleArn: imaginary-cp-peer-role-arn
-      Tags:
-        - Key: Name
-          Value: 8y5ck
-        - Key: giantswarm.io/tccp
-          Value: true
+      # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
+      # to properly deal with that by its own so the configured value must be
+      # quoted in order to ensure the peer owner id is properly handled as
+      # string. Otherwise stack creation fails.
+      PeerOwnerId: "control-plane-account"
+      PeerRoleArn: peer-role-arn
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
       VpcId: !Ref VPC
       RouteTableIds:
+        - !Ref PublicRouteTableEuCentral1a
         - !Ref PublicRouteTableEuCentral1b
+        - !Ref PublicRouteTableEuCentral1c
         - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
         - !Ref PrivateRouteTableEuCentral1c
-      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
-            Principal : "*"
+            Principal: "*"
             Effect: "Allow"
             Action: "s3:*"
             Resource: "arn:aws:s3:::*"

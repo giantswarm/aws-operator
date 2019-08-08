@@ -61,6 +61,7 @@ func (r *Resource) Name() string {
 
 func (r *Resource) getCloudFormationTags(cr v1alpha1.MachineDeployment) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
+	tags[key.TagStack] = key.StackTCNP
 	tags[label.MachineDeployment] = key.MachineDeploymentID(&cr)
 	return awstags.NewCloudFormation(tags)
 }

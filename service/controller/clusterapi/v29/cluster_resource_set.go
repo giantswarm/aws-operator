@@ -19,28 +19,30 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/clusterazs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpf"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpi"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanuploadbalancers"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpf"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnet"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/vpccidr"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 )
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -184,15 +186,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var clusterAZsResource controller.Resource
+	var tccpAZsResource controller.Resource
 	{
-		c := clusterazs.Config{
+		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
 		}
 
-		clusterAZsResource, err = clusterazs.New(c)
+		tccpAZsResource, err = tccpazs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -304,25 +306,37 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var loadBalancerResource controller.Resource
+	var cleanupEBSVolumesResource controller.Resource
 	{
-		c := loadbalancer.Config{
+		c := cleanupebsvolumes.Config{
 			Logger: config.Logger,
 		}
 
-		loadBalancerResource, err = loadbalancer.New(c)
+		cleanupEBSVolumesResource, err = cleanupebsvolumes.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var ebsVolumeResource controller.Resource
+	var cleanupLoadBalancersResource controller.Resource
 	{
-		c := ebsvolume.Config{
+		c := cleanuploadbalancers.Config{
 			Logger: config.Logger,
 		}
 
-		ebsVolumeResource, err = ebsvolume.New(c)
+		cleanupLoadBalancersResource, err = cleanuploadbalancers.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupSecurityGroups controller.Resource
+	{
+		c := cleanupsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupSecurityGroups, err = cleanupsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -344,10 +358,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpResource controller.Resource
 	{
 		c := tccp.Config{
-			APIWhitelist:         config.APIWhitelist,
+			CMAClient:            config.CMAClient,
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
+			APIWhitelist:       config.APIWhitelist,
 			Detection:          detectionService,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
@@ -377,21 +392,33 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpSubnetResource controller.Resource
+	var tccpRouteTablesResource controller.Resource
 	{
-		c := tccpsubnet.Config{
+		c := tccproutetables.Config{
 			Logger: config.Logger,
 		}
 
-		tccpSubnetResource, err = tccpsubnet.New(c)
+		tccpRouteTablesResource, err = tccproutetables.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var cpfResource controller.Resource
+	var tccpSubnetsResource controller.Resource
 	{
-		c := cpf.Config{
+		c := tccpsubnets.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetsResource, err = tccpsubnets.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpfResource controller.Resource
+	{
+		c := tccpf.Config{
 			Logger: config.Logger,
 
 			EncrypterBackend: config.EncrypterBackend,
@@ -399,21 +426,21 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Route53Enabled:   config.Route53Enabled,
 		}
 
-		cpfResource, err = cpf.New(c)
+		tccpfResource, err = tccpf.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var cpiResource controller.Resource
+	var tccpiResource controller.Resource
 	{
-		c := cpi.Config{
+		c := tccpi.Config{
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
 
-		cpiResource, err = cpi.New(c)
+		tccpiResource, err = tccpi.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -463,15 +490,15 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var routeTableResource controller.Resource
+	var cpRouteTablesResource controller.Resource
 	{
-		c := routetable.Config{
+		c := cproutetables.Config{
 			Logger: config.Logger,
 
 			Names: strings.Split(config.RouteTables, ","),
 		}
 
-		routeTableResource, err = routetable.New(c)
+		cpRouteTablesResource, err = cproutetables.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -561,45 +588,55 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 
 	var vpcCIDRResource controller.Resource
 	{
-		c := vpccidr.Config{
+		c := cpvpccidr.Config{
 			Logger: config.Logger,
 
 			VPCPeerID: config.VPCPeerID,
 		}
 
-		vpcCIDRResource, err = vpccidr.New(c)
+		vpcCIDRResource, err = cpvpccidr.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resources := []controller.Resource{
+		// All these resources only fetch information from remote APIs and put them
+		// into the controller context.
 		awsClientResource,
 		machineDeploymentResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
-		routeTableResource,
+		cpRouteTablesResource,
 		vpcCIDRResource,
 		tccpOutputsResource,
-		tccpSubnetResource,
+		tccpRouteTablesResource,
+		tccpSubnetsResource,
 		regionResource,
 		asgStatusResource,
+
+		// All these resources implement certain business logic and operate based on
+		// the information given in the controller context.
 		ipamResource,
-		clusterAZsResource,
 		bridgeZoneResource,
 		encryptionResource,
 		s3BucketResource,
 		s3ObjectResource,
-		loadBalancerResource,
-		ebsVolumeResource,
-		cpiResource,
+		tccpAZsResource,
+		tccpiResource,
 		tccpResource,
-		cpfResource,
+		tccpfResource,
 		namespaceResource,
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupEBSVolumesResource,
+		cleanupLoadBalancersResource,
+		cleanupSecurityGroups,
 	}
 
 	{

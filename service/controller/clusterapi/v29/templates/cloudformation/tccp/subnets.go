@@ -14,11 +14,9 @@ const Subnets = `
       - Key: Name
         Value: {{ .Name }}
       - Key: giantswarm.io/subnet-type
-        Value: {{ .Type }}
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+        Value: public
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: !Ref VPC
   {{ .RouteTableAssociation.Name }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -37,11 +35,9 @@ const Subnets = `
       - Key: Name
         Value: {{ .Name }}
       - Key: giantswarm.io/subnet-type
-        Value: {{ .Type }}
-      - Key: giantswarm.io/tccp
-        Value: true
-      - Key: "kubernetes.io/role/internal-elb"
-        Value: "1"
+        Value: private
+      - Key: kubernetes.io/role/internal-elb
+        Value: 1
       VpcId: !Ref VPC
   {{ .RouteTableAssociation.Name  }}:
     Type: AWS::EC2::SubnetRouteTableAssociation

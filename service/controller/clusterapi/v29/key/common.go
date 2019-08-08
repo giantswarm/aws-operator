@@ -73,10 +73,6 @@ func ImageID(region string) string {
 	return imageIDs()[region]
 }
 
-func MachineDeploymentASGName(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
-}
-
 func MachineDeploymentID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.MachineDeployment]
 }
@@ -101,6 +97,10 @@ func OrganizationID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Organization]
 }
 
+func PrivateInternetGatewayRouteName(az string) string {
+	return fmt.Sprintf("PrivateInternetGatewayRoute-%s", az)
+}
+
 func PrivateRouteTableName(az string) string {
 	return fmt.Sprintf("PrivateRouteTable-%s", az)
 }
@@ -111,6 +111,10 @@ func PrivateSubnetName(az string) string {
 
 func PrivateSubnetRouteTableAssociationName(az string) string {
 	return fmt.Sprintf("PrivateSubnetRouteTableAssociation-%s", az)
+}
+
+func PublicInternetGatewayRouteName(az string) string {
+	return fmt.Sprintf("PublicInternetGatewayRoute-%s", az)
 }
 
 func PublicSubnetName(az string) string {
@@ -150,10 +154,11 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 // SanitizeCFResourceName filters out all non-ascii alphanumberics from input
 // string.
 //
-// Example: SanitizeCFResourceName("abc-123") == "abc123"
-// Example2: SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
+//     SanitizeCFResourceName("abc-123") == "abc123"
+//     SanitizeCFResourceName("abc", "123") == "abc123"
+//     SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
 //
-func SanitizeCFResourceName(v string) string {
+func SanitizeCFResourceName(l ...string) string {
 	var rs []rune
 
 	// Start with true to capitalize first character.
@@ -161,7 +166,7 @@ func SanitizeCFResourceName(v string) string {
 
 	// Iterate over unicode characters and add numbers and ASCII letters title
 	// cased.
-	for _, r := range []rune(v) {
+	for _, r := range []rune(strings.Join(l, "-")) {
 		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
 			if previousWasSkipped {
 				rs = append(rs, unicode.ToTitle(r))
@@ -189,20 +194,24 @@ func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) s
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
 }
 
-func StackNameCPF(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-cpf", ClusterID(getter))
-}
-
-func StackNameCPI(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-cpi", ClusterID(getter))
-}
-
 func StackNameTCCP(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tccp", ClusterID(getter))
 }
 
+func StackNameTCCPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpf", ClusterID(getter))
+}
+
+func StackNameTCCPI(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpi", ClusterID(getter))
+}
+
 func StackNameTCNP(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp", getter.GetLabels()[label.Cluster])
+	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func StackNameTCNPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
 }
 
 func VPCPeeringRouteName(az string) string {

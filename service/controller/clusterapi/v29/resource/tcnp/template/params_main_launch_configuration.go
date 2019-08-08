@@ -8,6 +8,7 @@ type ParamsMainLaunchConfiguration struct {
 
 type ParamsMainLaunchConfigurationBlockDeviceMapping struct {
 	Docker  ParamsMainLaunchConfigurationBlockDeviceMappingDocker
+	Kubelet ParamsMainLaunchConfigurationBlockDeviceMappingKubelet
 	Logging ParamsMainLaunchConfigurationBlockDeviceMappingLogging
 }
 
@@ -22,6 +23,14 @@ type ParamsMainLaunchConfigurationBlockDeviceMappingDocker struct {
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume struct {
+	Size string
+}
+
+type ParamsMainLaunchConfigurationBlockDeviceMappingKubelet struct {
+	Volume ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume
+}
+
+type ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume struct {
 	Size string
 }
 

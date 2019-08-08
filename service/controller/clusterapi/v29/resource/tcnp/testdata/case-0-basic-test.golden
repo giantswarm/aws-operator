@@ -12,14 +12,14 @@ Outputs:
   InstanceType:
     Value: m5.2xlarge
   VersionBundleVersion:
-    Value: 
+    Value: 7.3.0
 Resources:
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
         - !Ref PrivateSubnetEuCentral1a
-        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PrivateSubnetEuCentral1c
       AvailabilityZones:
         - eu-central-1a
         - eu-central-1c
@@ -37,9 +37,6 @@ Resources:
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
-        - Key: Name
-          Value: cluster-8y5ck-tcnp-al9qy
-          PropagateAtLaunch: true
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
@@ -120,7 +117,7 @@ Resources:
     Properties:
       ImageId: ami-0eb0d9bb7ad1bd1e9
       SecurityGroups:
-      - !Ref NodePoolSecurityGroup
+      - !Ref GeneralSecurityGroup
       InstanceType: m5.2xlarge
       InstanceMonitoring: true
       IamInstanceProfile: !Ref NodePoolInstanceProfile
@@ -135,6 +132,11 @@ Resources:
           DeleteOnTermination: true
           VolumeSize: 100
           VolumeType: gp2
+      - DeviceName: /dev/xvdg
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
       AssociatePublicIpAddress: false
       UserData:
         Fn::Base64: |
@@ -144,7 +146,7 @@ Resources:
               "config": {
                 "append": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version//cloudconfig/v_4_5_0/worker"
+                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_5_0/worker"
                   }
                 ]
               }
@@ -190,65 +192,115 @@ Resources:
       HeartbeatTimeout: 3600
       LifecycleHookName: NodePool
       LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
-  NodePoolSecurityGroup:
+  
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-id
+      Tags:
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  NATRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: nat-gateway-id-eu-central-1a
+  PrivateRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-id
+      Tags:
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  NATRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: nat-gateway-id-eu-central-1c
+  GeneralSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
-      VpcId: imagenary-vpc-id
       SecurityGroupIngress:
-
-      # Allow traffic from control plane CIDR to 22 for SSH access.
       -
+        Description: Allow traffic from control plane CIDR to 22 for SSH access.
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
         CidrIp: 10.1.0.0/16
-
-      # Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
       -
+        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
         CidrIp: 10.1.0.0/16
-
-      # Allow traffic from control plane CIDR to 10250 for kubelet scraping.
       -
+        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
         CidrIp: 10.1.0.0/16
-
-      # Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
       -
+        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
         CidrIp: 10.1.0.0/16
-
-      # Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
       -
+        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
         CidrIp: 10.1.0.0/16
-
-      # Allow traffic from the ingress security group to 443 for ingress-controller.
       -
+        Description: Allow traffic from the ingress security group to 443 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        SourceSecurityGroupId: ingressSecurityGroupID
-
-      # Allow traffic from the ingress security group to 80 for ingress-controller.
+        SourceSecurityGroupId: ingress-security-group-id
       -
+        Description: Allow traffic from the ingress security group to 80 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        SourceSecurityGroupId: ingressSecurityGroupID
-
-      Tags:
-        - Key: Name
-          Value: NodePoolSecurityGroup
+        SourceSecurityGroupId: ingress-security-group-id
+      VpcId: vpc-id
+  GeneralMasterIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Master Security Group.
+      GroupId: master-security-group-id
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  InternalIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic between workloads within the Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  MasterGeneralIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCCP Master Security Group to the TCNP General Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: master-security-group-id
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
@@ -257,35 +309,66 @@ Resources:
       CidrBlock: 10.100.3.0/27
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1a
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
-      VpcId: imagenary-vpc-id
+      - Key: kubernetes.io/role/elb
+        Value: 1
+      VpcId: vpc-id
+    DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: PublicRouteTableEuCentral1a
-      SubnetId: validPublicSubnetID-1a
-  PrivateSubnetEuCentral1b:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      SubnetId: !Ref PrivateSubnetEuCentral1a
+  PrivateSubnetEuCentral1c:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1c
       CidrBlock: 10.100.3.64/27
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1b
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
-      VpcId: imagenary-vpc-id
-  PrivateSubnetRouteTableAssociationEuCentral1b:
+      - Key: kubernetes.io/role/elb
+        Value: 1
+      VpcId: vpc-id
+    DependsOn: VpcCidrBlock
+  PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: PublicRouteTableEuCentral1b
-      SubnetId: validPublicSubnetID-1b
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      SubnetId: !Ref PrivateSubnetEuCentral1c
   VpcCidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
-      VpcId: imagenary-vpc-id
       CidrBlock: 10.100.8.0/24
+      VpcId: vpc-id
+  VPCPeeringRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.1.0.0/16
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      VpcPeeringConnectionId: peering-connection-id
+  VPCPeeringRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.1.0.0/16
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      VpcPeeringConnectionId: peering-connection-id
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcId: vpc-id
+      RouteTableIds:
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1c
+      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*/*"

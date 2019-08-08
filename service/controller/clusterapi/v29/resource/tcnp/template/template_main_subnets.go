@@ -10,16 +10,15 @@ const TemplateMainSubnets = `
       CidrBlock: {{ .CIDR }}
       MapPublicIpOnLaunch: false
       Tags:
-      - Key: Name
-        Value: {{ .Name }}
-      - Key: "kubernetes.io/role/elb"
-        Value: "1"
+      - Key: kubernetes.io/role/elb
+        Value: 1
       VpcId: {{ .TCCP.VPC.ID }}
+    DependsOn: VpcCidrBlock
   {{ .RouteTableAssociation.Name }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: {{ .TCCP.Subnet.RouteTable.Name }}
-      SubnetId: {{ .TCCP.Subnet.ID }}
+      RouteTableId: !Ref {{ .RouteTable.Name }}
+      SubnetId: !Ref {{ .Name }}
   {{- end }}
 {{- end -}}
 `

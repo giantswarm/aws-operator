@@ -5,31 +5,26 @@ const InternetGateway = `
 {{- $v := .Guest.InternetGateway -}}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: {{ $v.ClusterID }}
-        - Key: giantswarm.io/tccp
-          Value: true
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
-      - {{ $v.PublicRouteTableName }}
-      {{- range $rt := $v.PrivateRouteTables }}
-      - {{ $rt }}
+      {{- range $v.InternetGateways }}
+      - {{ .RouteTable }}
       {{- end }}
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
       VpcId: !Ref VPC
-  InternetGatewayRoute:
+  {{- range $v.InternetGateways }}
+  {{ .InternetGatewayRoute }}:
     Type: AWS::EC2::Route
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref {{ $v.PublicRouteTableName }}
+      RouteTableId: !Ref {{ .RouteTable }}
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
+  {{- end}}
 {{- end -}}
 `

@@ -6,6 +6,7 @@ import (
 
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
 
@@ -49,7 +50,19 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		err = g.Wait()
-		if err != nil {
+		if certs.IsTimeout(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "certificate secrets are not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+			return nil, nil
+
+		} else if randomkeys.IsTimeout(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "random key secrets are not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+			return nil, nil
+
+		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}

@@ -2,12 +2,16 @@ package certs
 
 import "github.com/giantswarm/microerror"
 
-var executionError = &microerror.Error{
-	Kind: "executionError",
-}
-
-func IsExecution(err error) bool {
-	return microerror.Cause(err) == executionError
+// executionFailedError is an error type for situations where Resource execution
+// cannot continue and must always fall back to operatorkit.
+//
+// This error should never be matched against and therefore there is no matcher
+// implement. For further information see:
+//
+//     https://github.com/giantswarm/fmt/blob/master/go/errors.md#matching-errors
+//
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
 }
 
 var invalidConfigError = &microerror.Error{

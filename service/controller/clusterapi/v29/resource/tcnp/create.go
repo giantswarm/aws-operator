@@ -6,9 +6,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp/template"
@@ -31,6 +33,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
+		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
+
 		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -38,10 +47,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
+			return nil
+		}
+
+		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 	}
@@ -114,21 +129,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's node pool cloud formation stack")
 	}
 
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's node pool cloud formation stack")
-
-		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameTCNP(&cr)),
-		}
-
-		err = cc.Client.TenantCluster.AWS.CloudFormation.WaitUntilStackCreateComplete(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's node pool cloud formation stack")
-	}
-
 	return nil
 }
 
@@ -195,7 +195,6 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		MaxSize:               key.WorkerScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
 		MinSize:               key.WorkerScalingMin(cr),
-		Name:                  key.MachineDeploymentASGName(&cr),
 		Subnets:               subnets,
 	}
 
@@ -235,6 +234,11 @@ func newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) 
 			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
 					Size: key.WorkerDockerVolumeSizeGB(cr),
+				},
+			},
+			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
+				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
+					Size: key.WorkerKubeletVolumeSizeGB(cr),
 				},
 			},
 			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
@@ -283,6 +287,36 @@ func newOutputs(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	return outputs, nil
 }
 
+func newRouteTables(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainRouteTables, error) {
+	var routeTables template.ParamsMainRouteTables
+
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		r := template.ParamsMainRouteTablesListItem{
+			AvailabilityZone: a.Name,
+			Name:             key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			Route: template.ParamsMainRouteTablesListItemRoute{
+				Name: key.SanitizeCFResourceName(key.NATRouteName(a.Name)),
+			},
+			TCCP: template.ParamsMainRouteTablesListItemTCCP{
+				NATGateway: template.ParamsMainRouteTablesListItemTCCPNATGateway{
+					ID: a.NATGateway.ID,
+				},
+				VPC: template.ParamsMainRouteTablesListItemTCCPVPC{
+					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+				},
+			},
+		}
+		routeTables.List = append(routeTables.List, r)
+	}
+
+	return &routeTables, nil
+}
+
 func newSecurityGroups(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -297,7 +331,10 @@ func newSecurityGroups(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
 			Ingress: template.ParamsMainSecurityGroupsTenantClusterIngress{
-				ID: cc.Status.TenantCluster.TCCP.SecurityGroup.Ingress.ID,
+				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "ingress")),
+			},
+			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
+				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
@@ -316,24 +353,18 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 		return nil, microerror.Mask(err)
 	}
 
-	azMap := statusAZsToPublicSubnetIDs(cc.Status.TenantCluster.TCCP.AvailabilityZones)
-
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
-		// Create private subnet per AZ
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
 			CIDR:             a.Subnet.Private.CIDR.String(),
 			Name:             key.SanitizeCFResourceName(key.PrivateSubnetName(a.Name)),
+			RouteTable: template.ParamsMainSubnetsListItemRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
 				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.Name)),
 			},
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
-				Subnet: template.ParamsMainSubnetsListItemTCCPSubnet{
-					ID: azMap[a.Name],
-					RouteTable: template.ParamsMainSubnetsListItemTCCPSubnetRouteTable{
-						Name: key.SanitizeCFResourceName(key.PublicRouteTableName(a.Name)),
-					},
-				},
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
 					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 				},
@@ -344,26 +375,6 @@ func newSubnets(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	}
 
 	return &subnets, nil
-}
-
-func newVPCCIDR(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainVPCCIDR, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	vpcCIDR := &template.ParamsMainVPCCIDR{
-		TCCP: template.ParamsMainVPCCIDRTCCP{
-			VPC: template.ParamsMainVPCCIDRTCCPVPC{
-				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
-			},
-		},
-		TCNP: template.ParamsMainVPCCIDRTCNP{
-			CIDR: key.WorkerSubnet(cr),
-		},
-	}
-
-	return vpcCIDR, nil
 }
 
 func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMain, error) {
@@ -389,6 +400,10 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		routeTables, err := newRouteTables(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		securityGroups, err := newSecurityGroups(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -397,7 +412,7 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		vpcCIDR, err := newVPCCIDR(ctx, cr)
+		vpc, err := newVPC(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -408,21 +423,73 @@ func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 			LaunchConfiguration: launchConfiguration,
 			LifecycleHooks:      lifecycleHooks,
 			Outputs:             outputs,
+			RouteTables:         routeTables,
 			SecurityGroups:      securityGroups,
 			Subnets:             subnets,
-			VPCCIDR:             vpcCIDR,
+			VPC:                 vpc,
 		}
 	}
 
 	return params, nil
 }
 
-func statusAZsToPublicSubnetIDs(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) map[string]string {
-	m := make(map[string]string)
-	for _, az := range azs {
-		m[az.Name] = az.Subnet.Public.ID
+func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainVPC, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
-	return m
+
+	var routeTables []template.ParamsMainVPCRouteTable
+	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
+		r := template.ParamsMainVPCRouteTable{
+			ControlPlane: template.ParamsMainVPCRouteTableControlPlane{
+				VPC: template.ParamsMainVPCRouteTableControlPlaneVPC{
+					CIDR: cc.Status.ControlPlane.VPC.CIDR,
+				},
+			},
+			Route: template.ParamsMainVPCRouteTableRoute{
+				Name: key.SanitizeCFResourceName(key.VPCPeeringRouteName(a.Name)),
+			},
+			RouteTable: template.ParamsMainVPCRouteTableRouteTable{
+				Name: key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
+			},
+			TenantCluster: template.ParamsMainVPCRouteTableTenantCluster{
+				PeeringConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+			},
+		}
+		routeTables = append(routeTables, r)
+	}
+
+	vpc := &template.ParamsMainVPC{
+		Cluster: template.ParamsMainVPCCluster{
+			ID: key.ClusterID(&cr),
+		},
+		Region: template.ParamsMainVPCRegion{
+			ARN:  key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			Name: cc.Status.TenantCluster.AWS.Region,
+		},
+		RouteTables: routeTables,
+		TCCP: template.ParamsMainVPCTCCP{
+			VPC: template.ParamsMainVPCTCCPVPC{
+				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+			},
+		},
+		TCNP: template.ParamsMainVPCTCNP{
+			CIDR: key.WorkerSubnet(cr),
+		},
+	}
+
+	return vpc, nil
+}
+
+func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
+	for _, g := range groups {
+		if awstags.ValueForKey(g.Tags, "Name") == name {
+			return *g.GroupId
+		}
+	}
+
+	return ""
 }
 
 func workerCountRatio(workers int, ratio float32) string {

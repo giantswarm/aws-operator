@@ -23,8 +23,6 @@ const Instance = `
       Tags:
       - Key: Name
         Value: {{ $v.Cluster.ID }}-master
-      - Key: giantswarm.io/tccp
-        Value: true
   {{ $v.Master.DockerVolume.ResourceName }}:
     Type: AWS::EC2::Volume
     Properties:
@@ -37,8 +35,6 @@ const Instance = `
       Tags:
       - Key: Name
         Value: {{ $v.Master.DockerVolume.Name }}
-      - Key: giantswarm.io/tccp
-        Value: true
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -51,8 +47,6 @@ const Instance = `
       Tags:
       - Key: Name
         Value: {{ $v.Master.EtcdVolume.Name }}
-      - Key: giantswarm.io/tccp
-        Value: true
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -65,8 +59,6 @@ const Instance = `
       Tags:
       - Key: Name
         Value: {{ $v.Master.LogVolume.Name }}
-      - Key: giantswarm.io/tccp
-        Value: true
   {{ $v.Master.Instance.ResourceName }}DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
