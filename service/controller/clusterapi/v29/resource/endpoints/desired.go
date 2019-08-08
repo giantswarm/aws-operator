@@ -22,24 +22,31 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	instance, err := r.searchMasterInstance(ctx, cr)
-	if IsNotFound(err) {
-		// During updates the master instance is shut down and thus cannot be found.
-		// In such cases we cancel the reconciliation for the endpoint resource.
-		// This should be ok since all endpoints should be created and up to date
-		// already. In case we miss an update it will be done on the next resync
-		// period once the master instance is up again.
-		//
-		// TODO we might want to alert at some point when the master instance was
-		// not seen for too long. Like we should be able to find it again after
-		// three resync periods max or something.
-		r.logger.LogCtx(ctx, "level", "debug", "message", "master instance not found")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		resourcecanceledcontext.SetCanceled(ctx)
-		return nil, nil
+	var instance *ec2.Instance
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instance")
 
-	} else if err != nil {
-		return nil, microerror.Mask(err)
+		instance, err = r.searchMasterInstance(ctx, cr)
+		if IsNotFound(err) {
+			// During updates the master instance is shut down and thus cannot be found.
+			// In such cases we cancel the reconciliation for the endpoint resource.
+			// This should be ok since all endpoints should be created and up to date
+			// already. In case we miss an update it will be done on the next resync
+			// period once the master instance is up again.
+			//
+			// TODO we might want to alert at some point when the master instance was
+			// not seen for too long. Like we should be able to find it again after
+			// three resync periods max or something.
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find master instance")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+			return nil, nil
+
+		} else if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found master instance")
 	}
 
 	endpoints := &corev1.Endpoints{

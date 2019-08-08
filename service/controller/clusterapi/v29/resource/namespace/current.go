@@ -22,16 +22,15 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var namespace *corev1.Namespace
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the namespace in the Kubernetes API")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding namespace")
 
 		manifest, err := r.k8sClient.CoreV1().Namespaces().Get(key.ClusterNamespace(cr), metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the namespace in the Kubernetes API")
-			// fall through
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not namespace")
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found the namespace in the Kubernetes API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found namespace")
 			namespace = manifest
 		}
 	}
