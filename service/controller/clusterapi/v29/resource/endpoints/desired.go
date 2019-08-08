@@ -118,20 +118,6 @@ func (r Resource) searchMasterInstance(ctx context.Context, cr v1alpha1.Cluster)
 		}
 
 		instance = o.Reservations[0].Instances[0]
-
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		for _, r := range o.Reservations {
-			fmt.Printf("r: %#v\n", r)
-			for _, i := range r.Instances {
-				fmt.Printf("i: %#v\n", i)
-			}
-		}
-		fmt.Printf("instance: %#v\n", instance)
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
 	}
 
 	return instance, nil
