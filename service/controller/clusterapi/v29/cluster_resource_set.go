@@ -19,11 +19,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupebsvolumes"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanuploadbalancers"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ebsvolume"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
@@ -186,18 +186,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cleanupSecurityGroups controller.Resource
-	{
-		c := cleanupsecuritygroups.Config{
-			Logger: config.Logger,
-		}
-
-		cleanupSecurityGroups, err = cleanupsecuritygroups.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpAZsResource controller.Resource
 	{
 		c := tccpazs.Config{
@@ -318,6 +306,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var cleanupEBSVolumesResource controller.Resource
+	{
+		c := cleanupebsvolumes.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupEBSVolumesResource, err = cleanupebsvolumes.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cleanupLoadBalancersResource controller.Resource
 	{
 		c := cleanuploadbalancers.Config{
@@ -330,13 +330,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var ebsVolumeResource controller.Resource
+	var cleanupSecurityGroups controller.Resource
 	{
-		c := ebsvolume.Config{
+		c := cleanupsecuritygroups.Config{
 			Logger: config.Logger,
 		}
 
-		ebsVolumeResource, err = ebsvolume.New(c)
+		cleanupSecurityGroups, err = cleanupsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -623,7 +623,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		encryptionResource,
 		s3BucketResource,
 		s3ObjectResource,
-		ebsVolumeResource,
 		tccpAZsResource,
 		tccpiResource,
 		tccpResource,
@@ -632,6 +631,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupEBSVolumesResource,
 		cleanupLoadBalancersResource,
 		cleanupSecurityGroups,
 	}
