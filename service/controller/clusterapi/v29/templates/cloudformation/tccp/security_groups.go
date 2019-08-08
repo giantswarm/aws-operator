@@ -63,13 +63,10 @@ const SecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.EtcdELBSecurityGroupName }}
-  # Allow all access between masters and workers for calico. This is done after
-  # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: -1
       FromPort: -1
@@ -79,7 +76,6 @@ const SecurityGroups = `
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: "tcp"
       FromPort: 2379
@@ -88,8 +84,8 @@ const SecurityGroups = `
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
+      Description: Allow outbound traffic from loopback address.
       GroupId: !GetAtt VPC.DefaultSecurityGroup
-      Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
 {{- end -}}
