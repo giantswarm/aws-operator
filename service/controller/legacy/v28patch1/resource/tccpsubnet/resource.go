@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	Name = "tccpsubnetv28"
+	Name = "tccpsubnetv28patch1"
 )
 
 type Config struct {
