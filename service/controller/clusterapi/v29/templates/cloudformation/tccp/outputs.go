@@ -14,12 +14,12 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
     Value: {{ .Guest.Outputs.Master.Instance.Type }}
+  VersionBundleVersion:
+    Value:
+      Ref: VersionBundleVersionParameter
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
-  VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
 {{- end -}}
 `

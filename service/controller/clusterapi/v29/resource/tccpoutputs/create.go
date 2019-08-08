@@ -20,9 +20,6 @@ const (
 	VersionBundleVersionKey       = "VersionBundleVersion"
 	VPCIDKey                      = "VPCID"
 	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
-	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
-	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceTypeKey         = "WorkerInstanceType"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

@@ -5,29 +5,29 @@ const TemplateMainLaunchConfiguration = `
   NodePoolLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: {{ .LaunchConfiguration.Instance.Image }}
-      SecurityGroups:
-      - !Ref GeneralSecurityGroup
-      InstanceType: {{ .LaunchConfiguration.Instance.Type }}
-      InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
-      IamInstanceProfile: !Ref NodePoolInstanceProfile
+      AssociatePublicIpAddress: false
       BlockDeviceMappings:
       - DeviceName: /dev/xvdh
         Ebs:
           DeleteOnTermination: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Docker.Volume.Size }}
           VolumeType: gp2
-      - DeviceName: /dev/xvdf
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
-          VolumeType: gp2
       - DeviceName: /dev/xvdg
         Ebs:
           DeleteOnTermination: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Kubelet.Volume.Size }}
           VolumeType: gp2
-      AssociatePublicIpAddress: false
+      - DeviceName: /dev/xvdf
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
+          VolumeType: gp2
+      IamInstanceProfile: !Ref NodePoolInstanceProfile
+      ImageId: {{ .LaunchConfiguration.Instance.Image }}
+      InstanceType: {{ .LaunchConfiguration.Instance.Type }}
+      InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
+      SecurityGroups:
+      - !Ref GeneralSecurityGroup
       UserData:
         Fn::Base64: |
           {
@@ -53,20 +53,20 @@ const TemplateMainLaunchConfiguration = `
                   }
                 },
                 {
-                  "name": "log",
-                  "mount": {
-                    "device": "/dev/xvdf",
-                    "wipeFilesystem": true,
-                    "label": "log",
-                    "format": "xfs"
-                  }
-                },
-                {
                   "name": "kubelet",
                   "mount": {
                     "device": "/dev/xvdg",
                     "wipeFilesystem": true,
                     "label": "kubelet",
+                    "format": "xfs"
+                  }
+                },
+                {
+                  "name": "log",
+                  "mount": {
+                    "device": "/dev/xvdf",
+                    "wipeFilesystem": true,
+                    "label": "log",
                     "format": "xfs"
                   }
                 }

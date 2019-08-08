@@ -108,59 +108,6 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 	return append(apiRules, otherRules...), nil
 }
 
-func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.Cluster, hostClusterCIDR string) []securityGroupRule {
-	return []securityGroupRule{
-		{
-			Description:         "Allow traffic from the ingress security group to the ingress controller port 443.",
-			Port:                key.IngressControllerSecurePort,
-			Protocol:            tcpProtocol,
-			SourceSecurityGroup: ingressSecurityGroupName,
-		},
-		{
-			Description:         "Allow traffic from the ingress security group to the ingress controller port 80.",
-			Port:                key.IngressControllerInsecurePort,
-			Protocol:            tcpProtocol,
-			SourceSecurityGroup: ingressSecurityGroupName,
-		},
-		{
-			Description: "Allow traffic from control plane to ingress controller secure port for tenant cluster scraping.",
-			Port:        key.IngressControllerSecurePort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
-			Port:        cadvisorPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
-			Port:        kubeletPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10300 for node-exporter scraping.",
-			Port:        nodeExporterPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.",
-			Port:        kubeStateMetricsPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Only allow ssh traffic from the control plane.",
-			Port:        sshPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-	}
-}
-
 func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.Cluster) []securityGroupRule {
 	return []securityGroupRule{
 		{

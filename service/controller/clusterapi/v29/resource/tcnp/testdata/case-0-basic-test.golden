@@ -115,19 +115,9 @@ Resources:
   NodePoolLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: ami-0eb0d9bb7ad1bd1e9
-      SecurityGroups:
-      - !Ref GeneralSecurityGroup
-      InstanceType: m5.2xlarge
-      InstanceMonitoring: true
-      IamInstanceProfile: !Ref NodePoolInstanceProfile
+      AssociatePublicIpAddress: false
       BlockDeviceMappings:
       - DeviceName: /dev/xvdh
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      - DeviceName: /dev/xvdf
         Ebs:
           DeleteOnTermination: true
           VolumeSize: 100
@@ -137,7 +127,17 @@ Resources:
           DeleteOnTermination: true
           VolumeSize: 100
           VolumeType: gp2
-      AssociatePublicIpAddress: false
+      - DeviceName: /dev/xvdf
+        Ebs:
+          DeleteOnTermination: true
+          VolumeSize: 100
+          VolumeType: gp2
+      IamInstanceProfile: !Ref NodePoolInstanceProfile
+      ImageId: ami-0eb0d9bb7ad1bd1e9
+      InstanceType: m5.2xlarge
+      InstanceMonitoring: true
+      SecurityGroups:
+      - !Ref GeneralSecurityGroup
       UserData:
         Fn::Base64: |
           {
@@ -163,20 +163,20 @@ Resources:
                   }
                 },
                 {
-                  "name": "log",
-                  "mount": {
-                    "device": "/dev/xvdf",
-                    "wipeFilesystem": true,
-                    "label": "log",
-                    "format": "xfs"
-                  }
-                },
-                {
                   "name": "kubelet",
                   "mount": {
                     "device": "/dev/xvdg",
                     "wipeFilesystem": true,
                     "label": "kubelet",
+                    "format": "xfs"
+                  }
+                },
+                {
+                  "name": "log",
+                  "mount": {
+                    "device": "/dev/xvdf",
+                    "wipeFilesystem": true,
+                    "label": "log",
                     "format": "xfs"
                   }
                 }

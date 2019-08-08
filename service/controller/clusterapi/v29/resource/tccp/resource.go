@@ -25,7 +25,8 @@ const (
 
 const (
 	// namedIAMCapability is the AWS specific capability necessary to work with
-	// our Cloud Formation templates.
+	// our Cloud Formation templates. It is required for creating worker policy
+	// IAM roles.
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
 	// versionBundleVersionParameterKey is the key name of the Cloud Formation
 	// parameter that sets the version bundle version.
