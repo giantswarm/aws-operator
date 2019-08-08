@@ -1,4 +1,4 @@
-package ebsvolume
+package cleanupebsvolumes
 
 import (
 	"context"

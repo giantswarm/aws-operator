@@ -1,4 +1,4 @@
-package ebsvolume
+package cleanupebsvolumes
 
 import (
 	"github.com/giantswarm/microerror"
@@ -7,7 +7,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "ebsvolumev29"
+	Name = "cleanupebsvolumesv29"
 )
 
 // Config represents the configuration used to create a new ebsvolume resource.
@@ -27,7 +27,6 @@ func New(config Config) (*Resource, error) {
 	}
 
 	newResource := &Resource{
-		// Dependencies.
 		logger: config.Logger,
 	}
 
