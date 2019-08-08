@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/key"
 )
 
 const (
@@ -129,7 +129,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
 		if cloudformation.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v24 to
-			// v25. The code can be cleaned up in v28 and the controller context value
+			// v25. The code can be cleaned up in v28patch1 and the controller context value
 			// assignment can be managed like the other examples below.
 			//
 			//     https://github.com/giantswarm/giantswarm/issues/5570

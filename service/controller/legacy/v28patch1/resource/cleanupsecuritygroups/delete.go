@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {

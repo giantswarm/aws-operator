@@ -10,11 +10,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/detection"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/detection"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/key"
 )
 
 const (
