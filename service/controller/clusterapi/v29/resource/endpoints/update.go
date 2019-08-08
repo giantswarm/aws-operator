@@ -22,7 +22,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if endpointsToUpdate != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating Kubernetes endpoints")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updating endpoint")
 
 		namespace := key.ClusterNamespace(cr)
 		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(endpointsToUpdate)
@@ -30,10 +30,10 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated Kubernetes endpoints")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "updated endpoint")
 
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "Kubernetes endpoints do not need to be updated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not update endpoint")
 	}
 
 	return nil
@@ -67,8 +67,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the endpoints has to be updated")
-
 	var endpointsToUpdate *corev1.Endpoints
 
 	// The subsets can change if the private IP of the master node has changed.
@@ -78,8 +76,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			endpointsToUpdate = desiredEndpoints
 		}
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "found out if the endpoints has to be deleted")
 
 	return endpointsToUpdate, nil
 }

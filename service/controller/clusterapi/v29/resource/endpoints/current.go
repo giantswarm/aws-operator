@@ -17,21 +17,17 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "looking for the master endpoints in the Kubernetes API")
-
-	namespace := key.ClusterNamespace(cr)
-
-	// Lookup the current state of the endpoints.
 	var endpoints *corev1.Endpoints
 	{
-		manifest, err := r.k8sClient.CoreV1().Endpoints(namespace).Get(masterEndpointsName, metav1.GetOptions{})
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding endpoint")
+
+		manifest, err := r.k8sClient.CoreV1().Endpoints(key.ClusterNamespace(cr)).Get(masterEndpointsName, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the master endpoints in the Kubernetes API")
-			// fall through
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find endpoint")
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found the master endpoints in the Kubernetes API")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "found endpoint")
 			endpoints = manifest
 		}
 	}
