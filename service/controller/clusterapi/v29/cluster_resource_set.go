@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanuploadbalancers"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
@@ -26,7 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/loadbalancer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
@@ -318,13 +318,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var loadBalancerResource controller.Resource
+	var cleanupLoadBalancersResource controller.Resource
 	{
-		c := loadbalancer.Config{
+		c := cleanuploadbalancers.Config{
 			Logger: config.Logger,
 		}
 
-		loadBalancerResource, err = loadbalancer.New(c)
+		cleanupLoadBalancersResource, err = cleanuploadbalancers.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -632,7 +632,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
-		loadBalancerResource,
+		cleanupLoadBalancersResource,
 		cleanupSecurityGroups,
 	}
 
