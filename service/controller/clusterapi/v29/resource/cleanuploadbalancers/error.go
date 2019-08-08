@@ -1,4 +1,4 @@
-package loadbalancer
+package cleanuploadbalancers
 
 import (
 	"github.com/giantswarm/microerror"
