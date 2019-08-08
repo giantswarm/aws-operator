@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	name = "migrationv28"
+	name = "migrationv28patch1"
 
 	awsConfigNamespace               = "default"
 	credentialSecretDefaultNamespace = "giantswarm"
