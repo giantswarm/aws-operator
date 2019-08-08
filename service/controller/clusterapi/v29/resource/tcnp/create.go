@@ -180,10 +180,10 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
-	minDesiredNodes := minDesiredWorkers(key.WorkerScalingMin(cr), key.WorkerScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
+	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		AvailabilityZones: key.WorkerAvailabilityZones(cr),
+		AvailabilityZones: key.MachineDeploymentAvailabilityZones(cr),
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
@@ -192,9 +192,9 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 			Name: key.ELBNameIngress(&cr),
 		},
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
-		MaxSize:               key.WorkerScalingMax(cr),
+		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
-		MinSize:               key.WorkerScalingMin(cr),
+		MinSize:               key.MachineDeploymentScalingMin(cr),
 		Subnets:               subnets,
 	}
 
@@ -233,12 +233,12 @@ func newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) 
 		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
 			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
-					Size: key.WorkerDockerVolumeSizeGB(cr),
+					Size: key.MachineDeploymentDockerVolumeSizeGB(cr),
 				},
 			},
 			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
-					Size: key.WorkerKubeletVolumeSizeGB(cr),
+					Size: key.MachineDeploymentKubeletVolumeSizeGB(cr),
 				},
 			},
 			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
@@ -250,7 +250,7 @@ func newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) 
 		Instance: template.ParamsMainLaunchConfigurationInstance{
 			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Monitoring: true,
-			Type:       key.WorkerInstanceType(cr),
+			Type:       key.MachineDeploymentInstanceType(cr),
 		},
 		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
 			S3URL: key.SmallCloudConfigS3URL(&cr, cc.Status.TenantCluster.AWS.AccountID, "worker"),
@@ -274,10 +274,10 @@ func newOutputs(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 		CloudConfig: template.ParamsMainOutputsCloudConfig{
 			Version: key.CloudConfigVersion,
 		},
-		DockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
+		DockerVolumeSizeGB: key.MachineDeploymentDockerVolumeSizeGB(cr),
 		Instance: template.ParamsMainOutputsInstance{
 			Image: key.ImageID(cc.Status.TenantCluster.AWS.Region),
-			Type:  key.WorkerInstanceType(cr),
+			Type:  key.MachineDeploymentInstanceType(cr),
 		},
 		VersionBundle: template.ParamsMainOutputsVersionBundle{
 			Version: key.OperatorVersion(&cr),
@@ -475,7 +475,7 @@ func newVPC(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.Param
 			},
 		},
 		TCNP: template.ParamsMainVPCTCNP{
-			CIDR: key.WorkerSubnet(cr),
+			CIDR: key.MachineDeploymentSubnet(cr),
 		},
 	}
 
