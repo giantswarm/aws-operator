@@ -1,8 +1,6 @@
-
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Initializer Cloud Formation Stack.
 Resources:
-  
   PeerRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -23,4 +21,3 @@ Resources:
               - Effect: Allow
                 Action: 'ec2:AcceptVpcPeeringConnection'
                 Resource: '*'
-
