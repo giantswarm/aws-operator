@@ -12,13 +12,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/credential"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/asgstatus"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/credential"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/resource/tccpoutputs"
 )
 
 type DrainerResourceSetConfig struct {
