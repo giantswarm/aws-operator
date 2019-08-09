@@ -251,7 +251,7 @@
   revision = "b8e860764772b300c3cb0785153990d429c479a7"
 
 [[projects]]
-  branch = "aws-operator-template-imagepulldeadline"
+  branch = "master"
   digest = "1:4603c0713a064ac2d26e4da8da80665a11d5c81d9019d4957b99cc78f81ce7d3"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -260,7 +260,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "74054457ab25791fe078904a86da23988db81d08"
+  revision = "17c8488c90cdabc81b320d4bf48db6a20843ee2e"
 
 [[projects]]
   branch = "master"
