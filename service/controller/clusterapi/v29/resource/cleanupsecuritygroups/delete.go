@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
@@ -66,6 +67,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			if IsDependencyViolation(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("security group %#q for tenant cluster %#q still has dependency", *g.GroupId, key.ClusterID(&cr)))
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+
 				continue
 
 			} else if err != nil {
