@@ -56,6 +56,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	if len(groups) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d security groups for tenant cluster %#q", len(groups), key.ClusterID(&cr)))
 
+		var deleted int
 		for _, g := range groups {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
 
@@ -77,10 +78,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
+			deleted++
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d security groups for tenant cluster %#q", len(groups), key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d security groups for tenant cluster %#q", deleted, key.ClusterID(&cr)))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no security groups to be deleted for tenant cluster %#q", key.ClusterID(&cr)))
 	}
