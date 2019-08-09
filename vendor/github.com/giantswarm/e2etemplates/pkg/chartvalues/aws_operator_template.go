@@ -26,6 +26,8 @@ const awsOperatorTemplate = `Installation:
                 UsernameClaim: ""
                 GroupsClaim: ""
           ClusterIPRange: "172.31.0.0/24"
+        Kubelet:
+          ImagePullProgressDeadline: 1m
       SSH:
         SSOPublicKey: 'test'
         UserList: '{{ .SSH.UserList }}'
