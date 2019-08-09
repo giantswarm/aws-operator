@@ -54,6 +54,12 @@ type GuestInstanceAdapterMasterInstance struct {
 	Monitoring   bool
 }
 
+// SmallCloudconfigConfig represents the data structure required for executing
+// the small cloudconfig template.
+type SmallCloudconfigConfig struct {
+	S3URL string
+}
+
 func (i *GuestInstanceAdapter) Adapt(config Config) error {
 	{
 		i.Cluster.ID = key.ClusterID(&config.CustomObject)
@@ -78,8 +84,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.PrivateSubnet = key.SanitizeCFResourceName(key.PrivateSubnetName(i.Master.AZ))
 
 		c := SmallCloudconfigConfig{
-			InstanceRole: "master",
-			S3URL:        key.SmallCloudConfigS3URL(&config.CustomObject, config.TenantClusterAccountID, "master"),
+			S3URL: key.SmallCloudConfigS3URL(&config.CustomObject, config.TenantClusterAccountID, "master"),
 		}
 		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {
@@ -88,19 +93,12 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
 		i.Master.EncrypterBackend = config.EncrypterBackend
-
 		i.Master.DockerVolume.Name = key.VolumeNameDocker(config.CustomObject)
-
 		i.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
-
 		i.Master.EtcdVolume.Name = key.VolumeNameEtcd(config.CustomObject)
-
 		i.Master.LogVolume.Name = key.VolumeNameLog(config.CustomObject)
-
 		i.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
-
 		i.Master.Instance.Type = config.StackState.MasterInstanceType
-
 		i.Master.Instance.Monitoring = config.StackState.MasterInstanceMonitoring
 	}
 

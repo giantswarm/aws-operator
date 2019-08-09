@@ -20,9 +20,6 @@ const (
 	VersionBundleVersionKey       = "VersionBundleVersion"
 	VPCIDKey                      = "VPCID"
 	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
-	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
-	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceTypeKey         = "WorkerInstanceType"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -136,30 +133,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerDockerVolumeSizeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerImageIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.Image = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerInstanceTypeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.Type = v
 	}
 
 	return nil

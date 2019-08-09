@@ -93,6 +93,13 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 
 	for _, az := range clusterAZs {
 		a.PublicSubnets = append(a.PublicSubnets, key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)))
+	}
+
+	for _, az := range clusterAZs {
+		if az.Name != key.MasterAvailabilityZone(cfg.CustomObject) {
+			continue
+		}
+
 		a.PrivateSubnets = append(a.PrivateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 

@@ -129,16 +129,8 @@ func PolicyNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2PolicyK8s)
 }
 
-func PolicyNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2PolicyK8s)
-}
-
 func ProfileNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
-}
-
-func ProfileNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func Region(cluster v1alpha1.Cluster) string {
@@ -147,10 +139,6 @@ func Region(cluster v1alpha1.Cluster) string {
 
 func RoleNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
-}
-
-func RoleNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func RolePeerAccess(cluster v1alpha1.Cluster) string {

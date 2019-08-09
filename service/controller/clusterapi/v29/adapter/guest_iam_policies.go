@@ -13,9 +13,6 @@ type GuestIAMPoliciesAdapter struct {
 	MasterProfileName string
 	RegionARN         string
 	S3Bucket          string
-	WorkerRoleName    string
-	WorkerPolicyName  string
-	WorkerProfileName string
 }
 
 func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
@@ -26,9 +23,6 @@ func (i *GuestIAMPoliciesAdapter) Adapt(cfg Config) error {
 	i.MasterPolicyName = key.PolicyNameMaster(cfg.CustomObject)
 	i.MasterProfileName = key.ProfileNameMaster(cfg.CustomObject)
 	i.MasterRoleName = key.RoleNameMaster(cfg.CustomObject)
-	i.WorkerPolicyName = key.PolicyNameWorker(cfg.CustomObject)
-	i.WorkerProfileName = key.ProfileNameWorker(cfg.CustomObject)
-	i.WorkerRoleName = key.RoleNameWorker(cfg.CustomObject)
 	i.RegionARN = key.RegionARN(cfg.AWSRegion)
 	i.KMSKeyARN = cfg.TenantClusterKMSKeyARN
 	i.S3Bucket = key.BucketName(&cfg.CustomObject, cfg.TenantClusterAccountID)

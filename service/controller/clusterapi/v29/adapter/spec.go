@@ -70,26 +70,5 @@ type StackState struct {
 	MasterCloudConfigVersion string
 	MasterInstanceMonitoring bool
 
-	// TODO the cloud config versions shouldn't be injected here. These should
-	// actually always only be the ones the operator has hard coded. No other
-	// version should be used here ever.
-	WorkerCloudConfigVersion  string
-	WorkerDesired             int
-	WorkerDockerVolumeSizeGB  string
-	WorkerKubeletVolumeSizeGB string
-	WorkerLogVolumeSizeGB     string
-	WorkerImageID             string
-	WorkerInstanceMonitoring  bool
-	WorkerInstanceType        string
-	WorkerMax                 int
-	WorkerMin                 int
-
 	VersionBundleVersion string
-}
-
-// SmallCloudconfigConfig represents the data structure required for executing
-// the small cloudconfig template.
-type SmallCloudconfigConfig struct {
-	InstanceRole string
-	S3URL        string
 }

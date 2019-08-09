@@ -55,9 +55,15 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			},
 		}
 		s.PublicSubnets = append(s.PublicSubnets, snet)
+	}
 
-		snetName = key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
-		snet = Subnet{
+	for _, az := range zones {
+		if az.Name != key.MasterAvailabilityZone(cfg.CustomObject) {
+			continue
+		}
+
+		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
+		snet := Subnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR.String(),
 			Name:                snetName,

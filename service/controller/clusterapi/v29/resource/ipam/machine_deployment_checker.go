@@ -46,7 +46,7 @@ func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, 
 	// We check the subnet we want to ensure in the CR annotations. In case there
 	// is no subnet tracked so far, we want to proceed with the allocation
 	// process. Thus we return true.
-	if key.WorkerSubnet(*cr) == "" {
+	if key.MachineDeploymentSubnet(*cr) == "" {
 		return true, nil
 	}
 

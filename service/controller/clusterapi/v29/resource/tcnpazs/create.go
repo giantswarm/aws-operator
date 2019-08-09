@@ -26,7 +26,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	// We need to cancel the resource early in case the ipam resource did not yet
 	// allocate a subnet for the node pool.
-	if key.WorkerSubnet(cr) == "" {
+	if key.MachineDeploymentSubnet(cr) == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect private subnets for availability zones")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "node pool subnet not yet allocated")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -38,12 +38,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// mapping below.
 	var subnets []net.IPNet
 	{
-		_, netip, err := net.ParseCIDR(key.WorkerSubnet(cr))
+		_, netip, err := net.ParseCIDR(key.MachineDeploymentSubnet(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		subnets, err = ipam.Split(*netip, uint(len(key.WorkerAvailabilityZones(cr))))
+		subnets, err = ipam.Split(*netip, uint(len(key.MachineDeploymentAvailabilityZones(cr))))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -54,7 +54,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// private subnets.
 	var azs []string
 	{
-		for _, az := range key.WorkerAvailabilityZones(cr) {
+		for _, az := range key.MachineDeploymentAvailabilityZones(cr) {
 			azs = append(azs, az)
 		}
 

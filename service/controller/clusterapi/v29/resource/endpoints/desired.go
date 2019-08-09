@@ -100,6 +100,12 @@ func (r Resource) searchMasterInstance(ctx context.Context, cr v1alpha1.Cluster)
 						aws.String(key.ClusterID(&cr)),
 					},
 				},
+				{
+					Name: aws.String("instance-state-name"),
+					Values: []*string{
+						aws.String(ec2.InstanceStateNameRunning),
+					},
+				},
 			},
 		}
 

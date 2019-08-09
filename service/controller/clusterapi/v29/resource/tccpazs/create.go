@@ -85,7 +85,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		azMapping[key.MasterAvailabilityZone(cr)] = mapping{}
 
 		for _, md := range machineDeployments {
-			for _, az := range key.WorkerAvailabilityZones(md) {
+			for _, az := range key.MachineDeploymentAvailabilityZones(md) {
 				azMapping[az] = mapping{}
 			}
 		}

@@ -9,61 +9,18 @@ Outputs:
     Value: rsc-ac0dc01
   MasterInstanceType:
     Value: m5.xlarge
+  VersionBundleVersion:
+    Value:
+      Ref: VersionBundleVersionParameter
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
-  WorkerASGName:
-    Value: !Ref workerAutoScalingGroup
-  WorkerDockerVolumeSizeGB:
-    Value: 100
-  WorkerImageID:
-    Value: ami-0eb0d9bb7ad1bd1e9
-  WorkerInstanceType:
-    Value: m5.2xlarge
-  VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
 Parameters:
   VersionBundleVersionParameter:
     Type: String
     Description: Sets the VersionBundleVersion used to generate the template.
 Resources:
-  workerAutoScalingGroup:
-    Type: "AWS::AutoScaling::AutoScalingGroup"
-    Properties:
-      VPCZoneIdentifier:
-        - !Ref PrivateSubnetEuCentral1a
-        - !Ref PrivateSubnetEuCentral1b
-        - !Ref PrivateSubnetEuCentral1c
-      AvailabilityZones:
-        - eu-central-1a
-        - eu-central-1b
-        - eu-central-1c
-      DesiredCapacity: 3
-      MinSize: 3
-      MaxSize: 5
-      LaunchConfigurationName: !Ref workerLaunchConfiguration
-      LoadBalancerNames:
-        - !Ref IngressLoadBalancer
-      HealthCheckGracePeriod: 10
-      MetricsCollection:
-        - Granularity: "1Minute"
-      Tags:
-        - Key: k8s.io/cluster-autoscaler/enabled
-          Value: true
-          PropagateAtLaunch: false
-        - Key: k8s.io/cluster-autoscaler/8y5ck
-          Value: true
-          PropagateAtLaunch: false
-    UpdatePolicy:
-      AutoScalingRollingUpdate:
-        # minimum amount of instances that must always be running during a rolling update
-        MinInstancesInService: 2
-        # only do a rolling update of this amount of instances max
-        MaxBatchSize: 1
-        # after creating a new instance, pause operations on the ASG for this amount of time
-        PauseTime: PT15M
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -123,62 +80,6 @@ Resources:
       InstanceProfileName: 8y5ck-master-EC2-K8S-Role
       Roles:
         - Ref: "MasterRole"
-  WorkerRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: 8y5ck-worker-EC2-K8S-Role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            Service: ec2.amazonaws.com
-          Action: "sts:AssumeRole"
-  WorkerRolePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: 8y5ck-worker-EC2-K8S-Policy
-      Roles:
-        - Ref: "WorkerRole"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Action: "ec2:Describe*"
-            Resource: "*"
-          - Effect: "Allow"
-            Action: "ec2:AttachVolume"
-            Resource: "*"
-          - Effect: "Allow"
-            Action: "ec2:DetachVolume"
-            Resource: "*"
-          - Effect: "Allow"
-            Action:
-              - "s3:GetBucketLocation"
-              - "s3:ListAllMyBuckets"
-            Resource: "*"
-          - Effect: "Allow"
-            Action: "s3:ListBucket"
-            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
-          - Effect: "Allow"
-            Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
-          - Effect: "Allow"
-            Action:
-              - "ecr:GetAuthorizationToken"
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:GetRepositoryPolicy"
-              - "ecr:DescribeRepositories"
-              - "ecr:ListImages"
-              - "ecr:BatchGetImage"
-            Resource: "*"
-  WorkerInstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
-    Properties:
-      InstanceProfileName: 8y5ck-worker-EC2-K8S-Role
-      Roles:
-        - Ref: "WorkerRole"
   rsc-ac0dc01:
     Type: "AWS::EC2::Instance"
     Description: Master instance
@@ -195,7 +96,7 @@ Resources:
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnetEuCentral1b
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNF81XzAvbWFzdGVyIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsgCiAgICAgICAgIm5hbWUiOiAiZG9ja2VyIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkYyIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImRvY2tlciIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJsb2ciLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRmIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAibG9nIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImV0Y2QiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRoIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IGZhbHNlLAogICAgICAgICAgImxhYmVsIjogImV0Y2QiLAogICAgICAgICAgImZvcm1hdCI6ICJleHQ0IgogICAgICAgIH0KICAgICAgfQogICAgXQogIH0KfQo=
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNF81XzAvbWFzdGVyIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRjIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAiZXRjZCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogZmFsc2UsCiAgICAgICAgICAibGFiZWwiOiAiZXRjZCIsCiAgICAgICAgICAiZm9ybWF0IjogImV4dDQiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
       Tags:
       - Key: Name
         Value: 8y5ck-master
@@ -292,47 +193,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
-  workerLaunchConfiguration:
-    Type: "AWS::AutoScaling::LaunchConfiguration"
-    Description: worker launch configuration
-    Properties:
-      ImageId: ami-0eb0d9bb7ad1bd1e9
-      SecurityGroups:
-      - !Ref WorkerSecurityGroup
-      InstanceType: m5.2xlarge
-      InstanceMonitoring: false
-      IamInstanceProfile: !Ref WorkerInstanceProfile
-      BlockDeviceMappings:
-      
-      - DeviceName: "/dev/xvdh"
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      
-      - DeviceName: "/dev/xvdf"
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      
-      - DeviceName: "/dev/xvdg"
-        Ebs:
-          DeleteOnTermination: true
-          VolumeSize: 100
-          VolumeType: gp2
-      
-      AssociatePublicIpAddress: false
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNF81XzAvd29ya2VyIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsgCiAgICAgICAgIm5hbWUiOiAiZG9ja2VyIiwKICAgICAgICAibW91bnQiOiB7CiAgICAgICAgICAiZGV2aWNlIjogIi9kZXYveHZkaCIsCiAgICAgICAgICAid2lwZUZpbGVzeXN0ZW0iOiB0cnVlLAogICAgICAgICAgImxhYmVsIjogImRvY2tlciIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJsb2ciLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRmIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAibG9nIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImt1YmVsZXQiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRnIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAia3ViZWxldCIsCiAgICAgICAgICAiZm9ybWF0IjogInhmcyIKICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0K
-  NodeDrainerLifecycleHook:
-    Type: "AWS::AutoScaling::LifecycleHook"
-    Properties:
-      AutoScalingGroupName:
-        Ref: workerAutoScalingGroup
-      DefaultResult: CONTINUE
-      HeartbeatTimeout: 3600
-      LifecycleHookName: NodeDrainer
-      LifecycleTransition: "autoscaling:EC2_INSTANCE_TERMINATING"
   
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -393,11 +253,7 @@ Resources:
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
-        - !Ref PrivateSubnetEuCentral1a
-      
         - !Ref PrivateSubnetEuCentral1b
-      
-        - !Ref PrivateSubnetEuCentral1c
       
 
   IngressLoadBalancer:
@@ -466,13 +322,6 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: NATGatewayEuCentral1a
   NATGatewayEuCentral1b:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -490,13 +339,6 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: NATGatewayEuCentral1b
   NATGatewayEuCentral1c:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -514,13 +356,13 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATRouteEuCentral1c:
+  NATRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: NATGatewayEuCentral1c
+        Ref: NATGatewayEuCentral1b
   
   
   PublicRouteTableEuCentral1a:
@@ -550,22 +392,6 @@ Resources:
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: public
-  PrivateRouteTableEuCentral1a:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1a
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
   PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -579,22 +405,6 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
-  PrivateRouteTableEuCentral1c:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1c
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: VPCPeeringConnection
@@ -650,71 +460,6 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-master
-  WorkerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-worker
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      -
-        IpProtocol: tcp
-        FromPort: 30011
-        ToPort: 30011
-        
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
-        
-      -
-        IpProtocol: tcp
-        FromPort: 30010
-        ToPort: 30010
-        
-        SourceSecurityGroupId: !Ref IngressSecurityGroup
-        
-      -
-        IpProtocol: tcp
-        FromPort: 30011
-        ToPort: 30011
-        
-        CidrIp: 10.1.0.0/16
-        
-      -
-        IpProtocol: tcp
-        FromPort: 4194
-        ToPort: 4194
-        
-        CidrIp: 10.1.0.0/16
-        
-      -
-        IpProtocol: tcp
-        FromPort: 10250
-        ToPort: 10250
-        
-        CidrIp: 10.1.0.0/16
-        
-      -
-        IpProtocol: tcp
-        FromPort: 10300
-        ToPort: 10300
-        
-        CidrIp: 10.1.0.0/16
-        
-      -
-        IpProtocol: tcp
-        FromPort: 10301
-        ToPort: 10301
-        
-        CidrIp: 10.1.0.0/16
-        
-      -
-        IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        
-        CidrIp: 10.1.0.0/16
-        
-      Tags:
-        - Key: Name
-          Value:  8y5ck-worker
   IngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -759,63 +504,29 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
-  # Allow all access between masters and workers for calico. This is done after
-  # the other rules to avoid circular dependencies.
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
-  MasterAllowWorkerCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref WorkerSecurityGroup
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
-      # Allow access between masters and workers for calico.
       GroupId: !Ref MasterSecurityGroup
       IpProtocol: "tcp"
       FromPort: 2379
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
-  WorkerAllowCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: WorkerSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref WorkerSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref WorkerSecurityGroup
-  WorkerAllowMasterCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: WorkerSecurityGroup
-    Properties:
-      # Allow access between masters and workers for calico.
-      GroupId: !Ref WorkerSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref MasterSecurityGroup
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
+      Description: Allow outbound traffic from loopback address.
       GroupId: !GetAtt VPC.DefaultSecurityGroup
-      Description: "Allow outbound traffic from loopback address."
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
   
@@ -876,25 +587,6 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1c
       SubnetId: !Ref PublicSubnetEuCentral1c
-  PrivateSubnetEuCentral1a:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.3.0/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1a
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
-      VpcId: !Ref VPC
-  PrivateSubnetRouteTableAssociationEuCentral1a:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      SubnetId: !Ref PrivateSubnetEuCentral1a
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -914,25 +606,6 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       SubnetId: !Ref PrivateSubnetEuCentral1b
-  PrivateSubnetEuCentral1c:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.3.128/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1c
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
-      VpcId: !Ref VPC
-  PrivateSubnetRouteTableAssociationEuCentral1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      SubnetId: !Ref PrivateSubnetEuCentral1c
   
   VPC:
     Type: AWS::EC2::VPC
@@ -959,9 +632,7 @@ Resources:
         - !Ref PublicRouteTableEuCentral1a
         - !Ref PublicRouteTableEuCentral1b
         - !Ref PublicRouteTableEuCentral1c
-        - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
-        - !Ref PrivateRouteTableEuCentral1c
       ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"

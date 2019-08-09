@@ -156,7 +156,6 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
-			// CAPABILITY_NAMED_IAM is required for creating worker policy IAM roles.
 			Capabilities: []*string{
 				aws.String(namedIAMCapability),
 			},
@@ -243,8 +242,6 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.Cluster, templat
 
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
-				// CAPABILITY_NAMED_IAM is required for updating worker policy IAM
-				// roles.
 				aws.String(namedIAMCapability),
 			},
 			Parameters: []*cloudformation.Parameter{
@@ -305,18 +302,6 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 				MasterInstanceType:         key.MasterInstanceType(cr),
 				MasterCloudConfigVersion:   key.CloudConfigVersion,
 				MasterInstanceMonitoring:   r.instanceMonitoring,
-
-				WorkerCloudConfigVersion: key.CloudConfigVersion,
-				WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
-				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cc.Status.TenantCluster.TCCP.MachineDeployment),
-				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
-				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
-				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cc.Status.TenantCluster.TCCP.MachineDeployment),
-				WorkerImageID:             key.ImageID(cc.Status.TenantCluster.AWS.Region),
-				WorkerInstanceMonitoring:  r.instanceMonitoring,
-				WorkerInstanceType:        key.WorkerInstanceType(cc.Status.TenantCluster.TCCP.MachineDeployment),
-				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
-				WorkerMin:                 cc.Status.TenantCluster.TCCP.ASG.MinSize,
 
 				VersionBundleVersion: key.OperatorVersion(&cr),
 			},

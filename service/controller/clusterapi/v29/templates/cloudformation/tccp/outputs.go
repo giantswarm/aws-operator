@@ -14,20 +14,12 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
     Value: {{ .Guest.Outputs.Master.Instance.Type }}
+  VersionBundleVersion:
+    Value:
+      Ref: VersionBundleVersionParameter
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
-  WorkerASGName:
-    Value: !Ref {{ .Guest.Outputs.Worker.ASG.Ref }}
-  WorkerDockerVolumeSizeGB:
-    Value: {{ .Guest.Outputs.Worker.DockerVolumeSizeGB }}
-  WorkerImageID:
-    Value: {{ .Guest.Outputs.Worker.ImageID }}
-  WorkerInstanceType:
-    Value: {{ .Guest.Outputs.Worker.InstanceType }}
-  VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
 {{- end -}}
 `
