@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v26"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v27"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 )
 
@@ -22,6 +23,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 	versionBundles = append(versionBundles, v26.VersionBundle())
 	versionBundles = append(versionBundles, v27.VersionBundle())
 	versionBundles = append(versionBundles, v28.VersionBundle())
+	versionBundles = append(versionBundles, v28patch1.VersionBundle())
 	versionBundles = append(versionBundles, v29.VersionBundle())
 
 	return versionBundles
