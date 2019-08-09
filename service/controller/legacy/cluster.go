@@ -494,7 +494,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VPCPeerID:      config.VPCPeerID,
 		}
 
-		resourceSetV28patch1, err = v28.NewClusterResourceSet(c)
+		resourceSetV28patch1, err = v28patch1.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
