@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
+				Component:   "kubernetes",
+				Description: "Update kubernetes to 1.14.5 (CVE-2019-11247)",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -32,7 +32,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.14.3",
+				Version: "1.14.5",
 			},
 		},
 		Name:    "aws-operator",
