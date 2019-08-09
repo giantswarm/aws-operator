@@ -63,7 +63,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 
 			_, err := cc.Client.TenantCluster.AWS.EC2.DeleteSecurityGroup(i)
-			if err != nil {
+			if IsDependencyViolation(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("security group %#q for tenant cluster %#q still has dependency", *g.GroupId, key.ClusterID(&cr)))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
+				continue
+
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 
