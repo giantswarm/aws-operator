@@ -312,7 +312,7 @@
   revision = "ce634ba25306b7a1e7f590d1a672c9811d90d6f2"
 
 [[projects]]
-  branch = "kubernetes-1.14.5"
+  branch = "master"
   digest = "1:d276882f2e4eecd1c2a7e12b89cd97637bfcc4795fd70cae6478e903bccef607"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
@@ -326,7 +326,7 @@
     "v_4_6_0",
   ]
   pruneopts = "T"
-  revision = "c71b9db6c6c6d7ce50e978236cf12a0aa33f733c"
+  revision = "54edef3afe915cce66125eac2062a573c1ed2b93"
 
 [[projects]]
   branch = "master"
