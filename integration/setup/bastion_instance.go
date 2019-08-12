@@ -407,17 +407,6 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 				          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCrHyOvY5nH1DCybBDcA0BdZ916zrtaeP1fNBaqbxsfCg3m8SjMZVb62W5PHI5177o4Ci4JoMUj/+HpVY07Ao5UXCJ3J+LXPNaAsyzfijHBpVas7YgWG9pv3OtElFnB3wYPz1VpJH2BCy6p1SomvxqyJ6ihLeLIzWaXHoGu5d73aeKXKEelrpvl5Y2wFPSQBqIbl7prRB+q4ChG+D6ZR/9Zd8Tzth7WUrimJbmDUWBUKmhfgEYTjKVmIuUrHA2yRBv6dRE1yP9A3W5A8fOHMlcyEsKw+ZK4i7LZn+GRVY144K67w38B85KlPBmhVEXrbvFOLXZxzZqg9glb1TnVZ7eGzJBH3B72GB7y/igEytaGcHw/qt53+B/zYPTJFLC9fpyaLWC4JswzyOlNlybMZJY6EFxlvb+c0ALt935fhq+3+20SUIikZsTbQGMxnaTI7V48PMTxngNRykdBMYleB9iNQ6Weh2Ox8ZJFaWjKTGgtVujMtJEHI0rDpB8GnVgu0/No36z32E6juBApDCRLuoJDnNd47z6yM4Zq+bKL/xUIp5gTNKdiD1hVVrBv/HoECtHZjRrXklX0+wRPQV2AuTdl7kK1IfRtLet9osQgpEDVVD91D3xgPX4W2n2F180F6wgQLMzQuzcHtlepaDv459D2Mac1krkKbnNC131ElPfIMw== j.schaefer@estwx.de"
 				        ],
 				        "shell": "/bin/bash"
-				      },
-				      {
-				        "groups": [
-				          "sudo",
-				          "docker"
-				        ],
-				        "name": "thomas",
-				        "sshAuthorizedKeys": [
-				          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC+0XcR/g2ebbzSm3iO+DgceVRm9ZpnKe6WDc+OjTSzupa4Y/nhROEQZtNEllTkkgd7lraACdlu6PPf3vuqoaA/XZ2NNYtSOJ19JvZclLKaT7QwGlD4fMgHxESeo43SSH8Hpn+aZYgLYPjBA7lSshEpv0DSpeKhoL7sD9+SonGklRjLrhpr9RlGBlds2UiuNEVrp0TpBEqWacxPrlZ9UYfuU6lGuMWC/735ShvGMusghB9q/HLd8LdwkhY/yA31Hspc03rQbCUNC27vaUEEpGV27Z02b0e9xloo5KCHNDLBNP7zCDPCwAmwzvOkrxGAWR2fabBSvCjMBUsaIzI3PkmwUm8+LJnRnbbWTtOfcsJA+L7pptZ51d8lYenKfaszgXSKE873LxEXOMfZv4Jyzn6mBayCMFYpM88gle3nl6vjwVaE4xm5mAphZsxr7+PXhHpHtFx3dvsdLRN6vnC/woV3eY+2yj1zwukvp3P+h+su1moR2DfxBPFEhZTp2jtUtaSVwm787rtDxMGlxeZ8spLv1x2tquTDfozlM88nC7Q5nqLQcp+Cow9XqFPn8shgtboWeIc9U4zJe1D0MiJSdsvn2fxn6Q7UB65yY2xeKzkb1O3c/4V76X5q/CYJkX7/E1WdHWNlm9CQd7fq6EGBh2v4TfDdkZNa0iRJ1EPs33/wDQ== thomas@fussell.io"
-				        ],
-				        "shell": "/bin/bash"
 				      }
 				    ]
 				  },
