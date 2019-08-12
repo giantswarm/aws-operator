@@ -4,7 +4,6 @@ type ContextStatusTenantClusterTCCPASG struct {
 	DesiredCapacity int
 	MaxSize         int
 	MinSize         int
-	Name            string
 }
 
 func (a ContextStatusTenantClusterTCCPASG) IsEmpty() bool {
