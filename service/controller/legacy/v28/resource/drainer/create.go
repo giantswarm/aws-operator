@@ -30,7 +30,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	if key.AutoScalingGroupName(customObject, "worker") == "" {
+	workerASGName := cc.Status.TenantCluster.TCCP.ASG.Name
+	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
@@ -42,7 +43,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
-				aws.String(key.AutoScalingGroupName(customObject, "worker")),
+				aws.String(workerASGName),
 			},
 		}
 

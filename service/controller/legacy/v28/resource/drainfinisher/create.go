@@ -23,7 +23,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	if key.AutoScalingGroupName(customObject, "worker") == "" {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	workerASGName := cc.Status.TenantCluster.TCCP.ASG.Name
+	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
@@ -78,7 +84,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			err = r.completeLifecycleHook(ctx, instanceID, key.AutoScalingGroupName(customObject, "worker"))
+			err = r.completeLifecycleHook(ctx, instanceID, workerASGName)
 			if err != nil {
 				return microerror.Mask(err)
 			}

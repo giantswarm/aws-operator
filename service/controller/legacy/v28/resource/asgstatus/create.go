@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +24,25 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	asgName := key.AutoScalingGroupName(cr, "worker")
+
+	var asgName string
+	{
+		i := &cloudformation.DescribeStackResourceInput{
+			LogicalResourceId: aws.String(key.WorkerASGRef),
+			StackName:         aws.String(key.MainGuestStackName(cr)),
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStackResource(i)
+		if IsNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		asgName = *o.StackResourceDetail.PhysicalResourceId
+	}
 
 	var asg *autoscaling.Group
 	{
@@ -31,7 +50,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
-				aws.String(asgName),
+				&asgName,
 			},
 		}
 
@@ -105,6 +124,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity = desiredCapacity
 		cc.Status.TenantCluster.TCCP.ASG.MaxSize = maxSize
 		cc.Status.TenantCluster.TCCP.ASG.MinSize = minSize
+		cc.Status.TenantCluster.TCCP.ASG.Name = asgName
 	}
 
 	return nil
