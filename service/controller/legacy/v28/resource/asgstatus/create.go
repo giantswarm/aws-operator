@@ -6,10 +6,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
 )
@@ -26,16 +28,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		i := &autoscaling.DescribeTagsInput{
-			Filters: []*autoscaling.Filter{
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("key"),
-					Values: []*string{
-						aws.String(fmt.Sprintf("kubernetes.io/cluster/%s", key.ClusterID(cr))),
-					},
-				},
-				{
-					Name: aws.String("value"),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
 						aws.String(key.ClusterID(cr)),
 					},
@@ -43,7 +39,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeTags(i)
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -52,20 +48,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		for _, t := range o.Tags {
-			fmt.Printf("\n")
-			fmt.Printf("\n")
-			fmt.Printf("\n")
-			fmt.Printf("%#v\n", *t.Key)
-			fmt.Printf("%#v\n", *t.Value)
-			fmt.Printf("%#v\n", *t.ResourceId)
-			fmt.Printf("%#v\n", *t.ResourceType)
-
-			asgName = *t.ResourceId
+		if len(o.Reservations) == 0 {
+			return microerror.Maskf(executionFailedError, "expected at least one worker instance in asg")
 		}
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
+		if len(o.Reservations[0].Instances) == 0 {
+			return microerror.Maskf(executionFailedError, "expected at least one worker instance in asg")
+		}
+
+		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
 	}
 
 	var asg *autoscaling.Group
