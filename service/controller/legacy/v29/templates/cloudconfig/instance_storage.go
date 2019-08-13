@@ -6,7 +6,7 @@ storage:
     - name: ephemeral1
       mount:
         device: /dev/xvdb
-        format: xfs
+        format: ext4
         create:
           force: true
 `
