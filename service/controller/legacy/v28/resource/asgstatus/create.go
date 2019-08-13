@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,12 +26,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		i := &cloudformation.DescribeStackResourceInput{
-			LogicalResourceId: aws.String(key.WorkerASGRef),
-			StackName:         aws.String(key.MainGuestStackName(cr)),
+		i := &autoscaling.DescribeTagsInput{
+			Filters: []*autoscaling.Filter{
+				{
+					Name: aws.String("tag:giantswarm.io/cluster"),
+					Values: []*string{
+						aws.String(key.ClusterID(cr)),
+					},
+				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:kubernetes.io/cluster/%s", key.ClusterID(cr))),
+					Values: []*string{
+						aws.String("owned"),
+					},
+				},
+			},
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStackResource(i)
+		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeTags(i)
 		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -41,7 +52,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		asgName = *o.StackResourceDetail.PhysicalResourceId
+		for _, t := range o.Tags {
+			fmt.Printf("\n")
+			fmt.Printf("\n")
+			fmt.Printf("\n")
+			fmt.Printf("%#v\n", *t.Key)
+			fmt.Printf("%#v\n", *t.Value)
+			fmt.Printf("%#v\n", *t.ResourceId)
+			fmt.Printf("%#v\n", *t.ResourceType)
+
+			asgName = *t.ResourceId
+		}
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
 	}
 
 	var asg *autoscaling.Group
