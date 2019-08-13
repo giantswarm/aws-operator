@@ -29,15 +29,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &autoscaling.DescribeTagsInput{
 			Filters: []*autoscaling.Filter{
 				{
-					Name: aws.String("tag:giantswarm.io/cluster"),
+					Name: aws.String("key"),
 					Values: []*string{
-						aws.String(key.ClusterID(cr)),
+						aws.String(fmt.Sprintf("kubernetes.io/cluster/%s", key.ClusterID(cr))),
 					},
 				},
 				{
-					Name: aws.String(fmt.Sprintf("tag:kubernetes.io/cluster/%s", key.ClusterID(cr))),
+					Name: aws.String("value"),
 					Values: []*string{
-						aws.String("owned"),
+						aws.String(key.ClusterID(cr)),
 					},
 				},
 			},
