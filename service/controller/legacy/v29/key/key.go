@@ -88,6 +88,10 @@ const (
 )
 
 const (
+	TagCluster = "giantswarm.io/cluster"
+)
+
+const (
 	NodeDrainerLifecycleHookName = "NodeDrainer"
 	WorkerASGRef                 = "workerAutoScalingGroup"
 )
