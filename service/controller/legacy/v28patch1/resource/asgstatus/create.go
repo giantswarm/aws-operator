@@ -6,11 +6,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/key"
 )
@@ -27,12 +28,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		i := &cloudformation.DescribeStackResourceInput{
-			LogicalResourceId: aws.String(key.WorkerASGRef),
-			StackName:         aws.String(key.MainGuestStackName(cr)),
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+					Values: []*string{
+						aws.String(key.ClusterID(cr)),
+					},
+				},
+			},
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStackResource(i)
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -41,7 +48,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		asgName = *o.StackResourceDetail.PhysicalResourceId
+		if len(o.Reservations) == 0 {
+			return microerror.Maskf(executionFailedError, "expected at least one worker instance in asg")
+		}
+		if len(o.Reservations[0].Instances) == 0 {
+			return microerror.Maskf(executionFailedError, "expected at least one worker instance in asg")
+		}
+
+		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
 	}
 
 	var asg *autoscaling.Group
