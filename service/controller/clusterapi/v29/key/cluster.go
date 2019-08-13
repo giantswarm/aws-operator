@@ -36,24 +36,23 @@ const (
 	KubernetesSecurePort = 443
 )
 
-// MaximumNumberOfAZsInCluster defines the current limitation with Node Pools
-// implementation. Biggest limitation behind this is current IPAM
-// implementation that restricts network sizes. Another related problem is
-// restrictions in AWS resource structure.
-//
-// NOTE: This is currently used in several places such as clusterazs resource &
-// adapter. Move this to clusterazs resource when it's not needed elsewhere
-// anymore. This restriction on its whole will be removed when IPAM design gets
-// overhaul and TCCP infrastructure improved.
-const MaximumNumberOfAZsInCluster = 4
-
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagCluster      = "giantswarm.io/cluster"
-	TagSubnetType   = "giantswarm.io/subnet-type"
-	TagInstallation = "giantswarm.io/installation"
-	TagOrganization = "giantswarm.io/organization"
-	TagTCCP         = "giantswarm.io/tccp"
+	TagAvailabilityZone = "giantswarm.io/availability-zone"
+	TagCluster          = "giantswarm.io/cluster"
+	TagRouteTableType   = "giantswarm.io/route-table-type"
+	TagStack            = "giantswarm.io/stack"
+	TagSubnetType       = "giantswarm.io/subnet-type"
+	TagInstallation     = "giantswarm.io/installation"
+	TagOrganization     = "giantswarm.io/organization"
+)
+
+const (
+	StackTCCP  = "tccp"
+	StackTCCPF = "tccpf"
+	StackTCCPI = "tccpi"
+	StackTCNP  = "tcnp"
+	StackTCNPF = "tcnpf"
 )
 
 const (
@@ -97,20 +96,6 @@ func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
 	return getResourcenameWithTimeHash("DockerVolume", cluster)
 }
 
-func EC2ServiceDomain(cluster v1alpha1.Cluster) string {
-	domain := "ec2.amazonaws.com"
-
-	if isChinaRegion(cluster) {
-		domain += ".cn"
-	}
-
-	return domain
-}
-
-func ImageID(cluster v1alpha1.Cluster) string {
-	return imageIDs()[Region(cluster)]
-}
-
 func KubeletLabels(cluster v1alpha1.Cluster) string {
 	var labels string
 
@@ -144,46 +129,16 @@ func PolicyNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2PolicyK8s)
 }
 
-func PolicyNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2PolicyK8s)
-}
-
 func ProfileNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
-}
-
-func ProfileNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func Region(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.Region
 }
 
-func RegionARN(cluster v1alpha1.Cluster) string {
-	regionARN := "aws"
-
-	if isChinaRegion(cluster) {
-		regionARN += "-cn"
-	}
-
-	return regionARN
-}
-
-func RoleARNMaster(cluster v1alpha1.Cluster, accountID string) string {
-	return baseRoleARN(cluster, accountID, "master")
-}
-
-func RoleARNWorker(cluster v1alpha1.Cluster, accountID string) string {
-	return baseRoleARN(cluster, accountID, "worker")
-}
-
 func RoleNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
-}
-
-func RoleNameWorker(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("%s-worker-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
 func RolePeerAccess(cluster v1alpha1.Cluster) string {
@@ -192,18 +147,6 @@ func RolePeerAccess(cluster v1alpha1.Cluster) string {
 
 func RouteTableName(cluster v1alpha1.Cluster, suffix, az string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(&cluster), suffix, az)
-}
-
-func StackNameCPF(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-host-main", ClusterID(&cluster))
-}
-
-func StackNameCPI(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-host-setup", ClusterID(&cluster))
-}
-
-func StackNameTCCP(cluster v1alpha1.Cluster) string {
-	return fmt.Sprintf("cluster-%s-guest-main", ClusterID(&cluster))
 }
 
 func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
@@ -239,13 +182,6 @@ func VolumeNameEtcd(cluster v1alpha1.Cluster) string {
 
 func VolumeNameLog(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-log", ClusterID(&cluster))
-}
-
-func baseRoleARN(cluster v1alpha1.Cluster, accountID string, kind string) string {
-	clusterID := ClusterID(&cluster)
-	partition := RegionARN(cluster)
-
-	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
 }
 
 func ensureLabel(labels string, key string, value string) string {
@@ -293,40 +229,4 @@ func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string
 	upperClusterID := strings.ToUpper(id)
 
 	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
-}
-
-// imageIDs returns our Container Linux AMIs for each active AWS region. Note
-// that AMIs should always be for HVM virtualisation, not PV. Current Release is
-// CoreOS Container Linux stable 2135.4.0. AMI IDs are copied from the following
-// resource.
-//
-//     https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.
-//
-func imageIDs() map[string]string {
-	return map[string]string{
-		"ap-northeast-1": "ami-02e7b007b87514a38",
-		"ap-northeast-2": "ami-0b5d1f638fb771cc9",
-		"ap-south-1":     "ami-0db4916dd31b99465",
-		"ap-southeast-1": "ami-01f2de2186e97c395",
-		"ap-southeast-2": "ami-026d43721ef96eba8",
-		"ca-central-1":   "ami-07d5bae9b2c4c9df1",
-		"cn-north-1":     "ami-0dd65d250887524c1",
-		"cn-northwest-1": "ami-0c63b500c3173c90e",
-		"eu-central-1":   "ami-0eb0d9bb7ad1bd1e9",
-		"eu-north-1":     "ami-0e3eca3c62f4c6311",
-		"eu-west-1":      "ami-000307cf706ac9f94",
-		"eu-west-2":      "ami-0322cee7ff4e446ce",
-		"eu-west-3":      "ami-01c936a41649a8cda",
-		"sa-east-1":      "ami-0b4101a238b99a929",
-		"us-east-1":      "ami-00386353b49e325ba",
-		"us-east-2":      "ami-064fe7e0332ae6407",
-		"us-gov-east-1":  "ami-03e5a71feb2b7afd2",
-		"us-gov-west-1":  "ami-272d6846",
-		"us-west-1":      "ami-070bfb410b9f148c7",
-		"us-west-2":      "ami-0a7e0ff8d31da1836",
-	}
-}
-
-func isChinaRegion(cluster v1alpha1.Cluster) bool {
-	return strings.HasPrefix(Region(cluster), "cn-")
 }

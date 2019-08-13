@@ -17,14 +17,21 @@ version directory, and  then changes are introduced.
 
 ### Changed
 
-- Mount relevant directories so that the command `docker` can run in `Kubelet`. This is needed for `rbd` to mount `Ceph` volumes on the nodes.h
-- Add explicit cgroups for better grained resources management over operating system components and container runtime.
+- Mount relevant directories so that the command `docker` can run in `Kubelet`. This is needed for `rbd` to mount `Ceph` volumes on the nodes.
+- Add explicit cgroups for finer grained resources management over operating system components and container runtime.
 - Make --image-pull-progress-deadline configurable for kubelets so a longer
 duration can be used in AWS China regions to mitigate slow image pulls.
+- Harden `restricted` podsecuritypolicy.
 
 ### Fixed
 
 - Update `giantswarm-critical` priority class manifest to use `v1` stable.
+
+## [v4.5.1]
+
+### Changed
+
+- Update kubernetes to 1.14.5 CVE-2019-1002101, CVE-2019-11246
 
 ## [v4.5.0]
 
@@ -418,6 +425,7 @@ chart-operator).
 ## [v0.1.0]
 
 [v4.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_6_0
+[v4.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_1
 [v4.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_0
 [v4.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_4_0
 [v4.3.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_3_0

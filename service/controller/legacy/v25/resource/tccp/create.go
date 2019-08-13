@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v22/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v25/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25/key"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v25/templates"

@@ -7,6 +7,8 @@ type ParamsMain struct {
 	LaunchConfiguration *ParamsMainLaunchConfiguration
 	LifecycleHooks      *ParamsMainLifecycleHooks
 	Outputs             *ParamsMainOutputs
+	RouteTables         *ParamsMainRouteTables
 	SecurityGroups      *ParamsMainSecurityGroups
 	Subnets             *ParamsMainSubnets
+	VPC                 *ParamsMainVPC
 }

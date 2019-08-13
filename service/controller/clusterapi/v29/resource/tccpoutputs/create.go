@@ -20,9 +20,6 @@ const (
 	VersionBundleVersionKey       = "VersionBundleVersion"
 	VPCIDKey                      = "VPCID"
 	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
-	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
-	WorkerImageIDKey              = "WorkerImageID"
-	WorkerInstanceTypeKey         = "WorkerInstanceType"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -49,18 +46,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var outputs []cloudformation.Output
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster cloud formation stack outputs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack outputs")
 
-		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.StackNameTCCP(cr))
+		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.StackNameTCCP(&cr))
 		if cloudformation.IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster cloud formation stack does not exist")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane cloud formation stack outputs")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack does not exist")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
 		} else if cloudformation.IsOutputsNotAccessible(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster cloud formation stack outputs")
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster main cloud formation stack output values are not accessible due to stack status %#q", s))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane cloud formation stack outputs")
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack output values are not accessible due to stack status %#q", s))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			cc.Status.TenantCluster.TCCP.IsTransitioning = true
 			return nil
@@ -71,7 +68,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		outputs = o
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster cloud formation stack outputs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack outputs")
 	}
 
 	{
@@ -136,30 +133,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerDockerVolumeSizeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerImageIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.Image = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, WorkerInstanceTypeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.Type = v
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 
@@ -42,6 +43,16 @@ func ClusterID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Cluster]
 }
 
+func EC2ServiceDomain(region string) string {
+	domain := "ec2.amazonaws.com"
+
+	if isChinaRegion(region) {
+		domain += ".cn"
+	}
+
+	return domain
+}
+
 func ELBNameAPI(getter LabelsGetter) string {
 	return fmt.Sprintf("%s-api", ClusterID(getter))
 }
@@ -58,8 +69,8 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
 
-func MachineDeploymentASGName(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
+func ImageID(region string) string {
+	return imageIDs()[region]
 }
 
 func MachineDeploymentID(getter LabelsGetter) string {
@@ -86,6 +97,10 @@ func OrganizationID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Organization]
 }
 
+func PrivateInternetGatewayRouteName(az string) string {
+	return fmt.Sprintf("PrivateInternetGatewayRoute-%s", az)
+}
+
 func PrivateRouteTableName(az string) string {
 	return fmt.Sprintf("PrivateRouteTable-%s", az)
 }
@@ -96,6 +111,10 @@ func PrivateSubnetName(az string) string {
 
 func PrivateSubnetRouteTableAssociationName(az string) string {
 	return fmt.Sprintf("PrivateSubnetRouteTableAssociation-%s", az)
+}
+
+func PublicInternetGatewayRouteName(az string) string {
+	return fmt.Sprintf("PublicInternetGatewayRoute-%s", az)
 }
 
 func PublicSubnetName(az string) string {
@@ -110,17 +129,36 @@ func PublicSubnetRouteTableAssociationName(az string) string {
 	return fmt.Sprintf("PublicSubnetRouteTableAssociation-%s", az)
 }
 
+func RegionARN(region string) string {
+	regionARN := "aws"
+
+	if isChinaRegion(region) {
+		regionARN += "-cn"
+	}
+
+	return regionARN
+}
+
 func ReleaseVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ReleaseVersion]
+}
+
+func RoleARNMaster(getter LabelsGetter, region string, accountID string) string {
+	return baseRoleARN(getter, region, accountID, "master")
+}
+
+func RoleARNWorker(getter LabelsGetter, region string, accountID string) string {
+	return baseRoleARN(getter, region, accountID, "worker")
 }
 
 // SanitizeCFResourceName filters out all non-ascii alphanumberics from input
 // string.
 //
-// Example: SanitizeCFResourceName("abc-123") == "abc123"
-// Example2: SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
+//     SanitizeCFResourceName("abc-123") == "abc123"
+//     SanitizeCFResourceName("abc", "123") == "abc123"
+//     SanitizeCFResourceName("Dear god why? щ（ﾟДﾟщ）") == "Deargodwhy"
 //
-func SanitizeCFResourceName(v string) string {
+func SanitizeCFResourceName(l ...string) string {
 	var rs []rune
 
 	// Start with true to capitalize first character.
@@ -128,7 +166,7 @@ func SanitizeCFResourceName(v string) string {
 
 	// Iterate over unicode characters and add numbers and ASCII letters title
 	// cased.
-	for _, r := range []rune(v) {
+	for _, r := range []rune(strings.Join(l, "-")) {
 		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
 			if previousWasSkipped {
 				rs = append(rs, unicode.ToTitle(r))
@@ -156,10 +194,69 @@ func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) s
 	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
 }
 
+func StackNameTCCP(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccp", ClusterID(getter))
+}
+
+func StackNameTCCPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpf", ClusterID(getter))
+}
+
+func StackNameTCCPI(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpi", ClusterID(getter))
+}
+
 func StackNameTCNP(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tcnp", getter.GetLabels()[label.Cluster])
+	return fmt.Sprintf("cluster-%s-tcnp-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func StackNameTCNPF(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
 }
 
 func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
+}
+
+func baseRoleARN(getter LabelsGetter, region string, accountID string, kind string) string {
+	clusterID := ClusterID(getter)
+	partition := RegionARN(region)
+
+	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
+}
+
+// imageIDs returns our Container Linux AMIs for each active AWS region. Note
+// that AMIs should always be for HVM virtualisation, not PV. Current Release is
+// CoreOS Container Linux stable 2135.4.0. AMI IDs are copied from the following
+// resource.
+//
+//     https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.
+//
+func imageIDs() map[string]string {
+	return map[string]string{
+		"ap-northeast-1": "ami-02e7b007b87514a38",
+		"ap-northeast-2": "ami-0b5d1f638fb771cc9",
+		"ap-south-1":     "ami-0db4916dd31b99465",
+		"ap-southeast-1": "ami-01f2de2186e97c395",
+		"ap-southeast-2": "ami-026d43721ef96eba8",
+		"ca-central-1":   "ami-07d5bae9b2c4c9df1",
+		"cn-north-1":     "ami-0dd65d250887524c1",
+		"cn-northwest-1": "ami-0c63b500c3173c90e",
+		"eu-central-1":   "ami-0eb0d9bb7ad1bd1e9",
+		"eu-north-1":     "ami-0e3eca3c62f4c6311",
+		"eu-west-1":      "ami-000307cf706ac9f94",
+		"eu-west-2":      "ami-0322cee7ff4e446ce",
+		"eu-west-3":      "ami-01c936a41649a8cda",
+		"sa-east-1":      "ami-0b4101a238b99a929",
+		"us-east-1":      "ami-00386353b49e325ba",
+		"us-east-2":      "ami-064fe7e0332ae6407",
+		"us-gov-east-1":  "ami-03e5a71feb2b7afd2",
+		"us-gov-west-1":  "ami-272d6846",
+		"us-west-1":      "ami-070bfb410b9f148c7",
+		"us-west-2":      "ami-0a7e0ff8d31da1836",
+	}
+}
+
+func isChinaRegion(region string) bool {
+	return strings.HasPrefix(region, "cn-")
 }

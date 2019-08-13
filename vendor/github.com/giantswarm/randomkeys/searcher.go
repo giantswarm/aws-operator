@@ -21,22 +21,16 @@ const (
 )
 
 type Config struct {
-	// Dependencies.
-
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 }
 
-func DefaultConfig() Config {
-	return Config{
-		// Dependencies.
-		K8sClient: nil,
-		Logger:    nil,
-	}
+type Searcher struct {
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
 }
 
 func NewSearcher(config Config) (*Searcher, error) {
-	// Dependencies.
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.K8sClient must not be empty")
 	}
@@ -45,19 +39,11 @@ func NewSearcher(config Config) (*Searcher, error) {
 	}
 
 	s := &Searcher{
-		// Dependencies.
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 	}
 
 	return s, nil
-}
-
-type Searcher struct {
-	// Dependencies.
-
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
 }
 
 func (s *Searcher) SearchCluster(clusterID string) (Cluster, error) {
@@ -98,7 +84,7 @@ func (s *Searcher) search(randomKey *RandomKey, clusterID string, key Key) error
 		select {
 		case event, ok := <-watcher.ResultChan():
 			if !ok {
-				return microerror.Maskf(executionError, "watching secrets, selector = %q: unexpected closed channel", selector)
+				return microerror.Maskf(executionFailedError, "watching secrets, selector = %q: unexpected closed channel", selector)
 			}
 
 			switch event.Type {
@@ -113,7 +99,7 @@ func (s *Searcher) search(randomKey *RandomKey, clusterID string, key Key) error
 				// Noop. Ignore deleted events. These are
 				// handled by the certificate operator.
 			case watch.Error:
-				return microerror.Maskf(executionError, "watching secrets, selector = %q: %v", selector, apierrors.FromObject(event.Object))
+				return microerror.Maskf(executionFailedError, "watching secrets, selector = %q: %v", selector, apierrors.FromObject(event.Object))
 			}
 		case <-time.After(watchTimeOut):
 			return microerror.Maskf(timeoutError, "waiting secrets, selector = %q", selector)

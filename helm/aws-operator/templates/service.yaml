@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ tpl .Values.resource.default.name  . }}
+  namespace: {{ tpl .Values.resource.default.namespace  . }}
+  labels:
+    app: {{ tpl .Values.resource.default.name  . }}
+  annotations:
+    prometheus.io/scrape: "true"
+spec:
+  ports:
+  - port: 8000
+  selector:
+    app: {{ tpl .Values.resource.default.name  . }}

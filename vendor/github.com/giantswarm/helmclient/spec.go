@@ -2,11 +2,16 @@ package helmclient
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/helm/pkg/helm"
 )
 
 const (
+	// defaultEnsureTillerInstalledMaxWait is how long to wait in
+	// EnsureTillerInstalled to get a running tiller pod.
+	defaultEnsureTillerInstalledMaxWait = 1 * time.Minute
+
 	// defaultMaxHistory is the maximum number of release versions stored per
 	// release by default.
 	defaultMaxHistory = 10
@@ -15,12 +20,13 @@ const (
 	// runReleaseTestTimeout is the timeout in seconds when running tests.
 	runReleaseTestTimout = 300
 
-	defaultTillerImage     = "quay.io/giantswarm/tiller:v2.12.0"
-	defaultTillerNamespace = "kube-system"
-	roleBindingNamePrefix  = "tiller"
-	tillerLabelSelector    = "app=helm,name=tiller"
-	tillerPodName          = "tiller-giantswarm"
-	tillerPort             = 44134
+	defaultTillerImage      = "quay.io/giantswarm/tiller:v2.12.0"
+	defaultTillerNamespace  = "kube-system"
+	roleBindingNamePrefix   = "tiller"
+	runningPodFieldSelector = "status.phase=Running"
+	tillerLabelSelector     = "app=helm,name=tiller"
+	tillerPodName           = "tiller-giantswarm"
+	tillerPort              = 44134
 )
 
 // Interface describes the methods provided by the helm client.

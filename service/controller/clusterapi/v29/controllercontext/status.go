@@ -15,20 +15,13 @@ type ContextStatus struct {
 type ContextStatusControlPlane struct {
 	AWSAccountID string
 	NATGateway   ContextStatusControlPlaneNATGateway
-	RouteTable   ContextStatusControlPlaneRouteTable
+	RouteTables  []*ec2.RouteTable
 	PeerRole     ContextStatusControlPlanePeerRole
 	VPC          ContextStatusControlPlaneVPC
 }
 
 type ContextStatusControlPlaneNATGateway struct {
 	Addresses []*ec2.Address
-}
-
-type ContextStatusControlPlaneRouteTable struct {
-	// Mappings are key value pairs of control plane route table names and their
-	// IDs, where the map keys are route table names and the map values are route
-	// table IDs. The mapping is managed by the routetable resource.
-	Mappings map[string]string
 }
 
 type ContextStatusControlPlanePeerRole struct {
@@ -46,7 +39,6 @@ type ContextStatusTenantCluster struct {
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	VersionBundleVersion  string
-	WorkerInstance        ContextStatusTenantClusterWorkerInstance
 }
 
 type ContextStatusTenantClusterAWS struct {
@@ -70,8 +62,9 @@ type ContextStatusTenantClusterTCCP struct {
 	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
+	NATGateways       []*ec2.NatGateway
 	RouteTables       []*ec2.RouteTable
-	SecurityGroup     ContextStatusTenantClusterTCCPSecurityGroup
+	SecurityGroups    []*ec2.SecurityGroup
 	Subnets           []*ec2.Subnet
 	VPC               ContextStatusTenantClusterTCCPVPC
 }
@@ -84,8 +77,9 @@ type ContextStatusTenantClusterTCCPASG struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
-	Name   string
-	Subnet ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
+	Name       string
+	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
+	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -103,21 +97,15 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	ID   string
 }
 
-type ContextStatusTenantClusterTCCPSecurityGroup struct {
-	Ingress ContextStatusTenantClusterTCCPSecurityGroupIngress
+type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable struct {
+	Public ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic
 }
 
-type ContextStatusTenantClusterTCCPSecurityGroupIngress struct {
+type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 	ID string
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
 	ID                  string
 	PeeringConnectionID string
-}
-
-type ContextStatusTenantClusterWorkerInstance struct {
-	DockerVolumeSizeGB string
-	Image              string
-	Type               string
 }

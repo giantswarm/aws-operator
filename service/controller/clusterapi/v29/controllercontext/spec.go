@@ -16,8 +16,9 @@ type ContextSpecTenantClusterTCCP struct {
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZone struct {
-	Name   string
-	Subnet ContextSpecTenantClusterTCCPAvailabilityZoneSubnet
+	Name       string
+	Subnet     ContextSpecTenantClusterTCCPAvailabilityZoneSubnet
+	RouteTable ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -35,13 +36,31 @@ type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	ID   string
 }
 
+type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable struct {
+	Private ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePrivate
+	Public  ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePrivate struct {
+	ID string
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
+	ID string
+}
+
 type ContextSpecTenantClusterTCNP struct {
 	AvailabilityZones []ContextSpecTenantClusterTCNPAvailabilityZone
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZone struct {
-	Name   string
-	Subnet ContextSpecTenantClusterTCNPAvailabilityZoneSubnet
+	Name       string
+	NATGateway ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway
+	Subnet     ContextSpecTenantClusterTCNPAvailabilityZoneSubnet
+}
+
+type ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway struct {
+	ID string
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZoneSubnet struct {

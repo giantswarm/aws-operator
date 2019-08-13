@@ -13,22 +13,12 @@ import (
 	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	v22 "github.com/giantswarm/aws-operator/service/controller/legacy/v22"
-	v22adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v22/adapter"
-	v22cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v22/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1"
-	v22patch1adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1/adapter"
-	v22patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v22patch1/cloudconfig"
-	v23 "github.com/giantswarm/aws-operator/service/controller/legacy/v23"
-	v23adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v23/adapter"
-	v23cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v23/cloudconfig"
-	v24 "github.com/giantswarm/aws-operator/service/controller/legacy/v24"
-	v24adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v24/adapter"
-	v24cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v24/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	v25 "github.com/giantswarm/aws-operator/service/controller/legacy/v25"
 	v25adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v25/adapter"
 	v25cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v25/cloudconfig"
@@ -41,6 +31,9 @@ import (
 	v28 "github.com/giantswarm/aws-operator/service/controller/legacy/v28"
 	v28adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v28/adapter"
 	v28cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v28/cloudconfig"
+	v28patch1 "github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1"
+	v28patch1adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/adapter"
+	v28patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1/cloudconfig"
 	v29 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v29/cloudconfig"
@@ -71,6 +64,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	LabelSelector              ClusterConfigLabelSelector
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
 	ProjectName                string
@@ -88,6 +82,11 @@ type ClusterConfigAWSConfig struct {
 	AvailabilityZones []string
 	Region            string
 	SessionToken      string
+}
+
+type ClusterConfigLabelSelector struct {
+	Enabled          bool
+	OverridenVersion string
 }
 
 // ClusterConfigOIDC represents the configuration of the OIDC authorization
@@ -135,6 +134,9 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			Logger:  config.Logger,
 			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
 
+			ListOptions: metav1.ListOptions{
+				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
+			},
 			RateWait:     informer.DefaultRateWait,
 			ResyncPeriod: informer.DefaultResyncPeriod,
 		}
@@ -215,229 +217,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 
 		randomKeysSearcher, err = randomkeys.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV22 *controller.ResourceSet
-	{
-		c := v22.ClusterResourceSetConfig{
-			CertsSearcher: certsSearcher,
-			CMAClient:     config.CMAClient,
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-				Region:          config.HostAWSConfig.Region,
-			},
-			HostAWSClients:     controlPlaneAWSClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			NetworkAllocator:   config.NetworkAllocator,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			GuestUpdateEnabled:         config.GuestUpdateEnabled,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
-			IgnitionPath:               config.IgnitionPath,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v22cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v22adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.RouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV22, err = v22.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV22patch1 *controller.ResourceSet
-	{
-		c := v22patch1.ClusterResourceSetConfig{
-			CertsSearcher: certsSearcher,
-			CMAClient:     config.CMAClient,
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-				Region:          config.HostAWSConfig.Region,
-			},
-			HostAWSClients:     controlPlaneAWSClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			NetworkAllocator:   config.NetworkAllocator,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			GuestUpdateEnabled:         config.GuestUpdateEnabled,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
-			IgnitionPath:               config.IgnitionPath,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v22patch1cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v22patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.RouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV22patch1, err = v22patch1.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV23 *controller.ResourceSet
-	{
-		c := v23.ClusterResourceSetConfig{
-			CertsSearcher: certsSearcher,
-			CMAClient:     config.CMAClient,
-			G8sClient:     config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-				Region:          config.HostAWSConfig.Region,
-			},
-			HostAWSClients:     controlPlaneAWSClients,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			NetworkAllocator:   config.NetworkAllocator,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			GuestUpdateEnabled:         config.GuestUpdateEnabled,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
-			IgnitionPath:               config.IgnitionPath,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v23cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v23adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:       config.ProjectName,
-			PublicRouteTables: config.RouteTables,
-			RegistryDomain:    config.RegistryDomain,
-			SSOPublicKey:      config.SSOPublicKey,
-			VaultAddress:      config.VaultAddress,
-		}
-
-		resourceSetV23, err = v23.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV24 *controller.ResourceSet
-	{
-		c := v24.ClusterResourceSetConfig{
-			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			HostAWSConfig: awsclient.Config{
-				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-				Region:          config.HostAWSConfig.Region,
-				SessionToken:    config.HostAWSConfig.SessionToken,
-			},
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			NetworkAllocator:   config.NetworkAllocator,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
-			IgnitionPath:               config.IgnitionPath,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v24cloudconfig.OIDCConfig{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v24adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
-			},
-			ProjectName:    config.ProjectName,
-			RouteTables:    config.RouteTables,
-			RegistryDomain: config.RegistryDomain,
-			SSOPublicKey:   config.SSOPublicKey,
-			VaultAddress:   config.VaultAddress,
-		}
-
-		resourceSetV24, err = v24.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -665,6 +444,62 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV28patch1 *controller.ResourceSet
+	{
+		c := v28patch1.ClusterResourceSetConfig{
+			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v28patch1cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v28patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
+			VPCPeerID:      config.VPCPeerID,
+		}
+
+		resourceSetV28patch1, err = v28patch1.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSetV29 *controller.ResourceSet
 	{
 		c := v29.ClusterResourceSetConfig{
@@ -723,14 +558,11 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV22,
-		resourceSetV22patch1,
-		resourceSetV23,
-		resourceSetV24,
 		resourceSetV25,
 		resourceSetV26,
 		resourceSetV27,
 		resourceSetV28,
+		resourceSetV28patch1,
 		resourceSetV29,
 	}
 

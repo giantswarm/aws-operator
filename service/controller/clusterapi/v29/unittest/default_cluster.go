@@ -15,7 +15,8 @@ func DefaultCluster() cmav1alpha1.Cluster {
 	cr := cmav1alpha1.Cluster{
 		ObjectMeta: v1.ObjectMeta{
 			Labels: map[string]string{
-				label.Cluster: "8y5ck",
+				label.Cluster:         "8y5ck",
+				label.OperatorVersion: "7.3.0",
 			},
 		},
 	}
@@ -24,7 +25,7 @@ func DefaultCluster() cmav1alpha1.Cluster {
 		Cluster: g8sv1alpha1.AWSClusterSpecCluster{
 			Description: "Test cluster for template rendering unit test.",
 			DNS: g8sv1alpha1.AWSClusterSpecClusterDNS{
-				Domain: "guux.eu-central-1.aws.gigantic.io",
+				Domain: "gauss.eu-central-1.aws.gigantic.io",
 			},
 		},
 		Provider: g8sv1alpha1.AWSClusterSpecProvider{

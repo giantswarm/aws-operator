@@ -15,21 +15,21 @@ const NatGateway = `
         - AllocationId
       SubnetId: !Ref {{ .PublicSubnetName }}
       Tags:
-        - Key: Name
-          Value: {{ .ClusterID }}
-        - Key: giantswarm.io/tccp
-          Value: true
+        - Key: giantswarm.io/availability-zone
+          Value: {{ .AvailabilityZone }}
   {{ .NATEIPName }}:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
+  {{- end -}}
+  {{- range $v.NATRoutes }}
   {{ .NATRouteName }}:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref {{ .PrivateRouteTableName }}
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: "{{ .NATGWName }}"
+        Ref: {{ .NATGWName }}
   {{- end -}}
 {{- end -}}
 `

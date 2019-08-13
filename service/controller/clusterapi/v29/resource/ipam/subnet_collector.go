@@ -197,7 +197,7 @@ func (c *SubnetCollector) getSubnetsFromMachineDeployments(ctx context.Context) 
 
 	var results []net.IPNet
 	for _, md := range machineDeploymentList.Items {
-		cidr := key.WorkerSubnet(md)
+		cidr := key.MachineDeploymentSubnet(md)
 		if cidr == "" {
 			continue
 		}

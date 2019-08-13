@@ -13,10 +13,10 @@ const Small = `{
   },
   "storage": {
     "filesystems": [
-      { 
+      {
         "name": "docker",
         "mount": {
-          "device": "{{if eq .InstanceRole "master"}}/dev/xvdc{{else}}/dev/xvdh{{end}}",
+          "device": "/dev/xvdc",
           "wipeFilesystem": true,
           "label": "docker",
           "format": "xfs"
@@ -30,17 +30,7 @@ const Small = `{
           "label": "log",
           "format": "xfs"
         }
-      }{{ if eq .InstanceRole "worker" -}},
-      {
-        "name": "kubelet",
-        "mount": {
-          "device": "/dev/xvdg",
-          "wipeFilesystem": true,
-          "label": "kubelet",
-          "format": "xfs"
-        }
-      }
-      {{- end }}{{ if eq .InstanceRole "master" -}},
+      },
       {
         "name": "etcd",
         "mount": {
@@ -50,7 +40,6 @@ const Small = `{
           "format": "ext4"
         }
       }
-    {{- end }}
     ]
   }
 }

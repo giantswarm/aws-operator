@@ -50,6 +50,9 @@ func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namesp
 		if cr.Status.ProviderStatus == nil {
 			cr.Status.ProviderStatus = &runtime.RawExtension{}
 		}
+		if cr.Status.ProviderStatus.Raw == nil {
+			cr.Status.ProviderStatus.Raw = []byte{}
+		}
 
 		err := json.Unmarshal(cr.Status.ProviderStatus.Raw, &providerStatus)
 		if err != nil {
