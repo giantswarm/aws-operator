@@ -6,9 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
@@ -25,21 +26,38 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		i := &cloudformation.DescribeStackResourceInput{
-			LogicalResourceId: aws.String(key.RefWorkerASG),
-			StackName:         aws.String(key.StackNameTCCP(&cr)),
+		i := &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+					Values: []*string{
+						aws.String(key.ClusterID(&cr)),
+					},
+				},
+			},
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStackResource(i)
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		asgName = *o.StackResourceDetail.PhysicalResourceId
+		if len(o.Reservations) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+		if len(o.Reservations[0].Instances) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
 	}
 
 	var asg *autoscaling.Group
