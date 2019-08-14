@@ -196,6 +196,7 @@ func installCredentialDefaultSecret(ctx context.Context, config Config) error {
 	var values string
 	{
 		c := chartvalues.CredentialdConfig{
+			RegistryPullSecret: env.RegistryPullSecret(),
 			AWS: chartvalues.CredentialdConfigAWS{
 				CredentialDefault: chartvalues.CredentialdConfigAWSCredentialDefault{
 					AWSOperatorARN: env.GuestAWSARN(),
