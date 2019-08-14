@@ -201,6 +201,10 @@ func installCredentialDefaultSecret(ctx context.Context, config Config) error {
 					AWSOperatorARN: env.GuestAWSARN(),
 				},
 			},
+			Deployment: chartvalues.CredentialdConfigDeployment{
+				Replicas: 0,
+			},
+			RegistryPullSecret: env.RegistryPullSecret(),
 		}
 
 		values, err = chartvalues.NewCredentiald(c)
