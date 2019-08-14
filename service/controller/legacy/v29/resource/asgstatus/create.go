@@ -41,7 +41,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if err != nil {
@@ -49,10 +49,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(o.Reservations) == 0 {
-			return microerror.Maskf(executionFailedError, "expected at least one worker instance in asg")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		}
 		if len(o.Reservations[0].Instances) == 0 {
-			return microerror.Maskf(executionFailedError, "expected at least one worker instance in asg")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		}
 
 		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
