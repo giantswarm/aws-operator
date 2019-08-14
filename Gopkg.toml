@@ -60,8 +60,8 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/e2eclients"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "chartvalues"
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]

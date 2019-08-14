@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/statusresource"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
@@ -91,6 +92,10 @@ func New(config Config) (*Service, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+	}
+
+	{
+		i, _ := dynamic.NewForConfig(restConfig)
 	}
 
 	cmaClient, err := clientset.NewForConfig(restConfig)
