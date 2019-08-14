@@ -190,6 +190,33 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	return nil
 }
 
+func installCredentialDefaultSecret(ctx context.Context, config Config) error {
+	var err error
+
+	var values string
+	{
+		c := chartvalues.CredentialdConfig{
+			AWS: chartvalues.CredentialdConfigAWS{
+				CredentialDefault: chartvalues.CredentialdConfigAWSCredentialDefault{
+					AWSOperatorARN: env.GuestAWSARN(),
+				},
+			},
+		}
+
+		values, err = chartvalues.NewCredentiald(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	err = config.Release.Install(ctx, key.CredentialdReleaseName(), release.NewStableVersion(), values, config.Release.Condition().SecretExists(ctx, namespace, "credential-default"))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
 func installResources(ctx context.Context, config Config) error {
 	var err error
 
@@ -249,6 +276,13 @@ func installResources(ctx context.Context, config Config) error {
 		}
 
 		err = config.Release.InstallOperator(ctx, key.NodeOperatorReleaseName(), release.NewStableVersion(), values, corev1alpha1.NewDrainerConfigCRD())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = installCredentialDefaultSecret(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
