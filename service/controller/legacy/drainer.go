@@ -20,7 +20,7 @@ import (
 	v26 "github.com/giantswarm/aws-operator/service/controller/legacy/v26"
 	v27 "github.com/giantswarm/aws-operator/service/controller/legacy/v27"
 	v28 "github.com/giantswarm/aws-operator/service/controller/legacy/v28"
-	v28patch1 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
+	v28patch1 "github.com/giantswarm/aws-operator/service/controller/legacy/v28patch1"
 	v29 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 )
 
