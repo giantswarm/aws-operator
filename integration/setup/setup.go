@@ -282,6 +282,13 @@ func installResources(ctx context.Context, config Config) error {
 	}
 
 	{
+		err = installCredentialDefaultSecret(ctx, config)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
 		err = installAWSOperator(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
