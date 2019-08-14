@@ -153,10 +153,6 @@ func installAWSOperator(ctx context.Context, config Config) error {
 			RegistryPullSecret: env.RegistryPullSecret(),
 			Secret: chartvalues.AWSOperatorConfigSecret{
 				AWSOperator: chartvalues.AWSOperatorConfigSecretAWSOperator{
-					CredentialDefault: chartvalues.AWSOperatorConfigSecretAWSOperatorCredentialDefault{
-						AdminARN:       env.GuestAWSARN(),
-						AWSOperatorARN: env.GuestAWSARN(),
-					},
 					SecretYaml: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYaml{
 						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
 							AWS: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWS{
