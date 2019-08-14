@@ -54,9 +54,6 @@ const awsOperatorTemplate = `Installation:
       Domain: quay.io
     Secret:
       AWSOperator:
-        CredentialDefault:
-          AdminARN: '{{ .Secret.AWSOperator.CredentialDefault.AdminARN }}'
-          AWSOperatorARN: '{{ .Secret.AWSOperator.CredentialDefault.AWSOperatorARN }}'
         SecretYaml: |
           service:
             aws:
