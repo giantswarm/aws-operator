@@ -23,7 +23,7 @@ func CertsReleaseName(clusterID string) string {
 }
 
 func CredentialdReleaseName() string {
-	return "credentaild"
+	return "credentiald"
 }
 
 func NodeOperatorReleaseName() string {
