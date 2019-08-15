@@ -10,6 +10,7 @@ Installation:
       {{- if .AWS.CredentialDefault.AWSOperatorARN }}
         AWS:
           CredentialDefault:
+            AdminARN: "{{ .AWS.CredentialDefault.AdminARN }}"
             AWSOperatorARN: "{{ .AWS.CredentialDefault.AWSOperatorARN }}"
       {{- end }}
       {{- if .Azure.CredentialDefault.ClientID }}
