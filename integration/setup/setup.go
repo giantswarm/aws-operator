@@ -153,10 +153,6 @@ func installAWSOperator(ctx context.Context, config Config) error {
 			RegistryPullSecret: env.RegistryPullSecret(),
 			Secret: chartvalues.AWSOperatorConfigSecret{
 				AWSOperator: chartvalues.AWSOperatorConfigSecretAWSOperator{
-					CredentialDefault: chartvalues.AWSOperatorConfigSecretAWSOperatorCredentialDefault{
-						AdminARN:       env.GuestAWSARN(),
-						AWSOperatorARN: env.GuestAWSARN(),
-					},
 					SecretYaml: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYaml{
 						Service: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlService{
 							AWS: chartvalues.AWSOperatorConfigSecretAWSOperatorSecretYamlServiceAWS{
@@ -187,6 +183,38 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	}
 
 	err = config.Release.InstallOperator(ctx, key.AWSOperatorReleaseName(), release.NewVersion(env.CircleSHA()), values, providerv1alpha1.NewAWSConfigCRD())
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
+func installCredentialDefaultSecret(ctx context.Context, config Config) error {
+	var err error
+
+	var values string
+	{
+		c := chartvalues.CredentialdConfig{
+			AWS: chartvalues.CredentialdConfigAWS{
+				CredentialDefault: chartvalues.CredentialdConfigAWSCredentialDefault{
+					AdminARN:       env.GuestAWSARN(),
+					AWSOperatorARN: env.GuestAWSARN(),
+				},
+			},
+			Deployment: chartvalues.CredentialdConfigDeployment{
+				Replicas: 0,
+			},
+			RegistryPullSecret: env.RegistryPullSecret(),
+		}
+
+		values, err = chartvalues.NewCredentiald(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	err = config.Release.Install(ctx, key.CredentialdReleaseName(), release.NewStableVersion(), values, config.Release.Condition().SecretExists(ctx, namespace, "credential-default"))
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -253,6 +281,13 @@ func installResources(ctx context.Context, config Config) error {
 		}
 
 		err = config.Release.InstallOperator(ctx, key.NodeOperatorReleaseName(), release.NewStableVersion(), values, corev1alpha1.NewDrainerConfigCRD())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
+		err = installCredentialDefaultSecret(ctx, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -22,6 +22,10 @@ func CertsReleaseName(clusterID string) string {
 	return fmt.Sprintf("e2esetup-certs-%s", clusterID)
 }
 
+func CredentialdReleaseName() string {
+	return "credentiald"
+}
+
 func NodeOperatorReleaseName() string {
 	return "node-operator"
 }

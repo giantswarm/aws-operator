@@ -25,15 +25,7 @@ type AzureOperatorConfigSecret struct {
 }
 
 type AzureOperatorConfigSecretAzureOperator struct {
-	CredentialDefault AzureOperatorConfigSecretAzureOperatorCredentialDefault
-	SecretYaml        AzureOperatorConfigSecretAzureOperatorSecretYaml
-}
-
-type AzureOperatorConfigSecretAzureOperatorCredentialDefault struct {
-	ClientID       string
-	ClientSecret   string
-	SubscriptionID string
-	TenantID       string
+	SecretYaml AzureOperatorConfigSecretAzureOperatorSecretYaml
 }
 
 type AzureOperatorConfigSecretAzureOperatorSecretYaml struct {
@@ -73,18 +65,6 @@ type AzureOperatorConfigSecretRegistryPullSecret struct {
 func NewAzureOperator(config AzureOperatorConfig) (string, error) {
 	if config.Provider.Azure.Location == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Provider.Azure.Location must not be empty", config)
-	}
-	if config.Secret.AzureOperator.CredentialDefault.ClientID == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AzureOperator.CredentialDefault.ClientID must not be empty", config)
-	}
-	if config.Secret.AzureOperator.CredentialDefault.ClientSecret == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AzureOperator.CredentialDefault.ClientSecret must not be empty", config)
-	}
-	if config.Secret.AzureOperator.CredentialDefault.SubscriptionID == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AzureOperator.CredentialDefault.SubscriptionID must not be empty", config)
-	}
-	if config.Secret.AzureOperator.CredentialDefault.TenantID == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AzureOperator.CredentialDefault.TenantID must not be empty", config)
 	}
 	if config.Secret.AzureOperator.SecretYaml.Service.Azure.ClientID == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Secret.AzureOperator.SecretYaml.Service.Azure.ClientID must not be empty", config)
