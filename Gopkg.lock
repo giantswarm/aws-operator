@@ -251,7 +251,7 @@
   revision = "b8e860764772b300c3cb0785153990d429c479a7"
 
 [[projects]]
-  branch = "chartvalues"
+  branch = "master"
   digest = "1:d218abef732e77dede119c29a891e83a4a468e820b3b988af6ba20d42c50f157"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
@@ -260,7 +260,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "1a5b39a7988008ab5ea1e3148b9100f66484870d"
+  revision = "13ad1a49e228386657890b5f4175ec427ee0cb21"
 
 [[projects]]
   branch = "master"
