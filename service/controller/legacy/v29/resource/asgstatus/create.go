@@ -31,6 +31,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
+					Name: aws.String("tag:Name"),
+					Values: []*string{
+						aws.String(fmt.Sprintf("%s-worker", key.ClusterID(cr))),
+					},
+				},
+				{
 					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
 						aws.String(key.ClusterID(cr)),
