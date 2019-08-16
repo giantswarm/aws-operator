@@ -34,6 +34,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.ClusterID(&cr)),
 					},
 				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCNP),
+					},
+				},
 			},
 		}
 
