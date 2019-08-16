@@ -8,6 +8,15 @@ const RecordSets = `
     Type: 'AWS::Route53::HostedZone'
     Properties:
       Name: '{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+  HostedZonePrivate:
+    Type: 'AWS::Route53::HostedZone'
+    Properties:
+      Name: '{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+	  HostedZoneConfig:
+	    Comment: "Private hosted zone for internal network"
+	  VPCs:
+        - VPCId: !Ref VPC
+          VPCRegion: '{{ $v.VPCRegion }}'
   ApiRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
