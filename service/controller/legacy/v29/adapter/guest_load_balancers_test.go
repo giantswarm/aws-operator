@@ -18,9 +18,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedAPIElbName                       string
 		expectedAPIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 		expectedAPIElbScheme                     string
-		expectedAPIElbSchemeInternal             string
+		expectedAPIInternalElbScheme             string
 		expectedAPIElbSecurityGroupID            string
 		expectedAPIElbSubnetID                   string
+		expectedAPIInternalElbName               string
 		expectedEtcdElbName                      string
 		expectedEtcdElbPortsToOpen               []GuestLoadBalancersAdapterPortPair
 		expectedEtcdElbScheme                    string
@@ -100,7 +101,8 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				},
 			},
 			expectedAPIElbScheme:         "internet-facing",
-			expectedAPIElbSchemeInternal: "internal",
+			expectedAPIInternalElbScheme: "internal",
+			expectedAPIInternalElbName:   "test-cluster-api-internal",
 			expectedEtcdElbName:          "test-cluster-etcd",
 			expectedEtcdElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
@@ -158,8 +160,8 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 				t.Errorf("expected API ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.APIElbScheme, tc.expectedAPIElbScheme)
 			}
 
-			if tc.expectedAPIElbSchemeInternal != a.Guest.LoadBalancers.APIElbSchemeInternal {
-				t.Errorf("expected API ELB Scheme Internal, got %q, want %q", a.Guest.LoadBalancers.APIElbSchemeInternal, tc.expectedAPIElbSchemeInternal)
+			if tc.expectedAPIInternalElbScheme != a.Guest.LoadBalancers.APIInternalElbScheme {
+				t.Errorf("expected API ELB Scheme Internal, got %q, want %q", a.Guest.LoadBalancers.APIInternalElbScheme, tc.expectedAPIInternalElbScheme)
 			}
 
 			if tc.expectedEtcdElbName != a.Guest.LoadBalancers.EtcdElbName {
