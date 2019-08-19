@@ -15,6 +15,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 		expectedBaseDomain     string
 		expectedClusterID      string
 		expectedRoute53Enabled bool
+		expectedVPCRegion      string
 	}{
 		{
 			description: "basic matching, all fields present",
@@ -41,6 +42,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 								Name: "installation.aws.eu-central-1.gigantic.io",
 							},
 						},
+						Region: "eu-central-1",
 					},
 				},
 			},
@@ -48,6 +50,7 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 			expectedRoute53Enabled: true,
 			expectedClusterID:      "test-cluster",
 			expectedBaseDomain:     "installation.aws.eu-central-1.gigantic.io",
+			expectedVPCRegion:      "eu-central-1",
 		},
 	}
 
@@ -71,6 +74,9 @@ func TestAdapterRecordSetsRegularFields(t *testing.T) {
 			}
 			if a.Guest.RecordSets.Route53Enabled != tc.expectedRoute53Enabled {
 				t.Fatalf("Route53Enabled == %v, want %v", a.Guest.RecordSets.Route53Enabled, tc.expectedRoute53Enabled)
+			}
+			if a.Guest.RecordSets.VPCRegion != tc.expectedVPCRegion {
+				t.Fatalf("VPCRegion == %v, want %v", a.Guest.RecordSets.VPCRegion, tc.expectedVPCRegion)
 			}
 		})
 	}

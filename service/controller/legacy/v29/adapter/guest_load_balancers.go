@@ -21,6 +21,7 @@ type GuestLoadBalancersAdapter struct {
 	APIElbName                       string
 	APIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 	APIElbScheme                     string
+	APIElbSchemeInternal             string
 	APIElbSecurityGroupID            string
 	EtcdElbHealthCheckTarget         string
 	EtcdElbName                      string
@@ -63,6 +64,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 		},
 	}
 	a.APIElbScheme = externalELBScheme
+	a.APIElbSchemeInternal = internalELBScheme
 
 	// etcd load balancer settings.
 	etcdElbName, err := key.LoadBalancerName(key.EtcdDomain(cfg.CustomObject), cfg.CustomObject)
