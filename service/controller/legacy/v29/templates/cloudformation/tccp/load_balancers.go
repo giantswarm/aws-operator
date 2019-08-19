@@ -33,7 +33,7 @@ const LoadBalancers = `
       {{- range $s := $v.PublicSubnets }}
         - !Ref {{ $s }}
       {{end}}
-  ApiLoadBalancerPrivate:
+  ApiInternalLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
@@ -55,8 +55,8 @@ const LoadBalancers = `
         LoadBalancerPort: {{ .PortELB }}
         Protocol: TCP
       {{ end }}
-      LoadBalancerName: {{ $v.APIElbName }}
-      Scheme: {{ $v.APIElbSchemeInternal }}
+      LoadBalancerName: {{ $v.APIInternalElbName }}
+      Scheme: {{ $v.APIInternalElbScheme }}
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
