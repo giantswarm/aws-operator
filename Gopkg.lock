@@ -312,8 +312,8 @@
   revision = "ce634ba25306b7a1e7f590d1a672c9811d90d6f2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d276882f2e4eecd1c2a7e12b89cd97637bfcc4795fd70cae6478e903bccef607"
+  branch = "add-TTLAfterFinished"
+  digest = "1:42504b92ebf88444a37766617cc578c06bde800b6d2fd313133eda7540a8473e"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -326,7 +326,7 @@
     "v_4_6_0",
   ]
   pruneopts = "T"
-  revision = "54edef3afe915cce66125eac2062a573c1ed2b93"
+  revision = "fd0a2028c579bd605ccb2cfa2961db9b0332fab2"
 
 [[projects]]
   branch = "master"
