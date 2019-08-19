@@ -11,6 +11,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// ClientsConfig is DEPRECATED. Use https://github.com/giantswarm/k8sclient/
+// instead.
 type ClientsConfig struct {
 	Logger micrologger.Logger
 
@@ -26,6 +28,8 @@ type Clients struct {
 	restConfig *rest.Config
 }
 
+// NewClients is DEPRECATED. Use https://github.com/giantswarm/k8sclient/
+// instead.
 func NewClients(config ClientsConfig) (*Clients, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
