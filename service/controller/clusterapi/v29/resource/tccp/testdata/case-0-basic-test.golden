@@ -261,7 +261,7 @@ Resources:
         - !Ref PublicSubnetEuCentral1c
       
 
-  EtcdInternalLoadBalancer:
+  EtcdLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       ConnectionSettings:

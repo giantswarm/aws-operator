@@ -41,8 +41,8 @@ const RecordSets = `
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
-        DNSName: !GetAtt EtcdInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt EtcdInternalLoadBalancer.CanonicalHostedZoneNameID
+        DNSName: !GetAtt EtcdLoadBalancer.DNSName
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
