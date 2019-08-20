@@ -240,13 +240,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cc47045976689fd35995480c040ee083279dba44f1f44f828054ae5cbde30b6a"
+  digest = "1:b2cefe754cf48f0bb798324f38a79b47f74adee0d395e14107d953e53ce26ed4"
   name = "github.com/giantswarm/e2esetup"
-  packages = [
-    "chart/env",
-    "k8s",
-    "privaterepo",
-  ]
+  packages = ["privaterepo"]
   pruneopts = "UT"
   revision = "1675d59b4910bf10fd25b550112ba0a1c798b4d5"
 
@@ -1470,7 +1466,6 @@
     "github.com/giantswarm/e2e-harness/pkg/harness",
     "github.com/giantswarm/e2e-harness/pkg/release",
     "github.com/giantswarm/e2eclients/aws",
-    "github.com/giantswarm/e2esetup/k8s",
     "github.com/giantswarm/e2esetup/privaterepo",
     "github.com/giantswarm/e2etemplates/pkg/chartvalues",
     "github.com/giantswarm/e2etemplates/pkg/e2etemplates",
@@ -1481,6 +1476,7 @@
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
+    "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
     "github.com/giantswarm/k8scloudconfig/v_4_1_2",
     "github.com/giantswarm/k8scloudconfig/v_4_2_0",
