@@ -9,7 +9,18 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v4.6.0] WIP
+## [v4.7.0] WIP
+
+### Added
+
+- Enable TTLAfterFinished feature gate. This allows a TTL controller to clean up jobs after they finish execution.
+
+### Changed
+
+- Update kubernetes to 1.14.6, includes fixes for CVE-2019-9512, CVE-2019-9514
+- Update calico to 3.8.2
+
+## [v4.6.0]
 
 ### Added
 
@@ -424,6 +435,7 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v4.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_7_0
 [v4.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_6_0
 [v4.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_1
 [v4.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_0
