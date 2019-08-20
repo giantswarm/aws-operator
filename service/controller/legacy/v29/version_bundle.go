@@ -22,11 +22,21 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "kubernetes",
+				Description: "Update kubernetes to 1.14.6 (CVE-2019-9512, CVE-2019-9514) https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1146",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "calico",
+				Description: "Update calico to 3.8.2 https://docs.projectcalico.org/v3.8/release-notes/",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.7.2",
+				Version: "3.8.2",
 			},
 			{
 				Name:    "containerlinux",
@@ -42,7 +52,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.14.3",
+				Version: "1.14.6",
 			},
 		},
 		Name:    "aws-operator",
