@@ -64,7 +64,7 @@ const LoadBalancers = `
         - !Ref {{ $s }}
       {{end}}
 
-  EtcdLoadBalancer:
+  EtcdInternalLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       ConnectionSettings:
