@@ -269,6 +269,21 @@ func InstanceProfileName(customObject v1alpha1.AWSConfig, profileType string) st
 	return fmt.Sprintf("%s-%s-%s", ClusterID(customObject), profileType, ProfileNameTemplate)
 }
 
+func InternalLoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, error) {
+	if ClusterID(cluster) == "" {
+		return "", microerror.Maskf(missingCloudConfigKeyError, "spec.cluster.id")
+	}
+
+	componentName, err := componentName(domainName)
+	if err != nil {
+		return "", microerror.Maskf(malformedCloudConfigKeyError, "spec.cluster.id")
+	}
+
+	lbName := fmt.Sprintf("%s-%s-internal", ClusterID(cluster), componentName)
+
+	return lbName, nil
+}
+
 func IsChinaRegion(customObject v1alpha1.AWSConfig) bool {
 	return strings.HasPrefix(Region(customObject), "cn-")
 }
