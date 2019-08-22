@@ -32,6 +32,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Update calico to 3.8.2 https://docs.projectcalico.org/v3.8/release-notes/",
 				Kind:        versionbundle.KindChanged,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
