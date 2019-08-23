@@ -8,6 +8,7 @@ type GuestRecordSetsAdapter struct {
 	ClusterID                  string
 	MasterInstanceResourceName string
 	Route53Enabled             bool
+	VPCRegion                  string
 }
 
 func (a *GuestRecordSetsAdapter) Adapt(config Config) error {
@@ -16,6 +17,7 @@ func (a *GuestRecordSetsAdapter) Adapt(config Config) error {
 	a.ClusterID = key.ClusterID(config.CustomObject)
 	a.MasterInstanceResourceName = config.StackState.MasterInstanceResourceName
 	a.Route53Enabled = config.Route53Enabled
+	a.VPCRegion = key.Region(config.CustomObject)
 
 	return nil
 }
