@@ -1,3 +1,5 @@
+// +build k8srequired
+
 package draining
 
 import (
