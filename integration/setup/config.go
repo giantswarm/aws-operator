@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package setup
 
 import (
@@ -21,12 +19,12 @@ const (
 )
 
 type Config struct {
-	AWSClient *e2eclientsaws.Client
-	Guest     *framework.Guest
-	Host      *framework.Host
-	K8s       *k8sclient.Setup
-	Release   *release.Release
-	Logger    micrologger.Logger
+	AWSClient  *e2eclientsaws.Client
+	Guest      *framework.Guest
+	K8s        *k8sclient.Setup
+	K8sClients *k8sclient.Clients
+	Release    *release.Release
+	Logger     micrologger.Logger
 
 	// UseDefaultTenant defines whether the standard test setup should ensure the
 	// default tenant cluster. This is enabled by default. Most tests simply use
@@ -71,20 +69,6 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var host *framework.Host
-	{
-		c := framework.HostConfig{
-			Logger: logger,
-
-			ClusterID: env.ClusterID(),
-		}
-
-		host, err = framework.NewHost(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
 	var cpK8sClients *k8sclient.Clients
 	{
 		c := k8sclient.ClientsConfig{
@@ -116,9 +100,9 @@ func NewConfig() (Config, error) {
 	{
 		c := helmclient.Config{
 			Logger:    logger,
-			K8sClient: host.K8sClient(),
+			K8sClient: cpK8sClients.K8sClient(),
 
-			RestConfig:      host.RestConfig(),
+			RestConfig:      cpK8sClients.RestConfig(),
 			TillerNamespace: tillerNamespace,
 		}
 
@@ -131,10 +115,10 @@ func NewConfig() (Config, error) {
 	var newRelease *release.Release
 	{
 		c := release.Config{
-			ExtClient:  host.ExtClient(),
-			G8sClient:  host.G8sClient(),
+			ExtClient:  cpK8sClients.ExtClient(),
+			G8sClient:  cpK8sClients.G8sClient(),
 			HelmClient: helmClient,
-			K8sClient:  host.K8sClient(),
+			K8sClient:  cpK8sClients.K8sClient(),
 			Logger:     logger,
 
 			Namespace: namespace,
@@ -147,12 +131,12 @@ func NewConfig() (Config, error) {
 	}
 
 	c := Config{
-		AWSClient: awsClient,
-		Guest:     guest,
-		Host:      host,
-		K8s:       k8sSetup,
-		Logger:    logger,
-		Release:   newRelease,
+		AWSClient:  awsClient,
+		Guest:      guest,
+		K8s:        k8sSetup,
+		K8sClients: cpK8sClients,
+		Logger:     logger,
+		Release:    newRelease,
 
 		UseDefaultTenant: true,
 	}

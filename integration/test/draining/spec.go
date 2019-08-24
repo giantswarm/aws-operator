@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package draining
 
 type E2EAppResponse struct {

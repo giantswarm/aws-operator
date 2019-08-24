@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package clusterstate
 
 import (
@@ -30,7 +28,7 @@ func init() {
 	{
 		c := ProviderConfig{
 			AWSClient: config.AWSClient,
-			G8sClient: config.Host.G8sClient(),
+			G8sClient: config.K8sClients.G8sClient(),
 			Logger:    config.Logger,
 
 			ClusterID: env.ClusterID(),

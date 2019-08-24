@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package clusterstate
 
 import "github.com/giantswarm/microerror"

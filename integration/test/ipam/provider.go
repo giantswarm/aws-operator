@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package ipam
 
 import (
@@ -8,9 +6,9 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -20,25 +18,25 @@ import (
 )
 
 type ProviderConfig struct {
-	AWSClient *e2eclientsaws.Client
-	Host      *framework.Host
-	Logger    micrologger.Logger
-	Release   *release.Release
+	AWSClient  *e2eclientsaws.Client
+	K8sClients *k8sclient.Clients
+	Logger     micrologger.Logger
+	Release    *release.Release
 }
 
 type Provider struct {
-	awsClient *e2eclientsaws.Client
-	host      *framework.Host
-	logger    micrologger.Logger
-	release   *release.Release
+	awsClient  *e2eclientsaws.Client
+	k8sClients *k8sclient.Clients
+	logger     micrologger.Logger
+	release    *release.Release
 }
 
 func NewProvider(config ProviderConfig) (*Provider, error) {
 	if config.AWSClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AWSClient must not be empty", config)
 	}
-	if config.Host == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Host must not be empty", config)
+	if config.K8sClients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -48,10 +46,10 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 	}
 
 	p := &Provider{
-		awsClient: config.AWSClient,
-		host:      config.Host,
-		logger:    config.Logger,
-		release:   config.Release,
+		awsClient:  config.AWSClient,
+		k8sClients: config.K8sClients,
+		logger:     config.Logger,
+		release:    config.Release,
 	}
 
 	return p, nil
@@ -59,10 +57,10 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 
 func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 	setupConfig := setup.Config{
-		AWSClient: p.awsClient,
-		Host:      p.host,
-		Logger:    p.logger,
-		Release:   p.release,
+		AWSClient:  p.awsClient,
+		K8sClients: p.k8sClients,
+		Logger:     p.logger,
+		Release:    p.release,
 	}
 
 	wait := false
@@ -76,10 +74,10 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 
 func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 	setupConfig := setup.Config{
-		AWSClient: p.awsClient,
-		Host:      p.host,
-		Logger:    p.logger,
-		Release:   p.release,
+		AWSClient:  p.awsClient,
+		K8sClients: p.k8sClients,
+		Logger:     p.logger,
+		Release:    p.release,
 	}
 
 	wait := false
@@ -92,7 +90,7 @@ func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 }
 
 func (p *Provider) GetClusterStatus(ctx context.Context, id string) (v1alpha1.StatusCluster, error) {
-	customResource, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+	customResource, err := p.k8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 	if err != nil {
 		return v1alpha1.StatusCluster{}, microerror.Mask(err)
 	}
@@ -104,7 +102,7 @@ func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
 	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for tenant cluster %#q to be created", id))
 
 	o := func() error {
-		customResource, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+		customResource, err := p.k8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -134,7 +132,7 @@ func (p *Provider) WaitForClusterDeleted(ctx context.Context, id string) error {
 	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for tenant cluster %#q to be deleted", id))
 
 	o := func() error {
-		_, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+		_, err := p.k8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return nil
 		} else if err != nil {

@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package scaling
 
 import (
@@ -30,8 +28,8 @@ func init() {
 	var p *Provider
 	{
 		c := ProviderConfig{
+			G8sClient:      config.K8sClients.G8sClient(),
 			GuestFramework: config.Guest,
-			HostFramework:  config.Host,
 			Logger:         config.Logger,
 
 			ClusterID: env.ClusterID(),

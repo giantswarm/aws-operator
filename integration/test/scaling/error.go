@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package scaling
 
 import "github.com/giantswarm/microerror"

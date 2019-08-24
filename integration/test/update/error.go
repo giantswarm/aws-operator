@@ -1,5 +1,3 @@
-// +build k8srequired
-
 package update
 
 import "github.com/giantswarm/microerror"

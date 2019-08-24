@@ -161,16 +161,16 @@
   version = "v1.4.7"
 
 [[projects]]
-  digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
+  branch = "master"
+  digest = "1:08188cf7ce7027b22e88cc23da27f17349a0ba7746271a60cbe0a70266c2346f"
   name = "github.com/ghodss/yaml"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
+  revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
   branch = "master"
-  digest = "1:14554a80bf0ed32ad954646c5ca42cfcaefda50824d73754ed2ac3db34d36f66"
+  digest = "1:e31d104b95573e0fd2399d08d673ff73e4bfe4147167fc5d87e2d4b604984eaa"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -188,7 +188,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "6d6990ab19fc21766e67aec28d8ab62aede51a6a"
+  revision = "d71c762554af88c06ec8041e9f979c895a5d3bf1"
 
 [[projects]]
   branch = "master"
@@ -244,11 +244,11 @@
   name = "github.com/giantswarm/e2esetup"
   packages = ["privaterepo"]
   pruneopts = "UT"
-  revision = "1675d59b4910bf10fd25b550112ba0a1c798b4d5"
+  revision = "a7944f007d0ed219e788966522e213b2bac1a897"
 
 [[projects]]
   branch = "master"
-  digest = "1:d218abef732e77dede119c29a891e83a4a468e820b3b988af6ba20d42c50f157"
+  digest = "1:e39b5aaef4a4dab0fd2eb05602796768b40e7e418cf82818be614b5cf3a53e50"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -256,7 +256,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "13ad1a49e228386657890b5f4175ec427ee0cb21"
+  revision = "3c13cb10233d192e095a85700b7f66605fa37e70"
 
 [[projects]]
   branch = "master"
@@ -309,15 +309,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:60dc19718c86cd62db01e17d5f77cb8f8bb9e2c3d7b6840c0257a99e97fbe83a"
+  digest = "1:98c9ad635693241a4a3276f0ed2f99a08420aaf20afce0732318b4574289f010"
   name = "github.com/giantswarm/k8sclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0a72530d66189725d01f3e8aca5af0acfbb531c8"
+  revision = "cb19a71151dd4a9b440cd8846630a9fb948d2515"
 
 [[projects]]
   branch = "master"
-  digest = "1:2a70b7ff09a80ae30376f5049deffd3658c0d5774ea5d15846d3ebe544ad7626"
+  digest = "1:1ad927f341e05c436825187779b19605478ffcc66b5cac5e4064a5883c2acc54"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -330,7 +330,7 @@
     "v_4_6_0",
   ]
   pruneopts = "T"
-  revision = "9ef1576e72bfdb9226b8bb372c020f8fa7c27e9a"
+  revision = "4695b7d6eb35eae234d0ce0c0c09f4b412525a68"
 
 [[projects]]
   branch = "master"
@@ -398,11 +398,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:57bceb785c54b7eb57da7b1b1fbe8ee10513eaee85450c0b566747cce7f8ddec"
+  digest = "1:32124cbc6e2d37f9fa33fc2f582ebf9b114a78dae0582eb35b0dc7322120d6d0"
   name = "github.com/giantswarm/microstorage"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5a0784e0ee23c5b732c0d15023ac3dce8aef145a"
+  revision = "a5580e1bbf6074e09ab759efd875fb3c2af7f7d5"
 
 [[projects]]
   branch = "master"
@@ -469,7 +469,7 @@
   name = "github.com/giantswarm/valuemodifier"
   packages = ["path"]
   pruneopts = "UT"
-  revision = "0bece7c66c2856810bd57e2592512cff5338de28"
+  revision = "d1607f573080b30b0e756a4534b70f710eae5a95"
 
 [[projects]]
   branch = "master"
@@ -935,7 +935,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "4def268fd1a49955bfb3dda92fe3db4f924f2285"
+  revision = "60c769a6c58655dab1b9adac0d58967dd517cfba"
 
 [[projects]]
   branch = "master"
@@ -1040,7 +1040,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "55e96fffbd486c27fc0d5b4468c497d0de3f2727"
+  revision = "24fa4b261c55da65468f2abfdae2b024eef27dfb"
 
 [[projects]]
   digest = "1:48eafc052e46b4ebbc7882553873cf6198203e528627cefc94dcaf8553addd19"
