@@ -42,7 +42,7 @@ e2eTest: &e2eTest
             -e E2E_TESTED_VERSION=${E2E_TESTED_VERSION} \
             -e VAULT_TOKEN=mytoken \
             -w /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
-            golang:1 go test -v -tags k8srequired ./${E2E_TEST_DIR}/
+            golang:1 go test -v -timeout 7200s -tags k8srequired ./${E2E_TEST_DIR}/
     - run:
         name: Export logs
         command: |
