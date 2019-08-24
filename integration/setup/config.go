@@ -22,6 +22,7 @@ const (
 type Config struct {
 	AWSClient  *e2eclientsaws.Client
 	Guest      *framework.Guest
+	HelmClient *helmclient.Client
 	K8s        *k8sclient.Setup
 	K8sClients *k8sclient.Clients
 	Release    *release.Release
@@ -135,6 +136,7 @@ func NewConfig() (Config, error) {
 	c := Config{
 		AWSClient:  awsClient,
 		Guest:      guest,
+		HelmClient: helmClient,
 		K8s:        k8sSetup,
 		K8sClients: cpK8sClients,
 		Logger:     logger,
