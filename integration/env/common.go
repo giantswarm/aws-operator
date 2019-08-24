@@ -20,6 +20,7 @@ const (
 const (
 	EnvVarCircleCI             = "CIRCLECI"
 	EnvVarCircleSHA            = "CIRCLE_SHA1"
+	EnvVarE2EKubeconfig        = "E2E_KUBECONFIG"
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
@@ -32,6 +33,7 @@ var (
 	circleCI             string
 	circleSHA            string
 	clusterID            string
+	kubeconfigPath       string
 	registryPullSecret   string
 	githubToken          string
 	testDir              string
@@ -54,6 +56,11 @@ func init() {
 	githubToken = os.Getenv(EnvVarGithubBotToken)
 	if githubToken == "" {
 		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
+	}
+
+	kubeconfigPath = os.Getenv(EnvVarE2EKubeconfig)
+	if kubeconfigPath == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVarE2EKubeconfig))
 	}
 
 	testedVersion = os.Getenv(EnvVarTestedVersion)
@@ -121,6 +128,10 @@ func KeepResources() bool {
 
 func GithubToken() string {
 	return githubToken
+}
+
+func KubeConfigPath() string {
+	return kubeconfigPath
 }
 
 func RegistryPullSecret() string {

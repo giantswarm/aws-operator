@@ -4,7 +4,6 @@ package setup
 
 import (
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2e-harness/pkg/harness"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/helmclient"
@@ -56,30 +55,31 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var guest *framework.Guest
-	{
-		c := framework.GuestConfig{
-			Logger: logger,
-
-			ClusterID:    env.ClusterID(),
-			CommonDomain: env.CommonDomain(),
-		}
-
-		guest, err = framework.NewGuest(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
 	var cpK8sClients *k8sclient.Clients
 	{
 		c := k8sclient.ClientsConfig{
 			Logger: logger,
 
-			KubeConfigPath: harness.DefaultKubeConfig,
+			KubeConfigPath: env.KubeConfigPath(),
 		}
 
 		cpK8sClients, err = k8sclient.NewClients(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
+	var guest *framework.Guest
+	{
+		c := framework.GuestConfig{
+			Logger: logger,
+
+			HostK8sClient: cpK8sClients.K8sClient(),
+			ClusterID:     env.ClusterID(),
+			CommonDomain:  env.CommonDomain(),
+		}
+
+		guest, err = framework.NewGuest(c)
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
