@@ -40,6 +40,7 @@ e2eTest: &e2eTest
             -e CIRCLE_SHA1=${CIRCLE_SHA1} \
             -e GITHUB_BOT_TOKEN=${GITHUB_BOT_TOKEN} \
             -e E2E_TESTED_VERSION=${E2E_TESTED_VERSION} \
+            -e VAULT_TOKEN=mytoken \
             -w /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
             golang:1 go test -v -tags k8srequired ./${E2E_TEST_DIR}/
     - run:
