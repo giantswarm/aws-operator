@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
@@ -91,13 +91,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var clusterDetection *detection.Cluster
+	var clusterDetection *changedetection.Cluster
 	{
-		c := detection.ClusterConfig{
+		c := changedetection.ClusterConfig{
 			Logger: config.Logger,
 		}
 
-		clusterDetection, err = detection.NewCluster(c)
+		clusterDetection, err = changedetection.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

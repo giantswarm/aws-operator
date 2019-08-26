@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
 )
 
@@ -51,13 +51,13 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 	var err error
 
-	var d *detection.Cluster
+	var d *changedetection.Cluster
 	{
-		c := detection.ClusterConfig{
+		c := changedetection.ClusterConfig{
 			Logger: microloggertest.New(),
 		}
 
-		d, err = detection.NewCluster(c)
+		d, err = changedetection.NewCluster(c)
 		if err != nil {
 			t.Fatal(err)
 		}

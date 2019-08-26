@@ -1,4 +1,4 @@
-package detection
+package changedetection
 
 import (
 	"net"
