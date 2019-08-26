@@ -8,7 +8,6 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
@@ -62,6 +61,6 @@ func (r *Resource) Name() string {
 func (r *Resource) getCloudFormationTags(cr v1alpha1.MachineDeployment) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCNP
-	tags[label.MachineDeployment] = key.MachineDeploymentID(&cr)
+	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
 	return awstags.NewCloudFormation(tags)
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cpvpccidr"
@@ -281,6 +282,19 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpASGStatusResource controller.Resource
+	{
+		c := asgstatus.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		tcnpASGStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tcnpfResource controller.Resource
 	{
 		c := tcnpf.Config{
@@ -337,6 +351,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tccpRouteTablesResource,
 		tccpSubnetsResource,
 		tccpAZsResource,
+		tcnpASGStatusResource,
 		tcnpAZsResource,
 
 		// All these resources implement certain business logic and operate based on
