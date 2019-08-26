@@ -8,6 +8,15 @@ const RecordSets = `
     Type: 'AWS::Route53::HostedZone'
     Properties:
       Name: '{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+  InternalHostedZone:
+    Type: 'AWS::Route53::HostedZone'
+    Properties:
+      Name: '{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneConfig:
+        Comment: "Internal hosted zone for internal network"
+      VPCs:
+        - VPCId: !Ref VPC
+          VPCRegion: '{{ $v.VPCRegion }}'
   ApiRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -18,6 +27,16 @@ const RecordSets = `
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
+  ApiInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      Type: A
   EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -26,7 +45,7 @@ const RecordSets = `
         HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: '{{ $v.EtcdDomain }}.'
-      HostedZoneId: !Ref 'HostedZone'
+      HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet

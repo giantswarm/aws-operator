@@ -194,6 +194,39 @@ Resources:
       GatewayId:
         Ref: InternetGateway
   
+  ApiInternalLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: TCP:443
+        Timeout: 3
+        UnhealthyThreshold: 2
+      Instances:
+      - !Ref rsc-ac0dc01
+      Listeners:
+      
+      - InstancePort: 443
+        InstanceProtocol: TCP
+        LoadBalancerPort: 443
+        Protocol: TCP
+      
+      LoadBalancerName: 8y5ck-api-internal
+      Scheme: internal
+      SecurityGroups:
+        - !Ref MasterSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetEuCentral1a
+      
+        - !Ref PublicSubnetEuCentral1b
+      
+        - !Ref PublicSubnetEuCentral1c
+      
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
