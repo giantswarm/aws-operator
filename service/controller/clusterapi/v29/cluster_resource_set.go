@@ -16,7 +16,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupebsvolumes"
@@ -152,19 +151,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		accountIDResource, err = accountid.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var asgStatusResource controller.Resource
-	{
-		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		asgStatusResource, err = asgstatus.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -614,7 +600,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpRouteTablesResource,
 		tccpSubnetsResource,
 		regionResource,
-		asgStatusResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
