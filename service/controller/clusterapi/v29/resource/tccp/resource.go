@@ -12,8 +12,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
@@ -43,7 +43,7 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	APIWhitelist       adapter.APIWhitelist
-	Detection          *detection.Detection
+	Detection          *changedetection.Cluster
 	EncrypterBackend   string
 	InstallationName   string
 	InstanceMonitoring bool
@@ -60,7 +60,7 @@ type Resource struct {
 
 	apiWhiteList       adapter.APIWhitelist
 	encrypterBackend   string
-	detection          *detection.Detection
+	detection          *changedetection.Cluster
 	installationName   string
 	instanceMonitoring bool
 	publicRouteTables  string
