@@ -140,7 +140,6 @@ func DefaultContext() context.Context {
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
-					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
@@ -223,6 +222,9 @@ func DefaultContext() context.Context {
 						ID:                  "vpc-id",
 						PeeringConnectionID: "peering-connection-id",
 					},
+				},
+				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
+					ASG: controllercontext.ContextStatusTenantClusterTCNPASG{},
 				},
 				VersionBundleVersion: "6.3.0",
 			},
