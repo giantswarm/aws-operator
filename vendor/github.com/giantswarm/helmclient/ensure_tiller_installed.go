@@ -208,7 +208,7 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 			return nil
 		}
 
-		b := backoff.NewConstant(c.ensureTillerInstalledMaxWait, 3*time.Second)
+		b := backoff.NewConstant(c.ensureTillerInstalledMaxWait, 5*time.Second)
 		n := backoff.NewNotifier(c.logger, context.Background())
 
 		err = backoff.RetryNotify(o, b, n)
@@ -276,12 +276,12 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 
 			i++
 			if i < 3 {
-				return microerror.Maskf(executionFailedError, "failed to ping tiller 3 consecutive times")
+				return microerror.Maskf(tillerNotFoundError, "failed to ping tiller 3 consecutive times")
 			}
 
 			return nil
 		}
-		b := backoff.NewExponential(1*time.Minute, 5*time.Second)
+		b := backoff.NewExponential(c.ensureTillerInstalledMaxWait, 5*time.Second)
 		n := backoff.NewNotifier(c.logger, ctx)
 
 		err := backoff.RetryNotify(o, b, n)

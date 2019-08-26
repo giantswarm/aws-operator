@@ -22,6 +22,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
