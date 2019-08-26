@@ -46,12 +46,12 @@ func (c *Cluster) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.MachineDeploymentScalingMax(md) {
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.MachineDeploymentScalingMax(md) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
+	if !cc.Status.TenantCluster.TCNP.ASG.IsEmpty() && cc.Status.TenantCluster.TCNP.ASG.MaxSize != key.MachineDeploymentScalingMax(md) {
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCNP.ASG.MaxSize is %d while key.MachineDeploymentScalingMax(md) is %d", cc.Status.TenantCluster.TCNP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.MachineDeploymentScalingMin(md) {
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.MachineDeploymentScalingMin(md) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
+	if !cc.Status.TenantCluster.TCNP.ASG.IsEmpty() && cc.Status.TenantCluster.TCNP.ASG.MinSize != key.MachineDeploymentScalingMin(md) {
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCNP.ASG.MinSize is %d while key.MachineDeploymentScalingMin(md) is %d", cc.Status.TenantCluster.TCNP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
 		return true, nil
 	}
 
