@@ -43,7 +43,7 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	APIWhitelist       adapter.APIWhitelist
-	Detection          *detection.Detection
+	Detection          *detection.Cluster
 	EncrypterBackend   string
 	InstallationName   string
 	InstanceMonitoring bool
@@ -60,7 +60,7 @@ type Resource struct {
 
 	apiWhiteList       adapter.APIWhitelist
 	encrypterBackend   string
-	detection          *detection.Detection
+	detection          *detection.Cluster
 	installationName   string
 	instanceMonitoring bool
 	publicRouteTables  string

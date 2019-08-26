@@ -91,13 +91,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var detectionService *detection.Detection
+	var clusterDetection *detection.Cluster
 	{
-		c := detection.Config{
+		c := detection.ClusterConfig{
 			Logger: config.Logger,
 		}
 
-		detectionService, err = detection.New(c)
+		clusterDetection, err = detection.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -363,7 +363,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:               config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
-			Detection:          detectionService,
+			Detection:          clusterDetection,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
