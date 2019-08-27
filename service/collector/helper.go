@@ -11,7 +11,7 @@ import (
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/credential"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/credential"
 )
 
 type helperConfig struct {
