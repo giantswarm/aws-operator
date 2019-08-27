@@ -24,7 +24,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/locker"
-	legacynetwork "github.com/giantswarm/aws-operator/service/network"
 )
 
 // Config represents the configuration used to create a new service.
@@ -127,19 +126,6 @@ func New(config Config) (*Service, error) {
 		}
 
 		mutexLocker, err = locker.NewMutexLocker(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var legacyNetworkAllocator legacynetwork.Allocator
-	{
-		c := legacynetwork.Config{
-			Locker: mutexLocker,
-			Logger: config.Logger,
-		}
-
-		legacyNetworkAllocator, err = legacynetwork.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
