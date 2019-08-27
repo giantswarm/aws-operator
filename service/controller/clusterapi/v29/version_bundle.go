@@ -8,18 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "ignition",
-				Description: "Add name label for default and kube-system namespaces.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "ignition",
-				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Component:   "hello",
+				Description: "nothing here yet!",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
