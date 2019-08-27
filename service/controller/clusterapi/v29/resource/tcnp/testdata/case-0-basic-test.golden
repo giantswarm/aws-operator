@@ -4,7 +4,7 @@ Outputs:
   AutoScalingGroupName:
     Value: !Ref NodePoolAutoScalingGroup
   CloudConfigVersion:
-    Value: v_4_5_0
+    Value: v_4_6_0
   DockerVolumeSizeGB:
     Value: 100
   InstanceImage:
@@ -146,7 +146,7 @@ Resources:
               "config": {
                 "append": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_5_0/worker"
+                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_6_0/worker"
                   }
                 ]
               }
