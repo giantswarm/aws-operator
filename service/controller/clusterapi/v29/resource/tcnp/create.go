@@ -271,17 +271,12 @@ func newOutputs(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	}
 
 	outputs := &template.ParamsMainOutputs{
-		CloudConfig: template.ParamsMainOutputsCloudConfig{
-			Version: key.CloudConfigVersion,
-		},
 		DockerVolumeSizeGB: key.MachineDeploymentDockerVolumeSizeGB(cr),
 		Instance: template.ParamsMainOutputsInstance{
 			Image: key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Type:  key.MachineDeploymentInstanceType(cr),
 		},
-		VersionBundle: template.ParamsMainOutputsVersionBundle{
-			Version: key.OperatorVersion(&cr),
-		},
+		OperatorVersion: key.OperatorVersion(&cr),
 	}
 
 	return outputs, nil

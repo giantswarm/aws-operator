@@ -3,15 +3,13 @@ Description: Tenant Cluster Node Pool Cloud Formation Stack.
 Outputs:
   AutoScalingGroupName:
     Value: !Ref NodePoolAutoScalingGroup
-  CloudConfigVersion:
-    Value: v_4_6_0
   DockerVolumeSizeGB:
     Value: 100
   InstanceImage:
     Value: ami-0eb0d9bb7ad1bd1e9
   InstanceType:
     Value: m5.2xlarge
-  VersionBundleVersion:
+  OperatorVersion:
     Value: 7.3.0
 Resources:
   NodePoolAutoScalingGroup:

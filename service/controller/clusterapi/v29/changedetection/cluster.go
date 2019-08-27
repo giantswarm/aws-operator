@@ -81,8 +81,8 @@ func (c *Cluster) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1al
 		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cl) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cl)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.OperatorVersion(&cl) {
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.OperatorVersion(&cl) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.OperatorVersion(&cl)))
+	if cc.Status.TenantCluster.OperatorVersion != key.OperatorVersion(&cl) {
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.OperatorVersion is %q while key.OperatorVersion(&cl) is %q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cl)))
 		return true, nil
 	}
 

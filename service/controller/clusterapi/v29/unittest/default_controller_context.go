@@ -139,6 +139,7 @@ func DefaultContext() context.Context {
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
+				OperatorVersion:       "6.3.0",
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
@@ -226,7 +227,6 @@ func DefaultContext() context.Context {
 				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
 					ASG: controllercontext.ContextStatusTenantClusterTCNPASG{},
 				},
-				VersionBundleVersion: "6.3.0",
 			},
 		},
 	}

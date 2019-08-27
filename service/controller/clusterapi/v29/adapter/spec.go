@@ -64,11 +64,7 @@ type StackState struct {
 	MasterImageID              string
 	MasterInstanceType         string
 	MasterInstanceResourceName string
-	// TODO the cloud config versions shouldn't be injected here. These should
-	// actually always only be the ones the operator has hard coded. No other
-	// version should be used here ever.
-	MasterCloudConfigVersion string
-	MasterInstanceMonitoring bool
+	MasterInstanceMonitoring   bool
 
-	VersionBundleVersion string
+	OperatorVersion string
 }

@@ -9,17 +9,12 @@ Outputs:
     Value: rsc-ac0dc01
   MasterInstanceType:
     Value: m5.xlarge
-  VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
+  OperatorVersion:
+    Value: 7.3.0
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
-Parameters:
-  VersionBundleVersionParameter:
-    Type: String
-    Description: Sets the VersionBundleVersion used to generate the template.
 Resources:
   MasterRole:
     Type: "AWS::IAM::Role"
