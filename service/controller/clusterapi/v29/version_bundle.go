@@ -46,6 +46,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "6.3.0",
+		Version: "6.42.0",
 	}
 }
