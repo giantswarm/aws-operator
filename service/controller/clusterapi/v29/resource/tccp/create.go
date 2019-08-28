@@ -160,15 +160,9 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 				aws.String(namedIAMCapability),
 			},
 			EnableTerminationProtection: aws.Bool(true),
-			Parameters: []*cloudformation.Parameter{
-				{
-					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.OperatorVersion(&cr)),
-				},
-			},
-			StackName:    aws.String(key.StackNameTCCP(&cr)),
-			Tags:         r.getCloudFormationTags(cr),
-			TemplateBody: aws.String(templateBody),
+			StackName:                   aws.String(key.StackNameTCCP(&cr)),
+			Tags:                        r.getCloudFormationTags(cr),
+			TemplateBody:                aws.String(templateBody),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
@@ -244,12 +238,6 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.Cluster, templat
 			Capabilities: []*string{
 				aws.String(namedIAMCapability),
 			},
-			Parameters: []*cloudformation.Parameter{
-				{
-					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.OperatorVersion(&cr)),
-				},
-			},
 			StackName:    aws.String(key.StackNameTCCP(&cr)),
 			TemplateBody: aws.String(templateBody),
 		}
@@ -300,10 +288,9 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 				MasterImageID:              key.ImageID(cc.Status.TenantCluster.AWS.Region),
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         key.MasterInstanceType(cr),
-				MasterCloudConfigVersion:   key.CloudConfigVersion,
 				MasterInstanceMonitoring:   r.instanceMonitoring,
 
-				VersionBundleVersion: key.OperatorVersion(&cr),
+				OperatorVersion: key.OperatorVersion(&cr),
 			},
 			TenantClusterAccountID:         cc.Status.TenantCluster.AWS.AccountID,
 			TenantClusterAvailabilityZones: cc.Spec.TenantCluster.TCCP.AvailabilityZones,

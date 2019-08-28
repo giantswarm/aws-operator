@@ -14,9 +14,8 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
     Value: {{ .Guest.Outputs.Master.Instance.Type }}
-  VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
+  OperatorVersion:
+    Value: {{ .Guest.Outputs.OperatorVersion }}
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:

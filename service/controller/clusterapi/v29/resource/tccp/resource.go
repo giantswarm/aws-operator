@@ -28,9 +28,6 @@ const (
 	// our Cloud Formation templates. It is required for creating worker policy
 	// IAM roles.
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
-	// versionBundleVersionParameterKey is the key name of the Cloud Formation
-	// parameter that sets the version bundle version.
-	versionBundleVersionParameterKey = "VersionBundleVersionParameter"
 )
 
 // Config represents the configuration used to create a new cloudformation

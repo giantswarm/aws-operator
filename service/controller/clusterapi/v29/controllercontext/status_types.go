@@ -39,7 +39,7 @@ type ContextStatusTenantCluster struct {
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	TCNP                  ContextStatusTenantClusterTCNP
-	VersionBundleVersion  string
+	OperatorVersion       string
 }
 
 type ContextStatusTenantClusterAWS struct {
