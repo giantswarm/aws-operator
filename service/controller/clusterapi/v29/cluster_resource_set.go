@@ -27,7 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
@@ -432,24 +431,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var namespaceResource controller.Resource
-	{
-		c := namespace.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ops, err := namespace.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		namespaceResource, err = toCRUDResource(config.Logger, ops)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var natGatewayAddressesResource controller.Resource
 	{
 		c := natgatewayaddresses.Config{
@@ -612,7 +593,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpiResource,
 		tccpResource,
 		tccpfResource,
-		namespaceResource,
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
