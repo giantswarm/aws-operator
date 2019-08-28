@@ -139,8 +139,8 @@ func DefaultContext() context.Context {
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
+				OperatorVersion:       "6.3.0",
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
-					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
@@ -224,7 +224,9 @@ func DefaultContext() context.Context {
 						PeeringConnectionID: "peering-connection-id",
 					},
 				},
-				VersionBundleVersion: "6.3.0",
+				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
+					ASG: controllercontext.ContextStatusTenantClusterTCNPASG{},
+				},
 			},
 		},
 	}

@@ -10,13 +10,12 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupebsvolumes"
@@ -28,7 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
@@ -91,13 +89,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var detectionService *detection.Detection
+	var clusterDetection *changedetection.Cluster
 	{
-		c := detection.Config{
+		c := changedetection.ClusterConfig{
 			Logger: config.Logger,
 		}
 
-		detectionService, err = detection.New(c)
+		clusterDetection, err = changedetection.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -152,19 +150,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		accountIDResource, err = accountid.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var asgStatusResource controller.Resource
-	{
-		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		asgStatusResource, err = asgstatus.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -363,7 +348,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:               config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
-			Detection:          detectionService,
+			Detection:          clusterDetection,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
@@ -441,24 +426,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpiResource, err = tccpi.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var namespaceResource controller.Resource
-	{
-		c := namespace.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ops, err := namespace.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		namespaceResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -614,7 +581,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpRouteTablesResource,
 		tccpSubnetsResource,
 		regionResource,
-		asgStatusResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
@@ -627,7 +593,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpiResource,
 		tccpResource,
 		tccpfResource,
-		namespaceResource,
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,

@@ -38,7 +38,8 @@ type ContextStatusTenantCluster struct {
 	HostedZoneNameServers string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
-	VersionBundleVersion  string
+	TCNP                  ContextStatusTenantClusterTCNP
+	OperatorVersion       string
 }
 
 type ContextStatusTenantClusterAWS struct {
@@ -58,7 +59,6 @@ type ContextStatusTenantClusterMasterInstance struct {
 }
 
 type ContextStatusTenantClusterTCCP struct {
-	ASG               ContextStatusTenantClusterTCCPASG
 	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
 	MachineDeployment v1alpha1.MachineDeployment
@@ -67,13 +67,6 @@ type ContextStatusTenantClusterTCCP struct {
 	SecurityGroups    []*ec2.SecurityGroup
 	Subnets           []*ec2.Subnet
 	VPC               ContextStatusTenantClusterTCCPVPC
-}
-
-type ContextStatusTenantClusterTCCPASG struct {
-	DesiredCapacity int
-	MaxSize         int
-	MinSize         int
-	Name            string
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
@@ -108,4 +101,15 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 type ContextStatusTenantClusterTCCPVPC struct {
 	ID                  string
 	PeeringConnectionID string
+}
+
+type ContextStatusTenantClusterTCNP struct {
+	ASG ContextStatusTenantClusterTCNPASG
+}
+
+type ContextStatusTenantClusterTCNPASG struct {
+	DesiredCapacity int
+	MaxSize         int
+	MinSize         int
+	Name            string
 }

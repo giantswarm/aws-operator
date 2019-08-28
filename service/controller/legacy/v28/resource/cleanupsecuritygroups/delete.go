@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v28/key"
@@ -55,6 +56,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	if len(groups) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d security groups for tenant cluster %#q", len(groups), key.ClusterID(cr)))
 
+		var deleted int
 		for _, g := range groups {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(cr)))
 
@@ -63,14 +65,25 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 
 			_, err := cc.Client.TenantCluster.AWS.EC2.DeleteSecurityGroup(i)
-			if err != nil {
+			if IsDependencyViolation(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("security group %#q for tenant cluster %#q still has dependency", *g.GroupId, key.ClusterID(cr)))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(cr)))
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+
+				continue
+
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
+
+			deleted++
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(cr)))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d security groups for tenant cluster %#q", len(groups), key.ClusterID(cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d security groups for tenant cluster %#q", deleted, key.ClusterID(cr)))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no security groups to be deleted for tenant cluster %#q", key.ClusterID(cr)))
 	}

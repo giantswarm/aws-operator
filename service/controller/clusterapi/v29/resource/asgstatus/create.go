@@ -15,7 +15,7 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -32,6 +32,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
 						aws.String(key.ClusterID(&cr)),
+					},
+				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagMachineDeployment)),
+					Values: []*string{
+						aws.String(key.MachineDeploymentID(&cr)),
 					},
 				},
 				{
@@ -117,10 +123,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity = desiredCapacity
-		cc.Status.TenantCluster.TCCP.ASG.MaxSize = maxSize
-		cc.Status.TenantCluster.TCCP.ASG.MinSize = minSize
-		cc.Status.TenantCluster.TCCP.ASG.Name = asgName
+		cc.Status.TenantCluster.TCNP.ASG.DesiredCapacity = desiredCapacity
+		cc.Status.TenantCluster.TCNP.ASG.MaxSize = maxSize
+		cc.Status.TenantCluster.TCNP.ASG.MinSize = minSize
+		cc.Status.TenantCluster.TCNP.ASG.Name = asgName
 	}
 
 	return nil

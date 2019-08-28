@@ -1,4 +1,4 @@
-package detection
+package changedetection
 
 import (
 	"context"
@@ -12,26 +12,26 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
-type Config struct {
+type ClusterConfig struct {
 	Logger micrologger.Logger
 }
 
-// Detection is a service implementation deciding if a tenant cluster should be
-// updated or scaled.
-type Detection struct {
+// Cluster is a detection service implementation deciding if a tenant cluster
+// should be updated or scaled.
+type Cluster struct {
 	logger micrologger.Logger
 }
 
-func New(config Config) (*Detection, error) {
+func NewCluster(config ClusterConfig) (*Cluster, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	d := &Detection{
+	c := &Cluster{
 		logger: config.Logger,
 	}
 
-	return d, nil
+	return c, nil
 }
 
 // ShouldScale determines whether the reconciled tenant cluster should be
@@ -40,18 +40,18 @@ func New(config Config) (*Detection, error) {
 //     The tenant cluster's scaling max changes.
 //     The tenant cluster's scaling min changes.
 //
-func (d *Detection) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
+func (c *Cluster) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MaxSize != key.MachineDeploymentScalingMax(md) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCCP.ASG.MaxSize is %d while key.MachineDeploymentScalingMax(md) is %d", cc.Status.TenantCluster.TCCP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
+	if !cc.Status.TenantCluster.TCNP.ASG.IsEmpty() && cc.Status.TenantCluster.TCNP.ASG.MaxSize != key.MachineDeploymentScalingMax(md) {
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling max changes: cc.Status.TenantCluster.TCNP.ASG.MaxSize is %d while key.MachineDeploymentScalingMax(md) is %d", cc.Status.TenantCluster.TCNP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCCP.ASG.IsEmpty() && cc.Status.TenantCluster.TCCP.ASG.MinSize != key.MachineDeploymentScalingMin(md) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCCP.ASG.MinSize is %d while key.MachineDeploymentScalingMin(md) is %d", cc.Status.TenantCluster.TCCP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
+	if !cc.Status.TenantCluster.TCNP.ASG.IsEmpty() && cc.Status.TenantCluster.TCNP.ASG.MinSize != key.MachineDeploymentScalingMin(md) {
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should scale due to scaling min changes: cc.Status.TenantCluster.TCNP.ASG.MinSize is %d while key.MachineDeploymentScalingMin(md) is %d", cc.Status.TenantCluster.TCNP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
 		return true, nil
 	}
 
@@ -66,23 +66,23 @@ func (d *Detection) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployme
 //     The worker node's instance type changes.
 //     The tenant cluster's version changes.
 //
-func (d *Detection) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (bool, error) {
+func (c *Cluster) ShouldUpdate(ctx context.Context, cl v1alpha1.Cluster, md v1alpha1.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
 	if !availabilityZonesEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the tenant cluster should update due to availability zone changes"))
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprint("detected the tenant cluster should update due to availability zone changes"))
 		return true, nil
 	}
 
 	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cl) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cl) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cl)))
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cl) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cl)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.OperatorVersion(&cl) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.OperatorVersion(&cl) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.OperatorVersion(&cl)))
+	if cc.Status.TenantCluster.OperatorVersion != key.OperatorVersion(&cl) {
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.OperatorVersion is %q while key.OperatorVersion(&cl) is %q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cl)))
 		return true, nil
 	}
 
