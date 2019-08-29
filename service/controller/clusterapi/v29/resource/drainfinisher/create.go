@@ -20,11 +20,10 @@ import (
 // EnsureCreated completes ASG lifecycle hooks for nodes drained by
 // node-operator, and then deletes drained DrainerConfigs.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
