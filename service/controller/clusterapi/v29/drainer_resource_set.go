@@ -54,7 +54,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
