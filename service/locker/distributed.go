@@ -91,6 +91,7 @@ func (d DistributedLocker) Lock(ctx context.Context) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	time.Sleep(3 * time.Second)
 
 	return nil
 }
@@ -101,6 +102,7 @@ func (d DistributedLocker) Unlock(ctx context.Context) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	time.Sleep(3 * time.Second)
 
 	return nil
 }
