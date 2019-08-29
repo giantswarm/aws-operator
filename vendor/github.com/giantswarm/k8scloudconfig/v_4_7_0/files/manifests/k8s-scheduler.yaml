@@ -17,6 +17,7 @@ spec:
     command:
     - /hyperkube
     - scheduler
+    - --feature-gates=TTLAfterFinished=true
     - --config=/etc/kubernetes/config/scheduler.yaml
     - --v=2
     resources:
