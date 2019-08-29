@@ -318,6 +318,7 @@ systemd:
       --network-plugin=cni \
       --register-node=true \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
+      --feature-gates=TTLAfterFinished=true \
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="node.kubernetes.io/master,node-role.kubernetes.io/master,kubernetes.io/role=master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"

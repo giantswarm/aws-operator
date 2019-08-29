@@ -12,9 +12,6 @@ subjects:
 - kind: ServiceAccount
   name: kube-proxy
   namespace: kube-system
-- kind: ServiceAccount
-  name: nginx-ingress-controller
-  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
