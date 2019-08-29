@@ -67,7 +67,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.CMAClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll),
+			Watcher: config.CMAClient.ClusterV1alpha1().MachineDeployments(corev1.NamespaceAll),
 
 			ListOptions: metav1.ListOptions{
 				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
