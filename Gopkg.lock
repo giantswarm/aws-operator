@@ -342,6 +342,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:8979516db29cb8621973232481c8b15cf25b92f9b8172c1835a1892b405b2b99"
+  name = "github.com/giantswarm/kubelock"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "aa289048e71503a3b66393af6a80a657a5d28895"
+
+[[projects]]
+  branch = "master"
   digest = "1:a2122f2c0fae0df1c4225df3c18e624d712566cb43eabc38c6f0914231cae2bb"
   name = "github.com/giantswarm/microendpoint"
   packages = [
@@ -1485,6 +1493,7 @@
     "github.com/giantswarm/k8scloudconfig/v_4_5_0",
     "github.com/giantswarm/k8scloudconfig/v_4_5_1",
     "github.com/giantswarm/k8scloudconfig/v_4_6_0",
+    "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
     "github.com/giantswarm/microendpoint/service/version",
