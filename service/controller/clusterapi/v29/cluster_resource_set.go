@@ -520,39 +520,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	// TODO use that code later when the new Node Pool ready status resource is
-	// used again.
-	//
-	//var certsSearcher certs.Interface
-	//{
-	//	c := certs.Config{
-	//		K8sClient: config.K8sClient,
-	//		Logger:    config.Logger,
-	//
-	//		WatchTimeout: 5 * time.Second,
-	//	}
-	//
-	//	certsSearcher, err = certs.NewSearcher(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
-	//
-	//var tenantCluster tenantcluster.Interface
-	//{
-	//	c := tenantcluster.Config{
-	//		CertsSearcher: certsSearcher,
-	//		Logger:        config.Logger,
-	//
-	//		CertID: certs.APICert,
-	//	}
-	//
-	//	tenantCluster, err = tenantcluster.New(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
-
 	var vpcCIDRResource controller.Resource
 	{
 		c := cpvpccidr.Config{
