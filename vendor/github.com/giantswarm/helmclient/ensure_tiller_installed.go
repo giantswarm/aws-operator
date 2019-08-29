@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/errors/guest"
+	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -71,8 +71,8 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 		if errors.IsAlreadyExists(err) {
 			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("serviceaccount %#q in namespace %#q already exists", name, namespace))
 			// fall through
-		} else if guest.IsAPINotAvailable(err) {
-			return microerror.Maskf(guest.APINotAvailableError, err.Error())
+		} else if tenant.IsAPINotAvailable(err) {
+			return microerror.Maskf(tenant.APINotAvailableError, err.Error())
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
@@ -155,13 +155,13 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 					},
 				},
 				Ingress: []networkingv1.NetworkPolicyIngressRule{
-					networkingv1.NetworkPolicyIngressRule{
+					{
 						Ports: []networkingv1.NetworkPolicyPort{
-							networkingv1.NetworkPolicyPort{
+							{
 								Protocol: &protocolTCP,
 								Port:     &tillerPort,
 							},
-							networkingv1.NetworkPolicyPort{
+							{
 								Protocol: &protocolTCP,
 								Port:     &tillerHTTPPort,
 							},
@@ -169,7 +169,7 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 					},
 				},
 				Egress: []networkingv1.NetworkPolicyEgressRule{
-					networkingv1.NetworkPolicyEgressRule{},
+					{},
 				},
 				PolicyTypes: []networkingv1.PolicyType{
 					networkingv1.PolicyTypeIngress,

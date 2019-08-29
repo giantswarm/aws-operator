@@ -11,7 +11,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f0aff88350586f72f11c7dcda7648efc356ab2a7b079e3a52f9a0a3d70211165"
+  digest = "1:08188cf7ce7027b22e88cc23da27f17349a0ba7746271a60cbe0a70266c2346f"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:340d1ccad18e763216afd99a9d7cabe84e7b05bb10d7547122865e6253900447"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -28,7 +36,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "6d6990ab19fc21766e67aec28d8ab62aede51a6a"
+  revision = "7f178f7ebd4566ad4eb1dd5a8f83ede5b20ba978"
 
 [[projects]]
   branch = "master"
@@ -40,11 +48,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:83229decbb2987567752aa7e8091c59d22738db3a88f5cb61f23fb2a0804d005"
+  digest = "1:e8738596bf054a708e81e8637ba8d7ffd22cab0f8303583ced0a147332b06ef1"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5b803268ed51b69bf9e7657ab9e1d67d5868b295"
+  revision = "cb07ec533b5032add513abb1c4a886d7a19ddc69"
 
 [[projects]]
   branch = "master"
@@ -63,7 +71,7 @@
   name = "github.com/giantswarm/operatorkit"
   packages = ["client/k8scrdclient"]
   pruneopts = "UT"
-  revision = "a2a6a2f14115f32c611ee0373bc4e637c3a6da63"
+  revision = "1761824480ee80b795ae32f43881abf22c62fedf"
 
 [[projects]]
   branch = "master"
@@ -139,7 +147,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:d1a3774c1f8336a21669d6da87a7bafb4d6171a84752268b7011e767d6722c2b"
+  digest = "1:ca4524b4855ded427c7003ec903a5c854f37e7b1e8e2a93277243462c5b753a8"
   name = "github.com/googleapis/gnostic"
   packages = [
     "OpenAPIv2",
@@ -147,8 +155,8 @@
     "extensions",
   ]
   pruneopts = "UT"
-  revision = "e73c7ec21d36ddb0711cb36d1502d18363b5c2c9"
-  version = "v0.3.0"
+  revision = "ab0dd09aa10e2952b28e12ecd35681b20463ebab"
+  version = "v0.3.1"
 
 [[projects]]
   branch = "master"
@@ -239,11 +247,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "4def268fd1a49955bfb3dda92fe3db4f924f2285"
+  revision = "60c769a6c58655dab1b9adac0d58967dd517cfba"
 
 [[projects]]
   branch = "master"
-  digest = "1:6e518bd3b3acc24418a56e2974b8c6c40abca7055ebabae261f3cb02db5a96cd"
+  digest = "1:6a38b1d1f931c678d3471bf81665c3efa44730692e470cb75651bdbb85d508ff"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -254,7 +262,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "ca1201d0de80cfde86cb01aea620983605dfe99b"
+  revision = "74dc4d7220e7acc4e100824340f3e66577424772"
 
 [[projects]]
   branch = "master"

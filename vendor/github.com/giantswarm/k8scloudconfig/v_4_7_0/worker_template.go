@@ -215,6 +215,7 @@ systemd:
       --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
       --network-plugin=cni \
       --register-node=true \
+      --feature-gates=TTLAfterFinished=true \
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"

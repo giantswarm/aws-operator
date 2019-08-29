@@ -26,6 +26,7 @@ spec:
     - --terminated-pod-gc-threshold=10
     - --use-service-account-credentials=true
     - --kubeconfig=/etc/kubernetes/kubeconfig/controller-manager.yaml
+    - --feature-gates=TTLAfterFinished=true
     - --root-ca-file=/etc/kubernetes/ssl/apiserver-ca.pem
     - --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
     resources:
