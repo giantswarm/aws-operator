@@ -90,7 +90,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          clusterv1alpha1.NewClusterCRD(),
+			CRD:          clusterv1alpha1.NewMachineDeploymentCRD(),
 			CRDClient:    crdClient,
 			Informer:     newInformer,
 			Logger:       config.Logger,
