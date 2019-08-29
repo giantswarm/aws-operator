@@ -8,7 +8,7 @@ import (
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/errors/guest"
+	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"github.com/giantswarm/tenantcluster"
@@ -245,7 +245,7 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 		if k8sClient != nil {
 			o := metav1.ListOptions{}
 			list, err := k8sClient.CoreV1().Nodes().List(o)
-			if guest.IsAPINotAvailable(err) {
+			if tenant.IsAPINotAvailable(err) {
 				// fall through
 			} else if err != nil {
 				return nil, microerror.Mask(err)

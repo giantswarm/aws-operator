@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/certs"
 	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_6_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_7_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"

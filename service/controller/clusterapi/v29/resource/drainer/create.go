@@ -7,11 +7,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	clusterv1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -22,11 +22,10 @@ import (
 // EnsureCreated creates DrainerConfigs for ASG instances in terminating/wait
 // state then lets node-operator to do its job.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -118,11 +117,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, cr clusterv1alpha1.Cluster, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cr cmav1alpha1.Cluster, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for guest cluster nodes %#q", instanceID))
 
 	n := cr.GetNamespace()
-	c := &corev1alpha1.DrainerConfig{
+	c := &g8sv1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.InstanceID: instanceID,
@@ -132,19 +131,19 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr clusterv1alpha1.C
 			},
 			Name: privateDNS,
 		},
-		Spec: corev1alpha1.DrainerConfigSpec{
-			Guest: corev1alpha1.DrainerConfigSpecGuest{
-				Cluster: corev1alpha1.DrainerConfigSpecGuestCluster{
-					API: corev1alpha1.DrainerConfigSpecGuestClusterAPI{
+		Spec: g8sv1alpha1.DrainerConfigSpec{
+			Guest: g8sv1alpha1.DrainerConfigSpecGuest{
+				Cluster: g8sv1alpha1.DrainerConfigSpecGuestCluster{
+					API: g8sv1alpha1.DrainerConfigSpecGuestClusterAPI{
 						Endpoint: key.ClusterAPIEndpoint(cr),
 					},
 					ID: key.ClusterID(&cr),
 				},
-				Node: corev1alpha1.DrainerConfigSpecGuestNode{
+				Node: g8sv1alpha1.DrainerConfigSpecGuestNode{
 					Name: privateDNS,
 				},
 			},
-			VersionBundle: corev1alpha1.DrainerConfigSpecVersionBundle{
+			VersionBundle: g8sv1alpha1.DrainerConfigSpecVersionBundle{
 				Version: "0.2.0",
 			},
 		},
