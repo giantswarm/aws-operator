@@ -278,7 +278,6 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 			CustomObject:                    cr,
 			EncrypterBackend:                r.encrypterBackend,
 			InstallationName:                r.installationName,
-			MachineDeployment:               cc.Status.TenantCluster.TCCP.MachineDeployment,
 			PublicRouteTables:               r.publicRouteTables,
 			Route53Enabled:                  r.route53Enabled,
 			StackState: adapter.StackState{
