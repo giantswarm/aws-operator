@@ -197,8 +197,7 @@ func DefaultContext() context.Context {
 							},
 						},
 					},
-					IsTransitioning:   false,
-					MachineDeployment: DefaultMachineDeployment(),
+					IsTransitioning: false,
 					SecurityGroups: []*ec2.SecurityGroup{
 						{
 							GroupId: aws.String("ingress-security-group-id"),
