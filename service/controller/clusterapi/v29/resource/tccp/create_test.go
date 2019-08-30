@@ -51,13 +51,13 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 	var err error
 
-	var d *changedetection.Cluster
+	var d *changedetection.TCCP
 	{
-		c := changedetection.ClusterConfig{
+		c := changedetection.TCCPConfig{
 			Logger: microloggertest.New(),
 		}
 
-		d, err = changedetection.NewCluster(c)
+		d, err = changedetection.NewTCCP(c)
 		if err != nil {
 			t.Fatal(err)
 		}
