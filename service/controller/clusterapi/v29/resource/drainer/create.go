@@ -22,11 +22,10 @@ import (
 // EnsureCreated creates DrainerConfigs for ASG instances in terminating/wait
 // state then lets node-operator to do its job.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
