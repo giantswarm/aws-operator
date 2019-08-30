@@ -92,34 +92,36 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		update, err := r.detection.ShouldUpdate(ctx, cr, cc.Status.TenantCluster.TCCP.MachineDeployment)
+		update, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		if update {
-			err = r.updateStack(ctx, cr)
+			tp := templateParams{
+				MasterInstanceResourceName: key.MasterInstanceResourceName(cr),
+				DockerVolumeResourceName:   key.DockerVolumeResourceName(cr),
+			}
+
+			templateBody, err := r.newTemplateBody(ctx, cr, tp)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			return nil
-		}
-	}
-
-	{
-		scale, err := r.detection.ShouldScale(ctx, cc.Status.TenantCluster.TCCP.MachineDeployment)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if scale {
-			err = r.scaleStack(ctx, cr)
+			err = r.detachVolumes(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			return nil
+			err = r.terminateMasterInstance(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.updateStack(ctx, cr, templateBody)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 	}
 
@@ -225,34 +227,6 @@ func (r *Resource) detachVolumes(ctx context.Context, cr v1alpha1.Cluster) error
 	return nil
 }
 
-func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.Cluster, templateBody string) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring the tenant cluster's control plane cloud formation stack")
-
-		i := &cloudformation.UpdateStackInput{
-			Capabilities: []*string{
-				aws.String(namedIAMCapability),
-			},
-			StackName:    aws.String(key.StackNameTCCP(&cr)),
-			TemplateBody: aws.String(templateBody),
-		}
-
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured the tenant cluster's control plane cloud formation stack")
-	}
-
-	return nil
-}
-
 func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCP
@@ -313,54 +287,29 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 	return templateBody, nil
 }
 
-func (r *Resource) scaleStack(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster, templateBody string) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	tp := templateParams{
-		MasterInstanceResourceName: cc.Status.TenantCluster.MasterInstance.ResourceName,
-		DockerVolumeResourceName:   cc.Status.TenantCluster.MasterInstance.DockerVolumeResourceName,
-	}
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring the tenant cluster's control plane cloud formation stack")
 
-	templateBody, err := r.newTemplateBody(ctx, cr, tp)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+		i := &cloudformation.UpdateStackInput{
+			Capabilities: []*string{
+				aws.String(namedIAMCapability),
+			},
+			StackName:    aws.String(key.StackNameTCCP(&cr)),
+			TemplateBody: aws.String(templateBody),
+		}
 
-	err = r.ensureStack(ctx, cr, templateBody)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	return nil
-}
-
-func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster) error {
-	tp := templateParams{
-		MasterInstanceResourceName: key.MasterInstanceResourceName(cr),
-		DockerVolumeResourceName:   key.DockerVolumeResourceName(cr),
-	}
-
-	templateBody, err := r.newTemplateBody(ctx, cr, tp)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.detachVolumes(ctx, cr)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.terminateMasterInstance(ctx, cr)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = r.ensureStack(ctx, cr, templateBody)
-	if err != nil {
-		return microerror.Mask(err)
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured the tenant cluster's control plane cloud formation stack")
 	}
 
 	return nil
