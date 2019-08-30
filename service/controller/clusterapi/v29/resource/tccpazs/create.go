@@ -95,8 +95,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	// Map subnet, route table and natgateway information to their corresponding availability
-	// zones based on the AWS API results.
+	// Map subnet information to their corresponding availability zones based on
+	// the AWS API results.
 	{
 		azMapping, err = mapSubnets(azMapping, cc.Status.TenantCluster.TCCP.Subnets)
 		if err != nil {
