@@ -33,6 +33,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpf"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnpoutputs"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -336,6 +337,18 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpOutputsResource controller.Resource
+	{
+		c := tcnpoutputs.Config{
+			Logger: config.Logger,
+		}
+
+		tcnpOutputsResource, err = tcnpoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []controller.Resource{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -353,6 +366,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tccpAZsResource,
 		tcnpASGStatusResource,
 		tcnpAZsResource,
+		tcnpOutputsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
