@@ -2,8 +2,6 @@ package template
 
 const TemplateMainOutputs = `
 {{- define "outputs" -}}
-  AutoScalingGroupName:
-    Value: !Ref NodePoolAutoScalingGroup
   DockerVolumeSizeGB:
     Value: {{ .Outputs.DockerVolumeSizeGB }}
   InstanceImage:
