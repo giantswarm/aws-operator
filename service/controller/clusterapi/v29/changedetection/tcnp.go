@@ -46,11 +46,15 @@ func (t *TCNP) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (
 		return false, microerror.Mask(err)
 	}
 
-	if !cc.Status.TenantCluster.TCNP.ASG.IsEmpty() && cc.Status.TenantCluster.TCNP.ASG.MaxSize != key.MachineDeploymentScalingMax(md) {
+	asgEmpty := cc.Status.TenantCluster.TCNP.ASG.IsEmpty()
+	asgMaxEqual := cc.Status.TenantCluster.TCNP.ASG.MaxSize == key.MachineDeploymentScalingMax(md)
+	asgMinEqual := cc.Status.TenantCluster.TCNP.ASG.MinSize == key.MachineDeploymentScalingMin(md)
+
+	if !asgEmpty && !asgMaxEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should scale up due to scaling max changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
 		return true, nil
 	}
-	if !cc.Status.TenantCluster.TCNP.ASG.IsEmpty() && cc.Status.TenantCluster.TCNP.ASG.MinSize != key.MachineDeploymentScalingMin(md) {
+	if !asgEmpty && !asgMinEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should scale down due to scaling min changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
 		return true, nil
 	}
@@ -71,15 +75,19 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md v1alpha1.MachineDeployment) 
 		return false, microerror.Mask(err)
 	}
 
-	if cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB != key.MachineDeploymentDockerVolumeSizeGB(md) {
+	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(md)
+	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(md)
+	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&md)
+
+	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should update due to worker instance docker volume size changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(md)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.TCNP.WorkerInstance.Type != key.MachineDeploymentInstanceType(md) {
+	if !instanceTypeEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should update due to worker instance type changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.Type, key.MachineDeploymentInstanceType(md)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.OperatorVersion != key.OperatorVersion(&md) {
+	if !operatorVersionEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should update due to operator version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&md)))
 		return true, nil
 	}
