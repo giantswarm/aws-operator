@@ -37,8 +37,8 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 // ShouldScale determines whether the reconciled node pool should be scaled. A
 // node pool is only allowed to scale in the following cases.
 //
-//     The tenant cluster's scaling max changes.
-//     The tenant cluster's scaling min changes.
+//     The node pool's scaling max changes.
+//     The node pool's scaling min changes.
 //
 func (t *TCNP) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
@@ -67,7 +67,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (
 //
 //     The worker node's docker volume size changes.
 //     The worker node's instance type changes.
-//     The tenant cluster's version changes.
+//     The operator's version changes.
 //
 func (t *TCNP) ShouldUpdate(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
