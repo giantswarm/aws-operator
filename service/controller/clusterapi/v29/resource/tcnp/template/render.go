@@ -3,7 +3,7 @@ package template
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/templates"
+	"github.com/giantswarm/aws-operator/pkg/template"
 )
 
 func Render(v interface{}) (string, error) {
@@ -20,7 +20,7 @@ func Render(v interface{}) (string, error) {
 		TemplateMainVPC,
 	}
 
-	s, err := templates.Render(l, v)
+	s, err := template.Render(l, v)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
