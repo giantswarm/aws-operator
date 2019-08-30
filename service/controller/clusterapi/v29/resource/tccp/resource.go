@@ -40,7 +40,7 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	APIWhitelist       adapter.APIWhitelist
-	Detection          *changedetection.Cluster
+	Detection          *changedetection.TCCP
 	EncrypterBackend   string
 	InstallationName   string
 	InstanceMonitoring bool
@@ -57,7 +57,7 @@ type Resource struct {
 
 	apiWhiteList       adapter.APIWhitelist
 	encrypterBackend   string
-	detection          *changedetection.Cluster
+	detection          *changedetection.TCCP
 	installationName   string
 	instanceMonitoring bool
 	publicRouteTables  string

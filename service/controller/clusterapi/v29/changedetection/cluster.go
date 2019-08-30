@@ -12,26 +12,26 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
-type ClusterConfig struct {
+type TCCPConfig struct {
 	Logger micrologger.Logger
 }
 
-// Cluster is a detection service implementation deciding if a tenant cluster
-// should be updated or scaled.
-type Cluster struct {
+// TCCP is a detection service implementation deciding if a tenant cluster
+// control plane should be updated.
+type TCCP struct {
 	logger micrologger.Logger
 }
 
-func NewCluster(config ClusterConfig) (*Cluster, error) {
+func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	c := &Cluster{
+	t := &TCCP{
 		logger: config.Logger,
 	}
 
-	return c, nil
+	return t, nil
 }
 
 // ShouldUpdate determines whether the reconciled tenant cluster control plane
@@ -42,7 +42,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 //     The master node's instance type changes.
 //     The operator's version changes.
 //
-func (c *Cluster) ShouldUpdate(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
+func (t *TCCP) ShouldUpdate(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -53,15 +53,15 @@ func (c *Cluster) ShouldUpdate(ctx context.Context, cr v1alpha1.Cluster) (bool, 
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
 	if !azsEqual {
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster should update due to availability zone changes in node pools"))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to availability zone changes in node pools"))
 		return true, nil
 	}
 	if !masterInstanceEqual {
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster should update due to master instance type changes from %#q to %#q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to master instance type changes from %#q to %#q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
 		return true, nil
 	}
 	if !operatorVersionEqual {
-		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster should update due to version bundle version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to version bundle version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
 		return true, nil
 	}
 

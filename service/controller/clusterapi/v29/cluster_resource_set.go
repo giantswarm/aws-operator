@@ -88,13 +88,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var clusterDetection *changedetection.Cluster
+	var tccpChangeDetection *changedetection.TCCP
 	{
-		c := changedetection.ClusterConfig{
+		c := changedetection.TCCPConfig{
 			Logger: config.Logger,
 		}
 
-		clusterDetection, err = changedetection.NewCluster(c)
+		tccpChangeDetection, err = changedetection.NewTCCP(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -334,7 +334,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:               config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
-			Detection:          clusterDetection,
+			Detection:          tccpChangeDetection,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
