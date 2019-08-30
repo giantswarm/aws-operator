@@ -4,7 +4,6 @@ import (
 	"net"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 type ContextStatus struct {
@@ -61,7 +60,6 @@ type ContextStatusTenantClusterMasterInstance struct {
 type ContextStatusTenantClusterTCCP struct {
 	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
-	MachineDeployment v1alpha1.MachineDeployment
 	NATGateways       []*ec2.NatGateway
 	RouteTables       []*ec2.RouteTable
 	SecurityGroups    []*ec2.SecurityGroup

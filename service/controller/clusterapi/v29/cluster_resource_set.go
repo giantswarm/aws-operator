@@ -26,7 +26,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
@@ -215,19 +214,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var machineDeploymentResource controller.Resource
-	{
-		c := machinedeployment.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
-		}
-
-		machineDeploymentResource, err = machinedeployment.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -538,7 +524,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
-		machineDeploymentResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
