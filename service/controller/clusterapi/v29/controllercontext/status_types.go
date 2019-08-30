@@ -117,5 +117,6 @@ type ContextStatusTenantClusterTCNPASG struct {
 
 type ContextStatusTenantClusterTCNPWorkerInstance struct {
 	DockerVolumeSizeGB string
+	Image              string
 	Type               string
 }
