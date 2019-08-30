@@ -44,14 +44,6 @@ func NewKubeLockLocker(config KubeLockLockerConfig) (*KubeLockLocker, error) {
 	}
 
 	var err error
-	var gvr schema.GroupVersionResource
-	{
-		gvr = schema.GroupVersionResource{
-			Group:    "",
-			Version:  "v1",
-			Resource: "namespaces",
-		}
-	}
 
 	var dynClient dynamic.Interface
 	{
@@ -66,7 +58,11 @@ func NewKubeLockLocker(config KubeLockLockerConfig) (*KubeLockLocker, error) {
 	{
 		c := kubelock.Config{
 			DynClient: dynClient,
-			GVR:       gvr,
+			GVR: schema.GroupVersionResource{
+				Group:    "",
+				Version:  "v1",
+				Resource: "namespaces",
+			},
 		}
 		k, err = kubelock.New(c)
 		if err != nil {
