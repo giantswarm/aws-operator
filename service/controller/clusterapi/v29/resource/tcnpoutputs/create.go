@@ -19,7 +19,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
