@@ -104,7 +104,8 @@ type ContextStatusTenantClusterTCCPVPC struct {
 }
 
 type ContextStatusTenantClusterTCNP struct {
-	ASG ContextStatusTenantClusterTCNPASG
+	ASG            ContextStatusTenantClusterTCNPASG
+	WorkerInstance ContextStatusTenantClusterTCNPWorkerInstance
 }
 
 type ContextStatusTenantClusterTCNPASG struct {
@@ -112,4 +113,9 @@ type ContextStatusTenantClusterTCNPASG struct {
 	MaxSize         int
 	MinSize         int
 	Name            string
+}
+
+type ContextStatusTenantClusterTCNPWorkerInstance struct {
+	DockerVolumeSizeGB string
+	Type               string
 }
