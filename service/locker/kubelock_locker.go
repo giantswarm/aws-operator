@@ -90,6 +90,7 @@ func (d KubeLockLocker) Lock(ctx context.Context) error {
 
 	return nil
 }
+
 func (d KubeLockLocker) Unlock(ctx context.Context) error {
 	err := d.kubelock.Lock(lockName).Release(ctx, lockNamespaceName, kubelock.ReleaseOptions{
 		Owner: lockOwner,
