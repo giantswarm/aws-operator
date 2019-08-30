@@ -34,8 +34,9 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-// ShouldScale determines whether the reconciled node pool should be scaled. A
-// node pool is only allowed to scale in the following cases.
+// ShouldScale determines whether the reconciled tenant cluster node pool should
+// be scaled. A tenant cluster node pool is only allowed to scale in the
+// following cases.
 //
 //     The node pool's scaling max changes.
 //     The node pool's scaling min changes.
@@ -51,19 +52,20 @@ func (t *TCNP) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (
 	asgMinEqual := cc.Status.TenantCluster.TCNP.ASG.MinSize == key.MachineDeploymentScalingMin(md)
 
 	if !asgEmpty && !asgMaxEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should scale up due to scaling max changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should scale up due to scaling max changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
 		return true, nil
 	}
 	if !asgEmpty && !asgMinEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should scale down due to scaling min changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should scale down due to scaling min changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
 		return true, nil
 	}
 
 	return false, nil
 }
 
-// ShouldUpdate determines whether the reconciled node pool should be updated. A
-// node pool is only allowed to update in the following cases.
+// ShouldUpdate determines whether the reconciled tenant cluster node pool
+// should be updated. A tenant cluster node pool is only allowed to update in
+// the following cases.
 //
 //     The worker node's docker volume size changes.
 //     The worker node's instance type changes.
@@ -80,15 +82,15 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md v1alpha1.MachineDeployment) 
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&md)
 
 	if !dockerVolumeEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should update due to worker instance docker volume size changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to worker instance docker volume size changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(md)))
 		return true, nil
 	}
 	if !instanceTypeEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should update due to worker instance type changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.Type, key.MachineDeploymentInstanceType(md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to worker instance type changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.Type, key.MachineDeploymentInstanceType(md)))
 		return true, nil
 	}
 	if !operatorVersionEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected node pool should update due to operator version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to operator version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&md)))
 		return true, nil
 	}
 
