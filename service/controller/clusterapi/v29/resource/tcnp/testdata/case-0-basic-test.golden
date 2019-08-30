@@ -1,8 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Node Pool Cloud Formation Stack.
 Outputs:
-  AutoScalingGroupName:
-    Value: !Ref NodePoolAutoScalingGroup
   DockerVolumeSizeGB:
     Value: 100
   InstanceImage:
