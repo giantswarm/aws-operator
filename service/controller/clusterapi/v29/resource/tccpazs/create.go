@@ -98,11 +98,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Map subnet, route table and natgateway information to their corresponding availability
 	// zones based on the AWS API results.
 	{
-		azMapping, err = mapRouteTables(azMapping, cc.Status.TenantCluster.TCCP.RouteTables)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		azMapping, err = mapSubnets(azMapping, cc.Status.TenantCluster.TCCP.Subnets)
 		if err != nil {
 			return microerror.Mask(err)
@@ -241,35 +236,6 @@ func azSubnetsToString(azMapping map[string]mapping) string {
 	return result.String()
 }
 
-func mapRouteTables(azMapping map[string]mapping, routeTables []*ec2.RouteTable) (map[string]mapping, error) {
-	for _, rt := range routeTables {
-		if !awstags.HasTags(rt.Tags, key.TagRouteTableType) {
-			continue
-		}
-		if awstags.ValueForKey(rt.Tags, key.TagStack) != key.StackTCCP {
-			continue
-		}
-
-		for az, m := range azMapping {
-			if awstags.ValueForKey(rt.Tags, key.TagAvailabilityZone) != az {
-				continue
-			}
-
-			switch t := awstags.ValueForKey(rt.Tags, key.TagRouteTableType); {
-			case t == "public":
-				m.Public.RouteTable.ID = *rt.RouteTableId
-			case t == "private":
-				m.Private.RouteTable.ID = *rt.RouteTableId
-			default:
-				return nil, microerror.Maskf(invalidConfigError, "invalid route table type %#q", t)
-			}
-			azMapping[az] = m
-		}
-	}
-
-	return azMapping, nil
-}
-
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
 	for _, s := range subnets {
 		if !awstags.HasTags(s.Tags, key.TagSubnetType) {
@@ -320,14 +286,6 @@ func newAZSpec(azMapping map[string]mapping) []controllercontext.ContextSpecTena
 
 		az := controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 			Name: name,
-			RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
-				Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePrivate{
-					ID: sp.Private.RouteTable.ID,
-				},
-				Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-					ID: sp.Public.RouteTable.ID,
-				},
-			},
 			Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 				Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 					CIDR: sp.Private.Subnet.CIDR,
@@ -370,11 +328,6 @@ func newAZStatus(azMapping map[string]mapping) []controllercontext.ContextStatus
 		// Collect currently used AZ information to store it inside the cc status.
 		az := controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 			Name: name,
-			RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-				Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-					ID: sp.Public.RouteTable.ID,
-				},
-			},
 			Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 				Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 					CIDR: sp.Private.Subnet.CIDR,
