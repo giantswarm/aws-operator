@@ -24,18 +24,18 @@ var (
 	lockTTL   = 30 * time.Second
 )
 
-type DistributedLockerConfig struct {
+type KubeLockLockerConfig struct {
 	Logger     micrologger.Logger
 	RestConfig *rest.Config
 }
 
-type DistributedLocker struct {
+type KubeLockLocker struct {
 	logger micrologger.Logger
 
 	kubelock kubelock.Interface
 }
 
-func NewDistributedLocker(config DistributedLockerConfig) (*DistributedLocker, error) {
+func NewKubeLockLocker(config KubeLockLockerConfig) (*KubeLockLocker, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -74,7 +74,7 @@ func NewDistributedLocker(config DistributedLockerConfig) (*DistributedLocker, e
 		}
 	}
 
-	d := &DistributedLocker{
+	d := &KubeLockLocker{
 		logger: config.Logger,
 
 		kubelock: k,
@@ -83,7 +83,7 @@ func NewDistributedLocker(config DistributedLockerConfig) (*DistributedLocker, e
 	return d, nil
 }
 
-func (d DistributedLocker) Lock(ctx context.Context) error {
+func (d KubeLockLocker) Lock(ctx context.Context) error {
 	err := d.kubelock.Lock(lockName).Acquire(ctx, lockNamespaceName, kubelock.AcquireOptions{
 		Owner: lockOwner,
 		TTL:   lockTTL,
@@ -94,7 +94,7 @@ func (d DistributedLocker) Lock(ctx context.Context) error {
 
 	return nil
 }
-func (d DistributedLocker) Unlock(ctx context.Context) error {
+func (d KubeLockLocker) Unlock(ctx context.Context) error {
 	err := d.kubelock.Lock(lockName).Release(ctx, lockNamespaceName, kubelock.ReleaseOptions{
 		Owner: lockOwner,
 	})

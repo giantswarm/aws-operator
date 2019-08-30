@@ -123,14 +123,14 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var distributedLocker locker.Interface
+	var kubeLockLocker locker.Interface
 	{
-		c := locker.DistributedLockerConfig{
+		c := locker.KubeLockLockerConfig{
 			Logger:     config.Logger,
 			RestConfig: restConfig,
 		}
 
-		distributedLocker, err = locker.NewDistributedLocker(c)
+		kubeLockLocker, err = locker.NewKubeLockLocker(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -139,7 +139,7 @@ func New(config Config) (*Service, error) {
 	var legacyNetworkAllocator legacynetwork.Allocator
 	{
 		c := legacynetwork.Config{
-			Locker: distributedLocker,
+			Locker: kubeLockLocker,
 			Logger: config.Logger,
 		}
 
@@ -166,7 +166,7 @@ func New(config Config) (*Service, error) {
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
-			Locker:       distributedLocker,
+			Locker:       kubeLockLocker,
 			Logger:       config.Logger,
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
@@ -251,7 +251,7 @@ func New(config Config) (*Service, error) {
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
 			K8sExtClient: k8sExtClient,
-			Locker:       distributedLocker,
+			Locker:       kubeLockLocker,
 			Logger:       config.Logger,
 
 			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
