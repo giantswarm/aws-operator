@@ -1,11 +1,12 @@
 package cloudconfig
 
 import (
+	"context"
 	"encoding/base64"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_6_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_7_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
@@ -25,7 +26,7 @@ type WorkerExtension struct {
 	ClusterCerts certs.Cluster
 }
 
-func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+func (e *WorkerExtension) Files(ctx context.Context) ([]k8scloudconfig.FileAsset, error) {
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{

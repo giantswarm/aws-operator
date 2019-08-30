@@ -23,24 +23,38 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		return "", microerror.Mask(err)
 	}
 
+	be := baseExtension{
+		customObject:  customObject,
+		encrypter:     c.encrypter,
+		encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+	}
+
+	workerExtension := &WorkerExtension{
+		baseExtension: be,
+		ctlCtx:        cc,
+
+		ClusterCerts: clusterCerts,
+	}
+
+	files, err := workerExtension.Files(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	units, err := workerExtension.Units()
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	var params k8scloudconfig.Params
 	{
-		be := baseExtension{
-			customObject:  customObject,
-			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-		}
-
 		// Default registry, kubernetes, etcd images etcd.
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
 
 		params.Cluster = customObject.Spec.Cluster
-		params.Extension = &WorkerExtension{
-			baseExtension: be,
-			ctlCtx:        cc,
-
-			ClusterCerts: clusterCerts,
+		params.Extension = k8scloudconfig.Extension{
+			Files: files,
+			Units: units,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
@@ -86,13 +100,7 @@ type WorkerExtension struct {
 	ClusterCerts certs.Cluster
 }
 
-func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	// TODO Pass context to k8scloudconfig rendering fucntions
-	//
-	// See https://github.com/giantswarm/giantswarm/issues/4329.
-	//
-	ctx := context.TODO()
-
+func (e *WorkerExtension) Files(ctx context.Context) ([]k8scloudconfig.FileAsset, error) {
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,

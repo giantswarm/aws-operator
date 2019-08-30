@@ -21,25 +21,39 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr cmav1alpha1.Clus
 		return "", microerror.Mask(err)
 	}
 
+	be := baseExtension{
+		cluster:       cr,
+		encrypter:     c.encrypter,
+		encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+	}
+
+	workerExtension := &WorkerExtension{
+		awsConfigSpec: c.cmaClusterToG8sConfig(cr),
+		baseExtension: be,
+		ctlCtx:        cc,
+
+		ClusterCerts: clusterCerts,
+	}
+
+	files, err := workerExtension.Files(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	units, err := workerExtension.Units()
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	var params k8scloudconfig.Params
 	{
-		be := baseExtension{
-			cluster:       cr,
-			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-		}
 
 		// Default registry, kubernetes, etcd images etcd.
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
-
 		params.Cluster = c.cmaClusterToG8sConfig(cr).Cluster
-		params.Extension = &WorkerExtension{
-			awsConfigSpec: c.cmaClusterToG8sConfig(cr),
-			baseExtension: be,
-			ctlCtx:        cc,
-
-			ClusterCerts: clusterCerts,
+		params.Extension = k8scloudconfig.Extension{
+			Files: files,
+			Units: units,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.RegistryDomain = c.registryDomain

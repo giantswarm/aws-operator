@@ -4,102 +4,15 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_7_0"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/templates/cloudconfig"
 )
-
-// NewMasterTemplate generates a new master cloud config template and returns it
-// as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
-	var err error
-
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	be := baseExtension{
-		customObject:  customObject,
-		encrypter:     c.encrypter,
-		encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-	}
-
-	masterExtension := &MasterExtension{
-		baseExtension: be,
-		ctlCtx:        cc,
-
-		ClusterCerts:     clusterCerts,
-		RandomKeyTmplSet: randomKeyTmplSet,
-	}
-
-	files, err := masterExtension.Files(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	units, err := masterExtension.Units()
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	var params k8scloudconfig.Params
-	{
-
-		params = k8scloudconfig.DefaultParams()
-
-		params.Cluster = customObject.Spec.Cluster
-		params.DisableEncryptionAtREST = true
-		// Ingress controller service remains in k8scloudconfig and will be
-		// removed in a later migration.
-		params.DisableIngressControllerService = false
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
-		params.Extension = k8scloudconfig.Extension{
-			Files: files,
-			Units: units,
-		}
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
-		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-		params.RegistryDomain = c.registryDomain
-		params.SSOPublicKey = c.SSOPublicKey
-
-		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
-		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-	}
-
-	var newCloudConfig *k8scloudconfig.CloudConfig
-	{
-		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
-		cloudConfigConfig.Params = params
-		cloudConfigConfig.Template = k8scloudconfig.MasterTemplate
-
-		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-
-		err = newCloudConfig.ExecuteTemplate()
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-	}
-
-	return newCloudConfig.String(), nil
-}
 
 // RandomKeyTmplSet holds a collection of rendered templates for random key
 // encryption via KMS.
@@ -108,6 +21,7 @@ type RandomKeyTmplSet struct {
 }
 
 type MasterExtension struct {
+	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
 
 	// TODO Pass context to k8scloudconfig rendering fucntions
@@ -121,6 +35,10 @@ type MasterExtension struct {
 }
 
 func (e *MasterExtension) Files(ctx context.Context) ([]k8scloudconfig.FileAsset, error) {
+	// TODO Pass context to k8scloudconfig rendering functions.
+	//
+	//     https://github.com/giantswarm/giantswarm/issues/4329
+	//
 	var storageClass string
 	_, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
@@ -379,7 +297,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	var newUnits []k8scloudconfig.UnitAsset
 
 	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.customObject.Spec)
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.awsConfigSpec)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -393,10 +311,4 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	}
 
 	return newUnits, nil
-}
-
-func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
-	newSections := []k8scloudconfig.VerbatimSection{}
-
-	return newSections
 }
