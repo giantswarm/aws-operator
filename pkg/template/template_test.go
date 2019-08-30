@@ -1,12 +1,10 @@
-package templates_test
+package template
 
 import (
 	"testing"
-
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/templates"
 )
 
-func TestRender(t *testing.T) {
+func Test_Template_Render(t *testing.T) {
 	t.Parallel()
 	tpl := "some string <{{.Value}}> another string"
 	d := struct {
@@ -14,7 +12,7 @@ func TestRender(t *testing.T) {
 	}{"myvalue"}
 	expected := "some string <myvalue> another string"
 
-	actual, err := templates.Render([]string{tpl}, d)
+	actual, err := Render([]string{tpl}, d)
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
 	}
