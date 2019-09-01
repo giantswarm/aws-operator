@@ -19,7 +19,7 @@ e2eTest: &e2eTest
         when: always
 
 orbs:
-  architect: giantswarm/architect@0.2.0
+  architect: giantswarm/architect@dev:5c92e1f
 
 version: 2.1
 jobs:
@@ -63,6 +63,7 @@ jobs:
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             ./architect deploy
           fi
+
   master:
     docker:
       - image: busybox
@@ -250,6 +251,17 @@ workflows:
             - push-aws-operator-to-docker
           # Needed to trigger job also on git tag.
           filters:
+            tags:
+              only: /^v.*/
+      - architect/push-to-app-collection:
+          name: push-aws-operator-to-app-collection
+          app_name: "aws-operator"
+          app_collection_repo: "aws-app-collection"
+          requires:
+            - push-aws-operator-to-app-catalog
+          filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /^v.*/
       - hold:
