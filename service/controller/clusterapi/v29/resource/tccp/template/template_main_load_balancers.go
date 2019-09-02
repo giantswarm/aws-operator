@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const LoadBalancers = `
+const TemplateMainLoadBalancers = `
 {{- define "load_balancers" -}}
 {{- $v := .Guest.LoadBalancers }}
   ApiInternalLoadBalancer:

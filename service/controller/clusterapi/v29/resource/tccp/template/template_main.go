@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const Main = `
+const TemplateMain = `
 {{- define "main" -}}
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.

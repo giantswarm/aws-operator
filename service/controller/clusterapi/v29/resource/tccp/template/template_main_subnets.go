@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const Subnets = `
+const TemplateMainSubnets = `
 {{- define "subnets" -}}
 {{- $v := .Guest.Subnets }}
   {{- range $v.PublicSubnets }}

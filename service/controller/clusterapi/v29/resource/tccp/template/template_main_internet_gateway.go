@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const InternetGateway = `
+const TemplateMainInternetGateway = `
 {{- define "internet_gateway" -}}
 {{- $v := .Guest.InternetGateway -}}
   InternetGateway:
