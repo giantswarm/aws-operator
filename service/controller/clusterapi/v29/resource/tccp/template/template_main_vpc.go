@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const VPC = `
+const TemplateMainVPC = `
 {{- define "vpc" -}}
 {{- $v := .Guest.VPC }}
   VPC:

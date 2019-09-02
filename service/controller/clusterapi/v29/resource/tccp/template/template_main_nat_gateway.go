@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const NatGateway = `
+const TemplateMainNatGateway = `
 {{- define "nat_gateway" -}}
   {{- $v := .Guest.NATGateway -}}
   {{- range $v.Gateways }}

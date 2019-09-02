@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const SecurityGroups = `
+const TemplateMainSecurityGroups = `
 {{- define "security_groups" -}}
 {{- $v := .Guest.SecurityGroups -}}
   MasterSecurityGroup:

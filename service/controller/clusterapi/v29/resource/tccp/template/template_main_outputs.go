@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const Outputs = `
+const TemplateMainOutputs = `
 {{- define "outputs" -}}
   DockerVolumeResourceName:
     Value: {{ .Guest.Outputs.Master.DockerVolume.ResourceName }}

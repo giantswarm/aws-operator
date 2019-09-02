@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const Instance = `
+const TemplateMainInstance = `
 {{- define "instance" -}}
 {{- $v := .Guest.Instance -}}
   {{ $v.Master.Instance.ResourceName }}:
