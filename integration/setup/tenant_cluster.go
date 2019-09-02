@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/e2etemplates/pkg/e2etemplates"
 	"github.com/giantswarm/microerror"
+	"golang.org/x/sync/errgroup"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,13 +33,11 @@ const (
 )
 
 func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
-	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
+	g, ctx := errgroup.WithContext(ctx)
 
-	var err error
-
-	{
+	g.Go(func() error {
 		o := func() error {
-			err = ensureBastionHostCreated(ctx, id, config)
+			err := ensureBastionHostCreated(ctx, id, config)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -52,47 +51,58 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
 
-	err = ensureAWSConfigInstalled(ctx, id, config)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+		return nil
+	})
 
-	err = ensureCertConfigsInstalled(ctx, id, config)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	g.Go(func() error {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
 
-	if wait {
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q to be ready", id))
-
-		err = config.Guest.Initialize()
+		err := ensureAWSConfigInstalled(ctx, id, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		err := config.Guest.WaitForGuestReady(ctx)
+		err = ensureCertConfigsInstalled(ctx, id, config)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q to be ready", id))
-	}
+		if wait {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q to be ready", id))
 
-	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
+			err = config.Guest.Initialize()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err := config.Guest.WaitForGuestReady(ctx)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q to be ready", id))
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
+
+		return nil
+	})
+
+	err := g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }
 
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
-	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
+	g, ctx := errgroup.WithContext(ctx)
 
-	var err error
-
-	{
+	g.Go(func() error {
 		o := func() error {
-			err = ensureBastionHostDeleted(ctx, id, config)
+			err := ensureBastionHostDeleted(ctx, id, config)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -106,30 +116,43 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
 
-	err = config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
-	if err != nil {
-		return microerror.Mask(err)
-	}
+		return nil
+	})
 
-	err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotFound(ctx, "default", fmt.Sprintf("%s-api", id)))
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	g.Go(func() error {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
 
-	if wait {
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q API to be down", id))
-
-		err := config.Guest.WaitForAPIDown()
+		err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q API to be down", id))
-	}
+		err = config.Release.EnsureDeleted(ctx, key.CertsReleaseName(id), config.Release.Condition().SecretNotFound(ctx, "default", fmt.Sprintf("%s-api", id)))
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted tenant cluster %#q", id))
+		if wait {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q API to be down", id))
+
+			err := config.Guest.WaitForAPIDown()
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q API to be down", id))
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted tenant cluster %#q", id))
+
+		return nil
+	})
+
+	err := g.Wait()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }
