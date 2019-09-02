@@ -70,7 +70,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
-			// fall through
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's node pool cloud formation stack")
+
+			err = r.createStack(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
 
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -80,15 +87,36 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
-
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool cloud formation stack already exists")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's node pool cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool cloud formation stack already exists")
+	}
+
+	{
+		scale, err := r.detection.ShouldScale(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		update, err := r.detection.ShouldUpdate(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if scale || update {
+			err = r.updateStack(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (r *Resource) createStack(ctx context.Context, cr v1alpha1.MachineDeployment) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	var templateBody string
@@ -127,6 +155,58 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's node pool cloud formation stack")
+	}
+
+	return nil
+}
+
+func (r *Resource) getCloudFormationTags(cr v1alpha1.MachineDeployment) []*cloudformation.Tag {
+	tags := key.AWSTags(&cr, r.installationName)
+	tags[key.TagStack] = key.StackTCNP
+	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
+	return awstags.NewCloudFormation(tags)
+}
+
+func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.MachineDeployment) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var templateBody string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
+
+		params, err := newTemplateParams(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		templateBody, err = template.Render(params)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's node pool cloud formation stack")
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's node pool cloud formation stack")
+
+		i := &cloudformation.UpdateStackInput{
+			Capabilities: []*string{
+				aws.String(capabilityNamesIAM),
+			},
+			StackName:    aws.String(key.StackNameTCNP(&cr)),
+			TemplateBody: aws.String(templateBody),
+		}
+
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
 
 	return nil
