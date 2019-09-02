@@ -10,12 +10,7 @@ type mapping struct {
 }
 
 type network struct {
-	RouteTable routetable
-	Subnet     subnet
-}
-
-type routetable struct {
-	ID string
+	Subnet subnet
 }
 
 type subnet struct {

@@ -1,5 +1,6 @@
 *.swp
 aws-operator
+!helm/aws-operator
 TODO
 *.swp
 !vendor/**

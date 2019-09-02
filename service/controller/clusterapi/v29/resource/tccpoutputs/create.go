@@ -17,7 +17,7 @@ const (
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
-	VersionBundleVersionKey       = "VersionBundleVersion"
+	OperatorVersion               = "OperatorVersion"
 	VPCIDKey                      = "VPCID"
 	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
 )
@@ -112,11 +112,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, VersionBundleVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, OperatorVersion)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.VersionBundleVersion = v
+		cc.Status.TenantCluster.OperatorVersion = v
 	}
 
 	{

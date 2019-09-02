@@ -10,13 +10,12 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/cleanupebsvolumes"
@@ -27,8 +26,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/ipam"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
@@ -41,7 +38,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 )
 
@@ -91,13 +87,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var detectionService *detection.Detection
+	var tccpChangeDetection *changedetection.TCCP
 	{
-		c := detection.Config{
+		c := changedetection.TCCPConfig{
 			Logger: config.Logger,
 		}
 
-		detectionService, err = detection.New(c)
+		tccpChangeDetection, err = changedetection.NewTCCP(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -152,19 +148,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		accountIDResource, err = accountid.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var asgStatusResource controller.Resource
-	{
-		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		asgStatusResource, err = asgstatus.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -230,19 +213,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		ipamResource, err = ipam.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var machineDeploymentResource controller.Resource
-	{
-		c := machinedeployment.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
-		}
-
-		machineDeploymentResource, err = machinedeployment.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -363,7 +333,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			Logger:               config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
-			Detection:          detectionService,
+			Detection:          tccpChangeDetection,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
@@ -387,18 +357,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpOutputsResource, err = tccpoutputs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var tccpRouteTablesResource controller.Resource
-	{
-		c := tccproutetables.Config{
-			Logger: config.Logger,
-		}
-
-		tccpRouteTablesResource, err = tccproutetables.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -441,24 +399,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpiResource, err = tccpi.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var namespaceResource controller.Resource
-	{
-		c := namespace.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ops, err := namespace.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		namespaceResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -553,39 +493,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	// TODO use that code later when the new Node Pool ready status resource is
-	// used again.
-	//
-	//var certsSearcher certs.Interface
-	//{
-	//	c := certs.Config{
-	//		K8sClient: config.K8sClient,
-	//		Logger:    config.Logger,
-	//
-	//		WatchTimeout: 5 * time.Second,
-	//	}
-	//
-	//	certsSearcher, err = certs.NewSearcher(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
-	//
-	//var tenantCluster tenantcluster.Interface
-	//{
-	//	c := tenantcluster.Config{
-	//		CertsSearcher: certsSearcher,
-	//		Logger:        config.Logger,
-	//
-	//		CertID: certs.APICert,
-	//	}
-	//
-	//	tenantCluster, err = tenantcluster.New(c)
-	//	if err != nil {
-	//		return nil, microerror.Mask(err)
-	//	}
-	//}
-
 	var vpcCIDRResource controller.Resource
 	{
 		c := cpvpccidr.Config{
@@ -604,17 +511,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
-		machineDeploymentResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
 		cpRouteTablesResource,
 		vpcCIDRResource,
 		tccpOutputsResource,
-		tccpRouteTablesResource,
 		tccpSubnetsResource,
 		regionResource,
-		asgStatusResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
@@ -627,7 +531,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		tccpiResource,
 		tccpResource,
 		tccpfResource,
-		namespaceResource,
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
@@ -673,10 +576,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		cc := controllercontext.Context{}
-		ctx = controllercontext.NewContext(ctx, cc)
-
-		return ctx, nil
+		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
 
 	var resourceSet *controller.ResourceSet

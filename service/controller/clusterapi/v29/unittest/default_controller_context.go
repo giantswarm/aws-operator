@@ -18,11 +18,6 @@ func DefaultContext() context.Context {
 					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
-							RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1a",
-								},
-							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -36,11 +31,6 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1b",
-							RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1b",
-								},
-							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -54,11 +44,6 @@ func DefaultContext() context.Context {
 						},
 						{
 							Name: "eu-central-1c",
-							RouteTable: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1c",
-								},
-							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.128/27"),
@@ -139,8 +124,8 @@ func DefaultContext() context.Context {
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
+				OperatorVersion:       "6.3.0",
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
-					ASG: controllercontext.ContextStatusTenantClusterTCCPASG{},
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
@@ -197,8 +182,7 @@ func DefaultContext() context.Context {
 							},
 						},
 					},
-					IsTransitioning:   false,
-					MachineDeployment: DefaultMachineDeployment(),
+					IsTransitioning: false,
 					SecurityGroups: []*ec2.SecurityGroup{
 						{
 							GroupId: aws.String("ingress-security-group-id"),
@@ -224,7 +208,9 @@ func DefaultContext() context.Context {
 						PeeringConnectionID: "peering-connection-id",
 					},
 				},
-				VersionBundleVersion: "6.3.0",
+				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
+					ASG: controllercontext.ContextStatusTenantClusterTCNPASG{},
+				},
 			},
 		},
 	}

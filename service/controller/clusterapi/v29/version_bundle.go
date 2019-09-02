@@ -17,11 +17,16 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.7.2",
+				Version: "3.8.2",
 			},
 			{
 				Name:    "containerlinux",
@@ -37,7 +42,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.14.3",
+				Version: "1.14.6",
 			},
 		},
 		Name:    "aws-operator",

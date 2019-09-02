@@ -180,7 +180,7 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
-	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity)
+	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.TCNP.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.MachineDeploymentAvailabilityZones(cr),
@@ -271,17 +271,12 @@ func newOutputs(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.P
 	}
 
 	outputs := &template.ParamsMainOutputs{
-		CloudConfig: template.ParamsMainOutputsCloudConfig{
-			Version: key.CloudConfigVersion,
-		},
 		DockerVolumeSizeGB: key.MachineDeploymentDockerVolumeSizeGB(cr),
 		Instance: template.ParamsMainOutputsInstance{
 			Image: key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Type:  key.MachineDeploymentInstanceType(cr),
 		},
-		VersionBundle: template.ParamsMainOutputsVersionBundle{
-			Version: key.OperatorVersion(&cr),
-		},
+		OperatorVersion: key.OperatorVersion(&cr),
 	}
 
 	return outputs, nil

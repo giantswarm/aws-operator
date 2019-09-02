@@ -12,8 +12,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/detection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
@@ -28,9 +28,6 @@ const (
 	// our Cloud Formation templates. It is required for creating worker policy
 	// IAM roles.
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
-	// versionBundleVersionParameterKey is the key name of the Cloud Formation
-	// parameter that sets the version bundle version.
-	versionBundleVersionParameterKey = "VersionBundleVersionParameter"
 )
 
 // Config represents the configuration used to create a new cloudformation
@@ -43,7 +40,7 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	APIWhitelist       adapter.APIWhitelist
-	Detection          *detection.Detection
+	Detection          *changedetection.TCCP
 	EncrypterBackend   string
 	InstallationName   string
 	InstanceMonitoring bool
@@ -60,7 +57,7 @@ type Resource struct {
 
 	apiWhiteList       adapter.APIWhitelist
 	encrypterBackend   string
-	detection          *detection.Detection
+	detection          *changedetection.TCCP
 	installationName   string
 	instanceMonitoring bool
 	publicRouteTables  string

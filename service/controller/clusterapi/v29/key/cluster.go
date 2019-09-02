@@ -16,7 +16,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_4_5_0"
+	CloudConfigVersion = "v_4_7_0"
 	CloudProvider      = "aws"
 )
 
@@ -38,13 +38,14 @@ const (
 
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagAvailabilityZone = "giantswarm.io/availability-zone"
-	TagCluster          = "giantswarm.io/cluster"
-	TagRouteTableType   = "giantswarm.io/route-table-type"
-	TagStack            = "giantswarm.io/stack"
-	TagSubnetType       = "giantswarm.io/subnet-type"
-	TagInstallation     = "giantswarm.io/installation"
-	TagOrganization     = "giantswarm.io/organization"
+	TagAvailabilityZone  = "giantswarm.io/availability-zone"
+	TagCluster           = "giantswarm.io/cluster"
+	TagInstallation      = "giantswarm.io/installation"
+	TagMachineDeployment = "giantswarm.io/machine-deployment"
+	TagOrganization      = "giantswarm.io/organization"
+	TagRouteTableType    = "giantswarm.io/route-table-type"
+	TagStack             = "giantswarm.io/stack"
+	TagSubnetType        = "giantswarm.io/subnet-type"
 )
 
 const (

@@ -19,8 +19,10 @@ const (
 type GuestLoadBalancersAdapter struct {
 	APIElbHealthCheckTarget          string
 	APIElbName                       string
+	APIInternalElbName               string
 	APIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
 	APIElbScheme                     string
+	APIInternalElbScheme             string
 	APIElbSecurityGroupID            string
 	EtcdElbHealthCheckTarget         string
 	EtcdElbName                      string
@@ -49,6 +51,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	// API load balancer settings.
 	a.APIElbHealthCheckTarget = heathCheckTarget(key.KubernetesSecurePort)
 	a.APIElbName = key.ELBNameAPI(&cfg.CustomObject)
+	a.APIInternalElbName = key.InternalELBNameAPI(&cfg.CustomObject)
 	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
 			PortELB:      key.KubernetesSecurePort,
@@ -56,6 +59,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 		},
 	}
 	a.APIElbScheme = externalELBScheme
+	a.APIInternalElbScheme = internalELBScheme
 
 	// etcd load balancer settings.
 	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort)
