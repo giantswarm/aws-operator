@@ -4,7 +4,6 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/templates/cloudformation/tccp"
 )
 
 // NOTE that code below is deprecated and needs refactoring.
@@ -12,23 +11,6 @@ import (
 func CloudConfigSmallTemplates() []string {
 	return []string{
 		cloudconfig.Small,
-	}
-}
-
-func CloudFormationGuestTemplates() []string {
-	return []string{
-		tccp.IAMPolicies,
-		tccp.Instance,
-		tccp.InternetGateway,
-		tccp.LoadBalancers,
-		tccp.Main,
-		tccp.NatGateway,
-		tccp.Outputs,
-		tccp.RecordSets,
-		tccp.RouteTables,
-		tccp.SecurityGroups,
-		tccp.Subnets,
-		tccp.VPC,
 	}
 }
 

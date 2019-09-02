@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
@@ -37,6 +38,18 @@ import (
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
+
+	var tcnpChangeDetection *changedetection.TCNP
+	{
+		c := changedetection.TCNPConfig{
+			Logger: config.Logger,
+		}
+
+		tcnpChangeDetection, err = changedetection.NewTCNP(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var encrypterObject encrypter.Interface
 	{
@@ -259,6 +272,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	{
 		c := tcnp.Config{
 			CMAClient: config.CMAClient,
+			Detection: tcnpChangeDetection,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,

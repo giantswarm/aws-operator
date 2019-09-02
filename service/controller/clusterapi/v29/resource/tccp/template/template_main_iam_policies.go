@@ -1,6 +1,6 @@
-package tccp
+package template
 
-const IAMPolicies = `
+const TemplateMainIAMPolicies = `
 {{- define "iam_policies" -}}
 {{- $v := .Guest.IAMPolicies -}}
   MasterRole:
