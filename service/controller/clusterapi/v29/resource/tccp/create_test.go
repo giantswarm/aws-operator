@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
 )
 
@@ -83,17 +84,13 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			templateBody, err := r.newTemplateBody(tc.ctx, tc.cr, tc.tp)
-
-			switch {
-			case err == nil && tc.errorMatcher == nil:
-				// correct; carry on
-			case err != nil && tc.errorMatcher == nil:
-				t.Fatalf("error == %#v, want nil", err)
-			case err == nil && tc.errorMatcher != nil:
-				t.Fatalf("error == nil, want non-nil")
-			case !tc.errorMatcher(err):
-				t.Fatalf("error == %#v, want matching", err)
+			params, err := r.newTemplateParams(tc.ctx, tc.cr)
+			if err != nil {
+				t.Fatal(err)
+			}
+			templateBody, err := template.Render(params)
+			if err != nil {
+				t.Fatal(err)
 			}
 
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
@@ -104,7 +101,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-
 			goldenFile, err := ioutil.ReadFile(p)
 			if err != nil {
 				t.Fatal(err)
