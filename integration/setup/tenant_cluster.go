@@ -36,9 +36,22 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 
 	var err error
 
-	err = ensureBastionHostCreated(ctx, id, config)
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		o := func() error {
+			err = ensureBastionHostCreated(ctx, id, config)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		b := backoff.NewMaxRetries(10, 1*time.Minute)
+		n := backoff.NewNotifier(config.Logger, ctx)
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	err = ensureAWSConfigInstalled(ctx, id, config)
@@ -77,9 +90,22 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 
 	var err error
 
-	err = ensureBastionHostDeleted(ctx, id, config)
-	if err != nil {
-		return microerror.Mask(err)
+	{
+		o := func() error {
+			err = ensureBastionHostDeleted(ctx, id, config)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			return nil
+		}
+		b := backoff.NewMaxRetries(10, 1*time.Minute)
+		n := backoff.NewNotifier(config.Logger, ctx)
+
+		err := backoff.RetryNotify(o, b, n)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	err = config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
@@ -138,7 +164,7 @@ func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1b
 
 			return nil
 		}
-		b := backoff.NewExponential(5*time.Minute, 1*time.Minute)
+		b := backoff.NewConstant(5*time.Minute, 1*time.Minute)
 		n := backoff.NewNotifier(config.Logger, ctx)
 
 		err := backoff.RetryNotify(o, b, n)
@@ -181,7 +207,7 @@ func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv
 
 			return microerror.Maskf(stillExistsError, "CR %#q in namespace %#q", crName, crNamespace)
 		}
-		b := backoff.NewExponential(60*time.Minute, 5*time.Minute)
+		b := backoff.NewConstant(60*time.Minute, 5*time.Minute)
 		n := backoff.NewNotifier(config.Logger, ctx)
 
 		err := backoff.RetryNotify(o, b, n)
