@@ -2,6 +2,7 @@ package tccp
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -135,7 +136,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newTemplateParams(ctx, cr)
+		params, err := r.newTemplateParams(ctx, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -227,7 +228,7 @@ func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster) (adapter.Adapter, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (adapter.Adapter, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return adapter.Adapter{}, microerror.Mask(err)
@@ -251,9 +252,9 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster) (
 			StackState: adapter.StackState{
 				Name: key.StackNameTCCP(&cr),
 
-				DockerVolumeResourceName:   key.DockerVolumeResourceName(cr),
+				DockerVolumeResourceName:   key.DockerVolumeResourceName(cr, t),
 				MasterImageID:              key.ImageID(cc.Status.TenantCluster.AWS.Region),
-				MasterInstanceResourceName: key.MasterInstanceResourceName(cr),
+				MasterInstanceResourceName: key.MasterInstanceResourceName(cr, t),
 				MasterInstanceType:         key.MasterInstanceType(cr),
 				MasterInstanceMonitoring:   r.instanceMonitoring,
 
@@ -286,7 +287,7 @@ func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newTemplateParams(ctx, cr)
+		params, err := r.newTemplateParams(ctx, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
