@@ -25,7 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpnatgateways"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpvpcid"
@@ -244,18 +243,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpRouteTablesResource controller.Resource
-	{
-		c := tccproutetables.Config{
-			Logger: config.Logger,
-		}
-
-		tccpRouteTablesResource, err = tccproutetables.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpSubnetsResource controller.Resource
 	{
 		c := tccpsubnets.Config{
@@ -361,7 +348,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
-		tccpRouteTablesResource,
 		tccpSubnetsResource,
 		tccpAZsResource,
 		tcnpASGStatusResource,
