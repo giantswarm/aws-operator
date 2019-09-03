@@ -18,7 +18,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
-	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
