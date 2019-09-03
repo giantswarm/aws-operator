@@ -1,11 +1,11 @@
-package v29
+package v30
 
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/kms"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter/vault"
 )
 
 func newEncrypterObject(getter EncrypterConfigGetter) (encrypter.Interface, error) {

@@ -11,12 +11,12 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccp/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/ebs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/tccp/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
