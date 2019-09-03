@@ -17,8 +17,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 // MaxAZs is the maximum number of availability zones allowed for a tenant

@@ -11,10 +11,10 @@ import (
 	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it

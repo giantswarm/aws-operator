@@ -13,8 +13,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
