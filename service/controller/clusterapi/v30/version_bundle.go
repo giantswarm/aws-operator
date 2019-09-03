@@ -8,18 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "ignition",
-				Description: "Add name label for default and kube-system namespaces.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "ignition",
-				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Component:   "TODO",
+				Description: "TODO",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -46,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "6.3.0",
+		Version: "6.4.0",
 	}
 }

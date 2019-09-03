@@ -18,6 +18,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -174,8 +175,39 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
+	var v30ResourceSet *controller.ResourceSet
+	{
+		c := v30.MachineDeploymentResourceSetConfig{
+			CMAClient:              config.CMAClient,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			K8sClient:              config.K8sClient,
+			Locker:                 config.Locker,
+			Logger:                 config.Logger,
+
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			HostAWSConfig:              config.HostAWSConfig,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			ProjectName:                config.ProjectName,
+			Route53Enabled:             config.Route53Enabled,
+			RouteTables:                config.RouteTables,
+			VaultAddress:               config.VaultAddress,
+			VPCPeerID:                  config.VPCPeerID,
+		}
+
+		v30ResourceSet, err = v30.NewMachineDeploymentResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v29ResourceSet,
+		v30ResourceSet,
 	}
 
 	return resourceSets, nil
