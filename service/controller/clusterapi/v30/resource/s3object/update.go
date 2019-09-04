@@ -1,17 +1,22 @@
 package s3object
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
+	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	updateBucketState, err := toBucketObjectState(updateChange)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -19,25 +24,22 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	s3Object, err := toS3Object(updateChange)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-	for key, bucketObject := range updateBucketState {
-		if bucketObject.Key != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", key))
+	if s3Object != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", *s3Object.Key))
 
-			s3PutInput, err := toPutObjectInput(bucketObject)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(&s3PutInput)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", key))
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", key))
+		_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
+		if err != nil {
+			return microerror.Mask(err)
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", *s3Object.Key))
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", r.cloudConfig.Key(cr)))
 	}
 
 	return nil
@@ -48,7 +50,6 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-
 	update, err := r.newUpdateChange(ctx, obj, currentState, desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -62,32 +63,41 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentS3Object, err := toBucketObjectState(currentState)
+	currentS3Object, err := toS3Object(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredS3Object, err := toBucketObjectState(desiredState)
+	desiredS3Object, err := toS3Object(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the s3 objects should be updated")
-
-	updateState := map[string]BucketObjectState{}
-
-	for key, bucketObject := range desiredS3Object {
-		if _, ok := currentS3Object[key]; !ok {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be updated", key))
-			updateState[key] = BucketObjectState{}
+	// The passed resource state defines the actual Cloud Config content as
+	// io.ReadSeaker. In order to compare the current and desired state we need to
+	// read and re-apply the byte stream once we read it. Otherwise we would flush
+	// content and it would not be available anymore for create or update calls.
+	var updateState *s3.PutObjectInput
+	{
+		var c []byte
+		{
+			c, err = ioutil.ReadAll(currentS3Object.Body)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+			currentS3Object.Body = strings.NewReader(string(c))
 		}
 
-		currentObject := currentS3Object[key]
-		if currentObject.Body != "" && bucketObject.Body != currentObject.Body {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be updated", key))
-			updateState[key] = bucketObject
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be updated", key))
-			updateState[key] = BucketObjectState{}
+		var d []byte
+		{
+			d, err = ioutil.ReadAll(desiredS3Object.Body)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+			desiredS3Object.Body = strings.NewReader(string(d))
+		}
+
+		if !bytes.Equal(c, d) {
+			updateState = desiredS3Object
 		}
 	}
 

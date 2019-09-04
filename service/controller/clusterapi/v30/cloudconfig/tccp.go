@@ -17,103 +17,114 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
-// NewMasterTemplate generates a new master cloud config template and returns it
-// as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
-	var err error
+type TCCPConfig struct {
+	Config Config
+}
 
-	cc, err := controllercontext.FromContext(ctx)
+type TCCP struct {
+	config Config
+}
+
+func NewTCCP(config TCCPConfig) (*TCCP, error) {
+	err := config.Config.Default().Validate()
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
+	t := &TCCP{
+		config: config.Config,
+	}
+
+	return t, nil
+}
+
+func (t *TCCP) Key(getter key.LabelsGetter) string {
+	return key.S3ObjectPathTCCP(getter)
+}
+
+func (t *TCCP) Value(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
+	}
+
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	var params k8scloudconfig.Params
 	{
-		be := baseExtension{
-			cluster:       cr,
-			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-		}
-
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = c.cmaClusterToG8sConfig(cr).Cluster
+		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
-			awsConfigSpec: c.cmaClusterToG8sConfig(cr),
-			baseExtension: be,
-			ctlCtx:        cc,
-
-			ClusterCerts:     clusterCerts,
-			RandomKeyTmplSet: randomKeyTmplSet,
+			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
+			baseExtension: baseExtension{
+				cluster:       cr,
+				encrypter:     t.config.Encrypter,
+				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+			},
+			cc:               cc,
+			clusterCerts:     clusterCerts,
+			randomKeyTmplSet: randomKeyTmplSet,
 		}
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
-		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-		params.RegistryDomain = c.registryDomain
-		params.SSOPublicKey = c.ssoPublicKey
+		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = t.config.APIExtraArgs
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = t.config.KubeletExtraArgs
+		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
+		params.RegistryDomain = t.config.RegistryDomain
+		params.SSOPublicKey = t.config.SSOPublicKey
 
-		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
+		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
-	var newCloudConfig *k8scloudconfig.CloudConfig
+	var templateBody []byte
 	{
-		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
-		cloudConfigConfig.Params = params
-		cloudConfigConfig.Template = k8scloudconfig.MasterTemplate
-
-		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
-		if err != nil {
-			return "", microerror.Mask(err)
+		c := k8scloudconfig.CloudConfigConfig{
+			Params:   params,
+			Template: k8scloudconfig.MasterTemplate,
 		}
 
-		err = newCloudConfig.ExecuteTemplate()
+		cloudConfig, err := k8scloudconfig.NewCloudConfig(c)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
+
+		err = cloudConfig.ExecuteTemplate()
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		templateBody = []byte(cloudConfig.String())
 	}
 
-	return newCloudConfig.String(), nil
-}
-
-// RandomKeyTmplSet holds a collection of rendered templates for random key
-// encryption via KMS.
-type RandomKeyTmplSet struct {
-	APIServerEncryptionKey string
+	return templateBody, nil
 }
 
 type MasterExtension struct {
 	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
-
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
 	//	See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
-	ctlCtx *controllercontext.Context
-
-	ClusterCerts     certs.Cluster
-	RandomKeyTmplSet RandomKeyTmplSet
+	cc               *controllercontext.Context
+	clusterCerts     certs.Cluster
+	randomKeyTmplSet RandomKeyTmplSet
 }
 
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	// TODO Pass context to k8scloudconfig rendering functions.
-	//
-	//     https://github.com/giantswarm/giantswarm/issues/4329
-	//
+	ctx := context.TODO()
+
 	var storageClass string
 	_, ok := e.encrypter.(*vault.Encrypter)
 	if ok {
@@ -121,7 +132,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	} else {
 		storageClass = cloudconfig.InstanceStorageClassEncryptedContent
 	}
-	ctx := context.TODO()
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
@@ -152,7 +162,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 
 		{
-			AssetContent: e.RandomKeyTmplSet.APIServerEncryptionKey,
+			AssetContent: e.randomKeyTmplSet.APIServerEncryptionKey,
 			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -250,14 +260,14 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
-		certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
+		certFiles := certs.NewFilesClusterMaster(e.clusterCerts)
 
 		for _, f := range certFiles {
 			// TODO We should just pass ctx to Files.
 			//
 			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
 			//
-			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
+			ctx = controllercontext.NewContext(ctx, *e.cc)
 
 			data, err := e.encrypt(ctx, f.Data)
 			if err != nil {

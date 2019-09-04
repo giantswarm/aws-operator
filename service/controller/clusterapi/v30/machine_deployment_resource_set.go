@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
@@ -24,6 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/tccpsecuritygroups"
@@ -38,18 +40,6 @@ import (
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
-
-	var tcnpChangeDetection *changedetection.TCNP
-	{
-		c := changedetection.TCNPConfig{
-			Logger: config.Logger,
-		}
-
-		tcnpChangeDetection, err = changedetection.NewTCNP(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
 
 	var encrypterObject encrypter.Interface
 	{
@@ -83,6 +73,47 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		subnetCollector, err = ipam.NewSubnetCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tcnpChangeDetection *changedetection.TCNP
+	{
+		c := changedetection.TCNPConfig{
+			Logger: config.Logger,
+		}
+
+		tcnpChangeDetection, err = changedetection.NewTCNP(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tcnpCloudConfig *cloudconfig.TCNP
+	{
+		c := cloudconfig.TCNPConfig{
+			Config: cloudconfig.Config{
+				Encrypter: encrypterObject,
+				Logger:    config.Logger,
+
+				CalicoCIDR:                config.CalicoCIDR,
+				CalicoMTU:                 config.CalicoMTU,
+				CalicoSubnet:              config.CalicoSubnet,
+				ClusterIPRange:            config.ClusterIPRange,
+				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				IgnitionPath:              config.IgnitionPath,
+				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
+				OIDC:                      config.OIDC,
+				PodInfraContainerImage:    config.PodInfraContainerImage,
+				RegistryDomain:            config.RegistryDomain,
+				SSHUserList:               config.SSHUserList,
+				SSOPublicKey:              config.SSOPublicKey,
+			},
+		}
+
+		tcnpCloudConfig, err = cloudconfig.NewTCNP(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -187,6 +218,27 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 
 		ipamResource, err = ipam.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3ObjectResource controller.Resource
+	{
+		c := s3object.Config{
+			CertsSearcher:      config.CertsSearcher,
+			CloudConfig:        tcnpCloudConfig,
+			LabelsFunc:         key.KubeletLabelsTCNP,
+			Logger:             config.Logger,
+			RandomKeysSearcher: config.RandomKeysSearcher,
+		}
+
+		ops, err := s3object.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		s3ObjectResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -371,6 +423,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		encryptionResource,
+		s3ObjectResource,
 		ipamResource,
 		tcnpResource,
 		tcnpfResource,

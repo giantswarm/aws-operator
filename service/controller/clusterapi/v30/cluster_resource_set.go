@@ -60,28 +60,30 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cloudConfig *cloudconfig.CloudConfig
+	var tccpCloudConfig *cloudconfig.TCCP
 	{
-		c := cloudconfig.Config{
-			Encrypter: encrypterObject,
-			Logger:    config.Logger,
+		c := cloudconfig.TCCPConfig{
+			Config: cloudconfig.Config{
+				Encrypter: encrypterObject,
+				Logger:    config.Logger,
 
-			CalicoCIDR:                config.CalicoCIDR,
-			CalicoMTU:                 config.CalicoMTU,
-			CalicoSubnet:              config.CalicoSubnet,
-			ClusterIPRange:            config.ClusterIPRange,
-			DockerDaemonCIDR:          config.DockerDaemonCIDR,
-			IgnitionPath:              config.IgnitionPath,
-			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
-			NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
-			OIDC:                      config.OIDC,
-			PodInfraContainerImage:    config.PodInfraContainerImage,
-			RegistryDomain:            config.RegistryDomain,
-			SSHUserList:               config.SSHUserList,
-			SSOPublicKey:              config.SSOPublicKey,
+				CalicoCIDR:                config.CalicoCIDR,
+				CalicoMTU:                 config.CalicoMTU,
+				CalicoSubnet:              config.CalicoSubnet,
+				ClusterIPRange:            config.ClusterIPRange,
+				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				IgnitionPath:              config.IgnitionPath,
+				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
+				OIDC:                      config.OIDC,
+				PodInfraContainerImage:    config.PodInfraContainerImage,
+				RegistryDomain:            config.RegistryDomain,
+				SSHUserList:               config.SSHUserList,
+				SSOPublicKey:              config.SSOPublicKey,
+			},
 		}
 
-		cloudConfig, err = cloudconfig.New(c)
+		tccpCloudConfig, err = cloudconfig.NewTCCP(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -260,7 +262,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
-			CloudConfig:        cloudConfig,
+			CloudConfig:        tccpCloudConfig,
+			LabelsFunc:         key.KubeletLabelsTCCP,
 			Logger:             config.Logger,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}

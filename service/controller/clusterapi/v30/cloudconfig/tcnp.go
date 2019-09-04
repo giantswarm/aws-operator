@@ -8,91 +8,108 @@ import (
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_7_0"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
-// NewWorkerTemplate generates a new worker cloud config template and returns it
-// as a string.
-func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster) (string, error) {
-	var err error
+type TCNPConfig struct {
+	Config Config
+}
 
+type TCNP struct {
+	config Config
+}
+
+func NewTCNP(config TCNPConfig) (*TCNP, error) {
+	err := config.Config.Default().Validate()
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	t := &TCNP{
+		config: config.Config,
+	}
+
+	return t, nil
+}
+
+func (t *TCNP) Key(getter key.LabelsGetter) string {
+	return key.S3ObjectPathTCNP(getter)
+}
+
+func (t *TCNP) Value(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	var params k8scloudconfig.Params
 	{
-		be := baseExtension{
-			cluster:       cr,
-			encrypter:     c.encrypter,
-			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-		}
-
 		// Default registry, kubernetes, etcd images etcd.
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = c.cmaClusterToG8sConfig(cr).Cluster
+		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
 		params.Extension = &WorkerExtension{
-			awsConfigSpec: c.cmaClusterToG8sConfig(cr),
-			baseExtension: be,
-			ctlCtx:        cc,
-
-			ClusterCerts: clusterCerts,
+			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
+			baseExtension: baseExtension{
+				cluster:       cr,
+				encrypter:     t.config.Encrypter,
+				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+			},
+			cc:           cc,
+			clusterCerts: clusterCerts,
 		}
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
-		params.RegistryDomain = c.registryDomain
-		params.SSOPublicKey = c.ssoPublicKey
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = t.config.KubeletExtraArgs
+		params.RegistryDomain = t.config.RegistryDomain
+		params.SSOPublicKey = t.config.SSOPublicKey
 
-		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
+		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
-	var newCloudConfig *k8scloudconfig.CloudConfig
+	var templateBody []byte
 	{
-		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
-		cloudConfigConfig.Params = params
-		cloudConfigConfig.Template = k8scloudconfig.WorkerTemplate
-
-		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
-		if err != nil {
-			return "", microerror.Mask(err)
+		c := k8scloudconfig.CloudConfigConfig{
+			Params:   params,
+			Template: k8scloudconfig.MasterTemplate,
 		}
 
-		err = newCloudConfig.ExecuteTemplate()
+		cloudConfig, err := k8scloudconfig.NewCloudConfig(c)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
+
+		err = cloudConfig.ExecuteTemplate()
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		templateBody = []byte(cloudConfig.String())
 	}
 
-	return newCloudConfig.String(), nil
+	return templateBody, nil
 }
 
 type WorkerExtension struct {
 	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
-
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
 	// See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
-	ctlCtx *controllercontext.Context
-
-	ClusterCerts certs.Cluster
+	cc           *controllercontext.Context
+	clusterCerts certs.Cluster
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	// TODO Pass context to k8scloudconfig rendering fucntions
-	//
-	// See https://github.com/giantswarm/giantswarm/issues/4329.
-	//
 	ctx := context.TODO()
 
 	filesMeta := []k8scloudconfig.FileMetadata{
@@ -140,14 +157,10 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
-		certFiles := certs.NewFilesClusterWorker(e.ClusterCerts)
+		certFiles := certs.NewFilesClusterWorker(e.clusterCerts)
 
 		for _, f := range certFiles {
-			// TODO We should just pass ctx to Files.
-			//
-			// See https://github.com/giantswarm/giantswarm/issues/4329.
-			//
-			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
+			ctx = controllercontext.NewContext(ctx, *e.cc)
 
 			data, err := e.encrypt(ctx, f.Data)
 			if err != nil {

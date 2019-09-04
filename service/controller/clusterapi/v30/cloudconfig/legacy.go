@@ -10,17 +10,17 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
-func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.AWSConfigSpec {
+func cmaClusterToG8sConfig(c Config, cr cmav1alpha1.Cluster, l string) g8sv1alpha1.AWSConfigSpec {
 	return g8sv1alpha1.AWSConfigSpec{
 		Cluster: g8sv1alpha1.Cluster{
 			Calico: g8sv1alpha1.ClusterCalico{
-				CIDR:   c.calicoCIDR,
-				MTU:    c.calicoMTU,
-				Subnet: c.calicoSubnet,
+				CIDR:   c.CalicoCIDR,
+				MTU:    c.CalicoMTU,
+				Subnet: c.CalicoSubnet,
 			},
 			Docker: g8sv1alpha1.ClusterDocker{
 				Daemon: g8sv1alpha1.ClusterDockerDaemon{
-					CIDR: c.dockerDaemonCIDR,
+					CIDR: c.DockerDaemonCIDR,
 				},
 			},
 			Etcd: g8sv1alpha1.ClusterEtcd{
@@ -29,26 +29,26 @@ func (c *CloudConfig) cmaClusterToG8sConfig(cr cmav1alpha1.Cluster) g8sv1alpha1.
 			},
 			Kubernetes: g8sv1alpha1.ClusterKubernetes{
 				API: g8sv1alpha1.ClusterKubernetesAPI{
-					ClusterIPRange: c.clusterIPRange,
+					ClusterIPRange: c.ClusterIPRange,
 					Domain:         key.ClusterAPIEndpoint(cr),
 					SecurePort:     key.KubernetesSecurePort,
 				},
 				CloudProvider: key.CloudProvider,
 				DNS: g8sv1alpha1.ClusterKubernetesDNS{
-					IP: dnsIPFromRange(c.clusterIPRange),
+					IP: dnsIPFromRange(c.ClusterIPRange),
 				},
 				Domain: "cluster.local",
 				Kubelet: g8sv1alpha1.ClusterKubernetesKubelet{
 					Domain: key.ClusterKubeletEndpoint(cr),
-					Labels: key.KubeletLabels(cr),
+					Labels: l,
 				},
 				NetworkSetup: g8sv1alpha1.ClusterKubernetesNetworkSetup{
 					Docker: g8sv1alpha1.ClusterKubernetesNetworkSetupDocker{
-						Image: c.networkSetupDockerImage,
+						Image: c.NetworkSetupDockerImage,
 					},
 				},
 				SSH: g8sv1alpha1.ClusterKubernetesSSH{
-					UserList: stringToUserList(c.sshUserList),
+					UserList: stringToUserList(c.SSHUserList),
 				},
 			},
 		},

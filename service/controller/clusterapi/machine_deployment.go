@@ -31,17 +31,31 @@ type MachineDeploymentConfig struct {
 	Locker       locker.Interface
 	Logger       micrologger.Logger
 
+	CalicoCIDR                 int
+	CalicoMTU                  int
+	CalicoSubnet               string
+	ClusterIPRange             string
+	DeleteLoggingBucket        bool
+	DockerDaemonCIDR           string
 	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
 	HostAWSConfig              aws.Config
+	IgnitionPath               string
+	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	LabelSelector              MachineDeploymentConfigLabelSelector
+	NetworkSetupDockerImage    string
+	OIDC                       ClusterConfigOIDC
+	PodInfraContainerImage     string
 	ProjectName                string
+	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
+	SSHUserList                string
+	SSOPublicKey               string
 	VaultAddress               string
 	VPCPeerID                  string
 }

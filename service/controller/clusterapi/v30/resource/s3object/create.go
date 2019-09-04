@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	s3ObjectToCreate, err := toBucketObjectState(createChange)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -18,56 +20,40 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	s3Object, err := toS3Object(createChange)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
-	for key, bucketObject := range s3ObjectToCreate {
-		if bucketObject.Key != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", key))
+	if s3Object != nil {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", *s3Object.Key))
 
-			s3PutInput, err := toPutObjectInput(bucketObject)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(&s3PutInput)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", key))
+		_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
+		if err != nil {
+			return microerror.Mask(err)
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", *s3Object.Key))
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object %#q", r.cloudConfig.Key(cr)))
 	}
 
 	return nil
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentS3Object, err := toBucketObjectState(currentState)
+	currentS3Object, err := toS3Object(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredS3Object, err := toBucketObjectState(desiredState)
+	desiredS3Object, err := toS3Object(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the s3 objects should be created")
-
-	createState := map[string]BucketObjectState{}
-
-	for key, bucketObject := range desiredS3Object {
-		_, ok := currentS3Object[key]
-		if !ok {
-			// The desired object does not exist in the current state of the system,
-			// so we want to create it.
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be created", key))
-			createState[key] = bucketObject
-		} else {
-			// The desired object exists in the current state of the system, so we do
-			// not want to create it. We do track it using an empty object reference
-			// though, in order to get some more useful logging in ApplyCreateChange.
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be created", key))
-			createState[key] = BucketObjectState{}
-		}
+	var createState *s3.PutObjectInput
+	if currentS3Object == nil {
+		createState = desiredS3Object
 	}
 
 	return createState, nil

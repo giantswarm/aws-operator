@@ -2,6 +2,7 @@ package tcnp
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -333,7 +334,7 @@ func newLaunchConfiguration(ctx context.Context, cr v1alpha1.MachineDeployment) 
 			Type:       key.MachineDeploymentInstanceType(cr),
 		},
 		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
-			S3URL: key.SmallCloudConfigS3URL(&cr, cc.Status.TenantCluster.AWS.AccountID, "worker"),
+			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCNP(&cr)),
 		},
 	}
 
