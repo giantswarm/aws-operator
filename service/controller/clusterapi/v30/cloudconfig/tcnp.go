@@ -13,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 type TCNPConfig struct {
@@ -37,11 +36,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-func (t *TCNP) Key(getter key.LabelsGetter) string {
-	return key.S3ObjectPathTCNP(getter)
-}
-
-func (t *TCNP) Value(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCNP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

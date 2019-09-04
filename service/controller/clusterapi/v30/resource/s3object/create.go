@@ -35,7 +35,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", *s3Object.Key))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object %#q", r.cloudConfig.Key(cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object %#q", r.pathFunc(cr)))
 	}
 
 	return nil

@@ -83,13 +83,13 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	body, err := r.cloudConfig.Value(ctx, cluster, clusterCerts, clusterKeys, r.labelsFunc(cr))
+	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, r.labelsFunc(cr))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	s3Object := &s3.PutObjectInput{
-		Key:           aws.String(r.cloudConfig.Key(cr)),
+		Key:           aws.String(r.pathFunc(cr)),
 		Body:          strings.NewReader(string(body)),
 		Bucket:        aws.String(key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)),
 		ContentLength: aws.Int64(int64(len(body))),

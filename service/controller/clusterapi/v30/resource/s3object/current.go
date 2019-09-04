@@ -26,7 +26,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 	b := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
-	k := r.cloudConfig.Key(cr)
+	k := r.pathFunc(cr)
 
 	// During deletion, it might happen that the encryption key got already
 	// deleted. In such a case we do not have to do anything here anymore. The

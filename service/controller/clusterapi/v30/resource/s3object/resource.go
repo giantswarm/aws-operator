@@ -24,6 +24,7 @@ type Config struct {
 	CMAClient          clientset.Interface
 	LabelsFunc         func(key.LabelsGetter) string
 	Logger             micrologger.Logger
+	PathFunc           func(key.LabelsGetter) string
 	RandomKeysSearcher randomkeys.Interface
 }
 
@@ -35,6 +36,7 @@ type Resource struct {
 	cmaClient          clientset.Interface
 	labelsFunc         func(key.LabelsGetter) string
 	logger             micrologger.Logger
+	pathFunc           func(key.LabelsGetter) string
 	randomKeysSearcher randomkeys.Interface
 }
 
@@ -55,6 +57,9 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.PathFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PathFunc must not be empty", config)
+	}
 	if config.RandomKeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RandomKeySearcher must not be empty", config)
 	}
@@ -65,6 +70,7 @@ func New(config Config) (*Resource, error) {
 		cmaClient:          config.CMAClient,
 		labelsFunc:         config.LabelsFunc,
 		logger:             config.Logger,
+		pathFunc:           config.PathFunc,
 		randomKeysSearcher: config.RandomKeysSearcher,
 	}
 

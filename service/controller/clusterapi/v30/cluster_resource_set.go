@@ -265,6 +265,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			CloudConfig:        tccpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCCP,
 			Logger:             config.Logger,
+			PathFunc:           key.S3ObjectPathTCCP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
 

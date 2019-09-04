@@ -39,7 +39,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", *s3Object.Key))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", r.cloudConfig.Key(cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", r.pathFunc(cr)))
 	}
 
 	return nil
