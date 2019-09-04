@@ -230,6 +230,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			CloudConfig:        tcnpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCNP,
 			Logger:             config.Logger,
+			CMAClient:          config.CMAClient,
 			PathFunc:           key.S3ObjectPathTCNP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
