@@ -28,8 +28,16 @@ type Config struct {
 	RandomKeysSearcher randomkeys.Interface
 }
 
-// Resource implements the CRUD resource interface of operatorkit.
-// TODO S3 traffic, customer costs, simple resource refactoring later
+// Resource implements the CRUD resource interface of operatorkit to manage S3
+// objects containing rendered Cloud Config templates. The current
+// implementation potentially causes some amount of S3 Traffic which might be
+// neglectable from a customer costs point of view. In order to improve the
+// implementation and its performance as well as produced costs we would need to
+// refactor the resource and rewrite it basically completely using the simple
+// resource interface only using EnsureCreated and EnsureDeleted. That way we
+// could compute the E-Tag for the rquest to fetch the S3 Object and reduce
+// traffic as we would not fetch the whole body of the object when it does
+// effectively not change most of the time.
 type Resource struct {
 	certsSearcher      certs.Interface
 	cloudConfig        cloudconfig.Interface
