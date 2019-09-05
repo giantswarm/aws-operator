@@ -79,7 +79,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 	var updateState *s3.PutObjectInput
 	{
 		var c []byte
-		{
+		if currentS3Object != nil {
 			c, err = ioutil.ReadAll(currentS3Object.Body)
 			if err != nil {
 				return nil, microerror.Mask(err)
@@ -88,7 +88,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		var d []byte
-		{
+		if desiredS3Object != nil {
 			d, err = ioutil.ReadAll(desiredS3Object.Body)
 			if err != nil {
 				return nil, microerror.Mask(err)
