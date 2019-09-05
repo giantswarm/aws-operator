@@ -85,6 +85,10 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 				return nil, microerror.Mask(err)
 			}
 			currentS3Object.Body = strings.NewReader(string(c))
+		} else {
+			// In case there is no current state we need to create first and cannot
+			// update.
+			return nil, nil
 		}
 
 		var d []byte

@@ -168,7 +168,7 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 // S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded for
 // the TCCP stack.
 //
-//     /version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
 //
 func S3ObjectPathTCCP(getter LabelsGetter) string {
 	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
@@ -177,7 +177,7 @@ func S3ObjectPathTCCP(getter LabelsGetter) string {
 // S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for
 // the TCCP stack.
 //
-//     /version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tcnp-g3j50
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tcnp-g3j50
 //
 func S3ObjectPathTCNP(getter LabelsGetter) string {
 	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCNP(getter))
