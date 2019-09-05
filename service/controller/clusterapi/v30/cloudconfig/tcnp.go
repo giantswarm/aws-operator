@@ -74,7 +74,7 @@ func (t *TCNP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 	{
 		c := k8scloudconfig.CloudConfigConfig{
 			Params:   params,
-			Template: k8scloudconfig.MasterTemplate,
+			Template: k8scloudconfig.WorkerTemplate,
 		}
 
 		cloudConfig, err := k8scloudconfig.NewCloudConfig(c)

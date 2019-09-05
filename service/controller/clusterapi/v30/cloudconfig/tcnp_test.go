@@ -31,18 +31,20 @@ import (
 //
 func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
-		name  string
-		ctx   context.Context
-		cr    v1alpha1.Cluster
-		certs certs.Cluster
-		keys  randomkeys.Cluster
+		name   string
+		ctx    context.Context
+		cr     v1alpha1.Cluster
+		certs  certs.Cluster
+		keys   randomkeys.Cluster
+		labels string
 	}{
 		{
-			name:  "case 0: tcnp test",
-			ctx:   unittest.DefaultContext(),
-			cr:    unittest.DefaultCluster(),
-			certs: unittest.DefaultCerts(),
-			keys:  unittest.DefaultKeys(),
+			name:   "case 0: tcnp test",
+			ctx:    unittest.DefaultContext(),
+			cr:     unittest.DefaultCluster(),
+			certs:  unittest.DefaultCerts(),
+			keys:   unittest.DefaultKeys(),
+			labels: "k1=v1,k2=v2",
 		},
 	}
 
@@ -50,37 +52,39 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var err error
 
-			var cloudConfig *CloudConfig
+			var tcnp *TCNP
 			{
 				ignitionPath, err := k8scloudconfig.GetPackagePath()
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				c := Config{
-					Encrypter: &encrypter.EncrypterMock{},
-					Logger:    microloggertest.New(),
+				c := TCNPConfig{
+					Config{
+						Encrypter: &encrypter.EncrypterMock{},
+						Logger:    microloggertest.New(),
 
-					CalicoCIDR:                18,
-					CalicoMTU:                 1430,
-					CalicoSubnet:              "172.18.128.0",
-					ClusterIPRange:            "172.18.192.0/22",
-					DockerDaemonCIDR:          "172.18.224.1/19",
-					IgnitionPath:              ignitionPath,
-					ImagePullProgressDeadline: "1m",
-					NetworkSetupDockerImage:   "quay.io/giantswarm/k8s-setup-network-environment",
-					RegistryDomain:            "quay.io",
-					SSHUserList:               "user:ssh-rsa base64==",
-					SSOPublicKey:              "user:ssh-rsa base64==",
+						CalicoCIDR:                18,
+						CalicoMTU:                 1430,
+						CalicoSubnet:              "172.18.128.0",
+						ClusterIPRange:            "172.18.192.0/22",
+						DockerDaemonCIDR:          "172.18.224.1/19",
+						IgnitionPath:              ignitionPath,
+						ImagePullProgressDeadline: "1m",
+						NetworkSetupDockerImage:   "quay.io/giantswarm/k8s-setup-network-environment",
+						RegistryDomain:            "quay.io",
+						SSHUserList:               "user:ssh-rsa base64==",
+						SSOPublicKey:              "user:ssh-rsa base64==",
+					},
 				}
 
-				cloudConfig, err = New(c)
+				tcnp, err = NewTCNP(c)
 				if err != nil {
 					t.Fatal(err)
 				}
 			}
 
-			templateBody, err := cloudConfig.NewWorkerTemplate(tc.ctx, tc.cr, tc.certs)
+			templateBody, err := tcnp.Render(tc.ctx, tc.cr, tc.certs, tc.keys, tc.labels)
 			if err != nil {
 				t.Fatal(err)
 			}
