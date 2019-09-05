@@ -254,7 +254,7 @@ workflows:
             tags:
               only: /^v.*/
       - architect/push-to-app-collection:
-          name: push-aws-operator-to-app-collection
+          name: push-to-aws-app-collection
           app_name: "aws-operator"
           app_collection_repo: "aws-app-collection"
           requires:
