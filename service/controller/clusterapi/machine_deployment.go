@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
+	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -199,18 +200,36 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			Locker:                 config.Locker,
 			Logger:                 config.Logger,
 
+			CalicoCIDR:                 config.CalicoCIDR,
+			CalicoMTU:                  config.CalicoMTU,
+			CalicoSubnet:               config.CalicoSubnet,
+			ClusterIPRange:             config.ClusterIPRange,
+			DockerDaemonCIDR:           config.DockerDaemonCIDR,
 			EncrypterBackend:           config.EncrypterBackend,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
 			HostAWSConfig:              config.HostAWSConfig,
+			IgnitionPath:               config.IgnitionPath,
+			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			ProjectName:                config.ProjectName,
-			Route53Enabled:             config.Route53Enabled,
-			RouteTables:                config.RouteTables,
-			VaultAddress:               config.VaultAddress,
-			VPCPeerID:                  config.VPCPeerID,
+			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
+			OIDC: v30cloudconfig.ConfigOIDC{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			ProjectName:            config.ProjectName,
+			RegistryDomain:         config.RegistryDomain,
+			Route53Enabled:         config.Route53Enabled,
+			RouteTables:            config.RouteTables,
+			SSHUserList:            config.SSHUserList,
+			SSOPublicKey:           config.SSOPublicKey,
+			VaultAddress:           config.VaultAddress,
+			VPCPeerID:              config.VPCPeerID,
 		}
 
 		v30ResourceSet, err = v30.NewMachineDeploymentResourceSet(c)
