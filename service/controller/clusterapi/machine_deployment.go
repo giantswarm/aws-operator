@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
+	"github.com/giantswarm/randomkeys"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -174,6 +175,19 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
+	var randomKeysSearcher randomkeys.Interface
+	{
+		c := randomkeys.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		randomKeysSearcher, err = randomkeys.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var v29ResourceSet *controller.ResourceSet
 	{
 		c := v29.MachineDeploymentResourceSetConfig{
@@ -214,6 +228,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			K8sClient:              config.K8sClient,
 			Locker:                 config.Locker,
 			Logger:                 config.Logger,
+			RandomKeysSearcher:     randomKeysSearcher,
 
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
