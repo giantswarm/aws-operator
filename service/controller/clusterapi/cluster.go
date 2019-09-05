@@ -171,6 +171,19 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var controlPlaneAWSClients aws.Clients
 	{
 		c := aws.Config{
@@ -181,19 +194,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 
 		controlPlaneAWSClients, err = aws.NewClients(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var certsSearcher *certs.Searcher
-	{
-		c := certs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		certsSearcher, err = certs.NewSearcher(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

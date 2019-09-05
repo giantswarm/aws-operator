@@ -5,6 +5,7 @@ import (
 
 	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
@@ -145,6 +146,19 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var controlPlaneAWSClients aws.Clients
 	{
 		c := aws.Config{
@@ -193,6 +207,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	var v30ResourceSet *controller.ResourceSet
 	{
 		c := v30.MachineDeploymentResourceSetConfig{
+			CertsSearcher:          certsSearcher,
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
