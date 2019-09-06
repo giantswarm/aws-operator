@@ -12,6 +12,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
 )
 
+// randomKeyTmplSet holds a collection of rendered templates for random key
+// encryption via KMS.
+type RandomKeyTmplSet struct {
+	APIServerEncryptionKey string
+}
+
 func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, key string, clusterKeys randomkeys.Cluster) (RandomKeyTmplSet, error) {
 	var randomKeyTmplSet RandomKeyTmplSet
 	{

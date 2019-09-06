@@ -171,6 +171,19 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var controlPlaneAWSClients aws.Clients
 	{
 		c := aws.Config{
@@ -181,19 +194,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 
 		controlPlaneAWSClients, err = aws.NewClients(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var certsSearcher *certs.Searcher
-	{
-		c := certs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		certsSearcher, err = certs.NewSearcher(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -300,8 +300,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
 			IgnitionPath:               config.IgnitionPath,
 			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
 			IncludeTags:                config.IncludeTags,
@@ -314,12 +312,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			RouteTables:    config.RouteTables,
-			RegistryDomain: config.RegistryDomain,
-			SSHUserList:    config.SSHUserList,
-			SSOPublicKey:   config.SSOPublicKey,
-			VaultAddress:   config.VaultAddress,
-			VPCPeerID:      config.VPCPeerID,
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			RegistryDomain:         config.RegistryDomain,
+			Route53Enabled:         config.Route53Enabled,
+			RouteTables:            config.RouteTables,
+			SSHUserList:            config.SSHUserList,
+			SSOPublicKey:           config.SSOPublicKey,
+			VaultAddress:           config.VaultAddress,
+			VPCPeerID:              config.VPCPeerID,
 		}
 
 		resourceSetV30, err = v30.NewClusterResourceSet(c)

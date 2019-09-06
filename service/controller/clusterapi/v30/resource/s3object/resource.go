@@ -1,16 +1,15 @@
 package s3object
 
 import (
-	"strings"
-
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 const (
@@ -22,15 +21,30 @@ const (
 type Config struct {
 	CertsSearcher      certs.Interface
 	CloudConfig        cloudconfig.Interface
+	CMAClient          clientset.Interface
+	LabelsFunc         func(key.LabelsGetter) string
 	Logger             micrologger.Logger
+	PathFunc           func(key.LabelsGetter) string
 	RandomKeysSearcher randomkeys.Interface
 }
 
-// Resource implements the cloudformation resource.
+// Resource implements the CRUD resource interface of operatorkit to manage S3
+// objects containing rendered Cloud Config templates. The current
+// implementation potentially causes some amount of S3 Traffic which might be
+// neglectable from a customer costs point of view. In order to improve the
+// implementation and its performance as well as produced costs we would need to
+// refactor the resource and rewrite it basically completely using the simple
+// resource interface only using EnsureCreated and EnsureDeleted. That way we
+// could compute the E-Tag for the rquest to fetch the S3 Object and reduce
+// traffic as we would not fetch the whole body of the object when it does
+// effectively not change most of the time.
 type Resource struct {
 	certsSearcher      certs.Interface
 	cloudConfig        cloudconfig.Interface
+	cmaClient          clientset.Interface
+	labelsFunc         func(key.LabelsGetter) string
 	logger             micrologger.Logger
+	pathFunc           func(key.LabelsGetter) string
 	randomKeysSearcher randomkeys.Interface
 }
 
@@ -42,8 +56,17 @@ func New(config Config) (*Resource, error) {
 	if config.CloudConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
 	}
+	if config.CMAClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	}
+	if config.LabelsFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LabelsFunc must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+	if config.PathFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PathFunc must not be empty", config)
 	}
 	if config.RandomKeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RandomKeySearcher must not be empty", config)
@@ -52,7 +75,10 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		certsSearcher:      config.CertsSearcher,
 		cloudConfig:        config.CloudConfig,
+		cmaClient:          config.CMAClient,
+		labelsFunc:         config.LabelsFunc,
 		logger:             config.Logger,
+		pathFunc:           config.PathFunc,
 		randomKeysSearcher: config.RandomKeysSearcher,
 	}
 
@@ -63,35 +89,15 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func toBucketObjectState(v interface{}) (map[string]BucketObjectState, error) {
+func toS3Object(v interface{}) (*s3.PutObjectInput, error) {
 	if v == nil {
 		return nil, nil
 	}
 
-	bucketObjectState, ok := v.(map[string]BucketObjectState)
+	t, ok := v.(*s3.PutObjectInput)
 	if !ok {
-		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObjectState, v)
+		return nil, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &s3.PutObjectInput{}, v)
 	}
 
-	return bucketObjectState, nil
-}
-
-func toPutObjectInput(v interface{}) (s3.PutObjectInput, error) {
-	if v == nil {
-		return s3.PutObjectInput{}, nil
-	}
-
-	bucketObject, ok := v.(BucketObjectState)
-	if !ok {
-		return s3.PutObjectInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", bucketObject, v)
-	}
-
-	putObjectInput := s3.PutObjectInput{
-		Key:           aws.String(bucketObject.Key),
-		Body:          strings.NewReader(bucketObject.Body),
-		Bucket:        aws.String(bucketObject.Bucket),
-		ContentLength: aws.Int64(int64(len(bucketObject.Body))),
-	}
-
-	return putObjectInput, nil
+	return t, nil
 }

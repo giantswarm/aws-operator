@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"encoding/base64"
+	"fmt"
 	"sort"
 
 	"github.com/giantswarm/microerror"
@@ -84,7 +85,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.PrivateSubnet = key.SanitizeCFResourceName(key.PrivateSubnetName(i.Master.AZ))
 
 		c := SmallCloudconfigConfig{
-			S3URL: key.SmallCloudConfigS3URL(&config.CustomObject, config.TenantClusterAccountID, "master"),
+			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&config.CustomObject, config.TenantClusterAccountID), key.S3ObjectPathTCCP(&config.CustomObject)),
 		}
 		rendered, err := template.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {
