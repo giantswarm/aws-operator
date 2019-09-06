@@ -6,6 +6,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -132,7 +133,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var accountIDResource controller.Resource
+	var accountIDResource resource.Interface
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
@@ -144,7 +145,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var awsClientResource controller.Resource
+	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
@@ -160,7 +161,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var cpRouteTablesResource controller.Resource
+	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
 			Logger: config.Logger,
@@ -174,7 +175,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpAZsResource controller.Resource
+	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
@@ -188,7 +189,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var encryptionResource controller.Resource
+	var encryptionResource resource.Interface
 	{
 		c := encryption.Config{
 			Encrypter:     encrypterObject,
@@ -202,7 +203,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var ipamResource controller.Resource
+	var ipamResource resource.Interface
 	{
 		c := ipam.Config{
 			Checker:   machineDeploymentChecker,
@@ -223,7 +224,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var s3ObjectResource controller.Resource
+	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
@@ -246,7 +247,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpAZsResource controller.Resource
+	var tcnpAZsResource resource.Interface
 	{
 		c := tcnpazs.Config{
 			CMAClient: config.CMAClient,
@@ -259,7 +260,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpNATGatewaysResource controller.Resource
+	var tccpNATGatewaysResource resource.Interface
 	{
 		c := tccpnatgateways.Config{
 			Logger:        config.Logger,
@@ -272,7 +273,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var regionResource controller.Resource
+	var regionResource resource.Interface
 	{
 		c := region.Config{
 			Logger:        config.Logger,
@@ -285,7 +286,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpVPCPCXResource controller.Resource
+	var tccpVPCPCXResource resource.Interface
 	{
 		c := tccpvpcpcx.Config{
 			Logger:        config.Logger,
@@ -298,7 +299,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSecurityGroupsResource controller.Resource
+	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
 			Logger: config.Logger,
@@ -310,7 +311,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpSubnetsResource controller.Resource
+	var tccpSubnetsResource resource.Interface
 	{
 		c := tccpsubnets.Config{
 			Logger: config.Logger,
@@ -322,7 +323,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpResource controller.Resource
+	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
 			CMAClient: config.CMAClient,
@@ -338,7 +339,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpASGStatusResource controller.Resource
+	var tcnpASGStatusResource resource.Interface
 	{
 		c := asgstatus.Config{
 			G8sClient: config.G8sClient,
@@ -351,7 +352,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpfResource controller.Resource
+	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
 			Logger: config.Logger,
@@ -365,7 +366,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var cpVPCCIDRResource controller.Resource
+	var cpVPCCIDRResource resource.Interface
 	{
 		c := cpvpccidr.Config{
 			Logger: config.Logger,
@@ -379,7 +380,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpVPCIDResource controller.Resource
+	var tccpVPCIDResource resource.Interface
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
@@ -392,7 +393,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpOutputsResource controller.Resource
+	var tcnpOutputsResource resource.Interface
 	{
 		c := tcnpoutputs.Config{
 			Logger: config.Logger,
@@ -404,7 +405,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	resources := []controller.Resource{
+	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
