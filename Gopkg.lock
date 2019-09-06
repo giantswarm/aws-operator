@@ -131,7 +131,7 @@
     "reference",
   ]
   pruneopts = "UT"
-  revision = "1fb7fffdb26687adf375a4433a58a0d66a13fede"
+  revision = "14b96e55d84c367ebab6caf9f0086de0876eec72"
 
 [[projects]]
   branch = "master"
@@ -170,7 +170,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e31d104b95573e0fd2399d08d673ff73e4bfe4147167fc5d87e2d4b604984eaa"
+  digest = "1:68d520b606033d619c1ddd07d9484e8ed904b16d26e66ea94c3b7d9904d48f08"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -188,7 +188,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "18f9e0ee801dac7aec99a521a569aa69dd8ed84d"
+  revision = "a1822dc1393b7e6a7ece14d3bf2c6a410dc419c9"
 
 [[projects]]
   branch = "master"
@@ -248,7 +248,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e39b5aaef4a4dab0fd2eb05602796768b40e7e418cf82818be614b5cf3a53e50"
+  digest = "1:6f3d762271b3d07150f1db3e2ed0551b9285d37b9317b7152f4c7b6cb20090a3"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -256,7 +256,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "3c13cb10233d192e095a85700b7f66605fa37e70"
+  revision = "e90a23caca67e712ad2f0448b773cca68e7466d8"
 
 [[projects]]
   branch = "master"
@@ -317,7 +317,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1ad927f341e05c436825187779b19605478ffcc66b5cac5e4064a5883c2acc54"
+  digest = "1:2cd5a22587030750ef117d3fdd81feb4c440771a75354becb077dc39f1b3717a"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -330,7 +330,7 @@
     "v_4_7_0",
   ]
   pruneopts = "T"
-  revision = "4695b7d6eb35eae234d0ce0c0c09f4b412525a68"
+  revision = "e41ee1c5f7ed26051487a93f3d21f8597868f2ac"
 
 [[projects]]
   branch = "master"
@@ -414,7 +414,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e5b2fd7cb3d4dedae7d675606b3fbffe362b2ed54a4b9e3dce27c6cda3b8df7b"
+  digest = "1:575cc0b4417c44e1753c7bc0de70d29b3e8ef92eb2d0f58e3a86ab7de29fec62"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "client/k8scrdclient",
@@ -429,12 +429,13 @@
     "flag/service/kubernetes/watch",
     "informer",
     "informer/collector",
+    "resource",
     "resource/wrapper/internal",
     "resource/wrapper/metricsresource",
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "8de7a75649d103e17c21b577f79ea5fc32cf1084"
+  revision = "8a0fbd0dde5a82821baa1dbbea5d925bfbe7f37d"
 
 [[projects]]
   branch = "master"
@@ -473,11 +474,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2298af59a3ac91c06ffc33e12956e8d2fe159e151b1029adab2f2d5bbaac437b"
+  digest = "1:3afc4545906d8e16c2c9b18b2df0b034cc4544d95ee3da0209d40b1e4852f435"
   name = "github.com/giantswarm/valuemodifier"
   packages = ["path"]
   pruneopts = "UT"
-  revision = "d1607f573080b30b0e756a4534b70f710eae5a95"
+  revision = "c0b88953da58679f2df76755c502b6ba070bf7e4"
 
 [[projects]]
   branch = "master"
@@ -541,15 +542,15 @@
   version = "v0.2.3"
 
 [[projects]]
-  digest = "1:4d02824a56d268f74a6b6fdd944b20b58a77c3d70e81008b3ee0c4f1a6777340"
+  digest = "1:8a85f428bc6ebfa87f53216b6e43b52b30eccbcffcbd6b057a69ee16718a2248"
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
     "sortkeys",
   ]
   pruneopts = "UT"
-  revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
-  version = "v1.2.1"
+  revision = "0ca988a254f991240804bf9821f3450d87ccbb1b"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:f5ce1529abc1204444ec73779f44f94e2fa8fcdb7aca3c355b0c95947e4005c6"
@@ -985,14 +986,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c5b5d55096b762e29d0b887ce73932d06ddcf9def4285f1abd09f801176878ec"
+  digest = "1:4f9cc50343843f7c58c1a1aecf17c226ea0e855f4d3293e796701ae985111e0d"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c7b8b68b14567162c6602a7c5659ee0f26417c18"
+  revision = "749cb33beabd9aa6d3178e3de05bcc914f70b2bf"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -1049,7 +1050,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "24fa4b261c55da65468f2abfdae2b024eef27dfb"
+  revision = "92dd089d5514cecde7a465f807541f83dfd486d5"
 
 [[projects]]
   digest = "1:48eafc052e46b4ebbc7882553873cf6198203e528627cefc94dcaf8553addd19"
