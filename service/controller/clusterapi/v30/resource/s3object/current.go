@@ -1,21 +1,23 @@
 package s3object
 
 import (
-	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
+	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	cr, err := key.ToCluster(obj)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -23,6 +25,8 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	b := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
+	k := r.pathFunc(cr)
 
 	// During deletion, it might happen that the encryption key got already
 	// deleted. In such a case we do not have to do anything here anymore. The
@@ -31,90 +35,53 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// anything here anymore. The current implementation relies on the bucket
 	// deletion of the s3bucket resource, which deletes all S3 objects and the
 	// bucket itself.
-	if key.IsDeleted(&cr) {
+	if key.IsDeleted(cr) {
 		if cc.Status.TenantCluster.Encryption.Key == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "no encryption key in controller context")
-
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
-
 			return nil, nil
 		}
 	}
 
-	bucketName := key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID)
-
-	var objects []*s3.Object
+	var body []byte
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the S3 bucket %#q", bucketName))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding S3 object %#q/%#q", b, k))
 
-		i := &s3.ListObjectsV2Input{
-			Bucket: aws.String(bucketName),
+		i := &s3.GetObjectInput{
+			Bucket: aws.String(b),
+			Key:    aws.String(k),
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.S3.ListObjectsV2(i)
+		o, err := cc.Client.TenantCluster.AWS.S3.GetObject(i)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find the S3 bucket %#q", bucketName))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 bucket %#q", b))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
+
+		} else if IsObjectNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q/%#q", b, k))
+			return nil, nil
+
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		objects = o.Contents
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the S3 bucket %#q", bucketName))
-	}
-
-	currentBucketState := map[string]BucketObjectState{}
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the contents of %d S3 objects", len(objects)))
-
-		for _, object := range objects {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the content of the S3 object %#q", *object.Key))
-
-			body, err := r.getBucketObjectBody(ctx, bucketName, *object.Key)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			currentBucketState[*object.Key] = BucketObjectState{
-				Body:   body,
-				Bucket: bucketName,
-				Key:    *object.Key,
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the content of the S3 object %#q", *object.Key))
+		body, err = ioutil.ReadAll(o.Body)
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the contents of %d S3 objects", len(objects)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q/%#q", b, k))
 	}
 
-	return currentBucketState, nil
-}
-
-func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, keyName string) (string, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	input := &s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(keyName),
-	}
-	result, err := cc.Client.TenantCluster.AWS.S3.GetObject(input)
-	if IsObjectNotFound(err) || IsBucketNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q", keyName))
-		return "", nil
-	} else if err != nil {
-		return "", microerror.Mask(err)
+	s3Object := &s3.PutObjectInput{
+		Key:           aws.String(k),
+		Body:          strings.NewReader(string(body)),
+		Bucket:        aws.String(b),
+		ContentLength: aws.Int64(int64(len(body))),
 	}
 
-	var body string
-	{
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(result.Body)
-		body = buf.String()
-	}
-
-	return body, nil
+	return s3Object, nil
 }

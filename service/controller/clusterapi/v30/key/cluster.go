@@ -9,8 +9,6 @@ import (
 
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-
-	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 const (
@@ -95,15 +93,6 @@ func CredentialNamespace(cluster v1alpha1.Cluster) string {
 
 func DockerVolumeResourceName(cr v1alpha1.Cluster, t time.Time) string {
 	return getResourcenameWithTimeHash("DockerVolume", cr, t)
-}
-
-func KubeletLabels(cluster v1alpha1.Cluster) string {
-	var labels string
-
-	labels = ensureLabel(labels, label.Provider, "aws")
-	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(&cluster))
-
-	return labels
 }
 
 func MasterAvailabilityZone(cluster v1alpha1.Cluster) string {

@@ -26,15 +26,6 @@ func BucketName(getter LabelsGetter, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(getter))
 }
 
-// BucketObjectName computes the S3 object path to the actual cloud config.
-//
-//     /version/3.4.0/cloudconfig/v_3_2_5/master
-//     /version/3.4.0/cloudconfig/v_3_2_5/worker
-//
-func BucketObjectName(getter LabelsGetter, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, role)
-}
-
 func ClusterCloudProviderTag(getter LabelsGetter) string {
 	return fmt.Sprintf("kubernetes.io/cluster/%s", ClusterID(getter))
 }
@@ -75,6 +66,25 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 
 func ImageID(region string) string {
 	return imageIDs()[region]
+}
+
+func KubeletLabelsTCCP(getter LabelsGetter) string {
+	var labels string
+
+	labels = ensureLabel(labels, label.Provider, "aws")
+	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(getter))
+
+	return labels
+}
+
+func KubeletLabelsTCNP(getter LabelsGetter) string {
+	var labels string
+
+	labels = ensureLabel(labels, label.Provider, "aws")
+	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(getter))
+	labels = ensureLabel(labels, label.MachineDeployment, MachineDeploymentID(getter))
+
+	return labels
 }
 
 func MachineDeploymentID(getter LabelsGetter) string {
@@ -155,6 +165,24 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 	return baseRoleARN(getter, region, accountID, "worker")
 }
 
+// S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded for
+// the TCCP stack.
+//
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
+//
+func S3ObjectPathTCCP(getter LabelsGetter) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
+}
+
+// S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for
+// the TCCP stack.
+//
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tcnp-g3j50
+//
+func S3ObjectPathTCNP(getter LabelsGetter) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCNP(getter))
+}
+
 // SanitizeCFResourceName filters out all non-ascii alphanumberics from input
 // string.
 //
@@ -188,14 +216,6 @@ func SanitizeCFResourceName(l ...string) string {
 
 func SecurityGroupName(getter LabelsGetter, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(getter), groupName)
-}
-
-func SmallCloudConfigPath(getter LabelsGetter, accountID string, role string) string {
-	return fmt.Sprintf("%s/%s", BucketName(getter, accountID), BucketObjectName(getter, role))
-}
-
-func SmallCloudConfigS3URL(getter LabelsGetter, accountID string, role string) string {
-	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(getter, accountID, role))
 }
 
 func StackNameTCCP(getter LabelsGetter) string {

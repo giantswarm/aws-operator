@@ -2,20 +2,25 @@ package s3object
 
 import (
 	"context"
-	"sync"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
-	cr, err := key.ToCluster(obj)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -24,13 +29,24 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	var cluster v1alpha1.Cluster
 	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
 	{
 		g := &errgroup.Group{}
 
 		g.Go(func() error {
-			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(&cr))
+			m, err := r.cmaClient.ClusterV1alpha1().Clusters(cr.GetNamespace()).Get(key.ClusterID(cr), metav1.GetOptions{})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cluster = *m
+
+			return nil
+		})
+
+		g.Go(func() error {
+			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -40,7 +56,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(&cr))
+			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -67,52 +83,17 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	output := map[string]BucketObjectState{}
-	{
-		g := &errgroup.Group{}
-		m := sync.Mutex{}
-
-		g.Go(func() error {
-			b, err := r.cloudConfig.NewMasterTemplate(ctx, cr, clusterCerts, clusterKeys)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			m.Lock()
-			k := key.BucketObjectName(&cr, "master")
-			output[k] = BucketObjectState{
-				Bucket: key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-				Body:   b,
-				Key:    k,
-			}
-			m.Unlock()
-
-			return nil
-		})
-
-		g.Go(func() error {
-			b, err := r.cloudConfig.NewWorkerTemplate(ctx, cr, clusterCerts)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			m.Lock()
-			k := key.BucketObjectName(&cr, "worker")
-			output[k] = BucketObjectState{
-				Bucket: key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-				Body:   b,
-				Key:    k,
-			}
-			m.Unlock()
-
-			return nil
-		})
-
-		err = g.Wait()
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, r.labelsFunc(cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
-	return output, nil
+	s3Object := &s3.PutObjectInput{
+		Key:           aws.String(r.pathFunc(cr)),
+		Body:          strings.NewReader(string(body)),
+		Bucket:        aws.String(key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)),
+		ContentLength: aws.Int64(int64(len(body))),
+	}
+
+	return s3Object, nil
 }
