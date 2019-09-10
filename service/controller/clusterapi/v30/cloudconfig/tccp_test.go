@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_7_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_8_0"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
