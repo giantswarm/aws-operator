@@ -141,8 +141,8 @@ type VerbatimSection struct {
 	Content string
 }
 
-type Extension interface {
-	Files() ([]FileAsset, error)
-	Units() ([]UnitAsset, error)
-	VerbatimSections() []VerbatimSection
+type Extension struct {
+	Files            []FileAsset
+	Units            []UnitAsset
+	VerbatimSections []VerbatimSection
 }
