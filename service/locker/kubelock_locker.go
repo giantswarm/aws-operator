@@ -84,7 +84,9 @@ func (d KubeLockLocker) Lock(ctx context.Context) error {
 		Owner: lockOwner,
 		TTL:   lockTTL,
 	})
-	if err != nil {
+	if kubelock.IsAlreadyExists(err) {
+		return microerror.Maskf(alreadyExistsError, err.Error())
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -95,7 +97,9 @@ func (d KubeLockLocker) Unlock(ctx context.Context) error {
 	err := d.kubelock.Lock(lockName).Release(ctx, lockNamespaceName, kubelock.ReleaseOptions{
 		Owner: lockOwner,
 	})
-	if err != nil {
+	if kubelock.IsNotFound(err) {
+		return microerror.Maskf(notFoundError, err.Error())
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 

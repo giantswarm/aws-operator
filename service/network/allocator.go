@@ -42,18 +42,24 @@ func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize n
 	{
 		i.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
 		err := i.locker.Lock(ctx)
-		if err != nil {
+		if locker.IsAlreadyExists(err) {
+			i.logger.LogCtx(ctx, "level", "debug", "message", "lock for IPAM is already acquired")
+		} else if err != nil {
 			return net.IPNet{}, microerror.Mask(err)
+		} else {
+			i.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
 		}
-		i.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
 
 		defer func() {
 			i.logger.LogCtx(ctx, "level", "debug", "message", "releasing lock for IPAM")
 			err := i.locker.Unlock(ctx)
-			if err != nil {
+			if locker.IsNotFound(err) {
+				i.logger.LogCtx(ctx, "level", "debug", "message", "lock for IPAM is already released")
+			} else if err != nil {
 				i.logger.LogCtx(ctx, "level", "error", "message", "failed to release lock for IPAM", "stack", fmt.Sprintf("%#v", err))
+			} else {
+				i.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
 			}
-			i.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
 		}()
 	}
 
