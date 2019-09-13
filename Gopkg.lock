@@ -328,6 +328,7 @@
     "v_4_5_0",
     "v_4_5_1",
     "v_4_7_0",
+    "v_4_8_0",
   ]
   pruneopts = "T"
   revision = "e41ee1c5f7ed26051487a93f3d21f8597868f2ac"
@@ -1495,6 +1496,7 @@
     "github.com/giantswarm/k8scloudconfig/v_4_5_0",
     "github.com/giantswarm/k8scloudconfig/v_4_5_1",
     "github.com/giantswarm/k8scloudconfig/v_4_7_0",
+    "github.com/giantswarm/k8scloudconfig/v_4_8_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -1513,6 +1515,7 @@
     "github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext",
     "github.com/giantswarm/operatorkit/flag/service/kubernetes",
     "github.com/giantswarm/operatorkit/informer",
+    "github.com/giantswarm/operatorkit/resource",
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
