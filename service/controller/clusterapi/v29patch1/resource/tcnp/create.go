@@ -11,9 +11,9 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tcnp/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/resource/tcnp/template"
 )
 
 const (

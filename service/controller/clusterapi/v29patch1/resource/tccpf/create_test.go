@@ -12,9 +12,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpf/template"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/unittest"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/resource/tccpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
@@ -26,7 +26,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 // It uses golden file as reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
-//  go test ./service/controller/clusterapi/v29/resource/tccpf -run Test_Controller_Resource_TCCPF_Template_Render -update
+//  go test ./service/controller/clusterapi/v29patch1/resource/tccpf -run Test_Controller_Resource_TCCPF_Template_Render -update
 //
 func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 	testCases := []struct {

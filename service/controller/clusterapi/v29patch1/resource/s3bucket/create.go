@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/key"
 )
 
 const (

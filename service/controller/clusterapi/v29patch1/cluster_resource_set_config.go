@@ -1,4 +1,4 @@
-package v29
+package v29patch1
 
 import (
 	"net"
@@ -11,8 +11,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
 

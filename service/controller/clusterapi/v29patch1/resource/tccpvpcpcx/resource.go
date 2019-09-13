@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "tccpvpcpcxv29"
+	Name = "tccpvpcpcxv29patch1"
 )
 
 type Config struct {

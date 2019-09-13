@@ -7,12 +7,12 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpiv29"
+	Name = "tccpiv29patch1"
 )
 
 type Config struct {

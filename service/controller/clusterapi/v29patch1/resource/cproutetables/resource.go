@@ -10,11 +10,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/controllercontext"
 )
 
 const (
-	Name = "cproutetablesv29"
+	Name = "cproutetablesv29patch1"
 )
 
 type Config struct {

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Name = "drainerv29"
+	Name = "drainerv29patch1"
 )
 
 type ResourceConfig struct {

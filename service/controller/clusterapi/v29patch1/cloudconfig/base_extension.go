@@ -6,9 +6,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/key"
 )
 
 type baseExtension struct {

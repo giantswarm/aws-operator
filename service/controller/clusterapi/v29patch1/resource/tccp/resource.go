@@ -11,16 +11,16 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv29"
+	Name = "tccpv29patch1"
 )
 
 const (

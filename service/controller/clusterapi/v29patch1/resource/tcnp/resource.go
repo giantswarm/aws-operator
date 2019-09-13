@@ -5,12 +5,12 @@ import (
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29patch1/changedetection"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tcnpv29"
+	Name = "tcnpv29patch1"
 )
 
 type Config struct {
