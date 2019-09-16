@@ -60,7 +60,7 @@ const LoadBalancers = `
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-      {{- range $s := $v.PublicSubnets }}
+      {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
       {{end}}
 
