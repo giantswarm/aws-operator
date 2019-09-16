@@ -216,11 +216,7 @@ Resources:
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
-        - !Ref PublicSubnetEuCentral1a
-      
-        - !Ref PublicSubnetEuCentral1b
-      
-        - !Ref PublicSubnetEuCentral1c
+        - !Ref PrivateSubnetEuCentral1b
       
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
