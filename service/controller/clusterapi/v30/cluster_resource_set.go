@@ -21,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/cleanupebsvolumes"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/cleanuploadbalancers"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/cpvpccidr"
@@ -306,6 +307,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var cleanupMachineDeployments resource.Interface
+	{
+		c := cleanupmachinedeployments.Config{
+			CMAClient: config.CMAClient,
+			Logger:    config.Logger,
+		}
+
+		cleanupMachineDeployments, err = cleanupmachinedeployments.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cleanupSecurityGroups resource.Interface
 	{
 		c := cleanupsecuritygroups.Config{
@@ -546,6 +560,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		cleanupEBSVolumesResource,
 		cleanupLoadBalancersResource,
 		cleanupSecurityGroups,
+		cleanupMachineDeployments,
 	}
 
 	{
