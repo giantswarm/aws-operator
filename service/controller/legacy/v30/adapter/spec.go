@@ -45,10 +45,10 @@ const (
 	httpsPort = 443
 )
 
-// APIWhitelist defines guest cluster k8s api whitelisting.
+// APIWhitelist defines guest cluster k8s public/private api whitelisting.
 type APIWhitelist struct {
-	Enabled    bool
-	SubnetList string
+	Private Whitelist
+	Public  Whitelist
 }
 
 type Hydrater func(config Config) error
@@ -92,4 +92,9 @@ type StackState struct {
 type SmallCloudconfigConfig struct {
 	InstanceRole string
 	S3URL        string
+}
+
+type Whitelist struct {
+	Enabled    bool
+	SubnetList string
 }

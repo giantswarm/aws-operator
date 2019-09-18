@@ -77,7 +77,7 @@ type ClusterResourceSetConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.APIWhitelist
+	APIWhitelist               adapter.Whitelist
 	EncrypterBackend           string
 	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
@@ -94,6 +94,7 @@ type ClusterResourceSetConfig struct {
 	Route53Enabled             bool
 	RouteTables                string
 	PodInfraContainerImage     string
+	PrivateAPIWhitelist        adapter.Whitelist
 	RegistryDomain             string
 	SSOPublicKey               string
 	VaultAddress               string
@@ -131,6 +132,13 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
 	}
+	if config.PrivateAPIWhitelist.Enabled && config.PrivateAPIWhitelist.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.PrivateAPIWhitelist.SubnetList must not be empty when %T.PrivateAPIWhitelist is enabled", config)
+	}
+	if config.SSOPublicKey == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
+	}
+
 	if config.SSOPublicKey == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
 	}
@@ -364,7 +372,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
-			APIWhitelist:         config.APIWhitelist,
+			APIWhitelist: adapter.APIWhitelist{
+				Private: config.PrivateAPIWhitelist,
+				Public:  config.APIWhitelist,
+			},
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 

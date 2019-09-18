@@ -203,6 +203,11 @@ func New(config Config) (*Service, error) {
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
 				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
+			PrivateAPIWhitelist: clusterapi.FrameworkConfigAPIWhitelistConfig{
+				Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.PrivateWhitelist.Enabled),
+				SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.PrivateWhitelist.SubnetList),
+			},
+
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			ProjectName:            config.ProjectName,
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),

@@ -28,15 +28,16 @@ const (
 )
 
 type GuestSecurityGroupsAdapter struct {
-	APIWhitelistEnabled       bool
-	MasterSecurityGroupName   string
-	MasterSecurityGroupRules  []securityGroupRule
-	WorkerSecurityGroupName   string
-	WorkerSecurityGroupRules  []securityGroupRule
-	IngressSecurityGroupName  string
-	IngressSecurityGroupRules []securityGroupRule
-	EtcdELBSecurityGroupName  string
-	EtcdELBSecurityGroupRules []securityGroupRule
+	APIWhitelistEnabled        bool
+	PrivateAPIWhitelistEnabled bool
+	MasterSecurityGroupName    string
+	MasterSecurityGroupRules   []securityGroupRule
+	WorkerSecurityGroupName    string
+	WorkerSecurityGroupRules   []securityGroupRule
+	IngressSecurityGroupName   string
+	IngressSecurityGroupRules  []securityGroupRule
+	EtcdELBSecurityGroupName   string
+	EtcdELBSecurityGroupRules  []securityGroupRule
 }
 
 func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
@@ -45,7 +46,8 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
+	s.APIWhitelistEnabled = cfg.APIWhitelist.Public.Enabled
+	s.PrivateAPIWhitelistEnabled = cfg.APIWhitelist.Private.Enabled
 
 	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindMaster)
 	s.MasterSecurityGroupRules = masterRules
@@ -210,7 +212,7 @@ type securityGroupRule struct {
 
 func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// When API whitelisting is enabled, add separate security group rule per each subnet.
-	if cfg.APIWhitelist.Enabled {
+	if cfg.APIWhitelist.Public.Enabled {
 		rules := []securityGroupRule{
 			{
 				Description: "Allow traffic from control plane CIDR.",
@@ -227,7 +229,7 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		}
 
 		// Whitelist all configured subnets.
-		whitelistSubnets := strings.Split(cfg.APIWhitelist.SubnetList, ",")
+		whitelistSubnets := strings.Split(cfg.APIWhitelist.Public.SubnetList, ",")
 		for _, subnet := range whitelistSubnets {
 			if subnet != "" {
 				subnetRule := securityGroupRule{
