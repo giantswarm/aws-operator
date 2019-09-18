@@ -37,7 +37,7 @@ const TemplateMainRecordSets = `
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
-  EtcdRecordSet:
+  EtcdInternalRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
@@ -46,6 +46,16 @@ const TemplateMainRecordSets = `
         EvaluateTargetHealth: false
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
+      Type: A
+  EtcdRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt EtcdLoadBalancer.DNSName
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: '{{ $v.EtcdDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
       Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
