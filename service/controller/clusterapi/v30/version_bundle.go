@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Duplicate etcd record set into public hosted zone.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Add public internal-api record set for Kubernetes API private load balancer.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
