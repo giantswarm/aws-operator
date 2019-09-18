@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
@@ -338,7 +339,10 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
-			APIWhitelist:       config.APIWhitelist,
+			APIWhitelist: adapter.APIWhitelist{
+				Private: config.APIWhitelist.Private,
+				Public:  config.APIWhitelist.Public,
+			},
 			Detection:          tccpChangeDetection,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,

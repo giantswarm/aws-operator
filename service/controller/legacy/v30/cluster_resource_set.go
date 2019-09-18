@@ -77,7 +77,7 @@ type ClusterResourceSetConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.Whitelist
+	APIWhitelist               adapter.APIWhitelist
 	EncrypterBackend           string
 	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
@@ -94,7 +94,6 @@ type ClusterResourceSetConfig struct {
 	Route53Enabled             bool
 	RouteTables                string
 	PodInfraContainerImage     string
-	PrivateAPIWhitelist        adapter.Whitelist
 	RegistryDomain             string
 	SSOPublicKey               string
 	VaultAddress               string
@@ -129,11 +128,11 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	if config.ProjectName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ProjectName must not be empty", config)
 	}
-	if config.APIWhitelist.Enabled && config.APIWhitelist.SubnetList == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.SubnetList must not be empty when %T.APIWhitelist is enabled", config)
+	if config.APIWhitelist.Public.Enabled && config.APIWhitelist.Public.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
 	}
-	if config.PrivateAPIWhitelist.Enabled && config.PrivateAPIWhitelist.SubnetList == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.PrivateAPIWhitelist.SubnetList must not be empty when %T.PrivateAPIWhitelist is enabled", config)
+	if config.APIWhitelist.Private.Enabled && config.APIWhitelist.Private.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Private.SubnetList must not be empty when %T.APIWhitelist.Private is enabled", config)
 	}
 	if config.SSOPublicKey == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.SSOPublicKey must not be empty", config)
@@ -373,8 +372,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	{
 		c := tccp.Config{
 			APIWhitelist: adapter.APIWhitelist{
-				Private: config.PrivateAPIWhitelist,
-				Public:  config.APIWhitelist,
+				Private: config.APIWhitelist.Private,
+				Public:  config.APIWhitelist.Public,
 			},
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,

@@ -582,9 +582,15 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: v30adapter.Whitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+			APIWhitelist: v30adapter.APIWhitelist{
+				Private: v30adapter.Whitelist{
+					Enabled:    config.PrivateAPIWhitelist.Enabled,
+					SubnetList: config.PrivateAPIWhitelist.SubnetList,
+				},
+				Public: v30adapter.Whitelist{
+					Enabled:    config.APIWhitelist.Enabled,
+					SubnetList: config.APIWhitelist.SubnetList,
+				},
 			},
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			EncrypterBackend:           config.EncrypterBackend,
@@ -604,10 +610,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			PrivateAPIWhitelist: v30adapter.Whitelist{
-				Enabled:    config.PrivateAPIWhitelist.Enabled,
-				SubnetList: config.PrivateAPIWhitelist.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,

@@ -287,8 +287,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			APIWhitelist: v30adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Private: v30adapter.Whitelist{
+					Enabled:    config.PrivateAPIWhitelist.Enabled,
+					SubnetList: config.PrivateAPIWhitelist.SubnetList,
+				},
+				Public: v30adapter.Whitelist{
+					Enabled:    config.APIWhitelist.Enabled,
+					SubnetList: config.APIWhitelist.SubnetList,
+				},
 			},
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,

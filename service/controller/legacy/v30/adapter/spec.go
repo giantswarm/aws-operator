@@ -94,6 +94,8 @@ type SmallCloudconfigConfig struct {
 	S3URL        string
 }
 
+// Whitelist represents the structure required for defining whitelisting for
+// resource security group
 type Whitelist struct {
 	Enabled    bool
 	SubnetList string
