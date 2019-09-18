@@ -582,7 +582,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: v30adapter.APIWhitelist{
+			APIWhitelist: v30adapter.Whitelist{
 				Enabled:    config.APIWhitelist.Enabled,
 				SubnetList: config.APIWhitelist.SubnetList,
 			},
@@ -605,7 +605,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
-			PrivateAPIWhitelist: v30adapter.APIWhitelist{
+			PrivateAPIWhitelist: v30adapter.Whitelist{
 				Enabled:    config.PrivateAPIWhitelist.Enabled,
 				SubnetList: config.PrivateAPIWhitelist.SubnetList,
 			},

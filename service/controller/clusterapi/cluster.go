@@ -62,6 +62,7 @@ type ClusterConfig struct {
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
+	PrivateAPIWhitelist        FrameworkConfigAPIWhitelistConfig
 	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
