@@ -14,6 +14,11 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "cloudformation",
+				Description: "Add ingress internal load-balancer in private hosted zone.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
 				Description: "Duplicate etcd record set into public hosted zone.",
 				Kind:        versionbundle.KindAdded,
 			},
