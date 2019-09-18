@@ -61,7 +61,6 @@ type ClusterConfig struct {
 	LabelSelector              ClusterConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
-	PrivateAPIWhitelist        FrameworkConfigAPIWhitelistConfig
 	PodInfraContainerImage     string
 	ProjectName                string
 	RegistryDomain             string
@@ -312,10 +311,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			PrivateAPIWhitelist: v30adapter.APIWhitelist{
-				Enabled:    config.PrivateAPIWhitelist.Enabled,
-				SubnetList: config.PrivateAPIWhitelist.SubnetList,
 			},
 			PodInfraContainerImage: config.PodInfraContainerImage,
 			RegistryDomain:         config.RegistryDomain,
