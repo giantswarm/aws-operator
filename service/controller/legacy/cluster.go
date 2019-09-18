@@ -37,6 +37,9 @@ import (
 	v29 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v29/cloudconfig"
+	v30 "github.com/giantswarm/aws-operator/service/controller/legacy/v30"
+	v30adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v30/adapter"
+	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v30/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 
@@ -557,6 +560,63 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
+	var resourceSetV30 *controller.ResourceSet
+	{
+		c := v30.ClusterResourceSetConfig{
+			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:       config.AccessLogsExpiration,
+			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v30cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			APIWhitelist: v30adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Enabled,
+				SubnetList: config.APIWhitelist.SubnetList,
+			},
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
+			VPCPeerID:      config.VPCPeerID,
+		}
+
+		resourceSetV30, err = v30.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		resourceSetV25,
 		resourceSetV26,
@@ -564,6 +624,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV28,
 		resourceSetV28patch1,
 		resourceSetV29,
+		resourceSetV30,
 	}
 
 	return resourceSets, nil

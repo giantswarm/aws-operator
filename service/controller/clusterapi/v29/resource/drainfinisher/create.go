@@ -20,17 +20,16 @@ import (
 // EnsureCreated completes ASG lifecycle hooks for nodes drained by
 // node-operator, and then deletes drained DrainerConfigs.
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToMachineDeployment(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := cc.Status.TenantCluster.TCCP.ASG.Name
+	workerASGName := cc.Status.TenantCluster.TCNP.ASG.Name
 	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

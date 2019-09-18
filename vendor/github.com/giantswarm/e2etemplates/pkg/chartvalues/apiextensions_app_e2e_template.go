@@ -28,13 +28,6 @@ apps:
 {{- end }}
 {{- end }}
     version: "{{ .App.Version }}"
-  # Added app CR for bootstrapping chart-operator
-  - name: "chart-operator"
-    namespace: "giantswarm"
-    catalog: "giantswarm-catalog"
-    kubeConfig:
-      inCluster: true
-    version: "0.9.0"
 
 appCatalogs:
   - name: "{{ .AppCatalog.Name }}"
@@ -44,13 +37,6 @@ appCatalogs:
     storage:
       type: "{{ .AppCatalog.Storage.Type }}"
       url: "{{ .AppCatalog.Storage.URL }}"
-  - name: "giantswarm-catalog"
-    title: "giantswarm-catalog"
-    description: "giantswarm catalog"
-    logoUrl: "http://giantswarm.com/catalog-logo.png"
-    storage:
-      type: "helm"
-      url: "https://giantswarm.github.com/giantswarm-catalog/"
 
 appOperator:
   version: "{{ .AppOperator.Version }}"

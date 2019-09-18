@@ -65,6 +65,11 @@ rules:
       - drainerconfigs
     verbs:
       - "*"
+  # TODO drop create and delete permissions for namespaces when
+  # legacy bundles are gone and clusterapi bundle v29 is the latest version.
+  #
+  #     https://github.com/giantswarm/giantswarm/issues/6829
+  #
   - apiGroups:
       - ""
     resources:
@@ -73,6 +78,7 @@ rules:
       - get
       - create
       - delete
+      - update
   - apiGroups:
       - ""
     resources:

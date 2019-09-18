@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"k8s.io/client-go/kubernetes"
@@ -19,8 +20,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/machinedeployment"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/resource/tccpoutputs"
 )
 
 type DrainerResourceSetConfig struct {
@@ -38,7 +37,7 @@ type DrainerResourceSetConfig struct {
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	var asgStatusResource controller.Resource
+	var asgStatusResource resource.Interface
 	{
 		c := asgstatus.Config{
 			G8sClient: config.G8sClient,
@@ -51,12 +50,12 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var awsClientResource controller.Resource
+	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -67,11 +66,12 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var drainerResource controller.Resource
+	var drainerResource resource.Interface
 	{
 		c := drainer.ResourceConfig{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
+			G8sClient:     config.G8sClient,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
 		drainerResource, err = drainer.NewResource(c)
@@ -80,7 +80,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var drainFinisherResource controller.Resource
+	var drainFinisherResource resource.Interface
 	{
 		c := drainfinisher.ResourceConfig{
 			G8sClient: config.G8sClient,
@@ -93,37 +93,8 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var machineDeploymentResource controller.Resource
-	{
-		c := machinedeployment.Config{
-			CMAClient: config.CMAClient,
-			Logger:    config.Logger,
-		}
-
-		machineDeploymentResource, err = machinedeployment.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var tccpOutputsResource controller.Resource
-	{
-		c := tccpoutputs.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		tccpOutputsResource, err = tccpoutputs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	resources := []controller.Resource{
+	resources := []resource.Interface{
 		awsClientResource,
-		machineDeploymentResource,
-		tccpOutputsResource,
 		asgStatusResource,
 		drainerResource,
 		drainFinisherResource,
@@ -150,7 +121,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToCluster(obj)
+		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return false
 		}
@@ -163,10 +134,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 	}
 
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
-		cc := controllercontext.Context{}
-		ctx = controllercontext.NewContext(ctx, cc)
-
-		return ctx, nil
+		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
 
 	var resourceSet *controller.ResourceSet

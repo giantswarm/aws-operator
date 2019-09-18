@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"k8s.io/client-go/kubernetes"
@@ -35,7 +36,7 @@ type DrainerResourceSetConfig struct {
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	var drainerResource controller.Resource
+	var drainerResource resource.Interface
 	{
 		c := drainer.ResourceConfig{
 			G8sClient: config.G8sClient,
@@ -48,7 +49,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var drainFinisherResource controller.Resource
+	var drainFinisherResource resource.Interface
 	{
 		c := drainfinisher.ResourceConfig{
 			G8sClient: config.G8sClient,
@@ -61,7 +62,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpOutputsResource controller.Resource
+	var tccpOutputsResource resource.Interface
 	{
 		c := tccpoutputs.Config{
 			Logger: config.Logger,
@@ -75,7 +76,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var workerASGNameResource controller.Resource
+	var workerASGNameResource resource.Interface
 	{
 		c := workerasgname.ResourceConfig{
 			G8sClient: config.G8sClient,
@@ -88,7 +89,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	resources := []controller.Resource{
+	resources := []resource.Interface{
 		tccpOutputsResource,
 		workerASGNameResource,
 		drainerResource,
