@@ -27,7 +27,17 @@ const RecordSets = `
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
-  ApiInternalRecordSet:
+  ApiPublicInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'internal-api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
+      Type: A
+  ApiPrivateInternalRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
