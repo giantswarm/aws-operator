@@ -107,12 +107,12 @@ func init() {
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 
 	// ClusterID returns a cluster ID unique to a run integration test. It might
-	// look like ci-wip-3cc75-5e958.
+	// look like ci-w3e95.
 	//
 	//     ci is a static identifier stating a CI run of the aws-operator.
-	//     wip is a version reference which can also be cur for the current version.
-	//     3cc75 is the Git SHA.
-	//     5e958 is a hash of the integration test dir, if any.
+	//     w is a version reference for wip which can also be c for the current version.
+	//     3 is the first character of the Git SHA.
+	//     e95 is a randomly generated alphanumeric string.
 	//
 	var parts []string
 	parts = append(parts, "ci-")
