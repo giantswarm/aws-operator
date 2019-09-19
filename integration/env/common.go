@@ -104,29 +104,30 @@ func init() {
 		panic("version bundle version  must not be empty")
 	}
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
+
+	// ClusterID returns a cluster ID unique to a run integration test. It might
+	// look like ci-wip-3cc75-5e958.
+	//
+	//     ci is a static identifier stating a CI run of the aws-operator.
+	//     wip is a version reference which can also be cur for the current version.
+	//     3cc75 is the Git SHA.
+	//     5e958 is a hash of the integration test dir, if any.
+	//
+	var parts []string
+	parts = append(parts, "ci-")
+	parts = append(parts, TestedVersion()[0:1])
+	parts = append(parts, CircleSHA()[0:1])
+	parts = append(parts, generateID())
+	clusterID = strings.Join(parts, "")
+
 }
 
 func CircleSHA() string {
 	return circleSHA
 }
 
-// ClusterID returns a cluster ID unique to a run integration test. It might
-// look like ci-wip-3cc75-5e958.
-//
-//     ci is a static identifier stating a CI run of the aws-operator.
-//     wip is a version reference which can also be cur for the current version.
-//     3cc75 is the Git SHA.
-//     5e958 is a hash of the integration test dir, if any.
-//
 func ClusterID() string {
-	var parts []string
-
-	parts = append(parts, "ci-")
-	parts = append(parts, TestedVersion()[0:1])
-	parts = append(parts, CircleSHA()[0:1])
-	parts = append(parts, generateID())
-
-	return strings.Join(parts, "")
+	return clusterID
 }
 
 func KeepResources() bool {
