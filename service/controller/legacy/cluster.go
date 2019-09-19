@@ -53,7 +53,7 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	APIWhitelist               FrameworkConfigAPIWhitelist
 	DeleteLoggingBucket        bool
 	EncrypterBackend           string
 	GuestAWSConfig             ClusterConfigAWSConfig
@@ -69,7 +69,6 @@ type ClusterConfig struct {
 	IPAMNetworkRange           net.IPNet
 	LabelSelector              ClusterConfigLabelSelector
 	OIDC                       ClusterConfigOIDC
-	PrivateAPIWhitelist        FrameworkConfigAPIWhitelistConfig
 	PodInfraContainerImage     string
 	ProjectName                string
 	RegistryDomain             string
@@ -102,7 +101,13 @@ type ClusterConfigOIDC struct {
 	GroupsClaim   string
 }
 
-// Whitelist defines guest cluster k8s API whitelisting.
+// FrameworkConfigAPIWhitelist defines guest cluster k8s API whitelisting types.
+type FrameworkConfigAPIWhitelist struct {
+	Private FrameworkConfigAPIWhitelistConfig
+	Public  FrameworkConfigAPIWhitelistConfig
+}
+
+// FrameworkConfigAPIWhitelistConfig defines guest cluster k8s API whitelisting.
 type FrameworkConfigAPIWhitelistConfig struct {
 	Enabled    bool
 	SubnetList string
@@ -247,8 +252,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			APIWhitelist: v25adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
@@ -321,8 +326,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v26adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -376,8 +381,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v27adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -432,8 +437,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v28adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -488,8 +493,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v28patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -545,8 +550,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v29adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -584,12 +589,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			APIWhitelist: v30adapter.APIWhitelist{
 				Private: v30adapter.Whitelist{
-					Enabled:    config.PrivateAPIWhitelist.Enabled,
-					SubnetList: config.PrivateAPIWhitelist.SubnetList,
+					Enabled:    config.APIWhitelist.Private.Enabled,
+					SubnetList: config.APIWhitelist.Private.SubnetList,
 				},
 				Public: v30adapter.Whitelist{
-					Enabled:    config.APIWhitelist.Enabled,
-					SubnetList: config.APIWhitelist.SubnetList,
+					Enabled:    config.APIWhitelist.Public.Enabled,
+					SubnetList: config.APIWhitelist.Public.SubnetList,
 				},
 			},
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,

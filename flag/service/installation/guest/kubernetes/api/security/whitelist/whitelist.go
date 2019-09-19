@@ -6,11 +6,11 @@ type Whitelist struct {
 }
 
 type Private struct {
-	Enabled    bool
+	Enabled    string
 	SubnetList string
 }
 
 type Public struct {
-	Enabled    bool
+	Enabled    string
 	SubnetList string
 }
