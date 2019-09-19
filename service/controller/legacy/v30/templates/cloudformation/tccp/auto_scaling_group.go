@@ -20,7 +20,7 @@ const AutoScalingGroup = `
       LaunchConfigurationName: !Ref {{ $v.ASGType }}LaunchConfiguration
       LoadBalancerNames:
         - !Ref IngressLoadBalancer
-		- !Ref IngressInternalLoadBalancer
+        - !Ref IngressInternalLoadBalancer
       HealthCheckGracePeriod: {{ $v.HealthCheckGracePeriod }}
       MetricsCollection:
         - Granularity: "1Minute"
