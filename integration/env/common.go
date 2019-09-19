@@ -121,9 +121,9 @@ func CircleSHA() string {
 func ClusterID() string {
 	var parts []string
 
-	parts = append(parts, "ci")
+	parts = append(parts, "ci-")
 	parts = append(parts, TestedVersion()[0:1])
-	parts = append(parts, CircleSHA()[0:2])
+	parts = append(parts, CircleSHA()[0:1])
 	parts = append(parts, generateID())
 
 	return strings.Join(parts, "")
