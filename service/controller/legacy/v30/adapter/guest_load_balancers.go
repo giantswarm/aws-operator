@@ -114,7 +114,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.IngressElbScheme = externalELBScheme
 
 	// Ingress internal load balancer settings.
-	ingressInternalElbName, err := key.InternalLoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)
+	ingressInternalElbName, err := key.InternalLoadBalancerName("ingress", cfg.CustomObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
