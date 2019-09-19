@@ -219,7 +219,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:169046d4e462ff71a713eee496624e77d9f9952f9ead947b9947bf5170e1fdbf"
+  digest = "1:9040e13234b3f2d9aacb9f8f4cdaca5f108b334196cf17d1518d52307a7444b1"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "internal/filelogger",
@@ -228,7 +228,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "094ac65a5e97510adafec48e7bb35944b9e346e8"
+  revision = "3af6217b34041f7829e4e4b4c03fdffee47fd1d0"
 
 [[projects]]
   branch = "master"
