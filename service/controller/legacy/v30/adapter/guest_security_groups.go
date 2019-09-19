@@ -67,7 +67,7 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// Allow traffic to the Kubernetes API server depending on the API
 	// whitelisting rules.
-	apiRules, err := getKubernetesAPIRules(cfg, hostClusterCIDR)
+	publicAPIRules, err := getKubernetesPublicAPIRules(cfg, hostClusterCIDR)
 	if err != nil {
 		return []securityGroupRule{}, microerror.Mask(err)
 	}
@@ -112,7 +112,7 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 		},
 	}
 
-	return append(apiRules, otherRules...), nil
+	return append(publicAPIRules, otherRules...), nil
 }
 
 func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
@@ -210,8 +210,8 @@ type securityGroupRule struct {
 	SourceSecurityGroup string
 }
 
-func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
-	// When API whitelisting is enabled, add separate security group rule per each subnet.
+func getKubernetesPublicAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
+	// When public API whitelisting is enabled, add separate security group rule per each subnet.
 	if cfg.APIWhitelist.Public.Enabled {
 		rules := []securityGroupRule{
 			{
@@ -229,8 +229,8 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		}
 
 		// Whitelist all configured subnets.
-		whitelistSubnets := strings.Split(cfg.APIWhitelist.Public.SubnetList, ",")
-		for _, subnet := range whitelistSubnets {
+		publicWhitelistSubnets := strings.Split(cfg.APIWhitelist.Public.SubnetList, ",")
+		for _, subnet := range publicWhitelistSubnets {
 			if subnet != "" {
 				subnetRule := securityGroupRule{
 					Description: "Custom Whitelist CIDR.",

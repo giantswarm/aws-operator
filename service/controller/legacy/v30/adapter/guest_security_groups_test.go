@@ -505,7 +505,7 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 				CustomObject:                    tc.customObject,
 			}
 
-			rules, err := getKubernetesAPIRules(cfg, tc.hostClusterCIDR)
+			rules, err := getKubernetesPublicAPIRules(cfg, tc.hostClusterCIDR)
 			if tc.expectedError && err == nil {
 				t.Fatalf("expected error didn't happen")
 			}
