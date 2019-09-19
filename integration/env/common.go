@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
@@ -172,11 +173,14 @@ func VersionBundleVersion() string {
 
 // generateId returns a string to be used as unique cluster ID
 func generateID() string {
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
+
 	for {
 		letterRunes := []rune(IDChars)
 		b := make([]rune, IDLength)
 		for i := range b {
-			b[i] = letterRunes[rand.Intn(len(letterRunes))]
+			b[i] = letterRunes[rng.Intn(len(letterRunes))]
 		}
 
 		id := string(b)
