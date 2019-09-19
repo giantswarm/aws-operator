@@ -113,13 +113,13 @@ func ClusterID() string {
 	var parts []string
 
 	parts = append(parts, "ci")
-	parts = append(parts, TestedVersion()[0:3])
-	parts = append(parts, CircleSHA()[0:5])
+	parts = append(parts, TestedVersion()[0:1])
+	parts = append(parts, CircleSHA()[0:2])
 	if TestHash() != "" {
 		parts = append(parts, TestHash())
 	}
 
-	return strings.Join(parts, "-")
+	return strings.Join(parts, "")
 }
 
 func KeepResources() bool {
