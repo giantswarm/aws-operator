@@ -35,8 +35,10 @@ type GuestLoadBalancersAdapter struct {
 	ELBHealthCheckUnhealthyThreshold int
 	IngressElbHealthCheckTarget      string
 	IngressElbName                   string
+	IngressInternalElbName           string
 	IngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 	IngressElbScheme                 string
+	IngressInternalElbScheme         string
 	MasterInstanceResourceName       string
 	PublicSubnets                    []string
 	PrivateSubnets                   []string
@@ -110,6 +112,14 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 		},
 	}
 	a.IngressElbScheme = externalELBScheme
+
+	// Ingress internal load balancer settings.
+	ingressInternalElbName, err := key.InternalLoadBalancerName(cfg.CustomObject.Spec.Cluster.Kubernetes.IngressController.Domain, cfg.CustomObject)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	a.IngressInternalElbName = ingressInternalElbName
+	a.IngressInternalElbScheme = internalELBScheme
 
 	// Load balancer health check settings.
 	a.ELBHealthCheckHealthyThreshold = healthCheckHealthyThreshold

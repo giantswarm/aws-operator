@@ -8,8 +8,23 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
+				Component:   "cloudformation",
+				Description: "Use private subnets for internal Kubernetes API loadbalancer.",
+				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add ingress internal load-balancer in private hosted zone.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Duplicate etcd record set into public hosted zone.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add public internal-api record set for Kubernetes API private load balancer.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},

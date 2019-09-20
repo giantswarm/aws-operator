@@ -72,10 +72,11 @@ data:
                     groupsClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim }}'
               security:
                 whitelist:
-                  enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI }}
-                  {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI }}
-                  subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer }}"
-                  {{- end }}
+                  public:
+                    enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI }}
+                    {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI }}
+                    subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer }}"
+                    {{- end }}
         {{- end }}
       kubernetes:
         incluster: true

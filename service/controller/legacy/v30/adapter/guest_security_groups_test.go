@@ -188,14 +188,16 @@ func TestAdapterSecurityGroupsRegularFields(t *testing.T) {
 func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		description            string
-		customObject           v1alpha1.AWSConfig
-		apiWhitelistingEnabled bool
-		apiWhitelistSubnets    string
-		elasticIPs             []*ec2.Address
-		hostClusterCIDR        string
-		expectedError          bool
-		expectedRules          []securityGroupRule
+		description                   string
+		customObject                  v1alpha1.AWSConfig
+		apiWhitelistingEnabled        bool
+		apiWhitelistSubnets           string
+		elasticIPs                    []*ec2.Address
+		hostClusterCIDR               string
+		expectedError                 bool
+		expectedRules                 []securityGroupRule
+		privateAPIWhitelistingEnabled bool
+		privateAPIWhitelistSubnets    string
 	}{
 		{
 			description: "case 0: API whitelisting disabled",
@@ -494,14 +496,16 @@ func TestAdapterSecurityGroupsKubernetesAPIRules(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			cfg := Config{
 				APIWhitelist: APIWhitelist{
-					Enabled:    tc.apiWhitelistingEnabled,
-					SubnetList: tc.apiWhitelistSubnets,
+					Public: Whitelist{
+						Enabled:    tc.apiWhitelistingEnabled,
+						SubnetList: tc.apiWhitelistSubnets,
+					},
 				},
 				ControlPlaneNATGatewayAddresses: tc.elasticIPs,
 				CustomObject:                    tc.customObject,
 			}
 
-			rules, err := getKubernetesAPIRules(cfg, tc.hostClusterCIDR)
+			rules, err := getKubernetesPublicAPIRules(cfg, tc.hostClusterCIDR)
 			if tc.expectedError && err == nil {
 				t.Fatalf("expected error didn't happen")
 			}

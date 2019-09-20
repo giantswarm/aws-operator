@@ -27,7 +27,17 @@ const RecordSets = `
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
-  ApiInternalRecordSet:
+  ApiPublicInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'internal-api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
+      Type: A
+  ApiPrivateInternalRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
@@ -35,6 +45,16 @@ const RecordSets = `
         HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      Type: A
+  EtcdInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt EtcdLoadBalancer.DNSName
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
   EtcdRecordSet:
@@ -45,7 +65,7 @@ const RecordSets = `
         HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: '{{ $v.EtcdDomain }}.'
-      HostedZoneId: !Ref 'InternalHostedZone'
+      HostedZoneId: !Ref 'HostedZone'
       Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
@@ -56,6 +76,16 @@ const RecordSets = `
         EvaluateTargetHealth: false
       Name: 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
+      Type: A
+  IngressInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt IngressInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt IngressInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
   IngressWildcardRecordSet:
     Type: AWS::Route53::RecordSet

@@ -45,10 +45,10 @@ const (
 	httpsPort = 443
 )
 
-// APIWhitelist defines guest cluster k8s api whitelisting.
+// APIWhitelist defines guest cluster k8s public/private api whitelisting.
 type APIWhitelist struct {
-	Enabled    bool
-	SubnetList string
+	Private Whitelist
+	Public  Whitelist
 }
 
 type Hydrater func(config Config) error
@@ -67,4 +67,11 @@ type StackState struct {
 	MasterInstanceMonitoring   bool
 
 	OperatorVersion string
+}
+
+// Whitelist represents the structure required for defining whitelisting for
+// resource security group
+type Whitelist struct {
+	Enabled    bool
+	SubnetList string
 }

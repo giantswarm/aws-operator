@@ -8,6 +8,8 @@ import (
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
+
+	"github.com/giantswarm/aws-operator/service/locker"
 )
 
 // EnsureCreated allocates tenant cluster network segments. It gathers existing
@@ -21,18 +23,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
 		err := r.locker.Lock(ctx)
-		if err != nil {
+		if locker.IsAlreadyExists(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "lock for IPAM is already acquired")
+		} else if err != nil {
 			return microerror.Mask(err)
+		} else {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", "acquired lock for IPAM")
 
 		defer func() {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "releasing lock for IPAM")
 			err := r.locker.Unlock(ctx)
-			if err != nil {
+			if locker.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "lock for IPAM is already released")
+			} else if err != nil {
 				r.logger.LogCtx(ctx, "level", "error", "message", "failed to release lock for IPAM", "stack", fmt.Sprintf("%#v", err))
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
 			}
-			r.logger.LogCtx(ctx, "level", "debug", "message", "released lock for IPAM")
 		}()
 	}
 
