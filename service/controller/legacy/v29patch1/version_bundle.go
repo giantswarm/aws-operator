@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
+				Component:   "cloudformation",
+				Description: "Duplicate etcd record set into public hosted zone.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
