@@ -8,33 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "ignition",
-				Description: "Add name label for default and kube-system namespaces.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "ignition",
-				Description: "Use v1 stable for giantswarm-critical priority class.",
-				Kind:        versionbundle.KindFixed,
-			},
-			{
-				Component:   "ignition",
-				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Update kubernetes to 1.14.6 (CVE-2019-9512, CVE-2019-9514) https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1146",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "calico",
-				Description: "Update calico to 3.8.2 https://docs.projectcalico.org/v3.8/release-notes/",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Component:   "TODO",
+				Description: "TODO",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -61,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "5.3.0",
+		Version: "5.3.1",
 	}
 }
