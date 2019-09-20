@@ -8,10 +8,10 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/resource/cpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/resource/cpf/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

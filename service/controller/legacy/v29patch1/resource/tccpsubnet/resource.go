@@ -9,11 +9,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/controllercontext"
 )
 
 const (
-	Name = "tccpsubnetv29"
+	Name = "tccpsubnetv29patch1"
 )
 
 type Config struct {

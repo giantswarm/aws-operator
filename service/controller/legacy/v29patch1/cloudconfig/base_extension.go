@@ -6,8 +6,8 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/encrypter/vault"
 )
 
 type baseExtension struct {
