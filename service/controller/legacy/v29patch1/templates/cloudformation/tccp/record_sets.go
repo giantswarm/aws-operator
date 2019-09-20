@@ -57,6 +57,16 @@ const RecordSets = `
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
+  IngressInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt IngressInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt IngressInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:

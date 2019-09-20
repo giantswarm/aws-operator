@@ -35,6 +35,8 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedIngressElbName                   string
 		expectedIngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 		expectedIngressElbScheme                 string
+		expectedIngressInternalElbName           string
+		expectedIngressInternalElbScheme         string
 	}{
 		{
 			description: "empty custom object with AZs (to test for missing cloud config key",
@@ -127,7 +129,9 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					PortInstance: 30010,
 				},
 			},
-			expectedIngressElbScheme: "internet-facing",
+			expectedIngressElbScheme:         "internet-facing",
+			expectedIngressInternalElbName:   "test-cluster-ingress-internal",
+			expectedIngressInternalElbScheme: "internal",
 		},
 	}
 
@@ -202,6 +206,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 
 			if tc.expectedIngressElbScheme != a.Guest.LoadBalancers.IngressElbScheme {
 				t.Errorf("expected Ingress ELB Scheme, got %q, want %q", a.Guest.LoadBalancers.IngressElbScheme, tc.expectedIngressElbScheme)
+			}
+
+			if tc.expectedIngressInternalElbName != a.Guest.LoadBalancers.IngressInternalElbName {
+				t.Errorf("expected Ingress Internal ELB Name, got %q, want %q", a.Guest.LoadBalancers.IngressInternalElbName, tc.expectedIngressInternalElbName)
 			}
 		})
 	}
