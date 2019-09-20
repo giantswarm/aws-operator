@@ -39,7 +39,7 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	APIWhitelist               FrameworkConfigAPIWhitelist
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
@@ -86,7 +86,13 @@ type ClusterConfigOIDC struct {
 	GroupsClaim   string
 }
 
-// Whitelist defines guest cluster k8s API whitelisting.
+// FrameworkConfigAPIWhitelist defines guest cluster k8s API whitelisting types.
+type FrameworkConfigAPIWhitelist struct {
+	Private FrameworkConfigAPIWhitelistConfig
+	Public  FrameworkConfigAPIWhitelistConfig
+}
+
+// FrameworkConfigAPIWhitelistConfig defines guest cluster k8s API whitelisting.
 type FrameworkConfigAPIWhitelistConfig struct {
 	Enabled    bool
 	SubnetList string
@@ -228,8 +234,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			APIWhitelist: v29adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
@@ -286,8 +292,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			APIWhitelist: v30adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Private: v30adapter.Whitelist{
+					Enabled:    config.APIWhitelist.Private.Enabled,
+					SubnetList: config.APIWhitelist.Private.SubnetList,
+				},
+				Public: v30adapter.Whitelist{
+					Enabled:    config.APIWhitelist.Public.Enabled,
+					SubnetList: config.APIWhitelist.Public.SubnetList,
+				},
 			},
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
