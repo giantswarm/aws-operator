@@ -165,7 +165,7 @@ type securityGroupRule struct {
 func getKubernetesPrivateAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// When public API whitelisting is enabled, add separate security group rule per each subnet.
 	if cfg.APIWhitelist.Private.Enabled {
-		// Allow control-plane CIDR and tenant cluster CIDR
+		// Allow control-plane CIDR and tenant cluster CIDR.
 		rules := []securityGroupRule{
 			{
 				Description: "Allow traffic from control plane CIDR.",
