@@ -43,9 +43,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if len(machineDeployments) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d machinedeployments for tenant cluster %#q", len(machineDeployments), key.ClusterID(&cr)))
-
-		var deleted int
 		for _, md := range machineDeployments {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting machinedeployment %q for tenant cluster %#q", string(md.Namespace+"/"+md.Name), key.ClusterID(&cr)))
 
@@ -54,14 +51,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			deleted++
-
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted machinedeployment %q for tenant cluster %#q", string(md.Namespace+"/"+md.Name), key.ClusterID(&cr)))
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d machinedeployments for tenant cluster %#q", deleted, key.ClusterID(&cr)))
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no machinedeployments to be deleted for tenant cluster %#q", key.ClusterID(&cr)))
 	}
 
 	return nil
