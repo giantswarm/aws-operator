@@ -73,9 +73,14 @@ data:
               security:
                 whitelist:
                   public:
-                    enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI }}
-                    {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI }}
-                    subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer }}"
+                    enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Public }}
+                    {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Public }}
+                    subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer.Public }}"
+                    {{- end }}
+                  private:
+                    enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Private }}
+                    {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Private }}
+                    subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer.Private }}"
                     {{- end }}
         {{- end }}
       kubernetes:
