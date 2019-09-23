@@ -75,7 +75,7 @@ const RecordSets = `
       TTL: '300'
       Type: CNAME
       ResourceRecords:
-        - !Ref 'IngressRecordSet'
+        - !Ref 'IngressInternalRecordSet'
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
