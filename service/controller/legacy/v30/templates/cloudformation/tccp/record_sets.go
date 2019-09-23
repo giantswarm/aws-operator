@@ -87,7 +87,7 @@ const RecordSets = `
       Name: 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
-	IngressInternalWildcardRecordSet:
+  IngressInternalWildcardRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       Name: '*.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
