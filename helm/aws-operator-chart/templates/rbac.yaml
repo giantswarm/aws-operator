@@ -14,9 +14,19 @@ rules:
     resources:
       - clusters
       - clusters/status
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - cluster.k8s.io
+    resources:
       - machinedeployments
       - machinedeployments/status
     verbs:
+      - delete
       - get
       - list
       - patch
