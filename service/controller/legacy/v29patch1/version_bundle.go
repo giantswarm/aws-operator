@@ -17,6 +17,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add ingress internal load-balancer in private hosted zone.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Use private subnets for internal Kubernetes API loadbalancer.",
+				Kind:        versionbundle.KindChanged,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
