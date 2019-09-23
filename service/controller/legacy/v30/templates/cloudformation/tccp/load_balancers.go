@@ -58,7 +58,7 @@ const LoadBalancers = `
       LoadBalancerName: {{ $v.APIInternalElbName }}
       Scheme: {{ $v.APIInternalElbScheme }}
       SecurityGroups:
-        - !Ref MasterSecurityGroup
+        - !Ref APIInternalELBSecurityGroup
       Subnets:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
