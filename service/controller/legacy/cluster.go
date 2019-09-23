@@ -37,6 +37,9 @@ import (
 	v29 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v29/cloudconfig"
+	v29patch1 "github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1"
+	v29patch1adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/adapter"
+	v29patch1cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1/cloudconfig"
 	v30 "github.com/giantswarm/aws-operator/service/controller/legacy/v30"
 	v30adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v30/adapter"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v30/cloudconfig"
@@ -53,7 +56,7 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               FrameworkConfigAPIWhitelistConfig
+	APIWhitelist               FrameworkConfigAPIWhitelist
 	DeleteLoggingBucket        bool
 	EncrypterBackend           string
 	GuestAWSConfig             ClusterConfigAWSConfig
@@ -101,7 +104,13 @@ type ClusterConfigOIDC struct {
 	GroupsClaim   string
 }
 
-// Whitelist defines guest cluster k8s API whitelisting.
+// FrameworkConfigAPIWhitelist defines guest cluster k8s API whitelisting types.
+type FrameworkConfigAPIWhitelist struct {
+	Private FrameworkConfigAPIWhitelistConfig
+	Public  FrameworkConfigAPIWhitelistConfig
+}
+
+// FrameworkConfigAPIWhitelistConfig defines guest cluster k8s API whitelisting.
 type FrameworkConfigAPIWhitelistConfig struct {
 	Enabled    bool
 	SubnetList string
@@ -243,8 +252,13 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			NetworkAllocator:   config.NetworkAllocator,
 			RandomKeysSearcher: randomKeysSearcher,
 
-			AccessLogsExpiration:       config.AccessLogsExpiration,
-			AdvancedMonitoringEC2:      config.AdvancedMonitoringEC2,
+			AccessLogsExpiration:  config.AccessLogsExpiration,
+			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
+			APIWhitelist: v25adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
+			},
+
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			EncrypterBackend:           config.EncrypterBackend,
 			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
@@ -262,10 +276,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			APIWhitelist: v25adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -319,8 +329,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v26adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -374,8 +384,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v27adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -430,8 +440,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v28adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -486,8 +496,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v28patch1adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -543,8 +553,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			APIWhitelist: v29adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -560,9 +570,9 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV30 *controller.ResourceSet
+	var resourceSetV29patch1 *controller.ResourceSet
 	{
-		c := v30.ClusterResourceSetConfig{
+		c := v29patch1.ClusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
@@ -593,15 +603,78 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v30cloudconfig.OIDCConfig{
+			OIDC: v29patch1cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
+			APIWhitelist: v29patch1adapter.APIWhitelist{
+				Enabled:    config.APIWhitelist.Public.Enabled,
+				SubnetList: config.APIWhitelist.Public.SubnetList,
+			},
+			ProjectName:    config.ProjectName,
+			RouteTables:    config.RouteTables,
+			RegistryDomain: config.RegistryDomain,
+			SSOPublicKey:   config.SSOPublicKey,
+			VaultAddress:   config.VaultAddress,
+			VPCPeerID:      config.VPCPeerID,
+		}
+
+		resourceSetV29patch1, err = v29patch1.NewClusterResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var resourceSetV30 *controller.ResourceSet
+	{
+		c := v30.ClusterResourceSetConfig{
+			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			HostAWSConfig: awsclient.Config{
+				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
+				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
+				Region:          config.HostAWSConfig.Region,
+				SessionToken:    config.HostAWSConfig.SessionToken,
+			},
+			K8sClient:          config.K8sClient,
+			Logger:             config.Logger,
+			NetworkAllocator:   config.NetworkAllocator,
+			RandomKeysSearcher: randomKeysSearcher,
+
+			AccessLogsExpiration:  config.AccessLogsExpiration,
+			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
 			APIWhitelist: v30adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Enabled,
-				SubnetList: config.APIWhitelist.SubnetList,
+				Private: v30adapter.Whitelist{
+					Enabled:    config.APIWhitelist.Private.Enabled,
+					SubnetList: config.APIWhitelist.Private.SubnetList,
+				},
+				Public: v30adapter.Whitelist{
+					Enabled:    config.APIWhitelist.Public.Enabled,
+					SubnetList: config.APIWhitelist.Public.SubnetList,
+				},
+			},
+			DeleteLoggingBucket:        config.DeleteLoggingBucket,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestAvailabilityZones:     config.GuestAWSConfig.AvailabilityZones,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			Route53Enabled:             config.Route53Enabled,
+			IgnitionPath:               config.IgnitionPath,
+			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
+			IncludeTags:                config.IncludeTags,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			OIDC: v30cloudconfig.OIDCConfig{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			ProjectName:    config.ProjectName,
 			RouteTables:    config.RouteTables,
@@ -624,6 +697,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		resourceSetV28,
 		resourceSetV28patch1,
 		resourceSetV29,
+		resourceSetV29patch1,
 		resourceSetV30,
 	}
 

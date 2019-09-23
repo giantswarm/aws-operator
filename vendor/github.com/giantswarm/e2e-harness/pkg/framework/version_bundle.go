@@ -15,7 +15,7 @@ import (
 
 const (
 	defaultOwner = "giantswarm"
-	defaultRepo  = "installations"
+	defaultRepo  = "releases"
 )
 
 // VBVParams holds information which we can use to query  versionbundle
@@ -93,7 +93,7 @@ func getContent(provider, token string) (string, error) {
 
 	client := github.NewClient(tc)
 
-	path := fmt.Sprintf("release/provider/%s.yaml", provider)
+	path := fmt.Sprintf("%s.yaml", provider)
 	opt := &github.RepositoryContentGetOptions{}
 	repoContent, _, _, err := client.Repositories.GetContents(ctx, defaultOwner, defaultRepo, path, opt)
 
