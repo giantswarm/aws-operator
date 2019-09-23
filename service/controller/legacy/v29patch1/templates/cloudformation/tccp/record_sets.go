@@ -37,7 +37,7 @@ const RecordSets = `
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
-  EtcdInternalRecordSet:
+  EtcdRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
@@ -47,7 +47,7 @@ const RecordSets = `
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
-  EtcdRecordSet:
+  EtcdExternalRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
