@@ -214,7 +214,7 @@ Resources:
       LoadBalancerName: 8y5ck-api-internal
       Scheme: internal
       SecurityGroups:
-        - !Ref MasterSecurityGroup
+        - !Ref APIInternalELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       
@@ -528,6 +528,37 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
+  APIInternalELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 8y5ck-internal-api
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        Description: Allow all traffic to the master instance from A class network.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 10.0.0.0/8
+      
+      -
+        Description: Allow all traffic to the master instance from B class network.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 172.16.0.0/12
+      
+      -
+        Description: Allow all traffic to the master instance from C class network.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 192.168.0.0/16
+      
+      Tags:
+        - Key: Name
+          Value: 8y5ck-internal-api
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup

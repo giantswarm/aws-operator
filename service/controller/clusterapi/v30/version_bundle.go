@@ -22,6 +22,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add public internal-api record set for Kubernetes API private load balancer.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Add whitelisting for internal Kubernetes API.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{

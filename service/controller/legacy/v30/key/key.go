@@ -97,10 +97,11 @@ const (
 )
 
 const (
-	KindMaster  = "master"
-	KindIngress = "ingress"
-	KindWorker  = "worker"
-	KindEtcd    = "etcd-elb"
+	KindMaster      = "master"
+	KindIngress     = "ingress"
+	KindWorker      = "worker"
+	KindEtcd        = "etcd-elb"
+	KindInternalAPI = "internal-api"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
