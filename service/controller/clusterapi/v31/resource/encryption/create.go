@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

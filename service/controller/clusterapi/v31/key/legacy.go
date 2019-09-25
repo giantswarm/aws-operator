@@ -3,7 +3,7 @@ package key
 import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/templates/cloudconfig"
 )
 
 // NOTE that code below is deprecated and needs refactoring.

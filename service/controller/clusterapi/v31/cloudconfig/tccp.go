@@ -11,10 +11,10 @@ import (
 	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
 )
 
 type TCCPConfig struct {

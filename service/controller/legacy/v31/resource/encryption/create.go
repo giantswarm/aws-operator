@@ -7,8 +7,8 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

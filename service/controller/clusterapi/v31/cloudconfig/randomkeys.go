@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
 )
 
 // randomKeyTmplSet holds a collection of rendered templates for random key

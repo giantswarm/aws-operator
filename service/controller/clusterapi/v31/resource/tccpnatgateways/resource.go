@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "tccpnatgatewaysv30"
+	Name = "tccpnatgatewaysv31"
 )
 
 type Config struct {

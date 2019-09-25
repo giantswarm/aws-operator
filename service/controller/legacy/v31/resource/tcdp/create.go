@@ -8,9 +8,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/resource/cpi/template"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/resource/cpi/template"
 )
 
 const (

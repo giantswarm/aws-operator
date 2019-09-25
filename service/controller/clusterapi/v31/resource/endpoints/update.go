@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
