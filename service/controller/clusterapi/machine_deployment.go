@@ -22,6 +22,9 @@ import (
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
+	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
+	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
+
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -268,9 +271,60 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
+	var v31ResourceSet *controller.ResourceSet
+	{
+		c := v31.MachineDeploymentResourceSetConfig{
+			CertsSearcher:          certsSearcher,
+			CMAClient:              config.CMAClient,
+			ControlPlaneAWSClients: controlPlaneAWSClients,
+			G8sClient:              config.G8sClient,
+			K8sClient:              config.K8sClient,
+			Locker:                 config.Locker,
+			Logger:                 config.Logger,
+			RandomKeysSearcher:     randomKeysSearcher,
+
+			CalicoCIDR:                 config.CalicoCIDR,
+			CalicoMTU:                  config.CalicoMTU,
+			CalicoSubnet:               config.CalicoSubnet,
+			ClusterIPRange:             config.ClusterIPRange,
+			DockerDaemonCIDR:           config.DockerDaemonCIDR,
+			EncrypterBackend:           config.EncrypterBackend,
+			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
+			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
+			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
+			HostAWSConfig:              config.HostAWSConfig,
+			IgnitionPath:               config.IgnitionPath,
+			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
+			InstallationName:           config.InstallationName,
+			IPAMNetworkRange:           config.IPAMNetworkRange,
+			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
+			OIDC: v31cloudconfig.ConfigOIDC{
+				ClientID:      config.OIDC.ClientID,
+				IssuerURL:     config.OIDC.IssuerURL,
+				UsernameClaim: config.OIDC.UsernameClaim,
+				GroupsClaim:   config.OIDC.GroupsClaim,
+			},
+			PodInfraContainerImage: config.PodInfraContainerImage,
+			ProjectName:            config.ProjectName,
+			RegistryDomain:         config.RegistryDomain,
+			Route53Enabled:         config.Route53Enabled,
+			RouteTables:            config.RouteTables,
+			SSHUserList:            config.SSHUserList,
+			SSOPublicKey:           config.SSOPublicKey,
+			VaultAddress:           config.VaultAddress,
+			VPCPeerID:              config.VPCPeerID,
+		}
+
+		v31ResourceSet, err = v31.NewMachineDeploymentResourceSet(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resourceSets := []*controller.ResourceSet{
 		v29ResourceSet,
 		v30ResourceSet,
+		v31ResourceSet,
 	}
 
 	return resourceSets, nil
