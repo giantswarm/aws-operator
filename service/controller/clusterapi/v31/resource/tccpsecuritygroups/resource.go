@@ -10,12 +10,12 @@ import (
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
 )
 
 const (
-	Name = "tccpsecuritygroupsv30"
+	Name = "tccpsecuritygroupsv31"
 )
 
 type Config struct {

@@ -12,8 +12,8 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {

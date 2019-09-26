@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Name = "tcnpazsv30"
+	Name = "tcnpazsv31"
 )
 
 type Config struct {

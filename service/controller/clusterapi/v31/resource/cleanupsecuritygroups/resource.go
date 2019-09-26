@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Name = "cleanupsecuritygroupsv30"
+	Name = "cleanupsecuritygroupsv31"
 )
 
 type Config struct {

@@ -5,11 +5,11 @@ import (
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
 )
 
 const (
-	name = "encryptionv30"
+	name = "encryptionv31"
 )
 
 type Config struct {

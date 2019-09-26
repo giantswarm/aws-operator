@@ -8,13 +8,13 @@ import (
 	"github.com/giantswarm/randomkeys"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3objectv30"
+	Name = "s3objectv31"
 )
 
 // Config represents the configuration used to create a new cloudformation resource.

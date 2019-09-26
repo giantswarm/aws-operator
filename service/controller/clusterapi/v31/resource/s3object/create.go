@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {

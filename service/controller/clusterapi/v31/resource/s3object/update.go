@@ -12,7 +12,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller"
 	"k8s.io/apimachinery/pkg/api/meta"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {

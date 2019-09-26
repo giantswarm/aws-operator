@@ -8,10 +8,10 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/resource/tccpf/template"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpf/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/cloudformation"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/cloudformation"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/key"
 )
 
 const (
