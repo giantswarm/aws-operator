@@ -7,24 +7,24 @@ const TemplateMainLoadBalancers = `
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
-    Properties:     
-      Name: {{ $v.APIInternalElbName }} 
+    Properties:
+      Name: {{ $v.APIInternalElbName }}
       Scheme: {{ $v.APIInternalElbScheme }}
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
       SubnetMappings:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
-      {{end}}
+      {{- end}}
       Subnets:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
-      {{end}}
+      {{- end}}
       Type: network
-  {{ range $v.APIElbListenersAndTargets}}
+  {{- range $v.APIElbListenersAndTargets}}
   {{ .TargetResourceName }}
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties: 
+    Properties:
       HealthCheckEnabled: true
       HealthCheckIntervalSeconds: {{ $v.ELBHealthCheckInterval }}
       HealthCheckPort: {{ .PortInstance }}
@@ -33,27 +33,29 @@ const TemplateMainLoadBalancers = `
       HealthyThresholdCount: {{ $v.ELBHealthCheckHealthyThreshold }}
       Port: {{ .PortInstance }}
       Protocol: TCP
-      Targets: 
-      - Id: !Ref {{ $v.MasterInstanceResourceName }}      
+      Targets:
+      - Id: !Ref {{ $v.MasterInstanceResourceName }}
       TargetType: instance
       UnhealthyThresholdCount: {{ $v.ELBHealthCheckUnhealthyThreshold }}
       VpcId: !Ref VPC
   {{ .ListenerResourceName }}
     Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties: 
-      DefaultActions: 
+    Properties:
+      DefaultActions:
       - Type: forward
         TargetGroupArn: !Ref {{ .TargetResourceName }}
       LoadBalancerArn: !Ref ApiInternalLoadBalancer
       Port: {{ .PortELB }}
-      Protocol: TCP  
-  {{ end }}
+      Protocol: TCP
+  {{- end }}
 
   ApiLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
     Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
       HealthCheck:
         HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
         Interval: {{ $v.ELBHealthCheckInterval }}
@@ -69,7 +71,7 @@ const TemplateMainLoadBalancers = `
         LoadBalancerPort: {{ .PortELB }}
         Protocol: TCP
       {{ end }}
-      Name: {{ $v.APIElbName }}
+      LoadBalancerName: {{ $v.APIElbName }}
       Scheme: {{ $v.APIElbScheme }}
       SecurityGroups:
         - !Ref MasterSecurityGroup
@@ -79,8 +81,10 @@ const TemplateMainLoadBalancers = `
       {{end}}
 
   EtcdLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
+      ConnectionSettings:
+        IdleTimeout: 1200
       HealthCheck:
         HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
         Interval: {{ $v.ELBHealthCheckInterval }}
@@ -96,7 +100,7 @@ const TemplateMainLoadBalancers = `
         LoadBalancerPort: {{ .PortELB }}
         Protocol: TCP
       {{ end }}
-      Name: {{ $v.EtcdElbName }}
+      LoadBalancerName: {{ $v.EtcdElbName }}
       Scheme: {{ $v.EtcdElbScheme }}
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
@@ -106,10 +110,12 @@ const TemplateMainLoadBalancers = `
       {{end}}
 
   IngressLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
     Properties:
+      ConnectionSettings:
+        IdleTimeout: 60
       HealthCheck:
         HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
         Interval: {{ $v.ELBHealthCheckInterval }}
@@ -123,7 +129,7 @@ const TemplateMainLoadBalancers = `
         LoadBalancerPort: {{ .PortELB }}
         Protocol: TCP
       {{ end }}
-      Name: {{ $v.IngressElbName }}
+      LoadBalancerName: {{ $v.IngressElbName }}
       Policies:
       - PolicyName: "EnableProxyProtocol"
         PolicyType: "ProxyProtocolPolicyType"

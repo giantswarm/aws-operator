@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"fmt"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
@@ -36,6 +37,7 @@ type GuestLoadBalancersAdapter struct {
 	APIElbScheme                      string
 	APIInternalElbScheme              string
 	APIElbSecurityGroupID             string
+	EtcdElbHealthCheckTarget          string
 	EtcdElbName                       string
 	EtcdElbListenersAndTargets        []GuestLoadBalancersAdapterListenerAndTarget
 	EtcdElbScheme                     string
@@ -60,6 +62,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	}
 
 	// API load balancer settings.
+	a.APIElbHealthCheckTarget = heathCheckTarget(key.KubernetesSecurePort)
 	a.APIElbName = key.ELBNameAPI(&cfg.CustomObject)
 	a.APIInternalElbName = key.InternalELBNameAPI(&cfg.CustomObject)
 	a.APIElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
@@ -82,6 +85,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.APIInternalElbScheme = internalELBScheme
 
 	// etcd load balancer settings.
+	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort)
 	a.EtcdElbName = key.ELBNameEtcd(&cfg.CustomObject)
 	a.EtcdElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
@@ -94,6 +98,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.EtcdElbScheme = internalELBScheme
 
 	// Ingress load balancer settings.
+	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort)
 	a.IngressElbName = key.ELBNameIngress(&cfg.CustomObject)
 	a.IngressElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
@@ -142,4 +147,8 @@ type GuestLoadBalancersAdapterListenerAndTarget struct {
 	PortInstance int
 	// Target Group resource name
 	TargetResourceName string
+}
+
+func heathCheckTarget(port int) string {
+	return fmt.Sprintf("TCP:%d", port)
 }

@@ -190,34 +190,45 @@ Resources:
         Ref: InternetGateway
   
   ApiInternalLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      ConnectionSettings:
-        IdleTimeout: 1200
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:443
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
-      Listeners:
-      
-      - InstancePort: 443
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-api-internal
+      Name: 8y5ck-api-internal
       Scheme: internal
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
+      SubnetMappings:
+        - !Ref PrivateSubnetEuCentral1b
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
-      
+      Type: network
+  ApiInternalLoadBalancerTargetGroup
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPort: 443
+      HealthCheckProtocol: TCP
+      HealthCheckTimeoutSeconds: 3
+      HealthyThresholdCount: 2
+      Port: 443
+      Protocol: TCP
+      Targets:
+      - Id: !Ref MasterInstance8Y5CK78968
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPC
+  ApiInternalLoadBalancerListener
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref ApiInternalLoadBalancerTargetGroup
+      LoadBalancerArn: !Ref ApiInternalLoadBalancer
+      Port: 443
+      Protocol: TCP
+
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
