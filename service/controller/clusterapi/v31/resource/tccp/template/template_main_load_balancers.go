@@ -22,7 +22,7 @@ const TemplateMainLoadBalancers = `
       {{- end}}
       Type: network
   {{- range $v.APIElbListenersAndTargets}}
-  {{ .TargetResourceName }}
+  {{ .TargetResourceName }}:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -38,7 +38,7 @@ const TemplateMainLoadBalancers = `
       TargetType: instance
       UnhealthyThresholdCount: {{ $v.ELBHealthCheckUnhealthyThreshold }}
       VpcId: !Ref VPC
-  {{ .ListenerResourceName }}
+  {{ .ListenerResourceName }}:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
