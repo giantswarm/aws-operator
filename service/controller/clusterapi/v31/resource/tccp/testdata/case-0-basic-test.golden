@@ -203,7 +203,7 @@ Resources:
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       Type: network
-  ApiInternalLoadBalancerTargetGroup
+  ApiInternalLoadBalancerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -219,7 +219,7 @@ Resources:
       TargetType: instance
       UnhealthyThresholdCount: 2
       VpcId: !Ref VPC
-  ApiInternalLoadBalancerListener
+  ApiInternalLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
