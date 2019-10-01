@@ -23,7 +23,6 @@ const TemplateMainLoadBalancers = `
       HealthCheckIntervalSeconds: {{ $v.ELBHealthCheckInterval }}
       HealthCheckPort: {{ .PortInstance }}
       HealthCheckProtocol: TCP
-      HealthCheckTimeoutSeconds: {{ $v.ELBHealthCheckTimeout }}
       HealthyThresholdCount: {{ $v.ELBHealthCheckHealthyThreshold }}
       Port: {{ .PortInstance }}
       Protocol: TCP
