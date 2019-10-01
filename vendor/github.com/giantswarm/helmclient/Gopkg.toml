@@ -55,7 +55,7 @@ required = [
   name = "github.com/giantswarm/errors"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.15.4"
   name = "github.com/giantswarm/k8sportforward"
 
 [[constraint]]
@@ -76,23 +76,23 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/helm"
-  version = "=2.12.0"
+  version = "2.14.3"
 
 [[constraint]]
   name = "github.com/mholt/archiver"
@@ -105,6 +105,42 @@ required = [
 [[constraint]]
   name = "github.com/spf13/afero"
   version = "v1.2.0"
+
+[[override]]
+  name = "k8s.io/kubernetes"
+  version = "v1.15.4"
+
+[[override]]
+  name = "k8s.io/cli-runtime"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/component-base"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "github.com/ghodss/yaml"
+  branch = "master"
+
+[[override]]
+  name = "github.com/russross/blackfriday"
+  version = "v1.5.2"
 
 
 

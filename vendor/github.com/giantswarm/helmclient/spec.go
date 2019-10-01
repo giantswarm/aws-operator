@@ -20,7 +20,7 @@ const (
 	// runReleaseTestTimeout is the timeout in seconds when running tests.
 	runReleaseTestTimout = 300
 
-	defaultTillerImage      = "quay.io/giantswarm/tiller:v2.12.0"
+	defaultTillerImage      = "quay.io/giantswarm/tiller:v2.14.3"
 	defaultTillerNamespace  = "kube-system"
 	roleBindingNamePrefix   = "tiller"
 	runningPodFieldSelector = "status.phase=Running"
