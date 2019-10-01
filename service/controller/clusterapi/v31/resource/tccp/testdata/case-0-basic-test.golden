@@ -199,7 +199,7 @@ Resources:
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
       SubnetMappings:
-        - !Ref PrivateSubnetEuCentral1b
+        - SubnetId: !Ref PrivateSubnetEuCentral1b
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       Type: network
