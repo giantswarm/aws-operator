@@ -198,8 +198,6 @@ Resources:
       Scheme: internal
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
-      SubnetMappings:
-        - SubnetId: !Ref PrivateSubnetEuCentral1b
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       Type: network

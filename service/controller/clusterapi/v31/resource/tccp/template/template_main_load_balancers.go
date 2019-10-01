@@ -12,10 +12,6 @@ const TemplateMainLoadBalancers = `
       Scheme: {{ $v.APIInternalElbScheme }}
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
-      SubnetMappings:
-      {{- range $s := $v.PrivateSubnets }}
-        - SubnetId: !Ref {{ $s }}
-      {{- end}}
       Subnets:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
