@@ -11,7 +11,7 @@ const (
 	// Default values for health checks.
 	healthCheckHealthyThreshold   = 2
 	healthCheckInterval           = 10
-	healthCheckTimeout            = 3
+	healthCheckTimeout            = 6
 	healthCheckUnhealthyThreshold = 2
 
 	// resource names for ELBv2 Listener resources

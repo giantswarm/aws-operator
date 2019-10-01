@@ -206,7 +206,7 @@ Resources:
       HealthCheckIntervalSeconds: 10
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
-      HealthCheckTimeoutSeconds: 3
+      HealthCheckTimeoutSeconds: 6
       HealthyThresholdCount: 2
       Port: 443
       Protocol: TCP
@@ -236,7 +236,7 @@ Resources:
         HealthyThreshold: 2
         Interval: 10
         Target: TCP:443
-        Timeout: 3
+        Timeout: 6
         UnhealthyThreshold: 2
       Instances:
       - !Ref MasterInstance8Y5CK78968
@@ -268,7 +268,7 @@ Resources:
         HealthyThreshold: 2
         Interval: 10
         Target: TCP:2379
-        Timeout: 3
+        Timeout: 6
         UnhealthyThreshold: 2
       Instances:
       - !Ref MasterInstance8Y5CK78968
@@ -298,7 +298,7 @@ Resources:
         HealthyThreshold: 2
         Interval: 10
         Target: TCP:30011
-        Timeout: 3
+        Timeout: 6
         UnhealthyThreshold: 2
       Listeners:
       
