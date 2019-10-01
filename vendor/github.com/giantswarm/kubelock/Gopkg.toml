@@ -4,22 +4,22 @@
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.13.1"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
+  branch = "kubernetes-1.15.4"
   name = "github.com/giantswarm/e2e-harness"
-  branch = "master"
 
 [[constraint]]
+  branch = "kubernetes-1.15.4"
   name = "github.com/giantswarm/e2esetup"
-  branch = "master"
 
 [[constraint]]
-  branch = "master"
+  branch = "kubernetes-1.15.4"
   name = "github.com/giantswarm/k8sclient"
 
 [[constraint]]
@@ -29,3 +29,9 @@
 [[constraint]]
   name = "github.com/giantswarm/micrologger"
   branch = "master"
+
+
+
+[prune]
+  go-tests = true
+  unused-packages = true
