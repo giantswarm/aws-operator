@@ -196,8 +196,6 @@ Resources:
     Properties:
       Name: 8y5ck-api-internal
       Scheme: internal
-      SecurityGroups:
-        - !Ref APIInternalELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       Type: network
