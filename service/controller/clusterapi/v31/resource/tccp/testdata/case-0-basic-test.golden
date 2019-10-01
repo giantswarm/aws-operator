@@ -203,7 +203,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
-      HealthCheckIntervalSeconds: 5
+      HealthCheckIntervalSeconds: 10
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthCheckTimeoutSeconds: 3
@@ -234,7 +234,7 @@ Resources:
         IdleTimeout: 1200
       HealthCheck:
         HealthyThreshold: 2
-        Interval: 5
+        Interval: 10
         Target: TCP:443
         Timeout: 3
         UnhealthyThreshold: 2
@@ -266,7 +266,7 @@ Resources:
         IdleTimeout: 1200
       HealthCheck:
         HealthyThreshold: 2
-        Interval: 5
+        Interval: 10
         Target: TCP:2379
         Timeout: 3
         UnhealthyThreshold: 2
@@ -296,7 +296,7 @@ Resources:
         IdleTimeout: 60
       HealthCheck:
         HealthyThreshold: 2
-        Interval: 5
+        Interval: 10
         Target: TCP:30011
         Timeout: 3
         UnhealthyThreshold: 2
