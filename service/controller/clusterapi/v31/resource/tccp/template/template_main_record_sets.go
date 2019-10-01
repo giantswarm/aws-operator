@@ -32,7 +32,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneID
         EvaluateTargetHealth: false
       Name: 'internal-api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
@@ -42,7 +42,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneID
         EvaluateTargetHealth: false
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
