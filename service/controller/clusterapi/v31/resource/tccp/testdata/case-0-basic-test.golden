@@ -206,7 +206,6 @@ Resources:
       HealthCheckIntervalSeconds: 10
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
-      HealthCheckTimeoutSeconds: 6
       HealthyThresholdCount: 2
       Port: 443
       Protocol: TCP
