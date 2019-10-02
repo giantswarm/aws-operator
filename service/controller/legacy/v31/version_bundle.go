@@ -16,23 +16,23 @@ func VersionBundle() versionbundle.Bundle {
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
-				Version: "3.8.2",
+				Version: "3.9.1",
 			},
 			{
 				Name:    "containerlinux",
-				Version: "2135.4.0",
+				Version: "2191.5.0",
 			},
 			{
 				Name:    "docker",
-				Version: "18.06.1",
+				Version: "18.06.3",
 			},
 			{
 				Name:    "etcd",
-				Version: "3.3.13",
+				Version: "3.3.15",
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.14.6",
+				Version: "1.15.4",
 			},
 		},
 		Name:    "aws-operator",
