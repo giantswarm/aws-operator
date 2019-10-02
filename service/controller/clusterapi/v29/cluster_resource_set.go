@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
@@ -141,7 +142,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var accountIDResource controller.Resource
+	var accountIDResource resource.Interface
 	{
 		c := accountid.Config{
 			Logger: config.Logger,
@@ -153,7 +154,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var awsClientResource controller.Resource
+	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
@@ -169,7 +170,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpAZsResource controller.Resource
+	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
 			CMAClient:     config.CMAClient,
@@ -183,7 +184,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var encryptionResource controller.Resource
+	var encryptionResource resource.Interface
 	{
 		c := encryption.Config{
 			Encrypter:     encrypterObject,
@@ -197,7 +198,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var ipamResource controller.Resource
+	var ipamResource resource.Interface
 	{
 		c := ipam.Config{
 			Checker:   clusterChecker,
@@ -218,7 +219,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var bridgeZoneResource controller.Resource
+	var bridgeZoneResource resource.Interface
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
@@ -234,7 +235,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var s3BucketResource controller.Resource
+	var s3BucketResource resource.Interface
 	{
 		c := s3bucket.Config{
 			Logger: config.Logger,
@@ -256,7 +257,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var s3ObjectResource controller.Resource
+	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
@@ -276,7 +277,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cleanupEBSVolumesResource controller.Resource
+	var cleanupEBSVolumesResource resource.Interface
 	{
 		c := cleanupebsvolumes.Config{
 			Logger: config.Logger,
@@ -288,7 +289,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cleanupLoadBalancersResource controller.Resource
+	var cleanupLoadBalancersResource resource.Interface
 	{
 		c := cleanuploadbalancers.Config{
 			Logger: config.Logger,
@@ -300,7 +301,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cleanupSecurityGroups controller.Resource
+	var cleanupSecurityGroups resource.Interface
 	{
 		c := cleanupsecuritygroups.Config{
 			Logger: config.Logger,
@@ -312,7 +313,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var regionResource controller.Resource
+	var regionResource resource.Interface
 	{
 		c := region.Config{
 			Logger:        config.Logger,
@@ -325,7 +326,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpResource controller.Resource
+	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
 			CMAClient:            config.CMAClient,
@@ -348,7 +349,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpOutputsResource controller.Resource
+	var tccpOutputsResource resource.Interface
 	{
 		c := tccpoutputs.Config{
 			Logger: config.Logger,
@@ -362,7 +363,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpSubnetsResource controller.Resource
+	var tccpSubnetsResource resource.Interface
 	{
 		c := tccpsubnets.Config{
 			Logger: config.Logger,
@@ -374,7 +375,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpfResource controller.Resource
+	var tccpfResource resource.Interface
 	{
 		c := tccpf.Config{
 			Logger: config.Logger,
@@ -390,7 +391,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpiResource controller.Resource
+	var tccpiResource resource.Interface
 	{
 		c := tccpi.Config{
 			Logger: config.Logger,
@@ -404,7 +405,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var natGatewayAddressesResource controller.Resource
+	var natGatewayAddressesResource resource.Interface
 	{
 		c := natgatewayaddresses.Config{
 			Logger: config.Logger,
@@ -418,7 +419,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var peerRoleARNResource controller.Resource
+	var peerRoleARNResource resource.Interface
 	{
 		c := peerrolearn.Config{
 			Logger: config.Logger,
@@ -430,7 +431,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var cpRouteTablesResource controller.Resource
+	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
 			Logger: config.Logger,
@@ -444,7 +445,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var secretFinalizerResource controller.Resource
+	var secretFinalizerResource resource.Interface
 	{
 		c := secretfinalizer.Config{
 			K8sClient: config.K8sClient,
@@ -457,7 +458,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var serviceResource controller.Resource
+	var serviceResource resource.Interface
 	{
 		c := service.Config{
 			K8sClient: config.K8sClient,
@@ -475,7 +476,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var endpointsResource controller.Resource
+	var endpointsResource resource.Interface
 	{
 		c := endpoints.Config{
 			K8sClient: config.K8sClient,
@@ -493,7 +494,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var vpcCIDRResource controller.Resource
+	var vpcCIDRResource resource.Interface
 	{
 		c := cpvpccidr.Config{
 			Logger: config.Logger,
@@ -507,7 +508,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	resources := []controller.Resource{
+	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,

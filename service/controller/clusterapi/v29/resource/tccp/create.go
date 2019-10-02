@@ -2,6 +2,7 @@ package tccp
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -98,16 +99,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
-			tp := templateParams{
-				MasterInstanceResourceName: key.MasterInstanceResourceName(cr),
-				DockerVolumeResourceName:   key.DockerVolumeResourceName(cr),
-			}
-
-			templateBody, err := r.newTemplateBody(ctx, cr, tp)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			err = r.detachVolumes(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -118,7 +109,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			err = r.updateStack(ctx, cr, templateBody)
+			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -143,15 +134,19 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 
 	var templateBody string
 	{
-		tp := templateParams{
-			MasterInstanceResourceName: key.MasterInstanceResourceName(cr),
-			DockerVolumeResourceName:   key.DockerVolumeResourceName(cr),
-		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		templateBody, err = r.newTemplateBody(ctx, cr, tp)
+		params, err := r.newTemplateParams(ctx, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		templateBody, err = template.Render(params)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane cloud formation stack")
 	}
 
 	{
@@ -233,13 +228,13 @@ func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp templateParams) (string, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (adapter.Adapter, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return adapter.Adapter{}, microerror.Mask(err)
 	}
 
-	var templateBody string
+	var params adapter.Adapter
 	{
 		c := adapter.Config{
 			APIWhitelist:                    r.apiWhiteList,
@@ -257,9 +252,9 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 			StackState: adapter.StackState{
 				Name: key.StackNameTCCP(&cr),
 
-				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
+				DockerVolumeResourceName:   key.DockerVolumeResourceName(cr, t),
 				MasterImageID:              key.ImageID(cc.Status.TenantCluster.AWS.Region),
-				MasterInstanceResourceName: tp.MasterInstanceResourceName,
+				MasterInstanceResourceName: key.MasterInstanceResourceName(cr, t),
 				MasterInstanceType:         key.MasterInstanceType(cr),
 				MasterInstanceMonitoring:   r.instanceMonitoring,
 
@@ -273,28 +268,40 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.Cluster, tp 
 			c.TenantClusterKMSKeyARN = cc.Status.TenantCluster.Encryption.Key
 		}
 
-		params, err := adapter.NewGuest(c)
+		params, err = adapter.NewGuest(c)
 		if err != nil {
-			return "", microerror.Mask(err)
-		}
-
-		templateBody, err = template.Render(params)
-		if err != nil {
-			return "", microerror.Mask(err)
+			return adapter.Adapter{}, microerror.Mask(err)
 		}
 	}
 
-	return templateBody, nil
+	return params, nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster, templateBody string) error {
+func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
+	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring the tenant cluster's control plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
+
+		params, err := r.newTemplateParams(ctx, cr, time.Now())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		templateBody, err = template.Render(params)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane cloud formation stack")
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
@@ -309,7 +316,7 @@ func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster, templat
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured the tenant cluster's control plane cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane cloud formation stack")
 	}
 
 	return nil

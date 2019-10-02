@@ -13,8 +13,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
 )
 
 // EnsureCreated creates DrainerConfigs for ASG instances in terminating/wait

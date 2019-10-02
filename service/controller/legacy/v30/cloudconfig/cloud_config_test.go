@@ -9,13 +9,13 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_7_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_8_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/encrypter"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {

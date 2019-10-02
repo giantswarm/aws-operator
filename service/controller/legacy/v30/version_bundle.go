@@ -1,4 +1,4 @@
-package v29
+package v30
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -8,33 +8,28 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "ignition",
-				Description: "Add name label for default and kube-system namespaces.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "ignition",
-				Description: "Use v1 stable for giantswarm-critical priority class.",
-				Kind:        versionbundle.KindFixed,
-			},
-			{
-				Component:   "ignition",
-				Description: "Introduce explicit resource reservation for OS resources and container runtime.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "kubernetes",
-				Description: "Update kubernetes to 1.14.6 (CVE-2019-9512, CVE-2019-9514) https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1146",
-				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "calico",
-				Description: "Update calico to 3.8.2 https://docs.projectcalico.org/v3.8/release-notes/",
+				Component:   "cloudformation",
+				Description: "Use private subnets for internal Kubernetes API loadbalancer.",
 				Kind:        versionbundle.KindChanged,
 			},
 			{
 				Component:   "cloudformation",
-				Description: "Setup private hosted zone for internal api/etcd load-balancers.",
+				Description: "Add ingress internal load-balancer in private hosted zone.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Duplicate etcd record set into public hosted zone.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add public internal-api record set for Kubernetes API private load balancer.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add whitelisting for internal Kubernetes API.",
 				Kind:        versionbundle.KindAdded,
 			},
 		},
@@ -61,6 +56,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "5.3.0",
+		Version: "5.4.0",
 	}
 }

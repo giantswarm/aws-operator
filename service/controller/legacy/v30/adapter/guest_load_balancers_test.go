@@ -6,7 +6,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
 )
 
 func TestAdapterLoadBalancersRegularFields(t *testing.T) {
@@ -33,8 +33,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 		expectedELBHealthCheckTimeout            int
 		expectedELBHealthCheckUnhealthyThreshold int
 		expectedIngressElbName                   string
+		expectedIngressInternalElbName           string
 		expectedIngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
 		expectedIngressElbScheme                 string
+		expectedIngressInternalElbScheme         string
 	}{
 		{
 			description: "empty custom object with AZs (to test for missing cloud config key",
@@ -117,6 +119,7 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 			expectedELBHealthCheckTimeout:            3,
 			expectedELBHealthCheckUnhealthyThreshold: 2,
 			expectedIngressElbName:                   "test-cluster-ingress",
+			expectedIngressInternalElbName:           "test-cluster-ingress-internal",
 			expectedIngressElbPortsToOpen: []GuestLoadBalancersAdapterPortPair{
 				{
 					PortELB:      443,
@@ -127,7 +130,8 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 					PortInstance: 30010,
 				},
 			},
-			expectedIngressElbScheme: "internet-facing",
+			expectedIngressElbScheme:         "internet-facing",
+			expectedIngressInternalElbScheme: "internal",
 		},
 	}
 
@@ -194,6 +198,10 @@ func TestAdapterLoadBalancersRegularFields(t *testing.T) {
 
 			if tc.expectedIngressElbName != a.Guest.LoadBalancers.IngressElbName {
 				t.Errorf("expected Ingress ELB Name, got %q, want %q", a.Guest.LoadBalancers.IngressElbName, tc.expectedIngressElbName)
+			}
+
+			if tc.expectedIngressInternalElbName != a.Guest.LoadBalancers.IngressInternalElbName {
+				t.Errorf("expected Ingress Internal ELB Name, got %q, want %q", a.Guest.LoadBalancers.IngressInternalElbName, tc.expectedIngressInternalElbName)
 			}
 
 			if !reflect.DeepEqual(tc.expectedIngressElbPortsToOpen, a.Guest.LoadBalancers.IngressElbPortsToOpen) {

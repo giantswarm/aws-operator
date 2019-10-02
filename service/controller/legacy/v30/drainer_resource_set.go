@@ -1,4 +1,4 @@
-package v29
+package v30
 
 import (
 	"context"
@@ -7,18 +7,19 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/credential"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/resource/asgstatus"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/credential"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/resource/tccpoutputs"
 )
 
 type DrainerResourceSetConfig struct {
@@ -35,7 +36,7 @@ type DrainerResourceSetConfig struct {
 func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
-	var asgStatusResource controller.Resource
+	var asgStatusResource resource.Interface
 	{
 		c := asgstatus.Config{
 			G8sClient: config.G8sClient,
@@ -48,7 +49,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var drainerResource controller.Resource
+	var drainerResource resource.Interface
 	{
 		c := drainer.ResourceConfig{
 			G8sClient: config.G8sClient,
@@ -61,7 +62,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var drainFinisherResource controller.Resource
+	var drainFinisherResource resource.Interface
 	{
 		c := drainfinisher.ResourceConfig{
 			G8sClient: config.G8sClient,
@@ -74,7 +75,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpOutputsResource controller.Resource
+	var tccpOutputsResource resource.Interface
 	{
 		c := tccpoutputs.Config{
 			Logger: config.Logger,
@@ -88,7 +89,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	resources := []controller.Resource{
+	resources := []resource.Interface{
 		tccpOutputsResource,
 		asgStatusResource,
 		drainerResource,

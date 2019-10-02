@@ -10,14 +10,14 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/templates/cloudformation/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/templates/cloudformation/tccp"
 )
 
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_4_7_0"
+	CloudConfigVersion = "v_4_8_0"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -97,10 +97,11 @@ const (
 )
 
 const (
-	KindMaster  = "master"
-	KindIngress = "ingress"
-	KindWorker  = "worker"
-	KindEtcd    = "etcd-elb"
+	KindMaster      = "master"
+	KindIngress     = "ingress"
+	KindWorker      = "worker"
+	KindEtcd        = "etcd-elb"
+	KindInternalAPI = "internal-api"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -715,9 +716,9 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/controller/v29/key/key_test.go
-		service/controller/v29/adapter/adapter_test.go
-		service/controller/v29/resource/cloudformation/main_stack_test.go
+		service/controller/v30/key/key_test.go
+		service/controller/v30/adapter/adapter_test.go
+		service/controller/v30/resource/cloudformation/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 2135.4.0 (HVM)
 		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.

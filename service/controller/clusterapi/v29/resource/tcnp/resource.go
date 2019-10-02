@@ -1,15 +1,11 @@
 package tcnp
 
 import (
-	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
 )
 
 const (
@@ -63,11 +59,4 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
-}
-
-func (r *Resource) getCloudFormationTags(cr v1alpha1.MachineDeployment) []*cloudformation.Tag {
-	tags := key.AWSTags(&cr, r.installationName)
-	tags[key.TagStack] = key.StackTCNP
-	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
-	return awstags.NewCloudFormation(tags)
 }

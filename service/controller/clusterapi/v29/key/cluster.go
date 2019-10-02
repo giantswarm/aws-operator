@@ -93,8 +93,8 @@ func CredentialNamespace(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.CredentialSecret.Namespace
 }
 
-func DockerVolumeResourceName(cluster v1alpha1.Cluster) string {
-	return getResourcenameWithTimeHash("DockerVolume", cluster)
+func DockerVolumeResourceName(cr v1alpha1.Cluster, t time.Time) string {
+	return getResourcenameWithTimeHash("DockerVolume", cr, t)
 }
 
 func KubeletLabels(cluster v1alpha1.Cluster) string {
@@ -114,8 +114,8 @@ func MasterCount(cluster v1alpha1.Cluster) int {
 	return 1
 }
 
-func MasterInstanceResourceName(cluster v1alpha1.Cluster) string {
-	return getResourcenameWithTimeHash("MasterInstance", cluster)
+func MasterInstanceResourceName(cr v1alpha1.Cluster, t time.Time) string {
+	return getResourcenameWithTimeHash("MasterInstance", cr, t)
 }
 
 func MasterInstanceName(cluster v1alpha1.Cluster) string {
@@ -219,11 +219,11 @@ func ensureLabel(labels string, key string, value string) string {
 
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a
 // time hash and a cluster ID.
-func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster) string {
+func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster, t time.Time) string {
 	id := strings.Replace(ClusterID(&cluster), "-", "", -1)
 
 	h := sha1.New()
-	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	h.Write([]byte(strconv.FormatInt(t.UnixNano(), 10)))
 	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	upperTimeHash := strings.ToUpper(timeHash)

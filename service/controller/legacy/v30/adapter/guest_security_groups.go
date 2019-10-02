@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
 )
 
 const (
@@ -28,15 +28,18 @@ const (
 )
 
 type GuestSecurityGroupsAdapter struct {
-	APIWhitelistEnabled       bool
-	MasterSecurityGroupName   string
-	MasterSecurityGroupRules  []securityGroupRule
-	WorkerSecurityGroupName   string
-	WorkerSecurityGroupRules  []securityGroupRule
-	IngressSecurityGroupName  string
-	IngressSecurityGroupRules []securityGroupRule
-	EtcdELBSecurityGroupName  string
-	EtcdELBSecurityGroupRules []securityGroupRule
+	APIInternalELBSecurityGroupName  string
+	APIInternalELBSecurityGroupRules []securityGroupRule
+	APIWhitelistEnabled              bool
+	PrivateAPIWhitelistEnabled       bool
+	MasterSecurityGroupName          string
+	MasterSecurityGroupRules         []securityGroupRule
+	WorkerSecurityGroupName          string
+	WorkerSecurityGroupRules         []securityGroupRule
+	IngressSecurityGroupName         string
+	IngressSecurityGroupRules        []securityGroupRule
+	EtcdELBSecurityGroupName         string
+	EtcdELBSecurityGroupRules        []securityGroupRule
 }
 
 func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
@@ -45,7 +48,13 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	s.APIWhitelistEnabled = cfg.APIWhitelist.Enabled
+	internalAPIRules, err := getKubernetesPrivateAPIRules(cfg, cfg.ControlPlaneVPCCidr)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	s.APIWhitelistEnabled = cfg.APIWhitelist.Public.Enabled
+	s.PrivateAPIWhitelistEnabled = cfg.APIWhitelist.Private.Enabled
 
 	s.MasterSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindMaster)
 	s.MasterSecurityGroupRules = masterRules
@@ -59,13 +68,16 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 	s.EtcdELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindEtcd)
 	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
 
+	s.APIInternalELBSecurityGroupName = key.SecurityGroupName(cfg.CustomObject, key.KindInternalAPI)
+	s.APIInternalELBSecurityGroupRules = internalAPIRules
+
 	return nil
 }
 
 func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
 	// Allow traffic to the Kubernetes API server depending on the API
 	// whitelisting rules.
-	apiRules, err := getKubernetesAPIRules(cfg, hostClusterCIDR)
+	publicAPIRules, err := getKubernetesPublicAPIRules(cfg, hostClusterCIDR)
 	if err != nil {
 		return []securityGroupRule{}, microerror.Mask(err)
 	}
@@ -110,7 +122,7 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 		},
 	}
 
-	return append(apiRules, otherRules...), nil
+	return append(publicAPIRules, otherRules...), nil
 }
 
 func (s *GuestSecurityGroupsAdapter) getWorkerRules(customObject v1alpha1.AWSConfig, hostClusterCIDR string) []securityGroupRule {
@@ -208,9 +220,10 @@ type securityGroupRule struct {
 	SourceSecurityGroup string
 }
 
-func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
-	// When API whitelisting is enabled, add separate security group rule per each subnet.
-	if cfg.APIWhitelist.Enabled {
+func getKubernetesPrivateAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
+	// When public API whitelisting is enabled, add separate security group rule per each subnet.
+	if cfg.APIWhitelist.Private.Enabled {
+		// Allow control-plane CIDR and tenant cluster CIDR
 		rules := []securityGroupRule{
 			{
 				Description: "Allow traffic from control plane CIDR.",
@@ -227,8 +240,68 @@ func getKubernetesAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupR
 		}
 
 		// Whitelist all configured subnets.
-		whitelistSubnets := strings.Split(cfg.APIWhitelist.SubnetList, ",")
-		for _, subnet := range whitelistSubnets {
+		privateWhitelistSubnets := strings.Split(cfg.APIWhitelist.Private.SubnetList, ",")
+		for _, subnet := range privateWhitelistSubnets {
+			if subnet != "" {
+				subnetRule := securityGroupRule{
+					Description: "Custom Whitelist CIDR.",
+					Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+					Protocol:    tcpProtocol,
+					SourceCIDR:  subnet,
+				}
+				rules = append(rules, subnetRule)
+			}
+		}
+
+		return rules, nil
+	} else {
+		// When private API whitelisting is disabled, allow all private subnets traffic.
+		allowAllRule := []securityGroupRule{
+			{
+				Description: "Allow all traffic to the master instance from A class network.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  "10.0.0.0/8",
+			},
+			{
+				Description: "Allow all traffic to the master instance from B class network.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  "172.16.0.0/12",
+			},
+			{
+				Description: "Allow all traffic to the master instance from C class network.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  "192.168.0.0/16",
+			},
+		}
+
+		return allowAllRule, nil
+	}
+}
+
+func getKubernetesPublicAPIRules(cfg Config, hostClusterCIDR string) ([]securityGroupRule, error) {
+	// When public API whitelisting is enabled, add separate security group rule per each subnet.
+	if cfg.APIWhitelist.Public.Enabled {
+		rules := []securityGroupRule{
+			{
+				Description: "Allow traffic from control plane CIDR.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  hostClusterCIDR,
+			},
+			{
+				Description: "Allow traffic from tenant cluster CIDR.",
+				Port:        key.KubernetesAPISecurePort(cfg.CustomObject),
+				Protocol:    tcpProtocol,
+				SourceCIDR:  key.StatusNetworkCIDR(cfg.CustomObject),
+			},
+		}
+
+		// Whitelist all configured subnets.
+		publicWhitelistSubnets := strings.Split(cfg.APIWhitelist.Public.SubnetList, ",")
+		for _, subnet := range publicWhitelistSubnets {
 			if subnet != "" {
 				subnetRule := securityGroupRule{
 					Description: "Custom Whitelist CIDR.",
