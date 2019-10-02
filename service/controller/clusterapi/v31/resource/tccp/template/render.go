@@ -1,6 +1,7 @@
 package template
 
 import (
+	"fmt"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/template"
@@ -26,6 +27,8 @@ func Render(v interface{}) (string, error) {
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
+	fmt.Printf("%s\n", s)
 
 	return s, nil
 }
