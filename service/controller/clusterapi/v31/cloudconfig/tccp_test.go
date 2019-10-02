@@ -105,8 +105,8 @@ func Test_Controller_CloudConfig_TCCP_Template_Render(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !bytes.Equal([]byte(templateBody), goldenFile) {
-				t.Fatalf("\n\n%s\n", cmp.Diff(string(goldenFile), templateBody))
+			if !bytes.Equal(templateBody, goldenFile) {
+				t.Fatalf("\n\n%s\n", cmp.Diff(string(goldenFile), string(templateBody)))
 			}
 		})
 	}
