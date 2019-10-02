@@ -78,7 +78,6 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
-				OIDC:                      config.OIDC,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
 				SSHUserList:               config.SSHUserList,
