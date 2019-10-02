@@ -9,11 +9,19 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v4.8.0] WIP
+## [v4.8.0] - 2019-10-02
 
-### Added
+### Changed
 
-- TODO
+- Update Kubernetes to `1.15.4` (CVE-2019-11251).
+- Update Calico to `3.9.1`.
+- Update etcd to `3.3.15`.
+- Update `calicoctl` (debug tool) to `3.9.1`.
+- Update `crictl` (debug tool) to `1.15.0`.
+- Change `calico-node` `DaemonSet` from `v1beta1` to `v1`.
+- Change `calico-kube-controllers` `Deployment` from `v1beta1` to `v1`.
+- Use `/bin/calico-node -felix-live` for `calico-node` liveness probe instead of `httpGet`.
+- Generally minimize differences between [Calico v3.9 yaml](https://docs.projectcalico.org/v3.9/manifests/calico.yaml) and `calico-all.yaml`.
 
 ## [v4.7.0]
 
@@ -441,6 +449,7 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0
 [v4.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_7_0
 [v4.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_6_0
 [v4.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_1
@@ -462,6 +471,7 @@ chart-operator).
 [v3.6.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_1
 [v3.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_0
 [v3.5.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_3
+[v3.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_1
 [v3.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_0
 [v3.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_4_0
 [v3.3.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_4
