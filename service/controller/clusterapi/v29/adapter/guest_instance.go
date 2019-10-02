@@ -6,8 +6,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/templates"
 )
 
 type GuestInstanceAdapter struct {
@@ -86,7 +86,7 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		c := SmallCloudconfigConfig{
 			S3URL: key.SmallCloudConfigS3URL(&config.CustomObject, config.TenantClusterAccountID, "master"),
 		}
-		rendered, err := templates.Render(key.CloudConfigSmallTemplates(), c)
+		rendered, err := template.Render(key.CloudConfigSmallTemplates(), c)
 		if err != nil {
 			return microerror.Mask(err)
 		}

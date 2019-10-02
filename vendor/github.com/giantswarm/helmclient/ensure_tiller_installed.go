@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/errors/guest"
+	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -71,8 +71,8 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 		if errors.IsAlreadyExists(err) {
 			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("serviceaccount %#q in namespace %#q already exists", name, namespace))
 			// fall through
-		} else if guest.IsAPINotAvailable(err) {
-			return microerror.Maskf(guest.APINotAvailableError, err.Error())
+		} else if tenant.IsAPINotAvailable(err) {
+			return microerror.Maskf(tenant.APINotAvailableError, err.Error())
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {
@@ -155,13 +155,13 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 					},
 				},
 				Ingress: []networkingv1.NetworkPolicyIngressRule{
-					networkingv1.NetworkPolicyIngressRule{
+					{
 						Ports: []networkingv1.NetworkPolicyPort{
-							networkingv1.NetworkPolicyPort{
+							{
 								Protocol: &protocolTCP,
 								Port:     &tillerPort,
 							},
-							networkingv1.NetworkPolicyPort{
+							{
 								Protocol: &protocolTCP,
 								Port:     &tillerHTTPPort,
 							},
@@ -169,7 +169,7 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 					},
 				},
 				Egress: []networkingv1.NetworkPolicyEgressRule{
-					networkingv1.NetworkPolicyEgressRule{},
+					{},
 				},
 				PolicyTypes: []networkingv1.PolicyType{
 					networkingv1.PolicyTypeIngress,
@@ -208,7 +208,7 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 			return nil
 		}
 
-		b := backoff.NewConstant(c.ensureTillerInstalledMaxWait, 3*time.Second)
+		b := backoff.NewConstant(c.ensureTillerInstalledMaxWait, 5*time.Second)
 		n := backoff.NewNotifier(c.logger, context.Background())
 
 		err = backoff.RetryNotify(o, b, n)
@@ -276,12 +276,12 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 
 			i++
 			if i < 3 {
-				return microerror.Maskf(executionFailedError, "failed to ping tiller 3 consecutive times")
+				return microerror.Maskf(tillerNotFoundError, "failed to ping tiller 3 consecutive times")
 			}
 
 			return nil
 		}
-		b := backoff.NewExponential(1*time.Minute, 5*time.Second)
+		b := backoff.NewExponential(c.ensureTillerInstalledMaxWait, 5*time.Second)
 		n := backoff.NewNotifier(c.logger, ctx)
 
 		err := backoff.RetryNotify(o, b, n)

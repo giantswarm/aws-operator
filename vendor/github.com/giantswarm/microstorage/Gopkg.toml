@@ -34,8 +34,8 @@
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/prometheus/client_golang"
+  version = "0.9.3"
 
 [[constraint]]
   name = "github.com/stretchr/testify"

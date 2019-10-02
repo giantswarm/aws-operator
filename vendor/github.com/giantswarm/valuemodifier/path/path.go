@@ -351,6 +351,26 @@ func (s *Service) setFromInterface(path string, value interface{}, jsonStructure
 	split := strings.Split(path, s.separator)
 	key := s.unescapeKey(split[0])
 
+	// Create new element when the existing jsonStructure doesn't exist.
+	if jsonStructure == nil {
+		m := make(map[string]interface{})
+
+		// Just recurse when there are more components left in path with
+		// missing elements.
+		if len(split) > 1 {
+			var err error
+			recPath := strings.Join(split[1:], s.separator)
+			value, err = s.setFromInterface(recPath, value, nil)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		}
+
+		m[key] = value
+
+		return m, nil
+	}
+
 	// process map
 	{
 		_, ok := jsonStructure.(string)
@@ -367,28 +387,18 @@ func (s *Service) setFromInterface(path string, value interface{}, jsonStructure
 				// fall through
 			} else {
 				if len(split) == 1 {
-					_, ok := stringMap[path]
-					if ok {
-						stringMap[path] = value
-						return stringMap, nil
-					} else {
-						return nil, microerror.Maskf(notFoundError, "key '%s'", path)
-					}
+					stringMap[path] = value
+					return stringMap, nil
 				} else {
-					_, ok := stringMap[key]
-					if ok {
-						recPath := strings.Join(split[1:], s.separator)
+					recPath := strings.Join(split[1:], s.separator)
 
-						modified, err := s.setFromInterface(recPath, value, stringMap[key])
-						if err != nil {
-							return nil, microerror.Mask(err)
-						}
-						stringMap[key] = modified
-
-						return stringMap, nil
-					} else {
-						return nil, microerror.Maskf(notFoundError, "key '%s'", path)
+					modified, err := s.setFromInterface(recPath, value, stringMap[key])
+					if err != nil {
+						return nil, microerror.Mask(err)
 					}
+					stringMap[key] = modified
+
+					return stringMap, nil
 				}
 			}
 		}
