@@ -23,13 +23,10 @@ Resources:
       MinSize: 3
       MaxSize: 5
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
-      LoadBalancerNames:
-        - 8y5ck-ingress
-
+      TargetGroupARNs:        
       # 10 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
       HealthCheckGracePeriod: 10
-
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:

@@ -3,6 +3,7 @@ package tccpoutputs
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/giantswarm/microerror"
 
@@ -14,6 +15,7 @@ import (
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
 	HostedZoneNameServersKey      = "HostedZoneNameServers"
+	IngressTargetGroupIDs         = "IngressTargetGroupsIDs"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
@@ -85,6 +87,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.HostedZoneNameServers = v
+	}
+
+	{
+		v, err := cloudFormation.GetOutputValue(outputs, IngressTargetGroupIDs)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.IngressTargetGroupIDs = strings.Split(v, ",")
 	}
 
 	{

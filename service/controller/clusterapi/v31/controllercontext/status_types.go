@@ -35,6 +35,7 @@ type ContextStatusTenantCluster struct {
 	AWS                   ContextStatusTenantClusterAWS
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
+	IngressTargetGroupIDs []string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	TCNP                  ContextStatusTenantClusterTCNP

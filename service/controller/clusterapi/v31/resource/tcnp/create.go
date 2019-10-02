@@ -268,10 +268,8 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
-		DesiredCapacity: minDesiredNodes,
-		LoadBalancer: template.ParamsMainAutoScalingGroupLoadBalancer{
-			Name: key.ELBNameIngress(&cr),
-		},
+		DesiredCapacity:       minDesiredNodes,
+		IngressTargetGroupIDs: cc.Status.TenantCluster.IngressTargetGroupIDs,
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),

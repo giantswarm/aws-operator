@@ -73,7 +73,7 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 			TargetResourceName:   apiELBTargetGroupResourceName,
 		},
 	}
-	a.APIElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
+	a.APIInternalElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
 			ListenerResourceName: apiInternalELBListenerResourceName,
 			PortELB:              key.KubernetesSecurePort,
