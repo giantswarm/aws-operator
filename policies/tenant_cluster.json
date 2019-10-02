@@ -55,7 +55,7 @@
                 "iam:UpdateAssumeRolePolicy",
                 "iam:UpdateRoleDescription"
             ],
-            "Resource": "arn:aws:iam::120935651743:role/*-EC2-K8S-Role"
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-EC2-K8S-Role"
         },
         {
             "Effect": "Allow",
@@ -65,14 +65,14 @@
                 "iam:DeleteInstanceProfile",
                 "iam:RemoveRoleFromInstanceProfile"
             ],
-            "Resource": "arn:aws:iam::120935651743:instance-profile/*-EC2-K8S-Role"
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:instance-profile/*-EC2-K8S-Role"
         },
         {
             "Effect": "Allow",
             "Action": [
                 "iam:CreateServiceLinkedRole"
             ],
-            "Resource": "arn:aws:iam::120935651743:role/aws-service-role/*"
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/aws-service-role/*"
         }
     ]
 }
