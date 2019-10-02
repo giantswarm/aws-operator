@@ -35,25 +35,27 @@ const (
 func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
 	g, ctx := errgroup.WithContext(ctx)
 
-	g.Go(func() error {
-		o := func() error {
-			err := ensureBastionHostCreated(ctx, id, config)
+	/*
+		g.Go(func() error {
+			o := func() error {
+				err := ensureBastionHostCreated(ctx, id, config)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				return nil
+			}
+			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
+
+			err := backoff.RetryNotify(o, b, n)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			return nil
-		}
-		b := backoff.NewMaxRetries(10, 1*time.Minute)
-		n := backoff.NewNotifier(config.Logger, ctx)
-
-		err := backoff.RetryNotify(o, b, n)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
-	})
+		})
+	*/
 
 	g.Go(func() error {
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
@@ -100,25 +102,27 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
 	g, ctx := errgroup.WithContext(ctx)
 
-	g.Go(func() error {
-		o := func() error {
-			err := ensureBastionHostDeleted(ctx, id, config)
+	/*
+		g.Go(func() error {
+			o := func() error {
+				err := ensureBastionHostDeleted(ctx, id, config)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				return nil
+			}
+			b := backoff.NewMaxRetries(10, 1*time.Minute)
+			n := backoff.NewNotifier(config.Logger, ctx)
+
+			err := backoff.RetryNotify(o, b, n)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			return nil
-		}
-		b := backoff.NewMaxRetries(10, 1*time.Minute)
-		n := backoff.NewNotifier(config.Logger, ctx)
-
-		err := backoff.RetryNotify(o, b, n)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		return nil
-	})
+		})
+	*/
 
 	g.Go(func() error {
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
