@@ -13,8 +13,8 @@ import (
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
 	HostedZoneNameServersKey      = "HostedZoneNameServers"
-	IngressInsecureTargetGroupIDs = "IngressInsecureTargetGroupsIDs"
-	IngressSecureTargetGroupIDs   = "IngressSecureTargetGroupsIDs"
+	IngressInsecureTargetGroupIDs = "IngressInsecureTargetGroupsID"
+	IngressSecureTargetGroupIDs   = "IngressSecureTargetGroupsID"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
@@ -98,6 +98,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.IngressTargetGroupIDs = []string{v1, v2}
+		fmt.Printf("IngressLoadbalancerTargetGroups: XXSSAA  %#v\n", cc.Status.TenantCluster.IngressTargetGroupIDs)
 	}
 
 	{
