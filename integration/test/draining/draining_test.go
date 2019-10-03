@@ -18,8 +18,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -292,7 +293,7 @@ func Test_Draining(t *testing.T) {
 }
 
 func numberOfMasters(clusterID string) (int, error) {
-	cluster, err := config.Host.AWSCluster(clusterID)
+	cluster, err := config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -301,7 +302,7 @@ func numberOfMasters(clusterID string) (int, error) {
 }
 
 func numberOfWorkers(clusterID string) (int, error) {
-	cluster, err := config.Host.AWSCluster(clusterID)
+	cluster, err := config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -316,14 +317,18 @@ func removeWorker(clusterID string) error {
 		patch[0].Op = "remove"
 		patch[0].Path = "/spec/aws/workers/1"
 
-		err := config.Host.ApplyAWSConfigPatch(patch, clusterID)
+		patchBytes, err := json.Marshal(patch)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		_, err = config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(clusterID, types.JSONPatchType, patchBytes)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		customObject, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
+		customObject, err := config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -331,7 +336,7 @@ func removeWorker(clusterID string) error {
 		customObject.Spec.Cluster.Scaling.Max--
 		customObject.Spec.Cluster.Scaling.Min--
 
-		_, err = config.Host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		_, err = config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}

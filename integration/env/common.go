@@ -1,11 +1,17 @@
+// +build k8srequired
+
 package env
 
 import (
 	"crypto/sha1"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
@@ -18,18 +24,26 @@ const (
 const (
 	EnvVarCircleCI             = "CIRCLECI"
 	EnvVarCircleSHA            = "CIRCLE_SHA1"
+	EnvVarE2EKubeconfig        = "E2E_KUBECONFIG"
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
-	EnvVarTestedVersion        = "TESTED_VERSION"
-	EnvVarTestDir              = "TEST_DIR"
+	EnvVarTestedVersion        = "E2E_TESTED_VERSION"
+	EnvVarTestDir              = "E2E_TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
+
+	// IDChars represents the character set used to generate cluster IDs.
+	// (does not contain 1 and l, to avoid confusion)
+	IDChars = "023456789abcdefghijkmnopqrstuvwxyz"
+	// IDLength represents the number of characters used to create a cluster ID.
+	IDLength = 3
 )
 
 var (
 	circleCI             string
 	circleSHA            string
 	clusterID            string
+	kubeconfigPath       string
 	registryPullSecret   string
 	githubToken          string
 	testDir              string
@@ -52,6 +66,11 @@ func init() {
 	githubToken = os.Getenv(EnvVarGithubBotToken)
 	if githubToken == "" {
 		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
+	}
+
+	kubeconfigPath = os.Getenv(EnvVarE2EKubeconfig)
+	if kubeconfigPath == "" {
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVarE2EKubeconfig))
 	}
 
 	testedVersion = os.Getenv(EnvVarTestedVersion)
@@ -86,31 +105,30 @@ func init() {
 		panic("version bundle version  must not be empty")
 	}
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
+
+	// ClusterID returns a cluster ID unique to a run integration test. It might
+	// look like ci-w3e95.
+	//
+	//     ci is a static identifier stating a CI run of the aws-operator.
+	//     w is a version reference for wip which can also be c for the current version.
+	//     3 is the first character of the Git SHA.
+	//     e95 is a randomly generated alphanumeric string.
+	//
+	var parts []string
+	parts = append(parts, "ci-")
+	parts = append(parts, TestedVersion()[0:1])
+	parts = append(parts, CircleSHA()[0:1])
+	parts = append(parts, generateID())
+	clusterID = strings.Join(parts, "")
+
 }
 
 func CircleSHA() string {
 	return circleSHA
 }
 
-// ClusterID returns a cluster ID unique to a run integration test. It might
-// look like ci-wip-3cc75-5e958.
-//
-//     ci is a static identifier stating a CI run of the aws-operator.
-//     wip is a version reference which can also be cur for the current version.
-//     3cc75 is the Git SHA.
-//     5e958 is a hash of the integration test dir, if any.
-//
 func ClusterID() string {
-	var parts []string
-
-	parts = append(parts, "ci")
-	parts = append(parts, TestedVersion()[0:3])
-	parts = append(parts, CircleSHA()[0:5])
-	if TestHash() != "" {
-		parts = append(parts, TestHash())
-	}
-
-	return strings.Join(parts, "-")
+	return clusterID
 }
 
 func KeepResources() bool {
@@ -119,6 +137,10 @@ func KeepResources() bool {
 
 func GithubToken() string {
 	return githubToken
+}
+
+func KubeConfigPath() string {
+	return kubeconfigPath
 }
 
 func RegistryPullSecret() string {
@@ -147,4 +169,33 @@ func TestHash() string {
 
 func VersionBundleVersion() string {
 	return versionBundleVersion
+}
+
+// generateId returns a string to be used as unique cluster ID
+func generateID() string {
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
+
+	for {
+		letterRunes := []rune(IDChars)
+		b := make([]rune, IDLength)
+		for i := range b {
+			b[i] = letterRunes[rng.Intn(len(letterRunes))]
+		}
+
+		id := string(b)
+
+		if _, err := strconv.Atoi(id); err == nil {
+			// string is numbers only, which we want to avoid
+			continue
+		}
+
+		matched, err := regexp.MatchString("^[a-z]+$", id)
+		if err == nil && matched == true {
+			// strings is letters only, which we also avoid
+			continue
+		}
+
+		return id
+	}
 }

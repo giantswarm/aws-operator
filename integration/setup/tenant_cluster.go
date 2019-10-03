@@ -21,8 +21,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
@@ -169,20 +167,10 @@ func crExistsCondition(ctx context.Context, config Config, crd *apiextensionsv1b
 			Resource: crd.Spec.Names.Plural,
 		}
 
-		var dynamicClient dynamic.Interface
-		{
-			var err error
-
-			dynamicClient, err = dynamic.NewForConfig(rest.CopyConfig(config.Host.RestConfig()))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for creation of CR %#q in namespace %#q", crName, crNamespace))
 
 		o := func() error {
-			_, err := dynamicClient.Resource(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
+			_, err := config.K8sClients.DynClient().Resource(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return microerror.Maskf(notFoundError, "CR %#q in namespace %#q", crName, crNamespace)
 			} else if err != nil {
@@ -212,20 +200,10 @@ func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv
 			Resource: crd.Spec.Names.Plural,
 		}
 
-		var dynamicClient dynamic.Interface
-		{
-			var err error
-
-			dynamicClient, err = dynamic.NewForConfig(rest.CopyConfig(config.Host.RestConfig()))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for deletion of CR %#q in namespace %#q", crName, crNamespace))
 
 		o := func() error {
-			_, err := dynamicClient.Resource(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
+			_, err := config.K8sClients.DynClient().Resource(gvr).Namespace(crNamespace).Get(crName, metav1.GetOptions{})
 			if apierrors.IsNotFound(err) {
 				return nil
 			} else if err != nil {

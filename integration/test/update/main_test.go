@@ -31,7 +31,7 @@ func init() {
 	var p *Provider
 	{
 		c := ProviderConfig{
-			G8sClient: config.Host.G8sClient(),
+			G8sClient: config.K8sClients.G8sClient(),
 			Logger:    config.Logger,
 
 			ClusterID:   env.ClusterID(),

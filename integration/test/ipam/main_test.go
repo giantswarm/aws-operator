@@ -33,10 +33,10 @@ func init() {
 	var p *Provider
 	{
 		c := ProviderConfig{
-			AWSClient: config.AWSClient,
-			Host:      config.Host,
-			Logger:    config.Logger,
-			Release:   config.Release,
+			AWSClient:  config.AWSClient,
+			K8sClients: config.K8sClients,
+			Logger:     config.Logger,
+			Release:    config.Release,
 		}
 
 		p, err = NewProvider(c)

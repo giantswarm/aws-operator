@@ -218,8 +218,8 @@
   revision = "645efb99af631627de84ed3a5e6ed4572d3004fa"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9040e13234b3f2d9aacb9f8f4cdaca5f108b334196cf17d1518d52307a7444b1"
+  branch = "update-guest"
+  digest = "1:0d4b36dffc408477ea300d1cf27390e12f4c209866c1128147fe7739ba7eb8be"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "internal/filelogger",
@@ -228,7 +228,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "3af6217b34041f7829e4e4b4c03fdffee47fd1d0"
+  revision = "6511eb7ede0c5516fbd490e278427d04949737cc"
 
 [[projects]]
   branch = "master"
@@ -1474,7 +1474,6 @@
     "github.com/giantswarm/certs",
     "github.com/giantswarm/certs/certstest",
     "github.com/giantswarm/e2e-harness/pkg/framework",
-    "github.com/giantswarm/e2e-harness/pkg/harness",
     "github.com/giantswarm/e2e-harness/pkg/release",
     "github.com/giantswarm/e2eclients/aws",
     "github.com/giantswarm/e2esetup/privaterepo",
