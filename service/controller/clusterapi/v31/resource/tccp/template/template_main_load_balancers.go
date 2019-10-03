@@ -139,7 +139,8 @@ const TemplateMainLoadBalancers = `
       Port: {{ .PortInstance }}
       Protocol: TCP
       TargetGroupAttributes:
-      - proxy_protocol_v2.enabled: true
+      - Key: proxy_protocol_v2.enabled
+        Value: true
       TargetType: instance
       UnhealthyThresholdCount: {{ $v.ELBHealthCheckUnhealthyThreshold }}
       VpcId: !Ref VPC

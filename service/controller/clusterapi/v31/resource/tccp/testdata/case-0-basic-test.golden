@@ -325,7 +325,8 @@ Resources:
       Port: 30011
       Protocol: TCP
       TargetGroupAttributes:
-      - proxy_protocol_v2.enabled: true
+      - Key: proxy_protocol_v2.enabled
+        Value: true
       TargetType: instance
       UnhealthyThresholdCount: 2
       VpcId: !Ref VPC
@@ -349,7 +350,8 @@ Resources:
       Port: 30010
       Protocol: TCP
       TargetGroupAttributes:
-      - proxy_protocol_v2.enabled: true
+      - Key: proxy_protocol_v2.enabled
+        Value: true
       TargetType: instance
       UnhealthyThresholdCount: 2
       VpcId: !Ref VPC
