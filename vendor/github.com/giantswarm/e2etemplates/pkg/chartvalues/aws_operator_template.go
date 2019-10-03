@@ -71,4 +71,8 @@ const awsOperatorTemplate = `Installation:
     Security:
       RestrictAccess:
         Enabled: false
+        GSAPI: false
+        GuestAPI:
+          Private: false
+          Public: false
 `
