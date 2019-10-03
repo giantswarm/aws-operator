@@ -4,7 +4,10 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
@@ -24,6 +27,12 @@ const (
 	EnvVarTestedVersion        = "TESTED_VERSION"
 	EnvVarTestDir              = "TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
+
+	// IDChars represents the character set used to generate cluster IDs.
+	// (does not contain 1 and l, to avoid confusion)
+	IDChars = "023456789abcdefghijkmnopqrstuvwxyz"
+	// IDLength represents the number of characters used to create a cluster ID.
+	IDLength = 3
 )
 
 var (
@@ -104,11 +113,9 @@ func ClusterID() string {
 	var parts []string
 
 	parts = append(parts, "ci")
-	parts = append(parts, TestedVersion()[0:3])
-	parts = append(parts, CircleSHA()[0:5])
-	if TestHash() != "" {
-		parts = append(parts, TestHash())
-	}
+	parts = append(parts, TestedVersion()[0:1])
+	parts = append(parts, CircleSHA()[0:2])
+	parts = append(parts, generateID())
 
 	return strings.Join(parts, "-")
 }
@@ -147,4 +154,30 @@ func TestHash() string {
 
 func VersionBundleVersion() string {
 	return versionBundleVersion
+}
+
+// generateId returns a string to be used as unique cluster ID
+func generateID() string {
+	for {
+		letterRunes := []rune(IDChars)
+		b := make([]rune, IDLength)
+		for i := range b {
+			b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		}
+
+		id := string(b)
+
+		if _, err := strconv.Atoi(id); err == nil {
+			// string is numbers only, which we want to avoid
+			continue
+		}
+
+		matched, err := regexp.MatchString("^[a-z]+$", id)
+		if err == nil && matched == true {
+			// strings is letters only, which we also avoid
+			continue
+		}
+
+		return id
+	}
 }
