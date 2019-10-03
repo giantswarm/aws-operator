@@ -16,7 +16,7 @@ const TemplateMainLoadBalancers = `
       {{- end}}
       Type: network
   {{- range $v.APIInternalElbListenersAndTargets}}
-  {{ .TargetResourceName }}:
+  {{ .TargetGroupResourceName }}:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -24,6 +24,7 @@ const TemplateMainLoadBalancers = `
       HealthCheckPort: {{ .PortInstance }}
       HealthCheckProtocol: TCP
       HealthyThresholdCount: {{ $v.ELBHealthCheckHealthyThreshold }}
+      Name: {{ .TargetGroupName }}
       Port: {{ .PortInstance }}
       Protocol: TCP
       Targets:
@@ -36,7 +37,7 @@ const TemplateMainLoadBalancers = `
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref {{ .TargetResourceName }}
+        TargetGroupArn: !Ref {{ .TargetGroupResourceName }}
       LoadBalancerArn: !Ref ApiInternalLoadBalancer
       Port: {{ .PortELB }}
       Protocol: TCP
@@ -54,7 +55,7 @@ const TemplateMainLoadBalancers = `
       {{end}}
       Type: network
   {{- range $v.APIElbListenersAndTargets}}
-  {{ .TargetResourceName }}:
+  {{ .TargetGroupResourceName }}:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -62,6 +63,7 @@ const TemplateMainLoadBalancers = `
       HealthCheckPort: {{ .PortInstance }}
       HealthCheckProtocol: TCP
       HealthyThresholdCount: {{ $v.ELBHealthCheckHealthyThreshold }}
+      Name: {{ .TargetGroupName }}
       Port: {{ .PortInstance }}
       Protocol: TCP
       Targets:
@@ -74,7 +76,7 @@ const TemplateMainLoadBalancers = `
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref {{ .TargetResourceName }}
+        TargetGroupArn: !Ref {{ .TargetGroupResourceName }}
       LoadBalancerArn: !Ref ApiLoadBalancer
       Port: {{ .PortELB }}
       Protocol: TCP
@@ -90,7 +92,7 @@ const TemplateMainLoadBalancers = `
       {{end}}
       Type: network
   {{- range $v.EtcdElbListenersAndTargets}}
-  {{ .TargetResourceName }}:
+  {{ .TargetGroupResourceName }}:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -98,6 +100,7 @@ const TemplateMainLoadBalancers = `
       HealthCheckPort: {{ .PortInstance }}
       HealthCheckProtocol: TCP
       HealthyThresholdCount: {{ $v.ELBHealthCheckHealthyThreshold }}
+      Name: {{ .TargetGroupName }}
       Port: {{ .PortInstance }}
       Protocol: TCP
       Targets:
@@ -110,7 +113,7 @@ const TemplateMainLoadBalancers = `
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref {{ .TargetResourceName }}
+        TargetGroupArn: !Ref {{ .TargetGroupResourceName }}
       LoadBalancerArn: !Ref EtcdLoadBalancer
       Port: {{ .PortELB }}
       Protocol: TCP
@@ -128,7 +131,7 @@ const TemplateMainLoadBalancers = `
       {{end}}
       Type: network
   {{- range $v.IngressElbListenersAndTargets}}
-  {{ .TargetResourceName }}:
+  {{ .TargetGroupResourceName }}:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -136,6 +139,7 @@ const TemplateMainLoadBalancers = `
       HealthCheckPort: {{ .PortInstance }}
       HealthCheckProtocol: TCP
       HealthyThresholdCount: {{ $v.ELBHealthCheckHealthyThreshold }}
+      Name: {{ .TargetGroupName }}
       Port: {{ .PortInstance }}
       Protocol: TCP
       TargetGroupAttributes:
@@ -149,7 +153,7 @@ const TemplateMainLoadBalancers = `
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref {{ .TargetResourceName }}
+        TargetGroupArn: !Ref {{ .TargetGroupResourceName }}
       LoadBalancerArn: !Ref IngressLoadBalancer
       Port: {{ .PortELB }}
       Protocol: TCP

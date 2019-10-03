@@ -67,18 +67,20 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.APIInternalElbName = key.InternalELBNameAPI(&cfg.CustomObject)
 	a.APIElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
-			ListenerResourceName: apiELBListenerResourceName,
-			PortELB:              key.KubernetesSecurePort,
-			PortInstance:         key.KubernetesSecurePort,
-			TargetResourceName:   apiELBTargetGroupResourceName,
+			ListenerResourceName:    apiELBListenerResourceName,
+			PortELB:                 key.KubernetesSecurePort,
+			PortInstance:            key.KubernetesSecurePort,
+			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, apiELBTargetGroupResourceName),
+			TargetGroupResourceName: apiELBTargetGroupResourceName,
 		},
 	}
 	a.APIInternalElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
-			ListenerResourceName: apiInternalELBListenerResourceName,
-			PortELB:              key.KubernetesSecurePort,
-			PortInstance:         key.KubernetesSecurePort,
-			TargetResourceName:   apiInternalELBTargetGroupResourceName,
+			ListenerResourceName:    apiInternalELBListenerResourceName,
+			PortELB:                 key.KubernetesSecurePort,
+			PortInstance:            key.KubernetesSecurePort,
+			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, apiInternalELBTargetGroupResourceName),
+			TargetGroupResourceName: apiInternalELBTargetGroupResourceName,
 		},
 	}
 	a.APIElbScheme = externalELBScheme
@@ -89,10 +91,11 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.EtcdElbName = key.ELBNameEtcd(&cfg.CustomObject)
 	a.EtcdElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
-			ListenerResourceName: etcdELBListenerResourceName,
-			PortELB:              key.EtcdPort,
-			PortInstance:         key.EtcdPort,
-			TargetResourceName:   etcdELBTargetGroupResourceName,
+			ListenerResourceName:    etcdELBListenerResourceName,
+			PortELB:                 key.EtcdPort,
+			PortInstance:            key.EtcdPort,
+			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, etcdELBTargetGroupResourceName),
+			TargetGroupResourceName: etcdELBTargetGroupResourceName,
 		},
 	}
 	a.EtcdElbScheme = internalELBScheme
@@ -102,16 +105,18 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.IngressElbName = key.ELBNameIngress(&cfg.CustomObject)
 	a.IngressElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
 		{
-			ListenerResourceName: ingressELBSecureListenerResourceName,
-			PortELB:              httpsPort,
-			PortInstance:         key.IngressControllerSecurePort,
-			TargetResourceName:   ingressELBSecureTargetGroupResourceName,
+			ListenerResourceName:    ingressELBSecureListenerResourceName,
+			PortELB:                 httpsPort,
+			PortInstance:            key.IngressControllerSecurePort,
+			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, ingressELBSecureTargetGroupResourceName),
+			TargetGroupResourceName: ingressELBSecureTargetGroupResourceName,
 		},
 		{
-			ListenerResourceName: ingressELBInsecureListenerResourceName,
-			PortELB:              httpPort,
-			PortInstance:         key.IngressControllerInsecurePort,
-			TargetResourceName:   ingressELBInsecureTargetGroupResourceName,
+			ListenerResourceName:    ingressELBInsecureListenerResourceName,
+			PortELB:                 httpPort,
+			PortInstance:            key.IngressControllerInsecurePort,
+			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, ingressELBInsecureTargetGroupResourceName),
+			TargetGroupResourceName: ingressELBInsecureTargetGroupResourceName,
 		},
 	}
 	a.IngressElbScheme = externalELBScheme
@@ -145,8 +150,10 @@ type GuestLoadBalancersAdapterListenerAndTarget struct {
 	PortELB int
 	// PortInstance is the target port on the instance the ELB forwards traffic to.
 	PortInstance int
-	// Target Group resource name
-	TargetResourceName string
+	// TargetGroup name
+	TargetGroupName string
+	// TargetGroup resource name
+	TargetGroupResourceName string
 }
 
 func heathCheckTarget(port int) string {

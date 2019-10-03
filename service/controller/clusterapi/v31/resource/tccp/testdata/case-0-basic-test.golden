@@ -211,6 +211,7 @@ Resources:
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
+      Name: ApiInternalLoadBalancerTargetGroup-8y5ck
       Port: 443
       Protocol: TCP
       Targets:
@@ -250,6 +251,7 @@ Resources:
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
+      Name: ApiLoadBalancerTargetGroup-8y5ck
       Port: 443
       Protocol: TCP
       Targets:
@@ -283,6 +285,7 @@ Resources:
       HealthCheckPort: 2379
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
+      Name: EtcdLoadBalancerTargetGroup-8y5ck
       Port: 2379
       Protocol: TCP
       Targets:
@@ -322,6 +325,7 @@ Resources:
       HealthCheckPort: 30011
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
+      Name: IngressLoadBalancerSecureTargetGroup-8y5ck
       Port: 30011
       Protocol: TCP
       TargetGroupAttributes:
@@ -347,6 +351,7 @@ Resources:
       HealthCheckPort: 30010
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
+      Name: IngressLoadBalancerInsecureTargetGroup-8y5ck
       Port: 30010
       Protocol: TCP
       TargetGroupAttributes:

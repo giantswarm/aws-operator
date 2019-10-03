@@ -147,6 +147,10 @@ func TargetLogBucketName(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
 }
 
+func TargetGroupNameWithClusterID(cluster v1alpha1.Cluster, targetGroupName string) string {
+	return fmt.Sprintf("%s-%s", targetGroupName, ClusterID(&cluster))
+}
+
 func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 	if v == nil {
 		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
