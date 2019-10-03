@@ -4,9 +4,9 @@ Outputs:
   DockerVolumeResourceName:
     Value: DockerVolume8Y5CK78968
   IngressInsecureTargetGroupsIDs:
-    Value: !Ref IngressLoadBalancerInsecureTargetGroup
+    Value: !Ref IngressInsecureTargetGroup
   IngressSecureTargetGroupsIDs:
-    Value: !Ref IngressLoadBalancerSecureTargetGroup
+    Value: !Ref IngressSecureTargetGroup
   MasterImageID:
     Value: ami-0eb0d9bb7ad1bd1e9
   MasterInstanceResourceName:
@@ -203,7 +203,7 @@ Resources:
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       Type: network
-  ApiInternalLoadBalancerTargetGroup:
+  ApiInternalTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -211,7 +211,7 @@ Resources:
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: ApiInternalLoadBalancerTargetGroup-8y5ck
+      Name: ApiInternalTargetGroup-8y5ck
       Port: 443
       Protocol: TCP
       Targets:
@@ -224,7 +224,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref ApiInternalLoadBalancerTargetGroup
+        TargetGroupArn: !Ref ApiInternalTargetGroup
       LoadBalancerArn: !Ref ApiInternalLoadBalancer
       Port: 443
       Protocol: TCP
@@ -243,7 +243,7 @@ Resources:
         - !Ref PublicSubnetEuCentral1c
       
       Type: network
-  ApiLoadBalancerTargetGroup:
+  ApiTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -251,7 +251,7 @@ Resources:
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: ApiLoadBalancerTargetGroup-8y5ck
+      Name: ApiTargetGroup-8y5ck
       Port: 443
       Protocol: TCP
       Targets:
@@ -264,7 +264,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref ApiLoadBalancerTargetGroup
+        TargetGroupArn: !Ref ApiTargetGroup
       LoadBalancerArn: !Ref ApiLoadBalancer
       Port: 443
       Protocol: TCP
@@ -277,7 +277,7 @@ Resources:
         - !Ref PrivateSubnetEuCentral1b
       
       Type: network
-  EtcdLoadBalancerTargetGroup:
+  EtcdTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -285,7 +285,7 @@ Resources:
       HealthCheckPort: 2379
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: EtcdLoadBalancerTargetGroup-8y5ck
+      Name: EtcdTargetGroup-8y5ck
       Port: 2379
       Protocol: TCP
       Targets:
@@ -298,7 +298,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref EtcdLoadBalancerTargetGroup
+        TargetGroupArn: !Ref EtcdTargetGroup
       LoadBalancerArn: !Ref EtcdLoadBalancer
       Port: 2379
       Protocol: TCP
@@ -317,7 +317,7 @@ Resources:
         - !Ref PublicSubnetEuCentral1c
       
       Type: network
-  IngressLoadBalancerSecureTargetGroup:
+  IngressSecureTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -325,7 +325,7 @@ Resources:
       HealthCheckPort: 30011
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: IngressLoadBalancerSecureTargetGroup-8y5ck
+      Name: IngressSecureTargetGroup-8y5ck
       Port: 30011
       Protocol: TCP
       TargetGroupAttributes:
@@ -339,11 +339,11 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref IngressLoadBalancerSecureTargetGroup
+        TargetGroupArn: !Ref IngressSecureTargetGroup
       LoadBalancerArn: !Ref IngressLoadBalancer
       Port: 443
       Protocol: TCP
-  IngressLoadBalancerInsecureTargetGroup:
+  IngressInsecureTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckEnabled: true
@@ -351,7 +351,7 @@ Resources:
       HealthCheckPort: 30010
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: IngressLoadBalancerInsecureTargetGroup-8y5ck
+      Name: IngressInsecureTargetGroup-8y5ck
       Port: 30010
       Protocol: TCP
       TargetGroupAttributes:
@@ -365,7 +365,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref IngressLoadBalancerInsecureTargetGroup
+        TargetGroupArn: !Ref IngressInsecureTargetGroup
       LoadBalancerArn: !Ref IngressLoadBalancer
       Port: 80
       Protocol: TCP

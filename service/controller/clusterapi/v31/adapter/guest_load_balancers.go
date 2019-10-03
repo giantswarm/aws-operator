@@ -21,11 +21,11 @@ const (
 	ingressELBInsecureListenerResourceName = "IngressLoadBalancerInsecureListener"
 	ingressELBSecureListenerResourceName   = "IngressLoadBalancerSecureListener"
 	// resource names for ELBv2 Target group resources
-	apiInternalELBTargetGroupResourceName     = "ApiInternalLoadBalancerTargetGroup"
-	apiELBTargetGroupResourceName             = "ApiLoadBalancerTargetGroup"
-	etcdELBTargetGroupResourceName            = "EtcdLoadBalancerTargetGroup"
-	ingressELBInsecureTargetGroupResourceName = "IngressLoadBalancerInsecureTargetGroup"
-	ingressELBSecureTargetGroupResourceName   = "IngressLoadBalancerSecureTargetGroup"
+	apiInternalELBTargetGroupResourceName     = "ApiInternalTargetGroup"
+	apiELBTargetGroupResourceName             = "ApiTargetGroup"
+	etcdELBTargetGroupResourceName            = "EtcdTargetGroup"
+	ingressELBInsecureTargetGroupResourceName = "IngressInsecureTargetGroup"
+	ingressELBSecureTargetGroupResourceName   = "IngressSecureTargetGroup"
 )
 
 type GuestLoadBalancersAdapter struct {
