@@ -3,8 +3,6 @@ package tccpoutputs
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudformation"
@@ -15,7 +13,8 @@ import (
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
 	HostedZoneNameServersKey      = "HostedZoneNameServers"
-	IngressTargetGroupIDs         = "IngressTargetGroupsIDs"
+	IngressInsecureTargetGroupIDs = "IngressInsecureTargetGroupsIDs"
+	IngressSecureTargetGroupIDs   = "IngressSecureTargetGroupsIDs"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
@@ -90,11 +89,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, IngressTargetGroupIDs)
+		v1, err := cloudFormation.GetOutputValue(outputs, IngressInsecureTargetGroupIDs)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.IngressTargetGroupIDs = strings.Split(v, ",")
+		v2, err := cloudFormation.GetOutputValue(outputs, IngressSecureTargetGroupIDs)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.IngressTargetGroupIDs = []string{v1, v2}
 	}
 
 	{
