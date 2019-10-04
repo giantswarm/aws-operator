@@ -35,7 +35,6 @@ type ContextStatusTenantCluster struct {
 	AWS                   ContextStatusTenantClusterAWS
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
-	IngressTargetGroupIDs []string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
 	TCNP                  ContextStatusTenantClusterTCNP
@@ -59,13 +58,14 @@ type ContextStatusTenantClusterMasterInstance struct {
 }
 
 type ContextStatusTenantClusterTCCP struct {
-	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
-	IsTransitioning   bool
-	NATGateways       []*ec2.NatGateway
-	RouteTables       []*ec2.RouteTable
-	SecurityGroups    []*ec2.SecurityGroup
-	Subnets           []*ec2.Subnet
-	VPC               ContextStatusTenantClusterTCCPVPC
+	AvailabilityZones     []ContextStatusTenantClusterTCCPAvailabilityZone
+	IngressTargetGroupIDs []string
+	IsTransitioning       bool
+	NATGateways           []*ec2.NatGateway
+	RouteTables           []*ec2.RouteTable
+	SecurityGroups        []*ec2.SecurityGroup
+	Subnets               []*ec2.Subnet
+	VPC                   ContextStatusTenantClusterTCCPVPC
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {

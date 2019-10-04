@@ -1,8 +1,9 @@
-package tccpoutputs
+package tccpingresstargetgroups
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudformation"
@@ -11,19 +12,18 @@ import (
 )
 
 const (
-	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	HostedZoneNameServersKey      = "HostedZoneNameServers"
-	MasterImageIDKey              = "MasterImageID"
-	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
-	MasterInstanceTypeKey         = "MasterInstanceType"
-	OperatorVersion               = "OperatorVersion"
-	VPCIDKey                      = "VPCID"
-	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
+	IngressInsecureTargetGroupIDs = "IngressInsecureTargetGroupsID"
+	IngressSecureTargetGroupIDs   = "IngressSecureTargetGroupsID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
-	if err != nil {
+	cr, err := r.toClusterFunc(obj)
+	if IsNotFound(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
@@ -71,67 +71,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, DockerVolumeResourceNameKey)
+		ingressInsecureTargetGroup, err := cloudFormation.GetOutputValue(outputs, IngressInsecureTargetGroupIDs)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.MasterInstance.DockerVolumeResourceName = v
-	}
-
-	if r.route53Enabled {
-		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
+		ingressSecureTargetGroup, err := cloudFormation.GetOutputValue(outputs, IngressSecureTargetGroupIDs)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.HostedZoneNameServers = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterImageIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.Image = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceResourceNameKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.ResourceName = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceTypeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.Type = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, OperatorVersion)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.OperatorVersion = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCP.VPC.ID = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
+		cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs = []string{ingressInsecureTargetGroup, ingressSecureTargetGroup}
+		fmt.Printf("IngressLoadbalancerTargetGroups: XXSSAA  %#v\n", cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs)
 	}
 
 	return nil

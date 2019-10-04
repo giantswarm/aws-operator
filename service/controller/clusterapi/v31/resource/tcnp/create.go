@@ -60,6 +60,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
+
+		if len(cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "ingress target group ids not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
 	}
 
 	{
@@ -269,7 +275,7 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 			ID: key.ClusterID(&cr),
 		},
 		DesiredCapacity:       minDesiredNodes,
-		IngressTargetGroupIDs: cc.Status.TenantCluster.IngressTargetGroupIDs,
+		IngressTargetGroupIDs: cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs,
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
