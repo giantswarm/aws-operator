@@ -38,15 +38,15 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
@@ -58,7 +58,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]

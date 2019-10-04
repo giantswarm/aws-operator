@@ -85,6 +85,9 @@ var nonhermeticFunctions = []string{
 	// OS
 	"env",
 	"expandenv",
+
+	// Network
+	"getHostByName",
 }
 
 var genericMap = map[string]interface{}{
@@ -208,6 +211,7 @@ var genericMap = map[string]interface{}{
 	"empty":        empty,
 	"coalesce":     coalesce,
 	"compact":      compact,
+	"deepCopy":     deepCopy,
 	"toJson":       toJson,
 	"toPrettyJson": toPrettyJson,
 	"ternary":      ternary,
@@ -223,6 +227,9 @@ var genericMap = map[string]interface{}{
 	// OS:
 	"env":       func(s string) string { return os.Getenv(s) },
 	"expandenv": func(s string) string { return os.ExpandEnv(s) },
+
+	// Network:
+	"getHostByName": getHostByName,
 
 	// File Paths:
 	"base":  path.Base,
@@ -295,5 +302,5 @@ var genericMap = map[string]interface{}{
 
 	// URLs:
 	"urlParse": urlParse,
-	"urlJoin": urlJoin,
+	"urlJoin":  urlJoin,
 }

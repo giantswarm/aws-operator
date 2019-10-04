@@ -38,11 +38,11 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -62,7 +62,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
 
 [[constraint]]
@@ -92,6 +92,10 @@ required = [
 
 [[override]]
   name = "k8s.io/cli-runtime"
+  version = "kubernetes-1.15.4"
+
+[[override]]
+  name = "k8s.io/component-base"
   version = "kubernetes-1.15.4"
 
 [[override]]

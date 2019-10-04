@@ -108,6 +108,11 @@ func yamlToStringMap(input []byte) (map[string]interface{}, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	if raw == nil {
+		result := map[string]interface{}{}
+		return result, nil
+	}
+
 	inputMap, ok := raw.(map[interface{}]interface{})
 	if !ok {
 		return nil, microerror.Maskf(executionFailedError, "input type %T but expected %T", raw, inputMap)

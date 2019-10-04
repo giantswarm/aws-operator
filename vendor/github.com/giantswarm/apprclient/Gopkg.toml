@@ -39,7 +39,7 @@ ignored = [
 #  name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "kubernetes-1.15.4"
+  branch = "master"
   name = "github.com/giantswarm/k8sportforward"
 
 [[constraint]]
@@ -49,6 +49,10 @@ ignored = [
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/micrologger"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.4"
 
 
 [prune]
