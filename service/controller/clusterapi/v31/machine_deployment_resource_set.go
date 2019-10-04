@@ -409,7 +409,8 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var tccpingresstargetgroupsResource resource.Interface
 	{
 		c := tccpingresstargetgroups.Config{
-			Logger: config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
 		tccpingresstargetgroupsResource, err = tccpingresstargetgroups.New(c)
