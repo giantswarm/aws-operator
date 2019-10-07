@@ -17,10 +17,10 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -33,7 +33,6 @@ type DrainerConfig struct {
 
 	HostAWSConfig  aws.Config
 	LabelSelector  DrainerConfigLabelSelector
-	ProjectName    string
 	Route53Enabled bool
 }
 
@@ -102,7 +101,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
-			Name: config.ProjectName + "-drainer-controller",
+			Name: project.Name() + "-drainer-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -146,7 +145,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Logger:                 config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
+			ProjectName:    project.Name(),
 			Route53Enabled: config.Route53Enabled,
 		}
 
@@ -166,7 +165,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Logger:                 config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
+			ProjectName:    project.Name(),
 			Route53Enabled: config.Route53Enabled,
 		}
 
@@ -186,7 +185,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Logger:                 config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
+			ProjectName:    project.Name(),
 			Route53Enabled: config.Route53Enabled,
 		}
 

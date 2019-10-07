@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v29adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
 	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
@@ -28,7 +29,6 @@ import (
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	v31adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/adapter"
 	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -66,7 +66,6 @@ type ClusterConfig struct {
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
-	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
@@ -162,7 +161,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
-			Name: config.ProjectName + "-cluster-controller",
+			Name: project.Name() + "-cluster-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
