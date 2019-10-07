@@ -2,7 +2,6 @@ package tccp
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -163,7 +162,6 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		fmt.Printf("CF stack:\n%s\n", templateBody)
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)

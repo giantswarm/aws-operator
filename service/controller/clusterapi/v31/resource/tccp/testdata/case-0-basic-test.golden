@@ -201,7 +201,9 @@ Resources:
       Name: 8y5ck-api-internal
       Scheme: internal
       Subnets:
-        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PublicSubnetEuCentral1a
+        - !Ref PublicSubnetEuCentral1b
+        - !Ref PublicSubnetEuCentral1c
       Type: network
   ApiInternalTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -211,7 +213,7 @@ Resources:
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: ApiInternalTargetGroup-8y5ck
+      Name: 8y5ck-ApiInternalTargetGroup
       Port: 443
       Protocol: TCP
       Targets:
@@ -251,7 +253,7 @@ Resources:
       HealthCheckPort: 443
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: ApiTargetGroup-8y5ck
+      Name: 8y5ck-ApiTargetGroup
       Port: 443
       Protocol: TCP
       Targets:
@@ -274,7 +276,11 @@ Resources:
       Name: 8y5ck-etcd
       Scheme: internal
       Subnets:
-        - !Ref PrivateSubnetEuCentral1b
+        - !Ref PublicSubnetEuCentral1a
+      
+        - !Ref PublicSubnetEuCentral1b
+      
+        - !Ref PublicSubnetEuCentral1c
       
       Type: network
   EtcdTargetGroup:
@@ -285,7 +291,7 @@ Resources:
       HealthCheckPort: 2379
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: EtcdTargetGroup-8y5ck
+      Name: 8y5ck-EtcdTargetGroup
       Port: 2379
       Protocol: TCP
       Targets:
@@ -325,7 +331,7 @@ Resources:
       HealthCheckPort: 30011
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: IngressSecureTargetGroup-8y5ck
+      Name: 8y5ck-IngressSecureTargetGroup
       Port: 30011
       Protocol: TCP
       TargetGroupAttributes:
@@ -351,7 +357,7 @@ Resources:
       HealthCheckPort: 30010
       HealthCheckProtocol: TCP
       HealthyThresholdCount: 2
-      Name: IngressInsecureTargetGroup-8y5ck
+      Name: 8y5ck-IngressInsecureTargetGroup
       Port: 30010
       Protocol: TCP
       TargetGroupAttributes:

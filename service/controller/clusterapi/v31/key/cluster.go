@@ -148,7 +148,7 @@ func TargetLogBucketName(cluster v1alpha1.Cluster) string {
 }
 
 func TargetGroupNameWithClusterID(cluster v1alpha1.Cluster, targetGroupName string) string {
-	return fmt.Sprintf("%s-%s", targetGroupName, ClusterID(&cluster))
+	return fmt.Sprintf("%s-%s", ClusterID(&cluster), targetGroupName)
 }
 
 func ToCluster(v interface{}) (v1alpha1.Cluster, error) {

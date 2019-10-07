@@ -2,7 +2,6 @@ package v31
 
 import (
 	"context"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpingresstargetgroups"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -29,6 +28,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpingresstargetgroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpsubnets"
