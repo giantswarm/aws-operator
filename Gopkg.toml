@@ -85,7 +85,7 @@ required = [
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
-  branch = "update-images-480"
+  branch = "k8s-1_15_4-release"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
