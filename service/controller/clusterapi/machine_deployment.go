@@ -19,12 +19,12 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -56,7 +56,6 @@ type MachineDeploymentConfig struct {
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
-	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
@@ -131,7 +130,7 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-machine-deployment-controller.
-			Name: config.ProjectName + "-machine-deployment-controller",
+			Name: project.Name() + "-machine-deployment-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -208,7 +207,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			HostAWSConfig:              config.HostAWSConfig,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			ProjectName:                config.ProjectName,
+			ProjectName:                project.Name(),
 			Route53Enabled:             config.Route53Enabled,
 			RouteTables:                config.RouteTables,
 			VaultAddress:               config.VaultAddress,
@@ -255,7 +254,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			PodInfraContainerImage: config.PodInfraContainerImage,
-			ProjectName:            config.ProjectName,
+			ProjectName:            project.Name(),
 			RegistryDomain:         config.RegistryDomain,
 			Route53Enabled:         config.Route53Enabled,
 			RouteTables:            config.RouteTables,
@@ -305,7 +304,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			PodInfraContainerImage: config.PodInfraContainerImage,
-			ProjectName:            config.ProjectName,
+			ProjectName:            project.Name(),
 			RegistryDomain:         config.RegistryDomain,
 			Route53Enabled:         config.Route53Enabled,
 			RouteTables:            config.RouteTables,

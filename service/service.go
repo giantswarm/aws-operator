@@ -21,6 +21,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/controller/legacy"
@@ -37,7 +38,6 @@ type Config struct {
 
 	Description string
 	GitCommit   string
-	ProjectName string
 	Source      string
 	Version     string
 }
@@ -209,7 +209,6 @@ func New(config Config) (*Service, error) {
 				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			ProjectName:            config.ProjectName,
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
@@ -239,7 +238,6 @@ func New(config Config) (*Service, error) {
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
-			ProjectName:    config.ProjectName,
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
@@ -286,7 +284,6 @@ func New(config Config) (*Service, error) {
 				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
 			},
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			ProjectName:            config.ProjectName,
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
@@ -364,7 +361,7 @@ func New(config Config) (*Service, error) {
 			},
 
 			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			ProjectName:            config.ProjectName,
+			ProjectName:            project.Name(),
 			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
@@ -403,7 +400,7 @@ func New(config Config) (*Service, error) {
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
-			ProjectName:    config.ProjectName,
+			ProjectName:    project.Name(),
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
@@ -449,7 +446,7 @@ func New(config Config) (*Service, error) {
 		c := version.Config{
 			Description:    config.Description,
 			GitCommit:      config.GitCommit,
-			Name:           config.ProjectName,
+			Name:           project.Name(),
 			Source:         config.Source,
 			Version:        config.Version,
 			VersionBundles: NewVersionBundles(),
