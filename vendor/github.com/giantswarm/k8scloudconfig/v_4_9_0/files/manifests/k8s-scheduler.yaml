@@ -16,7 +16,7 @@ spec:
     image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
     command:
     - /hyperkube
-    - scheduler
+    - kube-scheduler
     - --feature-gates=TTLAfterFinished=true
     - --config=/etc/kubernetes/config/scheduler.yaml
     - --v=2
