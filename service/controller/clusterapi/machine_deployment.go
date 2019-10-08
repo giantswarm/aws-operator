@@ -20,7 +20,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
@@ -190,36 +189,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
-	var v29ResourceSet *controller.ResourceSet
-	{
-		c := v29.MachineDeploymentResourceSetConfig{
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			K8sClient:              config.K8sClient,
-			Locker:                 config.Locker,
-			Logger:                 config.Logger,
-
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			HostAWSConfig:              config.HostAWSConfig,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			ProjectName:                project.Name(),
-			Route53Enabled:             config.Route53Enabled,
-			RouteTables:                config.RouteTables,
-			VaultAddress:               config.VaultAddress,
-			VPCPeerID:                  config.VPCPeerID,
-		}
-
-		v29ResourceSet, err = v29.NewMachineDeploymentResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v30ResourceSet *controller.ResourceSet
 	{
 		c := v30.MachineDeploymentResourceSetConfig{
@@ -321,7 +290,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v29ResourceSet,
 		v30ResourceSet,
 		v31ResourceSet,
 	}
