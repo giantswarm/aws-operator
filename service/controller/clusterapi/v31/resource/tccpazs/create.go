@@ -282,7 +282,11 @@ func newAZSpec(azMapping map[string]mapping) []controllercontext.ContextSpecTena
 	var azNames []string
 	{
 		for az := range azMapping {
-			azNames = append(azNames, az)
+			// Drop the AZs that are not needed by Cluster or MachineDeployment
+			// CRs anymore. This will allow freeing up resources for later use.
+			if azMapping[az].RequiredByCR {
+				azNames = append(azNames, az)
+			}
 		}
 
 		sort.Strings(azNames)
@@ -317,11 +321,7 @@ func newAZStatus(azMapping map[string]mapping) []controllercontext.ContextStatus
 	var azNames []string
 	{
 		for az := range azMapping {
-			// Drop the AZs that are not needed by Cluster or MachineDeployment
-			// CRs anymore. This will allow freeing up resources for later use.
-			if azMapping[az].RequiredByCR {
-				azNames = append(azNames, az)
-			}
+			azNames = append(azNames, az)
 		}
 
 		sort.Strings(azNames)
