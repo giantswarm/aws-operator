@@ -82,16 +82,25 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// below.
 	azMapping := map[string]mapping{}
 	{
-		azMapping[key.MasterAvailabilityZone(cr)] = mapping{}
+		azMapping[key.MasterAvailabilityZone(cr)] = mapping{
+			RequiredByCR: true,
+		}
 
 		for _, md := range machineDeployments {
 			for _, az := range key.MachineDeploymentAvailabilityZones(md) {
-				azMapping[az] = mapping{}
+				azMapping[az] = mapping{
+					RequiredByCR: true,
+				}
 			}
 		}
 
 		for _, az := range azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets) {
-			azMapping[az] = mapping{}
+			_, exists := azMapping[az]
+			if !exists {
+				azMapping[az] = mapping{
+					RequiredByCR: false,
+				}
+			}
 		}
 	}
 
@@ -308,7 +317,11 @@ func newAZStatus(azMapping map[string]mapping) []controllercontext.ContextStatus
 	var azNames []string
 	{
 		for az := range azMapping {
-			azNames = append(azNames, az)
+			// Drop the AZs that are not needed by Cluster or MachineDeployment
+			// CRs anymore. This will allow freeing up resources for later use.
+			if azMapping[az].RequiredByCR {
+				azNames = append(azNames, az)
+			}
 		}
 
 		sort.Strings(azNames)
