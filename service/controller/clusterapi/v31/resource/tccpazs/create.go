@@ -115,7 +115,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		status := newAZStatus(azMapping)
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetsToString(azMapping)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetStatusToString(status)))
 
 		// Add the current AZ state from AWS to the cc status.
 		cc.Status.TenantCluster.TCCP.AvailabilityZones = status
@@ -135,7 +135,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		spec := newAZSpec(azMapping)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetsToString(azMapping)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetSpecToString(spec)))
 
 		// Add the desired AZ state to the controllercontext spec.
 		cc.Spec.TenantCluster.TCCP.AvailabilityZones = spec
@@ -229,14 +229,30 @@ func azsFromSubnets(subnets []*ec2.Subnet) []string {
 	return azs
 }
 
-func azSubnetsToString(azMapping map[string]mapping) string {
+func azSubnetSpecToString(azs []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone) string {
 	var result strings.Builder
 	result.WriteString("availability zone subnet allocations: {")
-	for az, mapping := range azMapping {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, mapping.Public.Subnet.CIDR.String(), mapping.Private.Subnet.CIDR.String()))
+	for _, az := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String()))
 	}
 
-	if len(azMapping) > 0 {
+	if len(azs) > 0 {
+		result.WriteString("\n}")
+	} else {
+		result.WriteString("}")
+	}
+
+	return result.String()
+}
+
+func azSubnetStatusToString(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) string {
+	var result strings.Builder
+	result.WriteString("availability zone subnet allocations: {")
+	for _, az := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String()))
+	}
+
+	if len(azs) > 0 {
 		result.WriteString("\n}")
 	} else {
 		result.WriteString("}")
