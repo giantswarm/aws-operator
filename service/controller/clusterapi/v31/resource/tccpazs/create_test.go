@@ -246,9 +246,15 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 0: three AZs without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]mapping{
-				"eu-central-1a": {},
-				"eu-central-1b": {},
-				"eu-central-1c": {},
+				"eu-central-1a": {
+					RequiredByCR: true,
+				},
+				"eu-central-1b": {
+					RequiredByCR: true,
+				},
+				"eu-central-1c": {
+					RequiredByCR: true,
+				},
 			},
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
@@ -262,6 +268,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					Public: network{
@@ -274,6 +281,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					Public: network{
@@ -286,6 +294,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -305,8 +314,11 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
-				"eu-central-1b": {},
+				"eu-central-1b": {
+					RequiredByCR: true,
+				},
 				"eu-central-1c": {
 					Public: network{
 						Subnet: subnet{
@@ -318,6 +330,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 			},
 			expectedAZs: map[string]mapping{
@@ -332,6 +345,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					Public: network{
@@ -344,6 +358,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					Public: network{
@@ -356,6 +371,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -364,8 +380,12 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			name:       "case 2: three AZs, two without subnets",
 			tccpSubnet: mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]mapping{
-				"eu-central-1a": {},
-				"eu-central-1b": {},
+				"eu-central-1a": {
+					RequiredByCR: true,
+				},
+				"eu-central-1b": {
+					RequiredByCR: true,
+				},
 				"eu-central-1c": {
 					Public: network{
 						Subnet: subnet{
@@ -377,6 +397,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 			},
 			expectedAZs: map[string]mapping{
@@ -391,6 +412,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					Public: network{
@@ -403,6 +425,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					Public: network{
@@ -415,6 +438,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -434,6 +458,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					Public: network{
@@ -446,6 +471,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					Public: network{
@@ -458,8 +484,11 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
-				"eu-central-1d": {},
+				"eu-central-1d": {
+					RequiredByCR: true,
+				},
 			},
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
@@ -473,6 +502,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					Public: network{
@@ -485,6 +515,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					Public: network{
@@ -497,6 +528,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1d": {
 					Public: network{
@@ -509,6 +541,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.224/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -528,6 +561,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					Public: network{
@@ -540,6 +574,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					Public: network{
@@ -552,6 +587,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
 				"eu-central-1d": {
 					Public: network{
@@ -564,8 +600,11 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.224/27"),
 						},
 					},
+					RequiredByCR: true,
 				},
-				"eu-central-1e": {},
+				"eu-central-1e": {
+					RequiredByCR: true,
+				},
 			},
 			expectedAZs:  nil,
 			errorMatcher: IsInvalidConfig,
