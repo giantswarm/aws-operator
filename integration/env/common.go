@@ -97,14 +97,7 @@ func init() {
 	}
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 
-	// ClusterID returns a cluster ID unique to a run integration test. It might
-	// look like ci-w3e95.
-	//
-	//     ci is a static identifier stating a CI run of the aws-operator.
-	//     w is a version reference which can also be c for the current version.
-	//     3 is the first character of the Git SHA.
-	//     e95 is a randomly generated alphanumeric string.
-	//
+	// init clusterID
 	rand.Seed(time.Now().UnixNano())
 	var parts []string
 	parts = append(parts, "ci-")
@@ -118,6 +111,14 @@ func CircleSHA() string {
 	return circleSHA
 }
 
+// ClusterID returns a cluster ID unique to a run integration test. It might
+// look like ci-w3e95.
+//
+//     ci is a static identifier stating a CI run of the aws-operator.
+//     w is a version reference which can also be c for the current version.
+//     3 is the first character of the Git SHA.
+//     e95 is a randomly generated alphanumeric string.
+//
 func ClusterID() string {
 	return clusterID
 }
