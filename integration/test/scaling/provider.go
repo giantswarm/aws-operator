@@ -4,13 +4,11 @@ package scaling
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 type ProviderConfig struct {
@@ -56,33 +54,6 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 }
 
 func (p *Provider) AddWorker() error {
-	// TODO remove the legacy approach when v22 resources are gone in the
-	// aws-operator.
-	{
-		customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		patches := []Patch{
-			{
-				Op:    "add",
-				Path:  "/spec/aws/workers/-",
-				Value: customObject.Spec.AWS.Workers[0],
-			},
-		}
-
-		b, err := json.Marshal(patches)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		_, err = p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(p.clusterID, types.JSONPatchType, b)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	{
 		customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 		if err != nil {
@@ -124,27 +95,6 @@ func (p *Provider) NumWorkers() (int, error) {
 }
 
 func (p *Provider) RemoveWorker() error {
-	// TODO remove the legacy approach when v22 resources are gone in the
-	// aws-operator.
-	{
-		patches := []Patch{
-			{
-				Op:   "remove",
-				Path: "/spec/aws/workers/1",
-			},
-		}
-
-		b, err := json.Marshal(patches)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		_, err = p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(p.clusterID, types.JSONPatchType, b)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	{
 		customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 		if err != nil {
