@@ -42,6 +42,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.ClusterID(cr)),
 					},
 				},
+				{
+					Name: aws.String("instance-state-name"),
+					Values: []*string{
+						aws.String(ec2.InstanceStateNamePending),
+						aws.String(ec2.InstanceStateNameRunning),
+						aws.String(ec2.InstanceStateNameStopped),
+						aws.String(ec2.InstanceStateNameStopping),
+					},
+				},
 			},
 		}
 
@@ -59,19 +68,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-		nonTerminatedInstances := o.Reservations[0].Instances[:0]
-		for _, i := range o.Reservations[0].Instances[:0] {
-			if *i.State.Name != ec2.InstanceStateNameTerminated {
-				nonTerminatedInstances = append(nonTerminatedInstances, i)
-			}
-		}
-		if len(nonTerminatedInstances) == 0 {
+		if len(o.Reservations[0].Instances) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgName = awstags.ValueForKey(nonTerminatedInstances[0].Tags, "aws:autoscaling:groupName")
+		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
 	}
 
 	var asg *autoscaling.Group
