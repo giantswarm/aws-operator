@@ -35,7 +35,7 @@ type Config struct {
 // implementation and its performance as well as produced costs we would need to
 // refactor the resource and rewrite it basically completely using the simple
 // resource interface only using EnsureCreated and EnsureDeleted. That way we
-// could compute the E-Tag for the rquest to fetch the S3 Object and reduce
+// could compute the E-Tag for the request to fetch the S3 Object and reduce
 // traffic as we would not fetch the whole body of the object when it does
 // effectively not change most of the time.
 type Resource struct {

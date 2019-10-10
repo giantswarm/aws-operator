@@ -15,6 +15,13 @@ type Config struct {
 	Logger    micrologger.Logger
 }
 
+// TODO the whole resource should be moved to cluster-operator as this
+// functionality is provider independent and absolutely not AWS specific. As
+// soon as we want to implement Node Pools and/or Cluster API for another
+// provider we want that to be done for all providers anyway.
+//
+//     https://github.com/giantswarm/giantswarm/issues/7221
+//
 type Resource struct {
 	cmaClient clientset.Interface
 	logger    micrologger.Logger

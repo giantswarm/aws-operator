@@ -21,7 +21,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 	var machineDeployments []v1alpha1.MachineDeployment
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding MachineDeployments for tenant cluster")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding machine deployments for tenant cluster")
 
 		l := metav1.AddLabelToSelector(
 			&metav1.LabelSelector{},
@@ -39,20 +39,18 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		machineDeployments = list.Items
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d MachineDeployments for tenant cluster", len(machineDeployments)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d machine deployments for tenant cluster", len(machineDeployments)))
 	}
 
-	if len(machineDeployments) > 0 {
-		for _, md := range machineDeployments {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting machinedeployment %q for tenant cluster %#q", string(md.Namespace+"/"+md.Name), key.ClusterID(&cr)))
+	for _, md := range machineDeployments {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr)))
 
-			err = r.cmaClient.ClusterV1alpha1().MachineDeployments(md.Namespace).Delete(md.Name, &metav1.DeleteOptions{})
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted machinedeployment %q for tenant cluster %#q", string(md.Namespace+"/"+md.Name), key.ClusterID(&cr)))
+		err = r.cmaClient.ClusterV1alpha1().MachineDeployments(md.Namespace).Delete(md.Name, &metav1.DeleteOptions{})
+		if err != nil {
+			return microerror.Mask(err)
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr)))
 	}
 
 	return nil
