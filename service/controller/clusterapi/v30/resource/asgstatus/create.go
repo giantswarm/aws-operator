@@ -63,13 +63,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-		if len(o.Reservations[0].Instances) == 0 {
+		nonTerminatedInstances := o.Reservations[0].Instances[:0]
+		for _, i := range o.Reservations[0].Instances[:0] {
+			if *i.State.Name != ec2.InstanceStateNameTerminated {
+				nonTerminatedInstances = append(nonTerminatedInstances, i)
+			}
+		}
+		if len(nonTerminatedInstances) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
+		asgName = awstags.ValueForKey(nonTerminatedInstances[0].Tags, "aws:autoscaling:groupName")
 	}
 
 	var asg *autoscaling.Group
