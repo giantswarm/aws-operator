@@ -24,14 +24,19 @@
 #   go-tests = true
 #   unused-packages = true
 
+ignored = [
+  # TODO reenable the tests after k8s+helm dependency update is done;
+  "github.com/giantswarm/e2e-harness/*"
+]
 
 [[constraint]]
   version = "^2.0.0"
   name = "github.com/cenkalti/backoff"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/e2e-harness"
+# TODO reenable the tests after k8s+helm dependency update is done;
+#[[constraint]]
+#  branch = "master"
+#  name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
   branch = "master"
@@ -44,6 +49,10 @@
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/micrologger"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.4"
 
 
 [prune]
