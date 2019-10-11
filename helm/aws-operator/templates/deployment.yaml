@@ -39,7 +39,7 @@ spec:
         runAsGroup: {{ .Values.pod.group.id }}
       containers:
       - name: {{ .Values.project.name }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         volumeMounts:
         - name: {{ .Values.project.name }}-configmap
           mountPath: /var/run/{{ .Values.project.name }}/configmap/

@@ -4,8 +4,12 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
@@ -24,6 +28,12 @@ const (
 	EnvVarTestedVersion        = "TESTED_VERSION"
 	EnvVarTestDir              = "TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
+
+	// IDChars represents the character set used to generate cluster IDs.
+	// (does not contain 1 and l, to avoid confusion)
+	IDChars = "023456789abcdefghijkmnopqrstuvwxyz"
+	// IDLength represents the number of characters used to create a cluster ID.
+	IDLength = 3
 )
 
 var (
@@ -86,6 +96,15 @@ func init() {
 		panic("version bundle version  must not be empty")
 	}
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
+
+	// init clusterID
+	rand.Seed(time.Now().UnixNano())
+	var parts []string
+	parts = append(parts, "ci-")
+	parts = append(parts, TestedVersion()[0:1])
+	parts = append(parts, CircleSHA()[0:1])
+	parts = append(parts, generateID(IDLength))
+	clusterID = strings.Join(parts, "")
 }
 
 func CircleSHA() string {
@@ -93,24 +112,15 @@ func CircleSHA() string {
 }
 
 // ClusterID returns a cluster ID unique to a run integration test. It might
-// look like ci-wip-3cc75-5e958.
+// look like ci-w3e95.
 //
 //     ci is a static identifier stating a CI run of the aws-operator.
-//     wip is a version reference which can also be cur for the current version.
-//     3cc75 is the Git SHA.
-//     5e958 is a hash of the integration test dir, if any.
+//     w is a version reference which can also be c for the current version.
+//     3 is the first character of the Git SHA.
+//     e95 is a randomly generated alphanumeric string.
 //
 func ClusterID() string {
-	var parts []string
-
-	parts = append(parts, "ci")
-	parts = append(parts, TestedVersion()[0:3])
-	parts = append(parts, CircleSHA()[0:5])
-	if TestHash() != "" {
-		parts = append(parts, TestHash())
-	}
-
-	return strings.Join(parts, "-")
+	return clusterID
 }
 
 func KeepResources() bool {
@@ -147,4 +157,30 @@ func TestHash() string {
 
 func VersionBundleVersion() string {
 	return versionBundleVersion
+}
+
+// generateID returns a string to be used as unique cluster ID
+func generateID(idLength int) string {
+	for {
+		letterRunes := []rune(IDChars)
+		b := make([]rune, idLength)
+		for i := range b {
+			b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		}
+
+		id := string(b)
+
+		if _, err := strconv.Atoi(id); err == nil {
+			// string is numbers only, which we want to avoid
+			continue
+		}
+
+		matched, err := regexp.MatchString("^[a-z]+$", id)
+		if err == nil && matched == true {
+			// strings is letters only, which we also avoid
+			continue
+		}
+
+		return id
+	}
 }

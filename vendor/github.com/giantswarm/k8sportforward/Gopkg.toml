@@ -31,16 +31,20 @@
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/fortytw2/leaktest"
+
+[[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.13.2"
+  version = "kubernetes-1.15.4"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/fortytw2/leaktest"
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.4"
 
 
 [prune]
