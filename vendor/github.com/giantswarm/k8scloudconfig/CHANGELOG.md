@@ -13,7 +13,7 @@ version directory, and  then changes are introduced.
 
 ### Added
 
-- TODO
+- Add k8s-api-healthz service to master node to enable proper LB health checks to api and etcd.
 
 ## [v4.7.0]
 
