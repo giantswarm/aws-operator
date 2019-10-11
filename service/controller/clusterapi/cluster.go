@@ -19,16 +19,13 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
-	v29adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/adapter"
-	v29cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29/cloudconfig"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v30adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/adapter"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	v31adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/adapter"
 	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -66,7 +63,6 @@ type ClusterConfig struct {
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
-	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
@@ -162,7 +158,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
-			Name: config.ProjectName + "-cluster-controller",
+			Name: project.Name() + "-cluster-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -217,64 +213,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 
 		randomKeysSearcher, err = randomkeys.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var resourceSetV29 *controller.ResourceSet
-	{
-		c := v29.ClusterResourceSetConfig{
-			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			HostAWSConfig:          config.HostAWSConfig,
-			K8sClient:              config.K8sClient,
-			Locker:                 config.Locker,
-			Logger:                 config.Logger,
-			RandomKeysSearcher:     randomKeysSearcher,
-
-			AccessLogsExpiration:  config.AccessLogsExpiration,
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: v29adapter.APIWhitelist{
-				Enabled:    config.APIWhitelist.Public.Enabled,
-				SubnetList: config.APIWhitelist.Public.SubnetList,
-			},
-			CalicoCIDR:                 config.CalicoCIDR,
-			CalicoMTU:                  config.CalicoMTU,
-			CalicoSubnet:               config.CalicoSubnet,
-			ClusterIPRange:             config.ClusterIPRange,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			DockerDaemonCIDR:           config.DockerDaemonCIDR,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			Route53Enabled:             config.Route53Enabled,
-			IgnitionPath:               config.IgnitionPath,
-			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
-			OIDC: v29cloudconfig.ConfigOIDC{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			RouteTables:    config.RouteTables,
-			RegistryDomain: config.RegistryDomain,
-			SSHUserList:    config.SSHUserList,
-			SSOPublicKey:   config.SSOPublicKey,
-			VaultAddress:   config.VaultAddress,
-			VPCPeerID:      config.VPCPeerID,
-		}
-
-		resourceSetV29, err = v29.NewClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -409,7 +347,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV29,
 		resourceSetV30,
 		resourceSetV31,
 	}
