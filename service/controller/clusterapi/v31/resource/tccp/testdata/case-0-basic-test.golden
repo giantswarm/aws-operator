@@ -505,6 +505,12 @@ Resources:
         ToPort: 2379
         CidrIp: 10.1.0.0/16
       -
+        Description: Allow traffic from Cluster CIDR to 2379 for network-lb health checks.
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 
+      -
         Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
         FromPort: 10250
@@ -552,60 +558,7 @@ Resources:
       
       Tags:
         - Key: Name
-          Value: 8y5ck-ingress
-  EtcdELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-etcd-elb
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 0.0.0.0/0
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-etcd-elb
-  APIInternalELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-internal-api
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        Description: Allow all traffic to the master instance from A class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 10.0.0.0/8
-      
-      -
-        Description: Allow all traffic to the master instance from B class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 172.16.0.0/12
-      
-      -
-        Description: Allow all traffic to the master instance from C class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 192.168.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-internal-api
+          Value: 8y5ck-ingress  
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
