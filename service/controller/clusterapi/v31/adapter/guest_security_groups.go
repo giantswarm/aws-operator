@@ -28,16 +28,12 @@ const (
 )
 
 type GuestSecurityGroupsAdapter struct {
-	APIInternalELBSecurityGroupName  string
-	APIInternalELBSecurityGroupRules []securityGroupRule
-	APIWhitelistEnabled              bool
-	PrivateAPIWhitelistEnabled       bool
-	MasterSecurityGroupName          string
-	MasterSecurityGroupRules         []securityGroupRule
-	IngressSecurityGroupName         string
-	IngressSecurityGroupRules        []securityGroupRule
-	EtcdELBSecurityGroupName         string
-	EtcdELBSecurityGroupRules        []securityGroupRule
+	APIWhitelistEnabled        bool
+	PrivateAPIWhitelistEnabled bool
+	MasterSecurityGroupName    string
+	MasterSecurityGroupRules   []securityGroupRule
+	IngressSecurityGroupName   string
+	IngressSecurityGroupRules  []securityGroupRule
 }
 
 func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
@@ -92,6 +88,12 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 			SourceCIDR:  hostClusterCIDR,
 		},
 		{
+			Description: "Allow traffic from Cluster CIDR to 2379 for network-lb health checks.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  key.StatusClusterNetworkCIDR(cfg.CustomObject),
+		},
+		{
 			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
 			Port:        kubeletPort,
 			Protocol:    tcpProtocol,
@@ -133,23 +135,6 @@ func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.Clust
 			Port:        httpsPort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  defaultCIDR,
-		},
-	}
-}
-
-func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.Cluster, hostClusterCIDR string) []securityGroupRule {
-	return []securityGroupRule{
-		{
-			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  defaultCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane to etcd port for backup and metrics.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
 		},
 	}
 }

@@ -6,7 +6,7 @@ import (
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_8_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
@@ -54,6 +54,12 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params = k8scloudconfig.DefaultParams()
 
 		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
+		// with network load-balancer, master needs to access API via localhost
+		// this is due to problem that network lb does not change source IP
+		// and packet sent from master via network load-balancer to master
+		// has same source and destination IP and the operating system will not forward the packet back to LB
+		// result is that connection does not work
+		params.Cluster.Kubernetes.API.Domain = APILocalhost
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.

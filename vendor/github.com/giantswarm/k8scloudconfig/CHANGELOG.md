@@ -13,7 +13,8 @@ version directory, and  then changes are introduced.
 
 ### Added
 
-- TODO
+- Add k8s-api-healthz service to master node to enable proper LB health checks to api and etcd.
+- Add calico 3.9.1 with k8s datastore for AWS Node Pools release.
 
 ## [v4.7.0]
 
