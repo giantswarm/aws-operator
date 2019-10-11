@@ -46,6 +46,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.StackTCNP),
 					},
 				},
+				{
+					Name: aws.String("instance-state-name"),
+					Values: []*string{
+						aws.String(ec2.InstanceStateNamePending),
+						aws.String(ec2.InstanceStateNameRunning),
+						aws.String(ec2.InstanceStateNameStopped),
+						aws.String(ec2.InstanceStateNameStopping),
+					},
+				},
 			},
 		}
 

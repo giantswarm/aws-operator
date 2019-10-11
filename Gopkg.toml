@@ -52,7 +52,7 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/certs"
 
-[[override]]
+[[constraint]]
   branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
@@ -84,13 +84,9 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/ipam"
 
-[[override]]
+[[constraint]]
   branch = "k8s-1_15_4-release"
   name = "github.com/giantswarm/k8scloudconfig"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/kubelock"
 
 [[constraint]]
   branch = "master"
@@ -183,8 +179,6 @@ required = [
 [[override]]
   name = "github.com/russross/blackfriday"
   version = "v1.5.2"
-
-
 
 [prune]
   go-tests = true

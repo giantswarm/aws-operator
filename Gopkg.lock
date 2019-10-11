@@ -195,7 +195,7 @@
     "reference",
   ]
   pruneopts = "UT"
-  revision = "14b96e55d84c367ebab6caf9f0086de0876eec72"
+  revision = "ae2e973db9365d6f8401ffb6bfc603f3cd76b111"
 
 [[projects]]
   digest = "1:53e99d883df3e940f5f0223795f300eb32b8c044f226132bfc0e74930f24ea4b"
@@ -282,7 +282,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "c43a075b8e7d8de7d6e310c1cd889a06419926c8"
+  revision = "efa5c38da056932db3d24b786daf200b856dc9a2"
 
 [[projects]]
   branch = "master"
@@ -322,7 +322,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "7f9aa6e338a7995c848c65f7da097b0faa7ddc1c"
+  revision = "b527706db0fd20a025f0134ce19cc56bdb5921cd"
 
 [[projects]]
   branch = "master"
@@ -338,7 +338,7 @@
   name = "github.com/giantswarm/e2esetup"
   packages = ["privaterepo"]
   pruneopts = "UT"
-  revision = "e4ef9f8134385917ff6e507e4e90e70b0dd710c6"
+  revision = "70d14e0bf5e78aad3a573f33a9db1dd8c920db6f"
 
 [[projects]]
   branch = "master"
@@ -490,7 +490,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:047e48867757c422d50bbd19c1ef1bf8ef6524c31c9a725445ab05ac6b1aa697"
+  digest = "1:7b29b00bf84e7fe9d54ef120606dac3ea0030f1e30e07cd978c5b407cf4d4c0f"
   name = "github.com/giantswarm/micrologger"
   packages = [
     ".",
@@ -498,7 +498,7 @@
     "microloggertest",
   ]
   pruneopts = "UT"
-  revision = "0926d9b7c5419173936b4556411a103bdf8d5966"
+  revision = "4312264bbeba0e06667c032e65293430f1fb51d2"
 
 [[projects]]
   branch = "master"
@@ -1004,12 +1004,12 @@
   version = "v2.1.0"
 
 [[projects]]
-  digest = "1:93131d8002d7025da13582877c32d1fc302486775a1b06f62241741006428c5e"
+  digest = "1:bbd3997f0121200f72b64d7a3826eb8a0b910d6a4c19894c9fe2852b9e5eaf3b"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   pruneopts = "UT"
-  revision = "728039f679cbcd4f6a54e080d2219a4c4928c546"
-  version = "v1.4.0"
+  revision = "8fe62057ea2d46ce44254c98e84e810044dbe197"
+  version = "v1.5.0"
 
 [[projects]]
   branch = "master"
@@ -1189,7 +1189,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5c8e1e1d1c7485ba2c669685b0f510a8e29b5f7c39483c71f227a7049dd076d5"
+  digest = "1:003287c67d3355f76e75aa9ed471c4c931a032c3eaced8c0df34f2a3656b7bb0"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -1203,7 +1203,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "d98b1b4438230571bd7fbc5aaa89843e92937bd3"
+  revision = "d66e71096ffb9f08f36d9aefcae80ce319de6d68"
 
 [[projects]]
   branch = "master"
@@ -1226,14 +1226,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:456406ce03ca17dfe57d9f3cae7eec35bc5101dce0adadf5bd636760b7d1e15c"
+  digest = "1:8465bc3baa8f05fb83a10b7a9029f90ecdf065957e6fb8ff4d75a0e5072f4148"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c178f38b412c7b426e4e97be2e75d11ff7b8d4d4"
+  revision = "06d7bd2c5f4f4a6cc6e910b611851044253bd7d1"
 
 [[projects]]
   digest = "1:dfcb3d446a3c6a6c71b74cf7baf366cd630a8cb43c3fcb741f34e49727da168d"
@@ -1288,8 +1288,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "bddb1f54ecfd64b1350fd2dd897fa11d426632bc"
-  version = "v1.6.4"
+  revision = "971852bfffca25b069c31162ae8f247a3dba083b"
+  version = "v1.6.5"
 
 [[projects]]
   branch = "master"
@@ -1297,7 +1297,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "c459b9ce5143dd819763d9329ff92a8e35e61bd9"
+  revision = "548a555dbc03994223efbaba0090152849259498"
 
 [[projects]]
   digest = "1:7fd79262cbb279c8e7143b41eeb0f181d267c83f4d54283ee5a53920b15b8c70"
@@ -2141,7 +2141,6 @@
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
-    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/dynamic",
