@@ -59,7 +59,8 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		// and packet sent from master via network load-balancer to master
 		// has same source and destination IP and the operating system will not forward the packet back to LB
 		// result is that connection does not work
-		params.Cluster.Kubernetes.API.Domain = APILocalhost
+		params.Cluster.Kubernetes.API.Domain = Localhost
+		params.Cluster.Etcd.Domain = Localhost
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.

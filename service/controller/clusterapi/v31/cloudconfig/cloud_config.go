@@ -1,7 +1,7 @@
 package cloudconfig
 
 const (
-	APILocalhost = "127.0.0.1"
+	Localhost = "127.0.0.1"
 
 	FileOwnerUserName  = "root"
 	FileOwnerGroupName = "root"

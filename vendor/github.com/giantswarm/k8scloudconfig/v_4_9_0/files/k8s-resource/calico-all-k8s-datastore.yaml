@@ -571,7 +571,7 @@ spec:
               memory: 100Mi
             limits:
               cpu: 50m
-              memory: 100M
+              memory: 100Mi
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir
