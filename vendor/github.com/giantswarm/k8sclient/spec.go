@@ -13,5 +13,6 @@ type Interface interface {
 	ExtClient() apiextensionsclient.Interface
 	G8sClient() versioned.Interface
 	K8sClient() kubernetes.Interface
-	RestConfig() *rest.Config
+	RESTClient() rest.Interface
+	RESTConfig() *rest.Config
 }
