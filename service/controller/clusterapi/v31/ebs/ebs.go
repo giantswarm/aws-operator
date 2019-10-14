@@ -77,8 +77,11 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 	return nil
 }
 
-// DetachVolume detaches an EBS volume. If force is specified data loss may occur. If shutdown is
-// specified the instance will be stopped first.
+// DetachVolume detaches an EBS volume. If force is specified data loss may
+// occur. If shutdown is specified the instance will be stopped first. Note that
+// the long term plan for the interface and functionality is to remove the EC2
+// instance management so the EBS service implementation here only manages EBS
+// volumes.
 func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool, shutdown bool, wait bool) error {
 	if shutdown {
 		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting to stop instance %#q", attachment.InstanceID))
@@ -98,7 +101,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 	}
 
 	if shutdown && wait {
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q to stop", attachment.InstanceID))
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q to be stopped", attachment.InstanceID))
 
 		i := &ec2.DescribeInstancesInput{
 			InstanceIds: []*string{
@@ -111,11 +114,11 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q to stop", attachment.InstanceID))
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q to be stopped", attachment.InstanceID))
 	}
 
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detaching EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting EBS volume %#q to be detached from instance %#q", volumeID, attachment.InstanceID))
 
 		i := &ec2.DetachVolumeInput{
 			Device:     aws.String(attachment.Device),
@@ -129,7 +132,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
+		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested EBS volume %#q to be detached from instance %#q", volumeID, attachment.InstanceID))
 	}
 
 	{
@@ -162,7 +165,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 		for _, a := range d.Attachments {
 			if a.State != nil {
 				attachmentStatus := *a.State
-				if attachmentStatus != "detached" {
+				if attachmentStatus != ec2.VolumeAttachmentStateDetached {
 					return microerror.Maskf(volumeAttachedError, "volume %#q still attached", volumeID)
 				}
 			} else {

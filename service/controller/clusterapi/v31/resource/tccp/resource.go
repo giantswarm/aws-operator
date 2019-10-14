@@ -178,6 +178,66 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.Clust
 	return instanceID, nil
 }
 
+func (r *Resource) stopMasterInstance(ctx context.Context, cr v1alpha1.Cluster) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var instanceID string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instance ID")
+
+		instanceID, err = r.searchMasterInstanceID(ctx, cr)
+		if IsNotExists(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find master instance ID")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "master instance does not exist")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found master instance ID %#q", instanceID))
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting to stop instance %#q", instanceID))
+
+		i := &ec2.StopInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instanceID),
+			},
+		}
+
+		_, err := cc.Client.TenantCluster.AWS.EC2.StopInstances(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested to stop instance %#q", instanceID))
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q to be stopped", instanceID))
+
+		i := &ec2.DescribeInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instanceID),
+			},
+		}
+
+		err := cc.Client.TenantCluster.AWS.EC2.WaitUntilInstanceStopped(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q to be stopped", instanceID))
+	}
+
+	return nil
+}
+
 func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
