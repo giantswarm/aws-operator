@@ -14,6 +14,11 @@ spec:
   containers:
   - name: k8s-api-server
     image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+    env:
+    - name: HOST_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
     command:
     - /hyperkube
     - apiserver
