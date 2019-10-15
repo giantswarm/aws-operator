@@ -64,14 +64,17 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
+		params.DisableCalico = true
 		params.DisableIngressControllerService = false
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
 			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
 			baseExtension: baseExtension{
-				cluster:       cr,
-				encrypter:     t.config.Encrypter,
-				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+				calicoMTU:      params.Cluster.Calico.MTU,
+				cluster:        cr,
+				encrypter:      t.config.Encrypter,
+				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				registryDomain: params.RegistryDomain,
 			},
 			cc:               cc,
 			clusterCerts:     clusterCerts,
@@ -82,6 +85,10 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
+
+		params.ExtraManifests = []string{
+			"calico-k8s-datastore.yaml",
+		}
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
@@ -137,6 +144,19 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	}
 
 	filesMeta := []k8scloudconfig.FileMetadata{
+		{
+			AssetContent: cloudconfig.CalicoK8sDatastore,
+			Path:         "/srv/calico-k8s-datastore.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: FilePermission,
+		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",

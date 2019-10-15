@@ -387,11 +387,7 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-    {{- if eq .Cluster.Kubernetes.CloudProvider "aws" }}
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/calico-all-k8s-datastore.yaml" }}"
-    {{- else }}
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/calico-all.yaml" }}"
-    {{- end }}
     {{- end }}
 
     {{- if not .DisableIngressControllerService }}

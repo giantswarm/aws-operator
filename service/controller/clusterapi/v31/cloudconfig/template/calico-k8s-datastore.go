@@ -1,3 +1,6 @@
+package cloudconfig
+
+const CalicoK8sDatastore = `
 # CALICO with k8s datastore, migration from etcd datastore is not supported 
 #
 # CALICO HAS SEPARATE MANIFEST FOR AZURE
@@ -9,8 +12,8 @@
 #  - Added resource limits to install-cni.
 #  - Added 'priorityClassName: system-cluster-critical' to calico daemonset.
 #  - Removed upgrade-ipam init container as its not needed.
-#  - Removed volume host-local-net-dir as its only used for `upgrade-ipam` init container.
-#  - !! Changed hostPath for hostPath volume `` from `/usr/libexec/kubernetes/kubelet-plugins/volume/exec/nodeagent~uds` to `/var/lib/kubelet/plugins/volume/exec/nodeagent~uds`
+#  - Removed volume host-local-net-dir as its only used for upgrade-ipam init container.
+#  - !! Changed hostPath for hostPath volume from /usr/libexec/kubernetes/kubelet-plugins/volume/exec/nodeagent~uds to /var/lib/kubelet/plugins/volume/exec/nodeagent~uds
 #
 # Calico Version v3.9.1
 # https://docs.projectcalico.org/v3.9/release-notes/
@@ -35,7 +38,7 @@ data:
   calico_backend: "bird"
 
   # Configure the MTU to use
-  veth_mtu: "{{.Cluster.Calico.MTU}}"
+  veth_mtu: "{{.CalicoMTU}}"
 
   # The CNI network configuration to install on each node.  The special
   # values in this config will be automatically populated.
@@ -625,10 +628,10 @@ spec:
                   key: veth_mtu
             # The default IPv4 pool to create on startup if none exists. Pod IPs will be
             # chosen from this range. Changing this value after installation will have
-            # no effect. This should fall within `--cluster-cidr`.
+            # no effect. This should fall within --cluster-cidr.
             - name: CALICO_IPV4POOL_CIDR
               value: "192.168.0.0/16"
-            # Disable file logging so `kubectl logs` works.
+            # Disable file logging so kubectl logs works.
             - name: CALICO_DISABLE_FILE_LOGGING
               value: "true"
             # Set Felix endpoint to host default action to ACCEPT.
@@ -760,7 +763,7 @@ spec:
           operator: Exists
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
-      
+
       nodeSelector:
         kubernetes.io/os: linux
         kubernetes.io/role: master
@@ -796,5 +799,4 @@ metadata:
 
 ---
 # Source: calico/templates/configure-canal.yaml
-
-
+`
