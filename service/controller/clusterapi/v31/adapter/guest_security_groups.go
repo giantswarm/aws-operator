@@ -76,6 +76,12 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 	// Other security group rules for the master.
 	otherRules := []securityGroupRule{
 		{
+			Description: "Allow traffic from control plane to etcd port for backup and metrics.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
+		},
+		{
 			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
 			Port:        cadvisorPort,
 			Protocol:    tcpProtocol,

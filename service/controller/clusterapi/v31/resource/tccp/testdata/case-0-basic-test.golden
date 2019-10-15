@@ -493,6 +493,12 @@ Resources:
         ToPort: 443
         CidrIp: 0.0.0.0/0
       -
+        Description: Allow traffic from control plane to etcd port for backup and metrics.
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 10.1.0.0/16
+      -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
