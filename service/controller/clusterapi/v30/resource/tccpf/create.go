@@ -144,6 +144,15 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBac
 	{
 		for _, rt := range cc.Status.ControlPlane.RouteTables {
 			for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
+				// Only those AZs have private subnet in TCCP that run master
+				// node. Rest of the AZs are there with public subnet only
+				// while the private subnet exists in corresponding node pools.
+				// Therefore we need to skip nil Private.CIDRs because there's
+				// nothing where we can route the traffic to.
+				if az.Subnet.Private.CIDR.IP == nil || az.Subnet.Private.CIDR.Mask == nil {
+					continue
+				}
+
 				route := template.ParamsMainRouteTablesRoute{
 					RouteTableID: *rt.RouteTableId,
 					// Requester CIDR block, we create the peering connection from the
