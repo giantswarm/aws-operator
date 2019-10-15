@@ -36,17 +36,12 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		name         string
 		cr           v1alpha1.Cluster
 		ctx          context.Context
-		tp           templateParams
 		errorMatcher func(error) bool
 	}{
 		{
-			name: "case 0: basic test",
-			cr:   unittest.DefaultCluster(),
-			ctx:  unittest.DefaultContext(),
-			tp: templateParams{
-				DockerVolumeResourceName:   "rsc-abbacd01",
-				MasterInstanceResourceName: "rsc-ac0dc01",
-			},
+			name:         "case 0: basic test",
+			cr:           unittest.DefaultCluster(),
+			ctx:          unittest.DefaultContext(),
 			errorMatcher: nil,
 		},
 	}
