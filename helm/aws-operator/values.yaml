@@ -8,7 +8,7 @@ flag:
         version: ""
 image:
   registry: "quay.io"
-  repository: "giantswarm/aws-operator"
+  name: "giantswarm/aws-operator"
   tag: "[[ .Version ]]"
 pod:
   user:

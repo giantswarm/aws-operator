@@ -53,7 +53,6 @@ func mainE(ctx context.Context) error {
 
 				Description: project.Description(),
 				GitCommit:   project.GitSHA(),
-				ProjectName: project.Name(),
 				Source:      project.Source(),
 				Version:     project.Version(),
 			}

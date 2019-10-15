@@ -19,11 +19,10 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -55,7 +54,6 @@ type MachineDeploymentConfig struct {
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
-	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
@@ -130,7 +128,7 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-machine-deployment-controller.
-			Name: config.ProjectName + "-machine-deployment-controller",
+			Name: project.Name() + "-machine-deployment-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -190,36 +188,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
-	var v29ResourceSet *controller.ResourceSet
-	{
-		c := v29.MachineDeploymentResourceSetConfig{
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			K8sClient:              config.K8sClient,
-			Locker:                 config.Locker,
-			Logger:                 config.Logger,
-
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			HostAWSConfig:              config.HostAWSConfig,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			ProjectName:                config.ProjectName,
-			Route53Enabled:             config.Route53Enabled,
-			RouteTables:                config.RouteTables,
-			VaultAddress:               config.VaultAddress,
-			VPCPeerID:                  config.VPCPeerID,
-		}
-
-		v29ResourceSet, err = v29.NewMachineDeploymentResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v30ResourceSet *controller.ResourceSet
 	{
 		c := v30.MachineDeploymentResourceSetConfig{
@@ -254,7 +222,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 				GroupsClaim:   config.OIDC.GroupsClaim,
 			},
 			PodInfraContainerImage: config.PodInfraContainerImage,
-			ProjectName:            config.ProjectName,
+			ProjectName:            project.Name(),
 			RegistryDomain:         config.RegistryDomain,
 			Route53Enabled:         config.Route53Enabled,
 			RouteTables:            config.RouteTables,
@@ -298,7 +266,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			IPAMNetworkRange:           config.IPAMNetworkRange,
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
-			ProjectName:                config.ProjectName,
+			ProjectName:                project.Name(),
 			RegistryDomain:             config.RegistryDomain,
 			Route53Enabled:             config.Route53Enabled,
 			RouteTables:                config.RouteTables,
@@ -315,7 +283,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v29ResourceSet,
 		v30ResourceSet,
 		v31ResourceSet,
 	}

@@ -17,10 +17,9 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	v29 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v29"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -33,7 +32,6 @@ type DrainerConfig struct {
 
 	HostAWSConfig  aws.Config
 	LabelSelector  DrainerConfigLabelSelector
-	ProjectName    string
 	Route53Enabled bool
 }
 
@@ -102,7 +100,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
-			Name: config.ProjectName + "-drainer-controller",
+			Name: project.Name() + "-drainer-controller",
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -136,26 +134,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v29ResourceSet *controller.ResourceSet
-	{
-		c := v29.DrainerResourceSetConfig{
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			K8sClient:              config.K8sClient,
-			Logger:                 config.Logger,
-
-			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		v29ResourceSet, err = v29.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v30ResourceSet *controller.ResourceSet
 	{
 		c := v30.DrainerResourceSetConfig{
@@ -166,7 +144,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Logger:                 config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
+			ProjectName:    project.Name(),
 			Route53Enabled: config.Route53Enabled,
 		}
 
@@ -186,7 +164,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Logger:                 config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    config.ProjectName,
+			ProjectName:    project.Name(),
 			Route53Enabled: config.Route53Enabled,
 		}
 
@@ -197,7 +175,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v29ResourceSet,
 		v30ResourceSet,
 		v31ResourceSet,
 	}

@@ -99,6 +99,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
+			err = r.stopMasterInstance(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
 			err = r.detachVolumes(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -203,11 +208,9 @@ func (r *Resource) detachVolumes(ctx context.Context, cr v1alpha1.Cluster) error
 			return microerror.Mask(err)
 		}
 
-		// First shutdown the instances and wait for it to be stopped. Then detach
-		// the etcd and docker volume without forcing.
 		force := false
-		shutdown := true
-		wait := true
+		shutdown := false
+		wait := false
 
 		for _, v := range volumes {
 			for _, a := range v.Attachments {
