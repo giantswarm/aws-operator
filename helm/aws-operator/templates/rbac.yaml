@@ -24,6 +24,7 @@ rules:
       - cluster.k8s.io
     resources:
       - machinedeployments
+      - machinedeployments/status
     verbs:
       - delete
       - get
