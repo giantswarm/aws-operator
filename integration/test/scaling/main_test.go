@@ -31,7 +31,6 @@ func init() {
 	{
 		c := ProviderConfig{
 			GuestFramework: config.Guest,
-			HostFramework:  config.Host,
 			Logger:         config.Logger,
 
 			ClusterID: env.ClusterID(),
