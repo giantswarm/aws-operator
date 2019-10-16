@@ -18,9 +18,6 @@ e2eTest: &e2eTest
         command: ./e2e-harness teardown
         when: always
 
-orbs:
-  architect: giantswarm/architect@0.3.0
-
 version: 2.1
 jobs:
   build:
@@ -229,39 +226,6 @@ workflows:
     jobs:
       - build:
           filters:
-            tags:
-              only: /^v.*/
-      - architect/push-to-docker:
-          name: push-aws-operator-to-docker
-          image: "quay.io/giantswarm/aws-operator"
-          username_envar: "QUAY_USERNAME"
-          password_envar: "QUAY_PASSWORD"
-          requires:
-            - build
-          # Needed to trigger job also on git tag.
-          filters:
-            tags:
-              only: /^v.*/
-      - architect/push-to-app-catalog:
-          name: push-aws-operator-to-app-catalog
-          app_catalog: "control-plane-catalog"
-          app_catalog_test: "control-plane-test-catalog"
-          chart: "aws-operator"
-          requires:
-            - push-aws-operator-to-docker
-          # Needed to trigger job also on git tag.
-          filters:
-            tags:
-              only: /^v.*/
-      - architect/push-to-app-collection:
-          name: push-to-aws-app-collection
-          app_name: "aws-operator"
-          app_collection_repo: "aws-app-collection"
-          requires:
-            - push-aws-operator-to-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /^v.*/
       - hold:
