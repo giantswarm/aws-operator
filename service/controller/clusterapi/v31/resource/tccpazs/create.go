@@ -218,7 +218,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 		}
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", azMapping))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZ subnet mappings: %#v", azMapping))
 
 	return azMapping, nil
 }

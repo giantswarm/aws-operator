@@ -2,6 +2,7 @@ package tccp
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -236,6 +237,9 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t
 	if err != nil {
 		return adapter.Adapter{}, microerror.Mask(err)
 	}
+
+	// XXX: DEBUG
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("tccp.newTemplateParams(): cc.Spec.TenantCluster.TCCP.AvailabilityZones: %#v", cc.Spec.TenantCluster.TCCP.AvailabilityZones))
 
 	var params adapter.Adapter
 	{
