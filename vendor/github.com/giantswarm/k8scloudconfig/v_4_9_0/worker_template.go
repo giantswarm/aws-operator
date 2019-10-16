@@ -139,23 +139,23 @@ systemd:
       [Install]
       WantedBy=multi-user.target
   - name: k8s-setup-download-hyperkube.service
-  enabled: true
-  contents: |
-    [Unit]
-    Description=Pulls hyperkube binary from image to local FS
-    After=docker.service
-    Requires=docker.service
-    [Service]
-    Type=oneshot
-    RemainAfterExit=yes
-    TimeoutStartSec=0
-    Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
-    Environment="NAME=%p.service"
-    ExecStart=/bin/bash -c "/usr/bin/docker create --name $NAME $IMAGE && \
-      /usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube && \
-      /usr/bin/docker rm $NAME"
-    [Install]
-    WantedBy=multi-user.target
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Pulls hyperkube binary from image to local FS
+      After=docker.service
+      Requires=docker.service
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=0
+      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
+      Environment="NAME=%p.service"
+      ExecStart=/bin/bash -c "/usr/bin/docker create --name $NAME $IMAGE && \
+        /usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube && \
+        /usr/bin/docker rm $NAME"
+      [Install]
+      WantedBy=multi-user.target
   - name: k8s-kubelet.service
     enabled: true
     contents: |
