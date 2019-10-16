@@ -18,7 +18,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -134,26 +133,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v30ResourceSet *controller.ResourceSet
-	{
-		c := v30.DrainerResourceSetConfig{
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			K8sClient:              config.K8sClient,
-			Logger:                 config.Logger,
-
-			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    project.Name(),
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		v30ResourceSet, err = v30.NewDrainerResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var v31ResourceSet *controller.ResourceSet
 	{
 		c := v31.DrainerResourceSetConfig{
@@ -175,7 +154,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v30ResourceSet,
 		v31ResourceSet,
 	}
 

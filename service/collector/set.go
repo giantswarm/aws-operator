@@ -1,17 +1,17 @@
 package collector
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/exporterkit/collector"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 )
 
 type SetConfig struct {
-	G8sClient versioned.Interface
+	CMAClient clientset.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
@@ -34,7 +34,7 @@ func NewSet(config SetConfig) (*Set, error) {
 	var h *helper
 	{
 		c := helperConfig{
-			G8sClient: config.G8sClient,
+			CMAClient: config.CMAClient,
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
