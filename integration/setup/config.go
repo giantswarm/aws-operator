@@ -21,12 +21,13 @@ const (
 )
 
 type Config struct {
-	AWSClient *e2eclientsaws.Client
-	Guest     *framework.Guest
-	Host      *framework.Host
-	K8s       *k8sclient.Setup
-	Release   *release.Release
-	Logger    micrologger.Logger
+	AWSClient  *e2eclientsaws.Client
+	Guest      *framework.Guest
+	HelmClient helmclient.Interface
+	Host       *framework.Host
+	K8s        *k8sclient.Setup
+	Release    *release.Release
+	Logger     micrologger.Logger
 
 	// UseDefaultTenant defines whether the standard test setup should ensure the
 	// default tenant cluster. This is enabled by default. Most tests simply use
@@ -147,12 +148,13 @@ func NewConfig() (Config, error) {
 	}
 
 	c := Config{
-		AWSClient: awsClient,
-		Guest:     guest,
-		Host:      host,
-		K8s:       k8sSetup,
-		Logger:    logger,
-		Release:   newRelease,
+		AWSClient:  awsClient,
+		Guest:      guest,
+		HelmClient: helmclient,
+		Host:       host,
+		K8s:        k8sSetup,
+		Logger:     logger,
+		Release:    newRelease,
 
 		UseDefaultTenant: true,
 	}
