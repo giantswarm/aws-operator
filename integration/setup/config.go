@@ -4,7 +4,6 @@ package setup
 
 import (
 	"github.com/giantswarm/e2e-harness/pkg/framework"
-	"github.com/giantswarm/e2e-harness/pkg/harness"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/helmclient"
@@ -59,44 +58,31 @@ func NewConfig() (Config, error) {
 		}
 	}
 
+	var cpK8sClients *k8sclient.Clients
+	{
+		c := k8sclient.ClientsConfig{
+			Logger: logger,
+
+			KubeConfigPath: env.KubeConfigPath(),
+		}
+
+		cpK8sClients, err = k8sclient.NewClients(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
 	var guest *framework.Guest
 	{
 		c := framework.GuestConfig{
-			Logger: logger,
+			Logger:        logger,
+			HostK8sClient: cpK8sClients.K8sClient(),
 
 			ClusterID:    env.ClusterID(),
 			CommonDomain: env.CommonDomain(),
 		}
 
 		guest, err = framework.NewGuest(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
-	var host *framework.Host
-	{
-		c := framework.HostConfig{
-			Logger: logger,
-
-			ClusterID: env.ClusterID(),
-		}
-
-		host, err = framework.NewHost(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
-	var cpK8sClients *k8sclient.Clients
-	{
-		c := k8sclient.ClientsConfig{
-			Logger: logger,
-
-			KubeConfigPath: harness.DefaultKubeConfig,
-		}
-
-		cpK8sClients, err = k8sclient.NewClients(c)
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
@@ -132,9 +118,9 @@ func NewConfig() (Config, error) {
 	{
 		c := helmclient.Config{
 			Logger:    logger,
-			K8sClient: host.K8sClient(),
+			K8sClient: cpK8sClients.K8sClient(),
 
-			RestConfig:      host.RestConfig(),
+			RestConfig:      cpK8sClients.RestConfig(),
 			TillerNamespace: tillerNamespace,
 		}
 
@@ -147,10 +133,10 @@ func NewConfig() (Config, error) {
 	var newRelease *release.Release
 	{
 		c := release.Config{
-			ExtClient:  host.ExtClient(),
-			G8sClient:  host.G8sClient(),
+			ExtClient:  cpK8sClients.ExtClient(),
+			G8sClient:  cpK8sClients.G8sClient(),
 			HelmClient: helmClient,
-			K8sClient:  host.K8sClient(),
+			K8sClient:  cpK8sClients.K8sClient(),
 			Logger:     logger,
 
 			Namespace: namespace,
@@ -163,14 +149,14 @@ func NewConfig() (Config, error) {
 	}
 
 	c := Config{
-		AWSClient:   awsClient,
+		AWSClient:  awsClient,
 		CPCRDClient: cpCRDClient,
-		Guest:       guest,
-		HelmClient:  helmClient,
-		Host:        host,
-		K8s:         k8sSetup,
-		Logger:      logger,
-		Release:     newRelease,
+		Guest:      guest,
+		HelmClient: helmClient,
+		K8s:        k8sSetup,
+		K8sClients: cpK8sClients,
+		Logger:     logger,
+		Release:    newRelease,
 
 		UseDefaultTenant: true,
 	}
