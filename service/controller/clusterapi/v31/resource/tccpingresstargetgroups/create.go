@@ -80,7 +80,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs = []string{ingressInsecureTargetGroup, ingressSecureTargetGroup}
-		fmt.Printf("IngressLoadbalancerTargetGroups: XXSSAA  %#v\n", cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs)
 	}
 
 	return nil

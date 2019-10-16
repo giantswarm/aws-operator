@@ -62,9 +62,10 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params.Cluster.Kubernetes.API.Domain = Localhost
 		params.Cluster.Etcd.Domain = Localhost
 		params.DisableEncryptionAtREST = true
+		// Disabling calico as we use calico with k8s datastore instead of etcd datastore that is in k8scloudconfig.
+		params.DisableCalico = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
-		params.DisableCalico = true
 		params.DisableIngressControllerService = false
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
