@@ -12,8 +12,8 @@ import (
 )
 
 type ProviderConfig struct {
+	G8sClient      versioned.Interface
 	GuestFramework *framework.Guest
-	HostFramework  *framework.Host
 	Logger         micrologger.Logger
 
 	ClusterID string

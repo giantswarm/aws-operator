@@ -20,25 +20,25 @@ import (
 )
 
 type ProviderConfig struct {
-	AWSClient *e2eclientsaws.Client
-	Host      *framework.Host
-	Logger    micrologger.Logger
-	Release   *release.Release
+	AWSClient  *e2eclientsaws.Client
+	K8sClients *k8sclient.Clients
+	Logger     micrologger.Logger
+	Release    *release.Release
 }
 
 type Provider struct {
-	awsClient *e2eclientsaws.Client
-	host      *framework.Host
-	logger    micrologger.Logger
-	release   *release.Release
+	awsClient  *e2eclientsaws.Client
+	k8sClients *k8sclient.Clients
+	logger     micrologger.Logger
+	release    *release.Release
 }
 
 func NewProvider(config ProviderConfig) (*Provider, error) {
 	if config.AWSClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AWSClient must not be empty", config)
 	}
-	if config.Host == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Host must not be empty", config)
+	if config.K8sClients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
