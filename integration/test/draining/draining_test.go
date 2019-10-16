@@ -18,7 +18,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
@@ -136,7 +136,7 @@ func Test_Draining(t *testing.T) {
 			}
 
 			for _, p := range l.Items {
-				if p.Status.Phase != v1.PodRunning {
+				if p.Status.Phase != corev1.PodRunning {
 					return microerror.Maskf(podError, "%#q is not running", p.GetName())
 				}
 			}
