@@ -11,7 +11,6 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
 
@@ -40,7 +39,6 @@ type MachineDeploymentResourceSetConfig struct {
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	NetworkSetupDockerImage    string
-	OIDC                       cloudconfig.ConfigOIDC
 	PodInfraContainerImage     string
 	ProjectName                string
 	RegistryDomain             string

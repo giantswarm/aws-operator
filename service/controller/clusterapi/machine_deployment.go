@@ -23,7 +23,6 @@ import (
 	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
 	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
-	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -266,21 +265,15 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
-			OIDC: v31cloudconfig.ConfigOIDC{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			ProjectName:            project.Name(),
-			RegistryDomain:         config.RegistryDomain,
-			Route53Enabled:         config.Route53Enabled,
-			RouteTables:            config.RouteTables,
-			SSHUserList:            config.SSHUserList,
-			SSOPublicKey:           config.SSOPublicKey,
-			VaultAddress:           config.VaultAddress,
-			VPCPeerID:              config.VPCPeerID,
+			PodInfraContainerImage:     config.PodInfraContainerImage,
+			ProjectName:                project.Name(),
+			RegistryDomain:             config.RegistryDomain,
+			Route53Enabled:             config.Route53Enabled,
+			RouteTables:                config.RouteTables,
+			SSHUserList:                config.SSHUserList,
+			SSOPublicKey:               config.SSOPublicKey,
+			VaultAddress:               config.VaultAddress,
+			VPCPeerID:                  config.VPCPeerID,
 		}
 
 		v31ResourceSet, err = v31.NewMachineDeploymentResourceSet(c)
