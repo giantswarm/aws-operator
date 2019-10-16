@@ -42,11 +42,6 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 		return microerror.Mask(err)
 	}
 
-	/*internalAPIRules, err := getKubernetesPrivateAPIRules(cfg, cfg.ControlPlaneVPCCidr)
-	if err != nil {
-		return microerror.Mask(err)
-	}*/
-
 	s.APIWhitelistEnabled = cfg.APIWhitelist.Public.Enabled
 	s.PrivateAPIWhitelistEnabled = cfg.APIWhitelist.Private.Enabled
 
@@ -55,12 +50,6 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.IngressSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "ingress")
 	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
-
-	//s.EtcdELBSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "etcd-elb")
-	//s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
-
-	//s.APIInternalELBSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "internal-api")
-	//s.APIInternalELBSecurityGroupRules = internalAPIRules
 
 	return nil
 }
