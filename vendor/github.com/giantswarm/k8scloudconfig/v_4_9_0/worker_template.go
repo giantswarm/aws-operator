@@ -138,15 +138,32 @@ systemd:
       ExecStopPost=-/usr/bin/docker rm -f $NAME
       [Install]
       WantedBy=multi-user.target
+  - name: k8s-setup-download-hyperkube.service
+  enabled: true
+  contents: |
+    [Unit]
+    Description=Pulls hyperkube binary from image to local FS
+    After=docker.service
+    Requires=docker.service
+    [Service]
+    Type=oneshot
+    RemainAfterExit=yes
+    TimeoutStartSec=0
+    Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
+    Environment="NAME=%p.service"
+    ExecStart=/bin/bash -c "/usr/bin/docker create --name $NAME $IMAGE && \
+      /usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube && \
+      /usr/bin/docker rm $NAME"
+    [Install]
+    WantedBy=multi-user.target
   - name: k8s-kubelet.service
     enabled: true
     contents: |
       [Unit]
-      Wants=k8s-setup-network-env.service k8s-setup-kubelet-config.service
-      After=k8s-setup-network-env.service k8s-setup-kubelet-config.service
+      Wants=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service
+      After=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service
       Description=k8s-kubelet
       StartLimitIntervalSec=0
-
       [Service]
       TimeoutStartSec=300
       Restart=always
@@ -162,11 +179,7 @@ systemd:
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem"
       Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem"
-      ExecStartPre=/bin/sh -c "/usr/bin/docker run \
-        -v /usr/bin/:/target/:rw \
-        $IMAGE \
-        cp /hyperkube /target/hyperkube"
-      ExecStart=/bin/sh -c "/opt/bin/kubelet \
+      ExecStart=/bin/sh -c "/opt/bin/hyperkube kubelet \
       {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
       {{ . }} \
       {{ end -}}
@@ -178,7 +191,6 @@ systemd:
       --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
       --network-plugin=cni \
       --register-node=true \
-      --feature-gates=TTLAfterFinished=true \
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
