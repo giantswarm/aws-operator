@@ -201,9 +201,7 @@ Resources:
       Name: 8y5ck-api-internal
       Scheme: internal
       Subnets:
-        - !Ref PublicSubnetEuCentral1a
-        - !Ref PublicSubnetEuCentral1b
-        - !Ref PublicSubnetEuCentral1c
+        - !Ref PrivateSubnetEuCentral1b
       Type: network
   ApiInternalTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -276,11 +274,7 @@ Resources:
       Name: 8y5ck-etcd
       Scheme: internal
       Subnets:
-        - !Ref PublicSubnetEuCentral1a
-      
-        - !Ref PublicSubnetEuCentral1b
-      
-        - !Ref PublicSubnetEuCentral1c
+        - !Ref PrivateSubnetEuCentral1b
       
       Type: network
   EtcdTargetGroup:

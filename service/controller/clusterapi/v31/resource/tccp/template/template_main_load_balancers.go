@@ -11,7 +11,7 @@ const TemplateMainLoadBalancers = `
       Name: {{ $v.APIInternalElbName }}
       Scheme: {{ $v.APIInternalElbScheme }}
       Subnets:
-      {{- range $s := $v.PublicSubnets }}
+      {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
       {{- end}}
       Type: network
@@ -87,7 +87,7 @@ const TemplateMainLoadBalancers = `
       Name: {{ $v.EtcdElbName }}
       Scheme: {{ $v.EtcdElbScheme }}
       Subnets:
-      {{- range $s := $v.PublicSubnets }}
+      {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
       {{end}}
       Type: network
