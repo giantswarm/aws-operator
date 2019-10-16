@@ -5,6 +5,7 @@ package scaling
 import (
 	"context"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -20,19 +21,19 @@ type ProviderConfig struct {
 }
 
 type Provider struct {
+	g8sClient      versioned.Interface
 	guestFramework *framework.Guest
-	hostFramework  *framework.Host
 	logger         micrologger.Logger
 
 	clusterID string
 }
 
 func NewProvider(config ProviderConfig) (*Provider, error) {
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
 	if config.GuestFramework == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestFramework must not be empty", config)
-	}
-	if config.HostFramework == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.HostFramework must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -43,8 +44,8 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 	}
 
 	p := &Provider{
+		g8sClient:      config.G8sClient,
 		guestFramework: config.GuestFramework,
-		hostFramework:  config.HostFramework,
 		logger:         config.Logger,
 
 		clusterID: config.ClusterID,
@@ -55,7 +56,7 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 
 func (p *Provider) AddWorker() error {
 	{
-		customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
+		customObject, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -63,7 +64,7 @@ func (p *Provider) AddWorker() error {
 		customObject.Spec.Cluster.Scaling.Max++
 		customObject.Spec.Cluster.Scaling.Min++
 
-		_, err = p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		_, err = p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Update(customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -73,7 +74,7 @@ func (p *Provider) AddWorker() error {
 }
 
 func (p *Provider) NumMasters() (int, error) {
-	customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
+	customObject, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -84,7 +85,7 @@ func (p *Provider) NumMasters() (int, error) {
 }
 
 func (p *Provider) NumWorkers() (int, error) {
-	customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
+	customObject, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -96,7 +97,7 @@ func (p *Provider) NumWorkers() (int, error) {
 
 func (p *Provider) RemoveWorker() error {
 	{
-		customObject, err := p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
+		customObject, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -104,7 +105,7 @@ func (p *Provider) RemoveWorker() error {
 		customObject.Spec.Cluster.Scaling.Max--
 		customObject.Spec.Cluster.Scaling.Min--
 
-		_, err = p.hostFramework.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		_, err = p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Update(customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}
