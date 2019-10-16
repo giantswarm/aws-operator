@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
@@ -11,7 +12,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig/template"
+	cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
@@ -49,6 +50,24 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		return nil, microerror.Mask(err)
 	}
 
+	var apiExtraArgs []string
+	{
+		if key.OIDCClientID(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cr)))
+		}
+		if key.OIDCIssuerURL(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(cr)))
+		}
+		if key.OIDCUsernameClaim(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(cr)))
+		}
+		if key.OIDCGroupsClaim(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(cr)))
+		}
+
+		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -81,7 +100,7 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 			clusterCerts:     clusterCerts,
 			randomKeyTmplSet: randomKeyTmplSet,
 		}
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = t.config.APIExtraArgs
+		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = t.config.KubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain

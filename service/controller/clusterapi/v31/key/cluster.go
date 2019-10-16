@@ -115,6 +115,19 @@ func MasterInstanceType(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.Master.InstanceType
 }
 
+func OIDCClientID(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.OIDC.ClientID
+}
+func OIDCIssuerURL(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.OIDC.IssuerURL
+}
+func OIDCUsernameClaim(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.OIDC.Claims.Username
+}
+func OIDCGroupsClaim(cluster v1alpha1.Cluster) string {
+	return clusterProviderSpec(cluster).Cluster.OIDC.Claims.Groups
+}
+
 func PolicyNameMaster(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2PolicyK8s)
 }
