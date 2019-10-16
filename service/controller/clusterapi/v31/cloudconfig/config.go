@@ -23,34 +23,13 @@ type Config struct {
 	ImagePullProgressDeadline string
 	KubeletExtraArgs          []string
 	NetworkSetupDockerImage   string
-	OIDC                      ConfigOIDC
 	PodInfraContainerImage    string
 	RegistryDomain            string
 	SSHUserList               string
 	SSOPublicKey              string
 }
 
-type ConfigOIDC struct {
-	ClientID      string
-	IssuerURL     string
-	UsernameClaim string
-	GroupsClaim   string
-}
-
 func (c Config) Default() Config {
-	if c.OIDC.ClientID != "" {
-		c.APIExtraArgs = append(c.APIExtraArgs, fmt.Sprintf("--oidc-client-id=%s", c.OIDC.ClientID))
-	}
-	if c.OIDC.IssuerURL != "" {
-		c.APIExtraArgs = append(c.APIExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", c.OIDC.IssuerURL))
-	}
-	if c.OIDC.UsernameClaim != "" {
-		c.APIExtraArgs = append(c.APIExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", c.OIDC.UsernameClaim))
-	}
-	if c.OIDC.GroupsClaim != "" {
-		c.APIExtraArgs = append(c.APIExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", c.OIDC.GroupsClaim))
-	}
-
 	if c.PodInfraContainerImage != "" {
 		c.KubeletExtraArgs = append(c.KubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", c.PodInfraContainerImage))
 	}
