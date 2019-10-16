@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/afero"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
@@ -316,14 +317,18 @@ func removeWorker(clusterID string) error {
 		patch[0].Op = "remove"
 		patch[0].Path = "/spec/aws/workers/1"
 
-		err := config.Host.ApplyAWSConfigPatch(patch, clusterID)
+		patchBytes, err := json.Marshal(patch)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		_, err = config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Patch(clusterID, types.JSONPatchType, patchBytes)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	{
-		customObject, err := config.Host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
+		customObject, err := config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
