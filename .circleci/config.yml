@@ -40,7 +40,7 @@ jobs:
 
     - deploy:
         command: |
-          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+          if [ "${CIRCLE_BRANCH}" == "thiccc" ]; then
             ./architect deploy
           fi
 
