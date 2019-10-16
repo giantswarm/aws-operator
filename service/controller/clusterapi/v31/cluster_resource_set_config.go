@@ -12,7 +12,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
 
@@ -47,7 +46,6 @@ type ClusterResourceSetConfig struct {
 	IPAMNetworkRange           net.IPNet
 	DeleteLoggingBucket        bool
 	NetworkSetupDockerImage    string
-	OIDC                       cloudconfig.ConfigOIDC
 	Route53Enabled             bool
 	RouteTables                string
 	PodInfraContainerImage     string
