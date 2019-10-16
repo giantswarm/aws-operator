@@ -265,7 +265,7 @@ systemd:
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem"
       Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem"
-      ExecStartPre=/bin/sh -c "/usr/bin/docker
+      ExecStartPre=/bin/sh -c "/usr/bin/docker run \
         -v /usr/bin/:/target/:rw \
         $IMAGE \
         cp /hyperkube /target/hyperkube"
