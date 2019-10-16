@@ -157,58 +157,21 @@ systemd:
       Slice=kubereserved.slice
       EnvironmentFile=/etc/network-environment
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
-      Environment="NAME=%p.service"
       Environment="PATH=/opt/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-      ExecStartPre=/usr/bin/docker pull $IMAGE
-      ExecStartPre=-/usr/bin/docker stop -t 10 $NAME
-      ExecStartPre=-/usr/bin/docker rm -f $NAME
-      ExecStart=/bin/sh -c "/usr/bin/docker run --rm --pid=host --net=host --privileged=true \
-      {{ range .Hyperkube.Kubelet.Docker.RunExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
-      -v /:/rootfs:ro,rshared \
-      -v /sys:/sys:ro \
-      -v /dev:/dev:rw \
-      -v /var/log:/var/log:rw \
-      -v /run/calico/:/run/calico/:rw \
-      -v /run/docker/:/run/docker/:rw \
-      -v /run/docker.sock:/run/docker.sock:rw \
-      -v /usr/bin/docker:/usr/bin/docker \
-      -v /run/metadata/torcx:/run/metadata/torcx \
-      -v /run/torcx/:/run/torcx/ \
-      -v /usr/lib/os-release:/etc/os-release \
-      -v /usr/share/ca-certificates/:/etc/ssl/certs \
-      -v /var/lib/calico/:/var/lib/calico \
-      -v /var/lib/docker/:/var/lib/docker:rw,rshared \
-      -v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \
-      -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \
-      -v /etc/kubernetes/config/:/etc/kubernetes/config/ \
-      -v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \
-      -v /etc/cni/net.d/:/etc/cni/net.d/ \
-      -v /opt/cni/bin/:/opt/cni/bin/ \
-      -v /opt/bin:/opt/bin \
-      -v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \
-      -v /etc/iscsi/:/etc/iscsi/ \
-      -v /dev/disk/by-path/:/dev/disk/by-path/ \
-      -v /dev/mapper/:/dev/mapper/ \
-      -v /lib/modules:/lib/modules \
-      -v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \
-      -v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \
-      -v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \
-      -v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \
-      -e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \
-      -e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \
-      -e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \
-      -e PATH \
-      --name $NAME \
-      $IMAGE \
-      /hyperkube kubelet \
+      Environment="PATH=/opt/bin/:/usr/bin/:/usr/sbin:/sbin:$PATH"
+      Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem"
+      Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem"
+      Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem"
+      ExecStartPre=/bin/sh -c "/usr/bin/docker
+        -v /usr/bin/:/target/:rw \
+        $IMAGE \
+        cp /hyperkube /target/hyperkube"
+      ExecStart=/bin/sh -c "/opt/bin/kubelet \
       {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
       {{ . }} \
       {{ end -}}
       --node-ip=${DEFAULT_IPV4} \
       --config=/etc/kubernetes/config/kubelet.yaml \
-      --containerized \
       --enable-server \
       --logtostderr=true \
       --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
@@ -219,8 +182,7 @@ systemd:
       --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
       --node-labels="node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
       --v=2"
-      ExecStop=-/usr/bin/docker stop -t 10 $NAME
-      ExecStopPost=-/usr/bin/docker rm -f $NAME
+      ExecStop=-/usr/bin/pkill kubelet
       [Install]
       WantedBy=multi-user.target
   - name: etcd2.service

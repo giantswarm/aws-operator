@@ -85,7 +85,7 @@ required = [
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
-  branch = "k8s-1_15_4-release"
+  branch = "systemd-kubelet"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
