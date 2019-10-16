@@ -292,7 +292,7 @@ func Test_Draining(t *testing.T) {
 }
 
 func numberOfMasters(clusterID string) (int, error) {
-	cluster, err := config.Host.AWSCluster(clusterID)
+	cluster, err := config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -301,7 +301,7 @@ func numberOfMasters(clusterID string) (int, error) {
 }
 
 func numberOfWorkers(clusterID string) (int, error) {
-	cluster, err := config.Host.AWSCluster(clusterID)
+	cluster, err := config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(clusterID, metav1.GetOptions{})
 	if err != nil {
 		return 0, microerror.Mask(err)
 	}
@@ -331,7 +331,7 @@ func removeWorker(clusterID string) error {
 		customObject.Spec.Cluster.Scaling.Max--
 		customObject.Spec.Cluster.Scaling.Min--
 
-		_, err = config.Host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+		_, err = config.K8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Update(customObject)
 		if err != nil {
 			return microerror.Mask(err)
 		}
