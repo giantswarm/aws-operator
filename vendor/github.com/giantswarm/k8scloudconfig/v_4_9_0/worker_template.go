@@ -179,22 +179,21 @@ systemd:
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem"
       Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem"
-      ExecStart=/bin/sh -c "/opt/bin/hyperkube kubelet \
-      {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
-      --node-ip=${DEFAULT_IPV4} \
-      --config=/etc/kubernetes/config/kubelet.yaml \
-      --enable-server \
-      --logtostderr=true \
-      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
-      --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
-      --network-plugin=cni \
-      --register-node=true \
-      --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
-      --node-labels="node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
-      --v=2"
-      ExecStop=-/usr/bin/pkill kubelet
+      ExecStart=/opt/bin/hyperkube kubelet \
+        {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
+        {{ . }} \
+        {{ end -}}
+        --node-ip=${DEFAULT_IPV4} \
+        --config=/etc/kubernetes/config/kubelet.yaml \
+        --enable-server \
+        --logtostderr=true \
+        --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
+        --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
+        --network-plugin=cni \
+        --register-node=true \
+        --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
+        --node-labels="node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+        --v=2
       [Install]
       WantedBy=multi-user.target
   - name: etcd2.service

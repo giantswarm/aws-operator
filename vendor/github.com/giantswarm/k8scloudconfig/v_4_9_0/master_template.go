@@ -280,24 +280,23 @@ systemd:
       Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem"
       Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem"
       Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem"
-      ExecStart=/bin/sh -c "/opt/bin/hyperkube kubelet \
-      {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
-      {{ . }} \
-      {{ end -}}
-      --node-ip=${DEFAULT_IPV4} \
-      --config=/etc/kubernetes/config/kubelet.yaml \
-      --enable-server \
-      --logtostderr=true \
-      --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
-      --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
-      --network-plugin=cni \
-      --register-node=true \
-      --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
-      --feature-gates=TTLAfterFinished=true \
-      --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
-      --node-labels="node.kubernetes.io/master,node-role.kubernetes.io/master,kubernetes.io/role=master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
-      --v=2"
-      ExecStop=-/usr/bin/pkill kubelet
+      ExecStart=/opt/bin/hyperkube kubelet \
+        {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
+        {{ . }} \
+        {{ end -}}
+        --node-ip=${DEFAULT_IPV4} \
+        --config=/etc/kubernetes/config/kubelet.yaml \
+        --enable-server \
+        --logtostderr=true \
+        --cloud-provider={{.Cluster.Kubernetes.CloudProvider}} \
+        --image-pull-progress-deadline={{.ImagePullProgressDeadline}} \
+        --network-plugin=cni \
+        --register-node=true \
+        --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
+        --feature-gates=TTLAfterFinished=true \
+        --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
+        --node-labels="node.kubernetes.io/master,node-role.kubernetes.io/master,kubernetes.io/role=master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+        --v=2
       [Install]
       WantedBy=multi-user.target
   - name: etcd2.service
@@ -505,6 +504,11 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "policies/audit-policy.yaml" }}"
+    - path: /etc/kubernetes/manifests/k8s-api-healthz.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "manifests/k8s-api-healthz.yaml" }}"
 
     - path: /etc/kubernetes/manifests/k8s-api-server.yaml
       filesystem: root
