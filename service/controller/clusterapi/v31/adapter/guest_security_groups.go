@@ -77,13 +77,7 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 			SourceCIDR:  hostClusterCIDR,
 		},
 		{
-			Description: "Allow traffic from control plane CIDR to 2379 for etcd backup.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from Cluster CIDR to 2379 for network-lb health checks.",
+			Description: "Allow traffic from tenant cluster CIDR to 2379 for network-lb health checks.",
 			Port:        etcdPort,
 			Protocol:    tcpProtocol,
 			SourceCIDR:  key.StatusClusterNetworkCIDR(cfg.CustomObject),

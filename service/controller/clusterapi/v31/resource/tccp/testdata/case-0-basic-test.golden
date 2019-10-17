@@ -499,13 +499,7 @@ Resources:
         ToPort: 4194
         CidrIp: 10.1.0.0/16
       -
-        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from Cluster CIDR to 2379 for network-lb health checks.
+        Description: Allow traffic from tenant cluster CIDR to 2379 for network-lb health checks.
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
