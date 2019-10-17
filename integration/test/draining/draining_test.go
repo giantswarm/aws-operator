@@ -65,7 +65,7 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	var apprClient *apprclient.Client
+	var apprClient apprclient.Interface
 	{
 		c := apprclient.Config{
 			Fs:     afero.NewOsFs(),
@@ -81,7 +81,7 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	var helmClient *helmclient.Client
+	var helmClient helmclient.Interface
 	{
 		c := helmclient.Config{
 			Logger:    newLogger,
