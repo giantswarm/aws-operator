@@ -408,7 +408,10 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 	var tccpOutputsResource resource.Interface
 	{
 		c := tccpoutputs.Config{
-			Logger: config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+
+			Route53Enabled: config.Route53Enabled,
 		}
 
 		tccpOutputsResource, err = tccpoutputs.New(c)
