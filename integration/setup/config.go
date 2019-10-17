@@ -150,7 +150,7 @@ func NewConfig() (Config, error) {
 	c := Config{
 		AWSClient:  awsClient,
 		Guest:      guest,
-		HelmClient: helmclient,
+		HelmClient: helmClient,
 		Host:       host,
 		K8s:        k8sSetup,
 		Logger:     logger,
