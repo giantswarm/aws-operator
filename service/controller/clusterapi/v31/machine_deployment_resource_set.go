@@ -2,7 +2,6 @@ package v31
 
 import (
 	"context"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpingresstargetgroups"
 	"strings"
 
 	"github.com/giantswarm/microerror"
