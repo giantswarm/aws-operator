@@ -268,9 +268,13 @@ func azSubnetStatusToString(azs []controllercontext.ContextStatusTenantClusterTC
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
 	for _, s := range subnets {
 		if !awstags.HasTags(s.Tags, key.TagSubnetType) {
+			// Filter out EC2 subnets that don't specify subnet type (i.e.
+			// public or private).
 			continue
 		}
 		if awstags.ValueForKey(s.Tags, key.TagStack) != key.StackTCCP {
+			// Filter out EC2 subnets that don't belong to tenant cluster
+			// control plane CF stack.
 			continue
 		}
 
