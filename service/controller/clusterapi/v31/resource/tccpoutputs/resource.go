@@ -3,6 +3,7 @@ package tccpoutputs
 import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 const (
@@ -10,7 +11,8 @@ const (
 )
 
 type Config struct {
-	Logger micrologger.Logger
+	Logger        micrologger.Logger
+	ToClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
 
 	Route53Enabled bool
 }
@@ -23,7 +25,8 @@ type Config struct {
 // added to the controller context and used in the CPF stack.
 //
 type Resource struct {
-	logger micrologger.Logger
+	logger        micrologger.Logger
+	toClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
 
 	route53Enabled bool
 }
@@ -33,8 +36,13 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.ToClusterFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
+	}
+
 	r := &Resource{
-		logger: config.Logger,
+		logger:        config.Logger,
+		toClusterFunc: config.ToClusterFunc,
 
 		route53Enabled: config.Route53Enabled,
 	}

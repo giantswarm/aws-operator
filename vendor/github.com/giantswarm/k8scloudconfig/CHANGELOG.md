@@ -9,11 +9,19 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v4.8.0] WIP
+
+## [v4.9.0] WIP
+
+### Added
+
+- Bind kube-proxy metrics address to 0.0.0.0 instead on default 127.0.0.1 in config file.
+
+## [v4.8.0] 
 
 ### Added
 
 - Add k8s-api-healthz service to master node to enable proper LB health checks to api and etcd.
+- Set api-server listen address to 0.0.0.0.
 
 ## [v4.7.0]
 
@@ -440,7 +448,8 @@ chart-operator).
 - Disable API etcd data encryption experimental feature.
 
 ## [v0.1.0]
-
+[v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
+[v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0
 [v4.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_7_0
 [v4.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_6_0
 [v4.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_1
