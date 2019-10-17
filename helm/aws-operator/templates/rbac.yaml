@@ -13,6 +13,7 @@ rules:
       - cluster.k8s.io
     resources:
       - clusters
+      - clusters/status
     verbs:
       - get
       - list
@@ -23,6 +24,7 @@ rules:
       - cluster.k8s.io
     resources:
       - machinedeployments
+      - machinedeployments/status
     verbs:
       - delete
       - get
