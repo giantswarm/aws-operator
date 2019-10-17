@@ -7,11 +7,11 @@ The aws-operator manages Kubernetes clusters running on AWS.
 ## Branches
 
 - `thiccc`
-    - Up to version v5.4.0.
+    - Up to and including version v5.4.0.
     - Contains all versions of legacy controllers (reconciling AWSConfig CRs) up
-      to v5.4.0.
+      to and including v5.4.0.
 - `legacy`
-    - From version v5.5.0 up to v5.x.x.
+    - From version v5.5.0 up to and including v5.x.x.
     - Contains only the latest version of legacy controllers (reconciling
       AWSConfig CRs).
 - `master`
