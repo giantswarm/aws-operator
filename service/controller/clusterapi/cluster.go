@@ -20,9 +20,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	v30 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30"
-	v30adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/adapter"
-	v30cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v30/cloudconfig"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	v31adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -217,70 +214,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV30 *controller.ResourceSet
-	{
-		c := v30.ClusterResourceSetConfig{
-			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			HostAWSConfig:          config.HostAWSConfig,
-			K8sClient:              config.K8sClient,
-			Locker:                 config.Locker,
-			Logger:                 config.Logger,
-			RandomKeysSearcher:     randomKeysSearcher,
-
-			AccessLogsExpiration:  config.AccessLogsExpiration,
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: v30adapter.APIWhitelist{
-				Private: v30adapter.Whitelist{
-					Enabled:    config.APIWhitelist.Private.Enabled,
-					SubnetList: config.APIWhitelist.Private.SubnetList,
-				},
-				Public: v30adapter.Whitelist{
-					Enabled:    config.APIWhitelist.Public.Enabled,
-					SubnetList: config.APIWhitelist.Public.SubnetList,
-				},
-			},
-			CalicoCIDR:                 config.CalicoCIDR,
-			CalicoMTU:                  config.CalicoMTU,
-			CalicoSubnet:               config.CalicoSubnet,
-			ClusterIPRange:             config.ClusterIPRange,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			DockerDaemonCIDR:           config.DockerDaemonCIDR,
-			EncrypterBackend:           config.EncrypterBackend,
-			GuestAvailabilityZones:     config.GuestAvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			IgnitionPath:               config.IgnitionPath,
-			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
-			OIDC: v30cloudconfig.ConfigOIDC{
-				ClientID:      config.OIDC.ClientID,
-				IssuerURL:     config.OIDC.IssuerURL,
-				UsernameClaim: config.OIDC.UsernameClaim,
-				GroupsClaim:   config.OIDC.GroupsClaim,
-			},
-			PodInfraContainerImage: config.PodInfraContainerImage,
-			RegistryDomain:         config.RegistryDomain,
-			Route53Enabled:         config.Route53Enabled,
-			RouteTables:            config.RouteTables,
-			SSHUserList:            config.SSHUserList,
-			SSOPublicKey:           config.SSOPublicKey,
-			VaultAddress:           config.VaultAddress,
-			VPCPeerID:              config.VPCPeerID,
-		}
-
-		resourceSetV30, err = v30.NewClusterResourceSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSetV31 *controller.ResourceSet
 	{
 		c := v31.ClusterResourceSetConfig{
@@ -340,7 +273,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV30,
 		resourceSetV31,
 	}
 

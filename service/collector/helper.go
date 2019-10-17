@@ -3,19 +3,20 @@ package collector
 import (
 	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/credential"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/credential"
 )
 
 type helperConfig struct {
-	G8sClient versioned.Interface
+	CMAClient clientset.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
@@ -23,7 +24,7 @@ type helperConfig struct {
 }
 
 type helper struct {
-	g8sClient versioned.Interface
+	cmaClient clientset.Interface
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
@@ -31,8 +32,8 @@ type helper struct {
 }
 
 func newHelper(config helperConfig) (*helper, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	if config.CMAClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
 	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
@@ -47,7 +48,7 @@ func newHelper(config helperConfig) (*helper, error) {
 	}
 
 	h := &helper{
-		g8sClient: config.G8sClient,
+		cmaClient: config.CMAClient,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
@@ -61,17 +62,15 @@ func newHelper(config helperConfig) (*helper, error) {
 func (h *helper) GetARNs() ([]string, error) {
 	var arns []string
 
-	// List AWSConfigs.
-	awsConfigClient := h.g8sClient.ProviderV1alpha1().AWSConfigs("")
-	awsConfigs, err := awsConfigClient.List(v1.ListOptions{})
+	clusterCRList, err := h.cmaClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll).List(v1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
-	for _, awsConfig := range awsConfigs.Items {
-		arn, err := credential.GetARN(h.k8sClient, &awsConfig)
+	for _, clusterCR := range clusterCRList.Items {
+		arn, err := credential.GetARN(h.k8sClient, clusterCR)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
 		if credential.IsCredentialNameEmptyError(err) {
