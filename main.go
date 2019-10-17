@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command"
@@ -23,7 +22,7 @@ var (
 func main() {
 	err := mainE(context.Background())
 	if err != nil {
-		panic(fmt.Sprintf("%#v", err))
+		panic(microerror.Stack(err))
 	}
 }
 
@@ -47,19 +46,15 @@ func mainE(ctx context.Context) error {
 		var newService *service.Service
 		{
 			c := service.Config{
-				Flag:   f,
 				Logger: logger,
-				Viper:  v,
 
-				Description: project.Description(),
-				GitCommit:   project.GitSHA(),
-				Source:      project.Source(),
-				Version:     project.Version(),
+				Flag:  f,
+				Viper: v,
 			}
 
 			newService, err = service.New(c)
 			if err != nil {
-				panic(fmt.Sprintf("%#v", microerror.Mask(err)))
+				panic(microerror.Stack(err))
 			}
 
 			go newService.Boot(ctx)
@@ -71,14 +66,13 @@ func mainE(ctx context.Context) error {
 			c := server.Config{
 				Logger:  logger,
 				Service: newService,
-				Viper:   v,
 
-				ProjectName: project.Name(),
+				Viper: v,
 			}
 
 			newServer, err = server.New(c)
 			if err != nil {
-				panic(err)
+				panic(microerror.Stack(err))
 			}
 		}
 
