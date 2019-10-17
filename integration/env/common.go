@@ -66,10 +66,9 @@ func init() {
 
 	testDir = os.Getenv(EnvVarTestDir)
 
-	var versionBundleVersion string
 	{
 		vbs := service.NewVersionBundles()
-		versionBundleVersion = vbs[len(vbs)-1], nil
+		versionBundleVersion = vbs[len(vbs)-1].Version
 
 		os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 	}

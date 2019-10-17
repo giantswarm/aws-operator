@@ -64,12 +64,12 @@ func (p *Provider) CurrentStatus() (v1alpha1.StatusCluster, error) {
 
 func (p *Provider) CurrentVersion() (string, error) {
 	vbs := service.NewVersionBundles()
-	return vbs[len(vbs)-2], nil
+	return vbs[len(vbs)-2].Version, nil
 }
 
 func (p *Provider) NextVersion() (string, error) {
 	vbs := service.NewVersionBundles()
-	return vbs[len(vbs)-1], nil
+	return vbs[len(vbs)-1].Version, nil
 }
 
 func (p *Provider) UpdateVersion(nextVersion string) error {
