@@ -30,6 +30,7 @@ func init() {
 	var p *Provider
 	{
 		c := ProviderConfig{
+			G8sClient:      config.K8sClients.G8sClient(),
 			GuestFramework: config.Guest,
 			Logger:         config.Logger,
 
