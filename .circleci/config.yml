@@ -5,17 +5,55 @@ e2eTest: &e2eTest
     - checkout
     - attach_workspace:
         at: .
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-    - run: ./e2e-harness localkube
-    - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=${TEST_DIR}
+    - run:
+        name: Get e2ectl binary
+        command: |
+          wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2ectl/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+          chmod +x ./e2ectl
+    - run:
+        name: Init cluster
+        command: |
+          ./e2ectl cluster create
+          cp $(./e2ectl kubeconfig path) ${E2E_TEST_DIR}/kubeconfig
+    - run:
+        name: Run test
+        command: |
+          docker run --rm --network host \
+            -v $(pwd)/${E2E_TEST_DIR}:/e2e \
+            -v $(pwd):/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
+            -e E2E_KUBECONFIG=/e2e/kubeconfig \
+            -e AWS_API_HOSTED_ZONE_GUEST=${AWS_API_HOSTED_ZONE_GUEST} \
+            -e AWS_INGRESS_HOSTED_ZONE_GUEST=${AWS_INGRESS_HOSTED_ZONE_GUEST} \
+            -e AWS_REGION=${AWS_REGION} \
+            -e CATALOGBOT_SSH_KEY_PRIVATE_BASE64=${CATALOGBOT_SSH_KEY_PRIVATE_BASE64} \
+            -e COMMON_DOMAIN=${COMMON_DOMAIN} \
+            -e DEPLOYMENT_EVENTS_TOKEN=${DEPLOYMENT_EVENTS_TOKEN} \
+            -e GITHUB_BOT_TOKEN=${GITHUB_BOT_TOKEN} \
+            -e GUEST_AWS_ACCESS_KEY_ID=${GUEST_AWS_ACCESS_KEY_ID} \
+            -e GUEST_AWS_ARN=${GUEST_AWS_ARN} \
+            -e GUEST_AWS_SECRET_ACCESS_KEY=${GUEST_AWS_SECRET_ACCESS_KEY} \
+            -e HOST_AWS_ACCESS_KEY_ID=${HOST_AWS_ACCESS_KEY_ID} \
+            -e HOST_AWS_SECRET_ACCESS_KEY=${HOST_AWS_SECRET_ACCESS_KEY} \
+            -e REGISTRY_PULL_SECRET=${REGISTRY_PULL_SECRET} \
+            -e RELEASE_TOKEN=${RELEASE_TOKEN} \
+            -e STORMFORGER_API_TOKEN=${STORMFORGER_API_TOKEN} \
+            -e CIRCLE_SHA1=${CIRCLE_SHA1} \
+            -e GITHUB_BOT_TOKEN=${GITHUB_BOT_TOKEN} \
+            -e E2E_TESTED_VERSION=${E2E_TESTED_VERSION} \
+            -e VAULT_TOKEN=mytoken \
+            -w /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \
+            golang:1 go test -v -timeout 7200s -tags k8srequired ./${E2E_TEST_DIR}/
+    - run:
+        name: Export logs
+        command: |
+          ./e2ectl logs export --logs-dir=kind/logs
+        when: always
     - store_artifacts:
-        path: .e2e-harness/workdir/logs
+        path: kind/logs
         destination: logs
     - run:
-        command: ./e2e-harness teardown
+        name: Finish with teardown
+        command: ./e2ectl cluster delete
         when: always
 
 orbs:
