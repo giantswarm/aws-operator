@@ -1,34 +1,26 @@
 package collector
 
 import (
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/prometheus/client_golang/prometheus"
-	"golang.org/x/sync/errgroup"
-
+	"github.com/aws/aws-sdk-go/service/cloudformation"
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
-	labelCIDR  = "cidr"
-	labelID    = "id"
-	labelStack = "stack_name"
-	labelState = "state"
-)
+	labelCloudFormation = "cloudformation"
 
-const (
-	subsystemVPC = "vpc"
+	subsystemCloudFormation = "cloudformation"
 )
 
 var (
-	vpcsDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, subsystemVPC, "info"),
-		"VPC information.",
+	cloudFormationStackDesc = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, subsystemCloudFormation, "info"),
+		"CloudFormation information.",
 		[]string{
 			labelAccountID,
-			labelCIDR,
 			labelCluster,
 			labelID,
 			labelInstallation,
@@ -41,21 +33,21 @@ var (
 	)
 )
 
-type VPCConfig struct {
+type CloudFormationConfig struct {
 	Helper *helper
 	Logger micrologger.Logger
 
 	InstallationName string
 }
 
-type VPC struct {
+type CloudFormation struct {
 	helper *helper
 	logger micrologger.Logger
 
 	installationName string
 }
 
-func NewVPC(config VPCConfig) (*VPC, error) {
+func NewCloudFormation(config CloudFormationConfig) (*CloudFormation, error) {
 	if config.Helper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
 	}
@@ -67,18 +59,18 @@ func NewVPC(config VPCConfig) (*VPC, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
-	v := &VPC{
+	cf := &CloudFormation{
 		helper: config.Helper,
 		logger: config.Logger,
 
 		installationName: config.InstallationName,
 	}
 
-	return v, nil
+	return cf, nil
 }
 
-func (v *VPC) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := v.helper.GetAWSClients()
+func (cf *CloudFormation) Collect(ch chan<- prometheus.Metric) error {
+	awsClientsList, err := cf.helper.GetAWSClients()
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -89,7 +81,7 @@ func (v *VPC) Collect(ch chan<- prometheus.Metric) error {
 		awsClients := item
 
 		g.Go(func() error {
-			err := v.collectForAccount(ch, awsClients)
+			err := cf.collectForAccount(ch, awsClients)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -106,26 +98,26 @@ func (v *VPC) Collect(ch chan<- prometheus.Metric) error {
 	return nil
 }
 
-func (v *VPC) Describe(ch chan<- *prometheus.Desc) error {
-	ch <- vpcsDesc
+func (cf *CloudFormation) Describe(ch chan<- *prometheus.Desc) error {
+	ch <- cloudFormationStackDesc
 	return nil
 }
 
-func (v *VPC) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-	o, err := awsClients.EC2.DescribeVpcs(&ec2.DescribeVpcsInput{})
+func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+	o, err := awsClients.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	accountID, err := v.helper.AWSAccountID(awsClients)
+	accountID, err := cf.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	for _, vpc := range o.Vpcs {
+	for _, stack := range o.Stacks {
 		var cluster, installation, name, organization, stackName string
 
-		for _, tag := range vpc.Tags {
+		for _, tag := range stack.Tags {
 			switch *tag.Key {
 			case tagCluster:
 				cluster = *tag.Value
@@ -140,23 +132,22 @@ func (v *VPC) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			}
 		}
 
-		if installation != v.installationName {
+		if installation != cf.installationName {
 			continue
 		}
 
 		ch <- prometheus.MustNewConstMetric(
-			vpcsDesc,
+			cloudFormationStackDesc,
 			prometheus.GaugeValue,
 			GaugeValue,
 			accountID,
-			*vpc.CidrBlock,
 			cluster,
-			*vpc.VpcId,
+			*stack.StackId,
 			installation,
 			name,
 			organization,
 			stackName,
-			*vpc.State,
+			*stack.StackStatus,
 		)
 	}
 
