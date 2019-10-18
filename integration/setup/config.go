@@ -27,7 +27,7 @@ type Config struct {
 	HelmClient  helmclient.Interface
 	Host        *framework.Host
 	K8s         *k8sclient.Setup
-	K8sClients	*k8sclient.Clients
+	K8sClients  *k8sclient.Clients
 	Logger      micrologger.Logger
 	Release     *release.Release
 
