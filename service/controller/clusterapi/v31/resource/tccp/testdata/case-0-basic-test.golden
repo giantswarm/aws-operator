@@ -3,6 +3,10 @@ Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   DockerVolumeResourceName:
     Value: DockerVolume8Y5CK78968
+  IngressInsecureTargetGroupsID:
+    Value: !Ref IngressInsecureTargetGroup
+  IngressSecureTargetGroupsID:
+    Value: !Ref IngressSecureTargetGroup
   MasterImageID:
     Value: ami-0eb0d9bb7ad1bd1e9
   MasterInstanceResourceName:
@@ -190,60 +194,47 @@ Resources:
         Ref: InternetGateway
   
   ApiInternalLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
     Properties:
-      ConnectionSettings:
-        IdleTimeout: 1200
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:443
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
-      Listeners:
-      
-      - InstancePort: 443
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-api-internal
+      Name: 8y5ck-api-internal
       Scheme: internal
-      SecurityGroups:
-        - !Ref APIInternalELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
-      
+      Type: network
+  ApiInternalTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 443
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: 2
+      Name: 8y5ck-ApiInternalTargetGroup
+      Port: 443
+      Protocol: TCP
+      Targets:
+      - Id: !Ref MasterInstance8Y5CK78968
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPC
+  ApiInternalLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref ApiInternalTargetGroup
+      LoadBalancerArn: !Ref ApiInternalLoadBalancer
+      Port: 443
+      Protocol: TCP
   ApiLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 1200
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:443
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
-      Listeners:
-      
-      - InstancePort: 443
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-api
-      Scheme: internet-facing
-      SecurityGroups:
-        - !Ref MasterSecurityGroup
+    Properties:      
+      Name: 8y5ck-api
+      Scheme: internet-facing  
       Subnets:
         - !Ref PublicSubnetEuCentral1a
       
@@ -251,76 +242,73 @@ Resources:
       
         - !Ref PublicSubnetEuCentral1c
       
-
-  EtcdLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+      Type: network
+  ApiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      ConnectionSettings:
-        IdleTimeout: 1200
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:2379
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
-      Listeners:
-      
-      - InstancePort: 2379
-        InstanceProtocol: TCP
-        LoadBalancerPort: 2379
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-etcd
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 443
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: 2
+      Name: 8y5ck-ApiTargetGroup
+      Port: 443
+      Protocol: TCP
+      Targets:
+      - Id: !Ref MasterInstance8Y5CK78968
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPC
+  ApiLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref ApiTargetGroup
+      LoadBalancerArn: !Ref ApiLoadBalancer
+      Port: 443
+      Protocol: TCP
+  EtcdLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:      
+      Name: 8y5ck-etcd
       Scheme: internal
-      SecurityGroups:
-        - !Ref EtcdELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       
-
+      Type: network
+  EtcdTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 2379
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: 2
+      Name: 8y5ck-EtcdTargetGroup
+      Port: 2379
+      Protocol: TCP
+      Targets:
+      - Id: !Ref MasterInstance8Y5CK78968
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPC
+  EtcdLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref EtcdTargetGroup
+      LoadBalancerArn: !Ref EtcdLoadBalancer
+      Port: 2379
+      Protocol: TCP
   IngressLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - VPCGatewayAttachment
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 60
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:30011
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Listeners:
-      
-      - InstancePort: 30011
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      - InstancePort: 30010
-        InstanceProtocol: TCP
-        LoadBalancerPort: 80
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-ingress
-      Policies:
-      - PolicyName: "EnableProxyProtocol"
-        PolicyType: "ProxyProtocolPolicyType"
-        Attributes:
-        - Name: "ProxyProtocol"
-          Value: "true"
-        InstancePorts:
-        
-        - 30011
-        
-        - 30010
-        
+    Properties:      
+      Name: 8y5ck-ingress   
       Scheme: internet-facing
-      SecurityGroups:
-        - !Ref IngressSecurityGroup
       Subnets:
         - !Ref PublicSubnetEuCentral1a
       
@@ -328,6 +316,59 @@ Resources:
       
         - !Ref PublicSubnetEuCentral1c
       
+      Type: network
+  IngressSecureTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 30011
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: 2
+      Name: 8y5ck-IngressSecureTargetGroup
+      Port: 30011
+      Protocol: TCP
+      TargetGroupAttributes:
+      - Key: proxy_protocol_v2.enabled
+        Value: true
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPC
+  IngressLoadBalancerSecureListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref IngressSecureTargetGroup
+      LoadBalancerArn: !Ref IngressLoadBalancer
+      Port: 443
+      Protocol: TCP
+  IngressInsecureTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 30010
+      HealthCheckProtocol: TCP
+      HealthyThresholdCount: 2
+      Name: 8y5ck-IngressInsecureTargetGroup
+      Port: 30010
+      Protocol: TCP
+      TargetGroupAttributes:
+      - Key: proxy_protocol_v2.enabled
+        Value: true
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPC
+  IngressLoadBalancerInsecureListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref IngressInsecureTargetGroup
+      LoadBalancerArn: !Ref IngressLoadBalancer
+      Port: 80
+      Protocol: TCP
   
   NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
@@ -446,17 +487,23 @@ Resources:
         ToPort: 443
         CidrIp: 0.0.0.0/0
       -
+        Description: Allow traffic from control plane to etcd port for backup and metrics.
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 10.1.0.0/16
+      -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
         CidrIp: 10.1.0.0/16
       -
-        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
+        Description: Allow traffic from tenant cluster CIDR to 2379 for network-lb health checks.
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
-        CidrIp: 10.1.0.0/16
+        CidrIp: 
       -
         Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
         IpProtocol: tcp
@@ -505,60 +552,7 @@ Resources:
       
       Tags:
         - Key: Name
-          Value: 8y5ck-ingress
-  EtcdELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-etcd-elb
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 0.0.0.0/0
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-etcd-elb
-  APIInternalELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-internal-api
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        Description: Allow all traffic to the master instance from A class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 10.0.0.0/8
-      
-      -
-        Description: Allow all traffic to the master instance from B class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 172.16.0.0/12
-      
-      -
-        Description: Allow all traffic to the master instance from C class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 192.168.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-internal-api
+          Value: 8y5ck-ingress  
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -568,15 +562,6 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
-  MasterAllowEtcdIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: "tcp"
-      FromPort: 2379
-      ToPort: 2379
-      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
