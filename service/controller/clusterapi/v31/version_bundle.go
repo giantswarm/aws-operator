@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "TODO",
+				Component:   "nodepools",
+				Description: "Add testing version 6.6.0",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
@@ -36,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "6.5.0",
+		Version: "6.6.0",
 	}
 }
