@@ -3,6 +3,8 @@
 package update
 
 import (
+	"fmt"
+
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/aws-operator/service"
@@ -64,12 +66,24 @@ func (p *Provider) CurrentStatus() (v1alpha1.StatusCluster, error) {
 
 func (p *Provider) CurrentVersion() (string, error) {
 	vbs := service.NewVersionBundles()
-	return vbs[len(vbs)-2].Version, nil
+	v := vbs[len(vbs)-2].Version
+	fmt.Printf("-------------------------------------------------->\n")
+	fmt.Printf("-------------------------------------------------->\n")
+	fmt.Printf("--------------------------------------------------> CurrentVersion() = %q\n", v)
+	fmt.Printf("-------------------------------------------------->\n")
+	fmt.Printf("-------------------------------------------------->\n")
+	return v, nil
 }
 
 func (p *Provider) NextVersion() (string, error) {
 	vbs := service.NewVersionBundles()
-	return vbs[len(vbs)-1].Version, nil
+	v := vbs[len(vbs)-1].Version
+	fmt.Printf("-------------------------------------------------->\n")
+	fmt.Printf("-------------------------------------------------->\n")
+	fmt.Printf("--------------------------------------------------> NextVersion() = %q\n", v)
+	fmt.Printf("-------------------------------------------------->\n")
+	fmt.Printf("-------------------------------------------------->\n")
+	return v, nil
 }
 
 func (p *Provider) UpdateVersion(nextVersion string) error {
