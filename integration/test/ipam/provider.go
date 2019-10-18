@@ -8,9 +8,9 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -49,7 +49,7 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 
 	p := &Provider{
 		awsClient: config.AWSClient,
-		host:      config.Host,
+		k8sClients: config.K8sClients,
 		logger:    config.Logger,
 		release:   config.Release,
 	}
@@ -60,7 +60,7 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 	setupConfig := setup.Config{
 		AWSClient: p.awsClient,
-		Host:      p.host,
+		K8sClients: p.k8sClients,
 		Logger:    p.logger,
 		Release:   p.release,
 	}
@@ -77,7 +77,7 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 	setupConfig := setup.Config{
 		AWSClient: p.awsClient,
-		Host:      p.host,
+		K8sClients: p.k8sClients,
 		Logger:    p.logger,
 		Release:   p.release,
 	}
@@ -92,7 +92,7 @@ func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 }
 
 func (p *Provider) GetClusterStatus(ctx context.Context, id string) (v1alpha1.StatusCluster, error) {
-	customResource, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+	customResource, err := p.k8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 	if err != nil {
 		return v1alpha1.StatusCluster{}, microerror.Mask(err)
 	}
@@ -104,7 +104,7 @@ func (p *Provider) WaitForClusterCreated(ctx context.Context, id string) error {
 	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for tenant cluster %#q to be created", id))
 
 	o := func() error {
-		customResource, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+		customResource, err := p.k8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -134,7 +134,7 @@ func (p *Provider) WaitForClusterDeleted(ctx context.Context, id string) error {
 	p.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for tenant cluster %#q to be deleted", id))
 
 	o := func() error {
-		_, err := p.host.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
+		_, err := p.k8sClients.G8sClient().ProviderV1alpha1().AWSConfigs("default").Get(id, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return nil
 		} else if err != nil {

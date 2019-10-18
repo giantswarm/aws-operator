@@ -27,6 +27,7 @@ type Config struct {
 	HelmClient  helmclient.Interface
 	Host        *framework.Host
 	K8s         *k8sclient.Setup
+	K8sClients	*k8sclient.Clients
 	Logger      micrologger.Logger
 	Release     *release.Release
 
@@ -120,7 +121,7 @@ func NewConfig() (Config, error) {
 			Logger:    logger,
 			K8sClient: cpK8sClients.K8sClient(),
 
-			RestConfig:      cpK8sClients.RestConfig(),
+			RestConfig:      cpK8sClients.RESTConfig(),
 			TillerNamespace: tillerNamespace,
 		}
 

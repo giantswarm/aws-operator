@@ -24,7 +24,7 @@ const (
 const (
 	EnvVarCircleCI             = "CIRCLECI"
 	EnvVarCircleSHA            = "CIRCLE_SHA1"
-	EnvVarE2EKubeConfig        = "E2E_KUBECONFIG"
+	EnvVarE2EKubeconfig        = "E2E_KUBECONFIG"
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
@@ -70,7 +70,7 @@ func init() {
 
 	kubeConfigPath = os.Getenv(EnvVarE2EKubeconfig)
 	if kubeConfigPath == "" {
-		panic(fmt.Sprintf("env var %q must not be empty", EnvVarE2EKubeConfig))
+		panic(fmt.Sprintf("env var %q must not be empty", EnvVarE2EKubeconfig))
 	}
 
 	testedVersion = os.Getenv(EnvVarTestedVersion)
