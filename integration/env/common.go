@@ -68,7 +68,14 @@ func init() {
 
 	{
 		vbs := service.NewVersionBundles()
-		versionBundleVersion = vbs[len(vbs)-1].Version
+
+		if pathutil.Base(testDir) == "update" {
+			// For the update test we want to create previous
+			// version so we can upgrade from it.
+			versionBundleVersion = vbs[len(vbs)-2].Version
+		} else {
+			versionBundleVersion = vbs[len(vbs)-1].Version
+		}
 
 		os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 	}
