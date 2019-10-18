@@ -48,10 +48,10 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 	}
 
 	p := &Provider{
-		awsClient: config.AWSClient,
+		awsClient:  config.AWSClient,
 		k8sClients: config.K8sClients,
-		logger:    config.Logger,
-		release:   config.Release,
+		logger:     config.Logger,
+		release:    config.Release,
 	}
 
 	return p, nil
@@ -59,10 +59,10 @@ func NewProvider(config ProviderConfig) (*Provider, error) {
 
 func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 	setupConfig := setup.Config{
-		AWSClient: p.awsClient,
+		AWSClient:  p.awsClient,
 		K8sClients: p.k8sClients,
-		Logger:    p.logger,
-		Release:   p.release,
+		Logger:     p.logger,
+		Release:    p.release,
 	}
 
 	wait := false
@@ -76,10 +76,10 @@ func (p *Provider) CreateCluster(ctx context.Context, id string) error {
 
 func (p *Provider) DeleteCluster(ctx context.Context, id string) error {
 	setupConfig := setup.Config{
-		AWSClient: p.awsClient,
+		AWSClient:  p.awsClient,
 		K8sClients: p.k8sClients,
-		Logger:    p.logger,
-		Release:   p.release,
+		Logger:     p.logger,
+		Release:    p.release,
 	}
 
 	wait := false
