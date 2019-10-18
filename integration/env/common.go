@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/aws-operator/service"
+	v28 "github.com/giantswarm/aws-operator/service/controller/legacy/v28"
 )
 
 const (
@@ -73,7 +74,15 @@ func init() {
 		if path.Base(testDir) == "update" {
 			// For the update test we want to create previous
 			// version so we can upgrade from it.
-			versionBundleVersion = vbs[len(vbs)-2].Version
+
+			// Versions v29patch1 and v29 are broken can it is not
+			// possible to upgrade from them so fixed version for
+			// bundle v28 is returned. If they were ok the code
+			// blow should look like:
+			//
+			//	versionBundleVersion = vbs[len(vbs)-2].Version
+			//
+			versionBundleVersion = v28.VersionBundle().Version
 		} else {
 			versionBundleVersion = vbs[len(vbs)-1].Version
 		}
