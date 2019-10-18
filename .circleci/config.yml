@@ -79,130 +79,130 @@ jobs:
 
   e2eTestCurPRClusterState:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/clusterstate"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
   e2eTestCurMasterClusterState:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/clusterstate"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
   e2eTestWIPPRClusterState:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/clusterstate"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
   e2eTestWIPMasterClusterState:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/clusterstate"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
 
 
   e2eTestCurPRDraining:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/draining"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
   e2eTestCurMasterDraining:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/draining"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
   e2eTestWIPPRDraining:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/draining"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
   e2eTestWIPMasterDraining:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/draining"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
 
 
 # e2eTestCurPRIPAM:
 #   environment:
-#     TESTED_VERSION: "current"
-#     TEST_DIR: "integration/test/ipam"
+#     E2E_TESTED_VERSION: "current"
+#     E2E_TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 #
 # e2eTestCurMasterIPAM:
 #   environment:
-#     TESTED_VERSION: "current"
-#     TEST_DIR: "integration/test/ipam"
+#     E2E_TESTED_VERSION: "current"
+#     E2E_TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 #
 # e2eTestWIPPRIPAM:
 #   environment:
-#     TESTED_VERSION: "wip"
-#     TEST_DIR: "integration/test/ipam"
+#     E2E_TESTED_VERSION: "wip"
+#     E2E_TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 #
 # e2eTestWIPMasterIPAM:
 #   environment:
-#     TESTED_VERSION: "wip"
-#     TEST_DIR: "integration/test/ipam"
+#     E2E_TESTED_VERSION: "wip"
+#     E2E_TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 
 
 
   e2eTestCurPRRecreateCluster:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/recreatecluster"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
   e2eTestCurMasterRecreateCluster:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/recreatecluster"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
   e2eTestWIPPRRecreateCluster:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/recreatecluster"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
   e2eTestWIPMasterRecreateCluster:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/recreatecluster"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
 
 
   e2eTestCurPRScaling:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/scaling"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
   e2eTestCurMasterScaling:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/scaling"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
   e2eTestWIPPRScaling:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/scaling"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
   e2eTestWIPMasterScaling:
     environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/scaling"
+      E2E_TESTED_VERSION: "wip"
+      E2E_TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
 
@@ -212,13 +212,13 @@ jobs:
   # same test twice and we can simply save resources by not doing so.
   e2eTestCurMasterUpdate:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/update"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/update"
     <<: *e2eTest
   e2eTestCurPRUpdate:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/update"
+      E2E_TESTED_VERSION: "current"
+      E2E_TEST_DIR: "integration/test/update"
     <<: *e2eTest
 
 

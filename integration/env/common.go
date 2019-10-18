@@ -28,8 +28,8 @@ const (
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
-	EnvVarTestedVersion        = "TESTED_VERSION"
-	EnvVarTestDir              = "TEST_DIR"
+	EnvVarTestedVersion        = "E2E_TESTED_VERSION"
+	EnvVarTestDir              = "E2E_TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
 
 	// IDChars represents the character set used to generate cluster IDs.
