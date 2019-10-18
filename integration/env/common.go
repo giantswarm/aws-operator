@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -69,7 +70,7 @@ func init() {
 	{
 		vbs := service.NewVersionBundles()
 
-		if pathutil.Base(testDir) == "update" {
+		if path.Base(testDir) == "update" {
 			// For the update test we want to create previous
 			// version so we can upgrade from it.
 			versionBundleVersion = vbs[len(vbs)-2].Version
