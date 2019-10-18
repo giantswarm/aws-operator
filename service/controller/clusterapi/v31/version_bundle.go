@@ -8,8 +8,8 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "TODO",
+				Component:   "nodepools",
+				Description: "Add testing version 6.5.0",
 				Kind:        versionbundle.KindChanged,
 			},
 		},
