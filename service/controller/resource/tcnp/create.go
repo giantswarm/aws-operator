@@ -273,10 +273,7 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
-		DesiredCapacity: minDesiredNodes,
-		LoadBalancer: template.ParamsMainAutoScalingGroupLoadBalancer{
-			Name: key.ELBNameIngress(&cr),
-		},
+		DesiredCapacity:       minDesiredNodes,
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
@@ -411,9 +408,6 @@ func newSecurityGroups(ctx context.Context, cr v1alpha1.MachineDeployment) (*tem
 			},
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
-			Ingress: template.ParamsMainSecurityGroupsTenantClusterIngress{
-				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "ingress")),
-			},
 			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},

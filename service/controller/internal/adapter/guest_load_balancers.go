@@ -33,10 +33,6 @@ type GuestLoadBalancersAdapter struct {
 	ELBHealthCheckInterval           int
 	ELBHealthCheckTimeout            int
 	ELBHealthCheckUnhealthyThreshold int
-	IngressElbHealthCheckTarget      string
-	IngressElbName                   string
-	IngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
-	IngressElbScheme                 string
 	MasterInstanceResourceName       string
 	PublicSubnets                    []string
 	PrivateSubnets                   []string
@@ -71,22 +67,6 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 		},
 	}
 	a.EtcdElbScheme = internalELBScheme
-
-	// Ingress load balancer settings.
-	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort)
-	a.IngressElbName = key.ELBNameIngress(&cfg.CustomObject)
-	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
-		{
-			PortELB: httpsPort,
-
-			PortInstance: key.IngressControllerSecurePort,
-		},
-		{
-			PortELB:      httpPort,
-			PortInstance: key.IngressControllerInsecurePort,
-		},
-	}
-	a.IngressElbScheme = externalELBScheme
 
 	// Load balancer health check settings.
 	a.ELBHealthCheckHealthyThreshold = healthCheckHealthyThreshold

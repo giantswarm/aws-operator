@@ -92,44 +92,5 @@ const TemplateMainLoadBalancers = `
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
       {{end}}
-
-  IngressLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 60
-      HealthCheck:
-        HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
-        Interval: {{ $v.ELBHealthCheckInterval }}
-        Target: {{ $v.IngressElbHealthCheckTarget }}
-        Timeout: {{ $v.ELBHealthCheckTimeout }}
-        UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
-      Listeners:
-      {{ range $v.IngressElbPortsToOpen}}
-      - InstancePort: {{ .PortInstance }}
-        InstanceProtocol: TCP
-        LoadBalancerPort: {{ .PortELB }}
-        Protocol: TCP
-      {{ end }}
-      LoadBalancerName: {{ $v.IngressElbName }}
-      Policies:
-      - PolicyName: "EnableProxyProtocol"
-        PolicyType: "ProxyProtocolPolicyType"
-        Attributes:
-        - Name: "ProxyProtocol"
-          Value: "true"
-        InstancePorts:
-        {{ range $v.IngressElbPortsToOpen}}
-        - {{ .PortInstance }}
-        {{ end }}
-      Scheme: {{ $v.IngressElbScheme }}
-      SecurityGroups:
-        - !Ref IngressSecurityGroup
-      Subnets:
-      {{- range $s := $v.PublicSubnets }}
-        - !Ref {{ $s }}
-      {{end}}
 {{- end -}}
 `

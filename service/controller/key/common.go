@@ -52,10 +52,6 @@ func ELBNameEtcd(getter LabelsGetter) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(getter))
 }
 
-func ELBNameIngress(getter LabelsGetter) string {
-	return fmt.Sprintf("%s-ingress", ClusterID(getter))
-}
-
 func InternalELBNameAPI(getter LabelsGetter) string {
 	return fmt.Sprintf("%s-api-internal", ClusterID(getter))
 }
