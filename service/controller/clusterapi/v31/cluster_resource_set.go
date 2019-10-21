@@ -361,8 +361,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpOutputsResource resource.Interface
 	{
 		c := tccpoutputs.Config{
-			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
 		}

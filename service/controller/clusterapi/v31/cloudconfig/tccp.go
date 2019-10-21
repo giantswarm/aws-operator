@@ -7,7 +7,7 @@ import (
 
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_8_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
@@ -73,16 +73,7 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params = k8scloudconfig.DefaultParams()
 
 		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
-		// with network load-balancer, master needs to access API via localhost
-		// this is due to problem that network lb does not change source IP
-		// and packet sent from master via network load-balancer to master
-		// has same source and destination IP and the operating system will not forward the packet back to LB
-		// result is that connection does not work
-		params.Cluster.Kubernetes.API.Domain = Localhost
-		params.Cluster.Etcd.Domain = Localhost
 		params.DisableEncryptionAtREST = true
-		// Disabling calico as we use calico with k8s datastore instead of etcd datastore that is in k8scloudconfig.
-		params.DisableCalico = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
@@ -90,11 +81,9 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params.Extension = &MasterExtension{
 			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
 			baseExtension: baseExtension{
-				calicoMTU:      params.Cluster.Calico.MTU,
-				cluster:        cr,
-				encrypter:      t.config.Encrypter,
-				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
-				registryDomain: params.RegistryDomain,
+				cluster:       cr,
+				encrypter:     t.config.Encrypter,
+				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 			},
 			cc:               cc,
 			clusterCerts:     clusterCerts,
@@ -105,10 +94,6 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
-
-		params.ExtraManifests = []string{
-			"calico-k8s-datastore.yaml",
-		}
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
@@ -164,19 +149,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	}
 
 	filesMeta := []k8scloudconfig.FileMetadata{
-		{
-			AssetContent: cloudconfig.CalicoK8sDatastore,
-			Path:         "/srv/calico-k8s-datastore.yaml",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
