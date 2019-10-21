@@ -8,10 +8,6 @@ const TemplateMainOutputs = `
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   {{- end }}
-  IngressInsecureTargetGroupsID:
-    Value: !Ref {{ .Guest.Outputs.IngressInsecureTargetGroupResourceName }}
-  IngressSecureTargetGroupsID:
-    Value: !Ref {{ .Guest.Outputs.IngressSecureTargetGroupResourceName }}
   MasterImageID:
     Value: {{ .Guest.Outputs.Master.ImageID }}
   MasterInstanceResourceName:

@@ -29,7 +29,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpnatgateways"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpvpcid"
@@ -405,21 +404,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpOutputsResource resource.Interface
-	{
-		c := tccpoutputs.Config{
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		tccpOutputsResource, err = tccpoutputs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -437,7 +421,6 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tcnpASGStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
-		tccpOutputsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
