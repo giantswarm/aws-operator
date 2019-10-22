@@ -37,6 +37,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpdetachlbsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpoutputs"
@@ -414,6 +415,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tccpdetachlbsubnetResource resource.Interface
+	{
+		c := tccpdetachlbsubnet.Config{
+			Logger: config.Logger,
+		}
+
+		tccpdetachlbsubnetResource, err = tccpdetachlbsubnet.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpVPCIDResource resource.Interface
 	{
 		c := tccpvpcid.Config{
@@ -552,6 +565,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		s3BucketResource,
 		s3ObjectResource,
 		tccpAZsResource,
+		tccpdetachlbsubnetResource,
 		tccpiResource,
 		tccpResource,
 		tccpfResource,
