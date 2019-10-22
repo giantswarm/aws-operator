@@ -443,10 +443,10 @@ spec:
               cpu: 250m
               memory: 150Mi
           livenessProbe:
-            exec:
-              command:
-              - /bin/calico-node
-              - -felix-live
+            httpGet:
+              path: /liveness
+              port: 9099
+              host: localhost
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6

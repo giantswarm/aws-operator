@@ -151,9 +151,9 @@ systemd:
       TimeoutStartSec=0
       Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
       Environment="NAME=%p.service"
-      ExecStart=/bin/bash -c "/usr/bin/docker create --name $NAME $IMAGE && \
-        /usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube && \
-        /usr/bin/docker rm $NAME"
+      ExecStartPre=/bin/bash -c "/usr/bin/docker create --name $NAME $IMAGE"
+      ExecStart=/bin/bash -c "/usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube"
+      ExecStartPost=/bin/bash -c "/usr/bin/docker rm $NAME"
       [Install]
       WantedBy=multi-user.target
   - name: k8s-kubelet.service
@@ -173,12 +173,6 @@ systemd:
       MemoryAccounting=true
       Slice=kubereserved.slice
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
-      Environment="PATH=/opt/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-      Environment="PATH=/opt/bin/:/usr/bin/:/usr/sbin:/sbin:$PATH"
-      Environment="ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem"
-      Environment="ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem"
-      Environment="ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem"
       ExecStart=/opt/bin/hyperkube kubelet \
         {{ range .Hyperkube.Kubelet.Docker.CommandExtraArgs -}}
         {{ . }} \
