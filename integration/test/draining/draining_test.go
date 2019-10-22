@@ -18,12 +18,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/key"
 )
 
 const (
@@ -65,7 +65,7 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	var apprClient *apprclient.Client
+	var apprClient apprclient.Interface
 	{
 		c := apprclient.Config{
 			Fs:     afero.NewOsFs(),
@@ -81,7 +81,7 @@ func Test_Draining(t *testing.T) {
 		}
 	}
 
-	var helmClient *helmclient.Client
+	var helmClient helmclient.Interface
 	{
 		c := helmclient.Config{
 			Logger:    newLogger,
@@ -136,7 +136,7 @@ func Test_Draining(t *testing.T) {
 			}
 
 			for _, p := range l.Items {
-				if p.Status.Phase != v1.PodRunning {
+				if p.Status.Phase != corev1.PodRunning {
 					return microerror.Maskf(podError, "%#q is not running", p.GetName())
 				}
 			}

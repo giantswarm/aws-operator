@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 )
@@ -21,12 +22,14 @@ const (
 )
 
 type Config struct {
-	AWSClient *e2eclientsaws.Client
-	Guest     *framework.Guest
-	Host      *framework.Host
-	K8s       *k8sclient.Setup
-	Release   *release.Release
-	Logger    micrologger.Logger
+	AWSClient   *e2eclientsaws.Client
+	Guest       *framework.Guest
+	CPCRDClient *k8scrdclient.CRDClient
+	HelmClient  helmclient.Interface
+	Host        *framework.Host
+	K8s         *k8sclient.Setup
+	Logger      micrologger.Logger
+	Release     *release.Release
 
 	// UseDefaultTenant defines whether the standard test setup should ensure the
 	// default tenant cluster. This is enabled by default. Most tests simply use
@@ -99,6 +102,19 @@ func NewConfig() (Config, error) {
 		}
 	}
 
+	var cpCRDClient *k8scrdclient.CRDClient
+	{
+		c := k8scrdclient.Config{
+			K8sExtClient: cpK8sClients.ExtClient(),
+			Logger:       logger,
+		}
+
+		cpCRDClient, err = k8scrdclient.New(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
 	var k8sSetup *k8sclient.Setup
 	{
 		c := k8sclient.SetupConfig{
@@ -147,12 +163,14 @@ func NewConfig() (Config, error) {
 	}
 
 	c := Config{
-		AWSClient: awsClient,
-		Guest:     guest,
-		Host:      host,
-		K8s:       k8sSetup,
-		Logger:    logger,
-		Release:   newRelease,
+		AWSClient:   awsClient,
+		CPCRDClient: cpCRDClient,
+		Guest:       guest,
+		HelmClient:  helmClient,
+		Host:        host,
+		K8s:         k8sSetup,
+		Logger:      logger,
+		Release:     newRelease,
 
 		UseDefaultTenant: true,
 	}
