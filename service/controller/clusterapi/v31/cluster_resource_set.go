@@ -41,6 +41,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpsubnets"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpvpcid"
 )
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -360,8 +361,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpOutputsResource resource.Interface
 	{
 		c := tccpoutputs.Config{
-			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
 		}
@@ -409,6 +409,19 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpiResource, err = tccpi.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpVPCIDResource resource.Interface
+	{
+		c := tccpvpcid.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+		}
+
+		tccpVPCIDResource, err = tccpvpcid.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -526,6 +539,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		peerRoleARNResource,
 		cpRouteTablesResource,
 		vpcCIDRResource,
+		tccpVPCIDResource,
 		tccpOutputsResource,
 		tccpSubnetsResource,
 		regionResource,

@@ -2,6 +2,7 @@ package tccp
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -87,6 +88,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
@@ -236,6 +242,9 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t
 	if err != nil {
 		return adapter.Adapter{}, microerror.Mask(err)
 	}
+
+	// XXX: DEBUG
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("tccp.newTemplateParams(): cc.Spec.TenantCluster.TCCP.AvailabilityZones: %#v", cc.Spec.TenantCluster.TCCP.AvailabilityZones))
 
 	var params adapter.Adapter
 	{

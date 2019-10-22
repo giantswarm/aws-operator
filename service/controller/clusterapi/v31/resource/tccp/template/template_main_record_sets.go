@@ -22,7 +22,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt ApiLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneID
+        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
@@ -32,7 +32,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneID
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: 'internal-api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
@@ -42,7 +42,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneID
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: 'api.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
@@ -52,7 +52,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt EtcdLoadBalancer.DNSName
-        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneID
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'InternalHostedZone'
@@ -62,7 +62,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt EtcdLoadBalancer.DNSName
-        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneID
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
@@ -72,7 +72,7 @@ const TemplateMainRecordSets = `
     Properties:
       AliasTarget:
         DNSName: !GetAtt IngressLoadBalancer.DNSName
-        HostedZoneId: !GetAtt IngressLoadBalancer.CanonicalHostedZoneID
+        HostedZoneId: !GetAtt IngressLoadBalancer.CanonicalHostedZoneNameID
         EvaluateTargetHealth: false
       Name: 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
