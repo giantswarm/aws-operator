@@ -1,4 +1,4 @@
-package v_4_9_0
+package v_4_8_1
 
 const MasterTemplate = `---
 ignition:
@@ -531,11 +531,6 @@ storage:
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "policies/audit-policy.yaml" }}"
-    - path: /etc/kubernetes/manifests/k8s-api-healthz.yaml
-      filesystem: root
-      mode: 0644
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "manifests/k8s-api-healthz.yaml" }}"
 
     - path: /etc/kubernetes/manifests/k8s-api-server.yaml
       filesystem: root
