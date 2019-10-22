@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/giantswarm/microerror"
@@ -40,6 +41,9 @@ func (s *GuestSubnetsAdapter) Adapt(cfg Config) error {
 			return microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
 		}
 	}
+
+	// XXX: DEBUG
+	fmt.Printf("\n\n================ XXXXXXXXXXXXxx ===========================\nGuestSubnetsAdapter.Adapt(): zones: %#v\n\n\n", zones)
 
 	for _, az := range zones {
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))

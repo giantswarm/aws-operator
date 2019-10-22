@@ -1,17 +1,12 @@
 package adapter
 
 type GuestOutputsAdapter struct {
-	IngressInsecureTargetGroupResourceName string
-	IngressSecureTargetGroupResourceName   string
-	Master                                 GuestOutputsAdapterMaster
-	OperatorVersion                        string
-	Route53Enabled                         bool
+	Master          GuestOutputsAdapterMaster
+	OperatorVersion string
+	Route53Enabled  bool
 }
 
 func (a *GuestOutputsAdapter) Adapt(config Config) error {
-	a.IngressInsecureTargetGroupResourceName = ingressELBInsecureTargetGroupResourceName
-	a.IngressSecureTargetGroupResourceName = ingressELBSecureTargetGroupResourceName
-
 	a.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 	a.Master.ImageID = config.StackState.MasterImageID
 	a.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
