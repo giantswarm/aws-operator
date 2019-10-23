@@ -77,149 +77,75 @@ jobs:
 
 
 
-  e2eTestCurPRClusterState:
+  e2eTestPRClusterState:
     environment:
-      TESTED_VERSION: "current"
       TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
-  e2eTestCurMasterClusterState:
+  e2eTestMasterClusterState:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-  e2eTestWIPPRClusterState:
-    environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-  e2eTestWIPMasterClusterState:
-    environment:
-      TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/clusterstate"
     <<: *e2eTest
 
 
 
-  e2eTestCurPRDraining:
+  e2eTestPRDraining:
     environment:
-      TESTED_VERSION: "current"
       TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
-  e2eTestCurMasterDraining:
+  e2eTestMasterDraining:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/draining"
-    <<: *e2eTest
-
-  e2eTestWIPPRDraining:
-    environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/draining"
-    <<: *e2eTest
-
-  e2eTestWIPMasterDraining:
-    environment:
-      TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/draining"
     <<: *e2eTest
 
 
 
-# e2eTestCurPRIPAM:
+# e2eTestPRIPAM:
 #   environment:
-#     TESTED_VERSION: "current"
 #     TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 #
-# e2eTestCurMasterIPAM:
+# e2eTestMasterIPAM:
 #   environment:
-#     TESTED_VERSION: "current"
-#     TEST_DIR: "integration/test/ipam"
-#   <<: *e2eTest
-#
-# e2eTestWIPPRIPAM:
-#   environment:
-#     TESTED_VERSION: "wip"
-#     TEST_DIR: "integration/test/ipam"
-#   <<: *e2eTest
-#
-# e2eTestWIPMasterIPAM:
-#   environment:
-#     TESTED_VERSION: "wip"
 #     TEST_DIR: "integration/test/ipam"
 #   <<: *e2eTest
 
 
 
-  e2eTestCurPRRecreateCluster:
+  e2eTestPRRecreateCluster:
     environment:
-      TESTED_VERSION: "current"
       TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
-  e2eTestCurMasterRecreateCluster:
+  e2eTestMasterRecreateCluster:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/recreatecluster"
-    <<: *e2eTest
-
-  e2eTestWIPPRRecreateCluster:
-    environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/recreatecluster"
-    <<: *e2eTest
-
-  e2eTestWIPMasterRecreateCluster:
-    environment:
-      TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/recreatecluster"
     <<: *e2eTest
 
 
 
-  e2eTestCurPRScaling:
+  e2eTestPRScaling:
     environment:
-      TESTED_VERSION: "current"
       TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
-  e2eTestCurMasterScaling:
+  e2eTestMasterScaling:
     environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/scaling"
-    <<: *e2eTest
-
-  e2eTestWIPPRScaling:
-    environment:
-      TESTED_VERSION: "wip"
-      TEST_DIR: "integration/test/scaling"
-    <<: *e2eTest
-
-  e2eTestWIPMasterScaling:
-    environment:
-      TESTED_VERSION: "wip"
       TEST_DIR: "integration/test/scaling"
     <<: *e2eTest
 
 
-
-  # Note we only have update tests for the current version because it anyway
-  # tests one version transition. Having the same tests for WIP only runs the
-  # same test twice and we can simply save resources by not doing so.
-  e2eTestCurMasterUpdate:
-    environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/update"
-    <<: *e2eTest
-  e2eTestCurPRUpdate:
-    environment:
-      TESTED_VERSION: "current"
-      TEST_DIR: "integration/test/update"
-    <<: *e2eTest
+  # Update test is disabled now. We need to figure how to create previous
+  # version of the cluster with flattened operator in integration tests.
+  #e2eTestMasterUpdate:
+  #  environment:
+  #    TEST_DIR: "integration/test/update"
+  #  <<: *e2eTest
+  #e2eTestPRUpdate:
+  #  environment:
+  #    TEST_DIR: "integration/test/update"
+  #  <<: *e2eTest
 
 
 
@@ -282,84 +208,54 @@ workflows:
 
 
 
-#     - e2eTestCurMasterClusterState:
+#     - e2eTestMasterClusterState:
 #         requires:
 #           - master
-#     - e2eTestWIPMasterClusterState:
-#         requires:
-#           - master
-      - e2eTestCurPRClusterState:
-          requires:
-            - pr
-      - e2eTestWIPPRClusterState:
+      - e2eTestPRClusterState:
           requires:
             - pr
 
 
 
-#     - e2eTestCurMasterDraining:
+#     - e2eTestMasterDraining:
 #         requires:
 #           - master
-#     - e2eTestWIPMasterDraining:
-#         requires:
-#           - master
-      - e2eTestCurPRDraining:
-          requires:
-            - pr
-      - e2eTestWIPPRDraining:
+      - e2eTestPRDraining:
           requires:
             - pr
 
 
 
-#     - e2eTestCurMasterIPAM:
+#     - e2eTestMasterIPAM:
 #         requires:
 #           - master
-#     - e2eTestWIPMasterIPAM:
-#         requires:
-#           - master
-#     - e2eTestCurPRIPAM:
-#         requires:
-#           - pr
-#     - e2eTestWIPPRIPAM:
+#     - e2eTestPRIPAM:
 #         requires:
 #           - pr
 
 
 
-#     - e2eTestCurMasterRecreateCluster:
+#     - e2eTestMasterRecreateCluster:
 #         requires:
 #           - master
-#     - e2eTestWIPMasterRecreateCluster:
-#         requires:
-#           - master
-      - e2eTestCurPRRecreateCluster:
-          requires:
-            - pr
-      - e2eTestWIPPRRecreateCluster:
+      - e2eTestPRRecreateCluster:
           requires:
             - pr
 
 
 
-#     - e2eTestCurMasterScaling:
+#     - e2eTestMasterScaling:
 #         requires:
 #           - master
-#     - e2eTestWIPMasterScaling:
-#         requires:
-#           - master
-      - e2eTestCurPRScaling:
-          requires:
-            - pr
-      - e2eTestWIPPRScaling:
+      - e2eTestPRScaling:
           requires:
             - pr
 
 
 
-#     - e2eTestCurMasterUpdate:
+#     - e2eTestMasterUpdate:
 #         requires:
 #         - master
-      - e2eTestCurPRUpdate:
-          requires:
-          - pr
+#     - e2eTestPRUpdate:
+#         requires:
+#         - pr
