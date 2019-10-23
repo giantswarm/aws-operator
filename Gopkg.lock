@@ -410,23 +410,15 @@
   revision = "079149b6a5df4f16247dd3c1b7c06fb14c03bcca"
 
 [[projects]]
-  branch = "k8s-1_15_4-release"
+  branch = "master"
   digest = "1:e849d96e61147bc9cadd3218cecb6ba33d1cc349dda6e95cca2bcb7bba92f826"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_4_1_2",
-    "v_4_2_0",
-    "v_4_3_0",
-    "v_4_4_0",
-    "v_4_5_0",
-    "v_4_5_1",
-    "v_4_7_0",
-    "v_4_8_0",
     "v_4_9_0",
   ]
   pruneopts = "T"
-  revision = "84b8f3e38b92e9a1886563813e1ce14b8bfedc52"
+  revision = "da54fee63eddac1f8c2db21a1b83bf060f759431"
 
 [[projects]]
   branch = "master"
@@ -559,14 +551,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "1a7ae4c49fa426b7d87169862b740f0d9dbc94ea"
-
-[[projects]]
-  branch = "master"
-  digest = "1:76f67d43a57b4391ec6e608e28cf2ddb2cd3a5ad065c96e22933d876912bf4cc"
-  name = "github.com/giantswarm/to"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "38e6500015bed1853163a441801d399a2f1a638d"
 
 [[projects]]
   branch = "master"
@@ -1969,16 +1953,14 @@
   revision = "69764acb6e8e900b7c05296c5d3c9c19545475f9"
 
 [[projects]]
-  digest = "1:84fbf0ea49eca8e85a4bf4c2ed066945f53817ec02e37bb85be85565a21140c1"
+  digest = "1:68e65e6ae936d015b54ae88de740a492df5f141bc8037865f0253b42f5b23af8"
   name = "sigs.k8s.io/cluster-api"
   packages = [
     "pkg/apis/cluster/common",
     "pkg/apis/cluster/v1alpha1",
     "pkg/client/clientset_generated/clientset",
-    "pkg/client/clientset_generated/clientset/fake",
     "pkg/client/clientset_generated/clientset/scheme",
     "pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1",
-    "pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1/fake",
   ]
   pruneopts = "UT"
   revision = "91f68a197033feecfdf1b1683cc7e426fb133533"
@@ -2090,14 +2072,6 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_1_2",
-    "github.com/giantswarm/k8scloudconfig/v_4_2_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_3_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_4_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_5_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_5_1",
-    "github.com/giantswarm/k8scloudconfig/v_4_7_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_8_0",
     "github.com/giantswarm/k8scloudconfig/v_4_9_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
@@ -2124,9 +2098,7 @@
     "github.com/giantswarm/randomkeys/randomkeystest",
     "github.com/giantswarm/statusresource",
     "github.com/giantswarm/tenantcluster",
-    "github.com/giantswarm/to",
     "github.com/giantswarm/versionbundle",
-    "github.com/google/go-cmp/cmp",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/spf13/afero",
     "github.com/spf13/viper",
@@ -2136,9 +2108,7 @@
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apimachinery/pkg/api/errors",
-    "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
-    "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
@@ -2149,7 +2119,6 @@
     "k8s.io/client-go/rest",
     "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1",
     "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset",
-    "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
