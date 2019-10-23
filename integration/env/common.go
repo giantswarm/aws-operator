@@ -3,15 +3,16 @@ package env
 import (
 	"crypto/sha1"
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/aws-operator/service"
+	v28 "github.com/giantswarm/aws-operator/service/controller/legacy/v28"
 )
 
 const (
@@ -25,7 +26,6 @@ const (
 	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
 	EnvVarKeepResources        = "KEEP_RESOURCES"
 	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
-	EnvVarTestedVersion        = "TESTED_VERSION"
 	EnvVarTestDir              = "TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
 
@@ -43,14 +43,11 @@ var (
 	registryPullSecret   string
 	githubToken          string
 	testDir              string
-	testedVersion        string
 	keepResources        string
 	versionBundleVersion string
 )
 
 func init() {
-	var err error
-
 	circleCI = os.Getenv(EnvVarCircleCI)
 	keepResources = os.Getenv(EnvVarKeepResources)
 
@@ -64,11 +61,6 @@ func init() {
 		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
 	}
 
-	testedVersion = os.Getenv(EnvVarTestedVersion)
-	if testedVersion == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarTestedVersion))
-	}
-
 	registryPullSecret = os.Getenv(EnvVarRegistryPullSecret)
 	if registryPullSecret == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarRegistryPullSecret))
@@ -76,33 +68,33 @@ func init() {
 
 	testDir = os.Getenv(EnvVarTestDir)
 
-	params := &framework.VBVParams{
-		Component: component,
-		Provider:  provider,
-		Token:     githubToken,
-		VType:     TestedVersion(),
-	}
-	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
-	if err != nil {
-		panic(err.Error())
-	}
-	// TODO there should be a not found error returned by the framework in such
-	// cases.
-	if VersionBundleVersion() == "" {
-		if strings.ToLower(TestedVersion()) == "wip" {
-			log.Println("WIP version bundle version not present, exiting.")
-			os.Exit(0)
+	{
+		vbs := service.NewVersionBundles()
+
+		if path.Base(testDir) == "update" {
+			// For the update test we want to create previous
+			// version so we can upgrade from it.
+
+			// Versions v29patch1 and v29 are broken can it is not
+			// possible to upgrade from them so fixed version for
+			// bundle v28 is returned. If they were ok the code
+			// blow should look like:
+			//
+			//	versionBundleVersion = vbs[len(vbs)-2].Version
+			//
+			versionBundleVersion = v28.VersionBundle().Version
+		} else {
+			versionBundleVersion = vbs[len(vbs)-1].Version
 		}
-		panic("version bundle version  must not be empty")
+
+		os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 	}
-	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 
 	// init clusterID
 	rand.Seed(time.Now().UnixNano())
 	var parts []string
 	parts = append(parts, "ci-")
-	parts = append(parts, TestedVersion()[0:1])
-	parts = append(parts, CircleSHA()[0:1])
+	parts = append(parts, CircleSHA()[0:2])
 	parts = append(parts, generateID(IDLength))
 	clusterID = strings.Join(parts, "")
 }
@@ -133,10 +125,6 @@ func GithubToken() string {
 
 func RegistryPullSecret() string {
 	return registryPullSecret
-}
-
-func TestedVersion() string {
-	return testedVersion
 }
 
 func TestDir() string {
