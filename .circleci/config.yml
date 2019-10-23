@@ -256,6 +256,6 @@ workflows:
 #     - e2eTestMasterUpdate:
 #         requires:
 #         - master
-      - e2eTestPRUpdate:
-          requires:
-          - pr
+#     - e2eTestPRUpdate:
+#         requires:
+#         - pr
