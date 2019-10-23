@@ -165,6 +165,17 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 						},
 					},
 				},
+				{
+					Name: "eu-central-1b",
+					Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+						Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+							CIDR: mustParseCIDR("10.100.3.96/27"),
+						},
+						Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
+							CIDR: mustParseCIDR("10.100.3.64/27"),
+						},
+					},
+				},
 			},
 			errorMatcher: nil,
 		},
