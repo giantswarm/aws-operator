@@ -42,13 +42,13 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 30011
         ToPort: 30011
-        CidrIp: 0.0.0.0/0
+        SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Ingress.ID }}
       -
         Description: Allow traffic from the ingress security group to 80 for ingress-controller.
         IpProtocol: tcp
         FromPort: 30010
         ToPort: 30010
-        CidrIp: 0.0.0.0/0
+        SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Ingress.ID }}
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress

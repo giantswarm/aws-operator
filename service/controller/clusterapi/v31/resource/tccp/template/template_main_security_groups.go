@@ -46,7 +46,40 @@ const TemplateMainSecurityGroups = `
       {{ end }}
       Tags:
         - Key: Name
-          Value: {{ $v.IngressSecurityGroupName }}  
+          Value: {{ $v.IngressSecurityGroupName }}
+  EtcdELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: {{ $v.EtcdELBSecurityGroupName }}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      {{ range $v.EtcdELBSecurityGroupRules }}
+      -
+        IpProtocol: {{ .Protocol }}
+        FromPort: {{ .Port }}
+        ToPort: {{ .Port }}
+        CidrIp: {{ .SourceCIDR }}
+      {{ end }}
+      Tags:
+        - Key: Name
+          Value: {{ $v.EtcdELBSecurityGroupName }}
+  APIInternalELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: {{ $v.APIInternalELBSecurityGroupName }}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      {{ range $v.APIInternalELBSecurityGroupRules }}
+      -
+        Description: {{ .Description }}
+        IpProtocol: {{ .Protocol }}
+        FromPort: {{ .Port }}
+        ToPort: {{ .Port }}
+        CidrIp: {{ .SourceCIDR }}
+      {{ end }}
+      Tags:
+        - Key: Name
+          Value: {{ $v.APIInternalELBSecurityGroupName }}
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -56,6 +89,15 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowEtcdIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 2379
+      ToPort: 2379
+      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:

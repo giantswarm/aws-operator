@@ -82,16 +82,25 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// below.
 	azMapping := map[string]mapping{}
 	{
-		azMapping[key.MasterAvailabilityZone(cr)] = mapping{}
+		azMapping[key.MasterAvailabilityZone(cr)] = mapping{
+			RequiredByCR: true,
+		}
 
 		for _, md := range machineDeployments {
 			for _, az := range key.MachineDeploymentAvailabilityZones(md) {
-				azMapping[az] = mapping{}
+				azMapping[az] = mapping{
+					RequiredByCR: true,
+				}
 			}
 		}
 
 		for _, az := range azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets) {
-			azMapping[az] = mapping{}
+			_, exists := azMapping[az]
+			if !exists {
+				azMapping[az] = mapping{
+					RequiredByCR: false,
+				}
+			}
 		}
 	}
 
@@ -106,7 +115,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		status := newAZStatus(azMapping)
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetsToString(azMapping)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetStatusToString(status)))
 
 		// Add the current AZ state from AWS to the cc status.
 		cc.Status.TenantCluster.TCCP.AvailabilityZones = status
@@ -126,7 +135,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		spec := newAZSpec(azMapping)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetsToString(azMapping)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetSpecToString(spec)))
 
 		// Add the desired AZ state to the controllercontext spec.
 		cc.Spec.TenantCluster.TCCP.AvailabilityZones = spec
@@ -205,7 +214,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 		}
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("setting cluster availability zones to controllercontext: %#v", azMapping))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZ subnet mappings: %#v", azMapping))
 
 	return azMapping, nil
 }
@@ -220,14 +229,30 @@ func azsFromSubnets(subnets []*ec2.Subnet) []string {
 	return azs
 }
 
-func azSubnetsToString(azMapping map[string]mapping) string {
+func azSubnetSpecToString(azs []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone) string {
 	var result strings.Builder
 	result.WriteString("availability zone subnet allocations: {")
-	for az, mapping := range azMapping {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az, mapping.Public.Subnet.CIDR.String(), mapping.Private.Subnet.CIDR.String()))
+	for _, az := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String()))
 	}
 
-	if len(azMapping) > 0 {
+	if len(azs) > 0 {
+		result.WriteString("\n}")
+	} else {
+		result.WriteString("}")
+	}
+
+	return result.String()
+}
+
+func azSubnetStatusToString(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) string {
+	var result strings.Builder
+	result.WriteString("availability zone subnet allocations: {")
+	for _, az := range azs {
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String()))
+	}
+
+	if len(azs) > 0 {
 		result.WriteString("\n}")
 	} else {
 		result.WriteString("}")
@@ -239,9 +264,13 @@ func azSubnetsToString(azMapping map[string]mapping) string {
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
 	for _, s := range subnets {
 		if !awstags.HasTags(s.Tags, key.TagSubnetType) {
+			// Filter out EC2 subnets that don't specify subnet type (i.e.
+			// public or private).
 			continue
 		}
 		if awstags.ValueForKey(s.Tags, key.TagStack) != key.StackTCCP {
+			// Filter out EC2 subnets that don't belong to tenant cluster
+			// control plane CF stack.
 			continue
 		}
 
