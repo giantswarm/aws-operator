@@ -10,8 +10,10 @@ import (
 )
 
 const (
+	// Label key that will hold the CF name.
 	labelCloudFormation = "cloudformation"
 
+	// Second part of the metric name, right after namespace.
 	subsystemCloudFormation = "cloudformation"
 )
 
@@ -33,6 +35,7 @@ var (
 	)
 )
 
+// Configuration struct.
 type CloudFormationConfig struct {
 	Helper *helper
 	Logger micrologger.Logger
@@ -40,6 +43,7 @@ type CloudFormationConfig struct {
 	InstallationName string
 }
 
+// Main struct for this collector.
 type CloudFormation struct {
 	helper *helper
 	logger micrologger.Logger
@@ -47,6 +51,7 @@ type CloudFormation struct {
 	installationName string
 }
 
+// Creates a new CloudFormation metrics collector.
 func NewCloudFormation(config CloudFormationConfig) (*CloudFormation, error) {
 	if config.Helper == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Helper must not be empty", config)
@@ -69,6 +74,7 @@ func NewCloudFormation(config CloudFormationConfig) (*CloudFormation, error) {
 	return cf, nil
 }
 
+// Collect is the main metrics collection function.
 func (cf *CloudFormation) Collect(ch chan<- prometheus.Metric) error {
 	awsClientsList, err := cf.helper.GetAWSClients()
 	if err != nil {
@@ -98,11 +104,13 @@ func (cf *CloudFormation) Collect(ch chan<- prometheus.Metric) error {
 	return nil
 }
 
+// Describe emits the description for the metrics collected here.
 func (cf *CloudFormation) Describe(ch chan<- *prometheus.Desc) error {
 	ch <- cloudFormationStackDesc
 	return nil
 }
 
+// collectForAccount collects and emits metrics for one AWS account.
 func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
 	o, err := awsClients.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{})
 	if err != nil {
