@@ -70,7 +70,7 @@ const TemplateMainIAMPolicies = `
         Statement:
           Effect: "Allow"
           Principal:
-            AWS: !Ref MasterRole.Arn
+            AWS: !GetAtt MasterRole.Arn
           Action: "sts:AssumeRole"
   IAMRoleManagerRolePolicy:
     Type: "AWS::IAM::Policy"
