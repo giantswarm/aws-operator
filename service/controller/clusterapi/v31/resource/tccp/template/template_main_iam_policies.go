@@ -81,9 +81,9 @@ const TemplateMainIAMPolicies = `
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-		  Effect: "Allow"
-		  Action: "sts:AssumeRole"
-		  Resources: "*"
+          Effect: "Allow"
+          Action: "sts:AssumeRole"
+          Resources: "*"
 
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
