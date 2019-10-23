@@ -245,6 +245,13 @@ func installResources(ctx context.Context, config Config) error {
 	}
 
 	{
+		err := config.HelmClient.EnsureTillerInstalled(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	{
 		c := chartvalues.E2ESetupVaultConfig{
 			Vault: chartvalues.E2ESetupVaultConfigVault{
 				Token: env.VaultToken(),
