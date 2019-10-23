@@ -3,15 +3,12 @@ package env
 import (
 	"crypto/sha1"
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/giantswarm/e2e-harness/pkg/framework"
 )
 
 const (
@@ -20,14 +17,12 @@ const (
 )
 
 const (
-	EnvVarCircleCI             = "CIRCLECI"
-	EnvVarCircleSHA            = "CIRCLE_SHA1"
-	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
-	EnvVarKeepResources        = "KEEP_RESOURCES"
-	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
-	EnvVarTestedVersion        = "TESTED_VERSION"
-	EnvVarTestDir              = "TEST_DIR"
-	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
+	EnvVarCircleCI           = "CIRCLECI"
+	EnvVarCircleSHA          = "CIRCLE_SHA1"
+	EnvVarGithubBotToken     = "GITHUB_BOT_TOKEN"
+	EnvVarKeepResources      = "KEEP_RESOURCES"
+	EnvVarRegistryPullSecret = "REGISTRY_PULL_SECRET"
+	EnvVarTestDir            = "TEST_DIR"
 
 	// IDChars represents the character set used to generate cluster IDs.
 	// (does not contain 1 and l, to avoid confusion)
@@ -37,20 +32,16 @@ const (
 )
 
 var (
-	circleCI             string
-	circleSHA            string
-	clusterID            string
-	registryPullSecret   string
-	githubToken          string
-	testDir              string
-	testedVersion        string
-	keepResources        string
-	versionBundleVersion string
+	circleCI           string
+	circleSHA          string
+	clusterID          string
+	registryPullSecret string
+	githubToken        string
+	testDir            string
+	keepResources      string
 )
 
 func init() {
-	var err error
-
 	circleCI = os.Getenv(EnvVarCircleCI)
 	keepResources = os.Getenv(EnvVarKeepResources)
 
@@ -64,11 +55,6 @@ func init() {
 		panic(fmt.Sprintf("env var %q must not be empty", EnvVarGithubBotToken))
 	}
 
-	testedVersion = os.Getenv(EnvVarTestedVersion)
-	if testedVersion == "" {
-		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarTestedVersion))
-	}
-
 	registryPullSecret = os.Getenv(EnvVarRegistryPullSecret)
 	if registryPullSecret == "" {
 		panic(fmt.Sprintf("env var '%s' must not be empty", EnvVarRegistryPullSecret))
@@ -76,33 +62,11 @@ func init() {
 
 	testDir = os.Getenv(EnvVarTestDir)
 
-	params := &framework.VBVParams{
-		Component: component,
-		Provider:  provider,
-		Token:     githubToken,
-		VType:     TestedVersion(),
-	}
-	versionBundleVersion, err = framework.GetVersionBundleVersion(params)
-	if err != nil {
-		panic(err.Error())
-	}
-	// TODO there should be a not found error returned by the framework in such
-	// cases.
-	if VersionBundleVersion() == "" {
-		if strings.ToLower(TestedVersion()) == "wip" {
-			log.Println("WIP version bundle version not present, exiting.")
-			os.Exit(0)
-		}
-		panic("version bundle version  must not be empty")
-	}
-	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
-
 	// init clusterID
 	rand.Seed(time.Now().UnixNano())
 	var parts []string
 	parts = append(parts, "ci-")
-	parts = append(parts, TestedVersion()[0:1])
-	parts = append(parts, CircleSHA()[0:1])
+	parts = append(parts, CircleSHA()[0:2])
 	parts = append(parts, generateID(IDLength))
 	clusterID = strings.Join(parts, "")
 }
@@ -135,10 +99,6 @@ func RegistryPullSecret() string {
 	return registryPullSecret
 }
 
-func TestedVersion() string {
-	return testedVersion
-}
-
 func TestDir() string {
 	return testDir
 }
@@ -153,10 +113,6 @@ func TestHash() string {
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	return s
-}
-
-func VersionBundleVersion() string {
-	return versionBundleVersion
 }
 
 // generateID returns a string to be used as unique cluster ID

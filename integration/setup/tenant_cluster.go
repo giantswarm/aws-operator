@@ -25,6 +25,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
+	v31 "github.com/giantswarm/aws-operator/service/controller/legacy/v31"
 )
 
 const (
@@ -192,7 +193,7 @@ func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) err
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
 			CommonDomain:         env.CommonDomain(),
 			ClusterName:          id,
-			VersionBundleVersion: env.VersionBundleVersion(),
+			VersionBundleVersion: v31.VersionBundle().Version,
 
 			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
 				Region:            env.AWSRegion(),
