@@ -69,10 +69,10 @@ Resources:
             Condition:
               StringEquals:
                 autoscaling:ResourceTag/giantswarm.io/cluster: "8y5ck"
-  IAMRoleManagerRole:
+  IAMManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: 8y5ck-IAMRoleManager-Role
+      RoleName: 8y5ck-IAMManager-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -80,12 +80,12 @@ Resources:
           Principal:
             AWS: !GetAtt MasterRole.Arn
           Action: "sts:AssumeRole"
-  IAMRoleManagerRolePolicy:
+  IAMManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: 8y5ck-IAMRoleManager-Policy
+      PolicyName: 8y5ck-IAMManager-Policy
       Roles:
-        - Ref: "IAMRoleManagerRole"
+        - Ref: "IAMManagerRole"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:

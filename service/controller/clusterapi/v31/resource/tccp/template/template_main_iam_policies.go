@@ -61,10 +61,10 @@ const TemplateMainIAMPolicies = `
             Condition:
               StringEquals:
                 autoscaling:ResourceTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
-  IAMRoleManagerRole:
+  IAMManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: {{ $v.ClusterID }}-IAMRoleManager-Role
+      RoleName: {{ $v.ClusterID }}-IAMManager-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -72,12 +72,12 @@ const TemplateMainIAMPolicies = `
           Principal:
             AWS: !GetAtt MasterRole.Arn
           Action: "sts:AssumeRole"
-  IAMRoleManagerRolePolicy:
+  IAMManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{ $v.ClusterID }}-IAMRoleManager-Policy
+      PolicyName: {{ $v.ClusterID }}-IAMManager-Policy
       Roles:
-        - Ref: "IAMRoleManagerRole"
+        - Ref: "IAMManagerRole"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
