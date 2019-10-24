@@ -17,7 +17,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_4_8_0"
+	CloudConfigVersion = "v_4_9_0"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -716,34 +716,41 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
 		NOTE 2: You also need to update the tests.
 
-		service/controller/v31/key/key_test.go
-		service/controller/v31/adapter/adapter_test.go
-		service/controller/v31/resource/cloudformation/main_stack_test.go
+		service/controller/legacy/v31/key/key_test.go
+		service/controller/legacy/v31/adapter/adapter_test.go
+		service/controller/legacy/v31/resource/cloudformation/main_stack_test.go
 
-		Current Release: CoreOS Container Linux stable 2135.4.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.
+		Current Release: CoreOS Container Linux stable 2191.5.0 (HVM)
+		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt.
+
+		Script to parse AMIs (Python 3):
+
+		import urllib.request
+		url='https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt'
+		a=urllib.request.urlopen(url).read()
+		print(',\n'.join(['"'+'":"'.join(i.split('='))+'"' for i in a.decode('utf-8').strip().split('|')])+',')
 	*/
 	imageIDs := map[string]string{
-		"ap-northeast-1": "ami-02e7b007b87514a38",
-		"ap-northeast-2": "ami-0b5d1f638fb771cc9",
-		"ap-south-1":     "ami-0db4916dd31b99465",
-		"ap-southeast-1": "ami-01f2de2186e97c395",
-		"ap-southeast-2": "ami-026d43721ef96eba8",
-		"ca-central-1":   "ami-07d5bae9b2c4c9df1",
-		"cn-north-1":     "ami-0dd65d250887524c1",
-		"cn-northwest-1": "ami-0c63b500c3173c90e",
-		"eu-central-1":   "ami-0eb0d9bb7ad1bd1e9",
-		"eu-north-1":     "ami-0e3eca3c62f4c6311",
-		"eu-west-1":      "ami-000307cf706ac9f94",
-		"eu-west-2":      "ami-0322cee7ff4e446ce",
-		"eu-west-3":      "ami-01c936a41649a8cda",
-		"sa-east-1":      "ami-0b4101a238b99a929",
-		"us-east-1":      "ami-00386353b49e325ba",
-		"us-east-2":      "ami-064fe7e0332ae6407",
-		"us-gov-east-1":  "ami-03e5a71feb2b7afd2",
-		"us-gov-west-1":  "ami-272d6846",
-		"us-west-1":      "ami-070bfb410b9f148c7",
-		"us-west-2":      "ami-0a7e0ff8d31da1836",
+		"ap-northeast-1": "ami-06443443a3ad575e0",
+		"ap-northeast-2": "ami-05385569b790d035a",
+		"ap-south-1":     "ami-05d7bc2359eaaecf1",
+		"ap-southeast-1": "ami-0e69fd5ed05e58e4a",
+		"ap-southeast-2": "ami-0af85d64c1d5aeae6",
+		"ca-central-1":   "ami-00cbc28393f9da64c",
+		"cn-north-1":     "ami-001272d09c87c54fa",
+		"cn-northwest-1": "ami-0c08167b4fb0293c1",
+		"eu-central-1":   "ami-038cea5071a5ee580",
+		"eu-north-1":     "ami-01f28d71d1c924642",
+		"eu-west-1":      "ami-067301c1a68e593f5",
+		"eu-west-2":      "ami-0f5c4ede722171894",
+		"eu-west-3":      "ami-07bf54c1c2b7c368e",
+		"sa-east-1":      "ami-0d1ca6b44a76c404a",
+		"us-east-1":      "ami-06d2804068b372d32",
+		"us-east-2":      "ami-07ee0d30575e363c4",
+		"us-gov-east-1":  "ami-0751c20ce4cb557df",
+		"us-gov-west-1":  "ami-a9571fc8",
+		"us-west-1":      "ami-0d05a67ab67139420",
+		"us-west-2":      "ami-039eb9d6842534000",
 	}
 
 	imageID, ok := imageIDs[region]

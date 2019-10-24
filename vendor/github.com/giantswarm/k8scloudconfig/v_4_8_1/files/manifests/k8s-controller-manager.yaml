@@ -16,7 +16,7 @@ spec:
     image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
     command:
     - /hyperkube
-    - kube-controller-manager
+    - controller-manager
     {{ range .Hyperkube.ControllerManager.Pod.CommandExtraArgs -}}
     - {{ . }}
     {{ end -}}

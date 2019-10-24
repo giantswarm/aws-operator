@@ -21,7 +21,7 @@ spec:
           fieldPath: status.podIP
     command:
     - /hyperkube
-    - kube-apiserver
+    - apiserver
     {{ range .Hyperkube.Apiserver.Pod.CommandExtraArgs -}}
     - {{ . }}
     {{ end -}}
@@ -31,7 +31,7 @@ spec:
     - --kubelet-https=true
     - --kubelet-preferred-address-types=InternalIP
     - --secure-port={{.Cluster.Kubernetes.API.SecurePort}}
-    - --bind-address=0.0.0.0
+    - --bind-address=$(HOST_IP)
     - --etcd-prefix={{.Cluster.Etcd.Prefix}}
     - --profiling=false
     - --service-account-lookup=true
