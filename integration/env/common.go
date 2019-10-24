@@ -21,13 +21,12 @@ const (
 )
 
 const (
-	EnvVarCircleCI             = "CIRCLECI"
-	EnvVarCircleSHA            = "CIRCLE_SHA1"
-	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
-	EnvVarKeepResources        = "KEEP_RESOURCES"
-	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
-	EnvVarTestDir              = "TEST_DIR"
-	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
+	EnvVarCircleCI           = "CIRCLECI"
+	EnvVarCircleSHA          = "CIRCLE_SHA1"
+	EnvVarGithubBotToken     = "GITHUB_BOT_TOKEN"
+	EnvVarKeepResources      = "KEEP_RESOURCES"
+	EnvVarRegistryPullSecret = "REGISTRY_PULL_SECRET"
+	EnvVarTestDir            = "TEST_DIR"
 
 	// IDChars represents the character set used to generate cluster IDs.
 	// (does not contain 1 and l, to avoid confusion)
@@ -86,8 +85,6 @@ func init() {
 		} else {
 			versionBundleVersion = vbs[len(vbs)-1].Version
 		}
-
-		os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 	}
 
 	// init clusterID
