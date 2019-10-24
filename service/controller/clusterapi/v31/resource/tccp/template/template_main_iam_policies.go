@@ -107,8 +107,8 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "route53:ChangeResourceRecordSets"
             Resource:
-              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone ] ]
-              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone ] ]
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone' ] ]
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone' ] ]
           - Effect: "Allow"
             Action:
               - "route53:ListHostedZones"
