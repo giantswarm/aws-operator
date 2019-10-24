@@ -9,9 +9,14 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "component",
-				Description: "TODO",
-				Kind:        versionbundle.KindChanged,
+				Component:   "cloudformation",
+				Description: "Add IAMManager IAM role for kiam managed app.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add Route53Manager IAM role for external-dns managed app.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
