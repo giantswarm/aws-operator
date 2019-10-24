@@ -60,12 +60,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
-
-		if len(cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "ingress target group ids not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
 	}
 
 	{
@@ -94,6 +88,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool cloud formation stack already exists")
@@ -274,8 +273,10 @@ func newAutoScalingGroup(ctx context.Context, cr v1alpha1.MachineDeployment) (*t
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
-		DesiredCapacity:       minDesiredNodes,
-		IngressTargetGroupIDs: cc.Status.TenantCluster.TCCP.IngressTargetGroupIDs,
+		DesiredCapacity: minDesiredNodes,
+		LoadBalancer: template.ParamsMainAutoScalingGroupLoadBalancer{
+			Name: key.ELBNameIngress(&cr),
+		},
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),

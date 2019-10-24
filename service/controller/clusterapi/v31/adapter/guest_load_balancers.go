@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
@@ -10,49 +11,35 @@ import (
 const (
 	// Default values for health checks.
 	healthCheckHealthyThreshold   = 2
-	healthCheckInterval           = 10
-	healthCheckTimeout            = 6
+	healthCheckInterval           = 5
+	healthCheckTimeout            = 3
 	healthCheckUnhealthyThreshold = 2
-
-	// resource names for ELBv2 Listener resources
-	apiInternalELBListenerResourceName     = "ApiInternalLoadBalancerListener"
-	apiELBListenerResourceName             = "ApiLoadBalancerListener"
-	etcdELBListenerResourceName            = "EtcdLoadBalancerListener"
-	ingressELBInsecureListenerResourceName = "IngressLoadBalancerInsecureListener"
-	ingressELBSecureListenerResourceName   = "IngressLoadBalancerSecureListener"
-	// resource names for ELBv2 Target group resources
-	apiInternalELBTargetGroupResourceName     = "ApiInternalTargetGroup"
-	apiELBTargetGroupResourceName             = "ApiTargetGroup"
-	etcdELBTargetGroupResourceName            = "EtcdTargetGroup"
-	ingressELBInsecureTargetGroupResourceName = "IngressInsecureTargetGroup"
-	ingressELBSecureTargetGroupResourceName   = "IngressSecureTargetGroup"
 )
 
 type GuestLoadBalancersAdapter struct {
-	APIElbHealthCheckTarget           string
-	APIElbName                        string
-	APIInternalElbName                string
-	APIElbListenersAndTargets         []GuestLoadBalancersAdapterListenerAndTarget
-	APIInternalElbListenersAndTargets []GuestLoadBalancersAdapterListenerAndTarget
-	APIElbScheme                      string
-	APIInternalElbScheme              string
-	APIElbSecurityGroupID             string
-	EtcdElbHealthCheckTarget          string
-	EtcdElbName                       string
-	EtcdElbListenersAndTargets        []GuestLoadBalancersAdapterListenerAndTarget
-	EtcdElbScheme                     string
-	EtcdElbSecurityGroupID            string
-	ELBHealthCheckHealthyThreshold    int
-	ELBHealthCheckInterval            int
-	ELBHealthCheckTimeout             int
-	ELBHealthCheckUnhealthyThreshold  int
-	IngressElbHealthCheckTarget       string
-	IngressElbName                    string
-	IngressElbListenersAndTargets     []GuestLoadBalancersAdapterListenerAndTarget
-	IngressElbScheme                  string
-	MasterInstanceResourceName        string
-	PublicSubnets                     []string
-	PrivateSubnets                    []string
+	APIElbHealthCheckTarget          string
+	APIElbName                       string
+	APIInternalElbName               string
+	APIElbPortsToOpen                []GuestLoadBalancersAdapterPortPair
+	APIElbScheme                     string
+	APIInternalElbScheme             string
+	APIElbSecurityGroupID            string
+	EtcdElbHealthCheckTarget         string
+	EtcdElbName                      string
+	EtcdElbPortsToOpen               []GuestLoadBalancersAdapterPortPair
+	EtcdElbScheme                    string
+	EtcdElbSecurityGroupID           string
+	ELBHealthCheckHealthyThreshold   int
+	ELBHealthCheckInterval           int
+	ELBHealthCheckTimeout            int
+	ELBHealthCheckUnhealthyThreshold int
+	IngressElbHealthCheckTarget      string
+	IngressElbName                   string
+	IngressElbPortsToOpen            []GuestLoadBalancersAdapterPortPair
+	IngressElbScheme                 string
+	MasterInstanceResourceName       string
+	PublicSubnets                    []string
+	PrivateSubnets                   []string
 }
 
 func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
@@ -65,22 +52,10 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	a.APIElbHealthCheckTarget = heathCheckTarget(key.KubernetesSecurePort)
 	a.APIElbName = key.ELBNameAPI(&cfg.CustomObject)
 	a.APIInternalElbName = key.InternalELBNameAPI(&cfg.CustomObject)
-	a.APIElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
+	a.APIElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			ListenerResourceName:    apiELBListenerResourceName,
-			PortELB:                 key.KubernetesSecurePort,
-			PortInstance:            key.KubernetesSecurePort,
-			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, apiELBTargetGroupResourceName),
-			TargetGroupResourceName: apiELBTargetGroupResourceName,
-		},
-	}
-	a.APIInternalElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
-		{
-			ListenerResourceName:    apiInternalELBListenerResourceName,
-			PortELB:                 key.KubernetesSecurePort,
-			PortInstance:            key.KubernetesSecurePort,
-			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, apiInternalELBTargetGroupResourceName),
-			TargetGroupResourceName: apiInternalELBTargetGroupResourceName,
+			PortELB:      key.KubernetesSecurePort,
+			PortInstance: key.KubernetesSecurePort,
 		},
 	}
 	a.APIElbScheme = externalELBScheme
@@ -89,13 +64,10 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	// etcd load balancer settings.
 	a.EtcdElbHealthCheckTarget = heathCheckTarget(key.EtcdPort)
 	a.EtcdElbName = key.ELBNameEtcd(&cfg.CustomObject)
-	a.EtcdElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
+	a.EtcdElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			ListenerResourceName:    etcdELBListenerResourceName,
-			PortELB:                 key.EtcdPort,
-			PortInstance:            key.EtcdPort,
-			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, etcdELBTargetGroupResourceName),
-			TargetGroupResourceName: etcdELBTargetGroupResourceName,
+			PortELB:      key.EtcdPort,
+			PortInstance: key.EtcdPort,
 		},
 	}
 	a.EtcdElbScheme = internalELBScheme
@@ -103,20 +75,15 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	// Ingress load balancer settings.
 	a.IngressElbHealthCheckTarget = heathCheckTarget(key.IngressControllerSecurePort)
 	a.IngressElbName = key.ELBNameIngress(&cfg.CustomObject)
-	a.IngressElbListenersAndTargets = []GuestLoadBalancersAdapterListenerAndTarget{
+	a.IngressElbPortsToOpen = []GuestLoadBalancersAdapterPortPair{
 		{
-			ListenerResourceName:    ingressELBSecureListenerResourceName,
-			PortELB:                 httpsPort,
-			PortInstance:            key.IngressControllerSecurePort,
-			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, ingressELBSecureTargetGroupResourceName),
-			TargetGroupResourceName: ingressELBSecureTargetGroupResourceName,
+			PortELB: httpsPort,
+
+			PortInstance: key.IngressControllerSecurePort,
 		},
 		{
-			ListenerResourceName:    ingressELBInsecureListenerResourceName,
-			PortELB:                 httpPort,
-			PortInstance:            key.IngressControllerInsecurePort,
-			TargetGroupName:         key.TargetGroupNameWithClusterID(cfg.CustomObject, ingressELBInsecureTargetGroupResourceName),
-			TargetGroupResourceName: ingressELBInsecureTargetGroupResourceName,
+			PortELB:      httpPort,
+			PortInstance: key.IngressControllerInsecurePort,
 		},
 	}
 	a.IngressElbScheme = externalELBScheme
@@ -143,17 +110,11 @@ func (a *GuestLoadBalancersAdapter) Adapt(cfg Config) error {
 	return nil
 }
 
-type GuestLoadBalancersAdapterListenerAndTarget struct {
-	// Listener resource name
-	ListenerResourceName string
+type GuestLoadBalancersAdapterPortPair struct {
 	// PortELB is the port the ELB should listen on.
 	PortELB int
-	// PortInstance is the target port on the instance the ELB forwards traffic to.
+	// PortInstance is the port on the instance the ELB forwards traffic to.
 	PortInstance int
-	// TargetGroup name
-	TargetGroupName string
-	// TargetGroup resource name
-	TargetGroupResourceName string
 }
 
 func heathCheckTarget(port int) string {

@@ -12,11 +12,9 @@ import (
 )
 
 type baseExtension struct {
-	calicoMTU      int
-	cluster        v1alpha1.Cluster
-	encrypter      encrypter.Interface
-	encryptionKey  string
-	registryDomain string
+	cluster       v1alpha1.Cluster
+	encrypter     encrypter.Interface
+	encryptionKey string
 }
 
 func (e *baseExtension) templateData() templateData {
@@ -32,12 +30,10 @@ func (e *baseExtension) templateData() templateData {
 	}
 
 	data := templateData{
-		AWSRegion:      key.Region(e.cluster),
-		CalicoMTU:      e.calicoMTU,
-		EncrypterType:  encrypterType,
-		RegistryDomain: e.registryDomain,
-		VaultAddress:   vaultAddress,
-		EncryptionKey:  e.encryptionKey,
+		AWSRegion:     key.Region(e.cluster),
+		EncrypterType: encrypterType,
+		VaultAddress:  vaultAddress,
+		EncryptionKey: e.encryptionKey,
 	}
 
 	return data
