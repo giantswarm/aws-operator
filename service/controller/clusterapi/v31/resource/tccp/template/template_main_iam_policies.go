@@ -111,8 +111,8 @@ const TemplateMainIAMPolicies = `
               - "arn:aws:route53:::hostedzone/!Ref 'InternalHostedZone'"
           - Effect: "Allow"
             Action:
-			        - "route53:ListHostedZones"
-			        - "route53:ListResourceRecordSets"
+              - "route53:ListHostedZones"
+              - "route53:ListResourceRecordSets"
             Resource: "*"
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
