@@ -10,6 +10,14 @@ func DurationP(d time.Duration) *time.Duration {
 	return &d
 }
 
+func Int(i *int) int {
+	return *i
+}
+
+func IntP(i int) *int {
+	return &i
+}
+
 func Int64(i *int64) int64 {
 	return *i
 }
