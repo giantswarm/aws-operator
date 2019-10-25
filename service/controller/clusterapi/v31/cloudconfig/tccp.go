@@ -13,9 +13,9 @@ import (
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type TCCPConfig struct {
