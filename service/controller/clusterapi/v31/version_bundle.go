@@ -1,6 +1,7 @@
 package v31
 
 import (
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/versionbundle"
 )
 
@@ -11,6 +12,16 @@ func VersionBundle() versionbundle.Bundle {
 				Component:   "nodepools",
 				Description: "Add testing version 6.5.0",
 				Kind:        versionbundle.KindChanged,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add IAMManager IAM role for kiam managed app.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "cloudformation",
+				Description: "Add Route53Manager IAM role for external-dns managed app.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -35,7 +46,7 @@ func VersionBundle() versionbundle.Bundle {
 				Version: "1.14.6",
 			},
 		},
-		Name:    "aws-operator",
-		Version: "6.5.0",
+		Name:    project.Name(),
+		Version: project.BundleVersion(),
 	}
 }
