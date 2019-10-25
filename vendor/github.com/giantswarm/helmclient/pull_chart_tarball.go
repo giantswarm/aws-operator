@@ -36,7 +36,9 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 
 	o := func() error {
 		resp, err := c.httpClient.Do(req)
-		if err != nil {
+		if isNoSuchHostError(err) {
+			return backoff.Permanent(microerror.Maskf(executionFailedError, "no such host %#q", req.Host))
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		defer resp.Body.Close()
@@ -50,7 +52,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 			// Github pages 404 produces full HTML page which
 			// obscures the logs.
 			if resp.StatusCode == http.StatusNotFound {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String()))
+				return backoff.Permanent(microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String())))
 			}
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q with body %s", resp.StatusCode, req.URL.String(), buf.String()))
 		}
@@ -71,7 +73,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 		return nil
 	}
 
-	b := backoff.NewMaxRetries(10, 5*time.Second)
+	b := backoff.NewMaxRetries(3, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)
