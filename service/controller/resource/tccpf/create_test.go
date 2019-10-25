@@ -13,8 +13,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/unittest"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf/template"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")

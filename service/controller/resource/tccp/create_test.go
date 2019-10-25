@@ -16,8 +16,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/unittest"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
