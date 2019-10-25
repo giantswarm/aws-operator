@@ -21,7 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
-	v31adapter "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/adapter"
+	v31adapter "github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
