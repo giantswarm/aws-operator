@@ -47,6 +47,21 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var cfCollector *CloudFormation
+	{
+		c := CloudFormationConfig{
+			Helper: h,
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		cfCollector, err = NewCloudFormation(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var asgCollector *ASG
 	{
 		c := ASGConfig{
@@ -124,6 +139,7 @@ func NewSet(config SetConfig) (*Set, error) {
 	{
 		c := collector.SetConfig{
 			Collectors: []collector.Interface{
+				cfCollector,
 				asgCollector,
 				ec2InstancesCollector,
 				elbCollector,
