@@ -15,11 +15,11 @@ import (
 )
 
 type CollectorConfig struct {
+	// FilterFunc is not required and therefore not validated within the
+	// constructor below.
 	FilterFunc func(Bundle) bool
 	Logger     micrologger.Logger
 	RestClient *resty.Client
-
-	Endpoints []*url.URL
 }
 
 type Collector struct {
@@ -29,8 +29,6 @@ type Collector struct {
 
 	bundles []Bundle
 	mutex   sync.Mutex
-
-	endpoints []*url.URL
 }
 
 func NewCollector(config CollectorConfig) (*Collector, error) {
@@ -41,19 +39,13 @@ func NewCollector(config CollectorConfig) (*Collector, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RestClient must not be empty", config)
 	}
 
-	if len(config.Endpoints) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Endpoints must not be empty", config)
-	}
-
 	c := &Collector{
-		filterFunc: config.FilterFunc, // Not required and therefore not validated above.
+		filterFunc: config.FilterFunc,
 		logger:     config.Logger,
 		restClient: config.RestClient,
 
 		bundles: nil,
 		mutex:   sync.Mutex{},
-
-		endpoints: config.Endpoints,
 	}
 
 	return c, nil
@@ -70,25 +62,25 @@ type CollectorEndpointResponse struct {
 	VersionBundles []Bundle `json:"version_bundles"`
 }
 
-func (c *Collector) Collect(ctx context.Context) error {
-	c.logger.Log("level", "debug", "message", "collector starts collecting version bundles from endpoints")
+func (c *Collector) Collect(ctx context.Context, endpoints []*url.URL) error {
+	c.logger.Log("level", "debug", "message", "collecting version bundles from endpoints")
 
 	responses := map[string][]byte{}
 	{
 		var g errgroup.Group
 
-		for _, endpoint := range c.endpoints {
+		for _, endpoint := range endpoints {
 			e := endpoint
 
 			g.Go(func() error {
-				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "collector requesting version bundles from endpoint")
+				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "requesting version bundles from endpoint")
 
 				res, err := c.restClient.NewRequest().Get(e.String())
 				if err != nil {
 					return microerror.Mask(err)
 				}
 
-				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "collector received version bundles from endpoint")
+				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "requested version bundles from endpoint")
 
 				c.mutex.Lock()
 				responses[e.String()] = res.Body()
@@ -120,10 +112,7 @@ func (c *Collector) Collect(ctx context.Context) error {
 				for _, b := range r.VersionBundles {
 					if c.filterFunc(b) {
 						filteredBundles = append(filteredBundles, b)
-					} else {
-						c.logger.Log("endpoint", e, "level", "debug", "message", fmt.Sprintf("filterFunc rejected: %#v", b))
 					}
-
 				}
 			} else {
 				filteredBundles = r.VersionBundles
@@ -143,7 +132,7 @@ func (c *Collector) Collect(ctx context.Context) error {
 		c.mutex.Unlock()
 	}
 
-	c.logger.Log("level", "debug", "message", "collector finishes collecting version bundles from endpoints")
+	c.logger.Log("level", "debug", "message", "collected version bundles from endpoints")
 
 	return nil
 }
