@@ -38,7 +38,7 @@ spec:
           image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
           command:
           - /hyperkube
-          - proxy
+          - kube-proxy
           - --config=/etc/kubernetes/config/proxy-config.yml
           - --v=2
           livenessProbe:
