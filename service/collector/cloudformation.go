@@ -23,6 +23,7 @@ var (
 		"CloudFormation information.",
 		[]string{
 			labelAccountID,
+			labelAccountType,
 			labelCluster,
 			labelID,
 			labelInstallation,
@@ -121,6 +122,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	accountType := "tenant-cluster"
 
 	for _, stack := range o.Stacks {
 		var cluster, installation, name, organization, stackName string
@@ -149,6 +151,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			prometheus.GaugeValue,
 			GaugeValue,
 			accountID,
+			accountType,
 			cluster,
 			*stack.StackId,
 			installation,
