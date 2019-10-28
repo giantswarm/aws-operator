@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type GuestVPCAdapter struct {
