@@ -7,7 +7,7 @@ import (
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func cmaClusterToG8sConfig(c Config, cr cmav1alpha1.Cluster, l string) g8sv1alpha1.AWSConfigSpec {

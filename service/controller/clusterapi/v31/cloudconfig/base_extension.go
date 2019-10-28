@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type baseExtension struct {

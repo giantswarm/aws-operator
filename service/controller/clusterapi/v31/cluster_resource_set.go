@@ -14,34 +14,34 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/bridgezone"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/cleanupebsvolumes"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/cleanuploadbalancers"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/cleanupsecuritygroups"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/cproutetables"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/cpvpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/encryption"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/endpoints"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/ipam"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/natgatewayaddresses"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/peerrolearn"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/region"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/s3bucket"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/s3object"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/secretfinalizer"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/service"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccp"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpazs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpf"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpi"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpoutputs"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpsubnets"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpccidr"
+	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
+	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
+	"github.com/giantswarm/aws-operator/service/controller/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
+	"github.com/giantswarm/aws-operator/service/controller/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpencryption"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 )
 
 func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -187,15 +187,14 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var encryptionResource resource.Interface
+	var tccpEncryptionResource resource.Interface
 	{
-		c := encryption.Config{
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+		c := tccpencryption.Config{
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
 		}
 
-		encryptionResource, err = encryption.New(c)
+		tccpEncryptionResource, err = tccpencryption.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -548,7 +547,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		// the information given in the controller context.
 		ipamResource,
 		bridgeZoneResource,
-		encryptionResource,
+		tccpEncryptionResource,
 		s3BucketResource,
 		s3ObjectResource,
 		tccpAZsResource,
