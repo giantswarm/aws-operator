@@ -14,12 +14,12 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/asgstatus"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
+	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
+	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 )
 
 type DrainerResourceSetConfig struct {

@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/template"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/key"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type GuestInstanceAdapter struct {
