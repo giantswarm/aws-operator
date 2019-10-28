@@ -190,9 +190,8 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 	var tccpEncryptionResource resource.Interface
 	{
 		c := tccpencryption.Config{
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
 		}
 
 		tccpEncryptionResource, err = tccpencryption.New(c)
