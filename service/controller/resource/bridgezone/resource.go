@@ -13,7 +13,7 @@ import (
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/credential"
+	"github.com/giantswarm/aws-operator/service/credential"
 )
 
 const (
