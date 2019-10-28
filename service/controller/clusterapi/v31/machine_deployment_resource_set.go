@@ -27,7 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
@@ -35,6 +34,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 )
@@ -188,15 +188,15 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tccpEncryptionResource resource.Interface
+	var tcnpEncryptionResource resource.Interface
 	{
-		c := tccpencryption.Config{
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		c := tcnpencryption.Config{
+			CMAClient: config.CMAClient,
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
 		}
 
-		tccpEncryptionResource, err = tccpencryption.New(c)
+		tcnpEncryptionResource, err = tcnpencryption.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -421,10 +421,10 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tcnpASGStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
+		tcnpEncryptionResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
-		tccpEncryptionResource,
 		s3ObjectResource,
 		ipamResource,
 		tcnpResource,
