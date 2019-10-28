@@ -23,11 +23,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnatgateways"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
@@ -188,15 +188,15 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var encryptionResource resource.Interface
+	var tccpEncryptionResource resource.Interface
 	{
-		c := encryption.Config{
+		c := tccpencryption.Config{
 			Encrypter:     encrypterObject,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
 		}
 
-		encryptionResource, err = encryption.New(c)
+		tccpEncryptionResource, err = tccpencryption.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -424,7 +424,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
-		encryptionResource,
+		tccpEncryptionResource,
 		s3ObjectResource,
 		ipamResource,
 		tcnpResource,

@@ -1,4 +1,4 @@
-package encryption
+package tccpencryption
 
 import (
 	"github.com/aws/aws-sdk-go/aws/awserr"

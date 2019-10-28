@@ -1,4 +1,4 @@
-package encryption
+package tccpencryption
 
 import (
 	"github.com/giantswarm/microerror"
@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	name = "encryptionv31"
+	name = "tccpencryptionv31"
 )
 
 type Config struct {
