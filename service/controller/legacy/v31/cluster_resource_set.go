@@ -25,7 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/credential"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/detection"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/encrypter/kms"
@@ -54,6 +53,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/resource/vpccidr"
+	"github.com/giantswarm/aws-operator/service/credential"
 	"github.com/giantswarm/aws-operator/service/network"
 )
 

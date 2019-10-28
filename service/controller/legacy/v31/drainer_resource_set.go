@@ -15,11 +15,11 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/credential"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/credential"
 )
 
 type DrainerResourceSetConfig struct {
