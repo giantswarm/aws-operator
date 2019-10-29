@@ -25,6 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/locker"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 // Config represents the configuration used to create a new service.
@@ -316,7 +317,7 @@ func New(config Config) (*Service, error) {
 			Name:           project.Name(),
 			Source:         project.Source(),
 			Version:        project.Version(),
-			VersionBundles: NewVersionBundles(),
+			VersionBundles: versionbundle.NewSlice(),
 		}
 
 		versionService, err = version.New(c)

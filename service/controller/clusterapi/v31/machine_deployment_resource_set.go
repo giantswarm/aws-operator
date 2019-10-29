@@ -37,6 +37,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -457,7 +458,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == versionbundle.New().Version {
 			return true
 		}
 

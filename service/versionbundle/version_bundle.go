@@ -1,11 +1,11 @@
-package v31
+package versionbundle
 
 import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/versionbundle"
 )
 
-func VersionBundle() versionbundle.Bundle {
+func New() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
@@ -48,5 +48,11 @@ func VersionBundle() versionbundle.Bundle {
 		},
 		Name:    project.Name(),
 		Version: project.BundleVersion(),
+	}
+}
+
+func NewSlice() []versionbundle.Bundle {
+	return []versionbundle.Bundle{
+		New(),
 	}
 }

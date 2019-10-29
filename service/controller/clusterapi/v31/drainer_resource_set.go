@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 type DrainerResourceSetConfig struct {
@@ -126,7 +127,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == versionbundle.New().Version {
 			return true
 		}
 
