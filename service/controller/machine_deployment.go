@@ -185,7 +185,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
-	var v31ResourceSet *controller.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
 		c := machineDeploymentResourceSetConfig{
 			CertsSearcher:          certsSearcher,
@@ -223,14 +223,14 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			VPCPeerID:                  config.VPCPeerID,
 		}
 
-		v31ResourceSet, err = newMachineDeploymentResourceSet(c)
+		resourceSet, err = newMachineDeploymentResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v31ResourceSet,
+		resourceSet,
 	}
 
 	return resourceSets, nil
