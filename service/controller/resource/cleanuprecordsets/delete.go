@@ -34,7 +34,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		for _, zone := range o.HostedZones {
-			if *zone.Name == key.ClusterBaseDomain(cr) {
+			baseDomain := fmt.Sprintf("%s.", key.ClusterBaseDomain(cr))
+			if *zone.Name == baseDomain {
 				hostedZones = append(hostedZones, zone)
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zones for tenant cluster %#q", key.ClusterID(&cr)))
