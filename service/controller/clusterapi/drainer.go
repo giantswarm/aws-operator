@@ -1,4 +1,4 @@
-package controller
+package clusterapi
 
 import (
 	"time"
@@ -18,6 +18,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
+	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -134,7 +135,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 
 	var v31ResourceSet *controller.ResourceSet
 	{
-		c := drainerResourceSetConfig{
+		c := v31.DrainerResourceSetConfig{
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
@@ -146,7 +147,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		v31ResourceSet, err = newDrainerResourceSet(c)
+		v31ResourceSet, err = v31.NewDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

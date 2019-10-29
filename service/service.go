@@ -23,7 +23,7 @@ import (
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
-	"github.com/giantswarm/aws-operator/service/controller"
+	"github.com/giantswarm/aws-operator/service/controller/clusterapi"
 	"github.com/giantswarm/aws-operator/service/locker"
 	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
@@ -40,9 +40,9 @@ type Service struct {
 	Version *version.Service
 
 	bootOnce                              sync.Once
-	clusterapiClusterController           *controller.Cluster
-	clusterapiDrainerController           *controller.Drainer
-	clusterapiMachineDeploymentController *controller.MachineDeployment
+	clusterapiClusterController           *clusterapi.Cluster
+	clusterapiDrainerController           *clusterapi.Drainer
+	clusterapiMachineDeploymentController *clusterapi.MachineDeployment
 	operatorCollector                     *collector.Set
 	statusResourceCollector               *statusresource.CollectorSet
 }
@@ -137,10 +137,10 @@ func New(config Config) (*Service, error) {
 		ipamNetworkRange = *ipnet
 	}
 
-	var clusterapiClusterController *controller.Cluster
+	var clusterapiClusterController *clusterapi.Cluster
 	{
 
-		c := controller.ClusterConfig{
+		c := clusterapi.ClusterConfig{
 			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
@@ -150,12 +150,12 @@ func New(config Config) (*Service, error) {
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
-			APIWhitelist: controller.FrameworkConfigAPIWhitelist{
-				Private: controller.FrameworkConfigAPIWhitelistConfig{
+			APIWhitelist: clusterapi.FrameworkConfigAPIWhitelist{
+				Private: clusterapi.FrameworkConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
 				},
-				Public: controller.FrameworkConfigAPIWhitelistConfig{
+				Public: clusterapi.FrameworkConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
 			},
@@ -176,12 +176,12 @@ func New(config Config) (*Service, error) {
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.ClusterConfigLabelSelector{
+			LabelSelector: clusterapi.ClusterConfigLabelSelector{
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
 			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
-			OIDC: controller.ClusterConfigOIDC{
+			OIDC: clusterapi.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
@@ -197,15 +197,15 @@ func New(config Config) (*Service, error) {
 			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
-		clusterapiClusterController, err = controller.NewCluster(c)
+		clusterapiClusterController, err = clusterapi.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var clusterapiDrainerController *controller.Drainer
+	var clusterapiDrainerController *clusterapi.Drainer
 	{
-		c := controller.DrainerConfig{
+		c := clusterapi.DrainerConfig{
 			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
@@ -213,22 +213,22 @@ func New(config Config) (*Service, error) {
 			Logger:       config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.DrainerConfigLabelSelector{
+			LabelSelector: clusterapi.DrainerConfigLabelSelector{
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
-		clusterapiDrainerController, err = controller.NewDrainer(c)
+		clusterapiDrainerController, err = clusterapi.NewDrainer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var clusterapiMachineDeploymentController *controller.MachineDeployment
+	var clusterapiMachineDeploymentController *clusterapi.MachineDeployment
 	{
-		c := controller.MachineDeploymentConfig{
+		c := clusterapi.MachineDeploymentConfig{
 			CMAClient:    cmaClient,
 			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
@@ -251,12 +251,12 @@ func New(config Config) (*Service, error) {
 			ImagePullProgressDeadline:  config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.MachineDeploymentConfigLabelSelector{
+			LabelSelector: clusterapi.MachineDeploymentConfigLabelSelector{
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
 			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
-			OIDC: controller.ClusterConfigOIDC{
+			OIDC: clusterapi.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
 				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
@@ -272,7 +272,7 @@ func New(config Config) (*Service, error) {
 			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
-		clusterapiMachineDeploymentController, err = controller.NewMachineDeployment(c)
+		clusterapiMachineDeploymentController, err = clusterapi.NewMachineDeployment(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
