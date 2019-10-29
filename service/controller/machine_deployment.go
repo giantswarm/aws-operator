@@ -1,4 +1,4 @@
-package clusterapi
+package controller
 
 import (
 	"net"
@@ -20,7 +20,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	v31 "github.com/giantswarm/aws-operator/service/controller/clusterapi/v31"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -188,7 +187,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 
 	var v31ResourceSet *controller.ResourceSet
 	{
-		c := v31.MachineDeploymentResourceSetConfig{
+		c := machineDeploymentResourceSetConfig{
 			CertsSearcher:          certsSearcher,
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
@@ -224,7 +223,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			VPCPeerID:                  config.VPCPeerID,
 		}
 
-		v31ResourceSet, err = v31.NewMachineDeploymentResourceSet(c)
+		v31ResourceSet, err = newMachineDeploymentResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
