@@ -1,4 +1,4 @@
-package legacy
+package controller
 
 import (
 	"time"
@@ -16,7 +16,6 @@ import (
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	v31 "github.com/giantswarm/aws-operator/service/controller/legacy/v31"
 )
 
 type DrainerConfig struct {
@@ -141,7 +140,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 
 	var v31ResourceSet *controller.ResourceSet
 	{
-		c := v31.DrainerResourceSetConfig{
+		c := drainerResourceSetConfig{
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
@@ -157,7 +156,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		v31ResourceSet, err = v31.NewDrainerResourceSet(c)
+		v31ResourceSet, err = newDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

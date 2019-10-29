@@ -1,4 +1,4 @@
-package legacy
+package controller
 
 import (
 	"net"
@@ -21,7 +21,6 @@ import (
 	v31adapter "github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	v31 "github.com/giantswarm/aws-operator/service/controller/legacy/v31"
 
 	"github.com/giantswarm/aws-operator/service/network"
 )
@@ -216,7 +215,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 	var resourceSetV31 *controller.ResourceSet
 	{
-		c := v31.ClusterResourceSetConfig{
+		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
@@ -271,7 +270,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VPCPeerID:      config.VPCPeerID,
 		}
 
-		resourceSetV31, err = v31.NewClusterResourceSet(c)
+		resourceSetV31, err = newClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
