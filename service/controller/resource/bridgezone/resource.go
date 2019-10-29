@@ -64,12 +64,12 @@ type Config struct {
 //	installation.eu-central-1.aws.gigantic.io (control plane account)
 //	├── NS k8s.installation.eu-central-1.aws.gigantic.io (default tenant account)
 //	└── NS cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
-
+//
 //	k8s.installation.eu-central-1.aws.gigantic.io (default tenant account)
 //	├── NS cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
 //	├── A api.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
 //	└── A ingress.old_cluster.k8s.installation.eu-central-1.aws.gigantic.io
-
+//
 //	cluster_id.k8s.installation.eu-central-1.aws.gigantic.io (byoc tenant account)
 //	├── A api.cluster_id.k8s.installation.eu-central-1.aws.gigantic.io
 //	└── A ingress.cluster_id.k8s.installation.eu-central-1.aws.gigantic.io
