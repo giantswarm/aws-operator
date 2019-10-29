@@ -10,7 +10,7 @@ const (
 	tagInstallation = "giantswarm.io/installation"
 	tagName         = "Name"
 	tagOrganization = "giantswarm.io/organization"
-	tagStack        = "aws:cloudformation:stack-name"
+	tagStackName    = "aws:cloudformation:stack-name"
 )
 
 const (

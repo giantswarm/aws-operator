@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
@@ -10,9 +12,6 @@ import (
 )
 
 const (
-	// Label key that will hold the CF name.
-	labelCloudFormation = "cloudformation"
-
 	// Second part of the metric name, right after namespace.
 	subsystemCloudFormation = "cloudformation"
 )
@@ -111,7 +110,7 @@ func (cf *CloudFormation) Describe(ch chan<- *prometheus.Desc) error {
 	return nil
 }
 
-// collectForAccount collects and emits metrics for one AWS account.
+// collectForAccount collects metrics for one AWS account.
 func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
 	o, err := awsClients.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{})
 	if err != nil {
@@ -122,7 +121,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	accountType := "tenant-cluster"
+	accountType := "" // TODO: specify if its tenant-cluster or control plane account
 
 	for _, stack := range o.Stacks {
 		var cluster, installation, name, organization, stackName string
@@ -137,12 +136,16 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 				name = *tag.Value
 			case tagOrganization:
 				organization = *tag.Value
-			case tagStack:
+			case tagStackName:
 				stackName = *tag.Value
 			}
 		}
 
 		if installation != cf.installationName {
+			continue
+		}
+
+		if !isStackNameFmt(stackName) {
 			continue
 		}
 
@@ -163,4 +166,10 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 	}
 
 	return nil
+}
+
+// Check if the input stack name follows fmt standard
+func isStackNameFmt(StackName string) bool {
+	return strings.HasPrefix(StackName, "cluster-") &&
+		strings.HasSuffix(StackName, "-tccp") || strings.HasSuffix(StackName, "-tccpf") || strings.HasSuffix(StackName, "-tccpi") || strings.Contains(StackName, "-tcnp-") || strings.Contains(StackName, "-tcnpf-")
 }
