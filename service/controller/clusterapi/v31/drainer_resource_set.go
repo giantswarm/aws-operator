@@ -1,4 +1,4 @@
-package controller
+package v31
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
-type drainerResourceSetConfig struct {
+type DrainerResourceSetConfig struct {
 	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
@@ -35,7 +35,7 @@ type drainerResourceSetConfig struct {
 	Route53Enabled bool
 }
 
-func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.ResourceSet, error) {
+func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var asgStatusResource resource.Interface

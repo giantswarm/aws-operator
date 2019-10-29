@@ -1,4 +1,4 @@
-package controller
+package v31
 
 import (
 	"context"
@@ -45,7 +45,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
-func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
+func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var encrypterObject encrypter.Interface

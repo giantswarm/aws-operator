@@ -1,4 +1,4 @@
-package controller
+package v31
 
 import (
 	"context"
@@ -40,7 +40,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
-func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
+func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var encrypterObject encrypter.Interface

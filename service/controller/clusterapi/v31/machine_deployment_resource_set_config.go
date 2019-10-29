@@ -1,4 +1,4 @@
-package controller
+package v31
 
 import (
 	"net"
@@ -11,63 +11,57 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
 
-type clusterResourceSetConfig struct {
+type MachineDeploymentResourceSetConfig struct {
 	CertsSearcher          certs.Interface
 	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
-	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface
 	Locker                 locker.Interface
 	Logger                 micrologger.Logger
 	RandomKeysSearcher     randomkeys.Interface
 
-	AccessLogsExpiration       int
-	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.APIWhitelist
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
 	ClusterIPRange             string
 	DockerDaemonCIDR           string
 	EncrypterBackend           string
-	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
-	IncludeTags                bool
+	HostAWSConfig              aws.Config
 	IgnitionPath               string
 	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	DeleteLoggingBucket        bool
 	NetworkSetupDockerImage    string
+	PodInfraContainerImage     string
+	ProjectName                string
+	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
-	PodInfraContainerImage     string
-	RegistryDomain             string
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
 	VPCPeerID                  string
 }
 
-func (c clusterResourceSetConfig) GetEncrypterBackend() string {
+func (c MachineDeploymentResourceSetConfig) GetEncrypterBackend() string {
 	return c.EncrypterBackend
 }
 
-func (c clusterResourceSetConfig) GetInstallationName() string {
+func (c MachineDeploymentResourceSetConfig) GetInstallationName() string {
 	return c.InstallationName
 }
 
-func (c clusterResourceSetConfig) GetLogger() micrologger.Logger {
+func (c MachineDeploymentResourceSetConfig) GetLogger() micrologger.Logger {
 	return c.Logger
 }
 
-func (c clusterResourceSetConfig) GetVaultAddress() string {
+func (c MachineDeploymentResourceSetConfig) GetVaultAddress() string {
 	return c.VaultAddress
 }
