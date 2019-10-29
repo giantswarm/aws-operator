@@ -83,19 +83,23 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		chageRecordSetInput := &route53.ChangeResourceRecordSetsInput{
-			ChangeBatch: &route53.ChangeBatch{
-				Changes: route53Changes,
-			},
-			HostedZoneId: hostedZone.Id,
-		}
+		if len(route53Changes) > 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleteting non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
 
-		_, err = cc.Client.TenantCluster.AWS.Route53.ChangeResourceRecordSets(chageRecordSetInput)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+			chageRecordSetInput := &route53.ChangeResourceRecordSetsInput{
+				ChangeBatch: &route53.ChangeBatch{
+					Changes: route53Changes,
+				},
+				HostedZoneId: hostedZone.Id,
+			}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
+			_, err = cc.Client.TenantCluster.AWS.Route53.ChangeResourceRecordSets(chageRecordSetInput)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
+		}
 	}
 
 	return nil
