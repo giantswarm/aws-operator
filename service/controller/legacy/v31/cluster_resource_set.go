@@ -55,6 +55,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/credential"
 	"github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 const (
@@ -673,7 +674,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.VersionBundleVersion(customObject) == VersionBundle().Version {
+		if key.VersionBundleVersion(customObject) == versionbundle.New().Version {
 			return true
 		}
 
