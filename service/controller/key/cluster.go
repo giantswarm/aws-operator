@@ -115,6 +115,17 @@ func MasterInstanceType(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.Master.InstanceType
 }
 
+func ManagedRecordSets(cluster v1alpha1.Cluster) []string {
+	baseDomain := ClusterBaseDomain(cluster)
+	return []string{
+		fmt.Sprintf("%s", baseDomain),
+		fmt.Sprintf("\\052.%s", baseDomain), // \\052 - `*` wildcard record
+		fmt.Sprintf("api.%s", baseDomain),
+		fmt.Sprintf("etcd.%s", baseDomain),
+		fmt.Sprintf("internal-api.%s", baseDomain),
+	}
+}
+
 func OIDCClientID(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Cluster.OIDC.ClientID
 }
