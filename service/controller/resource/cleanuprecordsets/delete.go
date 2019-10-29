@@ -22,7 +22,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var hostedZones *route53.HostedZonesByNameOutput
+	var hostedZones []*route53.HostedZone
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding hosted zones for tenant cluster %#q", key.ClusterID(&cr)))
 
@@ -56,7 +56,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		resourceRecordSets := o.ResourceRecordSets
 
-		managedRecordSets := key.ManagedRecordSets(&cr)
+		managedRecordSets := key.ManagedRecordSets(cr)
 		route53Changes := []*route53.Change{}
 		for _, rr := range resourceRecordSets {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("looking for non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
@@ -88,7 +88,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			HostedZoneId: hostedZone.Id,
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.Route53.ChangeResourceRecordSets(chageRecordSetInput)
+		_, err = cc.Client.TenantCluster.AWS.Route53.ChangeResourceRecordSets(chageRecordSetInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}

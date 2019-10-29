@@ -22,6 +22,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpccidr"
@@ -307,6 +308,18 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var cleanupRecordSets resource.Interface
+	{
+		c := cleanuprecordsets.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupRecordSets, err = cleanuprecordsets.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cleanupSecurityGroups resource.Interface
 	{
 		c := cleanupsecuritygroups.Config{
@@ -563,6 +576,7 @@ func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.Resourc
 		// on delete events.
 		cleanupEBSVolumesResource,
 		cleanupLoadBalancersResource,
+		cleanupRecordSets,
 		cleanupSecurityGroups,
 	}
 

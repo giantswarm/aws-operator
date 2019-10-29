@@ -1,4 +1,4 @@
-package cleanupsecuritygroups
+package cleanuprecordsets
 
 import (
 	"context"
