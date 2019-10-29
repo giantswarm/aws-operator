@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/server"
 	"github.com/giantswarm/aws-operator/service"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 var (
@@ -97,7 +98,7 @@ func mainE(ctx context.Context) error {
 			Name:           project.Name(),
 			Source:         project.Source(),
 			Version:        project.Version(),
-			VersionBundles: service.NewVersionBundles(),
+			VersionBundles: versionbundle.NewSlice(),
 		}
 
 		newCommand, err = command.New(c)
