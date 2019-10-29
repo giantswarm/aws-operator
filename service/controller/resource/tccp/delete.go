@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/encrypter"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {

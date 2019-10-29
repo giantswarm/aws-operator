@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/encrypter/vault"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it

@@ -11,10 +11,10 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/detection"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/detection"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/encrypter"
 )
 
 const (

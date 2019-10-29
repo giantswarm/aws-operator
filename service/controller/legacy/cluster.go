@@ -18,10 +18,10 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	v31adapter "github.com/giantswarm/aws-operator/service/controller/internal/adapter"
+	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	v31 "github.com/giantswarm/aws-operator/service/controller/legacy/v31"
-	v31adapter "github.com/giantswarm/aws-operator/service/controller/legacy/v31/adapter"
-	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/legacy/v31/cloudconfig"
 
 	"github.com/giantswarm/aws-operator/service/network"
 )
