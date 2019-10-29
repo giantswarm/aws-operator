@@ -11,6 +11,7 @@ const (
 	tagName         = "Name"
 	tagOrganization = "giantswarm.io/organization"
 	tagStackName    = "aws:cloudformation:stack-name"
+	tagStack        = "giantswarm.io/stack"
 )
 
 const (

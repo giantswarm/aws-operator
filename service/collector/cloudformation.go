@@ -1,14 +1,17 @@
 package collector
 
 import (
-	"strings"
-
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
+)
+
+const (
+	labelStackType   = "stack_type"
+	labelAccountType = "account_type"
 )
 
 const (
@@ -28,7 +31,7 @@ var (
 			labelInstallation,
 			labelName,
 			labelOrganization,
-			labelStack,
+			labelStackType,
 			labelState,
 		},
 		nil,
@@ -124,7 +127,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 	accountType := "" // TODO: specify if its tenant-cluster or control plane account
 
 	for _, stack := range o.Stacks {
-		var cluster, installation, name, organization, stackName string
+		var cluster, installation, name, organization, stackType string
 
 		for _, tag := range stack.Tags {
 			switch *tag.Key {
@@ -136,8 +139,8 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 				name = *tag.Value
 			case tagOrganization:
 				organization = *tag.Value
-			case tagStackName:
-				stackName = *tag.Value
+			case tagStack:
+				stackType = *tag.Value
 			}
 		}
 
@@ -145,7 +148,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			continue
 		}
 
-		if !isStackNameFmt(stackName) {
+		if !isOwnStack(stackType) {
 			continue
 		}
 
@@ -160,7 +163,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			installation,
 			name,
 			organization,
-			stackName,
+			stackType,
 			*stack.StackStatus,
 		)
 	}
@@ -168,8 +171,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 	return nil
 }
 
-// Check if the input stack name follows fmt standard
-func isStackNameFmt(StackName string) bool {
-	return strings.HasPrefix(StackName, "cluster-") &&
-		strings.HasSuffix(StackName, "-tccp") || strings.HasSuffix(StackName, "-tccpf") || strings.HasSuffix(StackName, "-tccpi") || strings.Contains(StackName, "-tcnp-") || strings.Contains(StackName, "-tcnpf-")
+// Check if the input stack is our own by checking the name of the stack type
+func isOwnStack(StackType string) bool {
+	return StackType == "tccp" || StackType == "tccpf" || StackType == "tccpi" || StackType == "tcnp" || StackType == "tcnpf"
 }
