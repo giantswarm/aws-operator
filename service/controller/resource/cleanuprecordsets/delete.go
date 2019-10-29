@@ -86,14 +86,14 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		if len(route53Changes) > 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleteting non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
 
-			chageRecordSetInput := &route53.ChangeResourceRecordSetsInput{
+			changeRecordSetInput := &route53.ChangeResourceRecordSetsInput{
 				ChangeBatch: &route53.ChangeBatch{
 					Changes: route53Changes,
 				},
 				HostedZoneId: hostedZone.Id,
 			}
 
-			_, err = cc.Client.TenantCluster.AWS.Route53.ChangeResourceRecordSets(chageRecordSetInput)
+			_, err = cc.Client.TenantCluster.AWS.Route53.ChangeResourceRecordSets(changeRecordSetInput)
 			if err != nil {
 				return microerror.Mask(err)
 			}
