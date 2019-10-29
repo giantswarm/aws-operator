@@ -1,4 +1,4 @@
-package v31
+package controller
 
 import (
 	"github.com/giantswarm/microerror"
@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 )
 
-func newEncrypterObject(getter EncrypterConfigGetter) (encrypter.Interface, error) {
+func newEncrypterObject(getter encrypterConfigGetter) (encrypter.Interface, error) {
 	if getter.GetEncrypterBackend() == encrypter.VaultBackend {
 		c := &vault.EncrypterConfig{
 			Logger: getter.GetLogger(),
@@ -42,7 +42,7 @@ func newEncrypterObject(getter EncrypterConfigGetter) (encrypter.Interface, erro
 	return nil, microerror.Maskf(invalidConfigError, "unknown encrypter backend %q", getter.GetEncrypterBackend())
 }
 
-func newEncrypterRoleManager(getter EncrypterConfigGetter) (encrypter.RoleManager, error) {
+func newEncrypterRoleManager(getter encrypterConfigGetter) (encrypter.RoleManager, error) {
 	if getter.GetEncrypterBackend() == encrypter.VaultBackend {
 		c := &vault.EncrypterConfig{
 			Logger: getter.GetLogger(),

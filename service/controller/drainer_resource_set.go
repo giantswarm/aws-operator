@@ -1,4 +1,4 @@
-package v31
+package controller
 
 import (
 	"context"
@@ -20,9 +20,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
-type DrainerResourceSetConfig struct {
+type drainerResourceSetConfig struct {
 	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
@@ -34,7 +35,7 @@ type DrainerResourceSetConfig struct {
 	Route53Enabled bool
 }
 
-func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.ResourceSet, error) {
+func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var asgStatusResource resource.Interface
@@ -126,7 +127,7 @@ func NewDrainerResourceSet(config DrainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == versionbundle.New().Version {
 			return true
 		}
 

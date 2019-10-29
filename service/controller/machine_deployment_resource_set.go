@@ -1,4 +1,4 @@
-package v31
+package controller
 
 import (
 	"context"
@@ -37,9 +37,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
+	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
-func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
+func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var encrypterObject encrypter.Interface
@@ -457,7 +458,7 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == VersionBundle().Version {
+		if key.OperatorVersion(&cr) == versionbundle.New().Version {
 			return true
 		}
 
