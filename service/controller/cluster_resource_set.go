@@ -1,4 +1,4 @@
-package v31
+package controller
 
 import (
 	"context"
@@ -65,7 +65,7 @@ const (
 	minAllocatedSubnetMaskBits = 16
 )
 
-type ClusterResourceSetConfig struct {
+type clusterResourceSetConfig struct {
 	CertsSearcher          certs.Interface
 	ControlPlaneAWSClients aws.Clients
 	CMAClient              clientset.Interface
@@ -101,7 +101,7 @@ type ClusterResourceSetConfig struct {
 	VPCPeerID                  string
 }
 
-func NewClusterResourceSet(config ClusterResourceSetConfig) (*controller.ResourceSet, error) {
+func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	if config.G8sClient == nil {
