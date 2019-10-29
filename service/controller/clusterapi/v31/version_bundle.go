@@ -18,6 +18,11 @@ func VersionBundle() versionbundle.Bundle {
 				Description: "Add Route53Manager IAM role for external-dns managed app.",
 				Kind:        versionbundle.KindAdded,
 			},
+			{
+				Component:   "clusterapi",
+				Description: "Add cleanuprecordsets resource to cleanup non-managed route53 records.",
+				Kind:        versionbundle.KindAdded,
+			},
 		},
 		Components: []versionbundle.Component{
 			{
