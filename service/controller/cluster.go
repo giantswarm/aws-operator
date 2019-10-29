@@ -18,8 +18,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	v31adapter "github.com/giantswarm/aws-operator/service/controller/internal/adapter"
-	v31cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 
 	"github.com/giantswarm/aws-operator/service/network"
@@ -213,7 +213,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV31 *controller.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
 		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
@@ -233,12 +233,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: v31adapter.APIWhitelist{
-				Private: v31adapter.Whitelist{
+			APIWhitelist: adapter.APIWhitelist{
+				Private: adapter.Whitelist{
 					Enabled:    config.APIWhitelist.Private.Enabled,
 					SubnetList: config.APIWhitelist.Private.SubnetList,
 				},
-				Public: v31adapter.Whitelist{
+				Public: adapter.Whitelist{
 					Enabled:    config.APIWhitelist.Public.Enabled,
 					SubnetList: config.APIWhitelist.Public.SubnetList,
 				},
@@ -256,7 +256,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			OIDC: v31cloudconfig.OIDCConfig{
+			OIDC: cloudconfig.OIDCConfig{
 				ClientID:      config.OIDC.ClientID,
 				IssuerURL:     config.OIDC.IssuerURL,
 				UsernameClaim: config.OIDC.UsernameClaim,
@@ -270,14 +270,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VPCPeerID:      config.VPCPeerID,
 		}
 
-		resourceSetV31, err = newClusterResourceSet(c)
+		resourceSet, err = newClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV31,
+		resourceSet,
 	}
 
 	return resourceSets, nil
