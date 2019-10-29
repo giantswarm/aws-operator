@@ -6,8 +6,8 @@ import (
 
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/service/controller/internal/templates"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/templates"
 )
 
 type GuestLaunchConfigAdapter struct {

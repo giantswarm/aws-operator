@@ -15,7 +15,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 )
 
 func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {

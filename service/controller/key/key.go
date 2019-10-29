@@ -12,8 +12,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/templates/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v31/templates/cloudformation/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudformation/tccp"
 )
 
 const (
@@ -732,7 +732,7 @@ func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
 		NOTE 2: You also need to update the tests.
 
 		service/controller/key/key_test.go
-		service/controller/legacy/v31/adapter/adapter_test.go
+		service/controller/internal/adapter/adapter_test.go
 		service/controller/resource/cloudformation/main_stack_test.go
 
 		Current Release: CoreOS Container Linux stable 2191.5.0 (HVM)
