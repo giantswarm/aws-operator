@@ -1,4 +1,4 @@
-package encryption
+package tccpencryption
 
 import (
 	"context"
@@ -8,16 +8,12 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := r.toClusterFunc(obj)
-	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-		return nil
-	} else if err != nil {
+	cr, err := key.ToCluster(obj)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)

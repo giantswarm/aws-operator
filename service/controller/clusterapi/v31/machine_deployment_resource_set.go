@@ -13,17 +13,16 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpccidr"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -35,6 +34,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 )
@@ -188,15 +188,15 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var encryptionResource resource.Interface
+	var tcnpEncryptionResource resource.Interface
 	{
-		c := encryption.Config{
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+		c := tcnpencryption.Config{
+			CMAClient: config.CMAClient,
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
 		}
 
-		encryptionResource, err = encryption.New(c)
+		tcnpEncryptionResource, err = tcnpencryption.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -421,10 +421,10 @@ func NewMachineDeploymentResourceSet(config MachineDeploymentResourceSetConfig) 
 		tcnpASGStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
+		tcnpEncryptionResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
-		encryptionResource,
 		s3ObjectResource,
 		ipamResource,
 		tcnpResource,
