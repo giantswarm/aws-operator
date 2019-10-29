@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	labelStackType   = "stack_type"
-	labelAccountType = "account_type"
+	labelStackType = "stack_type"
 )
 
 const (
@@ -25,7 +24,6 @@ var (
 		"CloudFormation information.",
 		[]string{
 			labelAccountID,
-			labelAccountType,
 			labelCluster,
 			labelID,
 			labelInstallation,
@@ -124,7 +122,6 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	accountType := "" // TODO: specify if its tenant-cluster or control plane account
 
 	for _, stack := range o.Stacks {
 		var cluster, installation, name, organization, stackType string
@@ -157,7 +154,6 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			prometheus.GaugeValue,
 			GaugeValue,
 			accountID,
-			accountType,
 			cluster,
 			*stack.StackId,
 			installation,

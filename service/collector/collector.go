@@ -17,7 +17,6 @@ const (
 const (
 	labelAccount      = "account"
 	labelAccountID    = "account_id"
-	labelAccountType  = "account_type"
 	labelCluster      = "cluster_id"
 	labelName         = "name"
 	labelInstallation = "installation"
