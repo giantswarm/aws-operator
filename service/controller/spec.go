@@ -1,8 +1,8 @@
-package v31
+package controller
 
 import "github.com/giantswarm/micrologger"
 
-type EncrypterConfigGetter interface {
+type encrypterConfigGetter interface {
 	GetEncrypterBackend() string
 	GetInstallationName() string
 	GetLogger() micrologger.Logger
