@@ -3,9 +3,9 @@ package v31
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter/kms"
-	"github.com/giantswarm/aws-operator/service/controller/clusterapi/v31/encrypter/vault"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 )
 
 func newEncrypterObject(getter EncrypterConfigGetter) (encrypter.Interface, error) {
