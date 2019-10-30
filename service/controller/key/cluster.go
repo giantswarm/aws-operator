@@ -115,6 +115,17 @@ func MasterInstanceType(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Provider.Master.InstanceType
 }
 
+func ManagedRecordSets(cluster v1alpha1.Cluster) []string {
+	tcBaseDomain := TenantClusterBaseDomain(cluster)
+	return []string{
+		fmt.Sprintf("%s.", tcBaseDomain),
+		fmt.Sprintf("\\052.%s.", tcBaseDomain), // \\052 - `*` wildcard record
+		fmt.Sprintf("api.%s.", tcBaseDomain),
+		fmt.Sprintf("etcd.%s.", tcBaseDomain),
+		fmt.Sprintf("internal-api.%s.", tcBaseDomain),
+	}
+}
+
 func OIDCClientID(cluster v1alpha1.Cluster) string {
 	return clusterProviderSpec(cluster).Cluster.OIDC.ClientID
 }
@@ -158,6 +169,10 @@ func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
 
 func TargetLogBucketName(cluster v1alpha1.Cluster) string {
 	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
+}
+
+func TenantClusterBaseDomain(cluster v1alpha1.Cluster) string {
+	return fmt.Sprintf("%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
 func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
