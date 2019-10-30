@@ -81,7 +81,7 @@ var stackNotFoundError = &microerror.Error{
 }
 
 // IsStackNotFound asserts stackNotFoundError.
-// Copied from service/controller/v17/cloudformation/error.go.
+// Copied from service/controller/internal/cloudformation/error.go.
 func IsStackNotFound(err error) bool {
 	if err == nil {
 		return false
@@ -96,7 +96,6 @@ func IsStackNotFound(err error) bool {
 	}
 
 	return false
-
 }
 
 var stillExistsError = &microerror.Error{
