@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	Name = "ipamv31"
+	Name = "ipam"
 )
 
 const (

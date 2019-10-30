@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Name = "tccpsecuritygroupsv31"
+	Name = "tccpsecuritygroups"
 )
 
 type Config struct {

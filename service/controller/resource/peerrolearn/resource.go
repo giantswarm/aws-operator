@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "peerrolearnv31"
+	Name = "peerrolearn"
 )
 
 type Config struct {

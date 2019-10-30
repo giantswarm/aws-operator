@@ -36,6 +36,12 @@ func New() versionbundle.Bundle {
 			{
 				Component:   "kubernetes",
 				Description: "Updated from v1.14.6 to v1.15.5.",
+				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "clusterapi",
+				Description: "Add cleanuprecordsets resource to cleanup non-managed route53 records.",
+				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{

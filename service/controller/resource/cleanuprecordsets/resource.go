@@ -1,4 +1,4 @@
-package cleanupebsvolumes
+package cleanuprecordsets
 
 import (
 	"github.com/giantswarm/microerror"
@@ -6,31 +6,27 @@ import (
 )
 
 const (
-	// Name is the identifier of the resource.
-	Name = "cleanupebsvolumes"
+	Name = "cleanuprecordsetsv31"
 )
 
-// Config represents the configuration used to create a new ebsvolume resource.
 type Config struct {
 	Logger micrologger.Logger
 }
 
-// Resource implements the ebsvolume resource.
 type Resource struct {
 	logger micrologger.Logger
 }
 
-// New creates a new configured ebsvolume resource.
 func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	newResource := &Resource{
+	r := &Resource{
 		logger: config.Logger,
 	}
 
-	return newResource, nil
+	return r, nil
 }
 
 func (r *Resource) Name() string {

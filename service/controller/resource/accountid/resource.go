@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Name = "accountidv31"
+	Name = "accountid"
 )
 
 type Config struct {

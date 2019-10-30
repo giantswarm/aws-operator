@@ -9,7 +9,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "endpointsv31"
+	Name = "endpoints"
 )
 
 const (
