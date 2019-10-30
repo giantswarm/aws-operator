@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	name = "bridgezonev31"
+	name = "bridgezone"
 )
 
 type Config struct {
