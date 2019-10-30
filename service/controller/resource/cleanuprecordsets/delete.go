@@ -24,7 +24,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 	var hostedZones []*route53.HostedZone
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding hosted zones for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding hosted zones")
 
 		hostedZonesInput := &route53.ListHostedZonesByNameInput{}
 
@@ -39,13 +39,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			if *zone.Name == baseDomain {
 				hostedZones = append(hostedZones, zone)
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found hosted zones for tenant cluster %#q", key.ClusterID(&cr)))
+				r.logger.LogCtx(ctx, "level", "debug", "message", "found hosted zones")
 			}
 		}
 	}
 
 	for _, hostedZone := range hostedZones {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding record sets in hosted zone %#q", *hostedZone.Id))
 
 		recordSetsInput := &route53.ListResourceRecordSetsInput{
 			HostedZoneId: hostedZone.Id,
@@ -61,7 +61,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		managedRecordSets := key.ManagedRecordSets(cr)
 		route53Changes := []*route53.Change{}
 		for _, rr := range resourceRecordSets {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("looking for non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("looking for non-managed record sets in hosted zone %#q", *hostedZone.Id))
 
 			if !stringInSlice(*rr.Name, managedRecordSets) {
 				route53Change := &route53.Change{
@@ -79,12 +79,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 				route53Changes = append(route53Changes, route53Change)
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found non-managed record set %#q in hosted zone %#q for tenant cluster %#q", *rr.Name, *hostedZone.Id, key.ClusterID(&cr)))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found non-managed record set %#q in hosted zone %#q", *rr.Name, *hostedZone.Id))
 			}
 		}
 
 		if len(route53Changes) > 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleteting non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleteting non-managed record sets in hosted zone %#q", *hostedZone.Id))
 
 			changeRecordSetInput := &route53.ChangeResourceRecordSetsInput{
 				ChangeBatch: &route53.ChangeBatch{
@@ -98,7 +98,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted non-managed record sets in hosted zone %#q for tenant cluster %#q", *hostedZone.Id, key.ClusterID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted non-managed record sets in hosted zone %#q", *hostedZone.Id))
 		}
 	}
 
