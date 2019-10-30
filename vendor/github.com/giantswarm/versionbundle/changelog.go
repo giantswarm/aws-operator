@@ -55,6 +55,9 @@ type Changelog struct {
 	// Kind is a machine readable type describing what kind of changelog the
 	// changelog actually is. Also see the kind type.
 	Kind kind `json:"kind" yaml:"kind"`
+	// URLs is a list of links which contain additional information to the
+	// changelog entry such as upstream changelogs or pull requests.
+	URLs []string `json:"urls" yaml:"urls"`
 }
 
 func (c Changelog) String() string {
