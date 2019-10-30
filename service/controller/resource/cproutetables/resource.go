@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "cproutetablesv31"
+	Name = "cproutetables"
 )
 
 type Config struct {

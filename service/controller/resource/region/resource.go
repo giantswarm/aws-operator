@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	Name = "regionv31"
+	Name = "region"
 )
 
 type Config struct {

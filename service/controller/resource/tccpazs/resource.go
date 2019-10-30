@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	Name = "tccpazsv31"
+	Name = "tccpazs"
 )
 
 type Config struct {

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	name = "tcnpencryptionv31"
+	name = "tcnpencryption"
 )
 
 type Config struct {
