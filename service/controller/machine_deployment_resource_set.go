@@ -371,7 +371,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		c := cpvpccidr.Config{
 			Logger: config.Logger,
 
-			VPCPeerID: config.VPCPeerID,
+			InstallationName: config.InstallationName,
 		}
 
 		cpVPCCIDRResource, err = cpvpccidr.New(c)

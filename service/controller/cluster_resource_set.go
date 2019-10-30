@@ -534,7 +534,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := cpvpccidr.Config{
 			Logger: config.Logger,
 
-			VPCPeerID: config.VPCPeerID,
+			InstallationName: config.InstallationName,
 		}
 
 		vpcCIDRResource, err = cpvpccidr.New(c)
