@@ -254,15 +254,7 @@ func baseRoleARN(getter LabelsGetter, region string, accountID string, kind stri
 // CoreOS Container Linux stable 2135.4.0. AMI IDs are copied from the following
 // resource.
 //
-// Current Release: CoreOS Container Linux stable 2191.5.0 (HVM)
-// AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt.
-//
-// Script to parse AMIs (Python 3):
-//
-// import urllib.request
-// url='https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt'
-// a=urllib.request.urlopen(url).read()
-// print(',\n'.join(['"'+'":"'.join(i.split('='))+'"' for i in a.decode('utf-8').strip().split('|')])+',')
+//     https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.
 //
 func imageIDs() map[string]string {
 	return map[string]string{
