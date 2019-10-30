@@ -25,7 +25,7 @@ import (
 
 const (
 	provider       = "aws"
-	bastionEnabled = false
+	bastionEnabled = true
 )
 
 func Setup(m *testing.M, config Config) {
