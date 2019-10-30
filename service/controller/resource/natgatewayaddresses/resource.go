@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	Name = "natgatewayaddressesv31"
+	Name = "natgatewayaddresses"
 )
 
 type Config struct {

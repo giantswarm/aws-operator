@@ -12,7 +12,7 @@ import (
 
 const (
 	// Name is the identifier of the resource.
-	Name = "s3bucketv31"
+	Name = "s3bucket"
 	// LifecycleLoggingBucketID is the Lifecycle ID for the logging bucket
 	LifecycleLoggingBucketID = "ExpirationLogs"
 )

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "routetablev31"
+	Name = "routetable"
 )
 
 type Config struct {
