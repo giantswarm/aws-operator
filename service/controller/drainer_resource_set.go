@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
@@ -20,7 +21,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/credential"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 type drainerResourceSetConfig struct {
@@ -123,7 +123,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.VersionBundleVersion(customObject) == versionbundle.New().Version {
+		if key.VersionBundleVersion(customObject) == project.BundleVersion() {
 			return true
 		}
 

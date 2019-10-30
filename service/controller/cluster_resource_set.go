@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
@@ -55,7 +56,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/vpccidr"
 	"github.com/giantswarm/aws-operator/service/credential"
 	"github.com/giantswarm/aws-operator/service/network"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 const (
@@ -674,7 +674,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.VersionBundleVersion(customObject) == versionbundle.New().Version {
+		if key.VersionBundleVersion(customObject) == project.BundleVersion() {
 			return true
 		}
 
