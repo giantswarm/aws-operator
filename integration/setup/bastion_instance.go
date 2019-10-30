@@ -216,7 +216,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 					},
 				},
 			},
-			UserData: aws.String(base64.StdEncoding.EncodeToString([]byte(userData))),
+			UserData: aws.String([]byte(userData)),
 		}
 
 		_, err := config.AWSClient.EC2.RunInstances(i)
@@ -447,6 +447,8 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
+	fmt.Println("userData", userDataJSON)
 
 	return base64.StdEncoding.EncodeToString(userDataJSON), nil
 }
