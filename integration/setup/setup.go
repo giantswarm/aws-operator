@@ -24,7 +24,8 @@ import (
 )
 
 const (
-	provider = "aws"
+	provider       = "aws"
+	bastionEnabled = false
 )
 
 func Setup(m *testing.M, config Config) {
@@ -42,25 +43,27 @@ func Setup(m *testing.M, config Config) {
 	{
 		g, ctx := errgroup.WithContext(ctx)
 
-		g.Go(func() error {
-			o := func() error {
-				//err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
-				//if err != nil {
-				//	return microerror.Mask(err)
-				//}
+		if bastionEnabled {
+			g.Go(func() error {
+				o := func() error {
+					err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+
+					return nil
+				}
+				b := backoff.NewMaxRetries(10, 1*time.Minute)
+				n := backoff.NewNotifier(config.Logger, ctx)
+
+				err := backoff.RetryNotify(o, b, n)
+				if err != nil {
+					config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
+				}
 
 				return nil
-			}
-			b := backoff.NewMaxRetries(10, 1*time.Minute)
-			n := backoff.NewNotifier(config.Logger, ctx)
-
-			err := backoff.RetryNotify(o, b, n)
-			if err != nil {
-				config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
-			}
-
-			return nil
-		})
+			})
+		}
 
 		g.Go(func() error {
 			if v == 0 && config.UseDefaultTenant {
@@ -88,25 +91,27 @@ func Setup(m *testing.M, config Config) {
 	if !env.KeepResources() {
 		g, ctx := errgroup.WithContext(ctx)
 
-		g.Go(func() error {
-			o := func() error {
-				//err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
-				//if err != nil {
-				//	return microerror.Mask(err)
-				//}
+		if bastionEnabled {
+			g.Go(func() error {
+				o := func() error {
+					err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+
+					return nil
+				}
+				b := backoff.NewMaxRetries(10, 1*time.Minute)
+				n := backoff.NewNotifier(config.Logger, ctx)
+
+				err := backoff.RetryNotify(o, b, n)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 
 				return nil
-			}
-			b := backoff.NewMaxRetries(10, 1*time.Minute)
-			n := backoff.NewNotifier(config.Logger, ctx)
-
-			err := backoff.RetryNotify(o, b, n)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			return nil
-		})
+			})
+		}
 
 		g.Go(func() error {
 			if config.UseDefaultTenant {
