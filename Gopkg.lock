@@ -413,7 +413,7 @@
   packages = [
     "ignition/v_2_2_0",
     "v_4_7_0",
-    "v_4_8_0",
+    "v_4_9_0",
   ]
   pruneopts = "T"
   revision = "da54fee63eddac1f8c2db21a1b83bf060f759431"
@@ -2023,7 +2023,7 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8scloudconfig/v_4_7_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_8_0",
+    "github.com/giantswarm/k8scloudconfig/v_4_9_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
