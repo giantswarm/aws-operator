@@ -132,7 +132,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var v31ResourceSet *controller.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
 		c := drainerResourceSetConfig{
 			CMAClient:              config.CMAClient,
@@ -146,14 +146,14 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		v31ResourceSet, err = newDrainerResourceSet(c)
+		resourceSet, err = newDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		v31ResourceSet,
+		resourceSet,
 	}
 
 	return resourceSets, nil

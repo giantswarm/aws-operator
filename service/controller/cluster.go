@@ -20,7 +20,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	v31adapter "github.com/giantswarm/aws-operator/service/controller/internal/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/locker"
 )
@@ -213,7 +213,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var resourceSetV31 *controller.ResourceSet
+	var resourceSet *controller.ResourceSet
 	{
 		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
@@ -228,12 +228,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: v31adapter.APIWhitelist{
-				Private: v31adapter.Whitelist{
+			APIWhitelist: adapter.APIWhitelist{
+				Private: adapter.Whitelist{
 					Enabled:    config.APIWhitelist.Private.Enabled,
 					SubnetList: config.APIWhitelist.Private.SubnetList,
 				},
-				Public: v31adapter.Whitelist{
+				Public: adapter.Whitelist{
 					Enabled:    config.APIWhitelist.Public.Enabled,
 					SubnetList: config.APIWhitelist.Public.SubnetList,
 				},
@@ -265,14 +265,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			VPCPeerID:                  config.VPCPeerID,
 		}
 
-		resourceSetV31, err = newClusterResourceSet(c)
+		resourceSet, err = newClusterResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	resourceSets := []*controller.ResourceSet{
-		resourceSetV31,
+		resourceSet,
 	}
 
 	return resourceSets, nil

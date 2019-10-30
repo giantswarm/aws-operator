@@ -18,12 +18,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/afero"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/integration/env"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/key"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
