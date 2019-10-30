@@ -51,11 +51,6 @@ func mainE(ctx context.Context) error {
 				Flag:   f,
 				Logger: logger,
 				Viper:  v,
-
-				Description: project.Description(),
-				GitCommit:   project.GitSHA(),
-				Source:      project.Source(),
-				Version:     project.Version(),
 			}
 
 			newService, err = service.New(c)
