@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/statusresource"
+	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -25,7 +26,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/locker"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 // Config represents the configuration used to create a new service.
@@ -317,7 +317,7 @@ func New(config Config) (*Service, error) {
 			Name:           project.Name(),
 			Source:         project.Source(),
 			Version:        project.Version(),
-			VersionBundles: versionbundle.NewSlice(),
+			VersionBundles: []versionbundle.Bundle{project.NewVersionBundle()},
 		}
 
 		versionService, err = version.New(c)
