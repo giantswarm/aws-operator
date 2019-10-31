@@ -21,7 +21,7 @@ const (
 var (
 	cloudFormationStackDesc = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, subsystemCloudFormation, "info"),
-		"CloudFormation information.",
+		"Metrics for Cloud Formation Stack statuses.",
 		[]string{
 			labelAccountID,
 			labelCluster,
