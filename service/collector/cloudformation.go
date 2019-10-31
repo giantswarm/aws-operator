@@ -2,11 +2,13 @@ package collector
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
+
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -169,5 +171,5 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 
 // Check if the input stack is our own by checking the name of the stack type
 func isOwnStack(StackType string) bool {
-	return StackType == "tccp" || StackType == "tccpf" || StackType == "tccpi" || StackType == "tcnp" || StackType == "tcnpf"
+	return StackType == key.StackTCCP || StackType == key.StackTCCPF || StackType == key.StackTCCPI || StackType == key.StackTCNP || StackType == key.StackTCNPF
 }
