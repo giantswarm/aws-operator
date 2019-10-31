@@ -1,8 +1,9 @@
 package versionbundle
 
 import (
-	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/versionbundle"
+
+	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
 func New() versionbundle.Bundle {
@@ -42,6 +43,11 @@ func New() versionbundle.Bundle {
 				Component:   "clusterapi",
 				Description: "Add cleanuprecordsets resource to cleanup non-managed route53 records.",
 				Kind:        versionbundle.KindAdded,
+			},
+			{
+				Component:   "nodepools",
+				Description: "Add Node Pools functionality. See https://docs.giantswarm.io/basics/nodepools/ for details.",
+				Kind:        versionbundle.KindChanged,
 			},
 		},
 		Components: []versionbundle.Component{
