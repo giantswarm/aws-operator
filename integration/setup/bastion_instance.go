@@ -169,7 +169,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating bastion instance")
 
 		i := &ec2.RunInstancesInput{
-			ImageId:      aws.String("ami-015e6cb33a709348e"),
+			ImageId:      aws.String("ami-038cea5071a5ee580"),
 			InstanceType: aws.String("t2.micro"),
 			MaxCount:     aws.Int64(1),
 			MinCount:     aws.Int64(1),
