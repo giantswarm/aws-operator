@@ -20,7 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
-	"github.com/giantswarm/aws-operator/service/credential"
+	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
 
 type drainerResourceSetConfig struct {

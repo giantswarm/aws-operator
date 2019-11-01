@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/giantswarm/aws-operator/service/locker"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 )
