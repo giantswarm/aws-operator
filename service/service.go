@@ -155,12 +155,12 @@ func New(config Config) (*Service, error) {
 			K8sExtClient:     k8sExtClient,
 			Logger:           config.Logger,
 			NetworkAllocator: legacyNetworkAllocator,
-			APIWhitelist: controller.FrameworkConfigAPIWhitelist{
-				Private: controller.FrameworkConfigAPIWhitelistConfig{
+			APIWhitelist: controller.ClusterConfigAPIWhitelist{
+				Private: controller.ClusterConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
 				},
-				Public: controller.FrameworkConfigAPIWhitelistConfig{
+				Public: controller.ClusterConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList),
 				},
