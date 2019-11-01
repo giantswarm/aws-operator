@@ -12,7 +12,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
-	"github.com/giantswarm/aws-operator/service/locker"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type clusterResourceSetConfig struct {
