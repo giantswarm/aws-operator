@@ -2,8 +2,6 @@ package project
 
 import (
 	"github.com/giantswarm/versionbundle"
-
-	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
 func NewVersionBundle() versionbundle.Bundle {
