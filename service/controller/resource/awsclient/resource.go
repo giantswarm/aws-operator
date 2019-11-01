@@ -10,7 +10,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/credential"
+	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
 
 const (

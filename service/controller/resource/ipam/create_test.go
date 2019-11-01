@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/giantswarm/aws-operator/service/locker"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
