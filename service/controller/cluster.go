@@ -35,7 +35,7 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               FrameworkConfigAPIWhitelist
+	APIWhitelist               ClusterConfigAPIWhitelist
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
@@ -81,14 +81,14 @@ type ClusterConfigOIDC struct {
 	GroupsClaim   string
 }
 
-// FrameworkConfigAPIWhitelist defines guest cluster k8s API whitelisting types.
-type FrameworkConfigAPIWhitelist struct {
-	Private FrameworkConfigAPIWhitelistConfig
-	Public  FrameworkConfigAPIWhitelistConfig
+// ClusterConfigAPIWhitelist defines guest cluster k8s API whitelisting types.
+type ClusterConfigAPIWhitelist struct {
+	Private ClusterConfigAPIWhitelistConfig
+	Public  ClusterConfigAPIWhitelistConfig
 }
 
-// FrameworkConfigAPIWhitelistConfig defines guest cluster k8s API whitelisting.
-type FrameworkConfigAPIWhitelistConfig struct {
+// ClusterConfigAPIWhitelistConfig defines guest cluster k8s API whitelisting.
+type ClusterConfigAPIWhitelistConfig struct {
 	Enabled    bool
 	SubnetList string
 }
