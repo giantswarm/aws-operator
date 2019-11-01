@@ -65,7 +65,7 @@ func NewVersionBundle() versionbundle.Bundle {
 				Version: "1.15.5",
 			},
 		},
-		Name:    project.Name(),
+		Name:    Name(),
 		Version: BundleVersion(),
 	}
 }
