@@ -21,7 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/internal/network"
 )
 
 type ClusterConfig struct {

@@ -25,8 +25,8 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/locker"
-	legacynetwork "github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/network"
 )
 
 // Config represents the configuration used to create a new service.
@@ -128,14 +128,14 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var legacyNetworkAllocator legacynetwork.Allocator
+	var legacyNetworkAllocator network.Allocator
 	{
-		c := legacynetwork.Config{
+		c := network.Config{
 			Locker: kubeLockLocker,
 			Logger: config.Logger,
 		}
 
-		legacyNetworkAllocator, err = legacynetwork.New(c)
+		legacyNetworkAllocator, err = network.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

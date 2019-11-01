@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/accountid"
+	"github.com/giantswarm/aws-operator/service/internal/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 

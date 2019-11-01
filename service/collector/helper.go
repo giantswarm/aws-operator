@@ -10,8 +10,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/accountid"
-	"github.com/giantswarm/aws-operator/service/credential"
+	"github.com/giantswarm/aws-operator/service/internal/accountid"
+	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
 
 type helperConfig struct {
