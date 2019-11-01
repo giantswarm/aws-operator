@@ -150,12 +150,12 @@ func New(config Config) (*Service, error) {
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
-			APIWhitelist: controller.FrameworkConfigAPIWhitelist{
-				Private: controller.FrameworkConfigAPIWhitelistConfig{
+			APIWhitelist: controller.ClusterConfigAPIWhitelist{
+				Private: controller.ClusterConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
 				},
-				Public: controller.FrameworkConfigAPIWhitelistConfig{
+				Public: controller.ClusterConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
 			},
