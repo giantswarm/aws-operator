@@ -14,13 +14,13 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 type drainerResourceSetConfig struct {
@@ -127,7 +127,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == versionbundle.New().Version {
+		if key.OperatorVersion(&cr) == project.BundleVersion() {
 			return true
 		}
 

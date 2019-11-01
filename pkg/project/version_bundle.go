@@ -1,12 +1,10 @@
-package versionbundle
+package project
 
 import (
 	"github.com/giantswarm/versionbundle"
-
-	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
-func New() versionbundle.Bundle {
+func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
@@ -52,13 +50,7 @@ func New() versionbundle.Bundle {
 				Version: "1.15.5",
 			},
 		},
-		Name:    project.Name(),
-		Version: project.BundleVersion(),
-	}
-}
-
-func NewSlice() []versionbundle.Bundle {
-	return []versionbundle.Bundle{
-		New(),
+		Name:    Name(),
+		Version: BundleVersion(),
 	}
 }

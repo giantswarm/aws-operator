@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
@@ -37,7 +38,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -458,7 +458,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == versionbundle.New().Version {
+		if key.OperatorVersion(&cr) == project.BundleVersion() {
 			return true
 		}
 
