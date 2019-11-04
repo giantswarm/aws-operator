@@ -7,13 +7,13 @@ import (
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/server"
 	"github.com/giantswarm/aws-operator/service"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 var (
@@ -92,7 +92,7 @@ func mainE(ctx context.Context) error {
 			Name:           project.Name(),
 			Source:         project.Source(),
 			Version:        project.Version(),
-			VersionBundles: versionbundle.NewSlice(),
+			VersionBundles: []versionbundle.Bundle{project.NewVersionBundle()},
 		}
 
 		newCommand, err = command.New(c)

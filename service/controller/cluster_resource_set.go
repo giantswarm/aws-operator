@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
@@ -43,7 +44,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
 )
 
 func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -605,7 +605,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == versionbundle.New().Version {
+		if key.OperatorVersion(&cr) == project.BundleVersion() {
 			return true
 		}
 

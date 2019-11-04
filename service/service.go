@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/statusresource"
+	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -24,8 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/locker"
-	"github.com/giantswarm/aws-operator/service/versionbundle"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 // Config represents the configuration used to create a new service.
@@ -150,12 +150,12 @@ func New(config Config) (*Service, error) {
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
-			APIWhitelist: controller.FrameworkConfigAPIWhitelist{
-				Private: controller.FrameworkConfigAPIWhitelistConfig{
+			APIWhitelist: controller.ClusterConfigAPIWhitelist{
+				Private: controller.ClusterConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
 				},
-				Public: controller.FrameworkConfigAPIWhitelistConfig{
+				Public: controller.ClusterConfigAPIWhitelistConfig{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
 			},
@@ -315,7 +315,7 @@ func New(config Config) (*Service, error) {
 			Name:           project.Name(),
 			Source:         project.Source(),
 			Version:        project.Version(),
-			VersionBundles: versionbundle.NewSlice(),
+			VersionBundles: []versionbundle.Bundle{project.NewVersionBundle()},
 		}
 
 		versionService, err = version.New(c)

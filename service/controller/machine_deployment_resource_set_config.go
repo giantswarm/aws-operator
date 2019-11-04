@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/locker"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type machineDeploymentResourceSetConfig struct {

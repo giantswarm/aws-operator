@@ -19,11 +19,6 @@ const (
 )
 
 const (
-	tagName  = "Name"
-	tagStack = "aws:cloudformation:stack-name"
-)
-
-const (
 	subsystemVPC = "vpc"
 )
 
@@ -140,7 +135,7 @@ func (v *VPC) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				name = *tag.Value
 			case tagOrganization:
 				organization = *tag.Value
-			case tagStack:
+			case tagStackName:
 				stackName = *tag.Value
 			}
 		}

@@ -11,8 +11,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/accountid"
-	"github.com/giantswarm/aws-operator/service/credential"
+	"github.com/giantswarm/aws-operator/service/internal/accountid"
+	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
 
 type helperConfig struct {
