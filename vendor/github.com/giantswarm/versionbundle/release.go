@@ -1,6 +1,7 @@
 package versionbundle
 
 import (
+	"reflect"
 	"sort"
 	"time"
 
@@ -91,7 +92,7 @@ func (r Release) Version() string {
 
 func (r *Release) removeChangelogEntry(clog Changelog) {
 	for i := 0; i < len(r.changelogs); i++ {
-		if clog == r.changelogs[i] {
+		if reflect.DeepEqual(clog, r.changelogs[i]) {
 			r.changelogs = append(r.changelogs[:i], r.changelogs[i+1:]...)
 			break
 		}
