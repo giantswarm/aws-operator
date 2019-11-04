@@ -194,7 +194,6 @@ func New(config Config) (*Service, error) {
 			SSHUserList:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
-			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		clusterapiClusterController, err = controller.NewCluster(c)
@@ -269,7 +268,6 @@ func New(config Config) (*Service, error) {
 			SSHUserList:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
-			VPCPeerID:              config.Viper.GetString(config.Flag.Service.AWS.VPCPeerID),
 		}
 
 		clusterapiMachineDeploymentController, err = controller.NewMachineDeployment(c)

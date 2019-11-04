@@ -22,7 +22,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpccidr"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -366,15 +366,15 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var cpVPCCIDRResource resource.Interface
+	var cpVPCResource resource.Interface
 	{
-		c := cpvpccidr.Config{
+		c := cpvpc.Config{
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
 
-		cpVPCCIDRResource, err = cpvpccidr.New(c)
+		cpVPCResource, err = cpvpc.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -412,7 +412,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		accountIDResource,
 		regionResource,
 		cpRouteTablesResource,
-		cpVPCCIDRResource,
+		cpVPCResource,
 		tccpNATGatewaysResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,

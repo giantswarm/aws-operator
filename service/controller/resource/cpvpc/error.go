@@ -1,4 +1,4 @@
-package cpvpccidr
+package cpvpc
 
 import (
 	"github.com/giantswarm/microerror"
