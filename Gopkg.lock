@@ -562,11 +562,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8c692f26876d709cd28e18f6b0c935b15539097d6dfd5e71af87f12d1f420874"
+  digest = "1:672e0eb4d4982ab6bb53c51a7d874f81267806557cd611149b88e22feaecd494"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
   pruneopts = "UT"
-  revision = "da16c09beea209bff3aff94585f6b8d81eee95e6"
+  revision = "21f4b8d7441e7dc7de8b2db37f712a675cf83a70"
 
 [[projects]]
   digest = "1:2a2e303bb32696f9250d4ba3d8c25c7849a6bff66a13a9f9caf4f34774b5ee51"

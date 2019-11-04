@@ -2,8 +2,8 @@ package versionbundle
 
 import (
 	"encoding/json"
-	"strings"
 
+	"github.com/coreos/go-semver/semver"
 	"github.com/giantswarm/microerror"
 )
 
@@ -26,21 +26,9 @@ func (c Component) Validate() error {
 		return microerror.Maskf(invalidComponentError, "version must not be empty")
 	}
 
-	versionSplit := strings.Split(c.Version, ".")
-	if len(versionSplit) != 3 {
-		return microerror.Maskf(invalidComponentError, "version format must be '<major>.<minor>.<patch>'")
-	}
-
-	if !isPositiveNumber(versionSplit[0]) {
-		return microerror.Maskf(invalidComponentError, "major version must be positive number")
-	}
-
-	if !isPositiveNumber(versionSplit[1]) {
-		return microerror.Maskf(invalidComponentError, "minor version must be positive number")
-	}
-
-	if !isPositiveNumber(versionSplit[2]) {
-		return microerror.Maskf(invalidComponentError, "patch version must be positive number")
+	_, err := semver.NewVersion(c.Version)
+	if err != nil {
+		return microerror.Maskf(invalidComponentError, "version parsing failed with error %#q", err)
 	}
 
 	return nil
