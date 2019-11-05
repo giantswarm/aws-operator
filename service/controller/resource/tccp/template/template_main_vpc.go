@@ -9,6 +9,9 @@ const TemplateMainVPC = `
       CidrBlock: {{ $v.CidrBlock }}
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
+      Tags:
+      - Key: Name
+        Value: {{ $v.ClusterID }}
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
