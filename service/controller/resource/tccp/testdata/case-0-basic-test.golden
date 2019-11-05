@@ -332,55 +332,6 @@ Resources:
       Subnets:
         - !Ref PrivateSubnetEuCentral1b
       
-
-  IngressLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties:
-      ConnectionSettings:
-        IdleTimeout: 60
-      HealthCheck:
-        HealthyThreshold: 2
-        Interval: 5
-        Target: TCP:30011
-        Timeout: 3
-        UnhealthyThreshold: 2
-      Listeners:
-      
-      - InstancePort: 30011
-        InstanceProtocol: TCP
-        LoadBalancerPort: 443
-        Protocol: TCP
-      
-      - InstancePort: 30010
-        InstanceProtocol: TCP
-        LoadBalancerPort: 80
-        Protocol: TCP
-      
-      LoadBalancerName: 8y5ck-ingress
-      Policies:
-      - PolicyName: "EnableProxyProtocol"
-        PolicyType: "ProxyProtocolPolicyType"
-        Attributes:
-        - Name: "ProxyProtocol"
-          Value: "true"
-        InstancePorts:
-        
-        - 30011
-        
-        - 30010
-        
-      Scheme: internet-facing
-      SecurityGroups:
-        - !Ref IngressSecurityGroup
-      Subnets:
-        - !Ref PublicSubnetEuCentral1a
-      
-        - !Ref PublicSubnetEuCentral1b
-      
-        - !Ref PublicSubnetEuCentral1c
-      
   
   NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
@@ -537,28 +488,6 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-master
-  IngressSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-ingress
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        CidrIp: 0.0.0.0/0
-      
-      -
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 0.0.0.0/0
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-ingress
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

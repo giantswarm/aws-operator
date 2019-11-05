@@ -67,16 +67,6 @@ const TemplateMainRecordSets = `
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
-  IngressRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt IngressLoadBalancer.DNSName
-        HostedZoneId: !GetAtt IngressLoadBalancer.CanonicalHostedZoneNameID
-        EvaluateTargetHealth: false
-      Name: 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
-      HostedZoneId: !Ref 'HostedZone'
-      Type: A
   IngressWildcardRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -85,7 +75,7 @@ const TemplateMainRecordSets = `
       TTL: '300'
       Type: CNAME
       ResourceRecords:
-        - !Ref 'IngressRecordSet'
+        - 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
 {{- end -}}
 {{- end -}}
 `
