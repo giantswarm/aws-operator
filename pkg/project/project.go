@@ -1,7 +1,7 @@
 package project
 
 var (
-	bundleVersion        = "7.0.0-dev"
+	bundleVersion        = "100.0.0-vaclav"
 	description          = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
 	gitSHA               = "n/a"
 	name          string = "aws-operator"
