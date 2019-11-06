@@ -9,23 +9,11 @@ func NewVersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "cloudformation",
-				Description: "Add IAMManager IAM role for kiam managed app.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Add Route53Manager IAM role for external-dns managed app.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "clusterapi",
-				Description: "Add cleanuprecordsets resource to cleanup non-managed route53 records.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "nodepools",
-				Description: "Add Node Pools functionality. See https://docs.giantswarm.io/basics/nodepools/ for details.",
-				Kind:        versionbundle.KindChanged,
+				Description: "Bring back name tags to AWS resources like VPCs, Subnets and EC2 Instances.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2059",
+				},
 			},
 		},
 		Components: []versionbundle.Component{
