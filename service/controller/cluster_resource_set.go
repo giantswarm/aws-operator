@@ -54,8 +54,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnet"
 	"github.com/giantswarm/aws-operator/service/controller/resource/vpccidr"
-	"github.com/giantswarm/aws-operator/service/credential"
-	"github.com/giantswarm/aws-operator/service/network"
+	"github.com/giantswarm/aws-operator/service/internal/credential"
+	"github.com/giantswarm/aws-operator/service/internal/network"
 )
 
 const (
