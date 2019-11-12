@@ -104,7 +104,7 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 		i := &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("giantswarm.io/installation"),
+					Name: aws.String("tag:giantswarm.io/installation"),
 					Values: []*string{
 						aws.String(installationName),
 					},
