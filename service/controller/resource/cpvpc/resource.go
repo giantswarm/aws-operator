@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "cpvpccidr"
+	Name = "cpvpc"
 )
 
 type Config struct {
