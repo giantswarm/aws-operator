@@ -31,22 +31,6 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value:  {{ $v.MasterSecurityGroupName }}
-  IngressSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: {{ $v.IngressSecurityGroupName }}
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      {{ range $v.IngressSecurityGroupRules }}
-      -
-        IpProtocol: {{ .Protocol }}
-        FromPort: {{ .Port }}
-        ToPort: {{ .Port }}
-        CidrIp: {{ .SourceCIDR }}
-      {{ end }}
-      Tags:
-        - Key: Name
-          Value: {{ $v.IngressSecurityGroupName }}
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

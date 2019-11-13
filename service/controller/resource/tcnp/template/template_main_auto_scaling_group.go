@@ -17,8 +17,6 @@ const TemplateMainAutoScalingGroup = `
       MinSize: {{ .AutoScalingGroup.MinSize }}
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
-      LoadBalancerNames:
-        - {{ .AutoScalingGroup.LoadBalancer.Name }}
 
       # 10 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
@@ -27,6 +25,8 @@ const TemplateMainAutoScalingGroup = `
       MetricsCollection:
         - Granularity: "1Minute"
       Tags:
+        - Key: Name
+          Value: {{ .AutoScalingGroup.Cluster.ID }}-worker
         - Key: k8s.io/cluster-autoscaler/enabled
           Value: true
           PropagateAtLaunch: false
