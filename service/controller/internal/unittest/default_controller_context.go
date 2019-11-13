@@ -113,8 +113,8 @@ func DefaultContext() context.Context {
 					ARN: "peer-role-arn",
 				},
 				VPC: controllercontext.ContextStatusControlPlaneVPC{
-					ID:   "vpc-testid",
 					CIDR: "10.1.0.0/16",
+					ID:   "vpc-testid",
 				},
 			},
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
