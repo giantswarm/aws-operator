@@ -6,7 +6,10 @@ const Small = `{
     "config": {
       "append": [
         {
-          "source": "{{ .S3URL }}"
+          "source": "{{ .S3URL }}",
+		  "verification": {
+            "hash": "sha512-{{ .SHA512 }}"
+		  }
         }
       ]
     }

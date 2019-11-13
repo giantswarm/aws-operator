@@ -2,6 +2,8 @@ package s3object
 
 import (
 	"context"
+	"crypto/sha512"
+	"encoding/base64"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -83,13 +85,23 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, r.labelsFunc(cr))
+	nodeRole := r.pathFunc(cr)
+	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, nodeRole)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
+	h := sha512.New()
+	h.Write(body)
+	ignitionSHA512 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	if nodeRole == "master" {
+		cc.Spec.TenantCluster.TCCP.IgnitionSHA512 = ignitionSHA512
+	} else {
+		cc.Spec.TenantCluster.TCNP.IgnitionSHA512 = ignitionSHA512
+	}
+
 	s3Object := &s3.PutObjectInput{
-		Key:           aws.String(r.pathFunc(cr)),
+		Key:           aws.String(nodeRole),
 		Body:          strings.NewReader(string(body)),
 		Bucket:        aws.String(key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)),
 		ContentLength: aws.Int64(int64(len(body))),

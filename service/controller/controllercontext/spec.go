@@ -13,6 +13,7 @@ type ContextSpecTenantCluster struct {
 
 type ContextSpecTenantClusterTCCP struct {
 	AvailabilityZones []ContextSpecTenantClusterTCCPAvailabilityZone
+	IgnitionSHA512    string
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZone struct {
@@ -45,6 +46,7 @@ type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 
 type ContextSpecTenantClusterTCNP struct {
 	AvailabilityZones []ContextSpecTenantClusterTCNPAvailabilityZone
+	IgnitionSHA512    string
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZone struct {

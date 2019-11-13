@@ -58,7 +58,8 @@ type GuestInstanceAdapterMasterInstance struct {
 // SmallCloudconfigConfig represents the data structure required for executing
 // the small cloudconfig template.
 type SmallCloudconfigConfig struct {
-	S3URL string
+	IgnitionSHA512 string
+	S3URL          string
 }
 
 func (i *GuestInstanceAdapter) Adapt(config Config) error {
