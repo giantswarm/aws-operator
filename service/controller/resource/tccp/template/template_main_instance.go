@@ -2,7 +2,6 @@ package template
 
 const TemplateMainInstance = `
 {{- define "instance" -}}
-{{- $v := .Guest.Instance -}}
   {{ $v.Master.Instance.ResourceName }}:
     Type: "AWS::EC2::Instance"
     Description: Master instance

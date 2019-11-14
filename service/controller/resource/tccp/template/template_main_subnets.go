@@ -2,7 +2,6 @@ package template
 
 const TemplateMainSubnets = `
 {{- define "subnets" -}}
-{{- $v := .Guest.Subnets }}
   {{- range $v.PublicSubnets }}
   {{ .Name }}:
     Type: AWS::EC2::Subnet

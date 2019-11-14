@@ -2,7 +2,6 @@ package template
 
 const TemplateMainInternetGateway = `
 {{- define "internet_gateway" -}}
-{{- $v := .Guest.InternetGateway -}}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
   VPCGatewayAttachment:

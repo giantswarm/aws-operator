@@ -2,7 +2,6 @@ package template
 
 const TemplateMainSecurityGroups = `
 {{- define "security_groups" -}}
-{{- $v := .Guest.SecurityGroups -}}
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
