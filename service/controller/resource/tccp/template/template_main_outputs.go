@@ -3,19 +3,19 @@ package template
 const TemplateMainOutputs = `
 {{- define "outputs" -}}
   DockerVolumeResourceName:
-    Value: {{ .Guest.Outputs.Master.DockerVolume.ResourceName }}
-  {{- if .Guest.Outputs.Route53Enabled }}
+    Value: {{ .Outputs.Master.DockerVolume.ResourceName }}
+  {{- if .Outputs.Route53Enabled }}
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   {{- end }}
   MasterImageID:
-    Value: {{ .Guest.Outputs.Master.ImageID }}
+    Value: {{ .Outputs.Master.ImageID }}
   MasterInstanceResourceName:
-    Value: {{ .Guest.Outputs.Master.Instance.ResourceName }}
+    Value: {{ .Outputs.Master.Instance.ResourceName }}
   MasterInstanceType:
-    Value: {{ .Guest.Outputs.Master.Instance.Type }}
+    Value: {{ .Outputs.Master.Instance.Type }}
   OperatorVersion:
-    Value: {{ .Guest.Outputs.OperatorVersion }}
+    Value: {{ .Outputs.OperatorVersion }}
   VPCID:
     Value: !Ref VPC
   VPCPeeringConnectionID:

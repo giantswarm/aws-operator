@@ -2,7 +2,7 @@ package template
 
 const TemplateMainNatGateway = `
 {{- define "nat_gateway" -}}
-  {{- $v := .Guest.NATGateway -}}
+  {{- $v := .NATGateway -}}
   {{- range $v.Gateways }}
   {{ .NATGWName }}:
     Type: AWS::EC2::NatGateway
