@@ -341,7 +341,6 @@
   revision = "70d14e0bf5e78aad3a573f33a9db1dd8c920db6f"
 
 [[projects]]
-  branch = "master"
   digest = "1:7ef81bf0dfb243b8bd9372bfbc4681062e54eb39cd17cb3ebfed676a259257f3"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
