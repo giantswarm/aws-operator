@@ -2,6 +2,7 @@ package template
 
 const TemplateMainRecordSets = `
 {{- define "record_sets" -}}
+{{- $v := .Guest.RecordSets }}
 {{- if $v.Route53Enabled -}}
   HostedZone:
     Type: 'AWS::Route53::HostedZone'

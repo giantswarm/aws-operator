@@ -2,6 +2,7 @@ package template
 
 const TemplateMainVPC = `
 {{- define "vpc" -}}
+{{- $v := .Guest.VPC }}
   VPC:
     Type: AWS::EC2::VPC
     Properties:
