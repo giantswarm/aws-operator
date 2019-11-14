@@ -24,11 +24,6 @@ const (
 )
 
 const (
-	IngressControllerInsecurePort = 30010
-	IngressControllerSecurePort   = 30011
-)
-
-const (
 	EtcdPort             = 2379
 	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443

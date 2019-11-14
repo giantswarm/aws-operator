@@ -74,9 +74,9 @@ func (t *TCCP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 
 		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
 		params.DisableEncryptionAtREST = true
-		// Ingress controller service remains in k8scloudconfig and will be
-		// removed in a later migration.
-		params.DisableIngressControllerService = false
+		// Ingress Controller service is not created via ignition.
+		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
+		params.DisableIngressControllerService = true
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
 			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),

@@ -23,8 +23,6 @@ const (
 	tcpProtocol  = "tcp"
 
 	defaultCIDR = "0.0.0.0/0"
-
-	ingressSecurityGroupName = "IngressSecurityGroup"
 )
 
 type GuestSecurityGroupsAdapter struct {
@@ -34,8 +32,6 @@ type GuestSecurityGroupsAdapter struct {
 	PrivateAPIWhitelistEnabled       bool
 	MasterSecurityGroupName          string
 	MasterSecurityGroupRules         []securityGroupRule
-	IngressSecurityGroupName         string
-	IngressSecurityGroupRules        []securityGroupRule
 	EtcdELBSecurityGroupName         string
 	EtcdELBSecurityGroupRules        []securityGroupRule
 }
@@ -56,9 +52,6 @@ func (s *GuestSecurityGroupsAdapter) Adapt(cfg Config) error {
 
 	s.MasterSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "master")
 	s.MasterSecurityGroupRules = masterRules
-
-	s.IngressSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "ingress")
-	s.IngressSecurityGroupRules = s.getIngressRules(cfg.CustomObject)
 
 	s.EtcdELBSecurityGroupName = key.SecurityGroupName(&cfg.CustomObject, "etcd-elb")
 	s.EtcdELBSecurityGroupRules = s.getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr)
@@ -118,23 +111,6 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 	}
 
 	return append(publicAPIRules, otherRules...), nil
-}
-
-func (s *GuestSecurityGroupsAdapter) getIngressRules(customObject v1alpha1.Cluster) []securityGroupRule {
-	return []securityGroupRule{
-		{
-			Description: "Allow all http traffic to the ingress load balancer.",
-			Port:        httpPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  defaultCIDR,
-		},
-		{
-			Description: "Allow all https traffic to the ingress load balancer.",
-			Port:        httpsPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  defaultCIDR,
-		},
-	}
 }
 
 func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.Cluster, hostClusterCIDR string) []securityGroupRule {
