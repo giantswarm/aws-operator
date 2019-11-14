@@ -61,7 +61,7 @@ required = [
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]
-  branch = "master"
+  branch = "add-installation-name-tag-to-vpc"
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
