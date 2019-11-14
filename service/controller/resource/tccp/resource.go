@@ -12,7 +12,6 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -39,7 +38,7 @@ type Config struct {
 	EncrypterRoleManager encrypter.RoleManager
 	Logger               micrologger.Logger
 
-	APIWhitelist       adapter.APIWhitelist
+	APIWhitelist       APIWhitelist
 	Detection          *changedetection.TCCP
 	EncrypterBackend   string
 	InstallationName   string
@@ -55,7 +54,7 @@ type Resource struct {
 	encrypterRoleManager encrypter.RoleManager
 	logger               micrologger.Logger
 
-	apiWhiteList       adapter.APIWhitelist
+	apiWhiteList       APIWhitelist
 	encrypterBackend   string
 	detection          *changedetection.TCCP
 	installationName   string
