@@ -26,7 +26,6 @@ type AWSOperatorConfigProviderAWS struct {
 	Encrypter       string
 	Region          string
 	RouteTableNames string
-	VPCPeerID       string
 }
 
 type AWSOperatorConfigSecret struct {
@@ -73,9 +72,6 @@ func NewAWSOperator(config AWSOperatorConfig) (string, error) {
 	}
 	if config.Provider.AWS.RouteTableNames == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Provider.AWS.RouteTableNames must not be empty", config)
-	}
-	if config.Provider.AWS.VPCPeerID == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.Provider.AWS.VPCPeerID must not be empty", config)
 	}
 	if config.RegistryPullSecret == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.RegistryPullSecret must not be empty", config)

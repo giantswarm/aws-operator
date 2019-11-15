@@ -142,7 +142,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	var values string
 	{
 		c := chartvalues.AWSOperatorConfig{
-			InstallationName: env.ClusterID(),
+			InstallationName: fmt.Sprintf("cp-peer-%s", env.ClusterID()),
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
 					Encrypter:       "kms",
