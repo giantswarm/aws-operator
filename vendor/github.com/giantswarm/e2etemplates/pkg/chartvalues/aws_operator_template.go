@@ -49,7 +49,6 @@ const awsOperatorTemplate = `Installation:
         Encrypter: '{{ .Provider.AWS.Encrypter }}'
         TrustedAdvisor:
           Enabled: false
-        VPCPeerID: '{{ .Provider.AWS.VPCPeerID }}'
     Registry:
       Domain: quay.io
     Secret:
