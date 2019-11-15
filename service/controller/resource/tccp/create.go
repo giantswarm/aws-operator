@@ -262,6 +262,7 @@ func newIAMPoliciesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.P
 
 	return iamPolicies, nil
 }
+
 func newInternetGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainInternetGateway, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
