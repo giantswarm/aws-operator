@@ -1,4 +1,4 @@
-package vpccidr
+package vpc
 
 import (
 	"context"
@@ -8,13 +8,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	cr, err := key.ToCustomObject(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.addVPCCIDRToContext(ctx, cr)
+	err = r.addVPCInfoToContext(ctx, cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}

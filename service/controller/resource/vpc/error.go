@@ -1,4 +1,4 @@
-package vpccidr
+package vpc
 
 import (
 	"github.com/giantswarm/microerror"

@@ -11,6 +11,7 @@ const (
 )
 
 type AWSOperatorConfig struct {
+	InstallationName   string
 	Provider           AWSOperatorConfigProvider
 	RegistryPullSecret string
 	Secret             AWSOperatorConfigSecret
@@ -61,6 +62,9 @@ type AWSOperatorConfigSSH struct {
 
 // NewAWSOperator renders values required by aws-operator-chart.
 func NewAWSOperator(config AWSOperatorConfig) (string, error) {
+	if config.InstallationName == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
 	if config.Provider.AWS.Encrypter == "" {
 		config.Provider.AWS.Encrypter = defaultEncrypter
 	}

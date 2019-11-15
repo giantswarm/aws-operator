@@ -32,6 +32,7 @@ type ContextStatusControlPlanePeerRole struct {
 
 type ContextStatusControlPlaneVPC struct {
 	CIDR string
+	ID   string
 }
 
 type ContextStatusTenantCluster struct {

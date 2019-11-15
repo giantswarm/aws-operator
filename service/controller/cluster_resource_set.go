@@ -53,7 +53,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnet"
-	"github.com/giantswarm/aws-operator/service/controller/resource/vpccidr"
+	"github.com/giantswarm/aws-operator/service/controller/resource/vpc"
 	"github.com/giantswarm/aws-operator/service/internal/credential"
 	"github.com/giantswarm/aws-operator/service/internal/network"
 )
@@ -98,7 +98,6 @@ type clusterResourceSetConfig struct {
 	RegistryDomain             string
 	SSOPublicKey               string
 	VaultAddress               string
-	VPCPeerID                  string
 }
 
 func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -385,7 +384,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
 			PublicRouteTables:  config.RouteTables,
 			Route53Enabled:     config.Route53Enabled,
-			VPCPeerID:          config.VPCPeerID,
 		}
 
 		tccpResource, err = tccp.New(c)
@@ -608,13 +606,13 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 
 	var vpcCIDRResource resource.Interface
 	{
-		c := vpccidr.Config{
+		c := vpc.Config{
 			Logger: config.Logger,
 
-			VPCPeerID: config.VPCPeerID,
+			InstallationName: config.InstallationName,
 		}
 
-		vpcCIDRResource, err = vpccidr.New(c)
+		vpcCIDRResource, err = vpc.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
