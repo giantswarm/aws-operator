@@ -80,7 +80,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, time.Time{}, r)
+			params, err := r.newTemplateParams(tc.ctx, tc.cr, time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
