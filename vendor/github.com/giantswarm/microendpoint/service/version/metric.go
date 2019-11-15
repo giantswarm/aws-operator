@@ -15,11 +15,9 @@ var buildInfo = prometheus.NewGaugeVec(
 	[]string{"bundle_version", "commit", "golang_version", "golang_goos", "golang_goarch"},
 )
 
-func init() {
-	prometheus.MustRegister(buildInfo)
-}
-
 func (s *Service) updateBuildInfoMetric() {
+	prometheus.MustRegister(buildInfo)
 	buildInfo.WithLabelValues(s.versionBundles[0].Version, s.gitCommit, runtime.Version(), runtime.GOOS, runtime.GOARCH).Set(1)
+	prometheus.MustRegister(buildInfo)
 	buildInfo.WithLabelValues("test", s.gitCommit, runtime.Version(), runtime.GOOS, runtime.GOARCH).Set(1)
 }
