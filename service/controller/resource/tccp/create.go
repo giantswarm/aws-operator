@@ -936,7 +936,6 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t
 		}
 
 		params = &template.ParamsMain{
-
 			IAMPolicies:     iamPolicies,
 			InternetGateway: internetGateway,
 			Instance:        instance,
