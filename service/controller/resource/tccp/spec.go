@@ -5,11 +5,6 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
-type templateParams struct {
-	DockerVolumeResourceName   string
-	MasterInstanceResourceName string
-}
-
 const (
 	// asgMaxBatchSizeRatio is the % of instances to be updated during a
 	// rolling update.
@@ -55,35 +50,6 @@ const (
 	httpsPort = 443
 )
 
-// APIWhitelist defines guest cluster k8s public/private api whitelisting.
-type APIWhitelist struct {
-	Private Whitelist
-	Public  Whitelist
-}
-
-// TODO we copy this because of a circular import issue with the cloudformation
-// resource. The way how the resource works with the adapter and how infromation
-// is passed has to be reworked at some point. Just hacking this now to keep
-// going and to keep the changes as minimal as possible.
-type StackState struct {
-	Name string
-
-	DockerVolumeResourceName   string
-	MasterImageID              string
-	MasterInstanceType         string
-	MasterInstanceResourceName string
-	MasterInstanceMonitoring   bool
-
-	OperatorVersion string
-}
-
-// Whitelist represents the structure required for defining whitelisting for
-// resource security group
-type Whitelist struct {
-	Enabled    bool
-	SubnetList string
-}
-
 const (
 	// Default values for health checks.
 	healthCheckHealthyThreshold   = 2
@@ -106,6 +72,24 @@ const (
 
 	defaultCIDR = "0.0.0.0/0"
 )
+
+type templateParams struct {
+	DockerVolumeResourceName   string
+	MasterInstanceResourceName string
+}
+
+// APIWhitelist defines guest cluster k8s public/private api whitelisting.
+type APIWhitelist struct {
+	Private Whitelist
+	Public  Whitelist
+}
+
+// Whitelist represents the structure required for defining whitelisting for
+// resource security group
+type Whitelist struct {
+	Enabled    bool
+	SubnetList string
+}
 
 type securityConfig struct {
 	APIWhitelist                    APIWhitelist

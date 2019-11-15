@@ -280,3 +280,7 @@ func imageIDs() map[string]string {
 func isChinaRegion(region string) bool {
 	return strings.HasPrefix(region, "cn-")
 }
+
+func HealthCheckTarget(port int) string {
+	return fmt.Sprintf("TCP:%d", port)
+}

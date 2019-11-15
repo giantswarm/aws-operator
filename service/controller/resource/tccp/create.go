@@ -63,6 +63,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
+
+		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
 	}
 
 	{
@@ -150,7 +157,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, time.Now(), r)
+		params, err := r.newTemplateParams(ctx, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -240,7 +247,7 @@ func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.
 	return awstags.NewCloudFormation(tags)
 }
 
-func newIAMPoliciesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -262,7 +269,7 @@ func newIAMPoliciesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.P
 
 	return iamPolicies, nil
 }
-func newInternetGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainInternetGateway, error) {
+func (r *Resource) newInternetGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainInternetGateway, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -288,7 +295,7 @@ func newInternetGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*templa
 
 	return internetGateway, nil
 }
-func newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, r *Resource) (*template.ParamsMainInstance, error) {
+func (r *Resource) newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (*template.ParamsMainInstance, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -336,11 +343,7 @@ func newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, r 
 	}
 	return instance, nil
 }
-
-func healthCheckTarget(port int) string {
-	return fmt.Sprintf("TCP:%d", port)
-}
-func newLoadBalancersParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (*template.ParamsMainLoadBalancers, error) {
+func (r *Resource) newLoadBalancersParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (*template.ParamsMainLoadBalancers, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -369,7 +372,7 @@ func newLoadBalancersParams(ctx context.Context, cr v1alpha1.Cluster, t time.Tim
 	var loadBalancers *template.ParamsMainLoadBalancers
 	{
 		loadBalancers = &template.ParamsMainLoadBalancers{
-			APIElbHealthCheckTarget: healthCheckTarget(key.KubernetesSecurePort),
+			APIElbHealthCheckTarget: key.HealthCheckTarget(key.KubernetesSecurePort),
 			APIElbName:              key.ELBNameAPI(&cr),
 			APIInternalElbName:      key.InternalELBNameAPI(&cr),
 			APIElbPortsToOpen: []template.ParamsMainLoadBalancersPortPair{
@@ -380,7 +383,7 @@ func newLoadBalancersParams(ctx context.Context, cr v1alpha1.Cluster, t time.Tim
 			},
 			APIElbScheme:             externalELBScheme,
 			APIInternalElbScheme:     internalELBScheme,
-			EtcdElbHealthCheckTarget: healthCheckTarget(key.EtcdPort),
+			EtcdElbHealthCheckTarget: key.HealthCheckTarget(key.EtcdPort),
 			EtcdElbName:              key.ELBNameEtcd(&cr),
 			EtcdElbPortsToOpen: []template.ParamsMainLoadBalancersPortPair{
 				{
@@ -400,7 +403,7 @@ func newLoadBalancersParams(ctx context.Context, cr v1alpha1.Cluster, t time.Tim
 	}
 	return loadBalancers, nil
 }
-func newNATGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainNATGateway, error) {
+func (r *Resource) newNATGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainNATGateway, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -441,7 +444,7 @@ func newNATGatewayParams(ctx context.Context, cr v1alpha1.Cluster) (*template.Pa
 
 	return natGateway, nil
 }
-func newOutputsParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, r *Resource) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newOutputsParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (*template.ParamsMainOutputs, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -467,7 +470,7 @@ func newOutputsParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, r *
 
 	return outputs, nil
 }
-func newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, r *Resource) (*template.ParamsMainRecordSets, error) {
+func (r *Resource) newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (*template.ParamsMainRecordSets, error) {
 	_, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -487,7 +490,7 @@ func newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, 
 
 	return recordSets, nil
 }
-func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainRouteTables, error) {
+func (r *Resource) newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -733,7 +736,7 @@ func getHostClusterNATGatewayRules(cfg securityConfig) ([]template.SecurityGroup
 	return gatewayRules, nil
 }
 
-func newSecurityGroupsParams(ctx context.Context, cr v1alpha1.Cluster, r *Resource) (*template.ParamsMainSecurityGroups, error) {
+func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -775,7 +778,7 @@ func newSecurityGroupsParams(ctx context.Context, cr v1alpha1.Cluster, r *Resour
 
 	return securityGroups, nil
 }
-func newSubnetsParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newSubnetsParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainSubnets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -786,13 +789,6 @@ func newSubnetsParams(ctx context.Context, cr v1alpha1.Cluster) (*template.Param
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
 	})
-
-	{
-		numAZs := len(zones)
-		if numAZs < 1 {
-			return nil, microerror.Maskf(invalidConfigError, "at least one configured availability zone required")
-		}
-	}
 
 	// XXX: DEBUG
 	fmt.Printf("\n\n================ XXXXXXXXXXXXxx ===========================\nnewSubnetsParams: zones: %#v\n\n\n", zones)
@@ -845,7 +841,7 @@ func newSubnetsParams(ctx context.Context, cr v1alpha1.Cluster) (*template.Param
 
 	return subnets, nil
 }
-func newVPCParams(ctx context.Context, cr v1alpha1.Cluster, r *Resource) (*template.ParamsMainVPC, error) {
+func (r *Resource) newVPCParams(ctx context.Context, cr v1alpha1.Cluster) (*template.ParamsMainVPC, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -887,50 +883,50 @@ func newVPCParams(ctx context.Context, cr v1alpha1.Cluster, r *Resource) (*templ
 	return vpc, nil
 }
 
-func newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time, r *Resource) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		iamPolicies, err := newIAMPoliciesParams(ctx, cr)
+		iamPolicies, err := r.newIAMPoliciesParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		internetGateway, err := newInternetGatewayParams(ctx, cr)
+		internetGateway, err := r.newInternetGatewayParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		instance, err := newInstanceParams(ctx, cr, t, r)
+		instance, err := r.newInstanceParams(ctx, cr, t)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		loadBalancers, err := newLoadBalancersParams(ctx, cr, t)
+		loadBalancers, err := r.newLoadBalancersParams(ctx, cr, t)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		natGateway, err := newNATGatewayParams(ctx, cr)
+		natGateway, err := r.newNATGatewayParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		outputs, err := newOutputsParams(ctx, cr, t, r)
+		outputs, err := r.newOutputsParams(ctx, cr, t)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		recordSets, err := newRecordSetsParams(ctx, cr, t, r)
+		recordSets, err := r.newRecordSetsParams(ctx, cr, t)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		routeTables, err := newRouteTablesParams(ctx, cr)
+		routeTables, err := r.newRouteTablesParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		securityGroups, err := newSecurityGroupsParams(ctx, cr, r)
+		securityGroups, err := r.newSecurityGroupsParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		subnets, err := newSubnetsParams(ctx, cr)
+		subnets, err := r.newSubnetsParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		vpc, err := newVPCParams(ctx, cr, r)
+		vpc, err := r.newVPCParams(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -964,7 +960,7 @@ func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, time.Now(), r)
+		params, err := r.newTemplateParams(ctx, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
