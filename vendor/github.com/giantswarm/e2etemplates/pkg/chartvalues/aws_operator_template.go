@@ -33,7 +33,7 @@ const awsOperatorTemplate = `Installation:
         UserList: '{{ .SSH.UserList }}'
       Update:
         Enabled: true
-    Name: '{{ .InstallationName }}'
+    Name: ci-aws-operator
     Provider:
       AWS:
         AvailabilityZones:
