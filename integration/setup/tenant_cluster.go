@@ -239,7 +239,7 @@ func ensureCertConfigsInstalled(ctx context.Context, id string, config Config) e
 	return nil
 }
 
-func ensureHostVPCCreated(ctx context.Context, config Config) (error) {
+func ensureHostVPCCreated(ctx context.Context, config Config) error {
 	stackName := "cp-peer-" + env.ClusterID()
 
 	{
