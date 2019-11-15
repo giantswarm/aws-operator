@@ -17,7 +17,7 @@ func NewVersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "kubelet",
-				Description: "Label nodes with operator instead of release version.",
+				Description: "Label nodes with operator version instead of release version.",
 				Kind:        versionbundle.KindFixed,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2064",
