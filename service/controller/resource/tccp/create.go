@@ -302,6 +302,9 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t
 		return nil, microerror.Mask(err)
 	}
 
+	// TODO: The rendering should be moved into the templates
+	// https://github.com/giantswarm/giantswarm/issues/7665
+
 	c := template.SmallCloudconfigConfig{
 		S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCP(&cr)),
 	}
@@ -533,12 +536,15 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster
 	return routeTables, nil
 }
 
+// TODO: The rule management should be moved to templates
+// https://github.com/giantswarm/giantswarm/issues/7665
+
 func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
 	// Allow traffic to the Kubernetes API server depending on the API
 	// whitelisting rules.
 	publicAPIRules, err := getKubernetesPublicAPIRules(cfg, hostClusterCIDR)
 	if err != nil {
-		return []template.SecurityGroupRule{}, microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	// Other security group rules for the master.
@@ -697,7 +703,7 @@ func getKubernetesPublicAPIRules(cfg securityConfig, hostClusterCIDR string) ([]
 		// Whitelist public EIPs of the host cluster NAT gateways.
 		hostClusterNATGatewayRules, err := getHostClusterNATGatewayRules(cfg)
 		if err != nil {
-			return []template.SecurityGroupRule{}, microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 
 		for _, gatewayRule := range hostClusterNATGatewayRules {
@@ -790,9 +796,6 @@ func (r *Resource) newSubnetsParams(ctx context.Context, cr v1alpha1.Cluster) (*
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
 	})
-
-	// XXX: DEBUG
-	fmt.Printf("\n\n================ XXXXXXXXXXXXxx ===========================\nnewSubnetsParams: zones: %#v\n\n\n", zones)
 
 	var publicSubnets []template.Subnet
 	for _, az := range zones {
