@@ -135,7 +135,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	err := ensureHostVPCCreated(ctx, config)
+	err = ensureHostVPCCreated(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
