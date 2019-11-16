@@ -183,7 +183,7 @@ func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv
 }
 
 func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) error {
-	vpcID, err := ensureHostVPCCreated(ctx, config)
+	err := ensureHostVPCCreated(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -201,7 +201,6 @@ func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) err
 				IngressHostedZone: env.AWSIngressHostedZoneGuest(),
 				RouteTable0:       env.AWSRouteTable0(),
 				RouteTable1:       env.AWSRouteTable1(),
-				VPCPeerID:         vpcID,
 			},
 		}
 
@@ -240,8 +239,8 @@ func ensureCertConfigsInstalled(ctx context.Context, id string, config Config) e
 	return nil
 }
 
-func ensureHostVPCCreated(ctx context.Context, config Config) (string, error) {
-	stackName := "host-peer-" + env.ClusterID()
+func ensureHostVPCCreated(ctx context.Context, config Config) error {
+	stackName := "cp-peer-" + env.ClusterID()
 
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating stack %#q", stackName))
@@ -258,7 +257,7 @@ func ensureHostVPCCreated(ctx context.Context, config Config) (string, error) {
 		if IsStackAlreadyExists(err) {
 			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stack %#q is already created", stackName))
 		} else if err != nil {
-			return "", microerror.Mask(err)
+			return microerror.Mask(err)
 		} else {
 			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created stack %#q", stackName))
 		}
@@ -271,31 +270,10 @@ func ensureHostVPCCreated(ctx context.Context, config Config) (string, error) {
 			StackName: aws.String(stackName),
 		})
 		if err != nil {
-			return "", microerror.Mask(err)
+			return microerror.Mask(err)
 		}
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q complete status", stackName))
 	}
-
-	var vpcID string
-	{
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding `VPCID` output in stack %#q", stackName))
-
-		describeOutput, err := config.AWSClient.CloudFormation.DescribeStacks(&cloudformation.DescribeStacksInput{
-			StackName: aws.String(stackName),
-		})
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-		for _, o := range describeOutput.Stacks[0].Outputs {
-			if *o.OutputKey == "VPCID" {
-				vpcID = *o.OutputValue
-				break
-			}
-		}
-
-		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found `VPCID` output in stack %#q", stackName))
-	}
-
-	return vpcID, nil
+	return nil
 }

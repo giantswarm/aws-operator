@@ -15,6 +15,8 @@ Resources:
       Tags:
       - Key: Name
         Value: ${CLUSTER_NAME}
+      - Key: giantswarm.io/installation
+        Value: cp-peer-${CLUSTER_NAME}
   PeerRouteTable0:
     Type: AWS::EC2::RouteTable
     Properties:
