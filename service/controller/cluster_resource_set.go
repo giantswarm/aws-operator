@@ -26,7 +26,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpccidr"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
@@ -362,7 +362,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
 			PublicRouteTables:  config.RouteTables,
 			Route53Enabled:     config.Route53Enabled,
-			VPCPeerID:          config.VPCPeerID,
 		}
 
 		tccpResource, err = tccp.New(c)
@@ -529,15 +528,15 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var vpcCIDRResource resource.Interface
+	var cpVPCResource resource.Interface
 	{
-		c := cpvpccidr.Config{
+		c := cpvpc.Config{
 			Logger: config.Logger,
 
-			VPCPeerID: config.VPCPeerID,
+			InstallationName: config.InstallationName,
 		}
 
-		vpcCIDRResource, err = cpvpccidr.New(c)
+		cpVPCResource, err = cpvpc.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -551,7 +550,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		natGatewayAddressesResource,
 		peerRoleARNResource,
 		cpRouteTablesResource,
-		vpcCIDRResource,
+		cpVPCResource,
 		tccpVPCIDResource,
 		tccpOutputsResource,
 		tccpSubnetsResource,

@@ -22,5 +22,4 @@ type AWS struct {
 	S3AccessLogsExpiration string
 	TrustedAdvisor         trustedadvisor.TrustedAdvisor
 	VaultAddress           string
-	VPCPeerID              string
 }

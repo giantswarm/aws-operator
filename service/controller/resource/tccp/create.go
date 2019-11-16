@@ -31,6 +31,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
+		// when aws operator starts it needs to find CP VPC information, so we have to
+		// cancel the resource in case the information is not yet available.
+		if cc.Status.ControlPlane.VPC.ID == "" || cc.Status.ControlPlane.VPC.CIDR == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the control plane VPC info is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
 		// When a tenant cluster is created, the CPI resource creates a peer role and
 		// with it an ARN for it. As long as the peer role ARN is not present, we have
 		// to cancel the resource to prevent further TCCP resource actions.
@@ -254,7 +262,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t
 			ControlPlaneAccountID:           cc.Status.ControlPlane.AWSAccountID,
 			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
 			ControlPlanePeerRoleARN:         cc.Status.ControlPlane.PeerRole.ARN,
-			ControlPlaneVPCID:               r.vpcPeerID,
+			ControlPlaneVPCID:               cc.Status.ControlPlane.VPC.ID,
 			ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
 			CustomObject:                    cr,
 			EncrypterBackend:                r.encrypterBackend,
