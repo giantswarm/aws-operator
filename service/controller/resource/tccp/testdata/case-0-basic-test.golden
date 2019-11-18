@@ -657,7 +657,7 @@ Resources:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
       VpcId: !Ref VPC
-      PeerVpcId: vpc-f8d0e10b
+      PeerVpcId: vpc-testid
       # PeerOwnerId may be a number starting with 0. Cloud Formation is not able
       # to properly deal with that by its own so the configured value must be
       # quoted in order to ensure the peer owner id is properly handled as

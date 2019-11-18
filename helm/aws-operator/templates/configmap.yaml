@@ -28,7 +28,6 @@ data:
         trustedAdvisor:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
-        vpcPeerID: '{{ .Values.Installation.V1.Provider.AWS.VPCPeerID }}'
       cluster:
         calico:
           cidr: '{{ .Values.Installation.V1.Guest.Calico.CIDR }}'

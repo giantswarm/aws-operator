@@ -47,7 +47,6 @@ type machineDeploymentResourceSetConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-	VPCPeerID                  string
 }
 
 func (c machineDeploymentResourceSetConfig) GetEncrypterBackend() string {

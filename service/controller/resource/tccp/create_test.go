@@ -69,7 +69,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			Logger:    microloggertest.New(),
 
 			EncrypterBackend: "kms",
-			VPCPeerID:        "vpc-f8d0e10b",
 		}
 
 		r, err = New(c)

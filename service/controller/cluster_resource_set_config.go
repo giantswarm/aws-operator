@@ -53,7 +53,6 @@ type clusterResourceSetConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-	VPCPeerID                  string
 }
 
 func (c clusterResourceSetConfig) GetEncrypterBackend() string {

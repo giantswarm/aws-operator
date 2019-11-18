@@ -57,7 +57,6 @@ type MachineDeploymentConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-	VPCPeerID                  string
 }
 
 type MachineDeploymentConfigLabelSelector struct {
@@ -220,7 +219,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			SSHUserList:                config.SSHUserList,
 			SSOPublicKey:               config.SSOPublicKey,
 			VaultAddress:               config.VaultAddress,
-			VPCPeerID:                  config.VPCPeerID,
 		}
 
 		resourceSet, err = newMachineDeploymentResourceSet(c)

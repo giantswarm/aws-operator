@@ -64,7 +64,6 @@ type ClusterConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-	VPCPeerID                  string
 }
 
 type ClusterConfigLabelSelector struct {
@@ -262,7 +261,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			SSHUserList:                config.SSHUserList,
 			SSOPublicKey:               config.SSOPublicKey,
 			VaultAddress:               config.VaultAddress,
-			VPCPeerID:                  config.VPCPeerID,
 		}
 
 		resourceSet, err = newClusterResourceSet(c)

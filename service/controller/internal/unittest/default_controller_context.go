@@ -114,6 +114,7 @@ func DefaultContext() context.Context {
 				},
 				VPC: controllercontext.ContextStatusControlPlaneVPC{
 					CIDR: "10.1.0.0/16",
+					ID:   "vpc-testid",
 				},
 			},
 			TenantCluster: controllercontext.ContextStatusTenantCluster{

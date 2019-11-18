@@ -84,9 +84,6 @@ func New(config Config) (*Resource, error) {
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
 	}
-	if config.VPCPeerID == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.VPCPeerID must not be empty", config)
-	}
 
 	r := &Resource{
 		cmaClient:            config.CMAClient,
@@ -100,7 +97,6 @@ func New(config Config) (*Resource, error) {
 		instanceMonitoring: config.InstanceMonitoring,
 		publicRouteTables:  config.PublicRouteTables,
 		route53Enabled:     config.Route53Enabled,
-		vpcPeerID:          config.VPCPeerID,
 	}
 
 	return r, nil

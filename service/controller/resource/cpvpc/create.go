@@ -1,4 +1,4 @@
-package cpvpccidr
+package cpvpc
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	err := r.addVPCCIDRToContext(ctx)
+	err := r.addVPCInfoToContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
