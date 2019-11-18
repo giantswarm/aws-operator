@@ -45,7 +45,6 @@ type Config struct {
 	InstanceMonitoring bool
 	PublicRouteTables  string
 	Route53Enabled     bool
-	VPCPeerID          string
 }
 
 // Resource implements the cloudformation resource.
@@ -61,7 +60,6 @@ type Resource struct {
 	instanceMonitoring bool
 	publicRouteTables  string
 	route53Enabled     bool
-	vpcPeerID          string
 }
 
 // New creates a new configured cloudformation resource.

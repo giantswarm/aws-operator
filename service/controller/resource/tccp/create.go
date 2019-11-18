@@ -884,7 +884,7 @@ func (r *Resource) newVPCParams(ctx context.Context, cr v1alpha1.Cluster) (*temp
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,
-			PeerVPCID:        r.vpcPeerID,
+			PeerVPCID:        cc.Status.ControlPlane.VPC.ID,
 			Region:           key.Region(cr),
 			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			PeerRoleArn:      cc.Status.ControlPlane.PeerRole.ARN,
