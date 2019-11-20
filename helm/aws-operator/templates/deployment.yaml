@@ -4,7 +4,8 @@ metadata:
   name: {{ tpl .Values.resource.default.name  . }}
   namespace: {{ tpl .Values.resource.default.namespace  . }}
   labels:
-    app: {{ tpl .Values.resource.default.name  . }}
+    app: {{ .Values.project.name }}
+    version: {{ .Values.project.version }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -15,7 +16,8 @@ spec:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        app: {{ tpl .Values.resource.default.name  . }}
+        app: {{ .Values.project.name }}
+        version: {{ .Values.project.version }}
     spec:
       volumes:
       - name: {{ .Values.project.name }}-configmap
