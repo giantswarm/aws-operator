@@ -4,11 +4,13 @@ metadata:
   name: {{ tpl .Values.resource.default.name  . }}
   namespace: {{ tpl .Values.resource.default.namespace  . }}
   labels:
-    app: {{ tpl .Values.resource.default.name  . }}
+    app: {{ .Values.project.name }}
+    version: {{ .Values.project.version }}
   annotations:
     prometheus.io/scrape: "true"
 spec:
   ports:
   - port: 8000
   selector:
-    app: {{ tpl .Values.resource.default.name  . }}
+    app: {{ .Values.project.name }}
+    version: {{ .Values.project.version }}
