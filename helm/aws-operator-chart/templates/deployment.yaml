@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     app: aws-operator
+    version: {{ .Chart.Version }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -16,6 +17,7 @@ spec:
         releasetime: {{ $.Release.Time }}
       labels:
         app: aws-operator
+        version: {{ .Chart.Version }}
     spec:
       volumes:
       - name: aws-operator-configmap
