@@ -68,7 +68,7 @@ func KubeletLabelsTCCP(getter LabelsGetter) string {
 	var labels string
 
 	labels = ensureLabel(labels, label.Provider, "aws")
-	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(getter))
+	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
 
 	return labels
 }
@@ -77,7 +77,7 @@ func KubeletLabelsTCNP(getter LabelsGetter) string {
 	var labels string
 
 	labels = ensureLabel(labels, label.Provider, "aws")
-	labels = ensureLabel(labels, label.ReleaseVersion, ReleaseVersion(getter))
+	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
 	labels = ensureLabel(labels, label.MachineDeployment, MachineDeploymentID(getter))
 
 	return labels
@@ -147,10 +147,6 @@ func RegionARN(region string) string {
 	}
 
 	return regionARN
-}
-
-func ReleaseVersion(getter LabelsGetter) string {
-	return getter.GetLabels()[label.ReleaseVersion]
 }
 
 func RoleARNMaster(getter LabelsGetter, region string, accountID string) string {
