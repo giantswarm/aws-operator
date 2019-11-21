@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     app: aws-operator
+    version: {{ .Chart.Version }}
   annotations:
     prometheus.io/scrape: "true"
 spec:
@@ -12,3 +13,4 @@ spec:
   - port: 8000
   selector:
     app: aws-operator
+    version: {{ .Chart.Version }}
