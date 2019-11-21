@@ -435,7 +435,7 @@
   revision = "dbc2afdfd1f75098efe6e3ac295d3c55a45af71f"
 
 [[projects]]
-  branch = "rename-version-label"
+  branch = "master"
   digest = "1:568716a2e87ca3f4fb9bce7f65b8491a2ab92c97adee4b2b750b1d76c709b183"
   name = "github.com/giantswarm/microendpoint"
   packages = [
@@ -445,7 +445,7 @@
     "service/version",
   ]
   pruneopts = "UT"
-  revision = "c26804fac7524bfad5c4fc107a21b211b2bd9a4c"
+  revision = "e991deac265373d9347b96ecc56b13f228be144f"
 
 [[projects]]
   branch = "master"
