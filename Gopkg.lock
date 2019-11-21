@@ -436,7 +436,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a4aed1ecd42d811ea6ab995570be14a7e1d1fb7eaae45d76f6f2841d6124f7b8"
+  digest = "1:568716a2e87ca3f4fb9bce7f65b8491a2ab92c97adee4b2b750b1d76c709b183"
   name = "github.com/giantswarm/microendpoint"
   packages = [
     "endpoint/healthz",
@@ -445,7 +445,7 @@
     "service/version",
   ]
   pruneopts = "UT"
-  revision = "ec99bee306f4065a5137ed70a0f7e3bf20bb896d"
+  revision = "e991deac265373d9347b96ecc56b13f228be144f"
 
 [[projects]]
   branch = "master"
