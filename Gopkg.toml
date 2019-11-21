@@ -89,7 +89,7 @@ required = [
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
-  branch = "master"
+  branch = "rename-version-label"
   name = "github.com/giantswarm/microendpoint"
 
 [[constraint]]
