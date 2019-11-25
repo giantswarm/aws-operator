@@ -72,12 +72,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-			return nil
-		}
 	}
 
 	{
