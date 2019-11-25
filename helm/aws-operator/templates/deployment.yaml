@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.project.name }}
-      version: {{ .Values.project.version }
+      version: {{ .Values.project.version }}
   strategy:
     type: RollingUpdate
   template:
