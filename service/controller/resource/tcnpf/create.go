@@ -122,7 +122,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.MachineDeployment) (*template.ParamsMainRouteTables, error) {
+func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -156,7 +156,7 @@ func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.Machine
 	return routeTables, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.MachineDeployment) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		routeTables, err := newRouteTablesParams(ctx, cr)

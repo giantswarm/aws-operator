@@ -8,42 +8,42 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
 
-func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.MachineDeployment) []string {
+func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.AWSMachineDeployment) []string {
 	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
 }
 
-func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha2.MachineDeployment) string {
+func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
 }
 
-func MachineDeploymentInstanceType(cr infrastructurev1alpha2.MachineDeployment) string {
+func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
 }
 
-func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.MachineDeployment) string {
+func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.KubeletVolumeSizeGB)
 }
 
-func MachineDeploymentScalingMax(cr infrastructurev1alpha2.MachineDeployment) int {
+func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Max
 }
 
-func MachineDeploymentScalingMin(cr infrastructurev1alpha2.MachineDeployment) int {
+func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment) int {
 	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
 }
 
-func MachineDeploymentSubnet(cr infrastructurev1alpha2.MachineDeployment) string {
+func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
-func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.MachineDeployment, error) {
+func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {
 	if v == nil {
-		return infrastructurev1alpha2.MachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.MachineDeployment{}, v)
+		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
 	}
 
-	p, ok := v.(*infrastructurev1alpha2.MachineDeployment)
+	p, ok := v.(*infrastructurev1alpha2.AWSMachineDeployment)
 	if !ok {
-		return infrastructurev1alpha2.MachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.MachineDeployment{}, v)
+		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
 	}
 
 	c := p.DeepCopy()

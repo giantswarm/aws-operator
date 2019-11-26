@@ -6,7 +6,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 )
 
-func machineDeploymentProviderSpec(machineDeployment infrastructurev1alpha2.MachineDeployment) infrastructurev1alpha2.AWSMachineDeploymentSpec {
+func machineDeploymentProviderSpec(machineDeployment infrastructurev1alpha2.AWSMachineDeployment) infrastructurev1alpha2.AWSMachineDeploymentSpec {
 	return mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(machineDeployment.Spec.Template.Spec.ProviderSpec)
 }
 

@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func DefaultMachineDeployment() infrastructurev1alpha2.MachineDeployment {
-	cr := infrastructurev1alpha2.MachineDeployment{
+func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
+	cr := infrastructurev1alpha2.AWSMachineDeployment{
 		ObjectMeta: v1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.MachineDeploymentSubnet: "10.100.8.0/24",
@@ -48,7 +48,7 @@ func DefaultMachineDeployment() infrastructurev1alpha2.MachineDeployment {
 	return mustCMAMachineDeploymentWithG8sProviderSpec(cr, spec)
 }
 
-func MachineDeploymentWithAZs(machineDeployment infrastructurev1alpha2.MachineDeployment, azs []string) infrastructurev1alpha2.MachineDeployment {
+func MachineDeploymentWithAZs(machineDeployment infrastructurev1alpha2.AWSMachineDeployment, azs []string) infrastructurev1alpha2.AWSMachineDeployment {
 	spec := mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(machineDeployment.Spec.Template.Spec.ProviderSpec)
 
 	spec.Provider.AvailabilityZones = azs
@@ -76,7 +76,7 @@ func mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(cmaSpec infrastruc
 	return g8sSpec
 }
 
-func mustCMAMachineDeploymentWithG8sProviderSpec(cr infrastructurev1alpha2.MachineDeployment, providerExtension infrastructurev1alpha2.AWSMachineDeploymentSpec) infrastructurev1alpha2.MachineDeployment {
+func mustCMAMachineDeploymentWithG8sProviderSpec(cr infrastructurev1alpha2.AWSMachineDeployment, providerExtension infrastructurev1alpha2.AWSMachineDeploymentSpec) infrastructurev1alpha2.AWSMachineDeployment {
 	var err error
 
 	if cr.Spec.Template.Spec.ProviderSpec.Value == nil {

@@ -25,7 +25,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	testCases := []struct {
 		name               string
 		cluster            infrastructurev1alpha2.AWSCluster
-		machineDeployments []infrastructurev1alpha2.MachineDeployment
+		machineDeployments []infrastructurev1alpha2.AWSMachineDeployment
 		ctxStatusSubnets   []*ec2.Subnet
 		expectedAZs        []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone
 		errorMatcher       func(error) bool
@@ -62,7 +62,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:    "case 1: control plane and 1 node pool on same AZ",
 			cluster: unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			machineDeployments: []infrastructurev1alpha2.MachineDeployment{
+			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{
@@ -97,7 +97,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:    "case 2: create control plane and 1 node pool on different AZ",
 			cluster: unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			machineDeployments: []infrastructurev1alpha2.MachineDeployment{
+			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1b"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{},
@@ -130,7 +130,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:               "case 3: keep control plane and delete 1 node pool from different AZ",
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			machineDeployments: []infrastructurev1alpha2.MachineDeployment{},
+			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				&ec2.Subnet{
 					AvailabilityZone: aws.String("eu-central-1a"),

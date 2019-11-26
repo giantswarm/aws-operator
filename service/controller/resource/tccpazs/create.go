@@ -51,7 +51,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	var machineDeployments []infrastructurev1alpha2.MachineDeployment
+	var machineDeployments []infrastructurev1alpha2.AWSMachineDeployment
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding MachineDeployments for tenant cluster")
 

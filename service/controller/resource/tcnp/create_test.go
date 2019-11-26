@@ -31,7 +31,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
-		cr   infrastructurev1alpha2.MachineDeployment
+		cr   infrastructurev1alpha2.AWSMachineDeployment
 	}{
 		{
 			name: "case 0: basic test",

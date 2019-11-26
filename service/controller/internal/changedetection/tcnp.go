@@ -41,7 +41,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 //     The node pool's scaling max changes.
 //     The node pool's scaling min changes.
 //
-func (t *TCNP) ShouldScale(ctx context.Context, md infrastructurev1alpha2.MachineDeployment) (bool, error) {
+func (t *TCNP) ShouldScale(ctx context.Context, md infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -71,7 +71,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, md infrastructurev1alpha2.Machin
 //     The worker node's instance type changes.
 //     The operator's version changes.
 //
-func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.MachineDeployment) (bool, error) {
+func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
