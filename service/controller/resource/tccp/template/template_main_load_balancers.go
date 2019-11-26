@@ -2,7 +2,7 @@ package template
 
 const TemplateMainLoadBalancers = `
 {{- define "load_balancers" -}}
-{{- $v := .Guest.LoadBalancers }}
+{{- $v := .LoadBalancers }}
   ApiInternalLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:

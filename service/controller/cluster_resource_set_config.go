@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -28,7 +28,7 @@ type clusterResourceSetConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               adapter.APIWhitelist
+	APIWhitelist               tccp.APIWhitelist
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string

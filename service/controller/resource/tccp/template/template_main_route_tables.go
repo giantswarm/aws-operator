@@ -2,7 +2,7 @@ package template
 
 const TemplateMainRouteTables = `
 {{- define "route_tables" -}}
-{{- $v := .Guest.RouteTables -}}
+{{- $v := .RouteTables -}}
   {{- range $v.PublicRouteTableNames }}
   {{ .ResourceName }}:
     Type: AWS::EC2::RouteTable
