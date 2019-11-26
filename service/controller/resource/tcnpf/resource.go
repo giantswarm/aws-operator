@@ -2,9 +2,9 @@ package tcnpf
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -49,7 +49,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) getCloudFormationTags(cr v1alpha1.MachineDeployment) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.MachineDeployment) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCNPF
 	return awstags.NewCloudFormation(tags)

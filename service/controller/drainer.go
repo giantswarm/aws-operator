@@ -3,7 +3,7 @@ package controller
 import (
 	"time"
 
-	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -89,12 +89,12 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          clusterv1alpha1.NewMachineDeploymentCRD(),
+			CRD:          infrastructurev1alpha2.NewMachineDeploymentCRD(),
 			CRDClient:    crdClient,
 			Informer:     newInformer,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.CMAClient.ClusterV1alpha1().RESTClient(),
+			RESTClient:   config.CMAClient.InfrastructureV1alpha2().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.

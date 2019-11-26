@@ -36,8 +36,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "infrastructure/v1alpha2"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -128,41 +128,41 @@ required = [
   name = "github.com/prometheus/client_golang"
   version = "0.9.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "sigs.k8s.io/cluster-api"
-  version = "=v0.1.10"
+  version = "=v0.2.7"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/cli-runtime"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "v1.15.4"
+  version = "v1.16.3"
 
 [[override]]
   name = "k8s.io/component-base"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "github.com/ghodss/yaml"

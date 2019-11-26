@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -138,7 +138,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -192,7 +192,7 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.Cluster) error {
 	return nil
 }
 
-func (r *Resource) detachVolumes(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) detachVolumes(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -239,13 +239,13 @@ func (r *Resource) detachVolumes(ctx context.Context, cr v1alpha1.Cluster) error
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr v1alpha1.Cluster) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.Cluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCP
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t time.Time) (adapter.Adapter, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.Cluster, t time.Time) (adapter.Adapter, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return adapter.Adapter{}, microerror.Mask(err)
@@ -297,7 +297,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, t
 	return params, nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

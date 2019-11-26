@@ -4,16 +4,15 @@ import (
 	"encoding/json"
 	"net"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func DefaultCluster() cmav1alpha1.Cluster {
-	cr := cmav1alpha1.Cluster{
+func DefaultCluster() infrastructurev1alpha2.Cluster {
+	cr := cmainfrastructurev1alpha2.Cluster{
 		ObjectMeta: v1.ObjectMeta{
 			Labels: map[string]string{
 				label.Cluster:         "8y5ck",
@@ -22,19 +21,19 @@ func DefaultCluster() cmav1alpha1.Cluster {
 		},
 	}
 
-	spec := g8sv1alpha1.AWSClusterSpec{
-		Cluster: g8sv1alpha1.AWSClusterSpecCluster{
+	spec := infrastructurev1alpha2.AWSClusterSpec{
+		Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{
 			Description: "Test cluster for template rendering unit test.",
-			DNS: g8sv1alpha1.AWSClusterSpecClusterDNS{
+			DNS: infrastructurev1alpha2.AWSClusterSpecClusterDNS{
 				Domain: "gauss.eu-central-1.aws.gigantic.io",
 			},
 		},
-		Provider: g8sv1alpha1.AWSClusterSpecProvider{
-			CredentialSecret: g8sv1alpha1.AWSClusterSpecProviderCredentialSecret{
+		Provider: infrastructurev1alpha2.AWSClusterSpecProvider{
+			CredentialSecret: infrastructurev1alpha2.AWSClusterSpecProviderCredentialSecret{
 				Name:      "default-credential-secret",
 				Namespace: "default",
 			},
-			Master: g8sv1alpha1.AWSClusterSpecProviderMaster{
+			Master: infrastructurev1alpha2.AWSClusterSpecProviderMaster{
 				AvailabilityZone: "eu-central-1b",
 				InstanceType:     "m5.xlarge",
 			},
@@ -46,7 +45,7 @@ func DefaultCluster() cmav1alpha1.Cluster {
 
 }
 
-func ClusterWithAZ(cluster cmav1alpha1.Cluster, az string) cmav1alpha1.Cluster {
+func ClusterWithAZ(cluster cmainfrastructurev1alpha2.Cluster, az string) cmainfrastructurev1alpha2.Cluster {
 	region := az[0 : len(az)-1]
 
 	spec := mustG8sClusterSpecFromCMAClusterSpec(cluster.Spec.ProviderSpec)
@@ -56,7 +55,7 @@ func ClusterWithAZ(cluster cmav1alpha1.Cluster, az string) cmav1alpha1.Cluster {
 	return mustCMAClusterWithG8sProviderSpec(cluster, spec)
 }
 
-func ClusterWithNetworkCIDR(cluster cmav1alpha1.Cluster, cidr *net.IPNet) cmav1alpha1.Cluster {
+func ClusterWithNetworkCIDR(cluster cmainfrastructurev1alpha2.Cluster, cidr *net.IPNet) cmainfrastructurev1alpha2.Cluster {
 	status := mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus)
 
 	status.Provider.Network.CIDR = cidr.String()
@@ -64,12 +63,12 @@ func ClusterWithNetworkCIDR(cluster cmav1alpha1.Cluster, cidr *net.IPNet) cmav1a
 	return mustCMAClusterWithG8sProviderStatus(cluster, status)
 }
 
-func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv1alpha1.AWSClusterSpec {
+func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec infrastructurev1alpha2.ProviderSpec) infrastructurev1alpha2.AWSClusterSpec {
 	if cmaSpec.Value == nil {
 		panic("provider spec value must not be empty")
 	}
 
-	var g8sSpec g8sv1alpha1.AWSClusterSpec
+	var g8sSpec infrastructurev1alpha2.AWSClusterSpec
 	{
 		if len(cmaSpec.Value.Raw) == 0 {
 			return g8sSpec
@@ -84,8 +83,8 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 	return g8sSpec
 }
 
-func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
-	var g8sStatus g8sv1alpha1.AWSClusterStatus
+func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) infrastructurev1alpha2.AWSClusterStatus {
+	var g8sStatus infrastructurev1alpha2.AWSClusterStatus
 	{
 		if cmaStatus == nil {
 			return g8sStatus
@@ -104,7 +103,7 @@ func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g
 	return g8sStatus
 }
 
-func mustCMAClusterWithG8sProviderSpec(cr cmav1alpha1.Cluster, providerExtension g8sv1alpha1.AWSClusterSpec) cmav1alpha1.Cluster {
+func mustCMAClusterWithG8sProviderSpec(cr cmainfrastructurev1alpha2.Cluster, providerExtension infrastructurev1alpha2.AWSClusterSpec) cmainfrastructurev1alpha2.Cluster {
 	var err error
 
 	if cr.Spec.ProviderSpec.Value == nil {
@@ -119,7 +118,7 @@ func mustCMAClusterWithG8sProviderSpec(cr cmav1alpha1.Cluster, providerExtension
 	return cr
 }
 
-func mustCMAClusterWithG8sProviderStatus(cr cmav1alpha1.Cluster, providerStatus g8sv1alpha1.AWSClusterStatus) cmav1alpha1.Cluster {
+func mustCMAClusterWithG8sProviderStatus(cr cmainfrastructurev1alpha2.Cluster, providerStatus infrastructurev1alpha2.AWSClusterStatus) cmainfrastructurev1alpha2.Cluster {
 	var err error
 
 	if cr.Status.ProviderStatus == nil {

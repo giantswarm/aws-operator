@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/giantswarm/aws-operator/service/internal/locker"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 func Test_SubnetAllocator(t *testing.T) {
@@ -91,7 +92,7 @@ func Test_SubnetAllocator(t *testing.T) {
 				}
 			}
 
-			err = newResource.EnsureCreated(context.Background(), &v1alpha1.Cluster{})
+			err = newResource.EnsureCreated(context.Background(), &infrastructurev1alpha2.Cluster{})
 			if err != nil {
 				t.Fatal(err)
 			}

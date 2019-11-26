@@ -5,9 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -44,7 +44,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return kms, nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.Cluster) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -155,7 +155,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr v1alpha1.
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr v1alpha1.Cluster) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -214,7 +214,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr v1alpha1.
 	return nil
 }
 
-func (k *Encrypter) EncryptionKey(ctx context.Context, cr v1alpha1.Cluster) (string, error) {
+func (k *Encrypter) EncryptionKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) (string, error) {
 	out, err := k.describeKey(ctx, cr)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -251,7 +251,7 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }
 
-func (k *Encrypter) describeKey(ctx context.Context, cr v1alpha1.Cluster) (*kms.DescribeKeyOutput, error) {
+func (k *Encrypter) describeKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) (*kms.DescribeKeyOutput, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

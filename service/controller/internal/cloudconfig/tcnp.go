@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
@@ -36,7 +36,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-func (t *TCNP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -94,7 +94,7 @@ func (t *TCNP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 }
 
 type WorkerExtension struct {
-	awsConfigSpec g8sv1alpha1.AWSConfigSpec
+	awsConfigSpec infrastructurev1alpha2.AWSConfigSpec
 	baseExtension
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//

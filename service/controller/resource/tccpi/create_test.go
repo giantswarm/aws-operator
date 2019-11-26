@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"testing"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/google/go-cmp/cmp"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi/template"
@@ -31,7 +31,7 @@ func Test_Controller_Resource_TCCPI_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
-		cr   v1alpha1.Cluster
+		cr   infrastructurev1alpha2.Cluster
 	}{
 		{
 			name: "case 0: basic test",

@@ -3,25 +3,24 @@ package key
 import (
 	"encoding/json"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
-func clusterProviderSpec(cluster cmav1alpha1.Cluster) g8sv1alpha1.AWSClusterSpec {
+func clusterProviderSpec(cluster cmainfrastructurev1alpha2.Cluster) infrastructurev1alpha2.AWSClusterSpec {
 	return mustG8sClusterSpecFromCMAClusterSpec(cluster.Spec.ProviderSpec)
 }
 
-func clusterProviderStatus(cluster cmav1alpha1.Cluster) g8sv1alpha1.AWSClusterStatus {
+func clusterProviderStatus(cluster cmainfrastructurev1alpha2.Cluster) infrastructurev1alpha2.AWSClusterStatus {
 	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus)
 }
 
-func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv1alpha1.AWSClusterSpec {
+func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec infrastructurev1alpha2.ProviderSpec) infrastructurev1alpha2.AWSClusterSpec {
 	if cmaSpec.Value == nil {
 		panic("provider spec value must not be empty")
 	}
 
-	var g8sSpec g8sv1alpha1.AWSClusterSpec
+	var g8sSpec infrastructurev1alpha2.AWSClusterSpec
 	{
 		if len(cmaSpec.Value.Raw) == 0 {
 			return g8sSpec
@@ -36,8 +35,8 @@ func mustG8sClusterSpecFromCMAClusterSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv
 	return g8sSpec
 }
 
-func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
-	var g8sStatus g8sv1alpha1.AWSClusterStatus
+func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) infrastructurev1alpha2.AWSClusterStatus {
+	var g8sStatus infrastructurev1alpha2.AWSClusterStatus
 	{
 		if cmaStatus == nil {
 			return g8sStatus

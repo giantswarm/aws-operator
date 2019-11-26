@@ -3,17 +3,16 @@ package unittest
 import (
 	"encoding/json"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func DefaultMachineDeployment() cmav1alpha1.MachineDeployment {
-	cr := cmav1alpha1.MachineDeployment{
+func DefaultMachineDeployment() infrastructurev1alpha2.MachineDeployment {
+	cr := infrastructurev1alpha2.MachineDeployment{
 		ObjectMeta: v1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.MachineDeploymentSubnet: "10.100.8.0/24",
@@ -26,21 +25,21 @@ func DefaultMachineDeployment() cmav1alpha1.MachineDeployment {
 		},
 	}
 
-	spec := g8sv1alpha1.AWSMachineDeploymentSpec{
-		NodePool: g8sv1alpha1.AWSMachineDeploymentSpecNodePool{
+	spec := infrastructurev1alpha2.AWSMachineDeploymentSpec{
+		NodePool: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePool{
 			Description: "Test node pool for cluster in template rendering unit test.",
-			Machine: g8sv1alpha1.AWSMachineDeploymentSpecNodePoolMachine{
+			Machine: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePoolMachine{
 				DockerVolumeSizeGB:  100,
 				KubeletVolumeSizeGB: 100,
 			},
-			Scaling: g8sv1alpha1.AWSMachineDeploymentSpecNodePoolScaling{
+			Scaling: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePoolScaling{
 				Max: 5,
 				Min: 3,
 			},
 		},
-		Provider: g8sv1alpha1.AWSMachineDeploymentSpecProvider{
+		Provider: infrastructurev1alpha2.AWSMachineDeploymentSpecProvider{
 			AvailabilityZones: []string{"eu-central-1a", "eu-central-1c"},
-			Worker: g8sv1alpha1.AWSMachineDeploymentSpecProviderWorker{
+			Worker: infrastructurev1alpha2.AWSMachineDeploymentSpecProviderWorker{
 				InstanceType: "m5.2xlarge",
 			},
 		},
@@ -49,7 +48,7 @@ func DefaultMachineDeployment() cmav1alpha1.MachineDeployment {
 	return mustCMAMachineDeploymentWithG8sProviderSpec(cr, spec)
 }
 
-func MachineDeploymentWithAZs(machineDeployment cmav1alpha1.MachineDeployment, azs []string) cmav1alpha1.MachineDeployment {
+func MachineDeploymentWithAZs(machineDeployment infrastructurev1alpha2.MachineDeployment, azs []string) infrastructurev1alpha2.MachineDeployment {
 	spec := mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(machineDeployment.Spec.Template.Spec.ProviderSpec)
 
 	spec.Provider.AvailabilityZones = azs
@@ -57,12 +56,12 @@ func MachineDeploymentWithAZs(machineDeployment cmav1alpha1.MachineDeployment, a
 	return mustCMAMachineDeploymentWithG8sProviderSpec(machineDeployment, spec)
 }
 
-func mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(cmaSpec cmav1alpha1.ProviderSpec) g8sv1alpha1.AWSMachineDeploymentSpec {
+func mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(cmaSpec infrastructurev1alpha2.ProviderSpec) infrastructurev1alpha2.AWSMachineDeploymentSpec {
 	if cmaSpec.Value == nil {
 		panic("provider spec value must not be empty")
 	}
 
-	var g8sSpec g8sv1alpha1.AWSMachineDeploymentSpec
+	var g8sSpec infrastructurev1alpha2.AWSMachineDeploymentSpec
 	{
 		if len(cmaSpec.Value.Raw) == 0 {
 			return g8sSpec
@@ -77,7 +76,7 @@ func mustG8sMachineDeploymentSpecFromCMAMachineDeploymentSpec(cmaSpec cmav1alpha
 	return g8sSpec
 }
 
-func mustCMAMachineDeploymentWithG8sProviderSpec(cr cmav1alpha1.MachineDeployment, providerExtension g8sv1alpha1.AWSMachineDeploymentSpec) cmav1alpha1.MachineDeployment {
+func mustCMAMachineDeploymentWithG8sProviderSpec(cr infrastructurev1alpha2.MachineDeployment, providerExtension infrastructurev1alpha2.AWSMachineDeploymentSpec) infrastructurev1alpha2.MachineDeployment {
 	var err error
 
 	if cr.Spec.Template.Spec.ProviderSpec.Value == nil {

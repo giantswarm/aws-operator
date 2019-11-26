@@ -8,12 +8,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -24,8 +24,8 @@ import (
 func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	testCases := []struct {
 		name               string
-		cluster            cmav1alpha1.Cluster
-		machineDeployments []cmav1alpha1.MachineDeployment
+		cluster            infrastructurev1alpha2.Cluster
+		machineDeployments []infrastructurev1alpha2.MachineDeployment
 		ctxStatusSubnets   []*ec2.Subnet
 		expectedAZs        []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone
 		errorMatcher       func(error) bool
@@ -62,7 +62,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:    "case 1: control plane and 1 node pool on same AZ",
 			cluster: unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			machineDeployments: []cmav1alpha1.MachineDeployment{
+			machineDeployments: []infrastructurev1alpha2.MachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{
@@ -97,7 +97,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:    "case 2: create control plane and 1 node pool on different AZ",
 			cluster: unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			machineDeployments: []cmav1alpha1.MachineDeployment{
+			machineDeployments: []infrastructurev1alpha2.MachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1b"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{},
@@ -130,7 +130,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:               "case 3: keep control plane and delete 1 node pool from different AZ",
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			machineDeployments: []cmav1alpha1.MachineDeployment{},
+			machineDeployments: []infrastructurev1alpha2.MachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				&ec2.Subnet{
 					AvailabilityZone: aws.String("eu-central-1a"),

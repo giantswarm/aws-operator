@@ -3,7 +3,7 @@ package controller
 import (
 	"net"
 
-	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
@@ -143,12 +143,12 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          clusterv1alpha1.NewClusterCRD(),
+			CRD:          infrastructurev1alpha2.NewClusterCRD(),
 			CRDClient:    crdClient,
 			Informer:     newInformer,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.CMAClient.ClusterV1alpha1().RESTClient(),
+			RESTClient:   config.CMAClient.InfrastructureV1alpha2().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.

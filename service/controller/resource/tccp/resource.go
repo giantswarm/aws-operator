@@ -6,9 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -117,7 +117,7 @@ func (r *Resource) Name() string {
 //
 //     pending, running, stopping, stopped
 //
-func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.Cluster) (string, error) {
+func (r *Resource) searchMasterInstanceID(ctx context.Context, cr infrastructurev1alpha2.Cluster) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -172,7 +172,7 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr v1alpha1.Clust
 	return instanceID, nil
 }
 
-func (r *Resource) stopMasterInstance(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) stopMasterInstance(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -232,7 +232,7 @@ func (r *Resource) stopMasterInstance(ctx context.Context, cr v1alpha1.Cluster) 
 	return nil
 }
 
-func (r *Resource) terminateMasterInstance(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) terminateMasterInstance(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

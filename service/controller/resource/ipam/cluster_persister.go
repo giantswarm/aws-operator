@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,7 +44,7 @@ func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namesp
 		return microerror.Mask(err)
 	}
 
-	var providerStatus v1alpha1.AWSClusterStatus
+	var providerStatus infrastructurev1alpha1.AWSClusterStatus
 	{
 		if cr.Status.ProviderStatus == nil {
 			cr.Status.ProviderStatus = &runtime.RawExtension{}

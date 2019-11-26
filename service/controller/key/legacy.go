@@ -14,6 +14,6 @@ func CloudConfigSmallTemplates() []string {
 	}
 }
 
-func StatusAWSConfigNetworkCIDR(customObject v1alpha1.AWSConfig) string {
+func StatusAWSConfigNetworkCIDR(customObject infrastructurev1alpha1.AWSConfig) string {
 	return customObject.Status.Cluster.Network.CIDR
 }

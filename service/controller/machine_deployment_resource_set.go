@@ -4,13 +4,13 @@ import (
 	"context"
 	"strings"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -487,16 +487,16 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	return resourceSet, nil
 }
 
-func newMachineDeploymentToClusterFunc(cmaClient clientset.Interface) func(obj interface{}) (v1alpha1.Cluster, error) {
-	return func(obj interface{}) (v1alpha1.Cluster, error) {
+func newMachineDeploymentToClusterFunc(cmaClient clientset.Interface) func(obj interface{}) (infrastructurev1alpha2.Cluster, error) {
+	return func(obj interface{}) (infrastructurev1alpha2.Cluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
-			return v1alpha1.Cluster{}, microerror.Mask(err)
+			return infrastructurev1alpha2.Cluster{}, microerror.Mask(err)
 		}
 
 		m, err := cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
-			return v1alpha1.Cluster{}, microerror.Mask(err)
+			return infrastructurev1alpha2.Cluster{}, microerror.Mask(err)
 		}
 
 		return *m, nil

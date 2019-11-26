@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -113,7 +113,7 @@ func (s *GuestSecurityGroupsAdapter) getMasterRules(cfg Config, hostClusterCIDR 
 	return append(publicAPIRules, otherRules...), nil
 }
 
-func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject v1alpha1.Cluster, hostClusterCIDR string) []securityGroupRule {
+func (s *GuestSecurityGroupsAdapter) getEtcdRules(customObject infrastructurev1alpha2.Cluster, hostClusterCIDR string) []securityGroupRule {
 	return []securityGroupRule{
 		{
 			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -41,7 +41,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 //     The node pool's scaling max changes.
 //     The node pool's scaling min changes.
 //
-func (t *TCNP) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
+func (t *TCNP) ShouldScale(ctx context.Context, md infrastructurev1alpha2.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -71,7 +71,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, md v1alpha1.MachineDeployment) (
 //     The worker node's instance type changes.
 //     The operator's version changes.
 //
-func (t *TCNP) ShouldUpdate(ctx context.Context, md v1alpha1.MachineDeployment) (bool, error) {
+func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.MachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)

@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -122,7 +122,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newRouteTablesParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMainRouteTables, error) {
+func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.MachineDeployment) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -156,7 +156,7 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*
 	return routeTables, nil
 }
 
-func newTemplateParams(ctx context.Context, cr v1alpha1.MachineDeployment) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.MachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		routeTables, err := newRouteTablesParams(ctx, cr)

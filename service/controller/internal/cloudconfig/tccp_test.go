@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"testing"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_0"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
@@ -36,7 +36,7 @@ func Test_Controller_CloudConfig_TCCP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name   string
 		ctx    context.Context
-		cr     v1alpha1.Cluster
+		cr     infrastructurev1alpha2.Cluster
 		certs  certs.Cluster
 		keys   randomkeys.Cluster
 		labels string

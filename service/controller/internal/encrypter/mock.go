@@ -3,7 +3,7 @@ package encrypter
 import (
 	"context"
 
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 )
 
 type EncrypterMock struct {
@@ -16,15 +16,15 @@ func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (str
 	return plaintext, nil
 }
 
-func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject v1alpha1.Cluster) (string, error) {
+func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.Cluster) (string, error) {
 	return "", nil
 }
 
-func (e *EncrypterMock) EnsureCreatedEncryptionKey(context.Context, v1alpha1.Cluster) error {
+func (e *EncrypterMock) EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.Cluster) error {
 	return nil
 }
 
-func (e *EncrypterMock) EnsureDeletedEncryptionKey(context.Context, v1alpha1.Cluster) error {
+func (e *EncrypterMock) EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.Cluster) error {
 	return nil
 }
 

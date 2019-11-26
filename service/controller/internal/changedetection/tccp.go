@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -42,7 +42,7 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 //     The master node's instance type changes.
 //     The operator's version changes.
 //
-func (t *TCCP) ShouldUpdate(ctx context.Context, cr v1alpha1.Cluster) (bool, error) {
+func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.Cluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
