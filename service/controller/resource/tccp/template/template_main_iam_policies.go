@@ -2,7 +2,7 @@ package template
 
 const TemplateMainIAMPolicies = `
 {{- define "iam_policies" -}}
-{{- $v := .Guest.IAMPolicies -}}
+{{- $v := .IAMPolicies -}}
   MasterRole:
     Type: "AWS::IAM::Role"
     Properties:

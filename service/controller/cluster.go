@@ -20,8 +20,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -227,12 +227,12 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: adapter.APIWhitelist{
-				Private: adapter.Whitelist{
+			APIWhitelist: tccp.APIWhitelist{
+				Private: tccp.Whitelist{
 					Enabled:    config.APIWhitelist.Private.Enabled,
 					SubnetList: config.APIWhitelist.Private.SubnetList,
 				},
-				Public: adapter.Whitelist{
+				Public: tccp.Whitelist{
 					Enabled:    config.APIWhitelist.Public.Enabled,
 					SubnetList: config.APIWhitelist.Public.SubnetList,
 				},

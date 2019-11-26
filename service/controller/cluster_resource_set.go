@@ -13,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
@@ -352,7 +351,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
-			APIWhitelist: adapter.APIWhitelist{
+			APIWhitelist: tccp.APIWhitelist{
 				Private: config.APIWhitelist.Private,
 				Public:  config.APIWhitelist.Public,
 			},

@@ -2,7 +2,7 @@ package template
 
 const TemplateMainSecurityGroups = `
 {{- define "security_groups" -}}
-{{- $v := .Guest.SecurityGroups -}}
+{{- $v := .SecurityGroups -}}
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -18,7 +18,7 @@ const TemplateMainSecurityGroups = `
         CidrIp: {{ .SourceCIDR }}
       {{- end }}
       {{- if $v.APIWhitelistEnabled }}
-      {{- $g := .Guest.NATGateway }}
+      {{- $g := .NATGateway }}
       {{- range $g.Gateways }}
       -
         Description: Allow NAT gateway IP
