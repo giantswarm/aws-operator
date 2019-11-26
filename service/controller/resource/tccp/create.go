@@ -142,7 +142,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -196,7 +196,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.Cl
 	return nil
 }
 
-func (r *Resource) detachVolumes(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) detachVolumes(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -243,7 +243,7 @@ func (r *Resource) detachVolumes(ctx context.Context, cr infrastructurev1alpha2.
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.Cluster) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCP
 	return awstags.NewCloudFormation(tags)
@@ -955,7 +955,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 	return params, nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

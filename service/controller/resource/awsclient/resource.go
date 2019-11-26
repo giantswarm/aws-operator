@@ -20,7 +20,7 @@ const (
 type Config struct {
 	K8sClient     kubernetes.Interface
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.Cluster, error)
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 
 	CPAWSConfig aws.Config
 }
@@ -28,7 +28,7 @@ type Config struct {
 type Resource struct {
 	k8sClient     kubernetes.Interface
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.Cluster, error)
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 
 	cpAWSConfig aws.Config
 }
@@ -59,7 +59,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addAWSClientsToContext(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) addAWSClientsToContext(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

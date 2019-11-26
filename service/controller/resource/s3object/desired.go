@@ -29,7 +29,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	var cluster infrastructurev1alpha2.Cluster
+	var cluster infrastructurev1alpha2.AWSCluster
 	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
 	{

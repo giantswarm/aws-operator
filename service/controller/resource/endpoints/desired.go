@@ -78,7 +78,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return endpoints, nil
 }
 
-func (r Resource) searchMasterInstance(ctx context.Context, cr infrastructurev1alpha2.Cluster) (*ec2.Instance, error) {
+func (r Resource) searchMasterInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*ec2.Instance, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

@@ -32,7 +32,7 @@ func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
-		cr   infrastructurev1alpha2.Cluster
+		cr   infrastructurev1alpha2.AWSCluster
 	}{
 		{
 			name: "case 0: basic test",

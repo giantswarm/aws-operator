@@ -12,7 +12,7 @@ import (
 )
 
 type baseExtension struct {
-	cluster       infrastructurev1alpha2.Cluster
+	cluster       infrastructurev1alpha2.AWSCluster
 	encrypter     encrypter.Interface
 	encryptionKey string
 }

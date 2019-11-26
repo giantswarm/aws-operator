@@ -16,15 +16,15 @@ func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (str
 	return plaintext, nil
 }
 
-func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.Cluster) (string, error) {
+func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (string, error) {
 	return "", nil
 }
 
-func (e *EncrypterMock) EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.Cluster) error {
+func (e *EncrypterMock) EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error {
 	return nil
 }
 
-func (e *EncrypterMock) EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.Cluster) error {
+func (e *EncrypterMock) EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error {
 	return nil
 }
 

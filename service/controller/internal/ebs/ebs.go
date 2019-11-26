@@ -184,7 +184,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 // the Etcd volume for the master instance will be returned. If persistentVolume
 // is set then any Persistent Volumes associated with the cluster will be
 // returned.
-func (e *EBS) ListVolumes(cr infrastructurev1alpha2.Cluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
+func (e *EBS) ListVolumes(cr infrastructurev1alpha2.AWSCluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
 	var volumes []Volume
 
 	// We filter to only select clusters with the cluster cloud provider tag.

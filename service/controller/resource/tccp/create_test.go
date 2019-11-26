@@ -34,7 +34,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name         string
-		cr           infrastructurev1alpha2.Cluster
+		cr           infrastructurev1alpha2.AWSCluster
 		ctx          context.Context
 		errorMatcher func(error) bool
 	}{

@@ -33,7 +33,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name   string
 		ctx    context.Context
-		cr     infrastructurev1alpha2.Cluster
+		cr     infrastructurev1alpha2.AWSCluster
 		certs  certs.Cluster
 		keys   randomkeys.Cluster
 		labels string

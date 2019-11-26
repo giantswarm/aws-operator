@@ -14,7 +14,7 @@ type secretAccessor struct {
 	Namespace string
 }
 
-func newSecretAccessors(ctx context.Context, cr infrastructurev1alpha2.Cluster) []secretAccessor {
+func newSecretAccessors(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) []secretAccessor {
 	return []secretAccessor{
 		// The secret accessors below are associated to the tenant's API
 		// certificate.

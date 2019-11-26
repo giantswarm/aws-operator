@@ -24,7 +24,7 @@ import (
 func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	testCases := []struct {
 		name               string
-		cluster            infrastructurev1alpha2.Cluster
+		cluster            infrastructurev1alpha2.AWSCluster
 		machineDeployments []infrastructurev1alpha2.MachineDeployment
 		ctxStatusSubnets   []*ec2.Subnet
 		expectedAZs        []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone

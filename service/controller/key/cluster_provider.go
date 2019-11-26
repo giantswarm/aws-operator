@@ -7,11 +7,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func clusterProviderSpec(cluster cmainfrastructurev1alpha2.Cluster) infrastructurev1alpha2.AWSClusterSpec {
+func clusterProviderSpec(cluster cmainfrastructurev1alpha2.AWSCluster) infrastructurev1alpha2.AWSClusterSpec {
 	return mustG8sClusterSpecFromCMAClusterSpec(cluster.Spec.ProviderSpec)
 }
 
-func clusterProviderStatus(cluster cmainfrastructurev1alpha2.Cluster) infrastructurev1alpha2.AWSClusterStatus {
+func clusterProviderStatus(cluster cmainfrastructurev1alpha2.AWSCluster) infrastructurev1alpha2.AWSClusterStatus {
 	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus)
 }
 

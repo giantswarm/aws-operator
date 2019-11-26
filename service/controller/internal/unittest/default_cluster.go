@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func DefaultCluster() infrastructurev1alpha2.Cluster {
-	cr := cmainfrastructurev1alpha2.Cluster{
+func DefaultCluster() infrastructurev1alpha2.AWSCluster {
+	cr := cmainfrastructurev1alpha2.AWSCluster{
 		ObjectMeta: v1.ObjectMeta{
 			Labels: map[string]string{
 				label.Cluster:         "8y5ck",
@@ -45,7 +45,7 @@ func DefaultCluster() infrastructurev1alpha2.Cluster {
 
 }
 
-func ClusterWithAZ(cluster cmainfrastructurev1alpha2.Cluster, az string) cmainfrastructurev1alpha2.Cluster {
+func ClusterWithAZ(cluster cmainfrastructurev1alpha2.AWSCluster, az string) cmainfrastructurev1alpha2.AWSCluster {
 	region := az[0 : len(az)-1]
 
 	spec := mustG8sClusterSpecFromCMAClusterSpec(cluster.Spec.ProviderSpec)
@@ -55,7 +55,7 @@ func ClusterWithAZ(cluster cmainfrastructurev1alpha2.Cluster, az string) cmainfr
 	return mustCMAClusterWithG8sProviderSpec(cluster, spec)
 }
 
-func ClusterWithNetworkCIDR(cluster cmainfrastructurev1alpha2.Cluster, cidr *net.IPNet) cmainfrastructurev1alpha2.Cluster {
+func ClusterWithNetworkCIDR(cluster cmainfrastructurev1alpha2.AWSCluster, cidr *net.IPNet) cmainfrastructurev1alpha2.AWSCluster {
 	status := mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus)
 
 	status.Provider.Network.CIDR = cidr.String()
@@ -103,7 +103,7 @@ func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) i
 	return g8sStatus
 }
 
-func mustCMAClusterWithG8sProviderSpec(cr cmainfrastructurev1alpha2.Cluster, providerExtension infrastructurev1alpha2.AWSClusterSpec) cmainfrastructurev1alpha2.Cluster {
+func mustCMAClusterWithG8sProviderSpec(cr cmainfrastructurev1alpha2.AWSCluster, providerExtension infrastructurev1alpha2.AWSClusterSpec) cmainfrastructurev1alpha2.AWSCluster {
 	var err error
 
 	if cr.Spec.ProviderSpec.Value == nil {
@@ -118,7 +118,7 @@ func mustCMAClusterWithG8sProviderSpec(cr cmainfrastructurev1alpha2.Cluster, pro
 	return cr
 }
 
-func mustCMAClusterWithG8sProviderStatus(cr cmainfrastructurev1alpha2.Cluster, providerStatus infrastructurev1alpha2.AWSClusterStatus) cmainfrastructurev1alpha2.Cluster {
+func mustCMAClusterWithG8sProviderStatus(cr cmainfrastructurev1alpha2.AWSCluster, providerStatus infrastructurev1alpha2.AWSClusterStatus) cmainfrastructurev1alpha2.AWSCluster {
 	var err error
 
 	if cr.Status.ProviderStatus == nil {

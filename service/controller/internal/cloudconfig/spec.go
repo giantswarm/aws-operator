@@ -9,5 +9,5 @@ import (
 )
 
 type Interface interface {
-	Render(ctx context.Context, cr infrastructurev1alpha2.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error)
+	Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error)
 }

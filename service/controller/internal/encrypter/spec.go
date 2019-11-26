@@ -17,17 +17,17 @@ type Interface interface {
 }
 
 type Encrypter interface {
-	EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.Cluster) (string, error)
+	EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (string, error)
 	Encrypt(ctx context.Context, key, plaintext string) (string, error)
 	IsKeyNotFound(error) bool
 }
 
 type Resource interface {
-	EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.Cluster) error
-	EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.Cluster) error
+	EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error
+	EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error
 }
 
 type RoleManager interface {
-	EnsureCreatedAuthorizedIAMRoles(context.Context, infrastructurev1alpha2.Cluster) error
-	EnsureDeletedAuthorizedIAMRoles(context.Context, infrastructurev1alpha2.Cluster) error
+	EnsureCreatedAuthorizedIAMRoles(context.Context, infrastructurev1alpha2.AWSCluster) error
+	EnsureDeletedAuthorizedIAMRoles(context.Context, infrastructurev1alpha2.AWSCluster) error
 }

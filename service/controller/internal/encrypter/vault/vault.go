@@ -73,7 +73,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return e, nil
 }
 
-func (e *Encrypter) EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.Cluster) (string, error) {
+func (e *Encrypter) EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (string, error) {
 	err := e.ensureToken()
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -146,7 +146,7 @@ func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return ciphertext, nil
 }
 
-func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -201,7 +201,7 @@ func (e *Encrypter) EnsureCreatedAuthorizedIAMRoles(ctx context.Context, cr infr
 	return nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.Cluster) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -253,7 +253,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, customObject
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -303,7 +303,7 @@ func (e *Encrypter) EnsureDeletedAuthorizedIAMRoles(ctx context.Context, cr infr
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.Cluster) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) error {
 	err := e.ensureToken()
 	if err != nil {
 		return microerror.Mask(err)
@@ -623,7 +623,7 @@ func (e *Encrypter) postAuthAWSRole(name string, data *AWSAuthRole) error {
 
 // TODO the key function should simply be used. No reason for the pointer
 // receiver wrapper.
-func (e *Encrypter) keyName(cr infrastructurev1alpha2.Cluster) string {
+func (e *Encrypter) keyName(cr infrastructurev1alpha2.AWSCluster) string {
 	return key.ClusterID(&cr)
 }
 

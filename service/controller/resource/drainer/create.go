@@ -117,7 +117,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1alpha2.Cluster, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for guest cluster nodes %#q", instanceID))
 
 	n := cr.GetNamespace()

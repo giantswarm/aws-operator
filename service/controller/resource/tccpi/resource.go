@@ -48,7 +48,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.Cluster) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCPI
 	return awstags.NewCloudFormation(tags)

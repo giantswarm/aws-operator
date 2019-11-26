@@ -116,7 +116,7 @@ func (r *Resource) Name() string {
 //
 //     pending, running, stopping, stopped
 //
-func (r *Resource) searchMasterInstanceID(ctx context.Context, cr infrastructurev1alpha2.Cluster) (string, error) {
+func (r *Resource) searchMasterInstanceID(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -171,7 +171,7 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr infrastructure
 	return instanceID, nil
 }
 
-func (r *Resource) stopMasterInstance(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) stopMasterInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -231,7 +231,7 @@ func (r *Resource) stopMasterInstance(ctx context.Context, cr infrastructurev1al
 	return nil
 }
 
-func (r *Resource) terminateMasterInstance(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) terminateMasterInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

@@ -14,13 +14,13 @@ const (
 type ResourceConfig struct {
 	G8sClient     versioned.Interface
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.Cluster, error)
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
 	g8sClient     versioned.Interface
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.Cluster, error)
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {

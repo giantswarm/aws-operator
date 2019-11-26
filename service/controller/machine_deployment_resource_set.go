@@ -487,16 +487,16 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	return resourceSet, nil
 }
 
-func newMachineDeploymentToClusterFunc(cmaClient clientset.Interface) func(obj interface{}) (infrastructurev1alpha2.Cluster, error) {
-	return func(obj interface{}) (infrastructurev1alpha2.Cluster, error) {
+func newMachineDeploymentToClusterFunc(cmaClient clientset.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+	return func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
-			return infrastructurev1alpha2.Cluster{}, microerror.Mask(err)
+			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
 		m, err := cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
-			return infrastructurev1alpha2.Cluster{}, microerror.Mask(err)
+			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
 		return *m, nil

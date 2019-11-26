@@ -113,7 +113,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newIAMRolesParams(ctx context.Context, cr infrastructurev1alpha2.Cluster) (*template.ParamsMainIAMRoles, error) {
+func newIAMRolesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMRoles, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -133,7 +133,7 @@ func newIAMRolesParams(ctx context.Context, cr infrastructurev1alpha2.Cluster) (
 	return iamRoles, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.Cluster) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		iamRoles, err := newIAMRolesParams(ctx, cr)

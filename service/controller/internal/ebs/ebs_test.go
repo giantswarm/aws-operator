@@ -16,7 +16,7 @@ import (
 func Test_ListVolumes(t *testing.T) {
 	t.Parallel()
 
-	customObject := infrastructurev1alpha2.Cluster{
+	customObject := infrastructurev1alpha2.AWSCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
 				label.Cluster: "test-cluster",
@@ -26,7 +26,7 @@ func Test_ListVolumes(t *testing.T) {
 
 	testCases := []struct {
 		description     string
-		obj             infrastructurev1alpha2.Cluster
+		obj             infrastructurev1alpha2.AWSCluster
 		filterFuncs     []func(t *ec2.Tag) bool
 		expectedVolumes []Volume
 		ebsVolumes      []ebsVolumeMock

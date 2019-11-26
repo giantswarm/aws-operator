@@ -41,7 +41,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addPeerRoleARNToContext(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (r *Resource) addPeerRoleARNToContext(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

@@ -12,12 +12,12 @@ const (
 
 type Config struct {
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.Cluster, error)
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.Cluster, error)
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {

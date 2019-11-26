@@ -21,7 +21,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	}{
 		{
 			description: "Get bucket name from custom object.",
-			obj: &infrastructurev1alpha2.Cluster{
+			obj: &infrastructurev1alpha2.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",

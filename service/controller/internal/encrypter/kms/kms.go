@@ -44,7 +44,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return kms, nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -155,7 +155,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -214,7 +214,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastru
 	return nil
 }
 
-func (k *Encrypter) EncryptionKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) (string, error) {
+func (k *Encrypter) EncryptionKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (string, error) {
 	out, err := k.describeKey(ctx, cr)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -251,7 +251,7 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }
 
-func (k *Encrypter) describeKey(ctx context.Context, cr infrastructurev1alpha2.Cluster) (*kms.DescribeKeyOutput, error) {
+func (k *Encrypter) describeKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*kms.DescribeKeyOutput, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

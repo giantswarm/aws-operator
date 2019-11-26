@@ -42,7 +42,7 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 //     The master node's instance type changes.
 //     The operator's version changes.
 //
-func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.Cluster) (bool, error) {
+func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)

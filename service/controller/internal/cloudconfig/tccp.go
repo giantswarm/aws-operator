@@ -39,7 +39,7 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	return t, nil
 }
 
-func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

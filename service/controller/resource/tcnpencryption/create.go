@@ -20,7 +20,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha2.Cluster
+	var cl infrastructurev1alpha2.AWSCluster
 	{
 		md, err := key.ToMachineDeployment(obj)
 		if err != nil {

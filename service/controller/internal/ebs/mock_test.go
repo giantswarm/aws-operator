@@ -9,7 +9,7 @@ import (
 )
 
 type EC2ClientMock struct {
-	customObject infrastructurev1alpha2.Cluster
+	customObject infrastructurev1alpha2.AWSCluster
 	ebsVolumes   []ebsVolumeMock
 }
 

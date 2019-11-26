@@ -92,7 +92,7 @@ func Test_SubnetAllocator(t *testing.T) {
 				}
 			}
 
-			err = newResource.EnsureCreated(context.Background(), &infrastructurev1alpha2.Cluster{})
+			err = newResource.EnsureCreated(context.Background(), &infrastructurev1alpha2.AWSCluster{})
 			if err != nil {
 				t.Fatal(err)
 			}

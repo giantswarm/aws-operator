@@ -17,7 +17,7 @@ const (
 	loadBalancerTagChunkSize     = 20
 )
 
-func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject infrastructurev1alpha2.Cluster) (*LoadBalancerState, error) {
+func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (*LoadBalancerState, error) {
 	lbState := &LoadBalancerState{}
 	clusterLBNames := []string{}
 
@@ -78,7 +78,7 @@ func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string 
 	return chunks
 }
 
-func containsClusterTag(tags []*elb.Tag, customObject infrastructurev1alpha2.Cluster) bool {
+func containsClusterTag(tags []*elb.Tag, customObject infrastructurev1alpha2.AWSCluster) bool {
 	tagKey := key.ClusterCloudProviderTag(&customObject)
 
 	for _, tag := range tags {

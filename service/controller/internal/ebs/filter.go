@@ -24,7 +24,7 @@ func IsFiltered(vol *ec2.Volume, filterFuncs []func(t *ec2.Tag) bool) bool {
 	return false
 }
 
-func NewDockerVolumeFilter(cr infrastructurev1alpha2.Cluster) func(t *ec2.Tag) bool {
+func NewDockerVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
 		if *t.Key == nameTagKey && *t.Value == key.VolumeNameDocker(cr) {
 			return true
@@ -33,7 +33,7 @@ func NewDockerVolumeFilter(cr infrastructurev1alpha2.Cluster) func(t *ec2.Tag) b
 	}
 }
 
-func NewEtcdVolumeFilter(cr infrastructurev1alpha2.Cluster) func(t *ec2.Tag) bool {
+func NewEtcdVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
 		if *t.Key == nameTagKey && *t.Value == key.VolumeNameEtcd(cr) {
 			return true
@@ -42,7 +42,7 @@ func NewEtcdVolumeFilter(cr infrastructurev1alpha2.Cluster) func(t *ec2.Tag) boo
 	}
 }
 
-func NewPersistentVolumeFilter(cr infrastructurev1alpha2.Cluster) func(t *ec2.Tag) bool {
+func NewPersistentVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
 		if *t.Key == cloudProviderPersistentVolumeTagKey {
 			return true
