@@ -384,23 +384,20 @@ func terminateBastionInstance(ctx context.Context, clusterID string, config Conf
 
 func generateBastionUserData(ctx context.Context, config Config) (string, error) {
 	type User struct {
-		Name   string   `json:"name"`
-		Groups []string `json:"groups"`
+		Name              string   `json:"name"`
+		Groups            []string `json:"groups"`
+		SshAuthorizedKeys []string `json:"sshAuthorizedKeys"`
+		Shell             string   `json:"shell"`
 	}
 	type Passwd struct {
 		Users []User `json:"users"`
 	}
 	type IgnitionConfig struct {
-		Config   interface{} `json:"config"`
-		Timeouts interface{} `json:"timeouts"`
-		Version  string      `json:"version"`
+		Version string `json:"version"`
 	}
 	type UserData struct {
 		Ignition IgnitionConfig `json:"ignition"`
-		Networkd interface{}    `json:"ignition"`
 		Passwd   Passwd         `json:"passwd"`
-		Storage  interface{}    `json:"storage"`
-		Systemd  interface{}    `json:"systemd"`
 	}
 
 	var sshUserList []User
@@ -447,8 +444,6 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-
-	fmt.Println("userData", string(userDataJSON))
 
 	return base64.StdEncoding.EncodeToString(userDataJSON), nil
 }
