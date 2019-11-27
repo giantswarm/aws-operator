@@ -10,7 +10,6 @@ import (
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/informer"
-	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -66,7 +65,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	{
 		c := informer.Config{
 			Logger:  config.Logger,
-			Watcher: config.CMAClient.ClusterV1alpha1().MachineDeployments(corev1.NamespaceAll),
+			Watcher: config.G8sClient.InfrastructureV1alpha2().AWSMachineDeployments(),
 
 			ListOptions: metav1.ListOptions{
 				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
@@ -94,7 +93,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			Informer:     newInformer,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.CMAClient.InfrastructureV1alpha2().RESTClient(),
+			RESTClient:   config.G8sClient.InfrastructureV1alpha2().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.

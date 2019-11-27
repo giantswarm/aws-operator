@@ -56,7 +56,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -72,7 +72,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 		c := drainer.ResourceConfig{
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		drainerResource, err = drainer.NewResource(c)

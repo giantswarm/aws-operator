@@ -5,13 +5,13 @@ import (
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -54,7 +54,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var machineDeploymentChecker *ipam.MachineDeploymentChecker
 	{
 		c := ipam.MachineDeploymentCheckerConfig{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -67,7 +67,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			CMAClient: config.CMAClient,
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
@@ -123,7 +122,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var machineDeploymentPersister *ipam.MachineDeploymentPersister
 	{
 		c := ipam.MachineDeploymentPersisterConfig{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -150,7 +149,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -178,9 +177,9 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			CMAClient:     config.CMAClient,
+			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
@@ -192,7 +191,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tcnpEncryptionResource resource.Interface
 	{
 		c := tcnpencryption.Config{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 		}
@@ -231,7 +230,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			CloudConfig:        tcnpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCNP,
 			Logger:             config.Logger,
-			CMAClient:          config.CMAClient,
+			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCNP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
@@ -250,7 +249,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tcnpAZsResource resource.Interface
 	{
 		c := tcnpazs.Config{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -264,7 +263,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpnatgateways.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpNATGatewaysResource, err = tccpnatgateways.New(c)
@@ -277,7 +276,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := region.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		regionResource, err = region.New(c)
@@ -290,7 +289,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpvpcpcx.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
@@ -326,7 +325,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Detection: tcnpChangeDetection,
 			Logger:    config.Logger,
 
@@ -384,7 +383,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpVPCIDResource, err = tccpvpcid.New(c)
@@ -487,14 +486,14 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	return resourceSet, nil
 }
 
-func newMachineDeploymentToClusterFunc(cmaClient clientset.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 	return func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}

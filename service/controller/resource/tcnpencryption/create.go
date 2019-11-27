@@ -27,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		m, err := r.cmaClient.ClusterV1alpha1().Clusters(md.Namespace).Get(key.ClusterID(&md), metav1.GetOptions{})
+		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(&md), metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

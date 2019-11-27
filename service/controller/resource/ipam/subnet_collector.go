@@ -12,14 +12,12 @@ import (
 	"github.com/giantswarm/micrologger"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type SubnetCollectorConfig struct {
-	CMAClient clientset.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -27,7 +25,6 @@ type SubnetCollectorConfig struct {
 }
 
 type SubnetCollector struct {
-	cmaClient clientset.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
@@ -35,9 +32,6 @@ type SubnetCollector struct {
 }
 
 func NewSubnetCollector(config SubnetCollectorConfig) (*SubnetCollector, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
-	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -50,7 +44,6 @@ func NewSubnetCollector(config SubnetCollectorConfig) (*SubnetCollector, error) 
 	}
 
 	c := &SubnetCollector{
-		cmaClient: config.CMAClient,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
@@ -166,7 +159,7 @@ func (c *SubnetCollector) getSubnetsFromAWSConfigs(ctx context.Context) ([]net.I
 }
 
 func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPNet, error) {
-	clusterList, err := c.cmaClient.Cluster().Clusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters().List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -190,7 +183,7 @@ func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPN
 }
 
 func (c *SubnetCollector) getSubnetsFromMachineDeployments(ctx context.Context) ([]net.IPNet, error) {
-	machineDeploymentList, err := c.cmaClient.Cluster().MachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
+	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

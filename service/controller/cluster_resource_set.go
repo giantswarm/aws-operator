@@ -107,7 +107,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var clusterChecker *ipam.ClusterChecker
 	{
 		c := ipam.ClusterCheckerConfig{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -120,7 +120,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			CMAClient: config.CMAClient,
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
@@ -136,7 +135,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var clusterPersister *ipam.ClusterPersister
 	{
 		c := ipam.ClusterPersisterConfig{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -177,7 +176,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			CMAClient:     config.CMAClient,
+			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
 		}
@@ -267,7 +266,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			CloudConfig:        tccpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCCP,
 			Logger:             config.Logger,
-			CMAClient:          config.CMAClient,
+			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCCP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
@@ -347,7 +346,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
-			CMAClient:            config.CMAClient,
+			G8sClient:            config.G8sClient,
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 

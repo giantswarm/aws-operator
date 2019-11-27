@@ -9,12 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
@@ -191,7 +190,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 				var err error
 
 				c := Config{
-					CMAClient:     fakeClient,
+					G8sClient:     fakeClient,
 					Logger:        microloggertest.New(),
 					ToClusterFunc: key.ToCluster,
 				}
@@ -204,7 +203,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 
 			// Prepare MachineDeployments for fake client.
 			for _, md := range tc.machineDeployments {
-				_, err := fakeClient.ClusterV1alpha1().MachineDeployments(metav1.NamespaceDefault).Create(&md)
+				_, err := fakeClient.InfrastructureV1alpha2().AWSMachineDeployments().Create(&md)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -627,7 +626,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 		var err error
 
 		c := Config{
-			CMAClient:     fake.NewSimpleClientset(),
+			G8sClient:     fake.NewSimpleClientset(),
 			Logger:        microloggertest.New(),
 			ToClusterFunc: key.ToCluster,
 		}

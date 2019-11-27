@@ -3,34 +3,34 @@ package ipam
 import (
 	"context"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type MachineDeploymentCheckerConfig struct {
-	CMAClient clientset.Interface
+	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 }
 
 type MachineDeploymentChecker struct {
-	cmaClient clientset.Interface
+	g8sClient versioned.Interface
 	logger    micrologger.Logger
 }
 
 func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*MachineDeploymentChecker, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	a := &MachineDeploymentChecker{
-		cmaClient: config.CMAClient,
+		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 	}
 
@@ -38,7 +38,7 @@ func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*Machin
 }
 
 func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	cr, err := c.cmaClient.ClusterV1alpha1().MachineDeployments(namespace).Get(name, metav1.GetOptions{})
+	cr, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().Get(name, metav1.GetOptions{})
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
