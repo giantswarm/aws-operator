@@ -59,35 +59,6 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var guest *framework.Guest
-	{
-		c := framework.GuestConfig{
-			Logger: logger,
-
-			ClusterID:    env.ClusterID(),
-			CommonDomain: env.CommonDomain(),
-		}
-
-		guest, err = framework.NewGuest(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
-	var host *framework.Host
-	{
-		c := framework.HostConfig{
-			Logger: logger,
-
-			ClusterID: env.ClusterID(),
-		}
-
-		host, err = framework.NewHost(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
 	var cpK8sClients *k8sclient.Clients
 	{
 		c := k8sclient.ClientsConfig{
@@ -110,6 +81,36 @@ func NewConfig() (Config, error) {
 		}
 
 		cpCRDClient, err = k8scrdclient.New(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
+	var guest *framework.Guest
+	{
+		c := framework.GuestConfig{
+			HostK8sClient: cpK8sClients.K8sClient(),
+			Logger:        logger,
+
+			ClusterID:    env.ClusterID(),
+			CommonDomain: env.CommonDomain(),
+		}
+
+		guest, err = framework.NewGuest(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
+	var host *framework.Host
+	{
+		c := framework.HostConfig{
+			Logger: logger,
+
+			ClusterID: env.ClusterID(),
+		}
+
+		host, err = framework.NewHost(c)
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
