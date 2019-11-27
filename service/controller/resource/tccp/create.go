@@ -249,7 +249,7 @@ func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) [
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -272,7 +272,7 @@ func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1
 	return iamPolicies, nil
 }
 
-func (r *Resource) newInternetGatewayParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainInternetGateway, error) {
+func (r *Resource) newInternetGatewayParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainInternetGateway, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -298,7 +298,7 @@ func (r *Resource) newInternetGatewayParams(ctx context.Context, cr infrastructu
 
 	return internetGateway, nil
 }
-func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alpha1.Cluster, t time.Time) (*template.ParamsMainInstance, error) {
+func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -349,7 +349,7 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alp
 	}
 	return instance, nil
 }
-func (r *Resource) newLoadBalancersParams(ctx context.Context, cr infrastructurev1alpha1.Cluster, t time.Time) (*template.ParamsMainLoadBalancers, error) {
+func (r *Resource) newLoadBalancersParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainLoadBalancers, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -409,7 +409,7 @@ func (r *Resource) newLoadBalancersParams(ctx context.Context, cr infrastructure
 	}
 	return loadBalancers, nil
 }
-func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainNATGateway, error) {
+func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainNATGateway, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -450,7 +450,7 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 
 	return natGateway, nil
 }
-func (r *Resource) newOutputsParams(ctx context.Context, cr infrastructurev1alpha1.Cluster, t time.Time) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newOutputsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainOutputs, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -476,7 +476,7 @@ func (r *Resource) newOutputsParams(ctx context.Context, cr infrastructurev1alph
 
 	return outputs, nil
 }
-func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha1.Cluster, t time.Time) (*template.ParamsMainRecordSets, error) {
+func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainRecordSets, error) {
 	_, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -496,7 +496,7 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 
 	return recordSets, nil
 }
-func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainRouteTables, error) {
+func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -592,7 +592,7 @@ func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.Secu
 	return append(publicAPIRules, otherRules...), nil
 }
 
-func getEtcdRules(customObject infrastructurev1alpha1.Cluster, hostClusterCIDR string) []template.SecurityGroupRule {
+func getEtcdRules(customObject infrastructurev1alpha2.AWSCluster, hostClusterCIDR string) []template.SecurityGroupRule {
 	return []template.SecurityGroupRule{
 		{
 			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
@@ -745,7 +745,7 @@ func getHostClusterNATGatewayRules(cfg securityConfig) ([]template.SecurityGroup
 	return gatewayRules, nil
 }
 
-func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainSecurityGroups, error) {
+func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -787,7 +787,7 @@ func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr infrastructur
 
 	return securityGroups, nil
 }
-func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainSubnets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -847,7 +847,7 @@ func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alph
 
 	return subnets, nil
 }
-func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha1.Cluster) (*template.ParamsMainVPC, error) {
+func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainVPC, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -889,7 +889,7 @@ func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha1.C
 	return vpc, nil
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha1.Cluster, t time.Time) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		iamPolicies, err := r.newIAMPoliciesParams(ctx, cr)

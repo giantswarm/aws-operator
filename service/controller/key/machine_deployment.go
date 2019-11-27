@@ -3,33 +3,34 @@ package key
 import (
 	"strconv"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
 
 func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.AWSMachineDeployment) []string {
-	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
+	return cr.Spec.Provider.AvailabilityZones
 }
 
 func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
-	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
+	return strconv.Itoa(cr.Spec.NodePool.Machine.DockerVolumeSizeGB)
 }
 
 func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeployment) string {
-	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
+	return cr.Spec.Provider.Worker.InstanceType
 }
 
 func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
-	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.KubeletVolumeSizeGB)
+	return strconv.Itoa(cr.Spec.NodePool.Machine.KubeletVolumeSizeGB)
 }
 
 func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {
-	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Max
+	return cr.Spec.NodePool.Scaling.Max
 }
 
 func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment) int {
-	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
+	return cr.Spec.NodePool.Scaling.Min
 }
 
 func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {

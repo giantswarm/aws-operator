@@ -59,7 +59,7 @@ func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
 }
 
 func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Cluster.DNS.Domain
+	return cluster.Spec.Cluster.DNS.Domain
 }
 
 func ClusterEtcdEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -79,11 +79,11 @@ func ClusterNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 }
 
 func CredentialName(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Provider.CredentialSecret.Name
+	return cluster.Spec.Provider.CredentialSecret.Name
 }
 
 func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Provider.CredentialSecret.Namespace
+	return cluster.Spec.Provider.CredentialSecret.Namespace
 }
 
 func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time) string {
@@ -91,7 +91,7 @@ func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time)
 }
 
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Provider.Master.AvailabilityZone
+	return cluster.Spec.Provider.Master.AvailabilityZone
 }
 
 func MasterCount(cluster infrastructurev1alpha2.AWSCluster) int {
@@ -107,7 +107,7 @@ func MasterInstanceName(cluster infrastructurev1alpha2.AWSCluster) string {
 }
 
 func MasterInstanceType(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Provider.Master.InstanceType
+	return cluster.Spec.Provider.Master.InstanceType
 }
 
 func ManagedRecordSets(cluster infrastructurev1alpha2.AWSCluster) []string {
@@ -122,16 +122,16 @@ func ManagedRecordSets(cluster infrastructurev1alpha2.AWSCluster) []string {
 }
 
 func OIDCClientID(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.ClientID
+	return cluster.Spec.Cluster.OIDC.ClientID
 }
 func OIDCIssuerURL(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.IssuerURL
+	return cluster.Spec.Cluster.OIDC.IssuerURL
 }
 func OIDCUsernameClaim(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.Claims.Username
+	return cluster.Spec.Cluster.OIDC.Claims.Username
 }
 func OIDCGroupsClaim(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.Claims.Groups
+	return cluster.Spec.Cluster.OIDC.Claims.Groups
 }
 
 func PolicyNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -143,7 +143,7 @@ func ProfileNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
 }
 
 func Region(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderSpec(cluster).Provider.Region
+	return cluster.Spec.Provider.Region
 }
 
 func RoleNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -159,7 +159,7 @@ func RouteTableName(cluster infrastructurev1alpha2.AWSCluster, suffix, az string
 }
 
 func StatusClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
-	return clusterProviderStatus(cluster).Provider.Network.CIDR
+	return cluster.Status.Provider.Network.CIDR
 }
 
 func TargetLogBucketName(cluster infrastructurev1alpha2.AWSCluster) string {

@@ -10,49 +10,49 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l string) infrastructurev1alpha2.AWSConfigSpec {
-	return infrastructurev1alpha2.AWSConfigSpec{
-		Cluster: g8sinfrastructurev1alpha2.AWSCluster{
-			Calico: g8sinfrastructurev1alpha2.AWSClusterCalico{
+func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l string) g8sv1alpha1.AWSConfigSpec {
+	return g8sv1alpha1.AWSConfigSpec{
+		Cluster: g8sv1alpha1.Cluster{
+			Calico: g8sv1alpha1.ClusterCalico{
 				CIDR:   c.CalicoCIDR,
 				MTU:    c.CalicoMTU,
 				Subnet: c.CalicoSubnet,
 			},
-			Docker: g8sinfrastructurev1alpha2.AWSClusterDocker{
-				Daemon: g8sinfrastructurev1alpha2.AWSClusterDockerDaemon{
+			Docker: g8sv1alpha1.ClusterDocker{
+				Daemon: g8sv1alpha1.ClusterDockerDaemon{
 					CIDR: c.DockerDaemonCIDR,
 				},
 			},
-			Etcd: g8sinfrastructurev1alpha2.AWSClusterEtcd{
+			Etcd: g8sv1alpha1.ClusterEtcd{
 				Domain: key.ClusterEtcdEndpoint(cr),
 				Prefix: key.EtcdPrefix,
 			},
-			Kubernetes: g8sinfrastructurev1alpha2.AWSClusterKubernetes{
-				API: g8sinfrastructurev1alpha2.AWSClusterKubernetesAPI{
+			Kubernetes: g8sv1alpha1.ClusterKubernetes{
+				API: g8sv1alpha1.ClusterKubernetesAPI{
 					ClusterIPRange: c.ClusterIPRange,
 					Domain:         key.ClusterAPIEndpoint(cr),
 					SecurePort:     key.KubernetesSecurePort,
 				},
 				CloudProvider: key.CloudProvider,
-				DNS: g8sinfrastructurev1alpha2.AWSClusterKubernetesDNS{
+				DNS: g8sv1alpha1.ClusterKubernetesDNS{
 					IP: dnsIPFromRange(c.ClusterIPRange),
 				},
 				Domain: "cluster.local",
-				Kubelet: g8sinfrastructurev1alpha2.AWSClusterKubernetesKubelet{
+				Kubelet: g8sv1alpha1.ClusterKubernetesKubelet{
 					Domain: key.ClusterKubeletEndpoint(cr),
 					Labels: l,
 				},
-				NetworkSetup: g8sinfrastructurev1alpha2.AWSClusterKubernetesNetworkSetup{
-					Docker: g8sinfrastructurev1alpha2.AWSClusterKubernetesNetworkSetupDocker{
+				NetworkSetup: g8sv1alpha1.ClusterKubernetesNetworkSetup{
+					Docker: g8sv1alpha1.ClusterKubernetesNetworkSetupDocker{
 						Image: c.NetworkSetupDockerImage,
 					},
 				},
-				SSH: g8sinfrastructurev1alpha2.AWSClusterKubernetesSSH{
+				SSH: g8sv1alpha1.ClusterKubernetesSSH{
 					UserList: stringToUserList(c.SSHUserList),
 				},
 			},
 		},
-		AWS: infrastructurev1alpha2.AWSConfigSpecAWS{
+		AWS: g8sv1alpha1.AWSConfigSpecAWS{
 			Region: key.Region(cr),
 		},
 	}
@@ -88,8 +88,8 @@ func ipFromString(cidr string) net.IP {
 	return ip
 }
 
-func stringToUserList(s string) []g8sinfrastructurev1alpha2.AWSClusterKubernetesSSHUser {
-	var list []g8sinfrastructurev1alpha2.AWSClusterKubernetesSSHUser
+func stringToUserList(s string) []g8sv1alpha1.ClusterKubernetesSSHUser {
+	var list []g8sv1alpha1.ClusterKubernetesSSHUser
 
 	for _, user := range strings.Split(s, ",") {
 		if user == "" {
@@ -103,7 +103,7 @@ func stringToUserList(s string) []g8sinfrastructurev1alpha2.AWSClusterKubernetes
 			panic("SSH user format must be <name>:<public key>")
 		}
 
-		u := g8sinfrastructurev1alpha2.AWSClusterKubernetesSSHUser{
+		u := g8sv1alpha1.ClusterKubernetesSSHUser{
 			Name:      split[0],
 			PublicKey: split[1],
 		}

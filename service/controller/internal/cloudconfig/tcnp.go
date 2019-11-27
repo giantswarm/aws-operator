@@ -94,7 +94,7 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 }
 
 type WorkerExtension struct {
-	awsConfigSpec infrastructurev1alpha2.AWSConfigSpec
+	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
