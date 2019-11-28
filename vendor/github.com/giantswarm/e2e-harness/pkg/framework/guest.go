@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -19,6 +19,10 @@ const (
 	// minimumNodesReady represents the minimun number of ready nodes in a guest
 	// cluster to be considered healthy.
 	minimumNodesReady = 3
+)
+
+var (
+	namespaces = []string{"giantswarm"}
 )
 
 type GuestConfig struct {
@@ -43,6 +47,9 @@ type Guest struct {
 }
 
 func NewGuest(config GuestConfig) (*Guest, error) {
+	if config.HostK8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostK8sClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -208,6 +215,11 @@ func (g *Guest) WaitForGuestReady(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
+	err = g.EnsureNamespacesExists(ctx, namespaces)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	err = g.WaitForNodesReady(ctx, minimumNodesReady)
 	if err != nil {
 		return microerror.Mask(err)
@@ -217,7 +229,7 @@ func (g *Guest) WaitForGuestReady(ctx context.Context) error {
 }
 
 func (g *Guest) WaitForNodesReady(ctx context.Context, expectedNodes int) error {
-	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for %d k8s nodes to be in %#q state", expectedNodes, corev1.NodeReady))
+	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for %d k8s nodes to be in %#q state", expectedNodes, v1.NodeReady))
 
 	o := func() error {
 		nodes, err := g.k8sClient.CoreV1().Nodes().List(metav1.ListOptions{})
@@ -228,14 +240,14 @@ func (g *Guest) WaitForNodesReady(ctx context.Context, expectedNodes int) error 
 		var nodesReady int
 		for _, n := range nodes.Items {
 			for _, c := range n.Status.Conditions {
-				if c.Type == corev1.NodeReady && c.Status == corev1.ConditionTrue {
+				if c.Type == v1.NodeReady && c.Status == v1.ConditionTrue {
 					nodesReady++
 				}
 			}
 		}
 
 		if nodesReady != expectedNodes {
-			return microerror.Maskf(waitError, "found %d/%d k8s nodes in %#q state but %d are expected", nodesReady, len(nodes.Items), corev1.NodeReady, expectedNodes)
+			return microerror.Maskf(waitError, "found %d/%d k8s nodes in %#q state but %d are expected", nodesReady, len(nodes.Items), v1.NodeReady, expectedNodes)
 		}
 
 		return nil
@@ -248,6 +260,28 @@ func (g *Guest) WaitForNodesReady(ctx context.Context, expectedNodes int) error 
 		return microerror.Mask(err)
 	}
 
-	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for %d k8s nodes to be in %#q state", expectedNodes, corev1.NodeReady))
+	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for %d k8s nodes to be in %#q state", expectedNodes, v1.NodeReady))
+	return nil
+}
+
+func (g *Guest) EnsureNamespacesExists(ctx context.Context, namespaces []string) error {
+	g.logger.Log("level", "debug", "message", "ensuring needed namespaces exist")
+	for _, name := range namespaces {
+		// check for existing namespace with this name
+		existing, _ := g.K8sClient().CoreV1().Namespaces().Get(name, metav1.GetOptions{})
+
+		if existing == nil || existing.Name != name {
+			g.logger.Log("level", "debug", "message", fmt.Sprintf("Creating namespace %s", name))
+			nsSpec := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: name}}
+			_, err := g.K8sClient().CoreV1().Namespaces().Create(nsSpec)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			g.logger.Log("level", "debug", "message", fmt.Sprintf("Created namespace %s", name))
+		}
+	}
+
+	g.logger.Log("level", "debug", "message", "ensured needed namespaces exist")
+
 	return nil
 }

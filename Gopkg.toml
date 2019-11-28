@@ -53,7 +53,7 @@ required = [
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "update-guest"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
@@ -65,7 +65,7 @@ required = [
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
-  branch = "update-guest"
+  branch = "master"
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
