@@ -9,13 +9,10 @@ import (
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/giantswarm/e2e-harness/pkg/harness"
 )
 
 const (
@@ -24,8 +21,14 @@ const (
 	minimumNodesReady = 3
 )
 
+var (
+	namespaces = []string{"giantswarm"}
+)
+
 type GuestConfig struct {
 	Logger micrologger.Logger
+
+	HostK8sClient kubernetes.Interface
 
 	ClusterID    string
 	CommonDomain string
@@ -34,15 +37,19 @@ type GuestConfig struct {
 type Guest struct {
 	logger micrologger.Logger
 
-	g8sClient  versioned.Interface
-	k8sClient  kubernetes.Interface
-	restConfig *rest.Config
+	g8sClient     versioned.Interface
+	hostK8sClient kubernetes.Interface
+	k8sClient     kubernetes.Interface
+	restConfig    *rest.Config
 
 	clusterID    string
 	commonDomain string
 }
 
 func NewGuest(config GuestConfig) (*Guest, error) {
+	if config.HostK8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostK8sClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -57,9 +64,7 @@ func NewGuest(config GuestConfig) (*Guest, error) {
 	g := &Guest{
 		logger: config.Logger,
 
-		g8sClient:  nil,
-		k8sClient:  nil,
-		restConfig: nil,
+		hostK8sClient: config.HostK8sClient,
 
 		clusterID:    config.ClusterID,
 		commonDomain: config.CommonDomain,
@@ -91,24 +96,13 @@ func (g *Guest) RestConfig() *rest.Config {
 
 // Initialize sets up the Guest fields that are not directly injected.
 func (g *Guest) Initialize() error {
-	var hostK8sClient kubernetes.Interface
-	{
-		c, err := clientcmd.BuildConfigFromFlags("", harness.DefaultKubeConfig)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		hostK8sClient, err = kubernetes.NewForConfig(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
 
 	var guestG8sClient versioned.Interface
 	var guestK8sClient kubernetes.Interface
 	var guestRestConfig *rest.Config
 	{
 		n := fmt.Sprintf("%s-api", g.clusterID)
-		s, err := hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
+		s, err := g.hostK8sClient.CoreV1().Secrets("default").Get(n, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -221,6 +215,11 @@ func (g *Guest) WaitForGuestReady(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
+	err = g.EnsureNamespacesExists(ctx, namespaces)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	err = g.WaitForNodesReady(ctx, minimumNodesReady)
 	if err != nil {
 		return microerror.Mask(err)
@@ -262,5 +261,27 @@ func (g *Guest) WaitForNodesReady(ctx context.Context, expectedNodes int) error 
 	}
 
 	g.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for %d k8s nodes to be in %#q state", expectedNodes, v1.NodeReady))
+	return nil
+}
+
+func (g *Guest) EnsureNamespacesExists(ctx context.Context, namespaces []string) error {
+	g.logger.Log("level", "debug", "message", "ensuring needed namespaces exist")
+	for _, name := range namespaces {
+		// check for existing namespace with this name
+		existing, _ := g.K8sClient().CoreV1().Namespaces().Get(name, metav1.GetOptions{})
+
+		if existing == nil || existing.Name != name {
+			g.logger.Log("level", "debug", "message", fmt.Sprintf("Creating namespace %s", name))
+			nsSpec := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: name}}
+			_, err := g.K8sClient().CoreV1().Namespaces().Create(nsSpec)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			g.logger.Log("level", "debug", "message", fmt.Sprintf("Created namespace %s", name))
+		}
+	}
+
+	g.logger.Log("level", "debug", "message", "ensured needed namespaces exist")
+
 	return nil
 }
