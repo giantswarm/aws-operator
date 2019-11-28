@@ -342,7 +342,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7ef81bf0dfb243b8bd9372bfbc4681062e54eb39cd17cb3ebfed676a259257f3"
+  digest = "1:c2991f6c5deabfa17b3e0f1ebd4dcda47515219ab313a089d73de9a7702f7007"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -350,7 +350,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "11c30c63f167e8b027926eea81ad4ca513becf20"
+  revision = "115e721c4fee6a177f6cc0df12b6a3c2649585fd"
 
 [[projects]]
   branch = "update-guest"
