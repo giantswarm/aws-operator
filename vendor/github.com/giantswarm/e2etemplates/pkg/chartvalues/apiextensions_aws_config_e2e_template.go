@@ -13,4 +13,5 @@ aws:
   ingressHostedZone: {{ .AWS.IngressHostedZone }}
   routeTable0: {{ .AWS.RouteTable0 }}
   routeTable1: {{ .AWS.RouteTable1 }}
+  vpcPeerId: {{ .AWS.VPCPeerID }}
 `
