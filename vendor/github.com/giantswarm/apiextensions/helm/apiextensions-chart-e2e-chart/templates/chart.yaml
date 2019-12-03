@@ -1,0 +1,19 @@
+apiVersion: "application.giantswarm.io/v1alpha1"
+kind: Chart
+metadata:
+  name: "{{ .Values.chart.name }}"
+  namespace: "{{ .Values.namespace }}"
+  labels:
+    app: "{{ .Values.chart.name }}"
+    chart-operator.giantswarm.io/version: "{{ .Values.chartOperator.version }}"
+spec:
+  name: "{{ .Values.chart.name }}"
+  namespace: "{{ .Values.chart.namespace }}"
+  config:
+    configMap:
+      name: "{{ .Values.chart.config.configMap.name }}"
+      namespace: "{{ .Values.chart.config.configMap.namespace }}"
+    secret:
+      name: "{{ .Values.chart.config.secret.name }}"
+      namespace: "{{ .Values.chart.config.secret.namespace }}"
+  tarballURL: "{{ .Values.chart.tarballURL }}"

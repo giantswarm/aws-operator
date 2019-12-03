@@ -1,0 +1,15 @@
+baseDomain: "k8s.gastropod.gridscale.kvm.gigantic.io"
+cluster:
+  id: "test-cluster"
+encryptionKey: "QitRZGlWeW5WOFo2YmdvMVRwQUQ2UWoxRHZSVEF4MmovajlFb05sT1AzOD0="
+sshUser: "test-user"
+sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAYQCurvzg5Ia54kb3NZapA6yP00//+Jt6XJNeC7Seq3TeCqMR9x7Snalj19r0lWok1PkRgDo1PXj+3y53zo/wqBrPqN4cQqp00R06kNfnhAgesaRMvYhuyVRQQbfXV5gQg8M= dummy-key"
+kvm:
+  vni: 11
+  ingress:
+    httpNodePort: 301487
+    httpTargetPort: 30010
+    httpsNodePort: 301488
+    httpsTargetPort: 30011
+versionBundle:
+  Version: "0.1.0"

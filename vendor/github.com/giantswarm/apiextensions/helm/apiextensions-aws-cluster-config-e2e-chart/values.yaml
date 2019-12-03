@@ -1,0 +1,18 @@
+guest:
+  name: "test-cluster"
+  dnsZone: "test-cluster.aws.giantswarm.io"
+  id: "test-cluster"
+  aws:
+    instanceTypeMaster: "m5.large"
+    instanceTypeWorker: "m5.large"
+  owner: "giantswarm"
+  versionBundles:
+  - name: aws-operator
+    version: 3.1.1
+  - name: cert-operator
+    version: 0.1.0
+  - name: cluster-operator
+    version: 0.3.0
+
+versionBundle:
+  version: "0.2.0"

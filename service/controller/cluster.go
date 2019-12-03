@@ -4,33 +4,24 @@ import (
 	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type ClusterConfig struct {
-	CMAClient    clientset.Interface
-	G8sClient    versioned.Interface
-	K8sClient    kubernetes.Interface
-	K8sExtClient apiextensionsclient.Interface
-	Locker       locker.Interface
-	Logger       micrologger.Logger
+	K8sClient k8sclient.Interface
+	Locker    locker.Interface
+	Logger    micrologger.Logger
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
@@ -98,40 +89,8 @@ type Cluster struct {
 func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var err error
 
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
-	}
-
-	var crdClient *k8scrdclient.CRDClient
-	{
-		c := k8scrdclient.Config{
-			K8sExtClient: config.K8sExtClient,
-			Logger:       config.Logger,
-		}
-
-		crdClient, err = k8scrdclient.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newInformer *informer.Informer
-	{
-		c := informer.Config{
-			Logger:  config.Logger,
-			Watcher: config.G8sClient.InfrastructureV1alpha2().AWSClusters(),
-
-			ListOptions: metav1.ListOptions{
-				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
-			},
-			RateWait:     informer.DefaultRateWait,
-			ResyncPeriod: informer.DefaultResyncPeriod,
-		}
-
-		newInformer, err = informer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	resourceSets, err := newClusterResourceSets(config)
@@ -143,15 +102,15 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	{
 		c := controller.Config{
 			CRD:          infrastructurev1alpha2.NewClusterCRD(),
-			CRDClient:    crdClient,
-			Informer:     newInformer,
+			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.G8sClient.InfrastructureV1alpha2().RESTClient(),
-
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
 			Name: project.Name() + "-cluster-controller",
+			NewRuntimeObjectFunc: func() runtime.Object {
+				return new(infrastructurev1alpha2.AWSCluster)
+			},
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -173,7 +132,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var certsSearcher *certs.Searcher
 	{
 		c := certs.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -201,7 +160,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -215,11 +174,10 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
+			G8sClient:              config.K8sClient.G8sClient(),
 			HostAWSConfig:          config.HostAWSConfig,
-			K8sClient:              config.K8sClient,
+			K8sClient:              config.K8sClient.K8sClient(),
 			Locker:                 config.Locker,
 			Logger:                 config.Logger,
 			RandomKeysSearcher:     randomKeysSearcher,

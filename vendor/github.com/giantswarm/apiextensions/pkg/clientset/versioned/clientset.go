@@ -22,6 +22,7 @@ import (
 	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
 	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/infrastructure/v1alpha2"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
@@ -32,41 +33,27 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Application() applicationv1alpha1.ApplicationV1alpha1Interface
 	CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Core() corev1alpha1.CoreV1alpha1Interface
 	ExampleV1alpha1() examplev1alpha1.ExampleV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Example() examplev1alpha1.ExampleV1alpha1Interface
+	InfrastructureV1alpha2() infrastructurev1alpha2.InfrastructureV1alpha2Interface
 	ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Provider() providerv1alpha1.ProviderV1alpha1Interface
 	ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Release() releasev1alpha1.ReleaseV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	applicationV1alpha1 *applicationv1alpha1.ApplicationV1alpha1Client
-	coreV1alpha1        *corev1alpha1.CoreV1alpha1Client
-	exampleV1alpha1     *examplev1alpha1.ExampleV1alpha1Client
-	providerV1alpha1    *providerv1alpha1.ProviderV1alpha1Client
-	releaseV1alpha1     *releasev1alpha1.ReleaseV1alpha1Client
+	applicationV1alpha1    *applicationv1alpha1.ApplicationV1alpha1Client
+	coreV1alpha1           *corev1alpha1.CoreV1alpha1Client
+	exampleV1alpha1        *examplev1alpha1.ExampleV1alpha1Client
+	infrastructureV1alpha2 *infrastructurev1alpha2.InfrastructureV1alpha2Client
+	providerV1alpha1       *providerv1alpha1.ProviderV1alpha1Client
+	releaseV1alpha1        *releasev1alpha1.ReleaseV1alpha1Client
 }
 
 // ApplicationV1alpha1 retrieves the ApplicationV1alpha1Client
 func (c *Clientset) ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha1Interface {
-	return c.applicationV1alpha1
-}
-
-// Deprecated: Application retrieves the default version of ApplicationClient.
-// Please explicitly pick a version.
-func (c *Clientset) Application() applicationv1alpha1.ApplicationV1alpha1Interface {
 	return c.applicationV1alpha1
 }
 
@@ -75,21 +62,14 @@ func (c *Clientset) CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface {
 	return c.coreV1alpha1
 }
 
-// Deprecated: Core retrieves the default version of CoreClient.
-// Please explicitly pick a version.
-func (c *Clientset) Core() corev1alpha1.CoreV1alpha1Interface {
-	return c.coreV1alpha1
-}
-
 // ExampleV1alpha1 retrieves the ExampleV1alpha1Client
 func (c *Clientset) ExampleV1alpha1() examplev1alpha1.ExampleV1alpha1Interface {
 	return c.exampleV1alpha1
 }
 
-// Deprecated: Example retrieves the default version of ExampleClient.
-// Please explicitly pick a version.
-func (c *Clientset) Example() examplev1alpha1.ExampleV1alpha1Interface {
-	return c.exampleV1alpha1
+// InfrastructureV1alpha2 retrieves the InfrastructureV1alpha2Client
+func (c *Clientset) InfrastructureV1alpha2() infrastructurev1alpha2.InfrastructureV1alpha2Interface {
+	return c.infrastructureV1alpha2
 }
 
 // ProviderV1alpha1 retrieves the ProviderV1alpha1Client
@@ -97,20 +77,8 @@ func (c *Clientset) ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interfac
 	return c.providerV1alpha1
 }
 
-// Deprecated: Provider retrieves the default version of ProviderClient.
-// Please explicitly pick a version.
-func (c *Clientset) Provider() providerv1alpha1.ProviderV1alpha1Interface {
-	return c.providerV1alpha1
-}
-
 // ReleaseV1alpha1 retrieves the ReleaseV1alpha1Client
 func (c *Clientset) ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface {
-	return c.releaseV1alpha1
-}
-
-// Deprecated: Release retrieves the default version of ReleaseClient.
-// Please explicitly pick a version.
-func (c *Clientset) Release() releasev1alpha1.ReleaseV1alpha1Interface {
 	return c.releaseV1alpha1
 }
 
@@ -142,6 +110,10 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
+	cs.infrastructureV1alpha2, err = infrastructurev1alpha2.NewForConfig(&configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
 	cs.providerV1alpha1, err = providerv1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
@@ -165,6 +137,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 	cs.applicationV1alpha1 = applicationv1alpha1.NewForConfigOrDie(c)
 	cs.coreV1alpha1 = corev1alpha1.NewForConfigOrDie(c)
 	cs.exampleV1alpha1 = examplev1alpha1.NewForConfigOrDie(c)
+	cs.infrastructureV1alpha2 = infrastructurev1alpha2.NewForConfigOrDie(c)
 	cs.providerV1alpha1 = providerv1alpha1.NewForConfigOrDie(c)
 	cs.releaseV1alpha1 = releasev1alpha1.NewForConfigOrDie(c)
 
@@ -178,6 +151,7 @@ func New(c rest.Interface) *Clientset {
 	cs.applicationV1alpha1 = applicationv1alpha1.New(c)
 	cs.coreV1alpha1 = corev1alpha1.New(c)
 	cs.exampleV1alpha1 = examplev1alpha1.New(c)
+	cs.infrastructureV1alpha2 = infrastructurev1alpha2.New(c)
 	cs.providerV1alpha1 = providerv1alpha1.New(c)
 	cs.releaseV1alpha1 = releasev1alpha1.New(c)
 

@@ -4,32 +4,23 @@ import (
 	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type MachineDeploymentConfig struct {
-	CMAClient    clientset.Interface
-	G8sClient    versioned.Interface
-	K8sClient    kubernetes.Interface
-	K8sExtClient apiextensionsclient.Interface
-	Locker       locker.Interface
-	Logger       micrologger.Logger
+	K8sClient k8sclient.Interface
+	Locker    locker.Interface
+	Logger    micrologger.Logger
 
 	CalicoCIDR                 int
 	CalicoMTU                  int
@@ -68,43 +59,11 @@ type MachineDeployment struct {
 }
 
 func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	var err error
-
-	var crdClient *k8scrdclient.CRDClient
-	{
-		c := k8scrdclient.Config{
-			K8sExtClient: config.K8sExtClient,
-			Logger:       config.Logger,
-		}
-
-		crdClient, err = k8scrdclient.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newInformer *informer.Informer
-	{
-		c := informer.Config{
-			Logger:  config.Logger,
-			Watcher: config.G8sClient.InfrastructureV1alpha2().AWSMachineDeployments(),
-
-			ListOptions: metav1.ListOptions{
-				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
-			},
-			RateWait:     informer.DefaultRateWait,
-			ResyncPeriod: informer.DefaultResyncPeriod,
-		}
-
-		newInformer, err = informer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
 
 	resourceSets, err := newMachineDeploymentResourceSets(config)
 	if err != nil {
@@ -115,15 +74,15 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 	{
 		c := controller.Config{
 			CRD:          infrastructurev1alpha2.NewMachineDeploymentCRD(),
-			CRDClient:    crdClient,
-			Informer:     newInformer,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.G8sClient.InfrastructureV1alpha2().RESTClient(),
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-machine-deployment-controller.
 			Name: project.Name() + "-machine-deployment-controller",
+			NewRuntimeObjectFunc: func() runtime.Object {
+				return new(infrastructurev1alpha2.AWSMachineDeployment)
+			},
 		}
 
 		operatorkitController, err = controller.New(c)
@@ -145,7 +104,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	var certsSearcher *certs.Searcher
 	{
 		c := certs.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -173,7 +132,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -187,10 +146,9 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	{
 		c := machineDeploymentResourceSetConfig{
 			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
-			K8sClient:              config.K8sClient,
+			G8sClient:              config.K8sClient.G8sClient(),
+			K8sClient:              config.K8sClient.K8sClient(),
 			Locker:                 config.Locker,
 			Logger:                 config.Logger,
 			RandomKeysSearcher:     randomKeysSearcher,

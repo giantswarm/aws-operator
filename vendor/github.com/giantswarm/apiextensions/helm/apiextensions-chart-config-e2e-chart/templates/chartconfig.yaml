@@ -1,0 +1,25 @@
+apiVersion: "core.giantswarm.io/v1alpha1"
+kind: ChartConfig
+metadata:
+  name: "{{ .Values.chart.name }}"
+  namespace: "{{ .Values.namespace }}"
+spec:
+  chart:
+    channel: "{{ .Values.chart.channel }}"
+    {{- if .Values.chart.configMap }}
+    configMap:
+      name: "{{ .Values.chart.configMap.name }}"
+      namespace: "{{ .Values.chart.configMap.namespace }}"
+      resourceVersion: "{{ .Values.chart.configMap.resourceVersion }}"
+    {{- end }}
+    name: "{{ .Values.chart.name }}"
+    namespace: "{{ .Values.chart.namespace }}"
+    release: "{{ .Values.chart.release }}"
+    {{- if .Values.chart.secret }}
+    secret:
+      name: "{{ .Values.chart.secret.name }}"
+      namespace: "{{ .Values.chart.secret.namespace }}"
+      resourceVersion: "{{ .Values.chart.secret.resourceVersion }}"
+    {{- end }}
+  versionBundle:
+    version: "{{ .Values.versionBundleVersion }}"

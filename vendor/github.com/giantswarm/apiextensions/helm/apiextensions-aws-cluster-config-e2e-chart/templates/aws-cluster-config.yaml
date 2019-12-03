@@ -1,0 +1,24 @@
+apiVersion: "core.giantswarm.io/v1alpha1"
+kind: AWSClusterConfig
+metadata:
+  name: {{ .Values.guest.name }}
+  labels:
+    giantswarm.io/cluster: "{{ .Values.guest.id }}"
+spec:
+  guest:
+    dnsZone: "{{ .Values.guest.dnsZone }}"
+    id: "{{ .Values.guest.id }}"
+    masters:
+    - id: master-1
+      instanceType: "{{ .Values.guest.aws.instanceTypeMaster }}"
+    name: "{{ .Values.guest.name }}"
+    owner: "{{ .Values.guest.owner }}"
+    versionBundles:
+{{ toYaml .Values.guest.versionBundles | indent 4 }}
+    workers:
+    - id: worker-1
+      instanceType: "{{ .Values.guest.aws.instanceTypeWorker }}"
+    - id: worker-2
+      instanceType: "{{ .Values.guest.aws.instanceTypeWorker }}"
+  versionBundle:
+    version: "{{ .Values.versionBundle.version}}"

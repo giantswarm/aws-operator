@@ -1,0 +1,29 @@
+{{- range .Values.appCatalogs }}
+apiVersion: "application.giantswarm.io/v1alpha1"
+kind: AppCatalog
+metadata:
+  name: "{{ .name }}"
+  labels:
+    app-operator.giantswarm.io/version: "{{ $.Values.appOperator.version }}"
+spec:
+  title: "{{ .title }}"
+  description: "{{ .description }}"
+  logoURL: "{{ .logoUrl }}"
+  storage:
+    type: "{{ .storage.type }}"
+    URL: "{{ .storage.url }}"
+  {{- if .config }}
+  config:
+    {{- if .config.configMap }}
+    configMap:
+      name: "{{ .config.configMap.name }}"
+      namespace: "{{ .config.configMap.namespace }}"
+    {{- end }}
+    {{- if .config.secret }}
+    secret:
+      name: "{{ .config.secret.name }}"
+      namespace: "{{ .config.secret.namespace }}"
+    {{- end }}
+  {{- end }}
+---
+{{- end }}

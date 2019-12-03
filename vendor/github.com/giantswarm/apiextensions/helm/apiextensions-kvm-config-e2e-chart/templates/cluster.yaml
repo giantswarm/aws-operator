@@ -1,0 +1,92 @@
+apiVersion: "provider.giantswarm.io/v1alpha1"
+kind: KVMConfig
+metadata:
+  name: {{.Values.cluster.id}}
+  namespace: "default"
+  labels:
+    giantswarm.io/cluster: {{.Values.cluster.id}}
+spec:
+  cluster:
+    id: "{{.Values.cluster.id}}"
+
+    customer:
+      id: "example-customer"
+
+    calico:
+      cidr: 16
+      domain: calico.{{.Values.cluster.id}}.{{.Values.baseDomain}}
+      mtu: 1430
+      subnet: 192.168.0.0
+    docker:
+      daemon:
+        cidr: 172.17.0.1/16
+    etcd:
+      domain: etcd.{{.Values.cluster.id}}.{{.Values.baseDomain}}
+      port: 443
+      prefix: giantswarm.io
+    kubernetes:
+      api:
+        altNames: kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local
+        clusterIPRange: 172.31.0.0/16
+        domain: api.{{.Values.cluster.id}}.{{.Values.baseDomain}}
+        insecurePort: 8080
+        ip: 172.31.0.1
+        securePort: 443
+      cloudProvider: ""
+      dns:
+        ip: 172.31.0.10
+      domain: cluster.local
+      ingressController:
+        docker:
+          image: quay.io/giantswarm/nginx-ingress-controller:0.9.0-beta.11
+        domain: ingress.{{.Values.cluster.id}}.{{.Values.baseDomain}}
+        insecurePort: 30010
+        securePort: 30011
+        wildcardDomain: '*.sxn4o.{{.Values.cluster.id}}.{{.Values.baseDomain}}'
+      kubelet:
+        altNames: kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local
+        domain: worker.{{.Values.cluster.id}}.{{.Values.baseDomain}}
+        labels: kvm-operator.giantswarm.io/version={{.Values.versionBundle.version}},giantswarm.io/provider=kvm
+        port: 10250
+      networkSetup:
+        docker:
+          image: quay.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9
+      ssh:
+        userList:
+        - name: "{{.Values.sshUser}}"
+          publicKey: "{{.Values.sshPublicKey}}"
+
+    masters:
+    - id: "master-1"
+    workers:
+    - id: "worker-1"
+    - id: "worker-2"
+    vault:
+      address: https://vault.gastropod.gridscale.kvm.gigantic.io:8200
+      token: 5623b042-fa62-416b-a252-190a164c0439
+  kvm:
+    k8sKVM:
+      storageType: hostPath
+    masters:
+    - cpus: 2
+      disk: 10
+      memory: 3G
+    network:
+      flannel:
+        vni: {{.Values.kvm.vni}}
+    'portMappings yaml:':
+    - name: ingress-http
+      nodePort: {{.Values.kvm.ingress.httpNodePort}}
+      targetPort: {{.Values.kvm.ingress.httpTargetPort}}
+    - name: ingress-https
+      nodePort: {{.Values.kvm.ingress.httpsNodePort}}
+      targetPort: {{.Values.kvm.ingress.httpsTargetPort}}
+    workers:
+    - cpus: 2
+      disk: 20
+      memory: 2G
+    - cpus: 2
+      disk: 20
+      memory: 2G
+  versionBundle:
+    version: "{{.Values.versionBundle.version}}"

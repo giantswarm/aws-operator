@@ -1,0 +1,3 @@
+name: apiextensions-kvm-config-e2e-chart
+version: 0.1.0
+description: KVMConfig object used in e2e tests.

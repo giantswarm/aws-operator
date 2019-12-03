@@ -1,0 +1,46 @@
+appOperator:
+  version: "1.0.0"
+
+apps:
+  - name: "myapp"
+    namespace: "giantswarm"
+    catalog: "myapp-catalog"
+    kubeConfig:
+      inCluster: "true"
+      secret:
+        name: "kubeconfig-secret"
+        namespace: "default"
+    config:
+      configMap:
+        name: "app-values"
+        namespace: "giantswarm"
+      secret:
+        name: "app-secrets"
+        namespace: "giantswarm"
+    version: "1.0.0"
+
+appCatalogs:
+  - name: "myapp-catalog"
+    title: "myapp-catalog"
+    description: "giantswarm myapp catalog"
+    logoUrl: "http://giantswarm.com/catalog-logo.png"
+    storage:
+      type: "helm"
+      url: "https://giantswarm.github.com/sample-catalog/"
+
+configMaps:
+  app-values:
+    Installation:
+      V1:
+        API:
+          Address: "https://api.g8s.gollum.westeurope.azure.gigantic.io"
+
+namespace: "default"
+
+secrets:
+  app-secrets:
+    Installation:
+      V1:
+        Secret:
+          API:
+            token: "test"

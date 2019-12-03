@@ -1,0 +1,31 @@
+chart:
+  name: "mychart"
+  namespace: "default"
+  config:
+    configMap:
+      name: "mychart-values"
+      namespace: "default"
+    secret:
+      name: "mychart-secrets"
+      namespace: "default"
+  tarballURL: "https://giantswarm.github.io/sample-catalog/kubernetes-test-app-chart-0.6.8.tgz"
+
+chartOperator:
+  version: "1.0.0"
+
+configMap:
+  values:
+    Installation:
+      V1:
+        API:
+          Address: "https://api.g8s.gollum.westeurope.azure.gigantic.io"
+
+namespace: "giantswarm"
+
+secret:
+  values:
+    Installation:
+      V1:
+        Secret:
+          API:
+            token: "test"

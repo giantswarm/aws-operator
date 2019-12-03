@@ -1,0 +1,38 @@
+{{- range .Values.apps }}
+apiVersion: "application.giantswarm.io/v1alpha1"
+kind: App
+metadata:
+  name: "{{ .name }}"
+  namespace: "{{ .namespace }}"
+  labels:
+    app: "{{ .name }}"
+    app-operator.giantswarm.io/version: "{{ $.Values.appOperator.version  }}"
+spec:
+  catalog: "{{ .catalog }}"
+  name: "{{ .name }}"
+  namespace: "{{ .namespace }}"
+  {{- if .kubeConfig}}
+  kubeConfig:
+    inCluster: {{ .kubeConfig.inCluster }}
+    {{- if not .kubeConfig.inCluster }}
+    secret:
+      name: "{{ .kubeConfig.secret.name }}"
+      namespace: "{{ .kubeConfig.secret.namespace }}"
+    {{- end }}
+  {{- end }}
+  {{- if .config}}
+  config:
+    {{- if .config.configMap }}
+    configMap:
+      name: "{{ .config.configMap.name }}"
+      namespace: "{{ .config.configMap.namespace }}"
+    {{- end }}
+    {{- if .config.secret }}
+    secret:
+      name: "{{ .config.secret.name }}"
+      namespace: "{{ .config.secret.namespace }}"
+    {{- end }}
+  {{- end }}
+  version: "{{ .version }}"
+---
+{{- end }}

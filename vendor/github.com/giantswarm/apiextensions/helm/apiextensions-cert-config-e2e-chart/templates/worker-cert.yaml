@@ -1,0 +1,28 @@
+apiVersion: "core.giantswarm.io/v1alpha1"
+kind: CertConfig
+metadata:
+  name: "{{.Values.clusterName}}-worker"
+  namespace: "default"
+  labels:
+    clusterID: "{{.Values.clusterName}}"
+    clusterComponent: "worker"
+    giantswarm.io/certificate: "worker"
+    giantswarm.io/cluster: "{{.Values.clusterName}}"
+spec:
+  cert:
+    clusterID: "{{.Values.clusterName}}"
+    clusterComponent: "worker"
+    commonName: "worker.{{.Values.clusterName}}.k8s.{{.Values.commonDomain}}"
+    altNames:
+    - "{{.Values.clusterName}}.k8s.{{.Values.commonDomain}}"
+    - "k8s-master-vm"
+    - "kubernetes"
+    - "kubernetes.default"
+    - "kubernetes.default.svc"
+    - "kubernetes.default.svc.cluster.local"
+    ipSans:
+    ttl: "720h"
+    allowBareDomains: true
+    organizations:
+  versionBundle:
+    version: 0.1.0

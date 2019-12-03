@@ -1,0 +1,37 @@
+apiVersion: core.giantswarm.io/v1alpha1
+kind: FlannelConfig
+metadata:
+  name: {{.Values.clusterName}}
+  labels:
+    clusterID: {{.Values.clusterName}}
+    giantswarm.io/cluster: "{{.Values.clusterName}}"
+spec:
+  bridge:
+    docker:
+      image: quay.io/giantswarm/k8s-network-bridge:9e4b9467f681e77994ba1c07d09f42520431108a
+    spec:
+      dns:
+        servers:
+        - 1.1.1.1
+        - 8.8.4.4
+      interface: eth0
+      ntp:
+        servers:
+        - 146.0.32.144
+        - 129.70.132.33
+      privateNetwork: 10.0.6.0/24
+  cluster:
+    customer: "example-customer"
+    id: "{{.Values.clusterName}}"
+    namespace: "{{.Values.clusterName}}"
+  flannel:
+    spec:
+      network: {{.Values.flannel.network}}
+      runDir: /run/flannel
+      subnetLen: 30
+      vni: {{.Values.flannel.vni}}
+  health:
+    docker:
+      image: quay.io/giantswarm/flannel-network-health:3b77d6fa5249b809d719c4d99efcd45f6991dce7
+  versionBundle:
+    version: "{{.Values.versionBundleVersion}}"
