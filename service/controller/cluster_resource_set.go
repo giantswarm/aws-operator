@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
+	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
@@ -632,13 +633,13 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	return resourceSet, nil
 }
 
-func toCRUDResource(logger micrologger.Logger, ops controller.CRUDResourceOps) (*controller.CRUDResource, error) {
-	c := controller.CRUDResourceConfig{
+func toCRUDResource(logger micrologger.Logger, ops crud.Interface) (*crud.Resource, error) {
+	c := crud.ResourceConfig{
+		CRUD:   ops,
 		Logger: logger,
-		Ops:    ops,
 	}
 
-	r, err := controller.NewCRUDResource(c)
+	r, err := crud.NewResource(c)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
