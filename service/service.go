@@ -7,16 +7,14 @@ import (
 	"net"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/api/node/v1alpha1"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -43,7 +41,6 @@ type Service struct {
 	clusterapiDrainerController           *controller.Drainer
 	clusterapiMachineDeploymentController *controller.MachineDeployment
 	operatorCollector                     *collector.Set
-	statusResourceCollector               *statusresource.CollectorSet
 }
 
 // New creates a new configured service object.
@@ -84,19 +81,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	g8sClient, err := versioned.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	k8sClient, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	k8sExtClient, err := apiextensionsclient.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var k8sClient *k8sclient.Clients
+	{
+		c := k8sclient.ClientsConfig{
+			AddToScheme: v1alpha1.AddToScheme,
+			Logger:      config.Logger,
+			RestConfig:  restConfig,
+		}
+		k8sClient, err = k8sclient.NewClients(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var awsConfig aws.Config
@@ -135,11 +130,9 @@ func New(config Config) (*Service, error) {
 	{
 
 		c := controller.ClusterConfig{
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Locker:       kubeLockLocker,
-			Logger:       config.Logger,
+			K8sClient: k8sClient,
+			Locker:    kubeLockLocker,
+			Logger:    config.Logger,
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
@@ -198,10 +191,8 @@ func New(config Config) (*Service, error) {
 	var clusterapiDrainerController *controller.Drainer
 	{
 		c := controller.DrainerConfig{
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Logger:       config.Logger,
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
 			LabelSelector: controller.DrainerConfigLabelSelector{
@@ -220,11 +211,9 @@ func New(config Config) (*Service, error) {
 	var clusterapiMachineDeploymentController *controller.MachineDeployment
 	{
 		c := controller.MachineDeploymentConfig{
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Locker:       kubeLockLocker,
-			Logger:       config.Logger,
+			K8sClient: k8sClient,
+			Locker:    kubeLockLocker,
+			Logger:    config.Logger,
 
 			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
@@ -270,8 +259,8 @@ func New(config Config) (*Service, error) {
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
-			G8sClient: g8sClient,
-			K8sClient: k8sClient,
+			G8sClient: k8sClient.G8sClient(),
+			K8sClient: k8sClient.K8sClient(),
 			Logger:    config.Logger,
 
 			AWSConfig:             awsConfig,
@@ -280,19 +269,6 @@ func New(config Config) (*Service, error) {
 		}
 
 		operatorCollector, err = collector.NewSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var statusResourceCollector *statusresource.CollectorSet
-	{
-		c := statusresource.CollectorSetConfig{
-			Logger:  config.Logger,
-			Watcher: g8sClient.ProviderV1alpha1().AWSConfigs("").Watch,
-		}
-
-		statusResourceCollector, err = statusresource.NewCollectorSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -323,7 +299,6 @@ func New(config Config) (*Service, error) {
 		clusterapiDrainerController:           clusterapiDrainerController,
 		clusterapiMachineDeploymentController: clusterapiMachineDeploymentController,
 		operatorCollector:                     operatorCollector,
-		statusResourceCollector:               statusResourceCollector,
 	}
 
 	return s, nil
@@ -332,7 +307,6 @@ func New(config Config) (*Service, error) {
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		go s.operatorCollector.Boot(ctx)
-		go s.statusResourceCollector.Boot(ctx)
 
 		go s.clusterapiClusterController.Boot(ctx)
 		go s.clusterapiDrainerController.Boot(ctx)
