@@ -7,9 +7,9 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/helmclient"
+	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )

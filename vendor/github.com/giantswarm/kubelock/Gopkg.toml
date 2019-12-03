@@ -25,7 +25,7 @@
   name = "github.com/google/go-cmp"
   version = "=0.3.1"
 
-[[override]]
+[[constraint]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.15.4"
 
@@ -35,10 +35,6 @@
 
 [[constraint]]
   name = "github.com/giantswarm/e2e-harness"
-  branch = "master"
-
-[[constraint]]
-  name = "github.com/giantswarm/e2esetup"
   branch = "master"
 
 [[constraint]]

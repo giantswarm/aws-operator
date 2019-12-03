@@ -1,3 +1,0 @@
-name: apiextensions-cert-config-e2e-chart
-version: 0.1.0
-description: CertConfig objects to be used in e2e tests.

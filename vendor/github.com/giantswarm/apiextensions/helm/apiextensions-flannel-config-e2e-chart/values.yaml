@@ -1,5 +1,0 @@
-clusterName: "test-cluster"
-versionBundleVersion: "0.2.0"
-flannel:
-  network: 172.23.0.0/24
-  vni: 11

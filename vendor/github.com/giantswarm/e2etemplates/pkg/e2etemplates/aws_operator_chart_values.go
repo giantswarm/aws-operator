@@ -39,6 +39,8 @@ const AWSOperatorChartValues = `Installation:
           Enabled: false
     Registry:
       Domain: quay.io
+    Installation:
+      Name: cp-peer-${CLUSTER_NAME}
     Secret:
       AWSOperator:
         IDRSAPub: ${IDRSA_PUB}

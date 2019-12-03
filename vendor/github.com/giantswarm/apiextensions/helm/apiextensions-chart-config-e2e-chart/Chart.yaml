@@ -1,3 +1,0 @@
-name: apiextensions-chart-config-e2e-chart
-version: 0.1.0
-description: ChartConfig objects to be used in e2e tests.

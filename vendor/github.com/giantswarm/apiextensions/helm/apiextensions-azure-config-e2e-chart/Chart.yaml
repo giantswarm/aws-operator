@@ -1,3 +1,0 @@
-name: apiextensions-azure-config-e2e-chart
-version: 0.1.0
-description: AzureConfig object used in e2e tests.

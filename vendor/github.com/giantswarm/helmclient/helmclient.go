@@ -54,7 +54,8 @@ type Config struct {
 
 	EnsureTillerInstalledMaxWait time.Duration
 	RestConfig                   *rest.Config
-	TillerImage                  string
+	TillerImageName              string
+	TillerImageRegistry          string
 	TillerNamespace              string
 }
 
@@ -90,8 +91,11 @@ func New(config Config) (*Client, error) {
 	if config.RestConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RestConfig must not be empty", config)
 	}
-	if config.TillerImage == "" {
-		config.TillerImage = defaultTillerImage
+	if config.TillerImageName == "" {
+		config.TillerImageName = defaultTillerImageName
+	}
+	if config.TillerImageRegistry == "" {
+		config.TillerImageRegistry = defaultTillerImageRegistry
 	}
 	if config.TillerNamespace == "" {
 		config.TillerNamespace = defaultTillerNamespace
@@ -102,6 +106,9 @@ func New(config Config) (*Client, error) {
 		Timeout: time.Second * httpClientTimeout,
 	}
 
+	// Registry is configurable for AWS China.
+	tillerImage := fmt.Sprintf("%s/%s", config.TillerImageRegistry, config.TillerImageName)
+
 	c := &Client{
 		fs:         config.Fs,
 		helmClient: config.HelmClient,
@@ -111,7 +118,7 @@ func New(config Config) (*Client, error) {
 
 		ensureTillerInstalledMaxWait: config.EnsureTillerInstalledMaxWait,
 		restConfig:                   config.RestConfig,
-		tillerImage:                  config.TillerImage,
+		tillerImage:                  tillerImage,
 		tillerNamespace:              config.TillerNamespace,
 	}
 
@@ -272,8 +279,8 @@ func (c *Client) getReleaseHistory(ctx context.Context, releaseName string) (*Re
 		}
 	}
 
-	if len(resp.Releases) > 1 {
-		return nil, microerror.Maskf(tooManyResultsError, "%d releases found, expected 1", len(resp.Releases))
+	if len(resp.Releases) == 0 {
+		return nil, nil
 	}
 
 	var history *ReleaseHistory

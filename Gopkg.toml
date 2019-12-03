@@ -36,7 +36,7 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[override]]
+[[constraint]]
   branch = "combine-capiv2-k8s-1-16"
   name = "github.com/giantswarm/apiextensions"
 
@@ -85,7 +85,7 @@ required = [
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
-  branch = "master"
+  branch = "k8s-1-16"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
@@ -129,6 +129,10 @@ required = [
   version = "0.9.3"
 
 [[override]]
+  branch = "combine-capiv2-k8s-1-16"
+  name = "github.com/giantswarm/apiextensions"
+
+[[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.16.3"
 
@@ -144,16 +148,20 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.16.3"
 
-[[constraint]]
-  name = "sigs.k8s.io/cluster-api"
-  version = "=v0.2.7"
-
 [[override]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/cli-runtime"
+  version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "k8s.io/helm"
+  version = "2.16.1"
+
+[[override]]
+  name = "k8s.io/kubectl"
   version = "kubernetes-1.16.3"
 
 [[override]]
@@ -175,6 +183,7 @@ required = [
 [[override]]
   source = "gopkg.in/fsnotify/fsnotify.v1"
   name = "gopkg.in/fsnotify.v1"
+  version = "v1.4.7"
 
 
 [prune]

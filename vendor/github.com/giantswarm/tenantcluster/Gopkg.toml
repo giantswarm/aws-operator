@@ -38,16 +38,20 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "master"
+  branch = "k8s-1-16"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
-  branch = "master"
+  branch = "k8s-1-16"
   name = "github.com/giantswarm/certs"
 
 [[constraint]]
-  branch = "master"
+  branch = "k8s-1-16"
   name = "github.com/giantswarm/helmclient"
+
+[[constraint]]
+  branch = "k8s-1-16"
+  name = "github.com/giantswarm/k8sclient"
 
 [[constraint]]
   branch = "master"
@@ -58,28 +62,28 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/operatorkit"
-
-[[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "v1.15.4"
+  version = "v1.16.3"
 
 [[override]]
   name = "k8s.io/cli-runtime"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/component-base"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "k8s.io/kubectl"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "github.com/russross/blackfriday"
