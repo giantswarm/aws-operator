@@ -46,6 +46,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	{
 		c := controller.Config{
 			CRD:          infrastructurev1alpha2.NewMachineDeploymentCRD(),
+			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
 
