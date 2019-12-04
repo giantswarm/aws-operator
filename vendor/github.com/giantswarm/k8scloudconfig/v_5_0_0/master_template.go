@@ -317,6 +317,24 @@ systemd:
   - name: systemd-networkd-wait-online.service
     enabled: false
     mask: true
+  - name: k8s-label-node.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Adds labels to the node after kubelet startup
+      After=k8s-kubelet.service
+      Requires=k8s-kubelet.service
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=0
+      Environment="KUBECTL=/opt/bin/hyperkube kubectl --kubeconfig /etc/kubernetes/kubeconfig/kubelet.yaml"
+      ExecStart=/bin/sh -c '\
+        while [ "$($KUBECTL get nodes | grep Ready | wc -l)" -lt "1" ]; do sleep 1 && echo "Waiting for healthy k8s";done;sleep 30s; \
+        $KUBECTL label nodes --overwrite $(hostname) node-role.kubernetes.io/master=""; \
+        $KUBECTL label nodes --overwrite $(hostname) kubernetes.io/role=master'
+      [Install]
+      WantedBy=multi-user.target
   - name: k8s-addons.service
     enabled: true
     contents: |
