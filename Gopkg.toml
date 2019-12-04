@@ -85,7 +85,7 @@ required = [
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
-  branch = "release-10-0-0"
+  branch = "release-11-0-0"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
