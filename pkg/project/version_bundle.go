@@ -24,8 +24,24 @@ func NewVersionBundle() versionbundle.Bundle {
 				},
 			},
 			{
+				Component:   "kube-proxy",
+				Description: "Switch from iptables to IPVS mode and tune kernel params accordingly.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/k8scloudconfig/pull/604",
+				},
+			},
+			{
+				Component:   "kubernetes",
+				Description: "Add Deny All as default Network Policy in kube-system and giantswarm namespaces.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/k8scloudconfig/pull/609",
+				},
+			},
+			{
 				Component:   "calico",
-				Description: "Updated from v3.9.1 to v3.10.1.",
+				Description: "Update from v3.9.1 to v3.10.1.",
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2084",
@@ -33,7 +49,7 @@ func NewVersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "containerlinux",
-				Description: "Updated from v2191.5.0 to v2247.6.0.",
+				Description: "Update from v2191.5.0 to v2247.6.0.",
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2084",
@@ -41,7 +57,7 @@ func NewVersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "etcd",
-				Description: "Updated from v3.3.15 to v3.3.17.",
+				Description: "Update from v3.3.15 to v3.3.17.",
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2084",
@@ -49,7 +65,7 @@ func NewVersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "kubernetes",
-				Description: "Updated from v1.15.5 to v1.16.3.",
+				Description: "Update from v1.15.5 to v1.16.3.",
 				Kind:        versionbundle.KindAdded,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2084",
