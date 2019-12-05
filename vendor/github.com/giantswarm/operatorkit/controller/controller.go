@@ -459,6 +459,8 @@ func (c *Controller) bootWithError(ctx context.Context) error {
 			// ourselves.
 			MetricsBindAddress: "0",
 			SyncPeriod:         to.DurationP(c.resyncPeriod),
+
+			Scheme: c.k8sClient.Scheme(),
 		}
 
 		mgr, err = manager.New(c.k8sClient.RESTConfig(), o)
