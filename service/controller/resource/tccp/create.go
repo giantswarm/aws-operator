@@ -24,6 +24,8 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+	fmt.Println("HERE")
+
 	cr, err := key.ToCluster(obj)
 	if err != nil {
 		return microerror.Mask(err)
