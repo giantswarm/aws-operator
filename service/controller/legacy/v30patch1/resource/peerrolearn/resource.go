@@ -9,12 +9,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/key"
 )
 
 const (
-	Name = "peerrolearnv30"
+	Name = "peerrolearnv30patch1"
 )
 
 type Config struct {

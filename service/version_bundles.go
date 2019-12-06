@@ -11,6 +11,7 @@ import (
 	v29 "github.com/giantswarm/aws-operator/service/controller/legacy/v29"
 	v29patch1 "github.com/giantswarm/aws-operator/service/controller/legacy/v29patch1"
 	v30 "github.com/giantswarm/aws-operator/service/controller/legacy/v30"
+	v30patch1 "github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1"
 )
 
 // NewVersionBundles returns the array of version bundles defined for the
@@ -26,6 +27,7 @@ func NewVersionBundles() []versionbundle.Bundle {
 	versionBundles = append(versionBundles, v29.VersionBundle())
 	versionBundles = append(versionBundles, v29patch1.VersionBundle())
 	versionBundles = append(versionBundles, v30.VersionBundle())
+	versionBundles = append(versionBundles, v30patch1.VersionBundle())
 
 	return versionBundles
 }

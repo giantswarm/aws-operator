@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Name = "secretfinalizerv30"
+	Name = "secretfinalizerv30patch1"
 )
 
 const (

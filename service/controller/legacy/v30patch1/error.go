@@ -1,4 +1,4 @@
-package v30
+package v30patch1
 
 import "github.com/giantswarm/microerror"
 

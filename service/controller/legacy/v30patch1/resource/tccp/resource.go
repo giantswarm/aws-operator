@@ -10,16 +10,16 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/adapter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/detection"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v30/key"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/adapter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/detection"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/legacy/v30patch1/key"
 )
 
 const (
 	// Name is the identifier of the resource.
-	Name = "tccpv30"
+	Name = "tccpv30patch1"
 )
 
 const (

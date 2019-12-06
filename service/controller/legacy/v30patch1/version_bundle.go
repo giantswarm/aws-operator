@@ -1,4 +1,4 @@
-package v30
+package v30patch1
 
 import (
 	"github.com/giantswarm/versionbundle"
@@ -8,29 +8,9 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudformation",
-				Description: "Use private subnets for internal Kubernetes API loadbalancer.",
+				Component:   "TODO",
+				Description: "TODO.",
 				Kind:        versionbundle.KindChanged,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Add ingress internal load-balancer in private hosted zone.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Duplicate etcd record set into public hosted zone.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Add public internal-api record set for Kubernetes API private load balancer.",
-				Kind:        versionbundle.KindAdded,
-			},
-			{
-				Component:   "cloudformation",
-				Description: "Add whitelisting for internal Kubernetes API.",
-				Kind:        versionbundle.KindAdded,
 			},
 		},
 		Components: []versionbundle.Component{
@@ -56,6 +36,6 @@ func VersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    "aws-operator",
-		Version: "5.4.0",
+		Version: "5.4.1",
 	}
 }
