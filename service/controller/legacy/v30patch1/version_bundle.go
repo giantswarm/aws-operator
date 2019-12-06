@@ -32,7 +32,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.14.6",
+				Version: "1.14.9",
 			},
 		},
 		Name:    "aws-operator",

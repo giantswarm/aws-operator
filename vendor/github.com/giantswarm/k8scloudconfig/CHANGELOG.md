@@ -9,6 +9,19 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v5.0.0] - 2019-11-12
+
+### Changed
+
+- Moved kubelet from container to host process (`--containerized` flag is removed in Kubernetes 1.16).
+- Switch from `iptables` to `ipvs` mode in kube-proxy and tune kernel params accordingly (all providers but azure).
+- Changed `restricted` PodSecurityPolicy to restrict the allowed range of user IDs for PODs.
+
+### Added
+
+- Add eviction hard setting for image file system in kubelet.
+- Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
+
 ## [v4.9.0] - 2019-10-17
 
 ### Changed
@@ -25,11 +38,11 @@ version directory, and  then changes are introduced.
 - Use `/bin/calico-node -felix-live` for `calico-node` liveness probe instead of `httpGet`.
 - Generally minimize differences between [Calico v3.9 yaml](https://docs.projectcalico.org/v3.9/manifests/calico.yaml) and `calico-all.yaml`.
 
-## [v4.8.1] 
+## [v4.8.1] - 2019-12-04
 
 ### Changed
 
-- Update kubernetes to 1.14.8, includes fixes for CVE-2019-11253
+- Update kubernetes to 1.14.9, includes fixes for CVE-2019-11253.
 
 ## [v4.8.0] 
 
@@ -464,6 +477,7 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
 [v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
 [v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_1
 [v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0
