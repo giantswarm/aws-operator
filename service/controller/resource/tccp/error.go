@@ -5,20 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+
 	"github.com/giantswarm/microerror"
 )
-
-// executionFailedError is an error type for situations where Resource execution
-// cannot continue and must always fall back to operatorkit.
-//
-// This error should never be matched against and therefore there is no matcher
-// implement. For further information see:
-//
-//     https://github.com/giantswarm/fmt/blob/master/go/errors.md#matching-errors
-//
-var executionFailedError = &microerror.Error{
-	Kind: "executionFailedError",
-}
 
 var alreadyTerminatedError = &microerror.Error{
 	Kind: "alreadyTerminatedError",
@@ -70,6 +59,27 @@ func IsDeleteInProgress(err error) bool {
 	return false
 }
 
+var emptyAmazonAccountIDError = &microerror.Error{
+	Kind: "emptyAmazonAccountIDError",
+}
+
+// IsEmptyAmazonAccountID asserts emptyAmazonAccountIDError.
+func IsEmptyAmazonAccountID(err error) bool {
+	return microerror.Cause(err) == emptyAmazonAccountIDError
+}
+
+// executionFailedError is an error type for situations where Resource execution
+// cannot continue and must always fall back to operatorkit.
+//
+// This error should never be matched against and therefore there is no matcher
+// implement. For further information see:
+//
+//     https://github.com/giantswarm/fmt/blob/master/go/errors.md#matching-errors
+//
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
+}
+
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
@@ -77,6 +87,15 @@ var invalidConfigError = &microerror.Error{
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
+}
+
+var malformedAmazonAccountIDError = &microerror.Error{
+	Kind: "malformedAmazonAccountIDError",
+}
+
+// IsMalformedAmazonAccountID asserts malformedAmazonAccountIDError.
+func IsMalformedAmazonAccountID(err error) bool {
+	return microerror.Cause(err) == malformedAmazonAccountIDError
 }
 
 var notExistsError = &microerror.Error{
@@ -102,6 +121,33 @@ func IsNotExists(err error) bool {
 	return false
 }
 
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
+}
+
+// IsNotFound asserts notFoundError
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
+}
+
+var tooFewResultsError = &microerror.Error{
+	Kind: "tooFewResultsError",
+}
+
+// IsTooFewResults asserts tooFewResultsError.
+func IsTooFewResults(err error) bool {
+	return microerror.Cause(err) == tooFewResultsError
+}
+
+var tooManyResultsError = &microerror.Error{
+	Kind: "tooManyResultsError",
+}
+
+// IsTooManyResults asserts tooManyResultsError.
+func IsTooManyResults(err error) bool {
+	return microerror.Cause(err) == tooManyResultsError
+}
+
 var updateInProgressError = &microerror.Error{
 	Kind: "updateInProgressError",
 }
@@ -125,33 +171,6 @@ func IsUpdateInProgress(err error) bool {
 	return false
 }
 
-var emptyAmazonAccountIDError = &microerror.Error{
-	Kind: "emptyAmazonAccountIDError",
-}
-
-// IsEmptyAmazonAccountID asserts emptyAmazonAccountIDError.
-func IsEmptyAmazonAccountID(err error) bool {
-	return microerror.Cause(err) == emptyAmazonAccountIDError
-}
-
-var malformedAmazonAccountIDError = &microerror.Error{
-	Kind: "malformedAmazonAccountIDError",
-}
-
-// IsMalformedAmazonAccountID asserts malformedAmazonAccountIDError.
-func IsMalformedAmazonAccountID(err error) bool {
-	return microerror.Cause(err) == malformedAmazonAccountIDError
-}
-
-var notFoundError = &microerror.Error{
-	Kind: "notFoundError",
-}
-
-// IsNotFound asserts notFoundError
-func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
-}
-
 var wrongAmazonAccountIDLengthError = &microerror.Error{
 	Kind: "wrongAmazonAccountIDLengthError",
 }
@@ -168,22 +187,4 @@ var wrongTypeError = &microerror.Error{
 // IsWrongType asserts wrongTypeError.
 func IsWrongType(err error) bool {
 	return microerror.Cause(err) == wrongTypeError
-}
-
-var tooFewResultsError = &microerror.Error{
-	Kind: "tooFewResultsError",
-}
-
-// IsTooFewResults asserts tooFewResultsError.
-func IsTooFewResults(err error) bool {
-	return microerror.Cause(err) == tooFewResultsError
-}
-
-var tooManyResultsError = &microerror.Error{
-	Kind: "tooManyResultsError",
-}
-
-// IsTooManyResults asserts tooManyResultsError.
-func IsTooManyResults(err error) bool {
-	return microerror.Cause(err) == tooManyResultsError
 }
