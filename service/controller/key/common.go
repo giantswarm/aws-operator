@@ -179,6 +179,10 @@ func S3ObjectPathTCNP(getter LabelsGetter) string {
 	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCNP(getter))
 }
 
+func S3URL(getter LabelsGetter, AccountID string) string {
+	return fmt.Sprintf("s3://%s/%s", BucketName(getter, AccountID), S3ObjectPathTCCP(getter))
+}
+
 // SanitizeCFResourceName filters out all non-ascii alphanumberics from input
 // string.
 //

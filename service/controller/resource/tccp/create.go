@@ -2,7 +2,6 @@ package tccp
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"sort"
 	"strings"
@@ -15,7 +14,6 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	pkgtemplate "github.com/giantswarm/aws-operator/pkg/template"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
@@ -304,17 +302,6 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t
 		return nil, microerror.Mask(err)
 	}
 
-	// TODO: The rendering should be moved into the templates
-	// https://github.com/giantswarm/giantswarm/issues/7665
-
-	c := template.SmallCloudconfigConfig{
-		S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCP(&cr)),
-	}
-	rendered, err := pkgtemplate.Render(key.CloudConfigSmallTemplates(), c)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var instance *template.ParamsMainInstance
 	{
 		instance = &template.ParamsMainInstance{
@@ -326,7 +313,7 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t
 			},
 			Master: template.ParamsMainInstanceMaster{
 				AZ:               key.MasterAvailabilityZone(cr),
-				CloudConfig:      base64.StdEncoding.EncodeToString([]byte(rendered)),
+				CloudConfig:      key.S3URL(&cr, cc.Status.TenantCluster.AWS.AccountID),
 				EncrypterBackend: r.encrypterBackend,
 				DockerVolume: template.ParamsMainInstanceMasterDockerVolume{
 					Name:         key.VolumeNameDocker(cr),
