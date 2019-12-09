@@ -30,7 +30,7 @@ type InfrastructureV1alpha2Interface interface {
 	AWSMachineDeploymentsGetter
 }
 
-// InfrastructureV1alpha2Client is used to interact with features provided by the infrastructure group.
+// InfrastructureV1alpha2Client is used to interact with features provided by the infrastructure.giantswarm.io group.
 type InfrastructureV1alpha2Client struct {
 	restClient rest.Interface
 }

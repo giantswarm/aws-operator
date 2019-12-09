@@ -33,9 +33,9 @@ type FakeAWSClusters struct {
 	Fake *FakeInfrastructureV1alpha2
 }
 
-var awsclustersResource = schema.GroupVersionResource{Group: "infrastructure", Version: "v1alpha2", Resource: "awsclusters"}
+var awsclustersResource = schema.GroupVersionResource{Group: "infrastructure.giantswarm.io", Version: "v1alpha2", Resource: "awsclusters"}
 
-var awsclustersKind = schema.GroupVersionKind{Group: "infrastructure", Version: "v1alpha2", Kind: "AWSCluster"}
+var awsclustersKind = schema.GroupVersionKind{Group: "infrastructure.giantswarm.io", Version: "v1alpha2", Kind: "AWSCluster"}
 
 // Get takes name of the aWSCluster, and returns the corresponding aWSCluster object, and an error if there is any.
 func (c *FakeAWSClusters) Get(name string, options v1.GetOptions) (result *v1alpha2.AWSCluster, err error) {

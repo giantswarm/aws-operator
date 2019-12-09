@@ -39,32 +39,32 @@ required = [
   version = "9.1.0"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/docker/distribution"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/backoff"
+  branch = "master"
 
 [[constraint]]
-  branch = "k8s-1-16"
   name = "github.com/giantswarm/k8sclient"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/errors"
+  branch = "master"
 
 [[constraint]]
-  branch = "k8s-1-16"
   name = "github.com/giantswarm/k8sportforward"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microerror"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/micrologger"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/google/go-cmp"

@@ -23,7 +23,9 @@
 
 required = [
   "github.com/docker/distribution/reference",
-  "k8s.io/apiserver/pkg/endpoints/request"
+  "k8s.io/apiserver/pkg/endpoints/request",
+  "k8s.io/kubectl/pkg/cmd/util",
+  "k8s.io/kubernetes/pkg/kubectl/cmd"
 ]
 
 
@@ -37,7 +39,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[constraint]]
-  branch = "combine-capiv2-k8s-1-16"
+  branch = "infrastructure/v1alpha2"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -49,7 +51,7 @@ required = [
   name = "github.com/giantswarm/backoff"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/certs"
 
 [[override]]
@@ -90,6 +92,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/k8sportforward"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/microendpoint"
 
 [[constraint]]
@@ -105,16 +111,12 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[override]]
-  branch = "controller-runtime-with-k8s-1-16"
+  branch = "k8s-1-16"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/randomkeys"
-
-[[constraint]]
-  branch = "k8s-1-16"
-  name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
   branch = "master"
@@ -129,7 +131,7 @@ required = [
   version = "0.9.3"
 
 [[override]]
-  branch = "combine-capiv2-k8s-1-16"
+  branch = "infrastructure/v1alpha2"
   name = "github.com/giantswarm/apiextensions"
 
 [[override]]

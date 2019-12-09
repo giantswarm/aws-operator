@@ -33,9 +33,9 @@ type FakeAWSMachineDeployments struct {
 	Fake *FakeInfrastructureV1alpha2
 }
 
-var awsmachinedeploymentsResource = schema.GroupVersionResource{Group: "infrastructure", Version: "v1alpha2", Resource: "awsmachinedeployments"}
+var awsmachinedeploymentsResource = schema.GroupVersionResource{Group: "infrastructure.giantswarm.io", Version: "v1alpha2", Resource: "awsmachinedeployments"}
 
-var awsmachinedeploymentsKind = schema.GroupVersionKind{Group: "infrastructure", Version: "v1alpha2", Kind: "AWSMachineDeployment"}
+var awsmachinedeploymentsKind = schema.GroupVersionKind{Group: "infrastructure.giantswarm.io", Version: "v1alpha2", Kind: "AWSMachineDeployment"}
 
 // Get takes name of the aWSMachineDeployment, and returns the corresponding aWSMachineDeployment object, and an error if there is any.
 func (c *FakeAWSMachineDeployments) Get(name string, options v1.GetOptions) (result *v1alpha2.AWSMachineDeployment, err error) {
