@@ -21,16 +21,16 @@ const (
 	// rollingUpdatePauseTime is how long to pause ASG operations after creating
 	// new instances. This allows time for new nodes to join the cluster.
 	rollingUpdatePauseTime = "PT15M"
-	// logEBSVolumeMountPoint is the path for mounting the log EBS volume
+	// logEBSVolumeMountPoint is the path for mounting the log EBS volume.
 	logEBSVolumeMountPoint = "/dev/xvdf"
-	// kubeletEBSVolumeMountPoint is the path for mounting the log EBS volume
+	// kubeletEBSVolumeMountPoint is the path for mounting the log EBS volume.
 	kubeletEBSVolumeMountPoint = "/dev/xvdg"
 
 	// Subnet keys
 	subnetDescription = "description"
 	subnetGroupName   = "group-name"
 
-	// accountIDIndex represents the index in which we can find the account ID in the user ARN
+	// accountIDIndex represents the index in which we can find the account ID in the user ARN.
 	// (splitting by colon)
 	accountIDIndex = 4
 
@@ -85,7 +85,7 @@ type APIWhitelist struct {
 }
 
 // Whitelist represents the structure required for defining whitelisting for
-// resource security group
+// resource security group.
 type Whitelist struct {
 	Enabled    bool
 	SubnetList string
