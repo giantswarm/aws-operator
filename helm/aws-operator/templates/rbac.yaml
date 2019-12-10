@@ -4,9 +4,10 @@ metadata:
   name: {{ tpl .Values.resource.default.name  . }}
 rules:
   - apiGroups:
-      - cluster.giantswarm.io
+      - infrastructure.giantswarm.io
     resources:
-      - awses
+      - awsclusters
+      - awsmachinedeployments
     verbs:
       - "*"
   - apiGroups:
