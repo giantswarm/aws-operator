@@ -16,7 +16,7 @@ type ParamsMainInstanceImage struct {
 
 type ParamsMainInstanceMaster struct {
 	AZ               string
-	CloudConfig      string
+	S3URL            string
 	EncrypterBackend string
 	DockerVolume     ParamsMainInstanceMasterDockerVolume
 	EtcdVolume       ParamsMainInstanceMasterEtcdVolume
@@ -42,10 +42,4 @@ type ParamsMainInstanceMasterInstance struct {
 	ResourceName string
 	Type         string
 	Monitoring   bool
-}
-
-// SmallCloudconfigConfig represents the data structure required for executing
-// the small cloudconfig template.
-type SmallCloudconfigConfig struct {
-	S3URL string
 }

@@ -313,7 +313,7 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr v1alpha1.Cluster, t
 			},
 			Master: template.ParamsMainInstanceMaster{
 				AZ:               key.MasterAvailabilityZone(cr),
-				CloudConfig:      key.S3URL(&cr, cc.Status.TenantCluster.AWS.AccountID),
+				S3URL:            key.S3URL(&cr, cc.Status.TenantCluster.AWS.AccountID),
 				EncrypterBackend: r.encrypterBackend,
 				DockerVolume: template.ParamsMainInstanceMasterDockerVolume{
 					Name:         key.VolumeNameDocker(cr),
