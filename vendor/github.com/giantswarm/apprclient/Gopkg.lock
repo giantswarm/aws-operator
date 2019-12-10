@@ -45,8 +45,8 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:a1f66d90646e72d72e99c53053879efa5bb32c0c8a15960a064f547c6c5d5ef7"
+  branch = "master"
+  digest = "1:2f9b3a4dc1447d6b0143e2416125989df27d522989afc22031740ff4782befc1"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -63,7 +63,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "e7e1dc9f9facd2257190cde1e1c2d50cd28bcee9"
+  revision = "a4fd7939e26e7e2cd681af032963a1597ffae781"
 
 [[projects]]
   branch = "master"
@@ -74,23 +74,23 @@
   revision = "4dd4911251929a0ac4c4f3d8c4bda482a9e09f30"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:609ae490630e107efd4c5f816f04bc1237f9c5592cf267d7ad4e9673e2980567"
+  branch = "master"
+  digest = "1:ca9ad5887021e13fca3a1aa33a58668a0061b3a03bd7dfc2d36c38dedf56f572"
   name = "github.com/giantswarm/k8sclient"
   packages = [
     ".",
     "k8scrdclient",
   ]
   pruneopts = "UT"
-  revision = "cf1bd7aac884f5f56d72757cf57e50f53ddd78de"
+  revision = "6cb127468cd6b30eaf8030b875f796e34b481938"
 
 [[projects]]
-  branch = "k8s-1-16"
+  branch = "master"
   digest = "1:42649fa57594fd0dd202a5cf01d9cae946ff99e0e8f87bc9c145860a2e57c17a"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
   pruneopts = "UT"
-  revision = "6ed91e0caa9377f3728f4e286866743bb54bda49"
+  revision = "676e7106283c008acc4c07c0cfc903c18cdbeda3"
 
 [[projects]]
   branch = "master"
@@ -262,7 +262,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "ac88ee75c92c889b97e05591e9a39b6480c538b3"
+  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
@@ -277,29 +277,29 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "ef20fe5d793301b553005db740f730d87993f778"
+  revision = "e7e4b65ae66375ec1e85afc8e6b9b4933ae4da81"
 
 [[projects]]
   branch = "master"
-  digest = "1:8d1c112fb1679fa097e9a9255a786ee47383fa2549a3da71bcb1334a693ebcfe"
+  digest = "1:55d36eb35766a3f105fa36cfb2faf053cc33c019108a6adee799c4e7d59d62b2"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "5d9234df094ce600ff541158d1491aa10d078a47"
+  revision = "858c2ad4c8b6c5d10852cb89079f6ca1c7309787"
 
 [[projects]]
   branch = "master"
-  digest = "1:055d921edfad0ae56ef0d21a124a002cf3a669b4c42e85b810abf0225226e2a3"
+  digest = "1:8191c209ac2aaba9e958a061256fab8955ad10cc731aa609660184800f1ef55a"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "63cb32ae39b28d6bb8e7e215c1fc39dd80dcdb02"
+  revision = "eeba5f6aabab6d6594a9191d6bfeaca5fa6a8248"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -336,14 +336,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a0e46a43516d3f5ff0ba3636488b8a8df632b2986da49823cd8340c070c1a125"
+  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
   name = "golang.org/x/xerrors"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "1b5146add8981d58be77b16229c0ff0f8bebd8c1"
+  revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"

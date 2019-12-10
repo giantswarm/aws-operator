@@ -220,10 +220,8 @@ type AWSClusterSpecProviderMaster struct {
 }
 
 type AWSClusterStatus struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Cluster           CommonClusterStatus      `json:"cluster" yaml:"cluster"`
-	Provider          AWSClusterStatusProvider `json:"provider" yaml:"provider"`
+	Cluster  CommonClusterStatus      `json:"cluster" yaml:"cluster"`
+	Provider AWSClusterStatusProvider `json:"provider" yaml:"provider"`
 }
 
 type AWSClusterStatusProvider struct {

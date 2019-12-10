@@ -10,12 +10,12 @@
   version = "v1.1.1"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:b375511685d72a75bc1e5951957121befe9583c3f13ff76fc9f1214a791978e8"
+  branch = "master"
+  digest = "1:d914e4b4106cef270f44419f5cce310826c9cf710b858172fc7f31e17db05c82"
   name = "github.com/giantswarm/apiextensions"
   packages = ["pkg/apis/provider/v1alpha1"]
   pruneopts = "UT"
-  revision = "e7e1dc9f9facd2257190cde1e1c2d50cd28bcee9"
+  revision = "a4fd7939e26e7e2cd681af032963a1597ffae781"
 
 [[projects]]
   branch = "master"
@@ -79,7 +79,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "ef20fe5d793301b553005db740f730d87993f778"
+  revision = "e7e4b65ae66375ec1e85afc8e6b9b4933ae4da81"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"

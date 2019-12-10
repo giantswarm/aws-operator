@@ -14,8 +14,8 @@ version directory, and  then changes are introduced.
 ### Changed
 
 - Moved kubelet from container to host process (`--containerized` flag is removed in Kubernetes 1.16).
-- Switch from `iptables` to `ipvs` mode in kube-proxy and tune kernel params accordingly (all providers but azure).
 - Changed `restricted` PodSecurityPolicy to restrict the allowed range of user IDs for PODs.
+- Increase `fs.inotify.max_user_instances` to 8192.
 
 ### Added
 
@@ -43,6 +43,7 @@ version directory, and  then changes are introduced.
 ### Changed
 
 - Update kubernetes to 1.14.8, includes fixes for CVE-2019-11253
+- Increase `fs.inotify.max_user_instances` to 8192.
 
 ## [v4.8.0] 
 

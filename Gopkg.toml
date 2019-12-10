@@ -43,7 +43,7 @@ required = [
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/apprclient"
 
 [[constraint]]
@@ -55,7 +55,7 @@ required = [
   name = "github.com/giantswarm/certs"
 
 [[override]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
@@ -67,11 +67,11 @@ required = [
   name = "github.com/giantswarm/e2etemplates"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/e2etests"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/e2esetup"
 
 [[constraint]]
@@ -79,7 +79,7 @@ required = [
   name = "github.com/giantswarm/exporterkit"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/helmclient"
 
 [[constraint]]
@@ -87,12 +87,12 @@ required = [
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
-  branch = "k8s-1-16"
-  name = "github.com/giantswarm/k8scloudconfig"
+  branch = "master"
+  name = "github.com/giantswarm/k8sclient"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/k8sportforward"
+  name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
   branch = "master"
@@ -111,7 +111,7 @@ required = [
   name = "github.com/giantswarm/micrologger"
 
 [[override]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]

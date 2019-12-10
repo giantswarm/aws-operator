@@ -5,59 +5,59 @@ import (
 	"time"
 )
 
-func (s CommonClusterStatus) GetCreatedCondition() CommonClusterStatusCondition {
+func (s CommonClusterStatusCluster) GetCreatedCondition() CommonClusterStatusClusterCondition {
 	return getCondition(s.Conditions, ClusterStatusConditionCreated)
 }
 
-func (s CommonClusterStatus) GetCreatingCondition() CommonClusterStatusCondition {
+func (s CommonClusterStatusCluster) GetCreatingCondition() CommonClusterStatusClusterCondition {
 	return getCondition(s.Conditions, ClusterStatusConditionCreating)
 }
 
-func (s CommonClusterStatus) GetDeletedCondition() CommonClusterStatusCondition {
+func (s CommonClusterStatusCluster) GetDeletedCondition() CommonClusterStatusClusterCondition {
 	return getCondition(s.Conditions, ClusterStatusConditionDeleted)
 }
 
-func (s CommonClusterStatus) GetDeletingCondition() CommonClusterStatusCondition {
+func (s CommonClusterStatusCluster) GetDeletingCondition() CommonClusterStatusClusterCondition {
 	return getCondition(s.Conditions, ClusterStatusConditionDeleting)
 }
 
-func (s CommonClusterStatus) GetUpdatedCondition() CommonClusterStatusCondition {
+func (s CommonClusterStatusCluster) GetUpdatedCondition() CommonClusterStatusClusterCondition {
 	return getCondition(s.Conditions, ClusterStatusConditionUpdated)
 }
 
-func (s CommonClusterStatus) GetUpdatingCondition() CommonClusterStatusCondition {
+func (s CommonClusterStatusCluster) GetUpdatingCondition() CommonClusterStatusClusterCondition {
 	return getCondition(s.Conditions, ClusterStatusConditionUpdating)
 }
 
-func (s CommonClusterStatus) HasCreatedCondition() bool {
+func (s CommonClusterStatusCluster) HasCreatedCondition() bool {
 	return hasCondition(s.Conditions, ClusterStatusConditionCreated)
 }
 
-func (s CommonClusterStatus) HasCreatingCondition() bool {
+func (s CommonClusterStatusCluster) HasCreatingCondition() bool {
 	return hasCondition(s.Conditions, ClusterStatusConditionCreating)
 }
 
-func (s CommonClusterStatus) HasDeletedCondition() bool {
+func (s CommonClusterStatusCluster) HasDeletedCondition() bool {
 	return hasCondition(s.Conditions, ClusterStatusConditionDeleted)
 }
 
-func (s CommonClusterStatus) HasDeletingCondition() bool {
+func (s CommonClusterStatusCluster) HasDeletingCondition() bool {
 	return hasCondition(s.Conditions, ClusterStatusConditionDeleting)
 }
 
-func (s CommonClusterStatus) HasUpdatedCondition() bool {
+func (s CommonClusterStatusCluster) HasUpdatedCondition() bool {
 	return hasCondition(s.Conditions, ClusterStatusConditionUpdated)
 }
 
-func (s CommonClusterStatus) HasUpdatingCondition() bool {
+func (s CommonClusterStatusCluster) HasUpdatingCondition() bool {
 	return hasCondition(s.Conditions, ClusterStatusConditionUpdating)
 }
 
-func (s CommonClusterStatus) HasVersion(semver string) bool {
+func (s CommonClusterStatusCluster) HasVersion(semver string) bool {
 	return hasVersion(s.Versions, semver)
 }
 
-func (s CommonClusterStatus) LatestCondition() string {
+func (s CommonClusterStatusCluster) LatestCondition() string {
 	if len(s.Conditions) == 0 {
 		return ""
 	}
@@ -67,7 +67,7 @@ func (s CommonClusterStatus) LatestCondition() string {
 	return s.Conditions[0].Condition
 }
 
-func (s CommonClusterStatus) LatestVersion() string {
+func (s CommonClusterStatusCluster) LatestVersion() string {
 	if len(s.Versions) == 0 {
 		return ""
 	}
@@ -77,8 +77,8 @@ func (s CommonClusterStatus) LatestVersion() string {
 	return s.Versions[0].Version
 }
 
-func (s CommonClusterStatus) WithCreatedCondition() []CommonClusterStatusCondition {
-	newCondition := CommonClusterStatusCondition{
+func (s CommonClusterStatusCluster) WithCreatedCondition() []CommonClusterStatusClusterCondition {
+	newCondition := CommonClusterStatusClusterCondition{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Condition:          ClusterStatusConditionCreated,
 	}
@@ -86,8 +86,8 @@ func (s CommonClusterStatus) WithCreatedCondition() []CommonClusterStatusConditi
 	return withCondition(s.Conditions, newCondition, ClusterConditionLimit)
 }
 
-func (s CommonClusterStatus) WithCreatingCondition() []CommonClusterStatusCondition {
-	newCondition := CommonClusterStatusCondition{
+func (s CommonClusterStatusCluster) WithCreatingCondition() []CommonClusterStatusClusterCondition {
+	newCondition := CommonClusterStatusClusterCondition{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Condition:          ClusterStatusConditionCreating,
 	}
@@ -95,8 +95,8 @@ func (s CommonClusterStatus) WithCreatingCondition() []CommonClusterStatusCondit
 	return withCondition(s.Conditions, newCondition, ClusterConditionLimit)
 }
 
-func (s CommonClusterStatus) WithDeletedCondition() []CommonClusterStatusCondition {
-	newCondition := CommonClusterStatusCondition{
+func (s CommonClusterStatusCluster) WithDeletedCondition() []CommonClusterStatusClusterCondition {
+	newCondition := CommonClusterStatusClusterCondition{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Condition:          ClusterStatusConditionDeleted,
 	}
@@ -104,8 +104,8 @@ func (s CommonClusterStatus) WithDeletedCondition() []CommonClusterStatusConditi
 	return withCondition(s.Conditions, newCondition, ClusterConditionLimit)
 }
 
-func (s CommonClusterStatus) WithDeletingCondition() []CommonClusterStatusCondition {
-	newCondition := CommonClusterStatusCondition{
+func (s CommonClusterStatusCluster) WithDeletingCondition() []CommonClusterStatusClusterCondition {
+	newCondition := CommonClusterStatusClusterCondition{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Condition:          ClusterStatusConditionDeleting,
 	}
@@ -113,8 +113,8 @@ func (s CommonClusterStatus) WithDeletingCondition() []CommonClusterStatusCondit
 	return withCondition(s.Conditions, newCondition, ClusterConditionLimit)
 }
 
-func (s CommonClusterStatus) WithNewVersion(version string) []CommonClusterStatusVersion {
-	newVersion := CommonClusterStatusVersion{
+func (s CommonClusterStatusCluster) WithNewVersion(version string) []CommonClusterStatusClusterVersion {
+	newVersion := CommonClusterStatusClusterVersion{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Version:            version,
 	}
@@ -122,8 +122,8 @@ func (s CommonClusterStatus) WithNewVersion(version string) []CommonClusterStatu
 	return withVersion(s.Versions, newVersion, ClusterVersionLimit)
 }
 
-func (s CommonClusterStatus) WithUpdatedCondition() []CommonClusterStatusCondition {
-	newCondition := CommonClusterStatusCondition{
+func (s CommonClusterStatusCluster) WithUpdatedCondition() []CommonClusterStatusClusterCondition {
+	newCondition := CommonClusterStatusClusterCondition{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Condition:          ClusterStatusConditionUpdated,
 	}
@@ -131,8 +131,8 @@ func (s CommonClusterStatus) WithUpdatedCondition() []CommonClusterStatusConditi
 	return withCondition(s.Conditions, newCondition, ClusterConditionLimit)
 }
 
-func (s CommonClusterStatus) WithUpdatingCondition() []CommonClusterStatusCondition {
-	newCondition := CommonClusterStatusCondition{
+func (s CommonClusterStatusCluster) WithUpdatingCondition() []CommonClusterStatusClusterCondition {
+	newCondition := CommonClusterStatusClusterCondition{
 		LastTransitionTime: DeepCopyTime{time.Now()},
 		Condition:          ClusterStatusConditionUpdating,
 	}
@@ -140,17 +140,17 @@ func (s CommonClusterStatus) WithUpdatingCondition() []CommonClusterStatusCondit
 	return withCondition(s.Conditions, newCondition, ClusterConditionLimit)
 }
 
-func getCondition(conditions []CommonClusterStatusCondition, condition string) CommonClusterStatusCondition {
+func getCondition(conditions []CommonClusterStatusClusterCondition, condition string) CommonClusterStatusClusterCondition {
 	for _, c := range conditions {
 		if c.Condition == condition {
 			return c
 		}
 	}
 
-	return CommonClusterStatusCondition{}
+	return CommonClusterStatusClusterCondition{}
 }
 
-func getConditionForPair(a CommonClusterStatusCondition) string {
+func getConditionForPair(a CommonClusterStatusClusterCondition) string {
 	for _, p := range conditionPairs {
 		if p[0] == a.Condition {
 			return p[1]
@@ -163,7 +163,7 @@ func getConditionForPair(a CommonClusterStatusCondition) string {
 	return ""
 }
 
-func hasCondition(conditions []CommonClusterStatusCondition, condition string) bool {
+func hasCondition(conditions []CommonClusterStatusClusterCondition, condition string) bool {
 	for _, c := range conditions {
 		if c.Condition == condition {
 			return true
@@ -173,7 +173,7 @@ func hasCondition(conditions []CommonClusterStatusCondition, condition string) b
 	return false
 }
 
-func hasVersion(versions []CommonClusterStatusVersion, search string) bool {
+func hasVersion(versions []CommonClusterStatusClusterVersion, search string) bool {
 	for _, v := range versions {
 		if v.Version == search {
 			return true
@@ -183,7 +183,7 @@ func hasVersion(versions []CommonClusterStatusVersion, search string) bool {
 	return false
 }
 
-func isConditionPair(a CommonClusterStatusCondition, b CommonClusterStatusCondition) bool {
+func isConditionPair(a CommonClusterStatusClusterCondition, b CommonClusterStatusClusterCondition) bool {
 	for _, p := range conditionPairs {
 		if p[0] == a.Condition && p[1] == b.Condition {
 			return true
@@ -206,15 +206,15 @@ func isConditionPair(a CommonClusterStatusCondition, b CommonClusterStatusCondit
 // automatically as this may happen due to unexpected behaviour in the callers
 // environment. For more information on implementation details read the inline
 // comments of the code.
-func withCondition(conditions []CommonClusterStatusCondition, condition CommonClusterStatusCondition, limit int) []CommonClusterStatusCondition {
+func withCondition(conditions []CommonClusterStatusClusterCondition, condition CommonClusterStatusClusterCondition, limit int) []CommonClusterStatusClusterCondition {
 	// We create a new list which acts like a copy so the input parameters are not
 	// manipulated. Here we also prepend the given condition and inject certain
 	// missing conditions in case the condition list gets out of sync
 	// unintendedly due to any eventual bugs. Test case 8 demonstrates that.
-	var newConditions []CommonClusterStatusCondition
+	var newConditions []CommonClusterStatusClusterCondition
 	{
 		if len(conditions) > 0 && conditions[0].Condition == condition.Condition {
-			injected := CommonClusterStatusCondition{
+			injected := CommonClusterStatusClusterCondition{
 				// The implication of unintendedly untracked conditions is that the
 				// automatically added condition does not obtain a reasonable timestamp.
 				// Here we take the timestamp of the new condition we want to track and
@@ -241,9 +241,9 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 	// The conditions are grouped into their corresponding pairs of transitioning
 	// states. Associated Creating/Created, Updating/Updated and Deleting/Deleted
 	// conditions are put together.
-	var conditionGroups [][]CommonClusterStatusCondition
+	var conditionGroups [][]CommonClusterStatusClusterCondition
 	for len(newConditions) > 0 {
-		var g []CommonClusterStatusCondition
+		var g []CommonClusterStatusClusterCondition
 
 		for _, c := range newConditions {
 			// If the list only contains one item anymore, we process it separately
@@ -251,7 +251,7 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 			// to the range calculations.
 			if len(newConditions) == 1 {
 				g = append(g, c)
-				newConditions = []CommonClusterStatusCondition{}
+				newConditions = []CommonClusterStatusClusterCondition{}
 				break
 			}
 
@@ -279,9 +279,9 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 	// The pairs are now grouped. When there are only three group kinds for
 	// create/update/delete, conditionPairs has a length of 3. Each of the groups
 	// has then as many pairs as grouped together. Below these groups are limited.
-	var conditionPairs [][]CommonClusterStatusCondition
+	var conditionPairs [][]CommonClusterStatusClusterCondition
 	for len(conditionGroups) > 0 {
-		var p []CommonClusterStatusCondition
+		var p []CommonClusterStatusClusterCondition
 
 		for _, g := range conditionGroups {
 			if len(p) == 0 {
@@ -303,7 +303,7 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 
 	// Here the list is finally flattened again and its pairs are limitted to the
 	// input parameter.
-	var limittedList []CommonClusterStatusCondition
+	var limittedList []CommonClusterStatusClusterCondition
 	for _, p := range conditionPairs {
 		// We compute the pair limit here for the total number of items. This is why
 		// we multiply by 2. When the limit is 5, we want to track for instance 5
@@ -330,13 +330,13 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 // version structure to append. withVersion also limits the total amount of
 // elements in the list by cutting off the tail with respect to the limit
 // parameter.
-func withVersion(versions []CommonClusterStatusVersion, version CommonClusterStatusVersion, limit int) []CommonClusterStatusVersion {
+func withVersion(versions []CommonClusterStatusClusterVersion, version CommonClusterStatusClusterVersion, limit int) []CommonClusterStatusClusterVersion {
 	if hasVersion(versions, version.Version) {
 		return versions
 	}
 
 	// Create a copy to not manipulate the input list.
-	var newVersions []CommonClusterStatusVersion
+	var newVersions []CommonClusterStatusClusterVersion
 	for _, v := range versions {
 		newVersions = append(newVersions, v)
 	}
@@ -352,7 +352,7 @@ func withVersion(versions []CommonClusterStatusVersion, version CommonClusterSta
 	}
 
 	// Cap the list and prepend the new version.
-	newVersions = append([]CommonClusterStatusVersion{version}, newVersions[0:l]...)
+	newVersions = append([]CommonClusterStatusClusterVersion{version}, newVersions[0:l]...)
 
 	return newVersions
 }

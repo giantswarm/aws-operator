@@ -203,7 +203,7 @@
     "reference",
   ]
   pruneopts = "UT"
-  revision = "dee21c0394b5e1e735412461dbd8d3a769e01799"
+  revision = "f18781257ec94f25301f1f546b2e4b90612295e7"
 
 [[projects]]
   digest = "1:53e99d883df3e940f5f0223795f300eb32b8c044f226132bfc0e74930f24ea4b"
@@ -280,7 +280,7 @@
 
 [[projects]]
   branch = "infrastructure/v1alpha2"
-  digest = "1:0fe16927b715c251c5ecb791487a1d8f87da6337184b868ecddf2556c29e0317"
+  digest = "1:0ebb658d0f7f60b493c25188d939d929c8ef2172b09cb5f0d2843bcd5203ecbd"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -306,15 +306,15 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "5f7f26ec5b9125dca8c653d0fd4f802e01f13616"
+  revision = "1c2ef27be4bcbdf257742a5f8acd3ca68e694205"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:922d39228b5a5d9066dd1c5bb35aa75454e1101e8303dd8785ae00f282db0ce9"
+  branch = "master"
+  digest = "1:9df3a29f6c60e6a436e53384d94d15fec3187b9bf9463aaa1a7d9d61931e51ba"
   name = "github.com/giantswarm/apprclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "7b2806abcaac6cf5dca973e9aa9e26cd1561c5e2"
+  revision = "955b7e89e6e212610b2f233082fbe76636c8acf1"
 
 [[projects]]
   branch = "master"
@@ -326,15 +326,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2f7917651b57cc2e4a92745b29ede61a0432b4b9225d59ae66e0d7f569bc456c"
+  digest = "1:330792610e9867b25e94acf7f5ca1061dc6f45c0502d1439522bc50068c2b722"
   name = "github.com/giantswarm/certs"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ada4896290219c76ac213d690eb1903981ad5cac"
+  revision = "3f774da07e59f9446507f506cae152c93ad2e46c"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:7d6684cef04ad512dc58da2cc9434889c1a22f4f57e41ba704cd1f1f16b049b4"
+  branch = "master"
+  digest = "1:4da39fa5b025e0e8747a0d0df1b1d2328a5ab4a66dcad7b1ad9b41354b575d2d"
   name = "github.com/giantswarm/e2e-harness"
   packages = [
     "internal/filelogger",
@@ -343,7 +343,7 @@
     "pkg/release",
   ]
   pruneopts = "UT"
-  revision = "720d188d8bb6ce345d6be92ae2fea964bb770584"
+  revision = "b2048d8645c15ac583a270c57b95855426e48958"
 
 [[projects]]
   branch = "master"
@@ -354,12 +354,12 @@
   revision = "889c9ae897f8c0fa1d857f98dca22fa124305237"
 
 [[projects]]
-  branch = "k8s-1-16"
+  branch = "master"
   digest = "1:b2cefe754cf48f0bb798324f38a79b47f74adee0d395e14107d953e53ce26ed4"
   name = "github.com/giantswarm/e2esetup"
   packages = ["privaterepo"]
   pruneopts = "UT"
-  revision = "d6b2f7147ba3a1c9a5c89a499392e77eef29d64b"
+  revision = "01b9f9061692ab47301542ea0eba601289880c2c"
 
 [[projects]]
   branch = "master"
@@ -374,7 +374,7 @@
   revision = "115e721c4fee6a177f6cc0df12b6a3c2649585fd"
 
 [[projects]]
-  branch = "k8s-1-16"
+  branch = "master"
   digest = "1:0020f60d83964a8b6e968615d5e27fd4248f6f452b2871dcab65bb03f0ea5286"
   name = "github.com/giantswarm/e2etests"
   packages = [
@@ -388,7 +388,7 @@
     "update/provider",
   ]
   pruneopts = "UT"
-  revision = "c72c34c8ace5fa2e485b656a7f9d500fa1d8cd14"
+  revision = "208247dafcdeff1443690d271cb9e033c1e134e1"
 
 [[projects]]
   branch = "master"
@@ -407,12 +407,12 @@
   revision = "9749deade60f7624620aa7158a4f38c87ea23795"
 
 [[projects]]
-  branch = "k8s-1-16"
+  branch = "master"
   digest = "1:f3e73f108ebb31c9a021261f9aaf8c8c430dfce7716b26253065afdb18be774a"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "058fc4d08fdd34451d80b9d89f5f78cc594c952a"
+  revision = "d3c47349776d30db46c3e200ee94d16aeb22aa0b"
 
 [[projects]]
   branch = "master"
@@ -423,8 +423,8 @@
   revision = "ce634ba25306b7a1e7f590d1a672c9811d90d6f2"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:3dc9cbe848abb3eed8e6f2002cb03a2ac4a7890374f8714bca9729707aa9fe92"
+  branch = "master"
+  digest = "1:5ea4a83b027c56f8f5f5bae17671964275cbcd50115528ed9dc733f9330cac79"
   name = "github.com/giantswarm/k8sclient"
   packages = [
     ".",
@@ -432,11 +432,11 @@
     "k8srestconfig",
   ]
   pruneopts = "UT"
-  revision = "7b962d7aea9ddc11fdbc8f9fa63ee685e47a8ca1"
+  revision = "6cb127468cd6b30eaf8030b875f796e34b481938"
 
 [[projects]]
-  branch = "k8s-1-16"
-  digest = "1:192adf79b2bf45cdaf98d257e7f48efa0ed6cb0fed8dee9b05394f6b90bc9cd9"
+  branch = "master"
+  digest = "1:45e53ee539ed41987e91035eb77962303c19c6e85147c73a8031bc0ccf4ec706"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -444,23 +444,23 @@
     "v_4_9_0",
   ]
   pruneopts = "T"
-  revision = "1647ee8309a9ce31e7c55c89b40aff0336f2c83a"
+  revision = "7e8a3601bfc0e7da0682eab3b1aca7c0b4ce6dfb"
 
 [[projects]]
   branch = "master"
-  digest = "1:42649fa57594fd0dd202a5cf01d9cae946ff99e0e8f87bc9c145860a2e57c17a"
+  digest = "1:72f7cc0f53c6e4da489b19288ba4cbcd6b8c2031b8184615ec57ac537bc2e478"
   name = "github.com/giantswarm/k8sportforward"
   packages = ["."]
   pruneopts = "UT"
-  revision = "676e7106283c008acc4c07c0cfc903c18cdbeda3"
+  revision = "21368288d82d86aeefb191825df98e7f71e96bb1"
 
 [[projects]]
   branch = "master"
-  digest = "1:5a6a752646c84e32fdc043e0d7397ca0b1e4646f21c9b7c9562aa5d68c41ce82"
+  digest = "1:6175366122ba7bc5c75e1664a202b69b18ac69e23c7ac8f02c6190542ca4b39b"
   name = "github.com/giantswarm/kubelock"
   packages = ["."]
   pruneopts = "UT"
-  revision = "30a19ede069e623324dda372897c1e626de6afae"
+  revision = "0d77173ef40907be60a52d54c342ddc73865bc2c"
 
 [[projects]]
   branch = "master"
@@ -527,7 +527,7 @@
   revision = "a5580e1bbf6074e09ab759efd875fb3c2af7f7d5"
 
 [[projects]]
-  branch = "k8s-1-16"
+  branch = "master"
   digest = "1:e3dcfca96177f8b713e76e0f15660b33afc5de3110b2cf6c0a801dbaac904a9f"
   name = "github.com/giantswarm/operatorkit"
   packages = [
@@ -546,15 +546,15 @@
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "026b9e92713808bdf8a3654cf44891389d29a769"
+  revision = "5d098618662e74384f52bf064fe3588436873eb2"
 
 [[projects]]
   branch = "master"
-  digest = "1:7393a6bb980c7cd879cfaa59a9d8356ff516c7e6a6ff851f745667c1fc918945"
+  digest = "1:8f604ffe72f5be95317c19460d703813999560412bedc2bf4178e683263ddeb4"
   name = "github.com/giantswarm/randomkeys"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ea46545f17b63306008718960b1eb9f8f4732d43"
+  revision = "5e18457bd062f9a11d11fe5719ccf28101945ce0"
 
 [[projects]]
   branch = "master"
@@ -574,11 +574,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:672e0eb4d4982ab6bb53c51a7d874f81267806557cd611149b88e22feaecd494"
+  digest = "1:90fda7152f6ded9c45d67bee5f23f2d8f148eb15672f30030c095e08eccf02b0"
   name = "github.com/giantswarm/versionbundle"
   packages = ["."]
   pruneopts = "UT"
-  revision = "21f4b8d7441e7dc7de8b2db37f712a675cf83a70"
+  revision = "be95231628aed039183214a0e337bfe621e3072a"
 
 [[projects]]
   digest = "1:591460fbfc463bda7071ac906bed19cbf64cffd5fcb80a6d1490e87b9dfad942"
@@ -877,7 +877,7 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "03217c3e97663914aec3faafde50d081f197a0a2"
-  version = "1.1.8"
+  version = "v1.1.8"
 
 [[projects]]
   branch = "master"
@@ -1170,12 +1170,12 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:0b60fc944fb6a7b6c985832bd341bdb7ed8fe894fea330414e7774bb24652962"
+  digest = "1:8d0b79a29be9946ea00b2f2b778ec5b36db07453d97abe9d754b25bc2cc49a0e"
   name = "github.com/spf13/viper"
   packages = ["."]
   pruneopts = "UT"
-  revision = "72b022eb357a56469725dcd03918449e2278d02e"
-  version = "v1.5.0"
+  revision = "eabbc68a3ecd5cf8c11a2f84dbda5e7a38493b2f"
+  version = "v1.6.1"
 
 [[projects]]
   digest = "1:f4b32291cad5efac2bfdba89ccde6aa04618b62ce06c1a571da2dc4f3f2677fb"
@@ -1205,11 +1205,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "86a70503ff7e82ffc18c7b0de83db35da4791e6a"
+  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
-  digest = "1:ed1045224dedf9437beebe62f499691df2b153857ce87621ac15ee6942bb50aa"
+  digest = "1:d2141fada30071732b202a4e797bcf97c8b7b91a9bbb26e8735e4c640c731c51"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -1225,7 +1225,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "5ee1b9f4859acd2e99987ef94ec7a58427c53bef"
+  revision = "c0dbc17a35534bf2e581d7a942408dc936316da4"
 
 [[projects]]
   branch = "master"
@@ -1248,14 +1248,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4dade6126937937ae62a2d345ceef96e1122e49bf3360a567ccd4177c0fb547b"
+  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ce4227a45e2eb77e5c847278dcc6a626742e2945"
+  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
   digest = "1:dfcb3d446a3c6a6c71b74cf7baf366cd630a8cb43c3fcb741f34e49727da168d"
@@ -1338,7 +1338,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "3fa9dbf08042c806feeb0b21b23e07587714c143"
+  revision = "0243a4be9c8f1264d238fdc2895620b4d9baf9e1"
 
 [[projects]]
   digest = "1:7aa50c5d543bc3199d9aa08bf6478efa849ea7f1ce3c2621c7b99362afaa88c6"
@@ -1409,6 +1409,14 @@
   pruneopts = "UT"
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
+
+[[projects]]
+  digest = "1:591460fbfc463bda7071ac906bed19cbf64cffd5fcb80a6d1490e87b9dfad942"
+  name = "gopkg.in/ini.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "87e589f4917038ae250cff2446db7573f47e97ca"
+  version = "v1.51.0"
 
 [[projects]]
   digest = "1:41206f4d0410803e64cfb203f665330c3183988408cb532b56305a816a87bd99"
@@ -2259,7 +2267,6 @@
     "github.com/spf13/viper",
     "golang.org/x/sync/errgroup",
     "k8s.io/api/core/v1",
-    "k8s.io/api/node/v1alpha1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",

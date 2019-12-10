@@ -31,11 +31,11 @@
   name = "github.com/giantswarm/backoff"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/k8sclient"
 
 [[constraint]]
-  branch = "k8s-1-16"
+  branch = "master"
   name = "github.com/giantswarm/k8sportforward"
 
 [[constraint]]

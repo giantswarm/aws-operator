@@ -7,6 +7,7 @@ import (
 	"net"
 	"sync"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
@@ -14,7 +15,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
-	"k8s.io/api/node/v1alpha1"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -84,9 +84,11 @@ func New(config Config) (*Service, error) {
 	var k8sClient *k8sclient.Clients
 	{
 		c := k8sclient.ClientsConfig{
-			AddToScheme: v1alpha1.AddToScheme,
-			Logger:      config.Logger,
-			RestConfig:  restConfig,
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				infrastructurev1alpha2.AddToScheme,
+			},
+			Logger:     config.Logger,
+			RestConfig: restConfig,
 		}
 		k8sClient, err = k8sclient.NewClients(c)
 		if err != nil {
