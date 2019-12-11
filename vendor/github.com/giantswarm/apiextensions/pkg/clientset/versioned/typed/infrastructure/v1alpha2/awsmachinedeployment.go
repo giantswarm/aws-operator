@@ -32,7 +32,7 @@ import (
 // AWSMachineDeploymentsGetter has a method to return a AWSMachineDeploymentInterface.
 // A group's client should implement this interface.
 type AWSMachineDeploymentsGetter interface {
-	AWSMachineDeployments() AWSMachineDeploymentInterface
+	AWSMachineDeployments(namespace string) AWSMachineDeploymentInterface
 }
 
 // AWSMachineDeploymentInterface has methods to work with AWSMachineDeployment resources.
@@ -51,12 +51,14 @@ type AWSMachineDeploymentInterface interface {
 // aWSMachineDeployments implements AWSMachineDeploymentInterface
 type aWSMachineDeployments struct {
 	client rest.Interface
+	ns     string
 }
 
 // newAWSMachineDeployments returns a AWSMachineDeployments
-func newAWSMachineDeployments(c *InfrastructureV1alpha2Client) *aWSMachineDeployments {
+func newAWSMachineDeployments(c *InfrastructureV1alpha2Client, namespace string) *aWSMachineDeployments {
 	return &aWSMachineDeployments{
 		client: c.RESTClient(),
+		ns:     namespace,
 	}
 }
 
@@ -64,6 +66,7 @@ func newAWSMachineDeployments(c *InfrastructureV1alpha2Client) *aWSMachineDeploy
 func (c *aWSMachineDeployments) Get(name string, options v1.GetOptions) (result *v1alpha2.AWSMachineDeployment, err error) {
 	result = &v1alpha2.AWSMachineDeployment{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -80,6 +83,7 @@ func (c *aWSMachineDeployments) List(opts v1.ListOptions) (result *v1alpha2.AWSM
 	}
 	result = &v1alpha2.AWSMachineDeploymentList{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -96,6 +100,7 @@ func (c *aWSMachineDeployments) Watch(opts v1.ListOptions) (watch.Interface, err
 	}
 	opts.Watch = true
 	return c.client.Get().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -106,6 +111,7 @@ func (c *aWSMachineDeployments) Watch(opts v1.ListOptions) (watch.Interface, err
 func (c *aWSMachineDeployments) Create(aWSMachineDeployment *v1alpha2.AWSMachineDeployment) (result *v1alpha2.AWSMachineDeployment, err error) {
 	result = &v1alpha2.AWSMachineDeployment{}
 	err = c.client.Post().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		Body(aWSMachineDeployment).
 		Do().
@@ -117,6 +123,7 @@ func (c *aWSMachineDeployments) Create(aWSMachineDeployment *v1alpha2.AWSMachine
 func (c *aWSMachineDeployments) Update(aWSMachineDeployment *v1alpha2.AWSMachineDeployment) (result *v1alpha2.AWSMachineDeployment, err error) {
 	result = &v1alpha2.AWSMachineDeployment{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		Name(aWSMachineDeployment.Name).
 		Body(aWSMachineDeployment).
@@ -128,6 +135,7 @@ func (c *aWSMachineDeployments) Update(aWSMachineDeployment *v1alpha2.AWSMachine
 // Delete takes name of the aWSMachineDeployment and deletes it. Returns an error if one occurs.
 func (c *aWSMachineDeployments) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		Name(name).
 		Body(options).
@@ -142,6 +150,7 @@ func (c *aWSMachineDeployments) DeleteCollection(options *v1.DeleteOptions, list
 		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -154,6 +163,7 @@ func (c *aWSMachineDeployments) DeleteCollection(options *v1.DeleteOptions, list
 func (c *aWSMachineDeployments) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.AWSMachineDeployment, err error) {
 	result = &v1alpha2.AWSMachineDeployment{}
 	err = c.client.Patch(pt).
+		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		SubResource(subresources...).
 		Name(name).

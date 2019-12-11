@@ -280,7 +280,7 @@
 
 [[projects]]
   branch = "infrastructure/v1alpha2"
-  digest = "1:0ebb658d0f7f60b493c25188d939d929c8ef2172b09cb5f0d2843bcd5203ecbd"
+  digest = "1:497cd07b528e95482a88e2ee0d03c02417c4c1e423264bdfde2489f7653dc6f2"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -306,7 +306,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "1c2ef27be4bcbdf257742a5f8acd3ca68e694205"
+  revision = "8d9b8269c9cbaef84894c20be3b8f440c9ba4e05"
 
 [[projects]]
   branch = "master"
@@ -2073,7 +2073,6 @@
   version = "v1.16.3"
 
 [[projects]]
-  branch = "master"
   digest = "1:598e25e87b9e4ec9dc91184f60114ddb42357e84805651036bb5fa0e571d4cf6"
   name = "k8s.io/metrics"
   packages = [
@@ -2086,7 +2085,8 @@
     "pkg/client/clientset/versioned/typed/metrics/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "b1134fd1210c0f59c2c495b797d8c7abfef04a4a"
+  revision = "5ca0c9d08c9d7c49677c5ce04530516393035d4b"
+  version = "v0.17.0"
 
 [[projects]]
   branch = "master"

@@ -31,6 +31,7 @@ import (
 // FakeAWSMachineDeployments implements AWSMachineDeploymentInterface
 type FakeAWSMachineDeployments struct {
 	Fake *FakeInfrastructureV1alpha2
+	ns   string
 }
 
 var awsmachinedeploymentsResource = schema.GroupVersionResource{Group: "infrastructure.giantswarm.io", Version: "v1alpha2", Resource: "awsmachinedeployments"}
@@ -40,7 +41,8 @@ var awsmachinedeploymentsKind = schema.GroupVersionKind{Group: "infrastructure.g
 // Get takes name of the aWSMachineDeployment, and returns the corresponding aWSMachineDeployment object, and an error if there is any.
 func (c *FakeAWSMachineDeployments) Get(name string, options v1.GetOptions) (result *v1alpha2.AWSMachineDeployment, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootGetAction(awsmachinedeploymentsResource, name), &v1alpha2.AWSMachineDeployment{})
+		Invokes(testing.NewGetAction(awsmachinedeploymentsResource, c.ns, name), &v1alpha2.AWSMachineDeployment{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -50,7 +52,8 @@ func (c *FakeAWSMachineDeployments) Get(name string, options v1.GetOptions) (res
 // List takes label and field selectors, and returns the list of AWSMachineDeployments that match those selectors.
 func (c *FakeAWSMachineDeployments) List(opts v1.ListOptions) (result *v1alpha2.AWSMachineDeploymentList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootListAction(awsmachinedeploymentsResource, awsmachinedeploymentsKind, opts), &v1alpha2.AWSMachineDeploymentList{})
+		Invokes(testing.NewListAction(awsmachinedeploymentsResource, awsmachinedeploymentsKind, c.ns, opts), &v1alpha2.AWSMachineDeploymentList{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -71,13 +74,15 @@ func (c *FakeAWSMachineDeployments) List(opts v1.ListOptions) (result *v1alpha2.
 // Watch returns a watch.Interface that watches the requested aWSMachineDeployments.
 func (c *FakeAWSMachineDeployments) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewRootWatchAction(awsmachinedeploymentsResource, opts))
+		InvokesWatch(testing.NewWatchAction(awsmachinedeploymentsResource, c.ns, opts))
+
 }
 
 // Create takes the representation of a aWSMachineDeployment and creates it.  Returns the server's representation of the aWSMachineDeployment, and an error, if there is any.
 func (c *FakeAWSMachineDeployments) Create(aWSMachineDeployment *v1alpha2.AWSMachineDeployment) (result *v1alpha2.AWSMachineDeployment, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(awsmachinedeploymentsResource, aWSMachineDeployment), &v1alpha2.AWSMachineDeployment{})
+		Invokes(testing.NewCreateAction(awsmachinedeploymentsResource, c.ns, aWSMachineDeployment), &v1alpha2.AWSMachineDeployment{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -87,7 +92,8 @@ func (c *FakeAWSMachineDeployments) Create(aWSMachineDeployment *v1alpha2.AWSMac
 // Update takes the representation of a aWSMachineDeployment and updates it. Returns the server's representation of the aWSMachineDeployment, and an error, if there is any.
 func (c *FakeAWSMachineDeployments) Update(aWSMachineDeployment *v1alpha2.AWSMachineDeployment) (result *v1alpha2.AWSMachineDeployment, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateAction(awsmachinedeploymentsResource, aWSMachineDeployment), &v1alpha2.AWSMachineDeployment{})
+		Invokes(testing.NewUpdateAction(awsmachinedeploymentsResource, c.ns, aWSMachineDeployment), &v1alpha2.AWSMachineDeployment{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -97,13 +103,14 @@ func (c *FakeAWSMachineDeployments) Update(aWSMachineDeployment *v1alpha2.AWSMac
 // Delete takes name of the aWSMachineDeployment and deletes it. Returns an error if one occurs.
 func (c *FakeAWSMachineDeployments) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewRootDeleteAction(awsmachinedeploymentsResource, name), &v1alpha2.AWSMachineDeployment{})
+		Invokes(testing.NewDeleteAction(awsmachinedeploymentsResource, c.ns, name), &v1alpha2.AWSMachineDeployment{})
+
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeAWSMachineDeployments) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewRootDeleteCollectionAction(awsmachinedeploymentsResource, listOptions)
+	action := testing.NewDeleteCollectionAction(awsmachinedeploymentsResource, c.ns, listOptions)
 
 	_, err := c.Fake.Invokes(action, &v1alpha2.AWSMachineDeploymentList{})
 	return err
@@ -112,7 +119,8 @@ func (c *FakeAWSMachineDeployments) DeleteCollection(options *v1.DeleteOptions, 
 // Patch applies the patch and returns the patched aWSMachineDeployment.
 func (c *FakeAWSMachineDeployments) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.AWSMachineDeployment, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(awsmachinedeploymentsResource, name, pt, data, subresources...), &v1alpha2.AWSMachineDeployment{})
+		Invokes(testing.NewPatchSubresourceAction(awsmachinedeploymentsResource, c.ns, name, pt, data, subresources...), &v1alpha2.AWSMachineDeployment{})
+
 	if obj == nil {
 		return nil, err
 	}

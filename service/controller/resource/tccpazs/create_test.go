@@ -202,7 +202,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 
 			// Prepare MachineDeployments for fake client.
 			for _, md := range tc.machineDeployments {
-				_, err := fakeClient.InfrastructureV1alpha2().AWSMachineDeployments().Create(&md)
+				_, err := fakeClient.InfrastructureV1alpha2().AWSMachineDeployments(md.Namespace).Create(&md)
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -35,12 +35,12 @@ type InfrastructureV1alpha2Client struct {
 	restClient rest.Interface
 }
 
-func (c *InfrastructureV1alpha2Client) AWSClusters() AWSClusterInterface {
-	return newAWSClusters(c)
+func (c *InfrastructureV1alpha2Client) AWSClusters(namespace string) AWSClusterInterface {
+	return newAWSClusters(c, namespace)
 }
 
-func (c *InfrastructureV1alpha2Client) AWSMachineDeployments() AWSMachineDeploymentInterface {
-	return newAWSMachineDeployments(c)
+func (c *InfrastructureV1alpha2Client) AWSMachineDeployments(namespace string) AWSMachineDeploymentInterface {
+	return newAWSMachineDeployments(c, namespace)
 }
 
 // NewForConfig creates a new InfrastructureV1alpha2Client for the given config.

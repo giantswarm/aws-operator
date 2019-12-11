@@ -493,7 +493,7 @@ func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(obj i
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(&cr), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}

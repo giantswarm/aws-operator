@@ -31,6 +31,7 @@ import (
 // FakeAWSClusters implements AWSClusterInterface
 type FakeAWSClusters struct {
 	Fake *FakeInfrastructureV1alpha2
+	ns   string
 }
 
 var awsclustersResource = schema.GroupVersionResource{Group: "infrastructure.giantswarm.io", Version: "v1alpha2", Resource: "awsclusters"}
@@ -40,7 +41,8 @@ var awsclustersKind = schema.GroupVersionKind{Group: "infrastructure.giantswarm.
 // Get takes name of the aWSCluster, and returns the corresponding aWSCluster object, and an error if there is any.
 func (c *FakeAWSClusters) Get(name string, options v1.GetOptions) (result *v1alpha2.AWSCluster, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootGetAction(awsclustersResource, name), &v1alpha2.AWSCluster{})
+		Invokes(testing.NewGetAction(awsclustersResource, c.ns, name), &v1alpha2.AWSCluster{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -50,7 +52,8 @@ func (c *FakeAWSClusters) Get(name string, options v1.GetOptions) (result *v1alp
 // List takes label and field selectors, and returns the list of AWSClusters that match those selectors.
 func (c *FakeAWSClusters) List(opts v1.ListOptions) (result *v1alpha2.AWSClusterList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootListAction(awsclustersResource, awsclustersKind, opts), &v1alpha2.AWSClusterList{})
+		Invokes(testing.NewListAction(awsclustersResource, awsclustersKind, c.ns, opts), &v1alpha2.AWSClusterList{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -71,13 +74,15 @@ func (c *FakeAWSClusters) List(opts v1.ListOptions) (result *v1alpha2.AWSCluster
 // Watch returns a watch.Interface that watches the requested aWSClusters.
 func (c *FakeAWSClusters) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewRootWatchAction(awsclustersResource, opts))
+		InvokesWatch(testing.NewWatchAction(awsclustersResource, c.ns, opts))
+
 }
 
 // Create takes the representation of a aWSCluster and creates it.  Returns the server's representation of the aWSCluster, and an error, if there is any.
 func (c *FakeAWSClusters) Create(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.AWSCluster, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(awsclustersResource, aWSCluster), &v1alpha2.AWSCluster{})
+		Invokes(testing.NewCreateAction(awsclustersResource, c.ns, aWSCluster), &v1alpha2.AWSCluster{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -87,7 +92,8 @@ func (c *FakeAWSClusters) Create(aWSCluster *v1alpha2.AWSCluster) (result *v1alp
 // Update takes the representation of a aWSCluster and updates it. Returns the server's representation of the aWSCluster, and an error, if there is any.
 func (c *FakeAWSClusters) Update(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.AWSCluster, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateAction(awsclustersResource, aWSCluster), &v1alpha2.AWSCluster{})
+		Invokes(testing.NewUpdateAction(awsclustersResource, c.ns, aWSCluster), &v1alpha2.AWSCluster{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -98,7 +104,8 @@ func (c *FakeAWSClusters) Update(aWSCluster *v1alpha2.AWSCluster) (result *v1alp
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 func (c *FakeAWSClusters) UpdateStatus(aWSCluster *v1alpha2.AWSCluster) (*v1alpha2.AWSCluster, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceAction(awsclustersResource, "status", aWSCluster), &v1alpha2.AWSCluster{})
+		Invokes(testing.NewUpdateSubresourceAction(awsclustersResource, "status", c.ns, aWSCluster), &v1alpha2.AWSCluster{})
+
 	if obj == nil {
 		return nil, err
 	}
@@ -108,13 +115,14 @@ func (c *FakeAWSClusters) UpdateStatus(aWSCluster *v1alpha2.AWSCluster) (*v1alph
 // Delete takes name of the aWSCluster and deletes it. Returns an error if one occurs.
 func (c *FakeAWSClusters) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewRootDeleteAction(awsclustersResource, name), &v1alpha2.AWSCluster{})
+		Invokes(testing.NewDeleteAction(awsclustersResource, c.ns, name), &v1alpha2.AWSCluster{})
+
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeAWSClusters) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewRootDeleteCollectionAction(awsclustersResource, listOptions)
+	action := testing.NewDeleteCollectionAction(awsclustersResource, c.ns, listOptions)
 
 	_, err := c.Fake.Invokes(action, &v1alpha2.AWSClusterList{})
 	return err
@@ -123,7 +131,8 @@ func (c *FakeAWSClusters) DeleteCollection(options *v1.DeleteOptions, listOption
 // Patch applies the patch and returns the patched aWSCluster.
 func (c *FakeAWSClusters) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.AWSCluster, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(awsclustersResource, name, pt, data, subresources...), &v1alpha2.AWSCluster{})
+		Invokes(testing.NewPatchSubresourceAction(awsclustersResource, c.ns, name, pt, data, subresources...), &v1alpha2.AWSCluster{})
+
 	if obj == nil {
 		return nil, err
 	}

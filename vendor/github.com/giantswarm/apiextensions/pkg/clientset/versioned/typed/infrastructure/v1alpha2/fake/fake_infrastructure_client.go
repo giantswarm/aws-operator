@@ -28,12 +28,12 @@ type FakeInfrastructureV1alpha2 struct {
 	*testing.Fake
 }
 
-func (c *FakeInfrastructureV1alpha2) AWSClusters() v1alpha2.AWSClusterInterface {
-	return &FakeAWSClusters{c}
+func (c *FakeInfrastructureV1alpha2) AWSClusters(namespace string) v1alpha2.AWSClusterInterface {
+	return &FakeAWSClusters{c, namespace}
 }
 
-func (c *FakeInfrastructureV1alpha2) AWSMachineDeployments() v1alpha2.AWSMachineDeploymentInterface {
-	return &FakeAWSMachineDeployments{c}
+func (c *FakeInfrastructureV1alpha2) AWSMachineDeployments(namespace string) v1alpha2.AWSMachineDeploymentInterface {
+	return &FakeAWSMachineDeployments{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

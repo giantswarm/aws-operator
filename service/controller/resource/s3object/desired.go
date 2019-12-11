@@ -36,7 +36,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		g := &errgroup.Group{}
 
 		g.Go(func() error {
-			m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(cr), metav1.GetOptions{})
+			m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(cr.GetNamespace()).Get(key.ClusterID(cr), metav1.GetOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}

@@ -32,7 +32,7 @@ import (
 // AWSClustersGetter has a method to return a AWSClusterInterface.
 // A group's client should implement this interface.
 type AWSClustersGetter interface {
-	AWSClusters() AWSClusterInterface
+	AWSClusters(namespace string) AWSClusterInterface
 }
 
 // AWSClusterInterface has methods to work with AWSCluster resources.
@@ -52,12 +52,14 @@ type AWSClusterInterface interface {
 // aWSClusters implements AWSClusterInterface
 type aWSClusters struct {
 	client rest.Interface
+	ns     string
 }
 
 // newAWSClusters returns a AWSClusters
-func newAWSClusters(c *InfrastructureV1alpha2Client) *aWSClusters {
+func newAWSClusters(c *InfrastructureV1alpha2Client, namespace string) *aWSClusters {
 	return &aWSClusters{
 		client: c.RESTClient(),
+		ns:     namespace,
 	}
 }
 
@@ -65,6 +67,7 @@ func newAWSClusters(c *InfrastructureV1alpha2Client) *aWSClusters {
 func (c *aWSClusters) Get(name string, options v1.GetOptions) (result *v1alpha2.AWSCluster, err error) {
 	result = &v1alpha2.AWSCluster{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -81,6 +84,7 @@ func (c *aWSClusters) List(opts v1.ListOptions) (result *v1alpha2.AWSClusterList
 	}
 	result = &v1alpha2.AWSClusterList{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -97,6 +101,7 @@ func (c *aWSClusters) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	}
 	opts.Watch = true
 	return c.client.Get().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -107,6 +112,7 @@ func (c *aWSClusters) Watch(opts v1.ListOptions) (watch.Interface, error) {
 func (c *aWSClusters) Create(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.AWSCluster, err error) {
 	result = &v1alpha2.AWSCluster{}
 	err = c.client.Post().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		Body(aWSCluster).
 		Do().
@@ -118,6 +124,7 @@ func (c *aWSClusters) Create(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.
 func (c *aWSClusters) Update(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.AWSCluster, err error) {
 	result = &v1alpha2.AWSCluster{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		Name(aWSCluster.Name).
 		Body(aWSCluster).
@@ -132,6 +139,7 @@ func (c *aWSClusters) Update(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.
 func (c *aWSClusters) UpdateStatus(aWSCluster *v1alpha2.AWSCluster) (result *v1alpha2.AWSCluster, err error) {
 	result = &v1alpha2.AWSCluster{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		Name(aWSCluster.Name).
 		SubResource("status").
@@ -144,6 +152,7 @@ func (c *aWSClusters) UpdateStatus(aWSCluster *v1alpha2.AWSCluster) (result *v1a
 // Delete takes name of the aWSCluster and deletes it. Returns an error if one occurs.
 func (c *aWSClusters) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		Name(name).
 		Body(options).
@@ -158,6 +167,7 @@ func (c *aWSClusters) DeleteCollection(options *v1.DeleteOptions, listOptions v1
 		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("awsclusters").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -170,6 +180,7 @@ func (c *aWSClusters) DeleteCollection(options *v1.DeleteOptions, listOptions v1
 func (c *aWSClusters) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.AWSCluster, err error) {
 	result = &v1alpha2.AWSCluster{}
 	err = c.client.Patch(pt).
+		Namespace(c.ns).
 		Resource("awsclusters").
 		SubResource(subresources...).
 		Name(name).

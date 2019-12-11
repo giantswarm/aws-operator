@@ -159,7 +159,7 @@ func (c *SubnetCollector) getSubnetsFromAWSConfigs(ctx context.Context) ([]net.I
 }
 
 func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPNet, error) {
-	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters().List(metav1.ListOptions{})
+	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -183,7 +183,7 @@ func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPN
 }
 
 func (c *SubnetCollector) getSubnetsFromMachineDeployments(ctx context.Context) ([]net.IPNet, error) {
-	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().List(metav1.ListOptions{})
+	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

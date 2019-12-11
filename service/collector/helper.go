@@ -61,7 +61,7 @@ func newHelper(config helperConfig) (*helper, error) {
 func (h *helper) GetARNs() ([]string, error) {
 	var arns []string
 
-	clusterCRList, err := h.g8sClient.InfrastructureV1alpha2().AWSClusters().List(metav1.ListOptions{})
+	clusterCRList, err := h.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
