@@ -14,7 +14,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -37,11 +36,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		g := &errgroup.Group{}
 
 		g.Go(func() error {
-			n := types.NamespacedName{
-				Name:      key.ClusterID(cr),
-				Namespace: cr.GetNamespace(),
-			}
-			m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(n.String(), metav1.GetOptions{})
+			m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(cr), metav1.GetOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}

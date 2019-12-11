@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -39,11 +38,7 @@ func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*Machin
 }
 
 func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	n := types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}
-	cr, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().Get(n.String(), metav1.GetOptions{})
+	cr, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().Get(name, metav1.GetOptions{})
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

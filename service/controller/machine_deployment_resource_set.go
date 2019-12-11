@@ -12,7 +12,6 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -494,11 +493,7 @@ func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(obj i
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
-		n := types.NamespacedName{
-			Name:      key.ClusterID(&cr),
-			Namespace: cr.Namespace,
-		}
-		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters().Get(n.String(), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}

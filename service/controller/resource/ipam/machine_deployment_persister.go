@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
@@ -40,11 +39,7 @@ func NewMachineDeploymentPersister(config MachineDeploymentPersisterConfig) (*Ma
 }
 
 func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	n := types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}
-	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().Get(n.String(), metav1.GetOptions{})
+	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments().Get(name, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
