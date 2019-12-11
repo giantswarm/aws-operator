@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type ClusterPersisterConfig struct {
@@ -37,7 +38,11 @@ func NewClusterPersister(config ClusterPersisterConfig) (*ClusterPersister, erro
 }
 
 func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(name, metav1.GetOptions{})
+	n := types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}
+	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(n.String(), metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}

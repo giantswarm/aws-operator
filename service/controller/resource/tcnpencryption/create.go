@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -27,7 +28,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(key.ClusterID(&md), metav1.GetOptions{})
+		n := types.NamespacedName{
+			Name:      key.ClusterID(&md),
+			Namespace: md.Namespace,
+		}
+		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters().Get(n.String(), metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
