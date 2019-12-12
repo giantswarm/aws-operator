@@ -363,7 +363,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c2991f6c5deabfa17b3e0f1ebd4dcda47515219ab313a089d73de9a7702f7007"
+  digest = "1:a18514ee6d33992c9fe9c828ae041fca1f2479cac978d4b19bcc3d091b8c5c67"
   name = "github.com/giantswarm/e2etemplates"
   packages = [
     "internal/render",
@@ -371,7 +371,7 @@
     "pkg/e2etemplates",
   ]
   pruneopts = "UT"
-  revision = "115e721c4fee6a177f6cc0df12b6a3c2649585fd"
+  revision = "2ae756e2f2832a8211e12a222227188cf13c5d17"
 
 [[projects]]
   branch = "master"
@@ -408,11 +408,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f3e73f108ebb31c9a021261f9aaf8c8c430dfce7716b26253065afdb18be774a"
+  digest = "1:3fbadedd3cb1905a17e9c467d8552f157b5342fead8020eb69ad9f09579d28bd"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d3c47349776d30db46c3e200ee94d16aeb22aa0b"
+  revision = "d1325340c4534d015b8e5abdae581883b030ec41"
 
 [[projects]]
   branch = "master"
@@ -436,7 +436,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:45e53ee539ed41987e91035eb77962303c19c6e85147c73a8031bc0ccf4ec706"
+  digest = "1:5f3f9f2fcdad72fa8349cf10a3ad6b64fdea867bb7ac72fb8b0f9c9ae24754ef"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
@@ -444,7 +444,7 @@
     "v_4_9_0",
   ]
   pruneopts = "T"
-  revision = "7e8a3601bfc0e7da0682eab3b1aca7c0b4ce6dfb"
+  revision = "d11385a99ef46892c42aad12dd1d2a6893702a39"
 
 [[projects]]
   branch = "master"
@@ -633,20 +633,20 @@
   version = "v0.19.3"
 
 [[projects]]
-  digest = "1:55d1c09fc8b3320b6842565249a9e4d0f363bead6f9b8be05c3b47f2c4264eda"
+  digest = "1:a60f47e736cc96075451c3c3502274d86ec6d96588c03d1ab56142ccbb8a5364"
   name = "github.com/go-openapi/spec"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8557d72e4f077c2dbe1e48df09e596b6fb9b7991"
-  version = "v0.19.4"
+  revision = "772572fd19ebcc983369e53bfaed4bde2077fe0c"
+  version = "v0.19.5"
 
 [[projects]]
-  digest = "1:43d0f99f53acce97119181dcd592321084690c2d462c57680ccb4472ae084949"
+  digest = "1:d79ccf65d7721efa48200dc7fc827f8fb29e1fba4db4d55be675fdec84e7cfe1"
   name = "github.com/go-openapi/swag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c3d0f7896d589f3babb99eea24bbc7de98108e72"
-  version = "v0.19.5"
+  revision = "8a84ec635f1b280a7062edeab609f0667a053248"
+  version = "v0.19.6"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -1971,8 +1971,8 @@
     "pkg/version",
   ]
   pruneopts = "UT"
-  revision = "6123e1c827f7a49a3686e31243181339da131c0c"
-  version = "kubernetes-1.16.3"
+  revision = "190eafce4a149d58ed93c5ca2e546244da4837d4"
+  version = "v0.16.4"
 
 [[projects]]
   digest = "1:1115b107985b9c04abbe5475cc4e2f993c59a4439e27367a7f2293d91f035869"
@@ -2069,8 +2069,8 @@
     "pkg/util/taints",
   ]
   pruneopts = "UT"
-  revision = "b3cbbae08ec52a7fc73d334838e18d17e8512749"
-  version = "v1.16.3"
+  revision = "224be7bdce5a9dd0c2fd0d46b83865648e2fe0ba"
+  version = "v1.16.4"
 
 [[projects]]
   digest = "1:598e25e87b9e4ec9dc91184f60114ddb42357e84805651036bb5fa0e571d4cf6"
@@ -2105,7 +2105,19 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:8053263951e435c10bfb257f59063caafdb5f7de5ee35336383c84949bb84a25"
+  digest = "1:7f75ccb5699922f4563bef0d8d3b00ea85b3796605e7d1fd1f20b5610ef010f4"
+  name = "sigs.k8s.io/cluster-api"
+  packages = [
+    "api/v1alpha2",
+    "errors",
+    "pkg/apis/deprecated/v1alpha1",
+  ]
+  pruneopts = "UT"
+  revision = "50de008625e64e4db0e48e41b8b45dcae02b8042"
+  version = "v0.2.8"
+
+[[projects]]
+  digest = "1:cc97a7615d4070de5afe5f68426ffc5cceb4c6b2ee656d1bc32ae52217faa8d9"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/cache",
@@ -2128,6 +2140,7 @@
     "pkg/reconcile",
     "pkg/recorder",
     "pkg/runtime/inject",
+    "pkg/scheme",
     "pkg/source",
     "pkg/source/internal",
     "pkg/webhook",
@@ -2281,6 +2294,8 @@
     "k8s.io/client-go/rest",
     "k8s.io/kubectl/pkg/cmd/util",
     "k8s.io/kubernetes/pkg/kubectl/cmd",
+    "sigs.k8s.io/cluster-api/api/v1alpha2",
+    "sigs.k8s.io/controller-runtime/pkg/client",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

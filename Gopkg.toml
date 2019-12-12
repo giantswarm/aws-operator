@@ -163,16 +163,20 @@ required = [
   version = "2.16.1"
 
 [[override]]
-  name = "k8s.io/kubectl"
-  version = "kubernetes-1.16.3"
-
-[[override]]
   name = "k8s.io/kubernetes"
   version = "v1.16.3"
 
 [[override]]
   name = "k8s.io/component-base"
   version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "sigs.k8s.io/cluster-api"
+  version = "~v0.2.8"
+
+[[override]]
+  name = "sigs.k8s.io/kustomize"
+  version = "v2.0.3"
 
 [[override]]
   name = "github.com/ghodss/yaml"
