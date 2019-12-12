@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
@@ -17,6 +18,7 @@ import (
 type clusterResourceSetConfig struct {
 	CertsSearcher          certs.Interface
 	ControlPlaneAWSClients aws.Clients
+	CtrlClient             client.Client
 	G8sClient              versioned.Interface
 	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface

@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
@@ -153,6 +154,20 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 
 		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var apiEndpointResource resource.Interface
+	{
+		c := apiendpoint.Config{
+			CtrlClient: config.CtrlClient,
+			G8sClient:  config.G8sClient,
+			Logger:     config.Logger,
+		}
+
+		apiEndpointResource, err = apiendpoint.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -557,6 +572,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
+		apiEndpointResource,
 		ipamResource,
 		bridgeZoneResource,
 		tccpEncryptionResource,

@@ -175,6 +175,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
+			CtrlClient:             config.K8sClient.CtrlClient(),
 			G8sClient:              config.K8sClient.G8sClient(),
 			HostAWSConfig:          config.HostAWSConfig,
 			K8sClient:              config.K8sClient.K8sClient(),
