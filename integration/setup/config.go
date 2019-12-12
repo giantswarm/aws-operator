@@ -3,6 +3,8 @@
 package setup
 
 import (
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 	"github.com/giantswarm/e2e-harness/pkg/release"
@@ -11,7 +13,6 @@ import (
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 )
@@ -59,10 +60,14 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var cpK8sClients *k8sclient.Clients
+	var cpK8sClients k8sclient.Interface
 	{
 		c := k8sclient.ClientsConfig{
 			Logger: logger,
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				corev1alpha1.AddToScheme,
+				providerv1alpha1.AddToScheme
+			},
 
 			KubeConfigPath: harness.DefaultKubeConfig,
 		}

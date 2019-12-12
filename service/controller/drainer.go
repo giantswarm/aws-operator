@@ -1,28 +1,19 @@
 package controller
 
 import (
-	"time"
-
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type DrainerConfig struct {
-	G8sClient    versioned.Interface
-	K8sClient    kubernetes.Interface
-	K8sExtClient apiextensionsclient.Interface
-	Logger       micrologger.Logger
+	K8sClient k8sclient.Interface
+	Logger    micrologger.Logger
 
 	GuestAWSConfig     DrainerConfigAWS
 	GuestUpdateEnabled bool
@@ -49,65 +40,30 @@ type Drainer struct {
 }
 
 func NewDrainer(config DrainerConfig) (*Drainer, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-
 	var err error
-
-	var crdClient *k8scrdclient.CRDClient
-	{
-		c := k8scrdclient.Config{
-			K8sExtClient: config.K8sExtClient,
-			Logger:       config.Logger,
-		}
-
-		crdClient, err = k8scrdclient.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newInformer *informer.Informer
-	{
-		c := informer.Config{
-			Logger:  config.Logger,
-			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
-
-			ListOptions: metav1.ListOptions{
-				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
-			},
-			RateWait:     informer.DefaultRateWait,
-			ResyncPeriod: 30 * time.Second,
-		}
-
-		newInformer, err = informer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
 
 	resourceSets, err := newDrainerResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var operatorkitController *controller.Controller
+	var clusterController *controller.Controller
 	{
 		c := controller.Config{
 			CRD:          v1alpha1.NewAWSConfigCRD(),
-			CRDClient:    crdClient,
-			Informer:     newInformer,
+			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
+			NewRuntimeObjectFunc: func() pkgruntime.Object {
+				return new(v1alpha1.AWSConfig)
+			},
 
 			// Name is used to compute finalizer names. This here results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer.
 			Name: config.ProjectName + "-drainer",
 		}
 
-		operatorkitController, err = controller.New(c)
+		clusterController, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

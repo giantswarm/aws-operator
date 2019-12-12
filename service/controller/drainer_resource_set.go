@@ -3,14 +3,13 @@ package controller
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -25,9 +24,8 @@ import (
 
 type drainerResourceSetConfig struct {
 	ControlPlaneAWSClients aws.Clients
-	G8sClient              versioned.Interface
 	HostAWSConfig          aws.Config
-	K8sClient              kubernetes.Interface
+	K8sClient              k8sclient.Interface
 	Logger                 micrologger.Logger
 
 	ProjectName    string
@@ -40,7 +38,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 	var asgStatusResource resource.Interface
 	{
 		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -53,7 +51,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 	var drainerResource resource.Interface
 	{
 		c := drainer.ResourceConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -66,7 +64,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 	var drainFinisherResource resource.Interface
 	{
 		c := drainfinisher.ResourceConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -133,7 +131,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
 		var tenantClusterAWSClients aws.Clients
 		{
-			arn, err := credential.GetARN(config.K8sClient, obj)
+			arn, err := credential.GetARN(config.K8sClient.K8sClient(), obj)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}

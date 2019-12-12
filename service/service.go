@@ -7,11 +7,13 @@ import (
 	"net"
 	"sync"
 
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8srestconfig"
+	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
@@ -90,19 +92,22 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	g8sClient, err := versioned.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+	var k8sClient k8sclient.Interface
+	{
+		c := k8sclient.ClientsConfig{
+			Logger: config.Logger,
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				corev1alpha1.AddToScheme,
+				providerv1alpha1.AddToScheme,
+			},
 
-	k8sClient, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+			RestConfig: restConfig,
+		}
 
-	k8sExtClient, err := apiextensionsclient.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+		k8sClient, err = k8sclient.NewClients(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var awsConfig aws.Config
@@ -150,9 +155,7 @@ func New(config Config) (*Service, error) {
 
 		c := controller.ClusterConfig{
 			CMAClient:        cmaClient,
-			G8sClient:        g8sClient,
 			K8sClient:        k8sClient,
-			K8sExtClient:     k8sExtClient,
 			Logger:           config.Logger,
 			NetworkAllocator: legacyNetworkAllocator,
 			APIWhitelist: controller.ClusterConfigAPIWhitelist{
@@ -220,9 +223,7 @@ func New(config Config) (*Service, error) {
 	var legacyDrainerController *controller.Drainer
 	{
 		c := controller.DrainerConfig{
-			G8sClient:    g8sClient,
 			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
 			Logger:       config.Logger,
 
 			GuestAWSConfig: controller.DrainerConfigAWS{
@@ -254,7 +255,6 @@ func New(config Config) (*Service, error) {
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
-			G8sClient: g8sClient,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -273,7 +273,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := statusresource.CollectorSetConfig{
 			Logger:  config.Logger,
-			Watcher: g8sClient.ProviderV1alpha1().AWSConfigs("").Watch,
+			Watcher: k8sClient.G8sClient().ProviderV1alpha1().AWSConfigs("").Watch,
 		}
 
 		statusResourceCollector, err = statusresource.NewCollectorSet(c)
