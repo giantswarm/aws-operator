@@ -11,11 +11,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e60c4ef4957b7ee2051d17948b64902ce3afd7e3e5e5af3e22db75cb408c1b38"
+  digest = "1:d914e4b4106cef270f44419f5cce310826c9cf710b858172fc7f31e17db05c82"
   name = "github.com/giantswarm/apiextensions"
   packages = ["pkg/apis/provider/v1alpha1"]
   pruneopts = "UT"
-  revision = "07abe143fd9b20533c2ac7ff739ec468216ea602"
+  revision = "a4fd7939e26e7e2cd681af032963a1597ffae781"
 
 [[projects]]
   branch = "master"
@@ -79,7 +79,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "ef20fe5d793301b553005db740f730d87993f778"
+  revision = "e7e4b65ae66375ec1e85afc8e6b9b4933ae4da81"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -123,18 +123,18 @@
   version = "v2.2.7"
 
 [[projects]]
-  digest = "1:0ea1db306fea54c4883d4210d39c6db8fa8107f3cf8cea3f83e28ec623c1607b"
+  digest = "1:eb11a748d682f5c438deb8899bc48701aa2dcfffc34cbae17266f35bc16f5813"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "3de75813f60447b64b34060fdaabd9bc23627eba"
-  version = "kubernetes-1.15.4"
+  revision = "0278775368336f7d84795d0a903ea2a3a83cfd49"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
-  digest = "1:46af89fe0763a626b3bbfe50edfc65c40b88f1cd9cf84ffed66aa9d6a1a20bf3"
+  digest = "1:c1cf119d72215104974652efa22d4028c25424d9f366bf301e152f90ce154cf6"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/resource",
@@ -160,8 +160,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
-  version = "kubernetes-1.15.4"
+  revision = "72ed19daf4bb788ae595ae4103c404cb0fa09c84"
+  version = "kubernetes-1.16.3"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
