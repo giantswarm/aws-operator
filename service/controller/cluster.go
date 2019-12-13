@@ -20,7 +20,6 @@ import (
 )
 
 type ClusterConfig struct {
-	CMAClient        clientset.Interface
 	K8sClient        k8sclient.Interface
 	Logger           micrologger.Logger
 	NetworkAllocator network.Allocator
@@ -173,7 +172,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,

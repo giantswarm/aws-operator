@@ -20,7 +20,6 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
@@ -87,11 +86,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	cmaClient, err := clientset.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var k8sClient k8sclient.Interface
 	{
 		c := k8sclient.ClientsConfig{
@@ -154,7 +148,6 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := controller.ClusterConfig{
-			CMAClient:        cmaClient,
 			K8sClient:        k8sClient,
 			Logger:           config.Logger,
 			NetworkAllocator: legacyNetworkAllocator,
