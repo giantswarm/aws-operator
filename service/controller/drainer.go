@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource/crud"
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
