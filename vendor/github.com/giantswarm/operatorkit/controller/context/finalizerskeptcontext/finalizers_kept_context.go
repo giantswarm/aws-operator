@@ -61,7 +61,7 @@ func IsKept(ctx context.Context) bool {
 // likely resource cancelation is desired to be used in combination with
 // SetKept. Context based functionality can be composed like the following.
 //
-//     finalizerskeptcontext.SetKept(ctx)
+//     // finalizerskeptcontext.SetKept(ctx)
 //     resourcecanceledcontext.SetCanceled(ctx)
 //
 func SetKept(ctx context.Context) {

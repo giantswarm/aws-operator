@@ -8,6 +8,7 @@ import (
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/tenantcluster"
@@ -26,8 +27,12 @@ type ResourceConfig struct {
 	ClusterEndpointFunc func(v interface{}) (string, error)
 	ClusterIDFunc       func(v interface{}) (string, error)
 	ClusterStatusFunc   func(v interface{}) (providerv1alpha1.StatusCluster, error)
-	Logger              micrologger.Logger
-	NodeCountFunc       func(v interface{}) (int, error)
+	// TODO replace this with a G8sClient to fetch the node versions from the
+	// NodeConfig status once we can use the NodeConfig for general node
+	// management. As of now NodeConfig CRs are still used for draining in older
+	// tenant clusters.
+	Logger        micrologger.Logger
+	NodeCountFunc func(v interface{}) (int, error)
 	// RESTClient needs to be configured with a serializer capable of serializing
 	// and deserializing the object which is watched by the informer. Otherwise
 	// deserialization will fail when trying to manage the cluster status.
@@ -40,11 +45,7 @@ type ResourceConfig struct {
 	//
 	//     g8sClient.CoreV1alpha1().RESTClient()
 	//
-	RESTClient rest.Interface
-	// TODO replace this with a G8sClient to fetch the node versions from the
-	// NodeConfig status once we can use the NodeConfig for general node
-	// management. As of now NodeConfig CRs are still used for draining in older
-	// tenant clusters.
+	RESTClient               rest.Interface
 	TenantCluster            tenantcluster.Interface
 	VersionBundleVersionFunc func(v interface{}) (string, error)
 }
@@ -54,6 +55,7 @@ type Resource struct {
 	clusterEndpointFunc      func(v interface{}) (string, error)
 	clusterIDFunc            func(v interface{}) (string, error)
 	clusterStatusFunc        func(v interface{}) (providerv1alpha1.StatusCluster, error)
+	k8sClient                k8sclient.Interface
 	logger                   micrologger.Logger
 	nodeCountFunc            func(v interface{}) (int, error)
 	restClient               rest.Interface

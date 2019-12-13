@@ -8,8 +8,8 @@ import (
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/resource/crud/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/resource/crud/context/reconciliationcanceledcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 )
@@ -85,7 +85,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		reconciliationcanceledcontext.SetCanceled(ctx)
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-		finalizerskeptcontext.SetKept(ctx)
+		// finalizerskeptcontext.SetKept(ctx)
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "did not patch CR status")
 	}

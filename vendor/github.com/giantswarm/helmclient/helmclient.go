@@ -54,8 +54,10 @@ type Config struct {
 
 	EnsureTillerInstalledMaxWait time.Duration
 	RestConfig                   *rest.Config
-	TillerImage                  string
+	TillerImageName              string
+	TillerImageRegistry          string
 	TillerNamespace              string
+	TillerUpgradeEnabled         bool
 }
 
 // Client knows how to talk with a Helm Tiller server.
@@ -70,6 +72,7 @@ type Client struct {
 	restConfig                   *rest.Config
 	tillerImage                  string
 	tillerNamespace              string
+	tillerUpgradeEnabled         bool
 }
 
 // New creates a new configured Helm client.
@@ -90,8 +93,11 @@ func New(config Config) (*Client, error) {
 	if config.RestConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RestConfig must not be empty", config)
 	}
-	if config.TillerImage == "" {
-		config.TillerImage = defaultTillerImage
+	if config.TillerImageName == "" {
+		config.TillerImageName = defaultTillerImageName
+	}
+	if config.TillerImageRegistry == "" {
+		config.TillerImageRegistry = defaultTillerImageRegistry
 	}
 	if config.TillerNamespace == "" {
 		config.TillerNamespace = defaultTillerNamespace
@@ -102,6 +108,9 @@ func New(config Config) (*Client, error) {
 		Timeout: time.Second * httpClientTimeout,
 	}
 
+	// Registry is configurable for AWS China.
+	tillerImage := fmt.Sprintf("%s/%s", config.TillerImageRegistry, config.TillerImageName)
+
 	c := &Client{
 		fs:         config.Fs,
 		helmClient: config.HelmClient,
@@ -111,8 +120,9 @@ func New(config Config) (*Client, error) {
 
 		ensureTillerInstalledMaxWait: config.EnsureTillerInstalledMaxWait,
 		restConfig:                   config.RestConfig,
-		tillerImage:                  config.TillerImage,
+		tillerImage:                  tillerImage,
 		tillerNamespace:              config.TillerNamespace,
+		tillerUpgradeEnabled:         config.TillerUpgradeEnabled,
 	}
 
 	return c, nil
@@ -272,8 +282,8 @@ func (c *Client) getReleaseHistory(ctx context.Context, releaseName string) (*Re
 		}
 	}
 
-	if len(resp.Releases) > 1 {
-		return nil, microerror.Maskf(tooManyResultsError, "%d releases found, expected 1", len(resp.Releases))
+	if len(resp.Releases) == 0 {
+		return nil, nil
 	}
 
 	var history *ReleaseHistory
@@ -674,7 +684,11 @@ func (c *Client) newTunnel() (*k8sportforward.Tunnel, error) {
 	// Do not create a tunnel if tiller is outdated.
 	err = validateTillerVersion(pod, c.tillerImage)
 	if err != nil {
-		return nil, microerror.Mask(err)
+		if IsTillerInvalidVersion(err) && !c.tillerUpgradeEnabled {
+			c.logger.Log("level", "debug", "message", "found an out-dated tiller but keep going to create a tunnel")
+		} else {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var forwarder *k8sportforward.Forwarder

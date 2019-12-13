@@ -37,7 +37,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 	o := func() error {
 		resp, err := c.httpClient.Do(req)
 		if isNoSuchHostError(err) {
-			return backoff.Permanent(microerror.Maskf(executionFailedError, "no such host %#q", req.Host))
+			return backoff.Permanent(microerror.Maskf(pullChartFailedError, "no such host %#q", req.Host))
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -52,7 +52,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 			// Github pages 404 produces full HTML page which
 			// obscures the logs.
 			if resp.StatusCode == http.StatusNotFound {
-				return backoff.Permanent(microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String())))
+				return backoff.Permanent(microerror.Maskf(pullChartFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String())))
 			}
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q with body %s", resp.StatusCode, req.URL.String(), buf.String()))
 		}

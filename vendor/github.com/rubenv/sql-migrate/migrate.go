@@ -2,6 +2,7 @@ package migrate
 
 import (
 	"bytes"
+	"os"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -25,28 +26,49 @@ const (
 	Down
 )
 
-var tableName = "gorp_migrations"
-var schemaName = ""
+// MigrationSet provides database parameters for a migration execution
+type MigrationSet struct {
+	// TableName name of the table used to store migration info.
+	TableName string
+	// SchemaName schema that the migration table be referenced.
+	SchemaName string
+	// IgnoreUnknown skips the check to see if there is a migration
+	// ran in the database that is not in MigrationSource.
+	//
+	// This should be used sparingly as it is removing a safety check.
+	IgnoreUnknown bool
+}
+
+var migSet = MigrationSet{}
+
+// NewMigrationSet returns a parametrized Migration object
+func (ms MigrationSet) getTableName() string {
+	if ms.TableName == "" {
+		return "gorp_migrations"
+	}
+	return ms.TableName
+}
+
 var numberPrefixRegex = regexp.MustCompile(`^(\d+).*$`)
 
 // PlanError happens where no migration plan could be created between the sets
 // of already applied migrations and the currently found. For example, when the database
 // contains a migration which is not among the migrations list found for an operation.
 type PlanError struct {
-	Migration   *Migration
-	ErrorMessag string
+	Migration    *Migration
+	ErrorMessage string
 }
 
 func newPlanError(migration *Migration, errorMessage string) error {
 	return &PlanError{
-		Migration:   migration,
-		ErrorMessag: errorMessage,
+		Migration:    migration,
+		ErrorMessage: errorMessage,
 	}
 }
 
 func (p *PlanError) Error() string {
 	return fmt.Sprintf("Unable to create migration plan because of %s: %s",
-		p.Migration.Id, p.ErrorMessag)
+		p.Migration.Id, p.ErrorMessage)
 }
 
 // TxError is returned when any error is encountered during a database
@@ -73,15 +95,23 @@ func (e *TxError) Error() string {
 // Should be called before any other call such as (Exec, ExecMax, ...).
 func SetTable(name string) {
 	if name != "" {
-		tableName = name
+		migSet.TableName = name
 	}
 }
 
 // SetSchema sets the name of a schema that the migration table be referenced.
 func SetSchema(name string) {
 	if name != "" {
-		schemaName = name
+		migSet.SchemaName = name
 	}
+}
+
+// SetIgnoreUnknown sets the flag that skips database check to see if there is a
+// migration in the database that is not in migration source.
+//
+// This should be used sparingly as it is removing a safety check.
+func SetIgnoreUnknown(v bool) {
+	migSet.IgnoreUnknown = v
 }
 
 type Migration struct {
@@ -212,14 +242,9 @@ func findMigrations(dir http.FileSystem) ([]*Migration, error) {
 
 	for _, info := range files {
 		if strings.HasSuffix(info.Name(), ".sql") {
-			file, err := dir.Open(info.Name())
+			migration, err := migrationFromFile(dir, info)
 			if err != nil {
-				return nil, fmt.Errorf("Error while opening %s: %s", info.Name(), err)
-			}
-
-			migration, err := ParseMigration(info.Name(), file)
-			if err != nil {
-				return nil, fmt.Errorf("Error while parsing %s: %s", info.Name(), err)
+				return nil, err
 			}
 
 			migrations = append(migrations, migration)
@@ -230,6 +255,20 @@ func findMigrations(dir http.FileSystem) ([]*Migration, error) {
 	sort.Sort(byId(migrations))
 
 	return migrations, nil
+}
+
+func migrationFromFile(dir http.FileSystem, info os.FileInfo) (*Migration, error) {
+	file, err := dir.Open(info.Name())
+	if err != nil {
+		return nil, fmt.Errorf("Error while opening %s: %s", info.Name(), err)
+	}
+	defer func () { _ = file.Close() }()
+
+	migration, err := ParseMigration(info.Name(), file)
+	if err != nil {
+		return nil, fmt.Errorf("Error while parsing %s: %s", info.Name(), err)
+	}
+	return migration, nil
 }
 
 // Migrations from a bindata asset set.
@@ -366,13 +405,23 @@ func Exec(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection)
 	return ExecMax(db, dialect, m, dir, 0)
 }
 
+// Returns the number of applied migrations.
+func (ms MigrationSet) Exec(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection) (int, error) {
+	return ms.ExecMax(db, dialect, m, dir, 0)
+}
+
 // Execute a set of migrations
 //
 // Will apply at most `max` migrations. Pass 0 for no limit (or use Exec).
 //
 // Returns the number of applied migrations.
 func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) (int, error) {
-	migrations, dbMap, err := PlanMigration(db, dialect, m, dir, max)
+	return migSet.ExecMax(db, dialect, m, dir, max)
+}
+
+// Returns the number of applied migrations.
+func (ms MigrationSet) ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) (int, error) {
+	migrations, dbMap, err := ms.PlanMigration(db, dialect, m, dir, max)
 	if err != nil {
 		return 0, err
 	}
@@ -443,7 +492,11 @@ func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirecti
 
 // Plan a migration.
 func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) ([]*PlannedMigration, *gorp.DbMap, error) {
-	dbMap, err := getMigrationDbMap(db, dialect)
+	return migSet.PlanMigration(db, dialect, m, dir, max)
+}
+
+func (ms MigrationSet) PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) ([]*PlannedMigration, *gorp.DbMap, error) {
+	dbMap, err := ms.getMigrationDbMap(db, dialect)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -454,7 +507,7 @@ func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationD
 	}
 
 	var migrationRecords []MigrationRecord
-	_, err = dbMap.Select(&migrationRecords, fmt.Sprintf("SELECT * FROM %s", dbMap.Dialect.QuotedTableForQuery(schemaName, tableName)))
+	_, err = dbMap.Select(&migrationRecords, fmt.Sprintf("SELECT * FROM %s", dbMap.Dialect.QuotedTableForQuery(ms.SchemaName, ms.getTableName())))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -470,13 +523,15 @@ func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationD
 
 	// Make sure all migrations in the database are among the found migrations which
 	// are to be applied.
-	migrationsSearch := make(map[string]struct{})
-	for _, migration := range migrations {
-		migrationsSearch[migration.Id] = struct{}{}
-	}
-	for _, existingMigration := range existingMigrations {
-		if _, ok := migrationsSearch[existingMigration.Id]; !ok {
-			return nil, nil, newPlanError(existingMigration, "unknown migration in database")
+	if !ms.IgnoreUnknown {
+		migrationsSearch := make(map[string]struct{})
+		for _, migration := range migrations {
+			migrationsSearch[migration.Id] = struct{}{}
+		}
+		for _, existingMigration := range existingMigrations {
+			if _, ok := migrationsSearch[existingMigration.Id]; !ok {
+				return nil, nil, newPlanError(existingMigration, "unknown migration in database")
+			}
 		}
 	}
 
@@ -621,13 +676,17 @@ func ToCatchup(migrations, existingMigrations []*Migration, lastRun *Migration) 
 }
 
 func GetMigrationRecords(db *sql.DB, dialect string) ([]*MigrationRecord, error) {
-	dbMap, err := getMigrationDbMap(db, dialect)
+	return migSet.GetMigrationRecords(db, dialect)
+}
+
+func (ms MigrationSet) GetMigrationRecords(db *sql.DB, dialect string) ([]*MigrationRecord, error) {
+	dbMap, err := ms.getMigrationDbMap(db, dialect)
 	if err != nil {
 		return nil, err
 	}
 
 	var records []*MigrationRecord
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY id ASC", dbMap.Dialect.QuotedTableForQuery(schemaName, tableName))
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY id ASC", dbMap.Dialect.QuotedTableForQuery(ms.SchemaName, ms.getTableName()))
 	_, err = dbMap.Select(&records, query)
 	if err != nil {
 		return nil, err
@@ -636,7 +695,7 @@ func GetMigrationRecords(db *sql.DB, dialect string) ([]*MigrationRecord, error)
 	return records, nil
 }
 
-func getMigrationDbMap(db *sql.DB, dialect string) (*gorp.DbMap, error) {
+func (ms MigrationSet) getMigrationDbMap(db *sql.DB, dialect string) (*gorp.DbMap, error) {
 	d, ok := MigrationDialects[dialect]
 	if !ok {
 		return nil, fmt.Errorf("Unknown dialect: %s", dialect)
@@ -664,7 +723,7 @@ Check https://github.com/go-sql-driver/mysql#parsetime for more info.`)
 
 	// Create migration database map
 	dbMap := &gorp.DbMap{Db: db, Dialect: d}
-	dbMap.AddTableWithNameAndSchema(MigrationRecord{}, schemaName, tableName).SetKeys(false, "Id")
+	dbMap.AddTableWithNameAndSchema(MigrationRecord{}, ms.SchemaName, ms.getTableName()).SetKeys(false, "Id")
 	//dbMap.TraceOn("", log.New(os.Stdout, "migrate: ", log.Lmicroseconds))
 
 	err := dbMap.CreateTablesIfNotExists()
