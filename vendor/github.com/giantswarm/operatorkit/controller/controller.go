@@ -26,8 +26,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/giantswarm/operatorkit/resource/crud/context/reconciliationcanceledcontext"
-	"github.com/giantswarm/operatorkit/resource/crud/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/operatorkit/resource"
 )
 

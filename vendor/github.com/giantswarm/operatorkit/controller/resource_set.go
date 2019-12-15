@@ -6,8 +6,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/operatorkit/resource/crud/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/resource/crud/context/updateallowedcontext"
+	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/controller/context/updateallowedcontext"
 	"github.com/giantswarm/operatorkit/resource"
 )
 

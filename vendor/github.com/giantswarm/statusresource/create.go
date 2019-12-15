@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/resource/crud/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"github.com/giantswarm/tenantcluster"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

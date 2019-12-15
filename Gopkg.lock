@@ -195,7 +195,7 @@
     "reference",
   ]
   pruneopts = "UT"
-  revision = "f18781257ec94f25301f1f546b2e4b90612295e7"
+  revision = "bdf3438b52eed58c616217b313fd36e91cb44bac"
 
 [[projects]]
   digest = "1:53e99d883df3e940f5f0223795f300eb32b8c044f226132bfc0e74930f24ea4b"
@@ -2096,6 +2096,7 @@
     "github.com/aws/aws-sdk-go/service/support/supportiface",
     "github.com/docker/distribution/reference",
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
+    "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned",
     "github.com/giantswarm/apprclient",
@@ -2130,12 +2131,13 @@
     "github.com/giantswarm/microkit/server",
     "github.com/giantswarm/micrologger",
     "github.com/giantswarm/micrologger/microloggertest",
-    "github.com/giantswarm/operatorkit/resource/crud",
-    "github.com/giantswarm/operatorkit/resource/crud/context/finalizerskeptcontext",
-    "github.com/giantswarm/operatorkit/resource/crud/context/reconciliationcanceledcontext",
-    "github.com/giantswarm/operatorkit/resource/crud/context/resourcecanceledcontext",
+    "github.com/giantswarm/operatorkit/controller",
+    "github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext",
+    "github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext",
+    "github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext",
     "github.com/giantswarm/operatorkit/flag/service/kubernetes",
     "github.com/giantswarm/operatorkit/resource",
+    "github.com/giantswarm/operatorkit/resource/crud",
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
