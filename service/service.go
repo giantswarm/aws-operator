@@ -9,16 +9,14 @@ import (
 
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -216,8 +214,8 @@ func New(config Config) (*Service, error) {
 	var legacyDrainerController *controller.Drainer
 	{
 		c := controller.DrainerConfig{
-			K8sClient:    k8sClient,
-			Logger:       config.Logger,
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
 
 			GuestAWSConfig: controller.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),

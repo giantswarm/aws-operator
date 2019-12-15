@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/resource/crud"
+	"github.com/giantswarm/operatorkit/controller"
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
@@ -47,7 +47,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	var clusterController *controller.Controller
+	var drainerController *controller.Controller
 	{
 		c := controller.Config{
 			CRD:          v1alpha1.NewAWSConfigCRD(),
@@ -63,14 +63,14 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			Name: config.ProjectName + "-drainer",
 		}
 
-		clusterController, err = controller.New(c)
+		drainerController, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	d := &Drainer{
-		Controller: operatorkitController,
+		Controller: drainerController,
 	}
 
 	return d, nil
@@ -98,7 +98,6 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 	{
 		c := drainerResourceSetConfig{
 			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,

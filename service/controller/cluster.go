@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/resource/crud"
+	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/randomkeys"
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 
