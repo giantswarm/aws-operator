@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
 
@@ -548,6 +549,11 @@ func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {
 
 func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConfigStatusAWSAvailabilityZone {
 	return customObject.Status.AWS.AvailabilityZones
+}
+
+// StatusClusterNetworkCIDR returns the allocated tenant cluster subnet CIDR.
+func StatusClusterNetworkCIDR(cluster v1alpha2.AWSCluster) string {
+	return cluster.Status.Provider.Network.CIDR
 }
 
 // StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.

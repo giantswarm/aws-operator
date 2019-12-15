@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
@@ -228,7 +227,7 @@ func getClusterSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	var results []net.IPNet
 
 	for _, c := range clusterList.Items {
-		cidr := statusClusterNetworkCIDR(c)
+		cidr := key.StatusClusterNetworkCIDR(c)
 		if cidr == "" {
 			continue
 		}
@@ -266,10 +265,6 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	return results, nil
-}
-
-func statusClusterNetworkCIDR(cluster v1alpha2.AWSCluster) string {
-	return cluster.Status.Provider.Network.CIDR
 }
 
 // splitSubnetToStatusAZs splits subnet such that each AZ gets private and
