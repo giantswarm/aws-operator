@@ -59,7 +59,7 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var cpK8sClients k8sclient.Interface
+	var cpK8sClients *k8sclient.Clients
 	{
 		c := k8sclient.ClientsConfig{
 			Logger: logger,
