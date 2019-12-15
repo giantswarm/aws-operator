@@ -66,7 +66,7 @@ func NewConfig() (Config, error) {
 			Logger: logger,
 			SchemeBuilder: k8sclient.SchemeBuilder{
 				corev1alpha1.AddToScheme,
-				providerv1alpha1.AddToScheme
+				providerv1alpha1.AddToScheme,
 			},
 
 			KubeConfigPath: harness.DefaultKubeConfig,
