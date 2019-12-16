@@ -84,6 +84,11 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 	if wait {
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for guest cluster %#q API to be down", id))
 
+		err = config.Guest.Initialize()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		err := config.Guest.WaitForAPIDown()
 		if err != nil {
 			return microerror.Mask(err)
