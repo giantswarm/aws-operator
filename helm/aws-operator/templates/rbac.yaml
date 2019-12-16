@@ -20,6 +20,12 @@ rules:
       - patch
       - update
       - watch
+- apiGroups:
+    - infrastructure.giantswarm.io
+  resources:
+    - awsclusters
+  verbs:
+    - list
   - apiGroups:
       - cluster.k8s.io
     resources:
