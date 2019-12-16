@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/api/v1alpha2"
+	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -18,9 +18,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cluster v1alpha2.Cluster
+	var cluster apiv1alpha2.Cluster
 	{
-		var clusters v1alpha2.ClusterList
+		var clusters apiv1alpha2.ClusterList
 
 		var labelSelector client.MatchingLabels
 		labelSelector = make(map[string]string)
@@ -42,7 +42,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		apiEndpoint := v1alpha2.APIEndpoint{
+		apiEndpoint := apiv1alpha2.APIEndpoint{
 			Host: key.ClusterAPIEndpoint(cr),
 			Port: 443,
 		}
