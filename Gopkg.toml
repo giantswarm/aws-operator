@@ -38,8 +38,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "infrastructure/v1alpha2"
+[[override]]
+  branch = "abstract-commoncluster-status"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -129,10 +129,6 @@ required = [
 [[constraint]]
   name = "github.com/prometheus/client_golang"
   version = "0.9.3"
-
-[[override]]
-  branch = "infrastructure/v1alpha2"
-  name = "github.com/giantswarm/apiextensions"
 
 [[override]]
   name = "k8s.io/api"

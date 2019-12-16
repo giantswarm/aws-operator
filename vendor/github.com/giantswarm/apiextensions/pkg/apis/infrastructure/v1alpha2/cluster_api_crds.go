@@ -11,9 +11,9 @@ import (
 //     apiVersion: apiextensions.k8s.io/v1beta1
 //     kind: CustomResourceDefinition
 //     metadata:
-//       name: clusters.cluster.k8s.io
+//       name: clusters.cluster.x-k8s.io
 //     spec:
-//       group: cluster.k8s.io
+//       group: cluster.x-k8s.io
 //       scope: Namespaced
 //       version: v1alpha2
 //       names:
@@ -33,10 +33,10 @@ func NewClusterCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 			Labels: map[string]string{
 				"controller-tools.k8s.io": "1.0",
 			},
-			Name: "clusters.cluster.k8s.io",
+			Name: "clusters.cluster.x-k8s.io",
 		},
 		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-			Group: "cluster.k8s.io",
+			Group: "cluster.x-k8s.io",
 			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
 				Kind:   "Cluster",
 				Plural: "clusters",
@@ -57,9 +57,9 @@ func NewClusterCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 //     apiVersion: apiextensions.k8s.io/v1beta1
 //     kind: CustomResourceDefinition
 //     metadata:
-//       name: machinedeployments.cluster.k8s.io
+//       name: machinedeployments.cluster.x-k8s.io
 //     spec:
-//       group: cluster.k8s.io
+//       group: cluster.x-k8s.io
 //       scope: Namespaced
 //       version: v1alpha2
 //       names:
@@ -79,10 +79,10 @@ func NewMachineDeploymentCRD() *apiextensionsv1beta1.CustomResourceDefinition {
 			Labels: map[string]string{
 				"controller-tools.k8s.io": "1.0",
 			},
-			Name: "machinedeployments.cluster.k8s.io",
+			Name: "machinedeployments.cluster.x-k8s.io",
 		},
 		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-			Group: "cluster.k8s.io",
+			Group: "cluster.x-k8s.io",
 			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
 				Kind:   "MachineDeployment",
 				Plural: "machinedeployments",

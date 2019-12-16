@@ -93,7 +93,7 @@ spec:
                 network:
                   properties:
                     cidr:
-                      pattern: ^\d+\.\d+\.\d+.\d+\/.\d+$
+                      pattern: ^\d+\.\d+\.\d+.\d+\/\d+$
                       type: string
                   type: object
               type: object

@@ -1,9 +1,5 @@
 package v1alpha2
 
-import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
 const (
 	// ClusterConditionLimit is the maximum amount of conditions tracked in the
 	// condition list of a tenant cluster's status. The limit here is applied to
@@ -91,32 +87,20 @@ var (
 	}
 )
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type CommonCluster struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Status            CommonClusterStatus `json:"status,omitempty" yaml:"status,omitempty"`
-}
-
+// CommonClusterStatus is shared type to contain provider independent cluster
+// status information.
 type CommonClusterStatus struct {
-	Cluster CommonClusterStatusCluster `json:"cluster" yaml:"cluster"`
+	Conditions []CommonClusterStatusCondition `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+	ID         string                         `json:"id" yaml:"id"`
+	Versions   []CommonClusterStatusVersion   `json:"versions,omitempty" yaml:"versions,omitempty"`
 }
 
-// CommonClusterStatusCluster is shared type to contain provider independent cluster status
-// information.
-type CommonClusterStatusCluster struct {
-	Conditions []CommonClusterStatusClusterCondition `json:"conditions" yaml:"conditions"`
-	ID         string                                `json:"id" yaml:"id"`
-	Versions   []CommonClusterStatusClusterVersion   `json:"versions" yaml:"versions"`
-}
-
-type CommonClusterStatusClusterCondition struct {
+type CommonClusterStatusCondition struct {
 	LastTransitionTime DeepCopyTime `json:"lastTransitionTime" yaml:"lastTransitionTime"`
 	Condition          string       `json:"condition" yaml:"condition"`
 }
 
-type CommonClusterStatusClusterVersion struct {
+type CommonClusterStatusVersion struct {
 	LastTransitionTime DeepCopyTime `json:"lastTransitionTime" yaml:"lastTransitionTime"`
 	Version            string       `json:"version" yaml:"version"`
 }
