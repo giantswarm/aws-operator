@@ -24,6 +24,15 @@ rules:
       - update
       - watch
   - apiGroups:
+      - cluster.x-k8s.io
+    resources:
+      - clusters
+      - clusters/status
+      - machinedeployments
+      - machinedeployments/status
+    verbs:
+      - "*"
+  - apiGroups:
       - cluster.k8s.io
     resources:
       - machinedeployments
