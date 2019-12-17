@@ -157,14 +157,14 @@ func NewConfig() (Config, error) {
 	}
 
 	c := Config{
-		AWSClient:  awsClient,
+		AWSClient:   awsClient,
 		CPCRDClient: k8sClient.CRDClient(),
-		Guest:      guest,
-		HelmClient: helmClient,
-		Host:       host,
-		K8s:        k8sSetup,
-		Logger:     logger,
-		Release:    newRelease,
+		Guest:       guest,
+		HelmClient:  helmClient,
+		Host:        host,
+		K8s:         k8sSetup,
+		Logger:      logger,
+		Release:     newRelease,
 
 		UseDefaultTenant: true,
 	}
