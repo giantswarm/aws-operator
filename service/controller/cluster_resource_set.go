@@ -164,7 +164,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	{
 		c := apiendpoint.Config{
 			CtrlClient: config.CtrlClient,
-			G8sClient:  config.G8sClient,
 			Logger:     config.Logger,
 		}
 
