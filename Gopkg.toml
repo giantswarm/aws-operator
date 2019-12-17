@@ -38,8 +38,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[override]]
-  branch = "abstract-commoncluster-status"
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]

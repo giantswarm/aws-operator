@@ -279,7 +279,7 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-  branch = "abstract-commoncluster-status"
+  branch = "master"
   digest = "1:5dddf1342f30cbdda064c87827164becfead1b5a35ef9029190cc3cb6d73376f"
   name = "github.com/giantswarm/apiextensions"
   packages = [
@@ -306,7 +306,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "e1c2b33476bcf63dcbdaba74667c41d8a4f7dcad"
+  revision = "29482fb3d774cedee3578619809e04274372bf9b"
 
 [[projects]]
   branch = "master"
