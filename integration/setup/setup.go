@@ -10,7 +10,7 @@ import (
 	"time"
 
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
-	infrastructurev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
@@ -238,7 +238,7 @@ func installResources(ctx context.Context, config Config) error {
 	{
 		b := backoff.NewMaxRetries(5, 2*time.Second)
 
-		err := config.CPCRDClient.EnsureCreated(ctx, infrastructurev1alpha1.NewAWSClusterCRD(), b)
+		err := config.CPCRDClient.EnsureCreated(ctx, infrastructurev1alpha2.NewAWSClusterCRD(), b)
 		if err != nil {
 			return microerror.Mask(err)
 		}
