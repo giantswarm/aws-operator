@@ -25,7 +25,7 @@ const (
 
 type Config struct {
 	AWSClient   *e2eclientsaws.Client
-	CPCRDClient *k8scrdclient.CRDClient
+	CPCRDClient k8scrdclient.Interface
 	Guest       *framework.Guest
 	HelmClient  helmclient.Interface
 	Host        *framework.Host
@@ -158,7 +158,7 @@ func NewConfig() (Config, error) {
 
 	c := Config{
 		AWSClient:   awsClient,
-		CPCRDClient: k8sClient.CRDClient(),
+		CPCRDClient: cpK8sClients.CRDClient(),
 		Guest:       guest,
 		HelmClient:  helmClient,
 		Host:        host,

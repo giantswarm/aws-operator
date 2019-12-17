@@ -244,17 +244,6 @@ func installResources(ctx context.Context, config Config) error {
 		}
 	}
 
-	// Install AWSCluster CRD for IPAM resource. It checks clusters objects
-	// for allocated ranges. If the CRD doesn't exist it fails.
-	{
-		b := backoff.NewMaxRetries(5, 2*time.Second)
-
-		err := config.CPCRDClient.EnsureCreated(ctx, clusterv1alpha1.NewClusterCRD(), b)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	{
 		err := config.HelmClient.EnsureTillerInstalled(ctx)
 		if err != nil {
