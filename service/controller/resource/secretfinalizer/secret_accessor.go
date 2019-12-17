@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -14,7 +14,7 @@ type secretAccessor struct {
 	Namespace string
 }
 
-func newSecretAccessors(ctx context.Context, cr v1alpha1.Cluster) []secretAccessor {
+func newSecretAccessors(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) []secretAccessor {
 	return []secretAccessor{
 		// The secret accessors below are associated to the tenant's API
 		// certificate.

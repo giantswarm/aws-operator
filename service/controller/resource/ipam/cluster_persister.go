@@ -2,37 +2,34 @@ package ipam
 
 import (
 	"context"
-	"encoding/json"
 	"net"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 )
 
 type ClusterPersisterConfig struct {
-	CMAClient clientset.Interface
+	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 }
 
 type ClusterPersister struct {
-	cmaClient clientset.Interface
+	g8sClient versioned.Interface
 	logger    micrologger.Logger
 }
 
 func NewClusterPersister(config ClusterPersisterConfig) (*ClusterPersister, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	p := &ClusterPersister{
-		cmaClient: config.CMAClient,
+		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 	}
 
@@ -40,42 +37,16 @@ func NewClusterPersister(config ClusterPersisterConfig) (*ClusterPersister, erro
 }
 
 func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	cr, err := p.cmaClient.ClusterV1alpha1().Clusters(namespace).Get(name, metav1.GetOptions{})
+	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSClusters(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	var providerStatus v1alpha1.AWSClusterStatus
-	{
-		if cr.Status.ProviderStatus == nil {
-			cr.Status.ProviderStatus = &runtime.RawExtension{}
-		}
-		if cr.Status.ProviderStatus.Raw == nil {
-			cr.Status.ProviderStatus.Raw = []byte{}
-		}
+	cr.Status.Provider.Network.CIDR = subnet.String()
 
-		err := json.Unmarshal(cr.Status.ProviderStatus.Raw, &providerStatus)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		providerStatus.Provider.Network.CIDR = subnet.String()
-	}
-
-	{
-		b, err := json.Marshal(providerStatus)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		cr.Status.ProviderStatus.Raw = b
-	}
-
-	{
-		_, err := p.cmaClient.ClusterV1alpha1().Clusters(cr.Namespace).UpdateStatus(cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+	_, err = p.g8sClient.InfrastructureV1alpha2().AWSClusters(namespace).UpdateStatus(cr)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil

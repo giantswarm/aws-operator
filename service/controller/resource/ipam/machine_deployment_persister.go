@@ -4,34 +4,34 @@ import (
 	"context"
 	"net"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
 
 type MachineDeploymentPersisterConfig struct {
-	CMAClient clientset.Interface
+	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 }
 
 type MachineDeploymentPersister struct {
-	cmaClient clientset.Interface
+	g8sClient versioned.Interface
 	logger    micrologger.Logger
 }
 
 func NewMachineDeploymentPersister(config MachineDeploymentPersisterConfig) (*MachineDeploymentPersister, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	p := &MachineDeploymentPersister{
-		cmaClient: config.CMAClient,
+		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 	}
 
@@ -39,7 +39,7 @@ func NewMachineDeploymentPersister(config MachineDeploymentPersisterConfig) (*Ma
 }
 
 func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	cr, err := p.cmaClient.ClusterV1alpha1().MachineDeployments(namespace).Get(name, metav1.GetOptions{})
+	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -53,7 +53,7 @@ func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPN
 	}
 
 	{
-		_, err := p.cmaClient.ClusterV1alpha1().MachineDeployments(cr.Namespace).Update(cr)
+		_, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Update(cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}

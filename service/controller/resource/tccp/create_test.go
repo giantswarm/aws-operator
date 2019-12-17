@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
@@ -34,7 +34,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name         string
-		cr           v1alpha1.Cluster
+		cr           infrastructurev1alpha2.AWSCluster
 		ctx          context.Context
 		errorMatcher func(error) bool
 	}{
@@ -64,7 +64,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 	{
 
 		c := Config{
-			CMAClient: fake.NewSimpleClientset(),
+			G8sClient: fake.NewSimpleClientset(),
 			Detection: d,
 			Logger:    microloggertest.New(),
 

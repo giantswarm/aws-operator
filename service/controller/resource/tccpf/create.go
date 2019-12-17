@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
@@ -115,7 +115,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster, route53Enabled bool) (*template.ParamsMainRecordSets, error) {
+func newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, route53Enabled bool) (*template.ParamsMainRecordSets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -134,7 +134,7 @@ func newRecordSetsParams(ctx context.Context, cr v1alpha1.Cluster, route53Enable
 	return recordSets, nil
 }
 
-func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBackend string) (*template.ParamsMainRouteTables, error) {
+func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, encrypterBackend string) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -196,7 +196,7 @@ func newRouteTablesParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBac
 	return routeTables, nil
 }
 
-func newTemplateParams(ctx context.Context, cr v1alpha1.Cluster, encrypterBackend string, route53Enabled bool) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, encrypterBackend string, route53Enabled bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		recordSets, err := newRecordSetsParams(ctx, cr, route53Enabled)
