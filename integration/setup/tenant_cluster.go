@@ -71,6 +71,11 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
 
+	err = config.Guest.Initialize()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	err = config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
 	if err != nil {
 		return microerror.Mask(err)
