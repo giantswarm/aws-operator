@@ -11,6 +11,7 @@ import (
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/k8scrdclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -23,13 +24,14 @@ const (
 )
 
 type Config struct {
-	AWSClient  *e2eclientsaws.Client
-	Guest      *framework.Guest
-	HelmClient helmclient.Interface
-	Host       *framework.Host
-	K8s        *k8sclient.Setup
-	Logger     micrologger.Logger
-	Release    *release.Release
+	AWSClient   *e2eclientsaws.Client
+	CPCRDClient *k8scrdclient.CRDClient
+	Guest       *framework.Guest
+	HelmClient  helmclient.Interface
+	Host        *framework.Host
+	K8s         *k8sclient.Setup
+	Logger      micrologger.Logger
+	Release     *release.Release
 
 	// UseDefaultTenant defines whether the standard test setup should ensure the
 	// default tenant cluster. This is enabled by default. Most tests simply use
@@ -156,6 +158,7 @@ func NewConfig() (Config, error) {
 
 	c := Config{
 		AWSClient:  awsClient,
+		CPCRDClient: k8sClient.CRDClient(),
 		Guest:      guest,
 		HelmClient: helmClient,
 		Host:       host,

@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	infrastructurev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha1"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
@@ -227,6 +228,29 @@ func installResources(ctx context.Context, config Config) error {
 
 	{
 		err := config.K8s.EnsureNamespaceCreated(ctx, namespace)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	// Install AWSCluster CRD for IPAM resource. It checks clusters objects
+	// for allocated ranges. If the CRD doesn't exist it fails.
+	{
+		b := backoff.NewMaxRetries(5, 2*time.Second)
+
+		err := config.CPCRDClient.EnsureCreated(ctx, infrastructurev1alpha1.NewAWSClusterCRD(), b)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+
+	// Install AWSCluster CRD for IPAM resource. It checks clusters objects
+	// for allocated ranges. If the CRD doesn't exist it fails.
+	{
+		b := backoff.NewMaxRetries(5, 2*time.Second)
+
+		err := config.CPCRDClient.EnsureCreated(ctx, clusterv1alpha1.NewClusterCRD(), b)
 		if err != nil {
 			return microerror.Mask(err)
 		}
