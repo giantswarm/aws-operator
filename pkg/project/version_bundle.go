@@ -16,6 +16,14 @@ func NewVersionBundle() versionbundle.Bundle {
 				},
 			},
 			{
+				Component:   "clusterapi",
+				Description: "Cluster API types upgraded to v1alpha2.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2080",
+				},
+			},
+			{
 				Component:   "kubelet",
 				Description: "Label nodes with operator version instead of release version.",
 				Kind:        versionbundle.KindFixed,
