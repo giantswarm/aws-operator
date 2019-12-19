@@ -260,13 +260,16 @@ func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			ClusterID:         key.ClusterID(&cr),
 			EC2ServiceDomain:  key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:         cc.Status.TenantCluster.Encryption.Key,
 			MasterPolicyName:  key.PolicyNameMaster(cr),
 			MasterProfileName: key.ProfileNameMaster(cr),
 			MasterRoleName:    key.RoleNameMaster(cr),
 			RegionARN:         key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			Route53Enabled:    r.route53Enabled,
 			S3Bucket:          key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
+		}
+
+		if r.encrypterBackend == encrypter.KMSBackend {
+			iamPolicies.KMSKeyARN = cc.Status.TenantCluster.Encryption.Key
 		}
 	}
 
