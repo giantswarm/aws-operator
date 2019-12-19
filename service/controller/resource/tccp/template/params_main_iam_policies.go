@@ -8,5 +8,6 @@ type ParamsMainIAMPolicies struct {
 	MasterPolicyName  string
 	MasterProfileName string
 	RegionARN         string
+	Route53Enabled    bool
 	S3Bucket          string
 }

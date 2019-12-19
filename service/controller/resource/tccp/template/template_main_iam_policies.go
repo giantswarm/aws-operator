@@ -84,6 +84,7 @@ const TemplateMainIAMPolicies = `
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
+{{- if $v.Route53Enabled -}}
   Route53ManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -114,6 +115,7 @@ const TemplateMainIAMPolicies = `
               - "route53:ListHostedZones"
               - "route53:ListResourceRecordSets"
             Resource: "*"
+{{ end }}
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
