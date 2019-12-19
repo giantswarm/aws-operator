@@ -6,7 +6,32 @@ import (
 
 func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
-		Changelogs: []versionbundle.Changelog{},
+		Changelogs: []versionbundle.Changelog{
+			{
+				Component:   "cloudformation",
+				Description: "Bring back name tags to AWS resources like VPCs, Subnets and EC2 Instances.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2059",
+				},
+			},
+			{
+				Component:   "clusterapi",
+				Description: "Cluster API types upgraded to v1alpha2.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2080",
+				},
+			},
+			{
+				Component:   "kubelet",
+				Description: "Label nodes with operator version instead of release version.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2064",
+				},
+			},
+		},
 		Components: []versionbundle.Component{
 			{
 				Name:    "calico",
