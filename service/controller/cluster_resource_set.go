@@ -339,6 +339,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	{
 		c := cleanuprecordsets.Config{
 			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
 		}
 
 		cleanupRecordSets, err = cleanuprecordsets.New(c)
