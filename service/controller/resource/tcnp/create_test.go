@@ -12,6 +12,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 )
@@ -29,20 +30,22 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 //
 func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
-		name string
-		ctx  context.Context
-		cr   infrastructurev1alpha2.AWSMachineDeployment
+		name             string
+		ctx              context.Context
+		cr               infrastructurev1alpha2.AWSMachineDeployment
+		encrypterBackend string
 	}{
 		{
-			name: "case 0: basic test",
-			ctx:  unittest.DefaultContext(),
-			cr:   unittest.DefaultMachineDeployment(),
+			name:             "case 0: basic test",
+			ctx:              unittest.DefaultContext(),
+			cr:               unittest.DefaultMachineDeployment(),
+			encrypterBackend: encrypter.KMSBackend,
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr)
+			params, err := newTemplateParams(tc.ctx, tc.cr, tc.encrypterBackend)
 			if err != nil {
 				t.Fatal(err)
 			}

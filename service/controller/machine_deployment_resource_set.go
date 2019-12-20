@@ -329,6 +329,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			Detection: tcnpChangeDetection,
 			Logger:    config.Logger,
 
+			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 		}
 
