@@ -18,6 +18,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 )
@@ -46,7 +47,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 0: basic test without encryption key when encrypter backend kms, route53 enabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              unittest.DefaultContext(),
-			encrypterBackend: "kms",
+			encrypterBackend: encrypter.KMSBackend,
 			errorMatcher:     nil,
 			route53Enabled:   true,
 		},
@@ -54,7 +55,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 1: basic test with encryption key when encrypter backend kms, route53 enabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
-			encrypterBackend: "kms",
+			encrypterBackend: encrypter.KMSBackend,
 			errorMatcher:     nil,
 			route53Enabled:   true,
 		},
@@ -62,7 +63,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 2: basic test without encryption key when encrypter backend vault, route53 enabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              unittest.DefaultContext(),
-			encrypterBackend: "vault",
+			encrypterBackend: encrypter.VaultBackend,
 			errorMatcher:     nil,
 			route53Enabled:   true,
 		},
@@ -70,7 +71,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 3: basic test with encryption key when encrypter backend vault, route53 enabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
-			encrypterBackend: "vault",
+			encrypterBackend: encrypter.VaultBackend,
 			errorMatcher:     nil,
 			route53Enabled:   true,
 		},
@@ -78,7 +79,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 4: basic test without encryption key when encrypter backend kms, route53 disabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              unittest.DefaultContext(),
-			encrypterBackend: "kms",
+			encrypterBackend: encrypter.KMSBackend,
 			errorMatcher:     nil,
 			route53Enabled:   false,
 		},
@@ -86,7 +87,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 5: basic test with encryption key when encrypter backend kms, route53 disabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
-			encrypterBackend: "kms",
+			encrypterBackend: encrypter.KMSBackend,
 			errorMatcher:     nil,
 			route53Enabled:   false,
 		},
@@ -94,7 +95,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 6: basic test without encryption key when encrypter backend vault, route53 disabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              unittest.DefaultContext(),
-			encrypterBackend: "vault",
+			encrypterBackend: encrypter.VaultBackend,
 			errorMatcher:     nil,
 			route53Enabled:   false,
 		},
@@ -102,7 +103,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:             "case 7: basic test with encryption key when encrypter backend vault, route53 disabled",
 			cr:               unittest.DefaultCluster(),
 			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
-			encrypterBackend: "vault",
+			encrypterBackend: encrypter.VaultBackend,
 			errorMatcher:     nil,
 			route53Enabled:   false,
 		},
