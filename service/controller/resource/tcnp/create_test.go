@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/ghodss/yaml"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/google/go-cmp/cmp"
 
@@ -36,10 +37,16 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 		encrypterBackend string
 	}{
 		{
-			name:             "case 0: basic test",
+			name:             "case 0: basic test with encrypter backend KMS",
 			ctx:              unittest.DefaultContext(),
 			cr:               unittest.DefaultMachineDeployment(),
 			encrypterBackend: encrypter.KMSBackend,
+		},
+		{
+			name:             "case 1: basic test with encrypter backend Vault",
+			ctx:              unittest.DefaultContext(),
+			cr:               unittest.DefaultMachineDeployment(),
+			encrypterBackend: encrypter.VaultBackend,
 		},
 	}
 
@@ -54,6 +61,10 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			_, err = yaml.YAMLToJSONStrict([]byte(templateBody))
+			if err != nil {
+				t.Fatal(err)
+			}
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
