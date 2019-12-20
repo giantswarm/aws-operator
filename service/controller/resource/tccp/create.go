@@ -187,13 +187,6 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
-			fmt.Printf("\n\n\n\n\n\n")
-			fmt.Printf("\n\n\n\n\n\n")
-			fmt.Printf("\n\n\n\n\n\n")
-			fmt.Printf("%s", templateBody)
-			fmt.Printf("\n\n\n\n\n\n")
-			fmt.Printf("\n\n\n\n\n\n")
-			fmt.Printf("\n\n\n\n\n\n")
 			return microerror.Mask(err)
 		}
 
