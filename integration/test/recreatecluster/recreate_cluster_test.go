@@ -35,16 +35,16 @@ func Test_Recreate_Cluster(t *testing.T) {
 		}
 	}
 
-	if setup.BastionEnabled {
-		err := setup.RestoreBastionTenantAssociation(ctx, config, networkInterface)
+	{
+		wait := true
+		err := setup.EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 	}
 
-	{
-		wait := true
-		err := setup.EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
+	if setup.BastionEnabled {
+		err := setup.RestoreBastionTenantAssociation(ctx, config, networkInterface)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
