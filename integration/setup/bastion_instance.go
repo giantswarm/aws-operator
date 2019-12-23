@@ -428,7 +428,7 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
-		sshUserList = userData.Passwd.Users
+		sshUserList = userData.Passwd.Users[0:27]
 	}
 
 	userData := UserData{
