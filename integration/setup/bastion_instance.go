@@ -428,7 +428,7 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
-		sshUserList = userData.Passwd.Users[0:27]
+		sshUserList = userData.Passwd.Users
 	}
 
 	userData := UserData{
@@ -436,7 +436,7 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 			Version: "2.1.0",
 		},
 		Passwd: Passwd{
-			Users: sshUserList,
+			Users: sshUserList[0:1],
 		},
 	}
 
@@ -445,5 +445,8 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 		return "", microerror.Mask(err)
 	}
 
-	return base64.StdEncoding.EncodeToString(userDataJSON), nil
+	encoded := base64.StdEncoding.EncodeToString(userDataJSON)
+	config.Logger.LogCtx(ctx, "level", "debug", "user_data_length", len(encoded))
+
+	return encoded, nil
 }
