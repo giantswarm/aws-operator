@@ -17,7 +17,6 @@ import (
 	"github.com/giantswarm/e2esetup/privaterepo"
 	"github.com/giantswarm/e2etemplates/pkg/chartvalues"
 	"github.com/giantswarm/microerror"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/key"
@@ -39,44 +38,9 @@ func Setup(m *testing.M, config Config) {
 		v = 1
 	}
 
-	{
-		g, ctx := errgroup.WithContext(ctx)
-
-		if BastionEnabled {
-			g.Go(func() error {
-				o := func() error {
-					err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-
-					return nil
-				}
-				b := backoff.NewMaxRetries(10, 1*time.Minute)
-				n := backoff.NewNotifier(config.Logger, ctx)
-
-				err := backoff.RetryNotify(o, b, n)
-				if err != nil {
-					config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
-				}
-
-				return nil
-			})
-		}
-
-		g.Go(func() error {
-			if v == 0 && config.UseDefaultTenant {
-				wait := true
-				err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-			}
-
-			return nil
-		})
-
-		err := g.Wait()
+	if v == 0 && config.UseDefaultTenant {
+		wait := true
+		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			v = 1
@@ -87,44 +51,9 @@ func Setup(m *testing.M, config Config) {
 		v = m.Run()
 	}
 
-	if !env.KeepResources() {
-		g, ctx := errgroup.WithContext(ctx)
-
-		if BastionEnabled {
-			g.Go(func() error {
-				o := func() error {
-					err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-
-					return nil
-				}
-				b := backoff.NewMaxRetries(10, 1*time.Minute)
-				n := backoff.NewNotifier(config.Logger, ctx)
-
-				err := backoff.RetryNotify(o, b, n)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-
-				return nil
-			})
-		}
-
-		g.Go(func() error {
-			if config.UseDefaultTenant {
-				wait := true
-				err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-			}
-
-			return nil
-		})
-
-		err := g.Wait()
+	if !env.KeepResources() && config.UseDefaultTenant {
+		wait := true
+		err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			v = 1

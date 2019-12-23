@@ -63,11 +63,25 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
 
+	if BastionEnabled {
+		err = ensureBastionHostCreated(ctx, id, config)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	return nil
 }
 
 func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
 	var err error
+
+	if BastionEnabled {
+		err = ensureBastionHostDeleted(ctx, id, config)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
 

@@ -6,8 +6,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/ec2"
-
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup"
 )
@@ -17,15 +15,6 @@ import (
 // idempotentency.
 func Test_Recreate_Cluster(t *testing.T) {
 	ctx := context.Background()
-
-	var networkInterface *ec2.InstanceNetworkInterface
-	if setup.BastionEnabled {
-		var err error
-		networkInterface, err = setup.RemoveBastionTenantAssociation(ctx, config, env.ClusterID())
-		if err != nil {
-			t.Fatalf("expected %#v got %#v", nil, err)
-		}
-	}
 
 	{
 		wait := true
@@ -38,13 +27,6 @@ func Test_Recreate_Cluster(t *testing.T) {
 	{
 		wait := true
 		err := setup.EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
-		if err != nil {
-			t.Fatalf("expected %#v got %#v", nil, err)
-		}
-	}
-
-	if setup.BastionEnabled {
-		err := setup.RestoreBastionTenantAssociation(ctx, config, networkInterface)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
