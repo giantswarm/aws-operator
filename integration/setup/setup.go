@@ -24,8 +24,7 @@ import (
 )
 
 const (
-	provider       = "aws"
-	bastionEnabled = true
+	BastionEnabled = true
 )
 
 func Setup(m *testing.M, config Config) {
@@ -43,7 +42,7 @@ func Setup(m *testing.M, config Config) {
 	{
 		g, ctx := errgroup.WithContext(ctx)
 
-		if bastionEnabled {
+		if BastionEnabled {
 			g.Go(func() error {
 				o := func() error {
 					err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
@@ -91,7 +90,7 @@ func Setup(m *testing.M, config Config) {
 	if !env.KeepResources() {
 		g, ctx := errgroup.WithContext(ctx)
 
-		if bastionEnabled {
+		if BastionEnabled {
 			g.Go(func() error {
 				o := func() error {
 					err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)

@@ -450,3 +450,86 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 
 	return encoded, nil
 }
+
+func GetBastionNetworkInterface(ctx context.Context, config Config, clusterID string) (*ec2.InstanceNetworkInterface, error) {
+	config.Logger.LogCtx(ctx, "level", "debug", "message", "finding bastion instance")
+
+	i := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("tag:Name"),
+				Values: []*string{aws.String(clusterID + "-bastion")},
+			},
+			{
+				Name:   aws.String("tag:giantswarm.io/cluster"),
+				Values: []*string{aws.String(clusterID)},
+			},
+			{
+				Name:   aws.String("tag:giantswarm.io/instance"),
+				Values: []*string{aws.String("e2e-bastion")},
+			},
+		},
+	}
+
+	o, err := config.AWSClient.EC2.DescribeInstancesWithContext(ctx, i)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	if len(o.Reservations) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected one reservation, got %d", len(o.Reservations))
+	}
+	reservation := o.Reservations[0]
+	if len(reservation.Instances) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected one instance, got %d", len(o.Reservations))
+	}
+	instance := reservation.Instances[0]
+	if len(instance.NetworkInterfaces) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected one network interface, got %d", len(o.Reservations))
+	}
+
+	return instance.NetworkInterfaces[0], nil
+}
+
+func RemoveBastionTenantAssociation(ctx context.Context, config Config, clusterID string) (*ec2.InstanceNetworkInterface, error) {
+	networkInterface, err := GetBastionNetworkInterface(ctx, config, clusterID)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var bastionSecurityGroupID *string
+	for _, group := range networkInterface.Groups {
+		if *group.GroupName == clusterID+"-bastion" {
+			bastionSecurityGroupID = group.GroupId
+		}
+	}
+	if bastionSecurityGroupID == nil {
+		return nil, microerror.Maskf(executionFailedError, "didn't find bastion security group for interface %#q", networkInterface.NetworkInterfaceId)
+	}
+
+	_, err = config.AWSClient.EC2.ModifyNetworkInterfaceAttributeWithContext(ctx, &ec2.ModifyNetworkInterfaceAttributeInput{
+		Groups:             []*string{bastionSecurityGroupID},
+		NetworkInterfaceId: networkInterface.NetworkInterfaceId,
+	})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return networkInterface, nil
+}
+
+func RestoreBastionTenantAssociation(ctx context.Context, config Config, networkInterface *ec2.InstanceNetworkInterface) error {
+	var groups []*string
+	for _, group := range networkInterface.Groups {
+		groups = append(groups, group.GroupId)
+	}
+
+	_, err := config.AWSClient.EC2.ModifyNetworkInterfaceAttributeWithContext(ctx, &ec2.ModifyNetworkInterfaceAttributeInput{
+		Groups:             groups,
+		NetworkInterfaceId: networkInterface.NetworkInterfaceId,
+	})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
