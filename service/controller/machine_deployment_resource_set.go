@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -93,6 +94,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 
 	var tcnpCloudConfig *cloudconfig.TCNP
 	{
+		config.Logger.Log("level", "vol-debug", "source", "machine_deployment_resource_set.go", "message", fmt.Sprintf("pod infra image %#q", config.PodInfraContainerImage))
 		c := cloudconfig.TCNPConfig{
 			Config: cloudconfig.Config{
 				Encrypter: encrypterObject,

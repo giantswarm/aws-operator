@@ -45,6 +45,8 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 
 	var kubeletExtraArgs []string
 	{
+		t.config.Logger.Log("level", "vol-debug", "source", "tcnp.go", "message", fmt.Sprintf("pod infra image %#q", t.config.PodInfraContainerImage))
+
 		kubeletExtraArgs = t.config.KubeletExtraArgs
 		if t.config.PodInfraContainerImage != "" {
 			kubeletExtraArgs = append(kubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", t.config.PodInfraContainerImage))

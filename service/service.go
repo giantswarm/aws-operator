@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"sync"
 
@@ -185,7 +186,7 @@ func New(config Config) (*Service, error) {
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
-
+		config.Logger.Log("level", "vol-debug", "source", "service.go", "message", fmt.Sprintf("pod infra image %#q", config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage)))
 		clusterapiClusterController, err = controller.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -69,6 +70,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 
 	var tccpCloudConfig *cloudconfig.TCCP
 	{
+		config.Logger.Log("level", "vol-debug", "source", "cluster_resource_set.go", "message", fmt.Sprintf("pod infra image %#q", config.PodInfraContainerImage))
+
 		c := cloudconfig.TCCPConfig{
 			Config: cloudconfig.Config{
 				Encrypter: encrypterObject,
