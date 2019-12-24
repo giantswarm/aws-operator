@@ -27,7 +27,7 @@ type TCCP struct {
 }
 
 func NewTCCP(config TCCPConfig) (*TCCP, error) {
-	err := config.Config.Default().Validate()
+	err := config.Config.Validate()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -68,6 +68,14 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
 	}
 
+	var kubeletExtraArgs []string
+	{
+		kubeletExtraArgs = t.config.KubeletExtraArgs
+		if t.config.PodInfraContainerImage != "" {
+			kubeletExtraArgs = append(kubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", t.config.PodInfraContainerImage))
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -90,7 +98,7 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 			randomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = t.config.KubeletExtraArgs
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
