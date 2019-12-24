@@ -244,13 +244,6 @@ func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
 }
 
-func baseRoleARN(getter LabelsGetter, region string, accountID string, kind string) string {
-	clusterID := ClusterID(getter)
-	partition := RegionARN(region)
-
-	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
-}
-
 // imageIDs returns our Container Linux AMIs for each active AWS region. Note
 // that AMIs should always be for HVM virtualisation, not PV. Current Release is
 // CoreOS Container Linux stable 2135.4.0. AMI IDs are copied from the following
