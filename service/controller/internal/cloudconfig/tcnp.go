@@ -43,14 +43,16 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		return nil, microerror.Mask(err)
 	}
 
+	t.config.Logger.LogCtx(ctx, "level", "vol-debug", "source", "tccp.go", "message", fmt.Sprintf("pod infra image %#q", t.config.PodInfraContainerImage))
+	fmt.Printf("\n\n vol-debug \n\n pod infra image %#q \n\n", t.config.PodInfraContainerImage)
+
 	var kubeletExtraArgs []string
 	{
-		t.config.Logger.Log("level", "vol-debug", "source", "tcnp.go", "message", fmt.Sprintf("pod infra image %#q", t.config.PodInfraContainerImage))
-
-		kubeletExtraArgs = t.config.KubeletExtraArgs
 		if t.config.PodInfraContainerImage != "" {
 			kubeletExtraArgs = append(kubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", t.config.PodInfraContainerImage))
 		}
+
+		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
 	var params k8scloudconfig.Params
