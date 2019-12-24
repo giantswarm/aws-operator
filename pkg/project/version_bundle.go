@@ -8,8 +8,8 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "todo",
-				Description: "TODO",
+				Component:   "cloudconfig",
+				Description: "Fix pause container image repository for China.",
 				Kind:        versionbundle.KindFixed,
 			},
 		},
