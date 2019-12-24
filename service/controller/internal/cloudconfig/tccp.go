@@ -68,9 +68,6 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
 	}
 
-	t.config.Logger.LogCtx(ctx, "level", "vol-debug", "source", "tccp.go", "message", fmt.Sprintf("pod infra image %#q", t.config.PodInfraContainerImage))
-	fmt.Printf("\n\n vol-debug \n\n pod infra image %#q \n\n", t.config.PodInfraContainerImage)
-
 	var kubeletExtraArgs []string
 	{
 		if t.config.PodInfraContainerImage != "" {
