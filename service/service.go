@@ -185,7 +185,6 @@ func New(config Config) (*Service, error) {
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
-
 		clusterapiClusterController, err = controller.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)

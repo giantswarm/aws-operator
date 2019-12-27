@@ -8,6 +8,10 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "cloudconfig",
+				Description: "Fix pause container image repository for China.",
+			},
+			{
 				Component:   "vault",
 				Description: "Fix vault encrypter role with new nodepools iam role names.",
 				Kind:        versionbundle.KindFixed,
