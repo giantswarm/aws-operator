@@ -8,8 +8,8 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "todo",
-				Description: "TODO",
+				Component:   "vault",
+				Description: "Fix vault encrypter role with new nodepools iam role names.",
 				Kind:        versionbundle.KindFixed,
 			},
 		},
