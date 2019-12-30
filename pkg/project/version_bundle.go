@@ -10,6 +10,7 @@ func NewVersionBundle() versionbundle.Bundle {
 			{
 				Component:   "cloudconfig",
 				Description: "Fix pause container image repository for China.",
+				Kind:        versionbundle.KindFixed,
 			},
 			{
 				Component:   "vault",
