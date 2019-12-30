@@ -84,7 +84,7 @@ const TemplateMainIAMPolicies = `
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
-{{- if $v.Route53Enabled -}}
+{{- if $v.Route53Enabled}}
   Route53ManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
