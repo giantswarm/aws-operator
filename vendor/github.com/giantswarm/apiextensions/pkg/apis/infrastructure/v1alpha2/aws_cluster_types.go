@@ -53,51 +53,6 @@ spec:
                   type: object
               type: object
           type: object
-        status:
-          properties:
-            cluster:
-              properties:
-                conditions:
-                  items:
-                    properties:
-                      lastTransitionTime:
-                        format: date-time
-                        type: string
-                      type:
-                        enum:
-                          - Creating
-                          - Created
-                          - Updating
-                          - Updated
-                          - Deleting
-                          - Deleted
-                    type: object
-                  type: array
-                id:
-                  pattern: "^[a-z0-9]{5}$"
-                  type: string
-                versions:
-                  items:
-                    properties:
-                      lastTransitionTime:
-                        format: date-time
-                        type: string
-                      version:
-                        pattern: ^\d+\.\d+\.\d+$
-                        type: string
-                    type: object
-                  type: array
-              type: object
-            provider:
-              properties:
-                network:
-                  properties:
-                    cidr:
-                      pattern: ^\d+\.\d+\.\d+.\d+\/.\d+$
-                      type: string
-                  type: object
-              type: object
-          type: object
   version: v1alpha2
 `
 
@@ -219,8 +174,8 @@ type AWSClusterSpecProviderMaster struct {
 }
 
 type AWSClusterStatus struct {
-	Cluster  CommonClusterStatus      `json:"cluster" yaml:"cluster"`
-	Provider AWSClusterStatusProvider `json:"provider" yaml:"provider"`
+	Cluster  CommonClusterStatus      `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Provider AWSClusterStatusProvider `json:"provider,omitempty" yaml:"provider,omitempty"`
 }
 
 type AWSClusterStatusProvider struct {

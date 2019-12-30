@@ -16,6 +16,9 @@ var (
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/nodes.* (unexpected )?EOF`),
 		// A regular expression representing EOF errors for the tenant API domain.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/namespaces/*/.* (unexpected )?EOF`),
+		// A regular expression representing EOF errors for the tenant API domain.
+		// These may occur when initializing controller runtime clients.
+		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api\?timeout.*: EOF`),
 		// A regular expression representing TLS errors related to establishing
 		// connections to tenant clusters while the tenant API is not fully up.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/nodes.* net/http: (TLS handshake timeout|request canceled).*?`),

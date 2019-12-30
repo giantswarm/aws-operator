@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/giantswarm/backoff"
@@ -20,6 +21,14 @@ func (c *Client) PullChartTarball(ctx context.Context, tarballURL string) (strin
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
+	u, err := url.Parse(tarballURL)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	// Set host header to prevent 404 responses from GitHub Pages.
+	req.Host = u.Host
 
 	chartTarballPath, err := c.doFile(ctx, req)
 	if err != nil {
@@ -49,11 +58,12 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			// Github pages 404 produces full HTML page which
-			// obscures the logs.
+
+			// Github Pages 404 produces full HTML page which obscures the logs.
 			if resp.StatusCode == http.StatusNotFound {
-				return backoff.Permanent(microerror.Maskf(pullChartFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String())))
+				return backoff.Permanent(microerror.Maskf(pullChartNotFoundError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String())))
 			}
+
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q with body %s", resp.StatusCode, req.URL.String(), buf.String()))
 		}
 

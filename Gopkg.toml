@@ -166,7 +166,7 @@ required = [
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "v1.16.3"
+  version = "=v1.16.3"
 
 [[override]]
   name = "k8s.io/component-base"

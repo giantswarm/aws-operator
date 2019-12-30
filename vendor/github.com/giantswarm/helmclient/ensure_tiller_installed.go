@@ -12,6 +12,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	schedulingv1 "k8s.io/api/scheduling/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -336,6 +337,36 @@ func (c *Client) EnsureTillerInstalledWithValues(ctx context.Context, values []s
 			return microerror.Mask(err)
 		} else {
 			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created networkpolicy %#q", name))
+		}
+	}
+
+	// Create the priority class for the tiller deployment.
+	{
+		priorityClassName := "giantswarm-critical"
+
+		c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating priorityclass %#q", priorityClassName))
+
+		pc := &schedulingv1.PriorityClass{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "scheduling.k8s.io/v1",
+				Kind:       "PriorityClass",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: priorityClassName,
+			},
+			Value:         1000000000,
+			GlobalDefault: false,
+			Description:   "This priority class is used by giantswarm kubernetes components.",
+		}
+
+		_, err := c.k8sClient.SchedulingV1().PriorityClasses().Create(pc)
+		if errors.IsAlreadyExists(err) {
+			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("priorityclass %#q already exists", priorityClassName))
+			// fall through
+		} else if err != nil {
+			return microerror.Mask(err)
+		} else {
+			c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created priorityclass %#q", priorityClassName))
 		}
 	}
 
