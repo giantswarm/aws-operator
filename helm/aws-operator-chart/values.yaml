@@ -1,4 +1,9 @@
 namespace: giantswarm
 
+Installation:
+  V1:
+    Registry:
+      Domain: quay.io
+
 userID: 1000
 groupID: 1000
