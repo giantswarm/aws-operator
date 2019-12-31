@@ -8,10 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -117,7 +117,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, cr cmav1alpha1.Cluster, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for guest cluster nodes %#q", instanceID))
 
 	n := cr.GetNamespace()

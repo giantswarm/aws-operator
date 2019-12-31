@@ -3,10 +3,10 @@
 package tccpazs
 
 import (
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 )
 
 const (
@@ -14,20 +14,20 @@ const (
 )
 
 type Config struct {
-	CMAClient     clientset.Interface
+	G8sClient     versioned.Interface
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
-	cmaClient     clientset.Interface
+	g8sClient     versioned.Interface
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -37,7 +37,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		cmaClient:     config.CMAClient,
+		g8sClient:     config.G8sClient,
 		logger:        config.Logger,
 		toClusterFunc: config.ToClusterFunc,
 	}

@@ -44,7 +44,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(l.MatchLabels).String(),
 		}
 
-		list, err := r.cmaClient.ClusterV1alpha1().MachineDeployments(cr.Namespace).List(o)
+		list, err := r.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(o)
 		if err != nil {
 			return microerror.Mask(err)
 		}

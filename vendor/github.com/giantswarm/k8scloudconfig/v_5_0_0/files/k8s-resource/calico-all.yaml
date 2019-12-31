@@ -636,20 +636,22 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-kube-controllers
 rules:
-# Nodes are watched to monitor for deletions.
 - apiGroups: [""]
   resources:
     - nodes
+    - pods
+    - namespaces
+    - serviceaccounts
   verbs:
     - watch
     - list
     - get
-# Pods are queried to check for existence.
-- apiGroups: [""]
+- apiGroups: ["networking.k8s.io"]
   resources:
-    - pods
+    - networkpolicies
   verbs:
-    - get
+    - watch
+    - list
 # IPAM resources are manipulated when nodes are deleted.
 - apiGroups: ["crd.projectcalico.org"]
   resources:

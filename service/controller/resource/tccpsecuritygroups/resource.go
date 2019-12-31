@@ -6,9 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -42,7 +42,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addInfoToCtx(ctx context.Context, cr v1alpha1.MachineDeployment) error {
+func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

@@ -2,6 +2,12 @@ package chartvalues
 
 var apiExtensionsAzureConfigE2ETemplate = `
 azure:
+  {{ $length := len .Azure.AvailabilityZones }} {{- if gt $length 0 -}}
+  availabilityZones:
+  {{ range $index, $element := .Azure.AvailabilityZones -}}
+  - {{ . }}
+  {{ end -}}
+  {{ end -}}
   calicoSubnetCIDR: {{ .Azure.CalicoSubnetCIDR }}
   cidr: {{ .Azure.CIDR }}
   location: {{ .Azure.Location }}

@@ -193,10 +193,6 @@ func validateReleaseAuthorities(indexReleases []IndexRelease) error {
 				return microerror.Maskf(invalidReleaseError, "release %s contains authority without Name", release.Version)
 			}
 
-			if authority.Endpoint == nil {
-				return microerror.Maskf(invalidReleaseError, "release %s authority %s doesn't have defined endpoint", release.Version, authority.Name)
-			}
-
 			if authority.Version == "" {
 				return microerror.Maskf(invalidReleaseError, "release %s authority %s doesn't have defined version", release.Version, authority.Name)
 			}

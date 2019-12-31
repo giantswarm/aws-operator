@@ -10,12 +10,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ghodss/yaml"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/fake"
 
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 )
@@ -33,16 +36,76 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 //
 func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 	testCases := []struct {
-		name         string
-		cr           v1alpha1.Cluster
-		ctx          context.Context
-		errorMatcher func(error) bool
+		name             string
+		cr               infrastructurev1alpha2.AWSCluster
+		ctx              context.Context
+		encrypterBackend string
+		route53Enabled   bool
+		errorMatcher     func(error) bool
 	}{
 		{
-			name:         "case 0: basic test",
-			cr:           unittest.DefaultCluster(),
-			ctx:          unittest.DefaultContext(),
-			errorMatcher: nil,
+			name:             "case 0: basic test without encryption key when encrypter backend kms, route53 enabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              unittest.DefaultContext(),
+			encrypterBackend: encrypter.KMSBackend,
+			errorMatcher:     nil,
+			route53Enabled:   true,
+		},
+		{
+			name:             "case 1: basic test with encryption key when encrypter backend kms, route53 enabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
+			encrypterBackend: encrypter.KMSBackend,
+			errorMatcher:     nil,
+			route53Enabled:   true,
+		},
+		{
+			name:             "case 2: basic test without encryption key when encrypter backend vault, route53 enabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              unittest.DefaultContext(),
+			encrypterBackend: encrypter.VaultBackend,
+			errorMatcher:     nil,
+			route53Enabled:   true,
+		},
+		{
+			name:             "case 3: basic test with encryption key when encrypter backend vault, route53 enabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
+			encrypterBackend: encrypter.VaultBackend,
+			errorMatcher:     nil,
+			route53Enabled:   true,
+		},
+		{
+			name:             "case 4: basic test without encryption key when encrypter backend kms, route53 disabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              unittest.DefaultContext(),
+			encrypterBackend: encrypter.KMSBackend,
+			errorMatcher:     nil,
+			route53Enabled:   false,
+		},
+		{
+			name:             "case 5: basic test with encryption key when encrypter backend kms, route53 disabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
+			encrypterBackend: encrypter.KMSBackend,
+			errorMatcher:     nil,
+			route53Enabled:   false,
+		},
+		{
+			name:             "case 6: basic test without encryption key when encrypter backend vault, route53 disabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              unittest.DefaultContext(),
+			encrypterBackend: encrypter.VaultBackend,
+			errorMatcher:     nil,
+			route53Enabled:   false,
+		},
+		{
+			name:             "case 7: basic test with encryption key when encrypter backend vault, route53 disabled",
+			cr:               unittest.DefaultCluster(),
+			ctx:              updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
+			encrypterBackend: encrypter.VaultBackend,
+			errorMatcher:     nil,
+			route53Enabled:   false,
 		},
 	}
 
@@ -60,30 +123,36 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		}
 	}
 
-	var r *Resource
-	{
-
-		c := Config{
-			CMAClient: fake.NewSimpleClientset(),
-			Detection: d,
-			Logger:    microloggertest.New(),
-
-			EncrypterBackend: "kms",
-		}
-
-		r, err = New(c)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var r *Resource
+			{
+
+				c := Config{
+					G8sClient: fake.NewSimpleClientset(),
+					Detection: d,
+					Logger:    microloggertest.New(),
+
+					EncrypterBackend: tc.encrypterBackend,
+					Route53Enabled:   tc.route53Enabled,
+				}
+
+				r, err = New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			params, err := r.newTemplateParams(tc.ctx, tc.cr, time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
 			templateBody, err := template.Render(params)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = yaml.YAMLToJSONStrict([]byte(templateBody))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -106,4 +175,14 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			}
 		})
 	}
+}
+
+func updateEncryptionKey(ctx context.Context, encryptionKey string) context.Context {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	cc.Status.TenantCluster.Encryption.Key = encryptionKey
+	return ctx
 }

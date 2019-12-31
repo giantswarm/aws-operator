@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
 	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
@@ -16,7 +15,6 @@ import (
 
 type machineDeploymentResourceSetConfig struct {
 	CertsSearcher          certs.Interface
-	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	K8sClient              kubernetes.Interface

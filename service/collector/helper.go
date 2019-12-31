@@ -3,12 +3,11 @@ package collector
 import (
 	"fmt"
 
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/internal/accountid"
@@ -16,7 +15,7 @@ import (
 )
 
 type helperConfig struct {
-	CMAClient clientset.Interface
+	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
@@ -24,7 +23,7 @@ type helperConfig struct {
 }
 
 type helper struct {
-	cmaClient clientset.Interface
+	g8sClient versioned.Interface
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
@@ -32,8 +31,8 @@ type helper struct {
 }
 
 func newHelper(config helperConfig) (*helper, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
@@ -48,7 +47,7 @@ func newHelper(config helperConfig) (*helper, error) {
 	}
 
 	h := &helper{
-		cmaClient: config.CMAClient,
+		g8sClient: config.G8sClient,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
@@ -62,7 +61,7 @@ func newHelper(config helperConfig) (*helper, error) {
 func (h *helper) GetARNs() ([]string, error) {
 	var arns []string
 
-	clusterCRList, err := h.cmaClient.ClusterV1alpha1().Clusters(corev1.NamespaceAll).List(v1.ListOptions{})
+	clusterCRList, err := h.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

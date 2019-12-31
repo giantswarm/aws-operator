@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
+	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 
@@ -18,10 +19,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
@@ -107,7 +110,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var clusterChecker *ipam.ClusterChecker
 	{
 		c := ipam.ClusterCheckerConfig{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -120,7 +123,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			CMAClient: config.CMAClient,
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
@@ -136,7 +138,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var clusterPersister *ipam.ClusterPersister
 	{
 		c := ipam.ClusterPersisterConfig{
-			CMAClient: config.CMAClient,
+			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
@@ -153,6 +155,19 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 
 		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var apiEndpointResource resource.Interface
+	{
+		c := apiendpoint.Config{
+			CtrlClient: config.CtrlClient,
+			Logger:     config.Logger,
+		}
+
+		apiEndpointResource, err = apiendpoint.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -177,7 +192,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			CMAClient:     config.CMAClient,
+			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
 		}
@@ -267,7 +282,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			CloudConfig:        tccpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCCP,
 			Logger:             config.Logger,
-			CMAClient:          config.CMAClient,
+			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCCP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
@@ -307,10 +322,25 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var cleanupMachineDeploymentsResource resource.Interface
+	{
+		c := cleanupmachinedeployments.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		cleanupMachineDeploymentsResource, err = cleanupmachinedeployments.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cleanupRecordSets resource.Interface
 	{
 		c := cleanuprecordsets.Config{
 			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
 		}
 
 		cleanupRecordSets, err = cleanuprecordsets.New(c)
@@ -347,7 +377,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
-			CMAClient:            config.CMAClient,
+			G8sClient:            config.G8sClient,
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
@@ -557,6 +587,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
+		apiEndpointResource,
 		ipamResource,
 		bridgeZoneResource,
 		tccpEncryptionResource,
@@ -574,6 +605,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		// on delete events.
 		cleanupEBSVolumesResource,
 		cleanupLoadBalancersResource,
+		cleanupMachineDeploymentsResource,
 		cleanupRecordSets,
 		cleanupSecurityGroups,
 	}
@@ -633,13 +665,13 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	return resourceSet, nil
 }
 
-func toCRUDResource(logger micrologger.Logger, ops controller.CRUDResourceOps) (*controller.CRUDResource, error) {
-	c := controller.CRUDResourceConfig{
+func toCRUDResource(logger micrologger.Logger, ops crud.Interface) (*crud.Resource, error) {
+	c := crud.ResourceConfig{
+		CRUD:   ops,
 		Logger: logger,
-		Ops:    ops,
 	}
 
-	r, err := controller.NewCRUDResource(c)
+	r, err := crud.NewResource(c)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

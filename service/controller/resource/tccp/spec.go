@@ -2,7 +2,7 @@ package tccp
 
 import (
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 )
 
 const (
@@ -95,5 +95,5 @@ type securityConfig struct {
 	APIWhitelist                    APIWhitelist
 	ControlPlaneNATGatewayAddresses []*ec2.Address
 	ControlPlaneVPCCidr             string
-	CustomObject                    v1alpha1.Cluster
+	CustomObject                    infrastructurev1alpha2.AWSCluster
 }

@@ -22,6 +22,14 @@ func NewStableChartInfo(name string) ChartInfo {
 	}
 }
 
+func NewChannelChartInfo(name string, channel string) ChartInfo {
+	return ChartInfo{
+		isChannel: true,
+		name:      name,
+		version:   channel,
+	}
+}
+
 // Version is an **alias** for ChartInfo. See https://golang.org/doc/go1.9#language.
 type Version = ChartInfo
 

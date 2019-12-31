@@ -2,11 +2,11 @@ package s3object
 
 import (
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -21,7 +21,7 @@ const (
 type Config struct {
 	CertsSearcher      certs.Interface
 	CloudConfig        cloudconfig.Interface
-	CMAClient          clientset.Interface
+	G8sClient          versioned.Interface
 	LabelsFunc         func(key.LabelsGetter) string
 	Logger             micrologger.Logger
 	PathFunc           func(key.LabelsGetter) string
@@ -41,7 +41,7 @@ type Config struct {
 type Resource struct {
 	certsSearcher      certs.Interface
 	cloudConfig        cloudconfig.Interface
-	cmaClient          clientset.Interface
+	g8sClient          versioned.Interface
 	labelsFunc         func(key.LabelsGetter) string
 	logger             micrologger.Logger
 	pathFunc           func(key.LabelsGetter) string
@@ -56,8 +56,8 @@ func New(config Config) (*Resource, error) {
 	if config.CloudConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
 	}
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.LabelsFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.LabelsFunc must not be empty", config)
@@ -75,7 +75,7 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		certsSearcher:      config.CertsSearcher,
 		cloudConfig:        config.CloudConfig,
-		cmaClient:          config.CMAClient,
+		g8sClient:          config.G8sClient,
 		labelsFunc:         config.LabelsFunc,
 		logger:             config.Logger,
 		pathFunc:           config.PathFunc,

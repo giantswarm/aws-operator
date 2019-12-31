@@ -2,11 +2,7 @@ apiVersion: kubeproxy.config.k8s.io/v1alpha1
 clientConnection:
   kubeconfig: /etc/kubernetes/config/proxy-kubeconfig.yaml
 kind: KubeProxyConfiguration
-{{- if eq .Cluster.Kubernetes.CloudProvider "azure" }}
 mode: iptables
-{{- else }}
-mode: ipvs
-{{- end }}
 resourceContainer: /kube-proxy
 clusterCIDR: {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}
 metricsBindAddress: 0.0.0.0:10249

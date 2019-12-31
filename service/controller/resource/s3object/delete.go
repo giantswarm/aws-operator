@@ -3,7 +3,7 @@ package s3object
 import (
 	"context"
 
-	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource/crud"
 )
 
 // ApplyDeleteChange is a noop as deletion for now is covered with the deletion
@@ -22,6 +22,6 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 }
 
 // NewDeletePatch is a noop like ApplyDeleteChange. See the godoc there.
-func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
+func (r *Resource) NewDeletePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*crud.Patch, error) {
 	return nil, nil
 }
