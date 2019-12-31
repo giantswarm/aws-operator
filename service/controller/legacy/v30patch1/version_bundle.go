@@ -8,9 +8,21 @@ func VersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO.",
+				Component:   "kubernetes",
+				Description: "Update from v1.14.6 to v1.14.10.",
 				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2088",
+					"https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#changelog-since-v11410",
+				},
+			},
+			{
+				Component:   "containerlinux",
+				Description: "Increase fs.inotify.max_user_instances to 8192.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/k8scloudconfig/pull/617",
+				},
 			},
 		},
 		Components: []versionbundle.Component{
@@ -32,7 +44,7 @@ func VersionBundle() versionbundle.Bundle {
 			},
 			{
 				Name:    "kubernetes",
-				Version: "1.14.6",
+				Version: "1.14.10",
 			},
 		},
 		Name:    "aws-operator",

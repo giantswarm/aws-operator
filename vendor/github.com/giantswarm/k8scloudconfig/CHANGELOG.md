@@ -38,11 +38,11 @@ version directory, and  then changes are introduced.
 - Use `/bin/calico-node -felix-live` for `calico-node` liveness probe instead of `httpGet`.
 - Generally minimize differences between [Calico v3.9 yaml](https://docs.projectcalico.org/v3.9/manifests/calico.yaml) and `calico-all.yaml`.
 
-## [v4.8.1] - 2019-12-04
+## [v4.8.1] - 2019-12-31
 
 ### Changed
 
-- Update kubernetes to 1.14.9, includes fixes for CVE-2019-11253.
+- Update Kubernetes to 1.14.10, includes fixes for CVE-2019-11253 and some Azure fixes.
 - Increase `fs.inotify.max_user_instances` to 8192.
 
 ## [v4.8.0] 
