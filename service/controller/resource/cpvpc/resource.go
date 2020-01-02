@@ -111,7 +111,7 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 					},
 				},
 				{
-					Name: aws.String(key.TagClusterType),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagClusterType)),
 					Values: []*string{
 						aws.String(key.TagClusterTypeControlPlane),
 					},
