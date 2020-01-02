@@ -136,13 +136,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if newObj.Status.Cluster.Scaling.DesiredCapacity != desiredCapacity {
+			r.logger.Log("level", "debug", "message", fmt.Sprintf("DEBUG updating status with desired capacity %d for %#v", desiredCapacity, newObj))
+
 			newObj.Status.Cluster.Scaling.DesiredCapacity = desiredCapacity
-			_, err = r.g8sClient.ProviderV1alpha1().AWSConfigs(newObj.GetNamespace()).UpdateStatus(newObj)
+			updatedObj, err := r.g8sClient.ProviderV1alpha1().AWSConfigs(newObj.GetNamespace()).UpdateStatus(newObj)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "updated status with desired capacity")
+			r.logger.Log("level", "debug", "message", fmt.Sprintf("DEBUG updated %#v", updatedObj))
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
