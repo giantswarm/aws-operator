@@ -33,6 +33,7 @@ const (
 const (
 	TagAvailabilityZone  = "giantswarm.io/availability-zone"
 	TagCluster           = "giantswarm.io/cluster"
+	TagClusterType       = "giantswarm.io/cluster-type"
 	TagInstallation      = "giantswarm.io/installation"
 	TagMachineDeployment = "giantswarm.io/machine-deployment"
 	TagOrganization      = "giantswarm.io/organization"

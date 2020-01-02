@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -107,6 +108,12 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 					Name: aws.String("tag:giantswarm.io/installation"),
 					Values: []*string{
 						aws.String(installationName),
+					},
+				},
+				{
+					Name: aws.String(key.TagClusterType),
+					Values: []*string{
+						aws.String("control-plane"),
 					},
 				},
 			},
