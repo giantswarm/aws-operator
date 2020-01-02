@@ -3,48 +3,48 @@ package key
 import (
 	"strconv"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
 
-func MachineDeploymentAvailabilityZones(cr v1alpha1.MachineDeployment) []string {
-	return machineDeploymentProviderSpec(cr).Provider.AvailabilityZones
+func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.AWSMachineDeployment) []string {
+	return cr.Spec.Provider.AvailabilityZones
 }
 
-func MachineDeploymentDockerVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
-	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.DockerVolumeSizeGB)
+func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return strconv.Itoa(cr.Spec.NodePool.Machine.DockerVolumeSizeGB)
 }
 
-func MachineDeploymentInstanceType(cr v1alpha1.MachineDeployment) string {
-	return machineDeploymentProviderSpec(cr).Provider.Worker.InstanceType
+func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return cr.Spec.Provider.Worker.InstanceType
 }
 
-func MachineDeploymentKubeletVolumeSizeGB(cr v1alpha1.MachineDeployment) string {
-	return strconv.Itoa(machineDeploymentProviderSpec(cr).NodePool.Machine.KubeletVolumeSizeGB)
+func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return strconv.Itoa(cr.Spec.NodePool.Machine.KubeletVolumeSizeGB)
 }
 
-func MachineDeploymentScalingMax(cr v1alpha1.MachineDeployment) int {
-	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Max
+func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+	return cr.Spec.NodePool.Scaling.Max
 }
 
-func MachineDeploymentScalingMin(cr v1alpha1.MachineDeployment) int {
-	return machineDeploymentProviderSpec(cr).NodePool.Scaling.Min
+func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+	return cr.Spec.NodePool.Scaling.Min
 }
 
-func MachineDeploymentSubnet(cr v1alpha1.MachineDeployment) string {
+func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
-func ToMachineDeployment(v interface{}) (v1alpha1.MachineDeployment, error) {
+func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {
 	if v == nil {
-		return v1alpha1.MachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.MachineDeployment{}, v)
+		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
 	}
 
-	p, ok := v.(*v1alpha1.MachineDeployment)
+	p, ok := v.(*infrastructurev1alpha2.AWSMachineDeployment)
 	if !ok {
-		return v1alpha1.MachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.MachineDeployment{}, v)
+		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
 	}
 
 	c := p.DeepCopy()

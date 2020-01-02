@@ -154,11 +154,17 @@ func RegionARN(region string) string {
 }
 
 func RoleARNMaster(getter LabelsGetter, region string, accountID string) string {
-	return baseRoleARN(getter, region, accountID, "master")
+	clusterID := ClusterID(getter)
+	partition := RegionARN(region)
+
+	return fmt.Sprintf("arn:%s:iam::%s:role/%s-master-%s", partition, accountID, clusterID, EC2RoleK8s)
 }
 
 func RoleARNWorker(getter LabelsGetter, region string, accountID string) string {
-	return baseRoleARN(getter, region, accountID, "worker")
+	clusterID := ClusterID(getter)
+	partition := RegionARN(region)
+
+	return fmt.Sprintf("arn:%s:iam::%s:role/gs-cluster-%s-role-*", partition, accountID, clusterID)
 }
 
 // S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded for
@@ -236,13 +242,6 @@ func StackNameTCNPF(getter LabelsGetter) string {
 
 func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
-}
-
-func baseRoleARN(getter LabelsGetter, region string, accountID string, kind string) string {
-	clusterID := ClusterID(getter)
-	partition := RegionARN(region)
-
-	return fmt.Sprintf("arn:%s:iam::%s:role/%s-%s-%s", partition, accountID, clusterID, kind, EC2RoleK8s)
 }
 
 // imageIDs returns our Container Linux AMIs for each active AWS region. Note

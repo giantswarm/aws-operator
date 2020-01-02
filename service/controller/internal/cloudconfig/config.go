@@ -1,8 +1,6 @@
 package cloudconfig
 
 import (
-	"fmt"
-
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -27,14 +25,6 @@ type Config struct {
 	RegistryDomain            string
 	SSHUserList               string
 	SSOPublicKey              string
-}
-
-func (c Config) Default() Config {
-	if c.PodInfraContainerImage != "" {
-		c.KubeletExtraArgs = append(c.KubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", c.PodInfraContainerImage))
-	}
-
-	return c
 }
 
 func (c Config) Validate() error {

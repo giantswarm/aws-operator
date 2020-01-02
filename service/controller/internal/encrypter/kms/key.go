@@ -3,11 +3,11 @@ package kms
 import (
 	"fmt"
 
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-func keyAlias(cr v1alpha1.Cluster) string {
+func keyAlias(cr infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("alias/%s", key.ClusterID(&cr))
 }

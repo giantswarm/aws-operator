@@ -29,7 +29,6 @@ type APIExtensionsAWSConfigE2EConfigAWS struct {
 	Region           string
 	RouteTable0      string
 	RouteTable1      string
-	VPCPeerID        string
 }
 
 // NewAPIExtensionsAWSConfigE2E renders values required by apiextensions-aws-config-e2e-chart.
@@ -66,9 +65,6 @@ func NewAPIExtensionsAWSConfigE2E(config APIExtensionsAWSConfigE2EConfig) (strin
 	}
 	if config.AWS.RouteTable1 == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.AWS.RouteTable1 must not be empty", config)
-	}
-	if config.AWS.VPCPeerID == "" {
-		return "", microerror.Maskf(invalidConfigError, "%T.AWS.VPCPeerID must not be empty", config)
 	}
 
 	values, err := render.Render(apiExtensionsAWSConfigE2ETemplate, config)

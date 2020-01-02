@@ -7,10 +7,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -184,7 +184,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 // the Etcd volume for the master instance will be returned. If persistentVolume
 // is set then any Persistent Volumes associated with the cluster will be
 // returned.
-func (e *EBS) ListVolumes(cr v1alpha1.Cluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
+func (e *EBS) ListVolumes(cr infrastructurev1alpha2.AWSCluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
 	var volumes []Volume
 
 	// We filter to only select clusters with the cluster cloud provider tag.

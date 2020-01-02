@@ -3,10 +3,10 @@ package awsclient
 import (
 	"context"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -20,7 +20,7 @@ const (
 type Config struct {
 	K8sClient     kubernetes.Interface
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 
 	CPAWSConfig aws.Config
 }
@@ -28,7 +28,7 @@ type Config struct {
 type Resource struct {
 	k8sClient     kubernetes.Interface
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (v1alpha1.Cluster, error)
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 
 	cpAWSConfig aws.Config
 }
@@ -59,7 +59,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addAWSClientsToContext(ctx context.Context, cr v1alpha1.Cluster) error {
+func (r *Resource) addAWSClientsToContext(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

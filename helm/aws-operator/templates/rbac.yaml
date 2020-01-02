@@ -4,9 +4,12 @@ metadata:
   name: {{ tpl .Values.resource.default.name  . }}
 rules:
   - apiGroups:
-      - cluster.giantswarm.io
+      - infrastructure.giantswarm.io
     resources:
-      - awses
+      - awsclusters
+      - awsclusters/status
+      - awsmachinedeployments
+      - awsmachinedeployments/status
     verbs:
       - "*"
   - apiGroups:
@@ -20,6 +23,15 @@ rules:
       - patch
       - update
       - watch
+  - apiGroups:
+      - cluster.x-k8s.io
+    resources:
+      - clusters
+      - clusters/status
+      - machinedeployments
+      - machinedeployments/status
+    verbs:
+      - "*"
   - apiGroups:
       - cluster.k8s.io
     resources:
