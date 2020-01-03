@@ -144,15 +144,13 @@ func ensureDefaultPatches(clusterStatus providerv1alpha1.StatusCluster, patches 
 	nodesEmpty := clusterStatus.Nodes == nil
 	versionsEmpty := clusterStatus.Versions == nil
 
-	/*
-		if conditionsEmpty && nodesEmpty && versionsEmpty {
-			patches = append(patches, Patch{
-				Op:    "add",
-				Path:  "/status",
-				Value: Status{},
-			})
-		}
-	*/
+	if conditionsEmpty && nodesEmpty && versionsEmpty {
+		patches = append(patches, Patch{
+			Op:    "add",
+			Path:  "/status",
+			Value: Status{},
+		})
+	}
 
 	if conditionsEmpty {
 		patches = append(patches, Patch{
