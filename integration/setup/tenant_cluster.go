@@ -32,7 +32,7 @@ const (
 	crNamespace = "default"
 )
 
-func ensureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
+func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
 
 	err := ensureAWSConfigInstalled(ctx, id, config)
@@ -73,7 +73,7 @@ func ensureTenantClusterCreated(ctx context.Context, id string, config Config, w
 	return nil
 }
 
-func ensureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
+func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
 	if config.Bastion != nil {
 		err := config.Bastion.EnsureDeleted(ctx)
 		if err != nil {
