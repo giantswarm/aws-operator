@@ -97,6 +97,11 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q API to be down", id))
 	}
 
+	err := ensureHostVPCDeleted(ctx, config)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted tenant cluster %#q", id))
 	return nil
 }
@@ -280,5 +285,40 @@ func ensureHostVPCCreated(ctx context.Context, config Config) error {
 
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q complete status", stackName))
 	}
+	return nil
+}
+
+func ensureHostVPCDeleted(ctx context.Context, config Config) error {
+	stackName := "cp-peer-" + env.ClusterID()
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting the deletion of stack %#q", stackName))
+
+		stackInput := &cloudformation.DeleteStackInput{
+			StackName:        aws.String(stackName),
+		}
+		_, err := config.AWSClient.CloudFormation.DeleteStack(stackInput)
+		if IsUpdateInProgress(err) {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stack %#q is being updated", stackName))
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested the deletion of stack %#q", stackName))
+	}
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for stack %#q delete complete status", stackName))
+
+		err := config.AWSClient.CloudFormation.WaitUntilStackDeleteComplete(&cloudformation.DescribeStacksInput{
+			StackName: aws.String(stackName),
+		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q delete complete status", stackName))
+	}
+
 	return nil
 }
