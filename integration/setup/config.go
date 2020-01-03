@@ -21,8 +21,8 @@ const (
 	namespace       = "giantswarm"
 	tillerNamespace = "kube-system"
 	bastionEnabled  = true
-	bastionAMI = "ami-015e6cb33a709348e"
-	bastionSize = "t2.micro"
+	bastionAMI      = "ami-015e6cb33a709348e"
+	bastionSize     = "t2.micro"
 )
 
 type Config struct {
@@ -170,9 +170,11 @@ func NewConfig() (Config, error) {
 	var bastionManager *bastion.Bastion
 	if bastionEnabled {
 		config := bastion.Config{
-			AWSClient: awsClient,
-			ClusterID: env.ClusterID(),
-			Logger:    logger,
+			AWSClient:    awsClient,
+			ClusterID:    env.ClusterID(),
+			ImageID:      bastionAMI,
+			InstanceType: bastionSize,
+			Logger:       logger,
 		}
 		bastionManager, err = bastion.NewBastion(config)
 		if err != nil {
