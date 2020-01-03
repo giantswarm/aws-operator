@@ -63,9 +63,9 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
 
-	if BastionEnabled {
+	if config.Bastion.enabled {
 		o := func() error {
-			err = ensureBastionHostCreated(ctx, env.ClusterID(), config)
+			err = config.Bastion.ensureCreated(ctx, env.ClusterID(), config)
 			if err != nil {
 				return microerror.Mask(err)
 			}

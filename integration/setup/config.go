@@ -30,6 +30,7 @@ type Config struct {
 	K8s         *k8sclient.Setup
 	Logger      micrologger.Logger
 	Release     *release.Release
+	Bastion     *bastionManager
 
 	// UseDefaultTenant defines whether the standard test setup should ensure the
 	// default tenant cluster. This is enabled by default. Most tests simply use
@@ -162,6 +163,11 @@ func NewConfig() (Config, error) {
 		}
 	}
 
+	var bastion *bastionManager
+	{
+		bastion, err = newBastionManager(env.ClusterID(), awsClient, logger)
+	}
+
 	c := Config{
 		AWSClient:   awsClient,
 		CPCRDClient: cpCRDClient,
@@ -171,6 +177,7 @@ func NewConfig() (Config, error) {
 		K8s:         k8sSetup,
 		Logger:      logger,
 		Release:     newRelease,
+		Bastion:     bastion,
 
 		UseDefaultTenant: true,
 	}
