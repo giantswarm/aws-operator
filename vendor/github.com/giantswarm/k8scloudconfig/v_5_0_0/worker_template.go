@@ -216,6 +216,14 @@ systemd:
     mask: true
 
 storage:
+  directories:
+    - path: /var/log/fluentbit_db
+      filesystem: root
+      mode: 2644
+      user:
+        name: giantswarm
+      group:
+        name: giantswarm
   files:
     - path: /etc/ssh/trusted-user-ca-keys.pem
       filesystem: root

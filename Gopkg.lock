@@ -388,11 +388,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:02da26132fd7cee432ddb90b6c7048522930670e01b7e18d1003ce99b9483d7c"
+  digest = "1:5474937fa59cd3513c5772d14724cca37d86a7b6dcc5d506bd4fcc14910b163f"
   name = "github.com/giantswarm/helmclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e64c820cdb5d608d81cac7f866d6347467481c71"
+  revision = "8d2f16a18b92557fea612dcae25da5c317739b51"
 
 [[projects]]
   branch = "master"
@@ -416,14 +416,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5f3f9f2fcdad72fa8349cf10a3ad6b64fdea867bb7ac72fb8b0f9c9ae24754ef"
+  digest = "1:8fcac04170acd9c50dc24e7f5c330c1ff9a1c68184252812d0e7d13b4531b9cc"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_4_9_0",
   ]
   pruneopts = "T"
-  revision = "d11385a99ef46892c42aad12dd1d2a6893702a39"
+  revision = "fd74eac277875634cd16f098c7ed020a96a87808"
 
 [[projects]]
   branch = "master"
@@ -539,12 +539,12 @@
   revision = "5e18457bd062f9a11d11fe5719ccf28101945ce0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:779bc27eaf7906f25a3e361f5ddcab0b6d4ddce63aa8b3323db4ce9bb9ae7e02"
+  branch = "fix-status-init"
+  digest = "1:b93f97cc5eae826c035de4cd63249a4f06b51f2e0f25fcdbf79e6cce050f6f2c"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "047d92c988eb4d8fe2a9b320b638b9f570051da3"
+  revision = "c5f1208e376ddab8671b46cde4a5c45a19fdd833"
 
 [[projects]]
   branch = "master"
@@ -1236,14 +1236,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ae1adb333e7a5c1d131ab92f85347600089f0790a9fd23b870bf0f52466123fb"
+  digest = "1:dab7f636e7fc0e8a5b61ca4cd3f13107717c6147fd25e9010d930f001e485ec3"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "04cbcbbfeed8aa0b2b010b2ddab558e9f717fd3e"
+  revision = "c96a22e43c9c1088b5e506727c975511357d9f68"
 
 [[projects]]
   digest = "1:dfcb3d446a3c6a6c71b74cf7baf366cd630a8cb43c3fcb741f34e49727da168d"
@@ -1326,7 +1326,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "3caeed10a8bf5b67c6007d5b0a7016f367cedbad"
+  revision = "f3c370f40bfba3cb25c5c2f823a1a8031b5ad724"
 
 [[projects]]
   digest = "1:6d53eaa1c3ab47024533824b1e3fedcea447333545d4f5e6a3276909f9a613c6"
