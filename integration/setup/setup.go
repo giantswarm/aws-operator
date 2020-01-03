@@ -22,45 +22,47 @@ import (
 	"github.com/giantswarm/aws-operator/integration/key"
 )
 
-const (
-	BastionEnabled = true
-)
-
 func Setup(m *testing.M, config Config) {
-	ctx := context.Background()
+	clusterID := env.ClusterID()
+	ctx := context.WithValue(context.Background(), "cluster_id", clusterID)
 
-	var v int
+	var exitCode int
+	var failed bool
 	var err error
 
 	err = installResources(ctx, config)
 	if err != nil {
 		config.Logger.LogCtx(ctx, "level", "error", "message", "failed to install AWS resources", "stack", fmt.Sprintf("%#v", err))
-		v = 1
+		failed = true
 	}
 
-	if v == 0 && config.UseDefaultTenant {
+	if !failed && config.UseDefaultTenant {
 		wait := true
-		err = EnsureTenantClusterCreated(ctx, env.ClusterID(), config, wait)
+		err = ensureTenantClusterCreated(ctx, clusterID, config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
-			v = 1
+			failed = true
 		}
 	}
 
-	if v == 0 {
-		v = m.Run()
+	if !failed {
+		exitCode = m.Run()
 	}
 
 	if !env.KeepResources() && config.UseDefaultTenant {
 		wait := true
-		err := EnsureTenantClusterDeleted(ctx, env.ClusterID(), config, wait)
+		err := ensureTenantClusterDeleted(ctx, clusterID, config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
-			v = 1
+			failed = true
 		}
 	}
 
-	os.Exit(v)
+	if failed {
+		exitCode = 1
+	}
+
+	os.Exit(exitCode)
 }
 
 func installAWSOperator(ctx context.Context, config Config) error {

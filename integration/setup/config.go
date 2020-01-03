@@ -14,11 +14,15 @@ import (
 	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 
 	"github.com/giantswarm/aws-operator/integration/env"
+	"github.com/giantswarm/aws-operator/integration/setup/bastion"
 )
 
 const (
 	namespace       = "giantswarm"
 	tillerNamespace = "kube-system"
+	bastionEnabled  = true
+	bastionAMI = "ami-015e6cb33a709348e"
+	bastionSize = "t2.micro"
 )
 
 type Config struct {
@@ -30,7 +34,7 @@ type Config struct {
 	K8s         *k8sclient.Setup
 	Logger      micrologger.Logger
 	Release     *release.Release
-	Bastion     *bastionManager
+	Bastion     *bastion.Bastion
 
 	// UseDefaultTenant defines whether the standard test setup should ensure the
 	// default tenant cluster. This is enabled by default. Most tests simply use
@@ -163,9 +167,17 @@ func NewConfig() (Config, error) {
 		}
 	}
 
-	var bastion *bastionManager
-	{
-		bastion, err = newBastionManager(env.ClusterID(), awsClient, logger)
+	var bastionManager *bastion.Bastion
+	if bastionEnabled {
+		config := bastion.Config{
+			AWSClient: awsClient,
+			ClusterID: env.ClusterID(),
+			Logger:    logger,
+		}
+		bastionManager, err = bastion.NewBastion(config)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
 	}
 
 	c := Config{
@@ -177,7 +189,7 @@ func NewConfig() (Config, error) {
 		K8s:         k8sSetup,
 		Logger:      logger,
 		Release:     newRelease,
-		Bastion:     bastion,
+		Bastion:     bastionManager,
 
 		UseDefaultTenant: true,
 	}

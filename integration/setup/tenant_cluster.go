@@ -32,7 +32,7 @@ const (
 	crNamespace = "default"
 )
 
-func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
+func ensureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
 
 	err := ensureAWSConfigInstalled(ctx, id, config)
@@ -63,51 +63,27 @@ func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, w
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created tenant cluster %#q", id))
 
-	if config.Bastion.enabled {
-		o := func() error {
-			err = config.Bastion.ensureCreated(ctx, env.ClusterID(), config)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			return nil
-		}
-		b := backoff.NewMaxRetries(10, 1*time.Minute)
-		n := backoff.NewNotifier(config.Logger, ctx)
-
-		err := backoff.RetryNotify(o, b, n)
+	if config.Bastion != nil {
+		err = config.Bastion.EnsureCreated(ctx)
 		if err != nil {
-			return err
+			return microerror.Mask(err)
 		}
 	}
 
 	return nil
 }
 
-func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
-	var err error
-
-	if BastionEnabled {
-		o := func() error {
-			err = ensureBastionHostDeleted(ctx, env.ClusterID(), config)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			return nil
-		}
-		b := backoff.NewMaxRetries(10, 1*time.Minute)
-		n := backoff.NewNotifier(config.Logger, ctx)
-
-		err := backoff.RetryNotify(o, b, n)
+func ensureTenantClusterDeleted(ctx context.Context, id string, config Config, wait bool) error {
+	if config.Bastion != nil {
+		err := config.Bastion.EnsureDeleted(ctx)
 		if err != nil {
-			return err
+			return microerror.Mask(err)
 		}
 	}
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
 
-	err = config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
+	err := config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
 	if err != nil {
 		return microerror.Mask(err)
 	}
