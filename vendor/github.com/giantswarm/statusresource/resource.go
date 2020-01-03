@@ -3,7 +3,6 @@ package statusresource
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -118,8 +117,6 @@ func (r *Resource) applyPatches(ctx context.Context, accessor metav1.Object, pat
 		Value: accessor.GetResourceVersion(),
 		Path:  "/metadata/resourceVersion",
 	})
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("DEBUG applying patches %#v", patches))
 
 	b, err := json.Marshal(patches)
 	if err != nil {
