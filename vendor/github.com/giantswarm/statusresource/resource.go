@@ -3,6 +3,7 @@ package statusresource
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 	"strings"
 	"time"
 
@@ -141,11 +142,11 @@ func ensureDefaultPatches(clusterStatus providerv1alpha1.StatusCluster, patches 
 	nodesEmpty := clusterStatus.Nodes == nil
 	versionsEmpty := clusterStatus.Versions == nil
 
-	if conditionsEmpty && nodesEmpty && versionsEmpty {
+	if reflect.DeepEqual(clusterStatus, providerv1alpha1.StatusCluster{}) {
 		patches = append(patches, Patch{
 			Op:    "add",
-			Path:  "/status",
-			Value: Status{},
+			Path:  "/status/cluster",
+			Value: providerv1alpha1.StatusCluster{},
 		})
 	}
 

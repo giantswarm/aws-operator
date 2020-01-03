@@ -223,7 +223,6 @@ workflows:
       - e2eTestPRDraining:
           requires:
             - pr
-            - e2eTestPRClusterState
 
 
 
@@ -242,7 +241,6 @@ workflows:
       - e2eTestPRRecreateCluster:
           requires:
             - pr
-            - e2eTestPRDraining
 
 
 
@@ -252,7 +250,6 @@ workflows:
       - e2eTestPRScaling:
           requires:
             - pr
-            - e2eTestPRRecreateCluster
 
 
 

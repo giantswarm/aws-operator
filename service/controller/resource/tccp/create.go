@@ -189,8 +189,6 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.AWSConfig) error
 			TemplateBody: aws.String(templateBody),
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", i.String())
-
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
@@ -275,8 +273,6 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.AWSConfig, templ
 			StackName:    aws.String(key.MainGuestStackName(cr)),
 			TemplateBody: aws.String(templateBody),
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", i.String())
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
 		if err != nil {

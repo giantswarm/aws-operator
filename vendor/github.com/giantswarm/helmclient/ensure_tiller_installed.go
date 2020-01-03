@@ -498,7 +498,7 @@ func (c *Client) installTiller(ctx context.Context, installerOptions *installer.
 
 		return nil
 	}
-	b := backoff.NewExponential(2*time.Minute, 5*time.Second)
+	b := backoff.NewExponential(c.ensureTillerInstalledMaxWait, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, context.Background())
 
 	err := backoff.RetryNotify(o, b, n)
@@ -522,7 +522,7 @@ func (c *Client) upgradeTiller(ctx context.Context, installerOptions *installer.
 
 		return nil
 	}
-	b := backoff.NewExponential(2*time.Minute, 5*time.Second)
+	b := backoff.NewExponential(c.ensureTillerInstalledMaxWait, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, context.Background())
 
 	err := backoff.RetryNotify(o, b, n)
