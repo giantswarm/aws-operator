@@ -114,7 +114,7 @@ required = [
 
 [[constraint]]
   name = "github.com/giantswarm/statusresource"
-  branch = "fix-status-init"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/giantswarm/tenantcluster"

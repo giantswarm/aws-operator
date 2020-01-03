@@ -539,12 +539,12 @@
   revision = "5e18457bd062f9a11d11fe5719ccf28101945ce0"
 
 [[projects]]
-  branch = "fix-status-init"
+  branch = "master"
   digest = "1:b93f97cc5eae826c035de4cd63249a4f06b51f2e0f25fcdbf79e6cce050f6f2c"
   name = "github.com/giantswarm/statusresource"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c5f1208e376ddab8671b46cde4a5c45a19fdd833"
+  revision = "1c017ce979b34a7f9bd1f46ebaeb2ca95771c758"
 
 [[projects]]
   branch = "master"
@@ -1236,14 +1236,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dab7f636e7fc0e8a5b61ca4cd3f13107717c6147fd25e9010d930f001e485ec3"
+  digest = "1:0cbf59a8e2cbbe6601b6f6c940d29aab7020f9f42c6b697fee4335a973bcce09"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c96a22e43c9c1088b5e506727c975511357d9f68"
+  revision = "a1369afcdac740082c63165b07ec83b531884be2"
 
 [[projects]]
   digest = "1:dfcb3d446a3c6a6c71b74cf7baf366cd630a8cb43c3fcb741f34e49727da168d"
