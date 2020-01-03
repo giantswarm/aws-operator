@@ -161,7 +161,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			if a.State != nil {
 				attachmentStatus := *a.State
 				if attachmentStatus != "detached" {
-					return microerror.Maskf(volumeAttachedError, "volume %#q still attached with status %#q", volumeID, attachmentStatus)
+					return microerror.Maskf(volumeAttachedError, "volume %#q still attached", volumeID)
 				}
 			} else {
 				// Shouldn't happen; log so we know if it is
