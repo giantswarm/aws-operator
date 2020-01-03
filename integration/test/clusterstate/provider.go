@@ -4,7 +4,6 @@ package clusterstate
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -13,8 +12,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -119,28 +116,13 @@ func (p *Provider) ReplaceMaster() error {
 		return microerror.Mask(err)
 	}
 
-	zones := key.StatusAvailabilityZones(*customObject)
-
-	p.logger.Log("level", "debug", "message", fmt.Sprintf("DEBUG Unsorted AZs from CR %#q", zones))
-
-	sort.Slice(zones, func(i, j int) bool {
-		return zones[i].Name < zones[j].Name
-	})
-
-	p.logger.Log("level", "debug", "message", fmt.Sprintf("DEBUG Sorted AZs from CR %#q", zones))
-
-	p.logger.Log("level", "debug", "message", fmt.Sprintf("DEBUG Chosen AZ %#q", zones[0]))
-
 	// Change instance type to trigger replacement of existing master node.
 	customObject.Spec.AWS.Masters[0].InstanceType = EC2InstanceType
 
-	updatedCR, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Update(customObject)
+	_, err = p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Update(customObject)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	updatedZones := key.StatusAvailabilityZones(*updatedCR)
-	p.logger.Log("level", "debug", "message", fmt.Sprintf("DEBUG AZs after update %#q", updatedZones))
 
 	return nil
 }
