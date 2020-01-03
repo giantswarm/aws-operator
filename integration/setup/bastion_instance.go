@@ -24,7 +24,7 @@ import (
 
 type UserData struct {
 	Ignition ignition.Ignition
-	Passwd ignition.Passwd
+	Passwd   ignition.Passwd
 }
 
 const (
@@ -184,7 +184,7 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %#q", bastionIgnitionBucket))
 
 		createBucketInput := &s3.CreateBucketInput{
-			Bucket:                    aws.String(bastionIgnitionBucket),
+			Bucket: aws.String(bastionIgnitionBucket),
 		}
 
 		_, err = config.AWSClient.S3.CreateBucket(createBucketInput)
