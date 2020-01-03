@@ -57,7 +57,7 @@ required = [
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "master"
+  branch = "add-guest-s3-client"
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]

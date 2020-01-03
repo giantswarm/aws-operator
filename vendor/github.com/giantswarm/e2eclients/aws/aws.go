@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 )
 
@@ -32,8 +33,9 @@ var (
 )
 
 type Client struct {
-	EC2            *ec2.EC2
 	CloudFormation *cloudformation.CloudFormation
+	EC2            *ec2.EC2
+	S3             *s3.S3
 }
 
 func NewClient() (*Client, error) {
@@ -46,28 +48,7 @@ func NewClient() (*Client, error) {
 		}
 	}
 
-	{
-		guestAccessKeyID = os.Getenv(envVarGuestAccessKeyID)
-		if guestAccessKeyID == "" {
-			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarGuestAccessKeyID)
-		}
-
-		guestSecretAccessKey = os.Getenv(envVarGuestSecretAccessKey)
-		if guestSecretAccessKey == "" {
-			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarGuestSecretAccessKey)
-		}
-
-		guestSessionToken = os.Getenv(envVarGuestSessionToken)
-		c := &aws.Config{
-			Credentials: credentials.NewStaticCredentials(
-				guestAccessKeyID,
-				guestSecretAccessKey,
-				guestSessionToken),
-			Region: aws.String(region),
-		}
-		a.EC2 = ec2.New(session.New(c))
-	}
-
+	var hostSession *session.Session
 	{
 		hostAccessKeyID = os.Getenv(envVarHostAccessKeyID)
 		if hostAccessKeyID == "" {
@@ -80,15 +61,50 @@ func NewClient() (*Client, error) {
 		}
 
 		hostSessionToken = os.Getenv(envVarHostSessionToken)
-		c := &aws.Config{
+		config := &aws.Config{
 			Credentials: credentials.NewStaticCredentials(
 				hostAccessKeyID,
 				hostSecretAccessKey,
 				hostSessionToken),
 			Region: aws.String(region),
 		}
-		a.CloudFormation = cloudformation.New(session.New(c))
+		var err error
+		hostSession, err = session.NewSession(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
+
+	var guestSession *session.Session
+	{
+		guestAccessKeyID = os.Getenv(envVarGuestAccessKeyID)
+		if guestAccessKeyID == "" {
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarGuestAccessKeyID)
+		}
+
+		guestSecretAccessKey = os.Getenv(envVarGuestSecretAccessKey)
+		if guestSecretAccessKey == "" {
+			return nil, microerror.Maskf(invalidConfigError, "%s must be set", envVarGuestSecretAccessKey)
+		}
+
+		guestSessionToken = os.Getenv(envVarGuestSessionToken)
+		config := &aws.Config{
+			Credentials: credentials.NewStaticCredentials(
+				guestAccessKeyID,
+				guestSecretAccessKey,
+				guestSessionToken),
+			Region: aws.String(region),
+		}
+		var err error
+		guestSession, err = session.NewSession(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	a.CloudFormation = cloudformation.New(hostSession)
+	a.EC2 = ec2.New(guestSession)
+	a.S3 = s3.New(guestSession)
 
 	return a, nil
 }

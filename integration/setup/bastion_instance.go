@@ -3,25 +3,33 @@
 package setup
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha512"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/ghodss/yaml"
 	"github.com/giantswarm/e2esetup/privaterepo"
+	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 )
 
-// TODO make the resource management more reliable to ensure proper setup and
-// teardown.
-//
-//     https://github.com/giantswarm/giantswarm/issues/5694
-//
+type UserData struct {
+	Ignition ignition.Ignition
+	Passwd ignition.Passwd
+}
+
+const (
+	bastionIgnitionKey = "ignition.json"
+)
 
 func ensureBastionHostCreated(ctx context.Context, clusterID string, config Config) error {
 	var err error
@@ -170,16 +178,73 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "updated bastion security group to allow ssh access")
 	}
 
-	var userData string
+	var bastionIgnitionBucket string
 	{
-		userData, err = generateBastionUserData(ctx, config)
+		bastionIgnitionBucket = fmt.Sprintf("%s-bastion", clusterID)
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %#q", bastionIgnitionBucket))
+
+		createBucketInput := &s3.CreateBucketInput{
+			Bucket:                    aws.String(bastionIgnitionBucket),
+		}
+
+		_, err = config.AWSClient.S3.CreateBucket(createBucketInput)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bastionIgnitionBucket))
+	}
+
+	var bastionIgnitionObjectURL string
+	var bastionIgnitionHash string
+
+	{
+		userData, err := generateBastionUserData(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		bastionIgnitionObjectURL = fmt.Sprintf("s3://%s/%s", bastionIgnitionBucket, bastionIgnitionKey)
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", bastionIgnitionObjectURL))
+
+		putObjectInput := &s3.PutObjectInput{
+			Key:           aws.String(bastionIgnitionKey),
+			Body:          bytes.NewReader(userData),
+			Bucket:        aws.String(bastionIgnitionBucket),
+			ContentLength: aws.Int64(int64(len(userData))),
+		}
+
+		_, err = config.AWSClient.S3.PutObject(putObjectInput)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", bastionIgnitionObjectURL))
+
+		sum := sha512.Sum512(userData)
+		bastionIgnitionHash = fmt.Sprintf("sha512-%s", hex.EncodeToString(sum[:]))
 	}
 
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", "creating bastion instance")
+
+		userData := UserData{
+			Ignition: ignition.Ignition{
+				Version: "2.2.0",
+				Config: ignition.IgnitionConfig{
+					Append: []ignition.ConfigReference{
+						{
+							Source: bastionIgnitionObjectURL,
+							Verification: ignition.Verification{
+								Hash: aws.String(bastionIgnitionHash),
+							},
+						},
+					},
+				},
+			},
+		}
+		userDataJSON, err := json.Marshal(userData)
+		userDataEncoded := base64.StdEncoding.EncodeToString(userDataJSON)
 
 		i := &ec2.RunInstancesInput{
 			ImageId:      aws.String("ami-015e6cb33a709348e"),
@@ -216,10 +281,10 @@ func ensureBastionHostCreated(ctx context.Context, clusterID string, config Conf
 					},
 				},
 			},
-			UserData: aws.String(userData),
+			UserData: aws.String(userDataEncoded),
 		}
 
-		_, err := config.AWSClient.EC2.RunInstances(i)
+		_, err = config.AWSClient.EC2.RunInstances(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -382,25 +447,8 @@ func terminateBastionInstance(ctx context.Context, clusterID string, config Conf
 	return nil
 }
 
-func generateBastionUserData(ctx context.Context, config Config) (string, error) {
-	type User struct {
-		Name              string   `json:"name"`
-		Groups            []string `json:"groups"`
-		SshAuthorizedKeys []string `json:"sshAuthorizedKeys"`
-		Shell             string   `json:"shell"`
-	}
-	type Passwd struct {
-		Users []User `json:"users"`
-	}
-	type IgnitionConfig struct {
-		Version string `json:"version"`
-	}
-	type UserData struct {
-		Ignition IgnitionConfig `json:"ignition"`
-		Passwd   Passwd         `json:"passwd"`
-	}
-
-	var sshUserList []User
+func generateBastionUserData(ctx context.Context) ([]byte, error) {
+	var sshUserList []ignition.PasswdUser
 	var err error
 
 	var privateRepo *privaterepo.PrivateRepo
@@ -413,40 +461,37 @@ func generateBastionUserData(ctx context.Context, config Config) (string, error)
 
 		privateRepo, err = privaterepo.New(c)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 	}
 
 	{
 		content, err := privateRepo.Content(ctx, "default-terraform-bastion-users.yaml")
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 
 		var userData UserData
 		err = yaml.Unmarshal([]byte(content), &userData)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 		sshUserList = userData.Passwd.Users
 	}
 
 	userData := UserData{
-		Ignition: IgnitionConfig{
+		Ignition: ignition.Ignition{
 			Version: "2.1.0",
 		},
-		Passwd: Passwd{
-			Users: sshUserList[0:1],
+		Passwd: ignition.Passwd{
+			Users: sshUserList,
 		},
 	}
 
 	userDataJSON, err := json.Marshal(userData)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
-	encoded := base64.StdEncoding.EncodeToString(userDataJSON)
-	config.Logger.LogCtx(ctx, "level", "debug", "user_data_length", len(encoded))
-
-	return encoded, nil
+	return userDataJSON, nil
 }

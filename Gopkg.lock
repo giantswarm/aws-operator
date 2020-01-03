@@ -325,12 +325,12 @@
   revision = "b527706db0fd20a025f0134ce19cc56bdb5921cd"
 
 [[projects]]
-  branch = "master"
-  digest = "1:08c7c55cf4dde5b8052d687a4eeff0d5796309f3e49b5f00e3c19dc62f033584"
+  branch = "add-guest-s3-client"
+  digest = "1:a0537334ff7fabc3b98029b6e54ad124207224f4c1eacd231707d5e4de0be898"
   name = "github.com/giantswarm/e2eclients"
   packages = ["aws"]
   pruneopts = "UT"
-  revision = "889c9ae897f8c0fa1d857f98dca22fa124305237"
+  revision = "fc290f9319ebfc5961b29e7357014705a2c37d2c"
 
 [[projects]]
   branch = "master"
