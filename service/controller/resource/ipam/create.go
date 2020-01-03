@@ -56,31 +56,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", "allocating cluster subnet CIDR")
 
-			var err error
-			var clusterAZs []string
-
-			statusAZs := key.StatusAvailabilityZones(cr)
-
-			if len(statusAZs) == 0 {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "selecting random AZs")
-
-				clusterAZs, err = r.selectRandomAZs(key.SpecAvailabilityZones(cr))
-				if err != nil {
-					return microerror.Mask(err)
-				}
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs %#v selected", clusterAZs))
-			} else {
-				for _, az := range statusAZs {
-					clusterAZs = append(clusterAZs, az.Name)
-				}
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs %#v already selected", clusterAZs))
+			randomAZs, err := r.selectRandomAZs(key.SpecAvailabilityZones(cr))
+			if err != nil {
+				return microerror.Mask(err)
 			}
 
 			callbacks := network.AllocationCallbacks{
 				GetReservedNetworks:     r.getReservedNetworks,
-				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, clusterAZs),
+				PersistAllocatedNetwork: r.persistAllocatedNetwork(cr, randomAZs),
 			}
 
 			subnetCIDR, err = r.networkAllocator.Allocate(ctx, r.networkRange, r.allocatedSubnetMask, callbacks)
