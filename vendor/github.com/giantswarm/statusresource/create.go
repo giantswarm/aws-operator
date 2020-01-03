@@ -45,7 +45,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("DEBUG status before %#v", newObj))
 
 			newAccessor, err := meta.Accessor(newObj)
 			if err != nil {
@@ -69,11 +68,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				}
 
 				modified = true
-				updatedObj, err := r.restClient.Get().AbsPath(newAccessor.GetSelfLink()).Do().Get()
-				if err != nil {
-					return microerror.Mask(err)
-				}
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("DEBUG status after %#v", updatedObj))
 			}
 
 			return nil
@@ -91,7 +85,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	if modified {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "patched CR status")
-
 		reconciliationcanceledcontext.SetCanceled(ctx)
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
 	} else {
