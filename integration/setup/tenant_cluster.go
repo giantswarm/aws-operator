@@ -97,7 +97,7 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for guest cluster %#q API to be down", id))
 	}
 
-	err := ensureHostVPCDeleted(ctx, config)
+	err = ensureHostVPCDeleted(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
