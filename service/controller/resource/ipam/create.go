@@ -2,7 +2,6 @@ package ipam
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/bits"
 	"math/rand"
@@ -11,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
@@ -19,9 +17,6 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -107,7 +102,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from VPCs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d allocated subnets from VPCs", len(subnets)))
 
 		return nil
 	})
@@ -123,7 +118,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d allocated subnets from AWSConfigs", len(subnets)))
 
 		return nil
 	})
@@ -131,15 +126,16 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
 
-		subnets, err := getClusterSubnets(r.cmaClient)
+		subnets, err := getClusterSubnets(r.g8sClient)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
 		mutex.Lock()
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d allocated subnets from Cluster CRs", len(subnets)))
 
 		return nil
 	})
@@ -222,15 +218,16 @@ func getAWSConfigSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 	return results, nil
 }
 
-func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
-	clusterList, err := cmaClient.Cluster().Clusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+func getClusterSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
+	clusterList, err := g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	var results []net.IPNet
+
 	for _, c := range clusterList.Items {
-		cidr := statusClusterNetworkCIDR(c)
+		cidr := key.StatusClusterNetworkCIDR(c)
 		if cidr == "" {
 			continue
 		}
@@ -268,30 +265,6 @@ func getVPCSubnets(ctx context.Context) ([]net.IPNet, error) {
 	}
 
 	return results, nil
-}
-
-func statusClusterNetworkCIDR(cluster cmav1alpha1.Cluster) string {
-	return mustG8sClusterStatusFromCMAClusterStatus(cluster.Status.ProviderStatus).Provider.Network.CIDR
-}
-
-func mustG8sClusterStatusFromCMAClusterStatus(cmaStatus *runtime.RawExtension) g8sv1alpha1.AWSClusterStatus {
-	var g8sStatus g8sv1alpha1.AWSClusterStatus
-	{
-		if cmaStatus == nil {
-			return g8sStatus
-		}
-
-		if len(cmaStatus.Raw) == 0 {
-			return g8sStatus
-		}
-
-		err := json.Unmarshal(cmaStatus.Raw, &g8sStatus)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return g8sStatus
 }
 
 // splitSubnetToStatusAZs splits subnet such that each AZ gets private and

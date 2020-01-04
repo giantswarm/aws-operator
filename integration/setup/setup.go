@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	clusterv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/e2e-harness/pkg/release"
@@ -115,6 +115,11 @@ func Setup(m *testing.M, config Config) {
 				if err != nil {
 					return microerror.Mask(err)
 				}
+
+				err = EnsureHostPeerStackDeleted(ctx, config, wait)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 
 			return nil
@@ -135,7 +140,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	err = ensureHostVPCCreated(ctx, config)
+	err = ensureHostPeerStackCreated(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -233,12 +238,12 @@ func installResources(ctx context.Context, config Config) error {
 		}
 	}
 
-	// Install Cluster CRD for IPAM resource. It checks clusters objects
+	// Install AWSCluster CRD for IPAM resource. It checks clusters objects
 	// for allocated ranges. If the CRD doesn't exist it fails.
 	{
 		b := backoff.NewMaxRetries(5, 2*time.Second)
 
-		err := config.CPCRDClient.EnsureCreated(ctx, clusterv1alpha1.NewClusterCRD(), b)
+		err := config.CPCRDClient.EnsureCreated(ctx, infrastructurev1alpha2.NewAWSClusterCRD(), b)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -3,15 +3,17 @@
 package setup
 
 import (
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/e2e-harness/pkg/framework"
 	"github.com/giantswarm/e2e-harness/pkg/harness"
 	"github.com/giantswarm/e2e-harness/pkg/release"
 	e2eclientsaws "github.com/giantswarm/e2eclients/aws"
 	"github.com/giantswarm/helmclient"
 	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/k8scrdclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 
 	"github.com/giantswarm/aws-operator/integration/env"
 )
@@ -23,8 +25,8 @@ const (
 
 type Config struct {
 	AWSClient   *e2eclientsaws.Client
+	CPCRDClient k8scrdclient.Interface
 	Guest       *framework.Guest
-	CPCRDClient *k8scrdclient.CRDClient
 	HelmClient  helmclient.Interface
 	Host        *framework.Host
 	K8s         *k8sclient.Setup
@@ -63,24 +65,15 @@ func NewConfig() (Config, error) {
 	{
 		c := k8sclient.ClientsConfig{
 			Logger: logger,
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				corev1alpha1.AddToScheme,
+				providerv1alpha1.AddToScheme,
+			},
 
 			KubeConfigPath: harness.DefaultKubeConfig,
 		}
 
 		cpK8sClients, err = k8sclient.NewClients(c)
-		if err != nil {
-			return Config{}, microerror.Mask(err)
-		}
-	}
-
-	var cpCRDClient *k8scrdclient.CRDClient
-	{
-		c := k8scrdclient.Config{
-			K8sExtClient: cpK8sClients.ExtClient(),
-			Logger:       logger,
-		}
-
-		cpCRDClient, err = k8scrdclient.New(c)
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
@@ -165,7 +158,7 @@ func NewConfig() (Config, error) {
 
 	c := Config{
 		AWSClient:   awsClient,
-		CPCRDClient: cpCRDClient,
+		CPCRDClient: cpK8sClients.CRDClient(),
 		Guest:       guest,
 		HelmClient:  helmClient,
 		Host:        host,

@@ -6,19 +6,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
+	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys"
 	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/tenantcluster"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -68,10 +67,8 @@ const (
 type clusterResourceSetConfig struct {
 	CertsSearcher          certs.Interface
 	ControlPlaneAWSClients aws.Clients
-	CMAClient              clientset.Interface
-	G8sClient              versioned.Interface
 	HostAWSConfig          aws.Config
-	K8sClient              kubernetes.Interface
+	K8sClient              k8sclient.Interface
 	Logger                 micrologger.Logger
 	NetworkAllocator       network.Allocator
 	RandomKeysSearcher     randomkeys.Interface
@@ -102,10 +99,6 @@ type clusterResourceSetConfig struct {
 
 func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
-
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
 
 	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestSubnetMaskBits (%d) must not be smaller than %d", config, config.GuestSubnetMaskBits, minAllocatedSubnetMaskBits)
@@ -219,7 +212,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var asgStatusResource resource.Interface
 	{
 		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -257,7 +250,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var migrationResource resource.Interface
 	{
 		c := migration.Config{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -270,8 +263,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var ipamResource resource.Interface
 	{
 		c := ipam.Config{
-			CMAClient:        config.CMAClient,
-			G8sClient:        config.G8sClient,
+			G8sClient:        config.K8sClient.G8sClient(),
 			Logger:           config.Logger,
 			NetworkAllocator: config.NetworkAllocator,
 
@@ -290,7 +282,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
-			K8sClient:     config.K8sClient,
+			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
@@ -451,7 +443,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var namespaceResource resource.Interface
 	{
 		c := namespace.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -509,7 +501,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var secretFinalizerResource resource.Interface
 	{
 		c := secretfinalizer.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -522,7 +514,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var serviceResource resource.Interface
 	{
 		c := service.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -540,7 +532,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var endpointsResource resource.Interface
 	{
 		c := endpoints.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -558,7 +550,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var certsSearcher certs.Interface
 	{
 		c := certs.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
 			WatchTimeout: 5 * time.Second,
@@ -593,7 +585,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			ClusterStatusFunc:        key.ToClusterStatus,
 			NodeCountFunc:            key.ToNodeCount,
 			Logger:                   config.Logger,
-			RESTClient:               config.G8sClient.ProviderV1alpha1().RESTClient(),
+			RESTClient:               config.K8sClient.G8sClient().ProviderV1alpha1().RESTClient(),
 			TenantCluster:            tenantCluster,
 			VersionBundleVersionFunc: key.ToVersionBundleVersion,
 		}
@@ -682,7 +674,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
 		var tenantClusterAWSClients aws.Clients
 		{
-			arn, err := credential.GetARN(config.K8sClient, obj)
+			arn, err := credential.GetARN(config.K8sClient.K8sClient(), obj)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -728,13 +720,13 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	return resourceSet, nil
 }
 
-func toCRUDResource(logger micrologger.Logger, ops controller.CRUDResourceOps) (*controller.CRUDResource, error) {
-	c := controller.CRUDResourceConfig{
+func toCRUDResource(logger micrologger.Logger, ops crud.Interface) (resource.Interface, error) {
+	c := crud.ResourceConfig{
+		CRUD:   ops,
 		Logger: logger,
-		Ops:    ops,
 	}
 
-	r, err := controller.NewCRUDResource(c)
+	r, err := crud.NewResource(c)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

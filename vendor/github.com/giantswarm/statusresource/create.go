@@ -9,6 +9,7 @@ import (
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/errors/tenant"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"github.com/giantswarm/tenantcluster"
@@ -51,7 +52,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			patches, err := r.computeCreateEventPatches(ctx, newObj)
-			if err != nil {
+			if tenant.IsAPINotAvailable(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster is not available")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+				return nil
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 
@@ -231,57 +237,63 @@ func (r *Resource) computeCreateEventPatches(ctx context.Context, obj interface{
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
-			k8sClient, err = r.tenantCluster.NewK8sClient(ctx, i, e)
+
+			restConfig, err := r.tenantCluster.NewRestConfig(ctx, i, e)
 			if tenantcluster.IsTimeout(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "did not create Kubernetes client for tenant cluster")
 				r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for certificates timed out")
 			} else if err != nil {
 				return nil, microerror.Mask(err)
-			} else {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "created Kubernetes client for tenant cluster")
 			}
+
+			clientsConfig := k8sclient.ClientsConfig{
+				Logger:     r.logger,
+				RestConfig: restConfig,
+			}
+			k8sClients, err := k8sclient.NewClients(clientsConfig)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			k8sClient = k8sClients.K8sClient()
+		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", "created Kubernetes client for tenant cluster")
+
+		o := metav1.ListOptions{}
+		list, err := k8sClient.CoreV1().Nodes().List(o)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		var nodes []providerv1alpha1.StatusClusterNode
+
+		for _, node := range list.Items {
+			l := node.GetLabels()
+			n := node.GetName()
+
+			labelProvider := "giantswarm.io/provider"
+			p, ok := l[labelProvider]
+			if !ok {
+				return nil, microerror.Maskf(missingLabelError, labelProvider)
+			}
+			labelVersion := p + "-operator.giantswarm.io/version"
+			v, ok := l[labelVersion]
+			if !ok {
+				return nil, microerror.Maskf(missingLabelError, labelVersion)
+			}
+
+			nodes = append(nodes, providerv1alpha1.NewStatusClusterNode(n, v, l))
 		}
 
-		if k8sClient != nil {
-			o := metav1.ListOptions{}
-			list, err := k8sClient.CoreV1().Nodes().List(o)
-			if tenant.IsAPINotAvailable(err) {
-				// fall through
-			} else if err != nil {
-				return nil, microerror.Mask(err)
-			} else {
-				var nodes []providerv1alpha1.StatusClusterNode
+		nodesDiffer := nodes != nil && !allNodesEqual(clusterStatus.Nodes, nodes)
 
-				for _, node := range list.Items {
-					l := node.GetLabels()
-					n := node.GetName()
+		if nodesDiffer {
+			patches = append(patches, Patch{
+				Op:    "replace",
+				Path:  "/status/cluster/nodes",
+				Value: nodes,
+			})
 
-					labelProvider := "giantswarm.io/provider"
-					p, ok := l[labelProvider]
-					if !ok {
-						return nil, microerror.Maskf(missingLabelError, labelProvider)
-					}
-					labelVersion := p + "-operator.giantswarm.io/version"
-					v, ok := l[labelVersion]
-					if !ok {
-						return nil, microerror.Maskf(missingLabelError, labelVersion)
-					}
-
-					nodes = append(nodes, providerv1alpha1.NewStatusClusterNode(n, v, l))
-				}
-
-				nodesDiffer := nodes != nil && !allNodesEqual(clusterStatus.Nodes, nodes)
-
-				if nodesDiffer {
-					patches = append(patches, Patch{
-						Op:    "replace",
-						Path:  "/status/cluster/nodes",
-						Value: nodes,
-					})
-
-					r.logger.LogCtx(ctx, "level", "info", "message", "setting status nodes")
-				}
-			}
+			r.logger.LogCtx(ctx, "level", "info", "message", "setting status nodes")
 		}
 	}
 

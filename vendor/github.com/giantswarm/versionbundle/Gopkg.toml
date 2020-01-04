@@ -25,6 +25,7 @@
 #   unused-packages = true
 
 
+
 [[constraint]]
   name = "github.com/coreos/go-semver"
   version = "0.2.0"
@@ -43,11 +44,9 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/kylelemons/godebug"
-
-[[constraint]]
-  branch = "master"
   name = "golang.org/x/sync"
+
+
 
 [prune]
   go-tests = true

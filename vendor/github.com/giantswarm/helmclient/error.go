@@ -86,6 +86,24 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var pullChartFailedError = &microerror.Error{
+	Kind: "pullChartFailedError",
+}
+
+// IsPullChartFailedError asserts pullChartFailedError.
+func IsPullChartFailedError(err error) bool {
+	return microerror.Cause(err) == pullChartFailedError
+}
+
+var pullChartNotFoundError = &microerror.Error{
+	Kind: "pullChartNotFoundError",
+}
+
+// IsPullChartNotFound asserts pullChartNotFoundError.
+func IsPullChartNotFound(err error) bool {
+	return microerror.Cause(err) == pullChartNotFoundError
+}
+
 var (
 	releaseAlreadyExistsRegexp = regexp.MustCompile(`release named \S+ already exists`)
 )
@@ -184,6 +202,15 @@ var testReleaseTimeoutError = &microerror.Error{
 // IsTestReleaseTimeout asserts testReleaseTimeoutError.
 func IsTestReleaseTimeout(err error) bool {
 	return microerror.Cause(err) == testReleaseTimeoutError
+}
+
+var tillerNotRunningError = &microerror.Error{
+	Kind: "tillerNotRunningError",
+}
+
+// IsTillerNotRunningError asserts tillerNotRunningError.
+func IsTillerNotRunningError(err error) bool {
+	return microerror.Cause(err) == tillerNotRunningError
 }
 
 var tillerNotFoundError = &microerror.Error{

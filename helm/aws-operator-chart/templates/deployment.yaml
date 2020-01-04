@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aws-operator
@@ -9,6 +9,10 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: aws-operator
+      version: {{ .Chart.Version }}
   strategy:
     type: RollingUpdate
   template:

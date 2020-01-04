@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/operatorkit/resource/crud"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -30,7 +30,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	return nil
 }
 
-func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*controller.Patch, error) {
+func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desiredState interface{}) (*crud.Patch, error) {
 	create, err := r.newCreateChange(ctx, obj, currentState, desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -41,7 +41,7 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 		return nil, microerror.Mask(err)
 	}
 
-	patch := controller.NewPatch()
+	patch := crud.NewPatch()
 	patch.SetCreateChange(create)
 	patch.SetUpdateChange(update)
 

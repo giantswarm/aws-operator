@@ -4,31 +4,22 @@ import (
 	"net"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8scrdclient"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/informer"
 	"github.com/giantswarm/randomkeys"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
+	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/network"
 )
 
 type ClusterConfig struct {
-	CMAClient        clientset.Interface
-	G8sClient        versioned.Interface
-	K8sClient        kubernetes.Interface
-	K8sExtClient     apiextensionsclient.Interface
+	K8sClient        k8sclient.Interface
 	Logger           micrologger.Logger
 	NetworkAllocator network.Allocator
 
@@ -100,68 +91,33 @@ type Cluster struct {
 func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var err error
 
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "config.G8sClient must not be empty")
-	}
-
-	var crdClient *k8scrdclient.CRDClient
-	{
-		c := k8scrdclient.Config{
-			K8sExtClient: config.K8sExtClient,
-			Logger:       config.Logger,
-		}
-
-		crdClient, err = k8scrdclient.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var newInformer *informer.Informer
-	{
-		c := informer.Config{
-			Logger:  config.Logger,
-			Watcher: config.G8sClient.ProviderV1alpha1().AWSConfigs(""),
-
-			ListOptions: metav1.ListOptions{
-				LabelSelector: key.VersionLabelSelector(config.LabelSelector.Enabled, config.LabelSelector.OverridenVersion),
-			},
-			RateWait:     informer.DefaultRateWait,
-			ResyncPeriod: informer.DefaultResyncPeriod,
-		}
-
-		newInformer, err = informer.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resourceSets, err := newClusterResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var operatorkitController *controller.Controller
+	var clusterController *controller.Controller
 	{
 		c := controller.Config{
 			CRD:          v1alpha1.NewAWSConfigCRD(),
-			CRDClient:    crdClient,
-			Informer:     newInformer,
+			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			RESTClient:   config.G8sClient.ProviderV1alpha1().RESTClient(),
+			NewRuntimeObjectFunc: func() pkgruntime.Object {
+				return new(v1alpha1.AWSConfig)
+			},
 
 			Name: config.ProjectName,
 		}
 
-		operatorkitController, err = controller.New(c)
+		clusterController, err = controller.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	c := &Cluster{
-		Controller: operatorkitController,
+		Controller: clusterController,
 	}
 
 	return c, nil
@@ -188,7 +144,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var certsSearcher *certs.Searcher
 	{
 		c := certs.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -201,7 +157,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -215,9 +171,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := clusterResourceSetConfig{
 			CertsSearcher:          certsSearcher,
-			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.G8sClient,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,

@@ -7,18 +7,17 @@ import (
 	"net"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/client/k8srestconfig"
 	"github.com/giantswarm/statusresource"
 	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
@@ -85,24 +84,22 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	cmaClient, err := clientset.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+	var k8sClient k8sclient.Interface
+	{
+		c := k8sclient.ClientsConfig{
+			Logger: config.Logger,
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				corev1alpha1.AddToScheme,
+				providerv1alpha1.AddToScheme,
+			},
 
-	g8sClient, err := versioned.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+			RestConfig: restConfig,
+		}
 
-	k8sClient, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	k8sExtClient, err := apiextensionsclient.NewForConfig(restConfig)
-	if err != nil {
-		return nil, microerror.Mask(err)
+		k8sClient, err = k8sclient.NewClients(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var awsConfig aws.Config
@@ -149,10 +146,7 @@ func New(config Config) (*Service, error) {
 		}
 
 		c := controller.ClusterConfig{
-			CMAClient:        cmaClient,
-			G8sClient:        g8sClient,
 			K8sClient:        k8sClient,
-			K8sExtClient:     k8sExtClient,
 			Logger:           config.Logger,
 			NetworkAllocator: legacyNetworkAllocator,
 			APIWhitelist: controller.ClusterConfigAPIWhitelist{
@@ -220,10 +214,8 @@ func New(config Config) (*Service, error) {
 	var legacyDrainerController *controller.Drainer
 	{
 		c := controller.DrainerConfig{
-			G8sClient:    g8sClient,
-			K8sClient:    k8sClient,
-			K8sExtClient: k8sExtClient,
-			Logger:       config.Logger,
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
 
 			GuestAWSConfig: controller.DrainerConfigAWS{
 				AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.AccessKey.ID),
@@ -254,7 +246,6 @@ func New(config Config) (*Service, error) {
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
-			G8sClient: g8sClient,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -273,7 +264,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := statusresource.CollectorSetConfig{
 			Logger:  config.Logger,
-			Watcher: g8sClient.ProviderV1alpha1().AWSConfigs("").Watch,
+			Watcher: k8sClient.G8sClient().ProviderV1alpha1().AWSConfigs("").Watch,
 		}
 
 		statusResourceCollector, err = statusresource.NewCollectorSet(c)

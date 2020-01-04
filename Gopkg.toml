@@ -33,96 +33,96 @@ required = [
   version = "=1.14.7"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/docker/distribution"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/apiextensions"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/apprclient"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/backoff"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/certs"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/e2e-harness"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/e2eclients"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/e2etemplates"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/e2etests"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/e2esetup"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/exporterkit"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/helmclient"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/ipam"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microendpoint"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microerror"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microkit"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/micrologger"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/operatorkit"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/randomkeys"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/statusresource"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/tenantcluster"
+  branch = "master"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/versionbundle"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/prometheus/client_golang"
@@ -134,39 +134,51 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
-  name = "sigs.k8s.io/cluster-api"
-  version = "=v0.1.10"
+[[override]]
+  name = "k8s.io/helm"
+  version = "2.16.1"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/cli-runtime"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "k8s.io/kubectl"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "v1.15.4"
+  version = "=v1.16.3"
 
 [[override]]
   name = "k8s.io/component-base"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "sigs.k8s.io/kustomize"
+  version = "v2.0.3"
+
+[[override]]
+  name = "github.com/evanphx/json-patch"
+  version = "4.5.0"
 
 [[override]]
   name = "github.com/ghodss/yaml"
@@ -175,6 +187,12 @@ required = [
 [[override]]
   name = "github.com/russross/blackfriday"
   version = "v1.5.2"
+
+[[override]]
+  name = "gopkg.in/fsnotify.v1"
+  source = "gopkg.in/fsnotify/fsnotify.v1"
+
+
 
 [prune]
   go-tests = true

@@ -112,7 +112,7 @@ func setConfigDefaults(config *rest.Config) error {
 	if config.NegotiatedSerializer == nil {
 		s := runtime.NewScheme()
 		c := serializer.NewCodecFactory(s)
-		config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: c}
+		config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: c}
 	}
 	if config.UserAgent == "" {
 		config.UserAgent = rest.DefaultKubernetesUserAgent()

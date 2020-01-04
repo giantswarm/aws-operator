@@ -5,7 +5,6 @@ package setup
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -31,6 +30,41 @@ import (
 const (
 	crNamespace = "default"
 )
+
+func EnsureHostPeerStackDeleted(ctx context.Context, config Config, wait bool) error {
+	stackName := hostPeerStackName()
+
+	{
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting the deletion of stack %#q", stackName))
+
+		stackInput := &cloudformation.DeleteStackInput{
+			StackName: aws.String(stackName),
+		}
+		_, err := config.AWSClient.CloudFormation.DeleteStack(stackInput)
+		if IsUpdateInProgress(err) {
+			config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("stack %#q is being updated", stackName))
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested the deletion of stack %#q", stackName))
+	}
+
+	if wait {
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for stack %#q delete complete status", stackName))
+
+		err := config.AWSClient.CloudFormation.WaitUntilStackDeleteComplete(&cloudformation.DescribeStacksInput{
+			StackName: aws.String(stackName),
+		})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q delete complete status", stackName))
+	}
+
+	return nil
+}
 
 func EnsureTenantClusterCreated(ctx context.Context, id string, config Config, wait bool) error {
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating tenant cluster %#q", id))
@@ -70,6 +104,11 @@ func EnsureTenantClusterDeleted(ctx context.Context, id string, config Config, w
 	var err error
 
 	config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting tenant cluster %#q", id))
+
+	err = config.Guest.Initialize()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	err = config.Release.EnsureDeleted(ctx, key.AWSConfigReleaseName(id), crNotFoundCondition(ctx, config, providerv1alpha1.NewAWSConfigCRD(), crNamespace, id))
 	if err != nil {
@@ -183,7 +222,7 @@ func crNotFoundCondition(ctx context.Context, config Config, crd *apiextensionsv
 }
 
 func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) error {
-	err := ensureHostVPCCreated(ctx, config)
+	err := ensureHostPeerStackCreated(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -239,18 +278,36 @@ func ensureCertConfigsInstalled(ctx context.Context, id string, config Config) e
 	return nil
 }
 
-func ensureHostVPCCreated(ctx context.Context, config Config) error {
-	stackName := "cp-peer-" + env.ClusterID()
+func ensureHostPeerStackCreated(ctx context.Context, config Config) error {
+	stackName := hostPeerStackName()
 
 	{
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating stack %#q", stackName))
 
-		os.Setenv("AWS_ROUTE_TABLE_0", env.AWSRouteTable0())
-		os.Setenv("AWS_ROUTE_TABLE_1", env.AWSRouteTable1())
-		os.Setenv("CLUSTER_NAME", env.ClusterID())
+		var awsHostPeerStackTemplate string
+		{
+			c := e2etemplates.AWSHostPeerStackConfig{
+				Stack: e2etemplates.AWSHostPeerStackConfigStack{
+					Name: stackName,
+				},
+				RouteTable0: e2etemplates.AWSHostPeerStackConfigRouteTable0{
+					Name: env.AWSRouteTable0(),
+				},
+				RouteTable1: e2etemplates.AWSHostPeerStackConfigRouteTable1{
+					Name: env.AWSRouteTable1(),
+				},
+			}
+			t, err := e2etemplates.NewAWSHostPeerStack(c)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			awsHostPeerStackTemplate = t
+		}
+
 		stackInput := &cloudformation.CreateStackInput{
 			StackName:        aws.String(stackName),
-			TemplateBody:     aws.String(os.ExpandEnv(e2etemplates.AWSHostVPCStack)),
+			TemplateBody:     aws.String(awsHostPeerStackTemplate),
 			TimeoutInMinutes: aws.Int64(2),
 		}
 		_, err := config.AWSClient.CloudFormation.CreateStack(stackInput)
@@ -276,4 +333,8 @@ func ensureHostVPCCreated(ctx context.Context, config Config) error {
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for stack %#q complete status", stackName))
 	}
 	return nil
+}
+
+func hostPeerStackName() string {
+	return "cp-peer-" + env.ClusterID()
 }
