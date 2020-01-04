@@ -116,7 +116,7 @@ func Setup(m *testing.M, config Config) {
 					return microerror.Mask(err)
 				}
 
-				err = EnsureHostVPCDeleted(ctx, config, wait)
+				err = EnsureHostPeerStackDeleted(ctx, config, wait)
 				if err != nil {
 					return microerror.Mask(err)
 				}
