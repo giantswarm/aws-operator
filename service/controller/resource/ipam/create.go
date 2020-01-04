@@ -102,7 +102,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from VPCs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d allocated subnets from VPCs", len(subnets)))
 
 		return nil
 	})
@@ -118,7 +118,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfigs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d allocated subnets from AWSConfigs", len(subnets)))
 
 		return nil
 	})
@@ -135,7 +135,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d allocated subnets from Cluster CRs", len(subnets)))
 
 		return nil
 	})
