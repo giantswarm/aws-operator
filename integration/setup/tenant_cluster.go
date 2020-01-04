@@ -295,7 +295,7 @@ func ensureHostVPCDeleted(ctx context.Context, config Config) error {
 		config.Logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting the deletion of stack %#q", stackName))
 
 		stackInput := &cloudformation.DeleteStackInput{
-			StackName:        aws.String(stackName),
+			StackName: aws.String(stackName),
 		}
 		_, err := config.AWSClient.CloudFormation.DeleteStack(stackInput)
 		if IsUpdateInProgress(err) {
