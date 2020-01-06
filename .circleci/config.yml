@@ -50,6 +50,7 @@ workflows:
     jobs:
       - build:
           filters:
+            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
 
@@ -60,8 +61,8 @@ workflows:
           password_envar: "QUAY_PASSWORD"
           requires:
             - build
-          # Needed to trigger job also on git tag.
           filters:
+            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
 
@@ -69,8 +70,8 @@ workflows:
           type: approval
           requires:
             - build
-          # Needed to prevent job from being triggered on master branch.
           filters:
+            # Do not trigger the job on merge to master.
             branches:
               ignore: master
 
@@ -82,8 +83,8 @@ workflows:
           # Push to Aliyun should execute for non-master branches only once manually approved.
           requires:
             - hold-push-aws-operator-to-aliyun-pr
-          # Needed to prevent job being triggered for master branch.
           filters:
+            # Do not trigger the job on merge to master.
             branches:
               ignore: master
 
@@ -95,31 +96,36 @@ workflows:
           password_envar: "ALIYUN_PASSWORD"
           requires:
             - build
-          # Needed to trigger job only on merge to master.
           filters:
+            # Trigger the job on merge to master.
             branches:
               only: master
+            # Trigger the job also on git tag.
+            tags:
+              only: /^v.*/
 
       - architect/push-to-app-catalog:
-          name: push-aws-operator-to-app-catalog
+          name: push-aws-operator-to-control-plane-app-catalog
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
             - push-aws-operator-to-quay
-          # Needed to trigger job also on git tag.
           filters:
+            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
 
       - architect/push-to-app-collection:
-          name: push-to-aws-app-collection
+          name: push-aws-operator-to-aws-app-collection
           app_name: "aws-operator"
           app_collection_repo: "aws-app-collection"
           requires:
-            - push-aws-operator-to-app-catalog
+            - push-aws-operator-to-control-plane-app-catalog
           filters:
+            # Do not trigger the job on commit.
             branches:
               ignore: /.*/
+            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
