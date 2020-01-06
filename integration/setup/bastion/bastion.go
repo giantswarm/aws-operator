@@ -353,7 +353,7 @@ func (b *Bastion) ensureIgnitionCreated(ctx context.Context) error {
 	}
 
 	if !bucketExists {
-		b.logger.LogCtx(ctx, "level", "debug", "message", "creating bastion ignition bucket for account", "bucket", ignitionBucket)
+		b.logger.LogCtx(ctx, "level", "debug", "message", "creating bastion ignition bucket", "bucket", ignitionBucket)
 		createBucketInput := &s3.CreateBucketInput{
 			Bucket: aws.String(ignitionBucket),
 		}
@@ -361,7 +361,7 @@ func (b *Bastion) ensureIgnitionCreated(ctx context.Context) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		b.logger.LogCtx(ctx, "level", "debug", "message", "created bastion ignition bucket for account", "bucket", ignitionBucket)
+		b.logger.LogCtx(ctx, "level", "debug", "message", "created bastion ignition bucket", "bucket", ignitionBucket)
 	}
 
 	{
