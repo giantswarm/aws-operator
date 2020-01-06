@@ -69,7 +69,7 @@ func NewConfig() (Config, error) {
 	{
 		config := accountid.Config{
 			Logger: logger,
-			STS:    nil,
+			STS:    awsClient.STS,
 		}
 		aid, err := accountid.New(config)
 		if err != nil {
