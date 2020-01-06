@@ -340,12 +340,14 @@ func (b *Bastion) ensureIgnitionCreated(ctx context.Context) error {
 		}
 		_, err := b.awsClient.S3.HeadBucketWithContext(ctx, headBucketInput)
 		if err != nil {
-			if err.Error() != s3.ErrCodeNoSuchBucket {
-				return microerror.Mask(err)
+			if awsErr, ok := err.(awserr.Error); ok {
+				if awsErr.Code() == s3.ErrCodeNoSuchBucket {
+					bucketExists = false
+				} else {
+					return microerror.Mask(err)
+				}
 			} else {
-				bucketExists = false
-				b.ignitionURL = nil
-				b.ignitionHash = nil
+				return microerror.Mask(err)
 			}
 		}
 	}
