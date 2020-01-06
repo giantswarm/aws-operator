@@ -445,16 +445,6 @@ func (b *Bastion) ensureIgnitionCreated(ctx context.Context) error {
 }
 
 func (b *Bastion) ensureDeletedOnce(ctx context.Context) error {
-	err := b.ensureSecurityGroupDeleted(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	err = b.ensureIgnitionDeleted(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
 	if b.instanceID != nil {
 		b.logger.LogCtx(ctx, "level", "debug", "message", "terminating bastion instance", "instance_id", b.instanceID)
 
@@ -464,7 +454,7 @@ func (b *Bastion) ensureDeletedOnce(ctx context.Context) error {
 			},
 		}
 
-		_, err = b.awsClient.EC2.TerminateInstancesWithContext(ctx, i)
+		_, err := b.awsClient.EC2.TerminateInstancesWithContext(ctx, i)
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok {
 				if awsErr.Code() != "InvalidInstanceID.NotFound" {
@@ -476,6 +466,16 @@ func (b *Bastion) ensureDeletedOnce(ctx context.Context) error {
 		}
 
 		b.logger.LogCtx(ctx, "level", "debug", "message", "terminated bastion instance", "instance_id", b.instanceID)
+	}
+
+	err := b.ensureIgnitionDeleted(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = b.ensureSecurityGroupDeleted(ctx)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	return nil
