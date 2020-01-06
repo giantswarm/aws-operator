@@ -5,7 +5,7 @@
 # Extra changes:
 #  - Added resource limits to calico-node and calico-kube-controller.
 #  - Added resource limits to install-cni.
-#  - Added 'priorityClassName: system-cluster-critical' to calico daemonset.
+#  - Added 'priorityClassName: system-node-critical' to calico daemonset.
 #
 # Calico Version v3.10.1
 # https://docs.projectcalico.org/v3.10/release-notes/
@@ -328,7 +328,7 @@ spec:
       # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
       # deletion": https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods.
       terminationGracePeriodSeconds: 0
-      priorityClassName: system-cluster-critical
+      priorityClassName: system-node-critical
       initContainers:
         # This container installs the CNI binaries
         # and CNI network config file on each node.

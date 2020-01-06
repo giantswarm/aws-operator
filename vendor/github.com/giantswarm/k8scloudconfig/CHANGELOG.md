@@ -9,7 +9,7 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v5.0.0] - 2019-11-26
+## [v5.0.0] - 2020-01-02
 
 ### Changed
 
@@ -20,7 +20,10 @@ version directory, and  then changes are introduced.
 - Update etcd to `3.3.17`.
 - Update `calicoctl` (debug tool) to `3.10.1`.
 - Update `crictl` (debug tool) to `1.16.1`.
+- Clean up k8s-addons (use system `kubectl`, avoid `kubectl get cs`).
+- Apply kubelet restricted role labels using new systemd service.
 - Increase `fs.inotify.max_user_instances` to 8192.
+- Change Priority Class for `calico-node` to `system-node-critical`.
 
 ### Added
 
@@ -43,11 +46,11 @@ version directory, and  then changes are introduced.
 - Use `/bin/calico-node -felix-live` for `calico-node` liveness probe instead of `httpGet`.
 - Generally minimize differences between [Calico v3.9 yaml](https://docs.projectcalico.org/v3.9/manifests/calico.yaml) and `calico-all.yaml`.
 
-## [v4.8.1] - 2019-12-04
+## [v4.8.1] - 2019-12-31
 
 ### Changed
 
-- Update kubernetes to 1.14.9, includes fixes for CVE-2019-11253.
+- Update Kubernetes to 1.14.10, includes fixes for CVE-2019-11253 and some Azure fixes.
 - Increase `fs.inotify.max_user_instances` to 8192.
 
 ## [v4.8.0] 
