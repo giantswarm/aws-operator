@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/giantswarm/microerror"
 )
 
@@ -36,6 +37,7 @@ type Client struct {
 	CloudFormation *cloudformation.CloudFormation
 	EC2            *ec2.EC2
 	S3             *s3.S3
+	STS            *sts.STS
 }
 
 func NewClient() (*Client, error) {
@@ -105,6 +107,7 @@ func NewClient() (*Client, error) {
 	a.CloudFormation = cloudformation.New(hostSession)
 	a.EC2 = ec2.New(guestSession)
 	a.S3 = s3.New(guestSession)
+	a.STS = sts.New(guestSession)
 
 	return a, nil
 }

@@ -326,11 +326,11 @@
 
 [[projects]]
   branch = "add-guest-s3-client"
-  digest = "1:a0537334ff7fabc3b98029b6e54ad124207224f4c1eacd231707d5e4de0be898"
+  digest = "1:f343cdb95da57af5ff5662fc1dc62332f368d7a245daca0670e542b735e77c79"
   name = "github.com/giantswarm/e2eclients"
   packages = ["aws"]
   pruneopts = "UT"
-  revision = "fc290f9319ebfc5961b29e7357014705a2c37d2c"
+  revision = "8aed926bf106f51779238887029a42cf5f210f1a"
 
 [[projects]]
   branch = "master"
@@ -2048,6 +2048,7 @@
     "github.com/aws/aws-sdk-go/service/support",
     "github.com/aws/aws-sdk-go/service/support/supportiface",
     "github.com/docker/distribution/reference",
+    "github.com/ghodss/yaml",
     "github.com/giantswarm/apiextensions/pkg/apis/cluster/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",

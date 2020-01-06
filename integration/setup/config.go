@@ -15,6 +15,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/integration/env"
 	"github.com/giantswarm/aws-operator/integration/setup/bastion"
+	"github.com/giantswarm/aws-operator/service/accountid"
 )
 
 const (
@@ -59,6 +60,22 @@ func NewConfig() (Config, error) {
 		c := micrologger.Config{}
 
 		logger, err = micrologger.New(c)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+	}
+
+	var accountID string
+	{
+		config := accountid.Config{
+			Logger: logger,
+			STS:    nil,
+		}
+		aid, err := accountid.New(config)
+		if err != nil {
+			return Config{}, microerror.Mask(err)
+		}
+		accountID, err = aid.Lookup()
 		if err != nil {
 			return Config{}, microerror.Mask(err)
 		}
@@ -171,6 +188,7 @@ func NewConfig() (Config, error) {
 	if bastionEnabled {
 		config := bastion.Config{
 			AWSClient:    awsClient,
+			AccountID:    accountID,
 			ClusterID:    env.ClusterID(),
 			ImageID:      bastionAMI,
 			InstanceType: bastionSize,
