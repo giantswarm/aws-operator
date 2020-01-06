@@ -45,7 +45,7 @@ type Config struct {
 type Bastion struct {
 	// Config
 	awsClient    *e2eclientsaws.Client
-	accountID     string
+	accountID    string
 	clusterID    string
 	imageID      string
 	instanceType string
@@ -61,8 +61,8 @@ type Bastion struct {
 	instanceID *string
 
 	// S3
-	ignitionURL    *string
-	ignitionHash   *string
+	ignitionURL  *string
+	ignitionHash *string
 }
 
 func NewBastion(config Config) (*Bastion, error) {
@@ -489,7 +489,6 @@ func (b *Bastion) ensureIgnitionDeleted(ctx context.Context) error {
 
 	return nil
 }
-
 
 func (b *Bastion) ensureSecurityGroupDeleted(ctx context.Context) error {
 	if b.bastionSecurityGroupID == nil {
