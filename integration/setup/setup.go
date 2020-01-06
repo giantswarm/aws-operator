@@ -38,7 +38,7 @@ func Setup(m *testing.M, config Config) {
 
 	if !failed && config.UseDefaultTenant {
 		wait := true
-		err = ensureTenantClusterCreated(ctx, clusterID, config, wait)
+		err = EnsureTenantClusterCreated(ctx, clusterID, config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			failed = true
@@ -51,7 +51,7 @@ func Setup(m *testing.M, config Config) {
 
 	if !env.KeepResources() && config.UseDefaultTenant {
 		wait := true
-		err := ensureTenantClusterDeleted(ctx, clusterID, config, wait)
+		err := EnsureTenantClusterDeleted(ctx, clusterID, config, wait)
 		if err != nil {
 			config.Logger.LogCtx(ctx, "level", "error", "message", err.Error())
 			failed = true
