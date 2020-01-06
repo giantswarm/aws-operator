@@ -326,7 +326,7 @@ func (b *Bastion) ensureSecurityGroupsCreated(ctx context.Context) error {
 
 		tagsInput := &ec2.CreateTagsInput{
 			Resources: []*string{
-				b.bastionSecurityGroupID,
+				o.GroupId,
 			},
 			Tags: []*ec2.Tag{
 				{
@@ -346,7 +346,7 @@ func (b *Bastion) ensureSecurityGroupsCreated(ctx context.Context) error {
 		}
 
 		ingressInput := &ec2.AuthorizeSecurityGroupIngressInput{
-			GroupId: b.bastionSecurityGroupID,
+			GroupId: o.GroupId,
 			IpPermissions: []*ec2.IpPermission{
 				{
 					FromPort:   aws.Int64(22),
