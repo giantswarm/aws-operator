@@ -16,6 +16,8 @@ version directory, and  then changes are introduced.
 - Moved kubelet from container to host process (`--containerized` flag is removed in Kubernetes 1.16).
 - Changed `restricted` PodSecurityPolicy to restrict the allowed range of user IDs for PODs.
 - Increase `fs.inotify.max_user_instances` to 8192.
+- Change Priority Class for `calico-node` to `system-node-critical`.
+- Use registry domain for k8s-api-healthz and wait for domains script for AWS China.
 
 ### Added
 

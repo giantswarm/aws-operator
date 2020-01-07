@@ -415,15 +415,15 @@
   revision = "f75fead2ae064a2ae20a117cc1cd1d2f6d050641"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8fcac04170acd9c50dc24e7f5c330c1ff9a1c68184252812d0e7d13b4531b9cc"
+  branch = "k8s-api-healthz"
+  digest = "1:e0b2de99b4d174e2f40ee0e2830ef0843e61cbd67a4bec899c0d5fd85612565c"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_4_9_0",
   ]
   pruneopts = "T"
-  revision = "fd74eac277875634cd16f098c7ed020a96a87808"
+  revision = "ea90005e44218aa3d0b6134e3cdf999df08b0020"
 
 [[projects]]
   branch = "master"

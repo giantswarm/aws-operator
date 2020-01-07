@@ -86,7 +86,7 @@ required = [
 
 [[constraint]]
   name = "github.com/giantswarm/k8scloudconfig"
-  branch = "master"
+  branch = "k8s-api-healthz"
 
 [[constraint]]
   name = "github.com/giantswarm/microendpoint"
