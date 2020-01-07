@@ -341,7 +341,7 @@ func (b *Bastion) ensureIgnitionCreated(ctx context.Context) error {
 		_, err := b.awsClient.S3.HeadBucketWithContext(ctx, headBucketInput)
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok {
-				if awsErr.Code() == "NotFound" {
+				if awsErr.Code() == s3.ErrCodeNoSuchBucket {
 					bucketExists = false
 				} else {
 					return microerror.Mask(err)
