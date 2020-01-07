@@ -19,6 +19,8 @@ e2eTest: &e2eTest
         when: always
 
 version: 2.1
+orbs:
+  architect: giantswarm/architect@0.4.5
 jobs:
   build:
     machine: true
@@ -54,12 +56,20 @@ jobs:
         root: .
         paths:
         - ./aws-operator
+        - ./architect
 
+  deploy:
+    machine: true
+    steps:
+    - checkout
+    - attach_workspace:
+        at: .
     - deploy:
         command: |
-          if [ "${CIRCLE_BRANCH}" == "thiccc" ]; then
             ./architect deploy
-          fi
+
+
+
 
   master:
     docker:
@@ -222,3 +232,44 @@ workflows:
       - e2eTestPRUpdate:
           requires:
           - pr
+      - hold-push-aws-operator-to-aliyun-pr:
+          type: approval
+          requires:
+            - build
+          # Needed to prevent job from being triggered on thiccc branch.
+          filters:
+            branches:
+              ignore: thiccc
+
+      - architect/push-to-docker-legacy:
+          name: push-aws-operator-to-aliyun-pr
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          # Push to Aliyun should execute for non-thiccc branches only once manually approved.
+          requires:
+            - hold-push-aws-operator-to-aliyun-pr
+          # Needed to prevent job from being triggered on thiccc branch.
+          filters:
+            branches:
+              ignore: thiccc
+
+       # Push to Aliyun should execute without manual approval on thiccc.
+      - architect/push-to-docker-legacy:
+          name: push-aws-operator-to-aliyun-thiccc
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          requires:
+            - build
+          # Needed to trigger job only on merge to thiccc.
+          filters:
+            branches:
+              only: thiccc
+      - deploy:
+          name: deploy
+          requires:
+            - push-aws-operator-to-aliyun-thiccc
+          filters:
+            branches:
+              only: thiccc
