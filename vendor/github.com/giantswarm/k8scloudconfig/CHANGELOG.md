@@ -24,6 +24,7 @@ version directory, and  then changes are introduced.
 - Apply kubelet restricted role labels using new systemd service.
 - Increase `fs.inotify.max_user_instances` to 8192.
 - Change Priority Class for `calico-node` to `system-node-critical`.
+- Use registry domain for k8s-api-healthz and wait for domains script for AWS China.
 
 ### Added
 

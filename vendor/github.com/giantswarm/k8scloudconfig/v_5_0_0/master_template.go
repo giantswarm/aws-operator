@@ -323,14 +323,13 @@ systemd:
       [Unit]
       Description=Adds labels to the node after kubelet startup
       After=k8s-kubelet.service
-      Requires=k8s-kubelet.service
+      Wants=k8s-kubelet.service
       [Service]
       Type=oneshot
       RemainAfterExit=yes
-      TimeoutStartSec=1200
       Environment="KUBECTL=/opt/bin/hyperkube kubectl --kubeconfig /etc/kubernetes/kubeconfig/kubelet.yaml"
       ExecStart=/bin/sh -c '\
-        while [ "$($KUBECTL get nodes $(hostname)| wc -l)" -lt "1" ]; do sleep 1 && echo "Waiting for healthy k8s";done;sleep 30s; \
+        while [ "$($KUBECTL get nodes $(hostname)| wc -l)" -lt "1" ]; do echo "Waiting for healthy k8s" && sleep 20s;done; \
         $KUBECTL label nodes --overwrite $(hostname) node-role.kubernetes.io/master=""; \
         $KUBECTL label nodes --overwrite $(hostname) kubernetes.io/role=master'
       [Install]
