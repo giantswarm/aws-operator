@@ -420,7 +420,7 @@
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_4_9_0",
+    "v_5_0_0",
   ]
   pruneopts = "T"
   revision = "ea90005e44218aa3d0b6134e3cdf999df08b0020"
@@ -2114,7 +2114,7 @@
     "github.com/giantswarm/k8sclient/k8scrdclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_9_0",
+    "github.com/giantswarm/k8scloudconfig/v_5_0_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
