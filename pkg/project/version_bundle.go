@@ -17,6 +17,14 @@ func NewVersionBundle() versionbundle.Bundle {
 				Description: "Fix vault encrypter role with new nodepools iam role names.",
 				Kind:        versionbundle.KindFixed,
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Propagate tag name from ASG to EC2 instances.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2110",
+				},
+			},
 		},
 		Components: []versionbundle.Component{
 			{
