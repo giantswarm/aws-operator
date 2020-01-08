@@ -25,6 +25,14 @@ func NewVersionBundle() versionbundle.Bundle {
 					"https://github.com/giantswarm/aws-operator/pull/2110",
 				},
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Drain nodes when deleting Node Pools.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2111",
+				},
+			},
 		},
 		Components: []versionbundle.Component{
 			{
