@@ -65,6 +65,14 @@ func NewVersionBundle() versionbundle.Bundle {
 					"https://github.com/giantswarm/aws-operator/pull/2084",
 				},
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Propagate tag name from ASG to EC2 instances.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2110",
+				},
+			},
 		},
 		Components: []versionbundle.Component{
 			{
