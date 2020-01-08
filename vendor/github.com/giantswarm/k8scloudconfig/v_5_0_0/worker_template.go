@@ -189,8 +189,25 @@ systemd:
         --network-plugin=cni \
         --register-node=true \
         --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
-        --node-labels="node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+        --node-labels="node.kubernetes.io/worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
         --v=2
+      [Install]
+      WantedBy=multi-user.target
+  - name: k8s-label-node.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=Adds labels to the node after kubelet startup
+      After=k8s-kubelet.service
+      Wants=k8s-kubelet.service
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      Environment="KUBECTL=/opt/bin/hyperkube kubectl --kubeconfig /etc/kubernetes/kubeconfig/kubelet.yaml"
+      ExecStart=/bin/sh -c '\
+        while [ "$($KUBECTL get nodes $(hostname)| wc -l)" -lt "1" ]; do echo "Waiting for healthy k8s" && sleep 20s;done; \
+        $KUBECTL label nodes --overwrite $(hostname) node-role.kubernetes.io/worker=""; \
+        $KUBECTL label nodes --overwrite $(hostname) kubernetes.io/role=worker'
       [Install]
       WantedBy=multi-user.target
   - name: etcd2.service

@@ -15,7 +15,7 @@
   name = "github.com/giantswarm/apiextensions"
   packages = ["pkg/apis/provider/v1alpha1"]
   pruneopts = "UT"
-  revision = "a4fd7939e26e7e2cd681af032963a1597ffae781"
+  revision = "29482fb3d774cedee3578619809e04274372bf9b"
 
 [[projects]]
   branch = "master"

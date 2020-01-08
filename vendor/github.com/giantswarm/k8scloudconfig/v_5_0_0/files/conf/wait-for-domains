@@ -1,5 +1,5 @@
 #!/bin/bash
-domains="{{.Cluster.Etcd.Domain}} {{.Cluster.Kubernetes.API.Domain}} quay.io"
+domains="{{.Cluster.Etcd.Domain}} {{.Cluster.Kubernetes.API.Domain}} {{ .RegistryDomain }}"
 
 for domain in $domains; do
 until nslookup $domain; do
