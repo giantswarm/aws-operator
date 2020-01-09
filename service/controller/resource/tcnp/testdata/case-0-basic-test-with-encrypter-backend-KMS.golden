@@ -24,6 +24,17 @@ Resources:
       MaxSize: 5
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
 
+      # We define a lifecycle hook as part of the ASG in order to drain nodes
+      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
+      # hook referencing the ASG name. In this setting when deleting a Node Pool
+      # the lifecycle hook was never executed. We always want node draining for
+      # reliably managing customer workloads.
+      LifecycleHookSpecificationList:
+        - DefaultResult: CONTINUE
+          HeartbeatTimeout: 3600
+          LifecycleHookName: NodePool
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+
       # 10 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
       HealthCheckGracePeriod: 10
@@ -180,15 +191,6 @@ Resources:
               ]
             }
           }
-  NodePoolLifecycleHook:
-    Type: AWS::AutoScaling::LifecycleHook
-    Properties:
-      AutoScalingGroupName:
-        Ref: NodePoolAutoScalingGroup
-      DefaultResult: CONTINUE
-      HeartbeatTimeout: 3600
-      LifecycleHookName: NodePool
-      LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
   
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
