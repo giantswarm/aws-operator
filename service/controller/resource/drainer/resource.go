@@ -62,18 +62,18 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1alpha2.AWSCluster, md infrastructurev1alpha2.AWSMachineDeployment, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for ec2 instance %#q", instanceID))
 
-	n := cr.GetNamespace()
+	n := md.GetNamespace()
 	c := &g8sv1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.InstanceID: instanceID,
 			},
 			Labels: map[string]string{
-				label.Cluster:           key.ClusterID(&cr),
-				label.MachineDeployment: key.MachineDeploymentID(&cr),
+				label.Cluster:           key.ClusterID(&md),
+				label.MachineDeployment: key.MachineDeploymentID(&md),
 			},
 			Name: privateDNS,
 		},
@@ -81,9 +81,9 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1a
 			Guest: g8sv1alpha1.DrainerConfigSpecGuest{
 				Cluster: g8sv1alpha1.DrainerConfigSpecGuestCluster{
 					API: g8sv1alpha1.DrainerConfigSpecGuestClusterAPI{
-						Endpoint: key.ClusterAPIEndpoint(cr),
+						Endpoint: key.ClusterAPIEndpoint(cl),
 					},
-					ID: key.ClusterID(&cr),
+					ID: key.ClusterID(&md),
 				},
 				Node: g8sv1alpha1.DrainerConfigSpecGuestNode{
 					Name: privateDNS,
@@ -108,7 +108,11 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1a
 // ensure creates DrainerConfigs for ASG instances in terminating/wait state
 // then lets node-operator to do its job.
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
-	cr, err := r.toClusterFunc(obj)
+	md, err := key.ToMachineDeployment(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cl, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -194,14 +198,14 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			n := cr.GetNamespace()
+			n := cl.GetNamespace()
 			o := metav1.GetOptions{}
 
 			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Get(privateDNS, o)
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
 
-				err := r.createDrainerConfig(ctx, cr, *instance.InstanceId, privateDNS)
+				err := r.createDrainerConfig(ctx, cl, md, *instance.InstanceId, privateDNS)
 				if err != nil {
 					return microerror.Mask(err)
 				}
