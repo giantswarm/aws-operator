@@ -72,7 +72,8 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cr infrastructurev1a
 				annotation.InstanceID: instanceID,
 			},
 			Labels: map[string]string{
-				label.Cluster: key.ClusterID(&cr),
+				label.Cluster:           key.ClusterID(&cr),
+				label.MachineDeployment: key.MachineDeploymentID(&cr),
 			},
 			Name: privateDNS,
 		},
