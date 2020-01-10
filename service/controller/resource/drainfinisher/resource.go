@@ -121,7 +121,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		n := cr.GetNamespace()
 		o := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
+			LabelSelector: fmt.Sprintf("%s=%s, %s=%s", label.Cluster, key.ClusterID(&cr), label.MachineDeployment, key.MachineDeploymentID(&cr)),
 		}
 
 		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
