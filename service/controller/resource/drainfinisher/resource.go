@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
@@ -60,7 +59,7 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 		AutoScalingGroupName:  aws.String(workerASGName),
 		InstanceId:            aws.String(instanceID),
 		LifecycleActionResult: aws.String("CONTINUE"),
-		LifecycleHookName:     aws.String(key.RefNodeDrainer),
+		LifecycleHookName:     aws.String("NodePool"),
 	}
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -120,7 +119,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding drained drainer configs for tenant cluster")
 
-		n := v1.NamespaceAll
+		n := cr.GetNamespace()
 		o := metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
 		}
@@ -133,7 +132,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		// As long as we have DrainerConfig CRs for this tenant cluster we want to
 		// keep finalizers and try again next time. We keep finalizers because this
 		// might be a delete event.
-		if len(drainedDrainerConfigs) != 0 {
+		if len(drainerConfigs.Items) != 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found drainer configs for tenant cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
@@ -161,7 +160,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring finised draining for drained nodes")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring finished draining for drained nodes")
 
 		for _, drainerConfig := range drainedDrainerConfigs {
 			// This is a special thing for AWS. We use annotations to transport EC2
@@ -184,7 +183,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured finised draining for drained nodes")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured finished draining for drained nodes")
 	}
 
 	return nil
