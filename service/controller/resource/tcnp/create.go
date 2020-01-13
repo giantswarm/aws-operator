@@ -94,6 +94,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateInProgress {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool cloud formation stack already exists")
@@ -350,10 +354,6 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	return launchConfiguration, nil
 }
 
-func newLifecycleHooks(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLifecycleHooks, error) {
-	return &template.ParamsMainLifecycleHooks{}, nil
-}
-
 func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -474,10 +474,6 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		lifecycleHooks, err := newLifecycleHooks(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 		outputs, err := newOutputs(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -503,7 +499,6 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			AutoScalingGroup:    autoScalingGroup,
 			IAMPolicies:         iamPolicies,
 			LaunchConfiguration: launchConfiguration,
-			LifecycleHooks:      lifecycleHooks,
 			Outputs:             outputs,
 			RouteTables:         routeTables,
 			SecurityGroups:      securityGroups,

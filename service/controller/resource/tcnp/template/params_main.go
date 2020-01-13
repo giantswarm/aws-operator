@@ -5,7 +5,6 @@ type ParamsMain struct {
 	AutoScalingGroup    *ParamsMainAutoScalingGroup
 	IAMPolicies         *ParamsMainIAMPolicies
 	LaunchConfiguration *ParamsMainLaunchConfiguration
-	LifecycleHooks      *ParamsMainLifecycleHooks
 	Outputs             *ParamsMainOutputs
 	RouteTables         *ParamsMainRouteTables
 	SecurityGroups      *ParamsMainSecurityGroups

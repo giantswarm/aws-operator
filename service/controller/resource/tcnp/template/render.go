@@ -12,7 +12,6 @@ func Render(v interface{}) (string, error) {
 		TemplateMainAutoScalingGroup,
 		TemplateMainIAMPolicies,
 		TemplateMainLaunchConfiguration,
-		TemplateMainLifecycleHooks,
 		TemplateMainOutputs,
 		TemplateMainRouteTables,
 		TemplateMainSecurityGroups,

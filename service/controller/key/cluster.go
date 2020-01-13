@@ -52,8 +52,7 @@ const (
 )
 
 const (
-	RefNodeDrainer = "NodeDrainer"
-	RefWorkerASG   = "workerAutoScalingGroup"
+	RefWorkerASG = "workerAutoScalingGroup"
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
