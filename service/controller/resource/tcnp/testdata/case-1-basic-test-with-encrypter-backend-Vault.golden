@@ -258,6 +258,16 @@ Resources:
         ToPort: 10301
         CidrIp: 10.1.0.0/16
       VpcId: vpc-id
+  GeneralInternalAPIIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: 443
+      SourceSecurityGroupId: 
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
