@@ -58,12 +58,6 @@ jobs:
         paths:
         - ./aws-operator
 
-    - deploy:
-        command: |
-          if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            ./architect deploy
-          fi
-
   master:
     docker:
       - image: busybox
