@@ -38,13 +38,6 @@ jobs:
         paths:
         - ./aws-operator
 
-    - deploy:
-        command: |
-          if [ "${CIRCLE_BRANCH}" == "thiccc" ]; then
-            ./architect deploy
-          fi
-
-
 workflows:
   build:
     jobs:
