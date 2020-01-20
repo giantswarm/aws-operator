@@ -230,7 +230,7 @@ func Test_Detection_availabilityZonesEqual(t *testing.T) {
 			matches: false,
 		},
 		{
-			name: "case 9, different order",
+			name: "case 8, different order",
 			spec: []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 				{
 					Name: "eu-central-1a",
