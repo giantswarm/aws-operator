@@ -114,7 +114,51 @@ Resources:
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnetEuCentral1b
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNF85XzAvY2x1c3Rlci04eTVjay10Y2NwIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRjIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAiZXRjZCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogZmFsc2UsCiAgICAgICAgICAibGFiZWwiOiAiZXRjZCIsCiAgICAgICAgICAiZm9ybWF0IjogImV4dDQiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
+      UserData:
+        Fn::Base64: |
+          {
+            "ignition": {
+          "version": "2.2.0",
+          "config": {
+            "append": [
+              {
+                "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_8_0/cluster-8y5ck-tccp"
+              }
+            ]
+          }
+        },
+        "storage": {
+          "filesystems": [
+            {
+              "name": "docker",
+              "mount": {
+                "device": "/dev/xvdc",
+                "wipeFilesystem": true,
+                "label": "docker",
+                "format": "xfs"
+              }
+            },
+            {
+              "name": "log",
+              "mount": {
+                "device": "/dev/xvdf",
+                "wipeFilesystem": true,
+                "label": "log",
+                "format": "xfs"
+              }
+            },
+            {
+              "name": "etcd",
+              "mount": {
+                "device": "/dev/xvdh",
+                "wipeFilesystem": false,
+                "label": "etcd",
+                "format": "ext4"
+              }
+            }
+          ]
+        }
+      }
       Tags:
       - Key: Name
         Value: 8y5ck-master
