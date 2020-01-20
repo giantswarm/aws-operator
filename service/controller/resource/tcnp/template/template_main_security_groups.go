@@ -45,7 +45,7 @@ const TemplateMainSecurityGroups = `
       Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
       GroupId: {{ .SecurityGroups.TenantCluster.InternalAPI.ID }}
       IpProtocol: tcp
-      FromPort: -1
+      FromPort: 443
       ToPort: 443
       SourceSecurityGroupId: !Ref GeneralSecurityGroup 
   GeneralMasterIngressRule:
