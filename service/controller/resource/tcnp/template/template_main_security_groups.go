@@ -43,11 +43,11 @@ const TemplateMainSecurityGroups = `
     DependsOn: GeneralSecurityGroup
     Properties:
       Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
-      GroupId: !Ref GeneralSecurityGroup
+      GroupId: {{ .SecurityGroups.TenantCluster.InternalAPI.ID }}
       IpProtocol: -1
       FromPort: -1
       ToPort: 443
-      SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.InternalAPI.ID }}
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
