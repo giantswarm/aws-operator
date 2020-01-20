@@ -8,19 +8,29 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "cloudconfig",
+				Description: "Fix pause container image repository for China.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
+				Component:   "vault",
+				Description: "Fix vault encrypter role with new nodepools iam role names.",
+				Kind:        versionbundle.KindFixed,
+			},
+			{
 				Component:   "cloudformation",
-				Description: "Bring back name tags to AWS resources like VPCs, Subnets and EC2 Instances.",
+				Description: "Propagate tag name from ASG to EC2 instances.",
 				Kind:        versionbundle.KindFixed,
 				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2059",
+					"https://github.com/giantswarm/aws-operator/pull/2110",
 				},
 			},
 			{
-				Component:   "kubelet",
-				Description: "Label nodes with operator version instead of release version.",
+				Component:   "cloudformation",
+				Description: "Drain nodes when deleting Node Pools.",
 				Kind:        versionbundle.KindFixed,
 				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2064",
+					"https://github.com/giantswarm/aws-operator/pull/2111",
 				},
 			},
 		},

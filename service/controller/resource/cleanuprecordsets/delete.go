@@ -22,6 +22,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	if !r.route53Enabled {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		return nil
+	}
+
 	var hostedZones []*route53.HostedZone
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding hosted zones")

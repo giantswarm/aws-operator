@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
@@ -22,7 +22,7 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 	}{
 		{
 			description: "current and desired state empty, expected empty",
-			obj: &v1alpha1.Cluster{
+			obj: &infrastructurev1alpha2.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",
@@ -35,7 +35,7 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state empty, desired state not empty, expected empty",
-			obj: &v1alpha1.Cluster{
+			obj: &infrastructurev1alpha2.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",
@@ -52,7 +52,7 @@ func Test_Resource_S3Bucket_newDelete(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty but equal, expected desired state avoiding delivery log bucket",
-			obj: &v1alpha1.Cluster{
+			obj: &infrastructurev1alpha2.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",

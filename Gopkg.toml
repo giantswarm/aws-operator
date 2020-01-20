@@ -23,7 +23,9 @@
 
 required = [
   "github.com/docker/distribution/reference",
-  "k8s.io/apiserver/pkg/endpoints/request"
+  "k8s.io/apiserver/pkg/endpoints/request",
+  "k8s.io/kubectl/pkg/cmd/util",
+  "k8s.io/kubernetes/pkg/kubectl/cmd"
 ]
 
 
@@ -52,7 +54,7 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/certs"
 
-[[constraint]]
+[[override]]
   branch = "master"
   name = "github.com/giantswarm/e2e-harness"
 
@@ -86,6 +88,10 @@ required = [
 
 [[constraint]]
   branch = "master"
+  name = "github.com/giantswarm/k8sclient"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
@@ -104,17 +110,13 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/micrologger"
 
-[[constraint]]
+[[override]]
   branch = "master"
   name = "github.com/giantswarm/operatorkit"
 
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/randomkeys"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/statusresource"
 
 [[constraint]]
   branch = "master"
@@ -128,41 +130,49 @@ required = [
   name = "github.com/prometheus/client_golang"
   version = "0.9.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.4"
-
-[[constraint]]
-  name = "sigs.k8s.io/cluster-api"
-  version = "=v0.1.10"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
 
 [[override]]
   name = "k8s.io/cli-runtime"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "k8s.io/helm"
+  version = "2.16.1"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "v1.15.4"
+  version = "v1.16.3"
 
 [[override]]
   name = "k8s.io/component-base"
-  version = "kubernetes-1.15.4"
+  version = "kubernetes-1.16.3"
+
+[[override]]
+  name = "sigs.k8s.io/cluster-api"
+  version = "~v0.2.8"
+
+[[override]]
+  name = "sigs.k8s.io/kustomize"
+  version = "v2.0.3"
 
 [[override]]
   name = "github.com/ghodss/yaml"
@@ -172,6 +182,10 @@ required = [
   name = "github.com/russross/blackfriday"
   version = "v1.5.2"
 
+[[override]]
+  source = "gopkg.in/fsnotify/fsnotify.v1"
+  name = "gopkg.in/fsnotify.v1"
+  version = "v1.4.7"
 
 
 [prune]

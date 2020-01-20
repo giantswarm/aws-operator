@@ -7,14 +7,14 @@ import (
 	"strings"
 	"time"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 )
 
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_4_8_0"
+	CloudConfigVersion = "v_4_9_0"
 	CloudProvider      = "aws"
 )
 
@@ -31,14 +31,16 @@ const (
 
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagAvailabilityZone  = "giantswarm.io/availability-zone"
-	TagCluster           = "giantswarm.io/cluster"
-	TagInstallation      = "giantswarm.io/installation"
-	TagMachineDeployment = "giantswarm.io/machine-deployment"
-	TagOrganization      = "giantswarm.io/organization"
-	TagRouteTableType    = "giantswarm.io/route-table-type"
-	TagStack             = "giantswarm.io/stack"
-	TagSubnetType        = "giantswarm.io/subnet-type"
+	TagAvailabilityZone        = "giantswarm.io/availability-zone"
+	TagCluster                 = "giantswarm.io/cluster"
+	TagClusterType             = "giantswarm.io/cluster-type"
+	TagClusterTypeControlPlane = "control-plane"
+	TagInstallation            = "giantswarm.io/installation"
+	TagMachineDeployment       = "giantswarm.io/machine-deployment"
+	TagOrganization            = "giantswarm.io/organization"
+	TagRouteTableType          = "giantswarm.io/route-table-type"
+	TagStack                   = "giantswarm.io/stack"
+	TagSubnetType              = "giantswarm.io/subnet-type"
 )
 
 const (
@@ -50,67 +52,66 @@ const (
 )
 
 const (
-	RefNodeDrainer = "NodeDrainer"
-	RefWorkerASG   = "workerAutoScalingGroup"
+	RefWorkerASG = "workerAutoScalingGroup"
 )
 
-func ClusterAPIEndpoint(cluster v1alpha1.Cluster) string {
+func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
-func ClusterBaseDomain(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.DNS.Domain
+func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Cluster.DNS.Domain
 }
 
-func ClusterEtcdEndpoint(cluster v1alpha1.Cluster) string {
+func ClusterEtcdEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
-func ClusterEtcdEndpointWithPort(cluster v1alpha1.Cluster) string {
+func ClusterEtcdEndpointWithPort(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s:2379", ClusterEtcdEndpoint(cluster))
 }
 
-func ClusterKubeletEndpoint(cluster v1alpha1.Cluster) string {
+func ClusterKubeletEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("worker.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
-func ClusterNamespace(cluster v1alpha1.Cluster) string {
+func ClusterNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 	return ClusterID(&cluster)
 }
 
-func CredentialName(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Provider.CredentialSecret.Name
+func CredentialName(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.CredentialSecret.Name
 }
 
-func CredentialNamespace(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Provider.CredentialSecret.Namespace
+func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.CredentialSecret.Namespace
 }
 
-func DockerVolumeResourceName(cr v1alpha1.Cluster, t time.Time) string {
+func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time) string {
 	return getResourcenameWithTimeHash("DockerVolume", cr, t)
 }
 
-func MasterAvailabilityZone(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Provider.Master.AvailabilityZone
+func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.Master.AvailabilityZone
 }
 
-func MasterCount(cluster v1alpha1.Cluster) int {
+func MasterCount(cluster infrastructurev1alpha2.AWSCluster) int {
 	return 1
 }
 
-func MasterInstanceResourceName(cr v1alpha1.Cluster, t time.Time) string {
+func MasterInstanceResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time) string {
 	return getResourcenameWithTimeHash("MasterInstance", cr, t)
 }
 
-func MasterInstanceName(cluster v1alpha1.Cluster) string {
+func MasterInstanceName(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-master", ClusterID(&cluster))
 }
 
-func MasterInstanceType(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Provider.Master.InstanceType
+func MasterInstanceType(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.Master.InstanceType
 }
 
-func ManagedRecordSets(cluster v1alpha1.Cluster) []string {
+func ManagedRecordSets(cluster infrastructurev1alpha2.AWSCluster) []string {
 	tcBaseDomain := TenantClusterBaseDomain(cluster)
 	return []string{
 		fmt.Sprintf("%s.", tcBaseDomain),
@@ -121,63 +122,63 @@ func ManagedRecordSets(cluster v1alpha1.Cluster) []string {
 	}
 }
 
-func OIDCClientID(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.ClientID
+func OIDCClientID(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Cluster.OIDC.ClientID
 }
-func OIDCIssuerURL(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.IssuerURL
+func OIDCIssuerURL(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Cluster.OIDC.IssuerURL
 }
-func OIDCUsernameClaim(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.Claims.Username
+func OIDCUsernameClaim(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Cluster.OIDC.Claims.Username
 }
-func OIDCGroupsClaim(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Cluster.OIDC.Claims.Groups
+func OIDCGroupsClaim(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Cluster.OIDC.Claims.Groups
 }
 
-func PolicyNameMaster(cluster v1alpha1.Cluster) string {
+func PolicyNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2PolicyK8s)
 }
 
-func ProfileNameMaster(cluster v1alpha1.Cluster) string {
+func ProfileNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
-func Region(cluster v1alpha1.Cluster) string {
-	return clusterProviderSpec(cluster).Provider.Region
+func Region(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.Region
 }
 
-func RoleNameMaster(cluster v1alpha1.Cluster) string {
+func RoleNameMaster(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-master-%s", ClusterID(&cluster), EC2RoleK8s)
 }
 
-func RolePeerAccess(cluster v1alpha1.Cluster) string {
+func RolePeerAccess(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-vpc-peer-access", ClusterID(&cluster))
 }
 
-func RouteTableName(cluster v1alpha1.Cluster, suffix, az string) string {
+func RouteTableName(cluster infrastructurev1alpha2.AWSCluster, suffix, az string) string {
 	return fmt.Sprintf("%s-%s-%s", ClusterID(&cluster), suffix, az)
 }
 
-func StatusClusterNetworkCIDR(cluster v1alpha1.Cluster) string {
-	return clusterProviderStatus(cluster).Provider.Network.CIDR
+func StatusClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Status.Provider.Network.CIDR
 }
 
-func TargetLogBucketName(cluster v1alpha1.Cluster) string {
+func TargetLogBucketName(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
 }
 
-func TenantClusterBaseDomain(cluster v1alpha1.Cluster) string {
+func TenantClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
-func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
+func ToCluster(v interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 	if v == nil {
-		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+		return infrastructurev1alpha2.AWSCluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSCluster{}, v)
 	}
 
-	p, ok := v.(*v1alpha1.Cluster)
+	p, ok := v.(*infrastructurev1alpha2.AWSCluster)
 	if !ok {
-		return v1alpha1.Cluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &v1alpha1.Cluster{}, v)
+		return infrastructurev1alpha2.AWSCluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSCluster{}, v)
 	}
 
 	c := p.DeepCopy()
@@ -185,15 +186,15 @@ func ToCluster(v interface{}) (v1alpha1.Cluster, error) {
 	return *c, nil
 }
 
-func VolumeNameDocker(cluster v1alpha1.Cluster) string {
+func VolumeNameDocker(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-docker", ClusterID(&cluster))
 }
 
-func VolumeNameEtcd(cluster v1alpha1.Cluster) string {
+func VolumeNameEtcd(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(&cluster))
 }
 
-func VolumeNameLog(cluster v1alpha1.Cluster) string {
+func VolumeNameLog(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s-log", ClusterID(&cluster))
 }
 
@@ -231,7 +232,7 @@ func ensureLabel(labels string, key string, value string) string {
 
 // getResourcenameWithTimeHash returns a string cromprised of some prefix, a
 // time hash and a cluster ID.
-func getResourcenameWithTimeHash(prefix string, cluster v1alpha1.Cluster, t time.Time) string {
+func getResourcenameWithTimeHash(prefix string, cluster infrastructurev1alpha2.AWSCluster, t time.Time) string {
 	id := strings.Replace(ClusterID(&cluster), "-", "", -1)
 
 	h := sha1.New()

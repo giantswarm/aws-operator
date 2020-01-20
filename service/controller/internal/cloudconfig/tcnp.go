@@ -3,13 +3,14 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-	cmav1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
@@ -24,7 +25,7 @@ type TCNP struct {
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
-	err := config.Config.Default().Validate()
+	err := config.Config.Validate()
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -36,10 +37,19 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-func (t *TCNP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	var kubeletExtraArgs []string
+	{
+		if t.config.PodInfraContainerImage != "" {
+			kubeletExtraArgs = append(kubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", t.config.PodInfraContainerImage))
+		}
+
+		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
 	var params k8scloudconfig.Params
@@ -59,7 +69,7 @@ func (t *TCNP) Render(ctx context.Context, cr cmav1alpha1.Cluster, clusterCerts 
 			cc:           cc,
 			clusterCerts: clusterCerts,
 		}
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = t.config.KubeletExtraArgs
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
 

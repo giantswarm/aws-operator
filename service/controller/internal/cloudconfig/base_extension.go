@@ -3,8 +3,8 @@ package cloudconfig
 import (
 	"context"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
@@ -12,7 +12,7 @@ import (
 )
 
 type baseExtension struct {
-	cluster       v1alpha1.Cluster
+	cluster       infrastructurev1alpha2.AWSCluster
 	encrypter     encrypter.Interface
 	encryptionKey string
 }

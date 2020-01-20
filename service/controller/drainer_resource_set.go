@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -24,7 +23,6 @@ import (
 )
 
 type drainerResourceSetConfig struct {
-	CMAClient              clientset.Interface
 	ControlPlaneAWSClients aws.Clients
 	G8sClient              versioned.Interface
 	K8sClient              kubernetes.Interface
@@ -56,7 +54,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -72,7 +70,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 		c := drainer.ResourceConfig{
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.CMAClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		drainerResource, err = drainer.NewResource(c)

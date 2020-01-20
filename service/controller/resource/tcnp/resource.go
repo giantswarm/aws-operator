@@ -1,9 +1,9 @@
 package tcnp
 
 import (
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 )
@@ -14,26 +14,28 @@ const (
 )
 
 type Config struct {
-	CMAClient clientset.Interface
+	G8sClient versioned.Interface
 	Detection *changedetection.TCNP
 	Logger    micrologger.Logger
 
+	EncrypterBackend string
 	InstallationName string
 }
 
 // Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
-	cmaClient clientset.Interface
+	g8sClient versioned.Interface
 	detection *changedetection.TCNP
 	logger    micrologger.Logger
 
+	encrypterBackend string
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
-	if config.CMAClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CMAClient must not be empty", config)
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
@@ -42,15 +44,19 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.EncrypterBackend == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
+	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
 	r := &Resource{
-		cmaClient: config.CMAClient,
+		g8sClient: config.G8sClient,
 		detection: config.Detection,
 		logger:    config.Logger,
 
+		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 	}
 

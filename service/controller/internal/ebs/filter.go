@@ -2,7 +2,7 @@ package ebs
 
 import (
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -24,7 +24,7 @@ func IsFiltered(vol *ec2.Volume, filterFuncs []func(t *ec2.Tag) bool) bool {
 	return false
 }
 
-func NewDockerVolumeFilter(cr v1alpha1.Cluster) func(t *ec2.Tag) bool {
+func NewDockerVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
 		if *t.Key == nameTagKey && *t.Value == key.VolumeNameDocker(cr) {
 			return true
@@ -33,7 +33,7 @@ func NewDockerVolumeFilter(cr v1alpha1.Cluster) func(t *ec2.Tag) bool {
 	}
 }
 
-func NewEtcdVolumeFilter(cr v1alpha1.Cluster) func(t *ec2.Tag) bool {
+func NewEtcdVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
 		if *t.Key == nameTagKey && *t.Value == key.VolumeNameEtcd(cr) {
 			return true
@@ -42,7 +42,7 @@ func NewEtcdVolumeFilter(cr v1alpha1.Cluster) func(t *ec2.Tag) bool {
 	}
 }
 
-func NewPersistentVolumeFilter(cr v1alpha1.Cluster) func(t *ec2.Tag) bool {
+func NewPersistentVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
 		if *t.Key == cloudProviderPersistentVolumeTagKey {
 			return true
