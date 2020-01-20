@@ -10,16 +10,19 @@ const TemplateMainLaunchConfiguration = `
       - DeviceName: /dev/xvdh
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Docker.Volume.Size }}
           VolumeType: gp2
       - DeviceName: /dev/xvdg
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Kubelet.Volume.Size }}
           VolumeType: gp2
       - DeviceName: /dev/xvdf
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
           VolumeType: gp2
       IamInstanceProfile: !Ref NodePoolInstanceProfile

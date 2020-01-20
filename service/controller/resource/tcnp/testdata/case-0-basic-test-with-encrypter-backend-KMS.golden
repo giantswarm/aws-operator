@@ -128,16 +128,19 @@ Resources:
       - DeviceName: /dev/xvdh
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: 100
           VolumeType: gp2
       - DeviceName: /dev/xvdg
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: 100
           VolumeType: gp2
       - DeviceName: /dev/xvdf
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: 100
           VolumeType: gp2
       IamInstanceProfile: !Ref NodePoolInstanceProfile
