@@ -229,6 +229,66 @@ func Test_Detection_availabilityZonesEqual(t *testing.T) {
 			},
 			matches: false,
 		},
+		{
+			name: "case 9, different order",
+			spec: []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
+				{
+					Name: "eu-central-1a",
+					Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+						Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+							CIDR: mustParseCIDR("10.1.4.0/27"),
+							ID:   "subnet-0854f0e4c66e3ef10",
+						},
+						Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
+							CIDR: mustParseCIDR("10.1.4.32/27"),
+							ID:   "subnet-0854f0e4c66e3ef10",
+						},
+					},
+				},
+				{
+					Name: "eu-central-1b",
+					Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+						Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+							CIDR: mustParseCIDR("10.1.4.64/27"),
+							ID:   "subnet-0934681f126016726",
+						},
+						Public: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic{
+							CIDR: mustParseCIDR("10.1.4.96/27"),
+							ID:   "subnet-0debe88c7b8120cb4",
+						},
+					},
+				},
+			},
+			status: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
+				{
+					Name: "eu-central-1b",
+					Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
+						Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+							CIDR: mustParseCIDR("10.1.4.64/27"),
+							ID:   "subnet-0934681f126016726",
+						},
+						Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic{
+							CIDR: mustParseCIDR("10.1.4.96/27"),
+							ID:   "subnet-0debe88c7b8120cb4",
+						},
+					},
+				},
+				{
+					Name: "eu-central-1a",
+					Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
+						Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
+							CIDR: mustParseCIDR("10.1.4.0/27"),
+							ID:   "subnet-0854f0e4c66e3ef10",
+						},
+						Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic{
+							CIDR: mustParseCIDR("10.1.4.32/27"),
+							ID:   "subnet-0854f0e4c66e3ef10",
+						},
+					},
+				},
+			},
+			matches: true,
+		},
 	}
 
 	for i, tc := range testCases {

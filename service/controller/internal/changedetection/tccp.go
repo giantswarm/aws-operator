@@ -81,13 +81,24 @@ func availabilityZonesEqual(spec []controllercontext.ContextSpecTenantClusterTCC
 		return false
 	}
 
-	for i, az := range spec {
-		if !availabilityZoneEqual(az, status[i]) {
+	for _, az := range spec {
+		// alternatively could sort the slice and compare as before.
+		if !containsAZ(az, status) {
 			return false
 		}
 	}
 
 	return true
+}
+
+// true if status slice has an AZ that is equal to target.
+func containsAZ(target controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone, status []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) bool {
+	for _, az := range status {
+		if availabilityZoneEqual(target, az) {
+			return true
+		}
+	}
+	return false
 }
 
 func availabilityZoneEqual(spec controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone, status controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) bool {
