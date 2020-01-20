@@ -264,7 +264,7 @@ Resources:
     Properties:
       Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
       GroupId: 
-      IpProtocol: -1
+      IpProtocol: tcp
       FromPort: -1
       ToPort: 443
       SourceSecurityGroupId: !Ref GeneralSecurityGroup 
