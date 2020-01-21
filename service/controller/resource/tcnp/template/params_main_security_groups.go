@@ -15,12 +15,17 @@ type ParamsMainSecurityGroupsControlPlaneVPC struct {
 }
 
 type ParamsMainSecurityGroupsTenantCluster struct {
-	Ingress ParamsMainSecurityGroupsTenantClusterIngress
-	Master  ParamsMainSecurityGroupsTenantClusterMaster
-	VPC     ParamsMainSecurityGroupsTenantClusterVPC
+	Ingress     ParamsMainSecurityGroupsTenantClusterIngress
+	InternalAPI ParamsMainSecurityGroupsTenantClusterInternalAPI
+	Master      ParamsMainSecurityGroupsTenantClusterMaster
+	VPC         ParamsMainSecurityGroupsTenantClusterVPC
 }
 
 type ParamsMainSecurityGroupsTenantClusterIngress struct {
+	ID string
+}
+
+type ParamsMainSecurityGroupsTenantClusterInternalAPI struct {
 	ID string
 }
 

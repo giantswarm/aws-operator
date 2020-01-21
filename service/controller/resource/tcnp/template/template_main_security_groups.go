@@ -41,6 +41,16 @@ const TemplateMainSecurityGroups = `
         - Key: Name
           Value: {{ .SecurityGroups.ClusterID }}-worker
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
+  GeneralInternalAPIIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
+      GroupId: {{ .SecurityGroups.TenantCluster.InternalAPI.ID }}
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

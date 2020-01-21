@@ -263,6 +263,16 @@ Resources:
         - Key: Name
           Value: 8y5ck-worker
       VpcId: vpc-id
+  GeneralInternalAPIIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
+      GroupId: internal-api-security-group-id
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
