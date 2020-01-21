@@ -19,7 +19,7 @@ The aws-operator manages Kubernetes clusters running on AWS.
     - Contains only the latest version of controllers (reconciling cluster API
       objects).
 
-## Getting Project
+## Getting the Project
 
 Download the latest release:
 https://github.com/giantswarm/aws-operator/releases/latest

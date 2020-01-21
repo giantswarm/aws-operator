@@ -105,7 +105,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
-			// Name is used to compute finalizer names. This here results in something
+			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
 			Name: project.Name() + "-cluster-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {

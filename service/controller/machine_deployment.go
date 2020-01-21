@@ -78,7 +78,7 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
 
-			// Name is used to compute finalizer names. This here results in something
+			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-machine-deployment-controller.
 			Name: project.Name() + "-machine-deployment-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {

@@ -50,7 +50,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
 
-			// Name is used to compute finalizer names. This here results in something
+			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
 			Name: project.Name() + "-drainer-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {
