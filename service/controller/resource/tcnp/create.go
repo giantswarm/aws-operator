@@ -415,6 +415,9 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			},
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
+			InternalAPI: template.ParamsMainSecurityGroupsTenantClusterInternalAPI{
+				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "internal-api")),
+			},
 			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},
