@@ -195,6 +195,15 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
+							GroupId: aws.String("internal-api-security-group-id"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("8y5ck-internal-api"),
+								},
+							},
+						},
+						{
 							GroupId: aws.String("master-security-group-id"),
 							Tags: []*ec2.Tag{
 								{
