@@ -27,7 +27,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 // resulting Cloud Config template and prevent from accidental Cloud Config
 // template changes.
 //
-// It uses golden file as reference template and when changes to template are
+// It uses a golden file as a reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
 //  go test ./service/controller/internal/cloudconfig -run Test_Controller_CloudConfig_TCCP_Template_Render -update

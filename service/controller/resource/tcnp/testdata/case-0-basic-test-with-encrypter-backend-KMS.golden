@@ -128,16 +128,19 @@ Resources:
       - DeviceName: /dev/xvdh
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: 100
           VolumeType: gp2
       - DeviceName: /dev/xvdg
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: 100
           VolumeType: gp2
       - DeviceName: /dev/xvdf
         Ebs:
           DeleteOnTermination: true
+          Encrypted: true
           VolumeSize: 100
           VolumeType: gp2
       IamInstanceProfile: !Ref NodePoolInstanceProfile
@@ -258,6 +261,16 @@ Resources:
         ToPort: 10301
         CidrIp: 10.1.0.0/16
       VpcId: vpc-id
+  GeneralInternalAPIIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
+      GroupId: internal-api-security-group-id
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

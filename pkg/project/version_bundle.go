@@ -81,6 +81,14 @@ func NewVersionBundle() versionbundle.Bundle {
 					"https://github.com/giantswarm/aws-operator/pull/2111",
 				},
 			},
+			{
+				Component:   "cloudformation",
+				Description: "Encrypt blockdevice mappings in worker nodes.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2116",
+				},
+			},
 		},
 		Components: []versionbundle.Component{
 			{
