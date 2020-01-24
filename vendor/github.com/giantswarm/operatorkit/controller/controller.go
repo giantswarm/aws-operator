@@ -4,9 +4,13 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/k8sclient"
@@ -14,28 +18,30 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/micrologger/loggermeta"
 	"github.com/giantswarm/to"
-	"github.com/prometheus/client_golang/prometheus"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/giantswarm/operatorkit/controller/collector"
 	"github.com/giantswarm/operatorkit/controller/context/reconciliationcanceledcontext"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/operatorkit/resource"
 )
 
 const (
-	DefaultResyncPeriod = 5 * time.Minute
-)
+	DefaultResyncPeriod   = 5 * time.Minute
+	DisableMetricsServing = "0"
 
-const (
 	loggerKeyController = "controller"
 	loggerKeyEvent      = "event"
 	loggerKeyLoop       = "loop"
@@ -75,6 +81,8 @@ type Config struct {
 	// versioned and different resources can be executed depending on the runtime
 	// object being reconciled.
 	ResourceSets []*ResourceSet
+	// Selector is used to filter objects before passing them to the controller.
+	Selector labels.Selector
 
 	// Name is the name which the controller uses on finalizers for resources.
 	// The name used should be unique in the kubernetes cluster, to ensure that
@@ -87,16 +95,19 @@ type Config struct {
 }
 
 type Controller struct {
-	crd                  *apiextensionsv1beta1.CustomResourceDefinition
 	backOffFactory       func() backoff.Interface
+	crd                  *apiextensionsv1beta1.CustomResourceDefinition
 	k8sClient            k8sclient.Interface
 	logger               micrologger.Logger
 	newRuntimeObjectFunc func() pkgruntime.Object
 	resourceSets         []*ResourceSet
+	selector             labels.Selector
 
 	bootOnce               sync.Once
 	booted                 chan struct{}
+	collector              *collector.Set
 	errorCollector         chan error
+	loop                   int64
 	mutex                  sync.Mutex
 	removedFinalizersCache *stringCache
 
@@ -118,6 +129,9 @@ func New(config Config) (*Controller, error) {
 	if len(config.ResourceSets) == 0 {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ResourceSets must not be empty", config)
 	}
+	if config.Selector == nil {
+		config.Selector = labels.Everything()
+	}
 
 	if config.Name == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Name must not be empty", config)
@@ -126,17 +140,31 @@ func New(config Config) (*Controller, error) {
 		config.ResyncPeriod = DefaultResyncPeriod
 	}
 
+	controllerConfig := collector.SetConfig{
+		Logger:               config.Logger,
+		K8sClient:            config.K8sClient,
+		NewRuntimeObjectFunc: config.NewRuntimeObjectFunc,
+	}
+
+	timestampCollector, err := collector.NewSet(controllerConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	c := &Controller{
 		crd:                  config.CRD,
 		backOffFactory:       func() backoff.Interface { return backoff.NewMaxRetries(7, 1*time.Second) },
 		k8sClient:            config.K8sClient,
 		logger:               config.Logger,
+		selector:             config.Selector,
 		newRuntimeObjectFunc: config.NewRuntimeObjectFunc,
 		resourceSets:         config.ResourceSets,
 
 		bootOnce:               sync.Once{},
 		booted:                 make(chan struct{}),
+		collector:              timestampCollector,
 		errorCollector:         make(chan error, 1),
+		loop:                   -1,
 		mutex:                  sync.Mutex{},
 		removedFinalizersCache: newStringCache(config.ResyncPeriod * 3),
 
@@ -174,17 +202,19 @@ func (c *Controller) Booted() chan struct{} {
 	return c.booted
 }
 
-// DeleteFunc executes the controller's ProcessDelete function.
-func (c *Controller) DeleteFunc(obj interface{}) {
-	ctx := context.Background()
-	c.deleteFunc(ctx, obj)
-}
-
 // Reconcile implements the reconciler given to the controller-runtime
 // controller. Reconcile never returns any error as we deal with them in
 // operatorkit internally.
 func (c *Controller) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	ctx := context.Background()
+
+	// Add common keys to the logger context.
+	{
+		loop := atomic.AddInt64(&c.loop, 1)
+
+		ctx = setLoggerCtxValue(ctx, loggerKeyController, c.name)
+		ctx = setLoggerCtxValue(ctx, loggerKeyLoop, strconv.FormatInt(loop, 10))
+	}
 
 	res, err := c.reconcile(ctx, req)
 	if err != nil {
@@ -195,14 +225,14 @@ func (c *Controller) Reconcile(req reconcile.Request) (reconcile.Result, error) 
 	return res, nil
 }
 
-// UpdateFunc executes the controller's ProcessUpdate function.
-func (c *Controller) UpdateFunc(oldObj, newObj interface{}) {
-	ctx := context.Background()
-	c.updateFunc(ctx, newObj)
-}
-
 func (c *Controller) bootWithError(ctx context.Context) error {
 	var err error
+
+	// Boot the collector
+	err = c.collector.Boot(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	if c.crd != nil {
 		c.logger.LogCtx(ctx, "level", "debug", "message", "ensuring custom resource definition exists")
@@ -254,7 +284,7 @@ func (c *Controller) bootWithError(ctx context.Context) error {
 		o := manager.Options{
 			// MetricsBindAddress is set to 0 in order to disable it. We do this
 			// ourselves.
-			MetricsBindAddress: "0",
+			MetricsBindAddress: DisableMetricsServing,
 			SyncPeriod:         to.DurationP(c.resyncPeriod),
 		}
 
@@ -264,30 +294,37 @@ func (c *Controller) bootWithError(ctx context.Context) error {
 		}
 	}
 
-	var ctrl controller.Controller
 	{
-		o := controller.Options{
-			MaxConcurrentReconciles: 1,
-			Reconciler:              c,
-		}
-
-		ctrl, err = controller.New(c.name, mgr, o)
+		// We build our controller and set up its reconciliation.
+		// We use the Complete() method instead of Build() because we don't
+		// need the controller instance.
+		err = builder.
+			ControllerManagedBy(mgr).
+			For(c.newRuntimeObjectFunc()).
+			WithOptions(controller.Options{
+				MaxConcurrentReconciles: 1,
+				Reconciler:              c,
+			}).
+			WithEventFilter(predicate.Funcs{
+				CreateFunc:  func(e event.CreateEvent) bool { return c.selector.Matches(labels.Set(e.Meta.GetLabels())) },
+				DeleteFunc:  func(e event.DeleteEvent) bool { return c.selector.Matches(labels.Set(e.Meta.GetLabels())) },
+				UpdateFunc:  func(e event.UpdateEvent) bool { return c.selector.Matches(labels.Set(e.MetaNew.GetLabels())) },
+				GenericFunc: func(e event.GenericEvent) bool { return c.selector.Matches(labels.Set(e.Meta.GetLabels())) },
+			}).
+			Complete(c)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-	}
 
-	// Initializing the watch means to have the operator's reconciliation set up.
-	// We put the controller into a booted state by closing its booted channel so
-	// users know when to go ahead. Note that mgr.Start below blocks the boot
-	// process until it ends gracefully or fails.
-	{
-		err = ctrl.Watch(&source.Kind{Type: c.newRuntimeObjectFunc()}, &handler.EnqueueRequestForObject{})
-		if err != nil {
-			return microerror.Mask(err)
+		// We put the controller into a booted state by closing its booted
+		// channel once so users know when to go ahead.
+		select {
+		case <-c.booted:
+		default:
+			close(c.booted)
 		}
-		close(c.booted)
 
+		// mgr.Start() blocks the boot process until it ends gracefully or fails.
 		err = mgr.Start(setupSignalHandler())
 		if err != nil {
 			return microerror.Mask(err)
@@ -371,18 +408,21 @@ func (c *Controller) deleteFunc(ctx context.Context, obj interface{}) {
 func (c *Controller) reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	obj := c.newRuntimeObjectFunc()
 	err := c.k8sClient.CtrlClient().Get(ctx, req.NamespacedName, obj)
-	if err != nil {
+	if errors.IsNotFound(err) {
+		// At this point the controller-runtime cache dispatches a runtime object
+		// which is already being deleted, which is why it cannot be found here
+		// anymore. We then likely perceive the last delete event of that runtime
+		// object and it got purged from the controller-runtime cache. We do not
+		// need to log these errors and just stop processing here in a more graceful
+		// way.
+		return reconcile.Result{}, nil
+	} else if err != nil {
 		return reconcile.Result{}, microerror.Mask(err)
 	}
 
 	var m metav1.Object
-	var t metav1.Type
 	{
 		m, err = meta.Accessor(obj)
-		if err != nil {
-			return reconcile.Result{}, microerror.Mask(err)
-		}
-		t, err = meta.TypeAccessor(obj)
 		if err != nil {
 			return reconcile.Result{}, microerror.Mask(err)
 		}
@@ -391,9 +431,7 @@ func (c *Controller) reconcile(ctx context.Context, req reconcile.Request) (reco
 	if m.GetDeletionTimestamp() != nil {
 		event := "delete"
 
-		deletionTimestampGauge.WithLabelValues(t.GetKind(), m.GetName(), m.GetNamespace()).Set(float64(m.GetDeletionTimestamp().Unix()))
 		t := prometheus.NewTimer(eventHistogram.WithLabelValues(event))
-
 		ctx = setLoggerCtxValue(ctx, loggerKeyEvent, event)
 		ctx = setLoggerCtxValue(ctx, loggerKeyObject, m.GetSelfLink())
 		ctx = setLoggerCtxValue(ctx, loggerKeyVersion, m.GetResourceVersion())
@@ -406,9 +444,7 @@ func (c *Controller) reconcile(ctx context.Context, req reconcile.Request) (reco
 	} else {
 		event := "update"
 
-		creationTimestampGauge.WithLabelValues(t.GetKind(), m.GetName(), m.GetNamespace()).Set(float64(m.GetCreationTimestamp().Unix()))
 		t := prometheus.NewTimer(eventHistogram.WithLabelValues(event))
-
 		ctx = setLoggerCtxValue(ctx, loggerKeyEvent, event)
 		ctx = setLoggerCtxValue(ctx, loggerKeyObject, m.GetSelfLink())
 		ctx = setLoggerCtxValue(ctx, loggerKeyVersion, m.GetResourceVersion())
