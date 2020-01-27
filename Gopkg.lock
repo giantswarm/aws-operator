@@ -527,10 +527,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e3dcfca96177f8b713e76e0f15660b33afc5de3110b2cf6c0a801dbaac904a9f"
+  digest = "1:e35bb8852e24edcf07a8ebf2f0a488ff21a8686ab105963a5d712c77e24bf005"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "controller",
+    "controller/collector",
     "controller/context/finalizerskeptcontext",
     "controller/context/reconciliationcanceledcontext",
     "controller/context/resourcecanceledcontext",
@@ -545,7 +546,7 @@
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "5d098618662e74384f52bf064fe3588436873eb2"
+  revision = "aa7ed959916171a1bc18c4f5ecf4b680c7e4af9e"
 
 [[projects]]
   branch = "master"
@@ -2116,14 +2117,16 @@
   version = "v0.2.8"
 
 [[projects]]
-  digest = "1:cc97a7615d4070de5afe5f68426ffc5cceb4c6b2ee656d1bc32ae52217faa8d9"
+  digest = "1:994c1277fb2527a27720a000dec94ffb194f5413ea4c32be8c40526270d9c168"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
+    "pkg/builder",
     "pkg/cache",
     "pkg/cache/internal",
     "pkg/client",
     "pkg/client/apiutil",
     "pkg/controller",
+    "pkg/conversion",
     "pkg/event",
     "pkg/handler",
     "pkg/healthz",
@@ -2144,6 +2147,7 @@
     "pkg/source/internal",
     "pkg/webhook",
     "pkg/webhook/admission",
+    "pkg/webhook/conversion",
     "pkg/webhook/internal/certwatcher",
     "pkg/webhook/internal/metrics",
   ]
