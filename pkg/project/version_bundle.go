@@ -8,6 +8,14 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+				Component:   "aws-operator",
+				Description: "Update to support Kubernetes 1.16.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2080",
+				},
+			},
+			{
 				Component:   "cloudconfig",
 				Description: "Fix pause container image repository for China.",
 				Kind:        versionbundle.KindFixed,
@@ -16,14 +24,6 @@ func NewVersionBundle() versionbundle.Bundle {
 				Component:   "vault",
 				Description: "Fix vault encrypter role with new nodepools iam role names.",
 				Kind:        versionbundle.KindFixed,
-			},
-			{
-				Component:   "kube-proxy",
-				Description: "Switch from iptables to IPVS mode and tune kernel params accordingly.",
-				Kind:        versionbundle.KindChanged,
-				URLs: []string{
-					"https://github.com/giantswarm/k8scloudconfig/pull/604",
-				},
 			},
 			{
 				Component:   "kubernetes",
