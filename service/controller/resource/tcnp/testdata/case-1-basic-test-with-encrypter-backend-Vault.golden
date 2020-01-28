@@ -157,7 +157,7 @@ Resources:
               "config": {
                 "append": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_4_9_0/cluster-8y5ck-tcnp-al9qy"
+                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_5_0_0/cluster-8y5ck-tcnp-al9qy"
                   }
                 ]
               }

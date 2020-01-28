@@ -36,6 +36,19 @@
     ]
   },
   "storage": {
+    "directories": [
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "giantswarm"
+        },
+        "mode": 2644,
+        "path": "/var/log/fluentbit_db",
+        "user": {
+          "name": "giantswarm"
+        }
+      }
+    ],
     "files": [
       {
         "contents": {
@@ -48,7 +61,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQprdWJlbGV0Q2dyb3VwczogL2t1YmVyZXNlcnZlZC5zbGljZQpydW50aW1lQ2dyb3VwczogL2t1YmVyZXNlcnZlZC5zbGljZQpzeXN0ZW1SZXNlcnZlZDoKICBjcHU6IDI1MG0KICBtZW1vcnk6IDM4NE1pCnN5c3RlbVJlc2VydmVkQ2dyb3VwOiAvc3lzdGVtLnNsaWNlCmF1dGhlbnRpY2F0aW9uOgogIGFub255bW91czoKICAgIGVuYWJsZWQ6IHRydWUgIyBEZWZhdWx0cyB0byBmYWxzZSBhcyBvZiAxLjEwCiAgd2ViaG9vazoKICAgIGVuYWJsZWQ6IGZhbHNlICMgRGVhZnVsdHMgdG8gdHJ1ZSBhcyBvZiAxLjEwCmF1dGhvcml6YXRpb246CiAgbW9kZTogQWx3YXlzQWxsb3cgIyBEZWFmdWx0cyB0byB3ZWJob29rIGFzIG9mIDEuMTAK",
+          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQpydW50aW1lQ2dyb3VwczogL2t1YmVyZXNlcnZlZC5zbGljZQpzeXN0ZW1SZXNlcnZlZDoKICBjcHU6IDI1MG0KICBtZW1vcnk6IDM4NE1pCnN5c3RlbVJlc2VydmVkQ2dyb3VwOiAvc3lzdGVtLnNsaWNlCmF1dGhlbnRpY2F0aW9uOgogIGFub255bW91czoKICAgIGVuYWJsZWQ6IHRydWUgIyBEZWZhdWx0cyB0byBmYWxzZSBhcyBvZiAxLjEwCiAgd2ViaG9vazoKICAgIGVuYWJsZWQ6IGZhbHNlICMgRGVhZnVsdHMgdG8gdHJ1ZSBhcyBvZiAxLjEwCmF1dGhvcml6YXRpb246CiAgbW9kZTogQWx3YXlzQWxsb3cgIyBEZWFmdWx0cyB0byB3ZWJob29rIGFzIG9mIDEuMTAKZmVhdHVyZUdhdGVzOgogIFRUTEFmdGVyRmluaXNoZWQ6IHRydWUK",
           "verification": {}
         },
         "filesystem": "root",
@@ -111,7 +124,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,ZnMuaW5vdGlmeS5tYXhfdXNlcl93YXRjaGVzID0gMTYzODQKa2VybmVsLmtwdHJfcmVzdHJpY3QgPSAyCmtlcm5lbC5zeXNycSA9IDAKbmV0LmlwdjQuY29uZi5hbGwubG9nX21hcnRpYW5zID0gMQpuZXQuaXB2NC5jb25mLmFsbC5zZW5kX3JlZGlyZWN0cyA9IDAKbmV0LmlwdjQuY29uZi5kZWZhdWx0LmFjY2VwdF9yZWRpcmVjdHMgPSAwCm5ldC5pcHY0LmNvbmYuZGVmYXVsdC5sb2dfbWFydGlhbnMgPSAxCm5ldC5pcHY0LnRjcF90aW1lc3RhbXBzID0gMApuZXQuaXB2Ni5jb25mLmFsbC5hY2NlcHRfcmVkaXJlY3RzID0gMApuZXQuaXB2Ni5jb25mLmRlZmF1bHQuYWNjZXB0X3JlZGlyZWN0cyA9IDAKIyBJbmNyZWFzZWQgbW1hcGZzIGJlY2F1c2Ugc29tZSBhcHBsaWNhdGlvbnMsIGxpa2UgRVMsIG5lZWQgaGlnaGVyIGxpbWl0IHRvIHN0b3JlIGRhdGEgcHJvcGVybHkKdm0ubWF4X21hcF9jb3VudCA9IDI2MjE0NAojIEluZ3Jlc3MgY29udHJvbGxlciBwZXJmb3JtYW5jZSBpbXByb3ZlbWVudHMKIyBTZWUgaHR0cHM6Ly9naXRodWIuY29tL2t1YmVybmV0ZXMvaW5ncmVzcy1uZ2lueC9pc3N1ZXMvMTkzOQpuZXQuY29yZS5zb21heGNvbm49MzI3NjgKbmV0LmlwdjQuaXBfbG9jYWxfcG9ydF9yYW5nZT0xMDI0IDY1NTM1Cm5ldC5pcHY0LmNvbmYuYWxsLnJwX2ZpbHRlciA9IDEKbmV0LmlwdjQuY29uZi5hbGwuYXJwX2lnbm9yZSA9IDEKbmV0LmlwdjQuY29uZi5hbGwuYXJwX2Fubm91bmNlID0gMgo=",
+          "source": "data:text/plain;charset=utf-8;base64,ZnMuaW5vdGlmeS5tYXhfdXNlcl93YXRjaGVzID0gMTYzODQKIyBEZWZhdWx0IGlzIDEyOCwgZG91YmxpbmcgZm9yIG5vZGVzIHdpdGggbWFueSBwb2RzCiMgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9naWFudHN3YXJtL2dpYW50c3dhcm0vaXNzdWVzLzc3MTEKZnMuaW5vdGlmeS5tYXhfdXNlcl9pbnN0YW5jZXMgPSA4MTkyCmtlcm5lbC5rcHRyX3Jlc3RyaWN0ID0gMgprZXJuZWwuc3lzcnEgPSAwCm5ldC5pcHY0LmNvbmYuYWxsLmxvZ19tYXJ0aWFucyA9IDEKbmV0LmlwdjQuY29uZi5hbGwuc2VuZF9yZWRpcmVjdHMgPSAwCm5ldC5pcHY0LmNvbmYuZGVmYXVsdC5hY2NlcHRfcmVkaXJlY3RzID0gMApuZXQuaXB2NC5jb25mLmRlZmF1bHQubG9nX21hcnRpYW5zID0gMQpuZXQuaXB2NC50Y3BfdGltZXN0YW1wcyA9IDAKbmV0LmlwdjYuY29uZi5hbGwuYWNjZXB0X3JlZGlyZWN0cyA9IDAKbmV0LmlwdjYuY29uZi5kZWZhdWx0LmFjY2VwdF9yZWRpcmVjdHMgPSAwCiMgSW5jcmVhc2VkIG1tYXBmcyBiZWNhdXNlIHNvbWUgYXBwbGljYXRpb25zLCBsaWtlIEVTLCBuZWVkIGhpZ2hlciBsaW1pdCB0byBzdG9yZSBkYXRhIHByb3Blcmx5CnZtLm1heF9tYXBfY291bnQgPSAyNjIxNDQKIyBJbmdyZXNzIGNvbnRyb2xsZXIgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnRzCiMgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9rdWJlcm5ldGVzL2luZ3Jlc3MtbmdpbngvaXNzdWVzLzE5MzkKbmV0LmNvcmUuc29tYXhjb25uPTMyNzY4Cm5ldC5pcHY0LmlwX2xvY2FsX3BvcnRfcmFuZ2U9MTAyNCA2NTUzNQpuZXQuaXB2NC5jb25mLmFsbC5ycF9maWx0ZXIgPSAxCm5ldC5pcHY0LmNvbmYuYWxsLmFycF9pZ25vcmUgPSAxCm5ldC5pcHY0LmNvbmYuYWxsLmFycF9hbm5vdW5jZSA9IDIK",
           "verification": {}
         },
         "filesystem": "root",
@@ -404,9 +417,19 @@
         "name": "k8s-setup-network-env.service"
       },
       {
-        "contents": "[Unit]\nWants=k8s-setup-network-env.service k8s-setup-kubelet-config.service\nAfter=k8s-setup-network-env.service k8s-setup-kubelet-config.service\nDescription=k8s-kubelet\nStartLimitIntervalSec=0\n\n[Service]\nTimeoutStartSec=300\nRestart=always\nRestartSec=0\nTimeoutStopSec=10\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironmentFile=/etc/network-environment\nEnvironment=\"IMAGE=quay.io/giantswarm/hyperkube:v1.15.5\"\nEnvironment=\"NAME=%p.service\"\nEnvironment=\"PATH=/opt/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"\nExecStartPre=/usr/bin/docker pull $IMAGE\nExecStartPre=-/usr/bin/docker stop -t 10 $NAME\nExecStartPre=-/usr/bin/docker rm -f $NAME\nExecStart=/bin/sh -c \"/usr/bin/docker run --rm --pid=host --net=host --privileged=true \\\n-v /:/rootfs:ro,rshared \\\n-v /sys:/sys:ro \\\n-v /dev:/dev:rw \\\n-v /var/log:/var/log:rw \\\n-v /run/calico/:/run/calico/:rw \\\n-v /run/docker/:/run/docker/:rw \\\n-v /run/docker.sock:/run/docker.sock:rw \\\n-v /usr/bin/docker:/usr/bin/docker \\\n-v /run/metadata/torcx:/run/metadata/torcx \\\n-v /run/torcx/:/run/torcx/ \\\n-v /usr/lib/os-release:/etc/os-release \\\n-v /usr/share/ca-certificates/:/etc/ssl/certs \\\n-v /var/lib/calico/:/var/lib/calico \\\n-v /var/lib/docker/:/var/lib/docker:rw,rshared \\\n-v /var/lib/kubelet/:/var/lib/kubelet:rw,rshared \\\n-v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ \\\n-v /etc/kubernetes/config/:/etc/kubernetes/config/ \\\n-v /etc/kubernetes/kubeconfig/:/etc/kubernetes/kubeconfig/ \\\n-v /etc/cni/net.d/:/etc/cni/net.d/ \\\n-v /opt/cni/bin/:/opt/cni/bin/ \\\n-v /opt/bin:/opt/bin \\\n-v /usr/sbin/iscsiadm:/usr/sbin/iscsiadm \\\n-v /etc/iscsi/:/etc/iscsi/ \\\n-v /dev/disk/by-path/:/dev/disk/by-path/ \\\n-v /dev/mapper/:/dev/mapper/ \\\n-v /lib/modules:/lib/modules \\\n-v /usr/sbin/mkfs.xfs:/usr/sbin/mkfs.xfs \\\n-v /usr/lib64/libxfs.so.0:/usr/lib/libxfs.so.0 \\\n-v /usr/lib64/libxcmd.so.0:/usr/lib/libxcmd.so.0 \\\n-v /usr/lib64/libreadline.so.7:/usr/lib/libreadline.so.7 \\\n-e ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem \\\n-e ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem \\\n-e ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem \\\n-e PATH \\\n--name $NAME \\\n$IMAGE \\\n/hyperkube kubelet \\\n--node-ip=${DEFAULT_IPV4} \\\n--config=/etc/kubernetes/config/kubelet.yaml \\\n--containerized \\\n--enable-server \\\n--logtostderr=true \\\n--cloud-provider=aws \\\n--image-pull-progress-deadline=1m \\\n--network-plugin=cni \\\n--register-node=true \\\n--feature-gates=TTLAfterFinished=true \\\n--kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \\\n--node-labels=\"node.kubernetes.io/worker,node-role.kubernetes.io/worker,kubernetes.io/role=worker,role=worker,ip=${DEFAULT_IPV4},k1=v1,k2=v2\" \\\n--v=2\"\nExecStop=-/usr/bin/docker stop -t 10 $NAME\nExecStopPost=-/usr/bin/docker rm -f $NAME\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=Pulls hyperkube binary from image to local FS\nAfter=docker.service\nRequires=docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironment=\"IMAGE=quay.io/giantswarm/hyperkube:v1.16.3\"\nEnvironment=\"NAME=%p.service\"\nExecStartPre=/bin/bash -c \"/usr/bin/docker create --name $NAME $IMAGE\"\nExecStart=/bin/bash -c \"/usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube\"\nExecStartPost=/bin/bash -c \"/usr/bin/docker rm $NAME\"\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "k8s-setup-download-hyperkube.service"
+      },
+      {
+        "contents": "[Unit]\nWants=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service\nAfter=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service\nDescription=k8s-kubelet\nStartLimitIntervalSec=0\n[Service]\nTimeoutStartSec=300\nRestart=always\nRestartSec=0\nTimeoutStopSec=10\nSlice=kubereserved.slice\nCPUAccounting=true\nMemoryAccounting=true\nEnvironment=\"ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem\"\nEnvironment=\"ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem\"\nEnvironment=\"ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem\"\nEnvironmentFile=/etc/network-environment\nExecStart=/opt/bin/hyperkube kubelet \\\n  --node-ip=${DEFAULT_IPV4} \\\n  --config=/etc/kubernetes/config/kubelet.yaml \\\n  --enable-server \\\n  --logtostderr=true \\\n  --cloud-provider=aws \\\n  --image-pull-progress-deadline=1m \\\n  --network-plugin=cni \\\n  --register-node=true \\\n  --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \\\n  --node-labels=\"node.kubernetes.io/worker,role=worker,ip=${DEFAULT_IPV4},k1=v1,k2=v2\" \\\n  --v=2\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-kubelet.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Adds labels to the node after kubelet startup\nAfter=k8s-kubelet.service\nWants=k8s-kubelet.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nEnvironment=\"KUBECTL=/opt/bin/hyperkube kubectl --kubeconfig /etc/kubernetes/kubeconfig/kubelet.yaml\"\nExecStart=/bin/sh -c '\\\n  while [ \"$($KUBECTL get nodes $(hostname)| wc -l)\" -lt \"1\" ]; do echo \"Waiting for healthy k8s\" \u0026\u0026 sleep 20s;done; \\\n  $KUBECTL label nodes --overwrite $(hostname) node-role.kubernetes.io/worker=\"\"; \\\n  $KUBECTL label nodes --overwrite $(hostname) kubernetes.io/role=worker'\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "k8s-label-node.service"
       },
       {
         "enabled": false,
