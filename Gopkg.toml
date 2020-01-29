@@ -168,7 +168,7 @@ required = [
 
 [[override]]
   name = "sigs.k8s.io/cluster-api"
-  version = "~v0.2.8"
+  branch = "master"
 
 [[override]]
   name = "sigs.k8s.io/kustomize"

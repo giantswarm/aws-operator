@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha2
+package v1alpha3
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -26,23 +26,26 @@ const (
 	// MachineFinalizer is set on PrepareForCreate callback.
 	MachineFinalizer = "machine.cluster.x-k8s.io"
 
-	// MachineClusterLabelName is the label set on machines linked to a cluster.
-	MachineClusterLabelName = "cluster.x-k8s.io/cluster-name"
-
-	// MachineControlPlaneLabelName is the label set on machines part of a control plane.
+	// MachineControlPlaneLabelName is the label set on machines or related objects that are part of a control plane.
 	MachineControlPlaneLabelName = "cluster.x-k8s.io/control-plane"
 
 	// ExcludeNodeDrainingAnnotation annotation explicitly skips node draining if set
 	ExcludeNodeDrainingAnnotation = "machine.cluster.x-k8s.io.io/exclude-node-draining"
+
+	// MachineSetLabelName is the label set on machines if they're controlled by MachineSet
+	MachineSetLabelName = "cluster.x-k8s.io/set-name"
+
+	// MachineDeploymentLabelName is the label set on machines if they're controlled by MachineDeployment
+	MachineDeploymentLabelName = "cluster.x-k8s.io/deployment-name"
 )
 
 // ANCHOR: MachineSpec
 
 // MachineSpec defines the desired state of Machine
 type MachineSpec struct {
-	// DEPRECATED: ObjectMeta has no function and isn't used anywhere.
-	// +optional
-	ObjectMeta `json:"metadata,omitempty"`
+	// ClusterName is the name of the Cluster this object belongs to.
+	// +kubebuilder:validation:MinLength=1
+	ClusterName string `json:"clusterName"`
 
 	// Bootstrap is a reference to a local struct which encapsulates
 	// fields to configure the Machine’s bootstrapping mechanism.
@@ -69,6 +72,11 @@ type MachineSpec struct {
 	// be interfacing with cluster-api as generic provider.
 	// +optional
 	ProviderID *string `json:"providerID,omitempty"`
+
+	// FailureDomain is the failure domain the machine will be created in.
+	// Must match a key in the FailureDomains map stored on the cluster object.
+	// +optional
+	FailureDomain *string `json:"failureDomain,omitempty"`
 }
 
 // ANCHOR_END: MachineSpec
@@ -92,7 +100,7 @@ type MachineStatus struct {
 	// +optional
 	Version *string `json:"version,omitempty"`
 
-	// ErrorReason will be set in the event that there is a terminal problem
+	// FailureReason will be set in the event that there is a terminal problem
 	// reconciling the Machine and will contain a succinct value suitable
 	// for machine interpretation.
 	//
@@ -109,9 +117,9 @@ type MachineStatus struct {
 	// can be added as events to the Machine object and/or logged in the
 	// controller's output.
 	// +optional
-	ErrorReason *capierrors.MachineStatusError `json:"errorReason,omitempty"`
+	FailureReason *capierrors.MachineStatusError `json:"failureReason,omitempty"`
 
-	// ErrorMessage will be set in the event that there is a terminal problem
+	// FailureMessage will be set in the event that there is a terminal problem
 	// reconciling the Machine and will contain a more verbose string suitable
 	// for logging and human consumption.
 	//
@@ -128,7 +136,7 @@ type MachineStatus struct {
 	// can be added as events to the Machine object and/or logged in the
 	// controller's output.
 	// +optional
-	ErrorMessage *string `json:"errorMessage,omitempty"`
+	FailureMessage *string `json:"failureMessage,omitempty"`
 
 	// Addresses is a list of addresses assigned to the machine.
 	// This field is copied from the infrastructure provider reference.
@@ -187,8 +195,17 @@ type Bootstrap struct {
 
 	// Data contains the bootstrap data, such as cloud-init details scripts.
 	// If nil, the Machine should remain in the Pending state.
+	//
+	// Deprecated: This field has been deprecated in v1alpha3 and
+	// will be removed in a future version. Switch to DataSecretName.
+	//
 	// +optional
 	Data *string `json:"data,omitempty"`
+
+	// DataSecretName is the name of the secret that stores the bootstrap data script.
+	// If nil, the Machine should remain in the Pending state.
+	// +optional
+	DataSecretName *string `json:"dataSecretName,omitempty"`
 }
 
 // ANCHOR_END: Bootstrap
@@ -196,6 +213,7 @@ type Bootstrap struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=machines,shortName=ma,scope=Namespaced,categories=cluster-api
 // +kubebuilder:subresource:status
+// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="ProviderID",type="string",JSONPath=".spec.providerID",description="Provider ID"
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="Machine status such as Terminating/Pending/Running/Failed etc"
 // +kubebuilder:printcolumn:name="NodeName",type="string",JSONPath=".status.nodeRef.name",description="Node name associated with this machine",priority=1

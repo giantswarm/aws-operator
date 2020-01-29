@@ -17,130 +17,348 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"errors"
-
-	conversion "k8s.io/apimachinery/pkg/conversion"
-	v1alpha1 "sigs.k8s.io/cluster-api/pkg/apis/deprecated/v1alpha1"
+	apiconversion "k8s.io/apimachinery/pkg/conversion"
+	"sigs.k8s.io/cluster-api/api/v1alpha3"
+	utilconversion "sigs.k8s.io/cluster-api/util/conversion"
+	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
-//nolint
-func Convert_v1alpha2_ClusterSpec_To_v1alpha1_ClusterSpec(in *ClusterSpec, out *v1alpha1.ClusterSpec, s conversion.Scope) error {
-	return errors.New("Not implemented")
-}
-
-//nolint
-func Convert_v1alpha1_ClusterNetworkingConfig_To_v1alpha2_ClusterNetwork(in *v1alpha1.ClusterNetworkingConfig, out *ClusterNetwork, s conversion.Scope) error {
-	var (
-		services NetworkRanges
-		pods     NetworkRanges
-	)
-
-	if err := Convert_v1alpha1_NetworkRanges_To_v1alpha2_NetworkRanges(&in.Services, &services, s); err != nil {
+func (src *Cluster) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.Cluster)
+	if err := Convert_v1alpha2_Cluster_To_v1alpha3_Cluster(src, dst, nil); err != nil {
 		return err
 	}
 
-	if err := Convert_v1alpha1_NetworkRanges_To_v1alpha2_NetworkRanges(&in.Pods, &pods, s); err != nil {
+	// Manually convert Status.APIEndpoints to Spec.ControlPlaneEndpoint.
+	if len(src.Status.APIEndpoints) > 0 {
+		endpoint := src.Status.APIEndpoints[0]
+		dst.Spec.ControlPlaneEndpoint.Host = endpoint.Host
+		dst.Spec.ControlPlaneEndpoint.Port = int32(endpoint.Port)
+	}
+
+	// Manually restore data.
+	restored := &v1alpha3.Cluster{}
+	if ok, err := utilconversion.UnmarshalData(src, restored); err != nil || !ok {
 		return err
 	}
 
-	out.Pods = &pods
-	out.Services = &services
+	dst.Spec.ControlPlaneRef = restored.Spec.ControlPlaneRef
+	dst.Status.ControlPlaneReady = restored.Status.ControlPlaneReady
 
 	return nil
 }
 
-//nolint
-func Convert_v1alpha1_ClusterSpec_To_v1alpha2_ClusterSpec(in *v1alpha1.ClusterSpec, out *ClusterSpec, s conversion.Scope) error {
-	var clusterNetwork ClusterNetwork
-
-	if err := Convert_v1alpha1_ClusterNetworkingConfig_To_v1alpha2_ClusterNetwork(&in.ClusterNetwork, &clusterNetwork, s); err != nil {
+func (dst *Cluster) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.Cluster)
+	if err := Convert_v1alpha3_Cluster_To_v1alpha2_Cluster(src, dst, nil); err != nil {
 		return err
 	}
 
-	out.ClusterNetwork = &clusterNetwork
-	// DISCARDS:
-	// ProviderSpec
+	// Manually convert Spec.ControlPlaneEndpoint to Status.APIEndpoints.
+	if !src.Spec.ControlPlaneEndpoint.IsZero() {
+		dst.Status.APIEndpoints = []APIEndpoint{
+			{
+				Host: src.Spec.ControlPlaneEndpoint.Host,
+				Port: int(src.Spec.ControlPlaneEndpoint.Port),
+			},
+		}
+	}
+
+	// Preserve Hub data on down-conversion.
+	if err := utilconversion.MarshalData(src, dst); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-//nolint
-func Convert_v1alpha2_ClusterStatus_To_v1alpha1_ClusterStatus(in *ClusterStatus, out *v1alpha1.ClusterStatus, s conversion.Scope) error {
-	return errors.New("Not implemented")
+func (src *ClusterList) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.ClusterList)
+
+	return Convert_v1alpha2_ClusterList_To_v1alpha3_ClusterList(src, dst, nil)
 }
 
-//nolint
-func Convert_v1alpha1_ClusterStatus_To_v1alpha2_ClusterStatus(in *v1alpha1.ClusterStatus, out *ClusterStatus, s conversion.Scope) error {
-	if err := autoConvert_v1alpha1_ClusterStatus_To_v1alpha2_ClusterStatus(in, out, s); err != nil {
+func (dst *ClusterList) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.ClusterList)
+
+	return Convert_v1alpha3_ClusterList_To_v1alpha2_ClusterList(src, dst, nil)
+}
+
+func (src *Machine) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.Machine)
+	if err := Convert_v1alpha2_Machine_To_v1alpha3_Machine(src, dst, nil); err != nil {
 		return err
 	}
 
-	out.ErrorReason = &in.ErrorReason
-	// DISCARDS:
-	// ProviderStatus
+	// Manually convert ClusterName from label, if any.
+	// This conversion can be overwritten when restoring the ClusterName field.
+	if name, ok := src.Labels[MachineClusterLabelName]; ok {
+		dst.Spec.ClusterName = name
+	}
+
+	// Manually restore data.
+	restored := &v1alpha3.Machine{}
+	if ok, err := utilconversion.UnmarshalData(src, restored); err != nil || !ok {
+		return err
+	}
+	restoreMachineSpec(&restored.Spec, &dst.Spec)
 
 	return nil
 }
 
-//nolint
-func Convert_v1alpha2_MachineSpec_To_v1alpha1_MachineSpec(in *MachineSpec, out *v1alpha1.MachineSpec, s conversion.Scope) error {
-	return errors.New("not implemented")
+func restoreMachineSpec(restored *v1alpha3.MachineSpec, dst *v1alpha3.MachineSpec) {
+	if restored.ClusterName != "" {
+		dst.ClusterName = restored.ClusterName
+	}
+	dst.Bootstrap.DataSecretName = restored.Bootstrap.DataSecretName
+	dst.FailureDomain = restored.FailureDomain
 }
 
-//nolint
-func Convert_v1alpha1_MachineSpec_To_v1alpha2_MachineSpec(in *v1alpha1.MachineSpec, out *MachineSpec, s conversion.Scope) error {
-	if err := autoConvert_v1alpha1_MachineSpec_To_v1alpha2_MachineSpec(in, out, s); err != nil {
+func (dst *Machine) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.Machine)
+	if err := Convert_v1alpha3_Machine_To_v1alpha2_Machine(src, dst, nil); err != nil {
 		return err
 	}
 
-	if in.Versions.ControlPlane != "" {
-		out.Version = &in.Versions.ControlPlane
-	} else if in.Versions.Kubelet != "" {
-		out.Version = &in.Versions.Kubelet
+	// Preserve Hub data on down-conversion.
+	if err := utilconversion.MarshalData(src, dst); err != nil {
+		return err
 	}
-
-	// DISCARDS:
-	// Taints
-	// ProviderSpec
-	// ConfigSource
 
 	return nil
 }
 
-//nolint
-func Convert_v1alpha2_MachineStatus_To_v1alpha1_MachineStatus(in *MachineStatus, out *v1alpha1.MachineStatus, s conversion.Scope) error {
-	return errors.New("not implemented")
+func (src *MachineList) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.MachineList)
+
+	return Convert_v1alpha2_MachineList_To_v1alpha3_MachineList(src, dst, nil)
 }
 
-//nolint
-func Convert_v1alpha1_MachineStatus_To_v1alpha2_MachineStatus(in *v1alpha1.MachineStatus, out *MachineStatus, s conversion.Scope) error {
-	if err := autoConvert_v1alpha1_MachineStatus_To_v1alpha2_MachineStatus(in, out, s); err != nil {
+func (dst *MachineList) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.MachineList)
+
+	return Convert_v1alpha3_MachineList_To_v1alpha2_MachineList(src, dst, nil)
+}
+
+func (src *MachineSet) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.MachineSet)
+	if err := Convert_v1alpha2_MachineSet_To_v1alpha3_MachineSet(src, dst, nil); err != nil {
 		return err
 	}
 
-	if in.Versions == nil {
-		return nil
+	// Manually convert ClusterName from label, if any.
+	// This conversion can be overwritten when restoring the ClusterName field.
+	if name, ok := src.Labels[MachineClusterLabelName]; ok {
+		dst.Spec.ClusterName = name
 	}
 
-	if in.Versions.ControlPlane != "" {
-		out.Version = &in.Versions.ControlPlane
-	} else if in.Versions.Kubelet != "" {
-		out.Version = &in.Versions.Kubelet
+	// Manually restore data.
+	restored := &v1alpha3.MachineSet{}
+	if ok, err := utilconversion.UnmarshalData(src, restored); err != nil || !ok {
+		return err
 	}
 
-	// DISCARDS:
-	// ProviderStatus
-	// Conditions
-	// LastOperation
+	if restored.Spec.ClusterName != "" {
+		dst.Spec.ClusterName = restored.Spec.ClusterName
+	}
+	restoreMachineSpec(&restored.Spec.Template.Spec, &dst.Spec.Template.Spec)
+
 	return nil
 }
 
-//nolint
-func Convert_v1alpha2_MachineSetStatus_To_v1alpha1_MachineSetStatus(in *MachineSetStatus, out *v1alpha1.MachineSetStatus, s conversion.Scope) error {
-	return errors.New("Not implemented")
+func (dst *MachineSet) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.MachineSet)
+	if err := Convert_v1alpha3_MachineSet_To_v1alpha2_MachineSet(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Preserve Hub data on down-conversion.
+	if err := utilconversion.MarshalData(src, dst); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-//nolint
-func Convert_v1alpha2_MachineDeploymentStatus_To_v1alpha1_MachineDeploymentStatus(in *MachineDeploymentStatus, out *v1alpha1.MachineDeploymentStatus, s conversion.Scope) error {
-	return errors.New("Not implemented")
+func (src *MachineSetList) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.MachineSetList)
+
+	return Convert_v1alpha2_MachineSetList_To_v1alpha3_MachineSetList(src, dst, nil)
+}
+
+func (dst *MachineSetList) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.MachineSetList)
+
+	return Convert_v1alpha3_MachineSetList_To_v1alpha2_MachineSetList(src, dst, nil)
+}
+
+func (src *MachineDeployment) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.MachineDeployment)
+	if err := Convert_v1alpha2_MachineDeployment_To_v1alpha3_MachineDeployment(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Manually convert ClusterName from label, if any.
+	// This conversion can be overwritten when restoring the ClusterName field.
+	if name, ok := src.Labels[MachineClusterLabelName]; ok {
+		dst.Spec.ClusterName = name
+	}
+
+	// Manually restore data.
+	restored := &v1alpha3.MachineDeployment{}
+	if ok, err := utilconversion.UnmarshalData(src, restored); err != nil || !ok {
+		return err
+	}
+
+	if restored.Spec.ClusterName != "" {
+		dst.Spec.ClusterName = restored.Spec.ClusterName
+	}
+	dst.Spec.Paused = restored.Spec.Paused
+	dst.Status.Phase = restored.Status.Phase
+	restoreMachineSpec(&restored.Spec.Template.Spec, &dst.Spec.Template.Spec)
+
+	return nil
+}
+
+func (dst *MachineDeployment) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.MachineDeployment)
+	if err := Convert_v1alpha3_MachineDeployment_To_v1alpha2_MachineDeployment(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Preserve Hub data on down-conversion.
+	if err := utilconversion.MarshalData(src, dst); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (src *MachineDeploymentList) ConvertTo(dstRaw conversion.Hub) error {
+	dst := dstRaw.(*v1alpha3.MachineDeploymentList)
+
+	return Convert_v1alpha2_MachineDeploymentList_To_v1alpha3_MachineDeploymentList(src, dst, nil)
+}
+
+func (dst *MachineDeploymentList) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha3.MachineDeploymentList)
+
+	return Convert_v1alpha3_MachineDeploymentList_To_v1alpha2_MachineDeploymentList(src, dst, nil)
+}
+
+func Convert_v1alpha2_MachineSpec_To_v1alpha3_MachineSpec(in *MachineSpec, out *v1alpha3.MachineSpec, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha2_MachineSpec_To_v1alpha3_MachineSpec(in, out, s); err != nil {
+		return err
+	}
+
+	// Discards unused ObjectMeta
+
+	return nil
+}
+
+func Convert_v1alpha2_ClusterSpec_To_v1alpha3_ClusterSpec(in *ClusterSpec, out *v1alpha3.ClusterSpec, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha2_ClusterSpec_To_v1alpha3_ClusterSpec(in, out, s); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Convert_v1alpha2_ClusterStatus_To_v1alpha3_ClusterStatus(in *ClusterStatus, out *v1alpha3.ClusterStatus, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha2_ClusterStatus_To_v1alpha3_ClusterStatus(in, out, s); err != nil {
+		return err
+	}
+
+	// Manually convert the Error fields to the Failure fields
+	out.FailureMessage = in.ErrorMessage
+	out.FailureReason = in.ErrorReason
+
+	return nil
+}
+
+func Convert_v1alpha3_ClusterStatus_To_v1alpha2_ClusterStatus(in *v1alpha3.ClusterStatus, out *ClusterStatus, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha3_ClusterStatus_To_v1alpha2_ClusterStatus(in, out, s); err != nil {
+		return err
+	}
+
+	// Manually convert the Failure fields to the Error fields
+	out.ErrorMessage = in.FailureMessage
+	out.ErrorReason = in.FailureReason
+
+	return nil
+}
+
+func Convert_v1alpha2_MachineSetStatus_To_v1alpha3_MachineSetStatus(in *MachineSetStatus, out *v1alpha3.MachineSetStatus, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha2_MachineSetStatus_To_v1alpha3_MachineSetStatus(in, out, s); err != nil {
+		return err
+	}
+
+	// Manually convert the Error fields to the Failure fields
+	out.FailureMessage = in.ErrorMessage
+	out.FailureReason = in.ErrorReason
+
+	return nil
+}
+
+func Convert_v1alpha3_MachineSetStatus_To_v1alpha2_MachineSetStatus(in *v1alpha3.MachineSetStatus, out *MachineSetStatus, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha3_MachineSetStatus_To_v1alpha2_MachineSetStatus(in, out, s); err != nil {
+		return err
+	}
+
+	// Manually convert the Failure fields to the Error fields
+	out.ErrorMessage = in.FailureMessage
+	out.ErrorReason = in.FailureReason
+
+	return nil
+}
+
+func Convert_v1alpha2_MachineStatus_To_v1alpha3_MachineStatus(in *MachineStatus, out *v1alpha3.MachineStatus, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha2_MachineStatus_To_v1alpha3_MachineStatus(in, out, s); err != nil {
+		return err
+	}
+
+	// Manually convert the Error fields to the Failure fields
+	out.FailureMessage = in.ErrorMessage
+	out.FailureReason = in.ErrorReason
+
+	return nil
+}
+
+func Convert_v1alpha3_ClusterSpec_To_v1alpha2_ClusterSpec(in *v1alpha3.ClusterSpec, out *ClusterSpec, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha3_ClusterSpec_To_v1alpha2_ClusterSpec(in, out, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func Convert_v1alpha3_MachineStatus_To_v1alpha2_MachineStatus(in *v1alpha3.MachineStatus, out *MachineStatus, s apiconversion.Scope) error {
+	if err := autoConvert_v1alpha3_MachineStatus_To_v1alpha2_MachineStatus(in, out, s); err != nil {
+		return err
+	}
+
+	// Manually convert the Failure fields to the Error fields
+	out.ErrorMessage = in.FailureMessage
+	out.ErrorReason = in.FailureReason
+
+	return nil
+}
+
+func Convert_v1alpha3_MachineDeploymentSpec_To_v1alpha2_MachineDeploymentSpec(in *v1alpha3.MachineDeploymentSpec, out *MachineDeploymentSpec, s apiconversion.Scope) error {
+	return autoConvert_v1alpha3_MachineDeploymentSpec_To_v1alpha2_MachineDeploymentSpec(in, out, s)
+}
+
+func Convert_v1alpha3_MachineDeploymentStatus_To_v1alpha2_MachineDeploymentStatus(in *v1alpha3.MachineDeploymentStatus, out *MachineDeploymentStatus, s apiconversion.Scope) error {
+	return autoConvert_v1alpha3_MachineDeploymentStatus_To_v1alpha2_MachineDeploymentStatus(in, out, s)
+}
+
+func Convert_v1alpha3_MachineSetSpec_To_v1alpha2_MachineSetSpec(in *v1alpha3.MachineSetSpec, out *MachineSetSpec, s apiconversion.Scope) error {
+	return autoConvert_v1alpha3_MachineSetSpec_To_v1alpha2_MachineSetSpec(in, out, s)
+}
+
+func Convert_v1alpha3_MachineSpec_To_v1alpha2_MachineSpec(in *v1alpha3.MachineSpec, out *MachineSpec, s apiconversion.Scope) error {
+	return autoConvert_v1alpha3_MachineSpec_To_v1alpha2_MachineSpec(in, out, s)
+}
+
+func Convert_v1alpha3_Bootstrap_To_v1alpha2_Bootstrap(in *v1alpha3.Bootstrap, out *Bootstrap, s apiconversion.Scope) error {
+	return autoConvert_v1alpha3_Bootstrap_To_v1alpha2_Bootstrap(in, out, s)
 }

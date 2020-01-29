@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes Authors.
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1alpha3
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,9 +29,14 @@ const (
 	RollingUpdateMachineDeploymentStrategyType MachineDeploymentStrategyType = "RollingUpdate"
 )
 
-/// [MachineDeploymentSpec]
+// ANCHOR: MachineDeploymentSpec
+
 // MachineDeploymentSpec defines the desired state of MachineDeployment
 type MachineDeploymentSpec struct {
+	// ClusterName is the name of the Cluster this object belongs to.
+	// +kubebuilder:validation:MinLength=1
+	ClusterName string `json:"clusterName"`
+
 	// Number of desired machines. Defaults to 1.
 	// This is a pointer to distinguish between explicit zero and not specified.
 	Replicas *int32 `json:"replicas,omitempty"`
@@ -74,9 +79,10 @@ type MachineDeploymentSpec struct {
 	ProgressDeadlineSeconds *int32 `json:"progressDeadlineSeconds,omitempty"`
 }
 
-/// [MachineDeploymentSpec]
+// ANCHOR_END: MachineDeploymentSpec
 
-/// [MachineDeploymentStrategy]
+// ANCHOR: MachineDeploymentStrategy
+
 // MachineDeploymentStrategy describes how to replace existing machines
 // with new ones.
 type MachineDeploymentStrategy struct {
@@ -92,10 +98,11 @@ type MachineDeploymentStrategy struct {
 	RollingUpdate *MachineRollingUpdateDeployment `json:"rollingUpdate,omitempty"`
 }
 
-/// [MachineDeploymentStrategy]
+// ANCHOR_END: MachineDeploymentStrategy
 
-/// [MachineRollingUpdateDeployment]
-// Spec to control the desired behavior of rolling update.
+// ANCHOR: MachineRollingUpdateDeployment
+
+// MachineRollingUpdateDeployment is used to control the desired behavior of rolling update.
 type MachineRollingUpdateDeployment struct {
 	// The maximum number of machines that can be unavailable during the update.
 	// Value can be an absolute number (ex: 5) or a percentage of desired
@@ -129,14 +136,21 @@ type MachineRollingUpdateDeployment struct {
 	MaxSurge *intstr.IntOrString `json:"maxSurge,omitempty" protobuf:"bytes,2,opt,name=maxSurge"`
 }
 
-/// [MachineRollingUpdateDeployment]
+// ANCHOR_END: MachineRollingUpdateDeployment
 
-/// [MachineDeploymentStatus]
+// ANCHOR: MachineDeploymentStatus
+
 // MachineDeploymentStatus defines the observed state of MachineDeployment
 type MachineDeploymentStatus struct {
 	// The generation observed by the deployment controller.
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty" protobuf:"varint,1,opt,name=observedGeneration"`
+
+	// Selector is the same as the label selector but in the string format to avoid introspection
+	// by clients. The string will be in the same format as the query-param syntax.
+	// More info about label selectors: http://kubernetes.io/docs/user-guide/labels#label-selectors
+	// +optional
+	Selector string `json:"selector,omitempty"`
 
 	// Total number of non-terminated machines targeted by this deployment
 	// (their labels match the selector).
@@ -164,18 +178,65 @@ type MachineDeploymentStatus struct {
 	// that still have not been created.
 	// +optional
 	UnavailableReplicas int32 `json:"unavailableReplicas,omitempty" protobuf:"varint,5,opt,name=unavailableReplicas"`
+
+	// Phase represents the current phase of a MachineDeployment (ScalingUp, ScalingDown, Running, Failed, or Unknown).
+	// +optional
+	Phase string `json:"phase,omitempty"`
 }
 
-/// [MachineDeploymentStatus]
+// ANCHOR_END: MachineDeploymentStatus
 
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// MachineDeploymentPhase indicates the progress of the machine deployment
+type MachineDeploymentPhase string
 
-/// [MachineDeployment]
+const (
+	// MachineDeploymentPhaseScalingUp indicates the MachineDeployment is scaling up.
+	MachineDeploymentPhaseScalingUp = MachineDeploymentPhase("ScalingUp")
+
+	// MachineDeploymentPhaseScalingDown indicates the MachineDeployment is scaling down.
+	MachineDeploymentPhaseScalingDown = MachineDeploymentPhase("ScalingDown")
+
+	// MachineDeploymentPhaseRunning indicates scaling has completed and all Machines are running.
+	MachineDeploymentPhaseRunning = MachineDeploymentPhase("Running")
+
+	// MachineDeploymentPhaseFailed indicates there was a problem scaling and user intervention might be required.
+	MachineDeploymentPhaseFailed = MachineDeploymentPhase("Failed")
+
+	// MachineDeploymentPhaseUnknown indicates the state of the MachineDeployment cannot be determined.
+	MachineDeploymentPhaseUnknown = MachineDeploymentPhase("Unknown")
+)
+
+// SetTypedPhase sets the Phase field to the string representation of MachineDeploymentPhase.
+func (md *MachineDeploymentStatus) SetTypedPhase(p MachineDeploymentPhase) {
+	md.Phase = string(p)
+}
+
+// GetTypedPhase attempts to parse the Phase field and return
+// the typed MachineDeploymentPhase representation.
+func (md *MachineDeploymentStatus) GetTypedPhase() MachineDeploymentPhase {
+	switch phase := MachineDeploymentPhase(md.Phase); phase {
+	case
+		MachineDeploymentPhaseScalingDown,
+		MachineDeploymentPhaseScalingUp,
+		MachineDeploymentPhaseRunning,
+		MachineDeploymentPhaseFailed:
+		return phase
+	default:
+		return MachineDeploymentPhaseUnknown
+	}
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:path=machinedeployments,shortName=md,scope=Namespaced,categories=cluster-api
+// +kubebuilder:storageversion
+// +kubebuilder:subresource:status
+// +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
+// +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="MachineDeployment status such as ScalingUp/ScalingDown/Running/Failed/Unknown"
+// +kubebuilder:printcolumn:name="Replicas",type="integer",JSONPath=".status.replicas",description="Total number of non-terminated machines targeted by this deployment"
+// +kubebuilder:printcolumn:name="Available",type="integer",JSONPath=".status.availableReplicas",description="Total number of available machines (ready for at least minReadySeconds)"
+// +kubebuilder:printcolumn:name="Ready",type="integer",JSONPath=".status.readyReplicas",description="Total number of ready machines targeted by this deployment."
+
 // MachineDeployment is the Schema for the machinedeployments API
-// +k8s:openapi-gen=true
-// +kubebuilder:resource:path=machinedeployments,shortName=md
-// +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.labelSelector
 type MachineDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -184,9 +245,7 @@ type MachineDeployment struct {
 	Status MachineDeploymentStatus `json:"status,omitempty"`
 }
 
-/// [MachineDeployment]
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // MachineDeploymentList contains a list of MachineDeployment
 type MachineDeploymentList struct {

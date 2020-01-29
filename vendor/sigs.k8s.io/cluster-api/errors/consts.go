@@ -111,3 +111,39 @@ const (
 	// Example: the ProviderSpec specifies an instance type that doesn't exist.
 	InvalidConfigurationMachineSetError MachineSetStatusError = "InvalidConfiguration"
 )
+
+type MachinePoolStatusError string
+
+const (
+	// Represents that the combination of configuration in the MachineTemplateSpec
+	// is not supported by this cluster. This is not a transient error, but
+	// indicates a state that must be fixed before progress can be made.
+	//
+	// Example: the ProviderSpec specifies an instance type that doesn't exist.
+	InvalidConfigurationMachinePoolError MachinePoolStatusError = "InvalidConfiguration"
+)
+
+type KubeadmControlPlaneStatusError string
+
+const (
+	// InvalidConfigurationKubeadmControlPlaneError indicates that the kubeadm control plane
+	// configuration is invalid.
+	InvalidConfigurationKubeadmControlPlaneError KubeadmControlPlaneStatusError = "InvalidConfiguration"
+
+	// UnsupportedChangeKubeadmControlPlaneError indicates that the kubeadm control plane
+	// spec has been updated in an unsupported way that cannot be
+	// reconciled.
+	UnsupportedChangeKubeadmControlPlaneError KubeadmControlPlaneStatusError = "UnsupportedChange"
+
+	// CreateKubeadmControlPlaneError indicates that an error was encountered
+	// when trying to create the kubeadm control plane.
+	CreateKubeadmControlPlaneError KubeadmControlPlaneStatusError = "CreateError"
+
+	// UpdateKubeadmControlPlaneError indicates that an error was encountered
+	// when trying to update the kubeadm control plane.
+	UpdateKubeadmControlPlaneError KubeadmControlPlaneStatusError = "UpdateError"
+
+	// DeleteKubeadmControlPlaneError indicates that an error was encountered
+	// when trying to delete the kubeadm control plane.
+	DeleteKubeadmControlPlaneError KubeadmControlPlaneStatusError = "DeleteError"
+)

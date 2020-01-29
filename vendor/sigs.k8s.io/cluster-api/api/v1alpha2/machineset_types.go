@@ -202,7 +202,6 @@ func (m *MachineSet) Default() {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=machinesets,shortName=ms,scope=Namespaced,categories=cluster-api
-// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 

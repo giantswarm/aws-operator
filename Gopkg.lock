@@ -2105,27 +2105,31 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:7f75ccb5699922f4563bef0d8d3b00ea85b3796605e7d1fd1f20b5610ef010f4"
+  branch = "master"
+  digest = "1:67931c23ff58ee59cd2fdec214ef250c2699200e66bb9cfa91424d66150b2e70"
   name = "sigs.k8s.io/cluster-api"
   packages = [
     "api/v1alpha2",
+    "api/v1alpha3",
     "errors",
-    "pkg/apis/deprecated/v1alpha1",
+    "util/conversion",
   ]
   pruneopts = "UT"
-  revision = "50de008625e64e4db0e48e41b8b45dcae02b8042"
-  version = "v0.2.8"
+  revision = "0b35eea112b57571545e46a4b78851f011ed0614"
 
 [[projects]]
-  digest = "1:994c1277fb2527a27720a000dec94ffb194f5413ea4c32be8c40526270d9c168"
+  digest = "1:c1a25c0b164f6a122ef1aa3396a55c284e3b65764065046ea40ffd879e44fd08"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
+    ".",
     "pkg/builder",
     "pkg/cache",
     "pkg/cache/internal",
     "pkg/client",
     "pkg/client/apiutil",
+    "pkg/client/config",
     "pkg/controller",
+    "pkg/controller/controllerutil",
     "pkg/conversion",
     "pkg/event",
     "pkg/handler",
@@ -2137,6 +2141,7 @@
     "pkg/leaderelection",
     "pkg/log",
     "pkg/manager",
+    "pkg/manager/signals",
     "pkg/metrics",
     "pkg/predicate",
     "pkg/reconcile",

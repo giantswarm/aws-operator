@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha2
+package v1alpha3
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capierrors "sigs.k8s.io/cluster-api/errors"
@@ -30,9 +32,22 @@ const (
 
 // ClusterSpec defines the desired state of Cluster
 type ClusterSpec struct {
-	// Cluster network configuration
+	// Paused can be used to prevent controllers from processing the Cluster and all its associated objects.
+	// +optional
+	Paused bool `json:"paused,omitempty"`
+
+	// Cluster network configuration.
 	// +optional
 	ClusterNetwork *ClusterNetwork `json:"clusterNetwork,omitempty"`
+
+	// ControlPlaneEndpoint represents the endpoint used to communicate with the control plane.
+	// +optional
+	ControlPlaneEndpoint APIEndpoint `json:"controlPlaneEndpoint"`
+
+	// ControlPlaneRef is an optional reference to a provider-specific resource that holds
+	// the details for provisioning the Control Plane for a Cluster.
+	// +optional
+	ControlPlaneRef *corev1.ObjectReference `json:"controlPlaneRef,omitempty"`
 
 	// InfrastructureRef is a reference to a provider-specific resource that holds the details
 	// for provisioning infrastructure for a cluster in said provider.
@@ -79,20 +94,19 @@ type NetworkRanges struct {
 
 // ClusterStatus defines the observed state of Cluster
 type ClusterStatus struct {
-	// APIEndpoints represents the endpoints to communicate with the control plane.
-	// +optional
-	APIEndpoints []APIEndpoint `json:"apiEndpoints,omitempty"`
+	// FailureDomains is a slice of failure domain objects synced from the infrastructure provider.
+	FailureDomains FailureDomains `json:"failureDomains,omitempty"`
 
-	// ErrorReason indicates that there is a problem reconciling the
+	// FailureReason indicates that there is a fatal problem reconciling the
 	// state, and will be set to a token value suitable for
 	// programmatic interpretation.
 	// +optional
-	ErrorReason *capierrors.ClusterStatusError `json:"errorReason,omitempty"`
+	FailureReason *capierrors.ClusterStatusError `json:"failureReason,omitempty"`
 
-	// ErrorMessage indicates that there is a problem reconciling the
+	// FailureMessage indicates that there is a fatal problem reconciling the
 	// state, and will be set to a descriptive error message.
 	// +optional
-	ErrorMessage *string `json:"errorMessage,omitempty"`
+	FailureMessage *string `json:"failureMessage,omitempty"`
 
 	// Phase represents the current phase of cluster actuation.
 	// E.g. Pending, Running, Terminating, Failed etc.
@@ -106,6 +120,10 @@ type ClusterStatus struct {
 	// ControlPlaneInitialized defines if the control plane has been initialized.
 	// +optional
 	ControlPlaneInitialized bool `json:"controlPlaneInitialized"`
+
+	// ControlPlaneReady defines if the control plane is ready.
+	// +optional
+	ControlPlaneReady bool `json:"controlPlaneReady,omitempty"`
 }
 
 // ANCHOR_END: ClusterStatus
@@ -139,13 +157,24 @@ type APIEndpoint struct {
 	Host string `json:"host"`
 
 	// The port on which the API server is serving.
-	Port int `json:"port"`
+	Port int32 `json:"port"`
+}
+
+// IsZero returns true if either the host or the port are zero values.
+func (v APIEndpoint) IsZero() bool {
+	return v.Host == "" || v.Port == 0
+}
+
+// String returns a formatted version HOST:PORT of this APIEndpoint.
+func (v APIEndpoint) String() string {
+	return fmt.Sprintf("%s:%d", v.Host, v.Port)
 }
 
 // ANCHOR_END: APIEndpoint
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=clusters,shortName=cl,scope=Namespaced,categories=cluster-api
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="Cluster status such as Pending/Provisioning/Provisioned/Deleting/Failed"
 
@@ -169,4 +198,31 @@ type ClusterList struct {
 
 func init() {
 	SchemeBuilder.Register(&Cluster{}, &ClusterList{})
+}
+
+// FailureDomains is a slice of FailureDomains.
+type FailureDomains map[string]FailureDomainSpec
+
+// FilterControlPlane returns a FailureDomain slice containing only the domains suitable to be used
+// for control plane nodes.
+func (in FailureDomains) FilterControlPlane() FailureDomains {
+	res := make(FailureDomains)
+	for id, spec := range in {
+		if spec.ControlPlane {
+			res[id] = spec
+		}
+	}
+	return res
+}
+
+// FailureDomainSpec is the Schema for Cluster API failure domains.
+// It allows controllers to understand how many failure domains a cluster can optionally span across.
+type FailureDomainSpec struct {
+	// ControlPlane determines if this failure domain is suitable for use by control plane machines.
+	// +optional
+	ControlPlane bool `json:"controlPlane"`
+
+	// Attributes is a free form map of attributes an infrastructure provider might use or require.
+	// +optional
+	Attributes map[string]string `json:"attributes,omitempty"`
 }

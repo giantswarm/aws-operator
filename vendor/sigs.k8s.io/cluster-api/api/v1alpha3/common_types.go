@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes Authors.
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,49 +14,52 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1alpha3
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
-// ProviderSpec defines the configuration to use during node creation.
-type ProviderSpec struct {
+const (
+	// ClusterLabelName is the label set on machines linked to a cluster and
+	// external objects(bootstrap and infrastructure providers)
+	ClusterLabelName = "cluster.x-k8s.io/cluster-name"
 
-	// No more than one of the following may be specified.
+	// ProviderLabelName is the label set on components in the provider manifest.
+	// This label allows to easily identify all the components belonging to a provider; the clusterctl
+	// tool uses this label for implementing provider's lifecycle operations.
+	ProviderLabelName = "cluster.x-k8s.io/provider"
 
-	// Value is an inlined, serialized representation of the resource
-	// configuration. It is recommended that providers maintain their own
-	// versioned API types that should be serialized/deserialized from this
-	// field, akin to component config.
-	// +optional
-	Value *runtime.RawExtension `json:"value,omitempty"`
+	// PausedAnnotation is an annotation that can be applied to any Cluster API
+	// object to prevent a controller from processing a resource.
+	//
+	// Controllers working with Cluster API objects must check the existence of this annotation
+	// on the reconciled object.
+	PausedAnnotation = "cluster.x-k8s.io/paused"
+)
 
-	// Source for the provider configuration. Cannot be used if value is
-	// not empty.
-	// +optional
-	ValueFrom *ProviderSpecSource `json:"valueFrom,omitempty"`
+// MachineAddressType describes a valid MachineAddress type.
+type MachineAddressType string
+
+const (
+	MachineHostName    MachineAddressType = "Hostname"
+	MachineExternalIP  MachineAddressType = "ExternalIP"
+	MachineInternalIP  MachineAddressType = "InternalIP"
+	MachineExternalDNS MachineAddressType = "ExternalDNS"
+	MachineInternalDNS MachineAddressType = "InternalDNS"
+)
+
+// MachineAddress contains information for the node's address.
+type MachineAddress struct {
+	// Machine address type, one of Hostname, ExternalIP or InternalIP.
+	Type MachineAddressType `json:"type"`
+
+	// The machine address.
+	Address string `json:"address"`
 }
 
-// ProviderSpecSource represents a source for the provider-specific
-// resource configuration.
-type ProviderSpecSource struct {
-	// The machine class from which the provider config should be sourced.
-	// +optional
-	MachineClass *MachineClassRef `json:"machineClass,omitempty"`
-}
-
-// MachineClassRef is a reference to the MachineClass object. Controllers should find the right MachineClass using this reference.
-type MachineClassRef struct {
-	// +optional
-	*corev1.ObjectReference `json:",inline"`
-
-	// Provider is the name of the cloud-provider which MachineClass is intended for.
-	// +optional
-	Provider string `json:"provider,omitempty"`
-}
+// MachineAddresses is a slice of MachineAddress items to be used by infrastructure providers.
+type MachineAddresses []MachineAddress
 
 // ObjectMeta is metadata that all persisted resources must have, which includes all objects
 // users must create. This is a copy of customizable fields from metav1.ObjectMeta.
