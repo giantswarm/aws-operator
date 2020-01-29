@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
+
 	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -47,19 +48,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			Port: 443,
 		}
 
-		for _, ep := range cluster.Status.APIEndpoints {
-			if ep.Host == apiEndpoint.Host && ep.Port == apiEndpoint.Port {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "API endpoint already set")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-				return nil
-			}
+		if cluster.Spec.ControlPlaneEndpoint.Host == apiEndpoint.Host && cluster.Spec.ControlPlaneEndpoint.Port == apiEndpoint.Port {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "API endpoint already set")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		}
 
-		cluster.Status.APIEndpoints = append(cluster.Status.APIEndpoints, apiEndpoint)
+		cluster.Spec.ControlPlaneEndpoint = apiEndpoint
+
 	}
 
 	{
-		err = r.ctrlClient.Status().Update(ctx, &cluster)
+		//TODO LH question for tim, update whole cluster or just ClusterSpec ?
+		err = r.ctrlClient.Update(ctx, &cluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}
