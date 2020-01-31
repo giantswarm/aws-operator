@@ -142,21 +142,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var controlPlaneAWSClients aws.Clients
-	{
-		c := aws.Config{
-			AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-			AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-			Region:          config.HostAWSConfig.Region,
-			SessionToken:    config.HostAWSConfig.SessionToken,
-		}
-
-		controlPlaneAWSClients, err = aws.NewClients(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
@@ -173,15 +158,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	var resourceSet *controller.ResourceSet
 	{
 		c := clusterResourceSetConfig{
-			CertsSearcher:          certsSearcher,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			CtrlClient:             config.K8sClient.CtrlClient(),
-			G8sClient:              config.K8sClient.G8sClient(),
-			HostAWSConfig:          config.HostAWSConfig,
-			K8sClient:              config.K8sClient.K8sClient(),
-			Locker:                 config.Locker,
-			Logger:                 config.Logger,
-			RandomKeysSearcher:     randomKeysSearcher,
+			CertsSearcher:      certsSearcher,
+			CtrlClient:         config.K8sClient.CtrlClient(),
+			G8sClient:          config.K8sClient.G8sClient(),
+			HostAWSConfig:      config.HostAWSConfig,
+			K8sClient:          config.K8sClient.K8sClient(),
+			Locker:             config.Locker,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,

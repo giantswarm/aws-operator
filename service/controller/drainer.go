@@ -74,28 +74,12 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	var controlPlaneAWSClients aws.Clients
-	{
-		c := aws.Config{
-			AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-			AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-			Region:          config.HostAWSConfig.Region,
-			SessionToken:    config.HostAWSConfig.SessionToken,
-		}
-
-		controlPlaneAWSClients, err = aws.NewClients(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSet *controller.ResourceSet
 	{
 		c := drainerResourceSetConfig{
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.K8sClient.G8sClient(),
-			K8sClient:              config.K8sClient.K8sClient(),
-			Logger:                 config.Logger,
+			G8sClient: config.K8sClient.G8sClient(),
+			K8sClient: config.K8sClient.K8sClient(),
+			Logger:    config.Logger,
 
 			HostAWSConfig:  config.HostAWSConfig,
 			ProjectName:    project.Name(),
