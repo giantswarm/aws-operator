@@ -16,15 +16,14 @@ import (
 )
 
 type clusterResourceSetConfig struct {
-	CertsSearcher          certs.Interface
-	ControlPlaneAWSClients aws.Clients
-	CtrlClient             client.Client
-	G8sClient              versioned.Interface
-	HostAWSConfig          aws.Config
-	K8sClient              kubernetes.Interface
-	Locker                 locker.Interface
-	Logger                 micrologger.Logger
-	RandomKeysSearcher     randomkeys.Interface
+	CertsSearcher      certs.Interface
+	CtrlClient         client.Client
+	G8sClient          versioned.Interface
+	HostAWSConfig      aws.Config
+	K8sClient          kubernetes.Interface
+	Locker             locker.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool

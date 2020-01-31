@@ -14,13 +14,12 @@ import (
 )
 
 type machineDeploymentResourceSetConfig struct {
-	CertsSearcher          certs.Interface
-	ControlPlaneAWSClients aws.Clients
-	G8sClient              versioned.Interface
-	K8sClient              kubernetes.Interface
-	Locker                 locker.Interface
-	Logger                 micrologger.Logger
-	RandomKeysSearcher     randomkeys.Interface
+	CertsSearcher      certs.Interface
+	G8sClient          versioned.Interface
+	K8sClient          kubernetes.Interface
+	Locker             locker.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 
 	CalicoCIDR                 int
 	CalicoMTU                  int

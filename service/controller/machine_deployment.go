@@ -115,21 +115,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 		}
 	}
 
-	var controlPlaneAWSClients aws.Clients
-	{
-		c := aws.Config{
-			AccessKeyID:     config.HostAWSConfig.AccessKeyID,
-			AccessKeySecret: config.HostAWSConfig.AccessKeySecret,
-			Region:          config.HostAWSConfig.Region,
-			SessionToken:    config.HostAWSConfig.SessionToken,
-		}
-
-		controlPlaneAWSClients, err = aws.NewClients(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
@@ -146,13 +131,12 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	var resourceSet *controller.ResourceSet
 	{
 		c := machineDeploymentResourceSetConfig{
-			CertsSearcher:          certsSearcher,
-			ControlPlaneAWSClients: controlPlaneAWSClients,
-			G8sClient:              config.K8sClient.G8sClient(),
-			K8sClient:              config.K8sClient.K8sClient(),
-			Locker:                 config.Locker,
-			Logger:                 config.Logger,
-			RandomKeysSearcher:     randomKeysSearcher,
+			CertsSearcher:      certsSearcher,
+			G8sClient:          config.K8sClient.G8sClient(),
+			K8sClient:          config.K8sClient.K8sClient(),
+			Locker:             config.Locker,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
 
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
