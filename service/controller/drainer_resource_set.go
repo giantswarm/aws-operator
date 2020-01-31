@@ -23,10 +23,9 @@ import (
 )
 
 type drainerResourceSetConfig struct {
-	ControlPlaneAWSClients aws.Clients
-	G8sClient              versioned.Interface
-	K8sClient              kubernetes.Interface
-	Logger                 micrologger.Logger
+	G8sClient versioned.Interface
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
 	HostAWSConfig  aws.Config
 	ProjectName    string
