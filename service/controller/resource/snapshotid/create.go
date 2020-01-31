@@ -6,11 +6,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/api/pkg/key"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -23,18 +23,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	clusterID := key.ClusterID(cr)
-
-	// TODO define key function
-
-	// TODO lookup snapshot
-	input := &ec2.DescribeSnapshotsInput{
-		//use the filter here
+	i := &ec2.DescribeSnapshotsInput{
 		Filters: []*ec2.Filter{
 			{
 				Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 				Values: []*string{
-					aws.String(key.ClusterID(&cr)),
+					aws.String(key.ClusterID(cr)),
 				},
 			},
 			{
@@ -45,16 +39,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			},
 		},
 	}
-	result, err := cc.Client.TenantCluster.AWS.EC2.DescribeSnapshots(input)
-	// 1 is good
-	// 0 bad
-	// > 1 bad
+
+	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSnapshots(i)
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	count := len(o.Snapshots)
+	if count == 1 {
+		return microerror.Maskf(notExistsError, "snapshot")
+	}
+	if count != 1 {
+		return microerror.Maskf(executionFailedError, "expected one snapshot, got %d", count)
+	}
 
 	// TODO define structure
-	cc.Status.TenantCluster.TCNP.ASG.MinSize = minSize
+	// TODO LH ask TS what we need to store in the cc ?
+	//cc.Status.TenantCluster.TCNP.ASG.MinSize = minSize
 
 	return nil
 }
