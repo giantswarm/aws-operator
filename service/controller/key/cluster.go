@@ -29,6 +29,10 @@ const (
 	KubernetesSecurePort = 443
 )
 
+const (
+	HAMasterSnapshotIDValue = "ha-master-migration"
+)
+
 // AWS Tags used for cost analysis and general resource tagging.
 const (
 	TagAvailabilityZone        = "giantswarm.io/availability-zone"
@@ -40,6 +44,7 @@ const (
 	TagOrganization            = "giantswarm.io/organization"
 	TagRouteTableType          = "giantswarm.io/route-table-type"
 	TagStack                   = "giantswarm.io/stack"
+	TagSnapshot                = "giantswarm.io/snapshot"
 	TagSubnetType              = "giantswarm.io/subnet-type"
 )
 
