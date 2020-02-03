@@ -167,13 +167,13 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 	return fmt.Sprintf("arn:%s:iam::%s:role/gs-cluster-%s-role-*", partition, accountID, clusterID)
 }
 
-// S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded for
-// the TCCP stack.
+// S3ObjectPathTCCPN computes the S3 object path to the cloud config uploaded
+// for the TCCPN stack.
 //
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn
 //
-func S3ObjectPathTCCP(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
+func S3ObjectPathTCCPN(getter LabelsGetter) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCPN(getter))
 }
 
 // S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for
@@ -230,6 +230,10 @@ func StackNameTCCPF(getter LabelsGetter) string {
 
 func StackNameTCCPI(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tccpi", ClusterID(getter))
+}
+
+func StackNameTCCPN(getter LabelsGetter) string {
+	return fmt.Sprintf("cluster-%s-tccpn", ClusterID(getter))
 }
 
 func StackNameTCNP(getter LabelsGetter) string {

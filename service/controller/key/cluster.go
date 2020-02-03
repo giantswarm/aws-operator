@@ -52,6 +52,7 @@ const (
 	StackTCCP  = "tccp"
 	StackTCCPF = "tccpf"
 	StackTCCPI = "tccpi"
+	StackTCCPN = "tccpn"
 	StackTCNP  = "tcnp"
 	StackTCNPF = "tcnpf"
 )
