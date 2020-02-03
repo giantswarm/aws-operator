@@ -52,7 +52,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Maskf(executionFailedError, "expected one snapshot, got %d", count)
 	}
 
-	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = key.HAMasterSnapshotIDValue
+	//store the snapshot id
+	snapshot := o.Snapshots[0]
+	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = snapshot.SnapshotId
 
 	return nil
 }
