@@ -53,6 +53,7 @@ type ContextStatusTenantClusterEncryption struct {
 
 type ContextStatusTenantClusterMasterInstance struct {
 	DockerVolumeResourceName string
+	EtcdVolumeSnapshotID     string
 	Image                    string
 	ResourceName             string
 	Type                     string

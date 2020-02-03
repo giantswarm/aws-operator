@@ -131,6 +131,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
+			err = r.snapshotEtcdVolume(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
 			err = r.terminateMasterInstance(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -961,6 +966,84 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 	}
 
 	return params, nil
+}
+
+func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID != "" {
+		// In case there is a snapshot ID, we already created the snapshot and do
+		// not need to do it again.
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not creating etcd volume snapshot")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "etcd volume snapshot already created")
+		return nil
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "creating etcd volume snapshot")
+
+	var ebsService ebs.Interface
+	{
+		c := ebs.Config{
+			Client: cc.Client.TenantCluster.AWS.EC2,
+			Logger: r.logger,
+		}
+
+		ebsService, err = ebs.New(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	var etcdVolumeID string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding etcd volume ID")
+
+		volumes, err := ebsService.ListVolumes(cr, ebs.NewEtcdVolumeFilter(cr))
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(volumes) != 1 {
+			return microerror.Maskf(executionFailedError, "1 etcd volume must exist, got %d", len(volumes))
+		}
+
+		etcdVolumeID = volumes[0].VolumeID
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found etcd volume ID %#q", etcdVolumeID))
+	}
+
+	{
+		i := &ec2.CreateSnapshotInput{
+			TagSpecifications: []*ec2.TagSpecification{
+				{
+					ResourceType: aws.String("snapshot"),
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String(key.TagSnapshot),
+							Value: aws.String(key.HAMasterSnapshotIDValue),
+						},
+						{
+							Key:   aws.String(key.TagCluster),
+							Value: aws.String(key.ClusterID(&cr)),
+						},
+					},
+				},
+			},
+			VolumeId: aws.String(etcdVolumeID),
+		}
+
+		_, err := cc.Client.TenantCluster.AWS.EC2.CreateSnapshot(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "created etcd volume snapshot")
+
+	return nil
 }
 
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
