@@ -54,7 +54,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	//store the snapshot id
 	snapshot := o.Snapshots[0]
-	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = snapshot.SnapshotId
+	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = aws.StringValue(snapshot.SnapshotId)
 
 	return nil
 }
