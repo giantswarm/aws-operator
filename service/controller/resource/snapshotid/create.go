@@ -45,16 +45,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 	count := len(o.Snapshots)
-	if count == 1 {
+	if count == 0 {
 		return microerror.Maskf(notExistsError, "snapshot")
 	}
 	if count != 1 {
 		return microerror.Maskf(executionFailedError, "expected one snapshot, got %d", count)
 	}
 
-	// TODO define structure
-	// TODO LH ask TS what we need to store in the cc ?
-	//cc.Status.TenantCluster.TCNP.ASG.MinSize = minSize
+	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = key.HAMasterSnapshotIDValue
 
 	return nil
 }
