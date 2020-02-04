@@ -52,6 +52,28 @@ func (c *ClusterState) Test(ctx context.Context) error {
 	var err error
 
 	{
+		c.logger.LogCtx(ctx, "level", "debug", "message", "getting current AZs in tenant cluster")
+		zones, err := c.provider.GetClusterAZs(ctx)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		c.logger.LogCtx(ctx, "level", "debug", "message", "found AZs in tenant cluster", "azs", zones)
+
+		c.logger.LogCtx(ctx, "level", "debug", "message", "getting expected AZs from CR")
+		expectedAZs, err := c.provider.ExpectedAZs()
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		c.logger.LogCtx(ctx, "level", "debug", "message", "found expected AZs from CR", "azs", expectedAZs)
+
+		for i, v := range expectedAZs {
+			if v != zones[i] {
+				return microerror.Maskf(executionFailedError, "Expected %v zones, got %v zones", expectedAZs, zones)
+			}
+		}
+	}
+
+	{
 		c.logger.LogCtx(ctx, "level", "debug", "message", "installing e2e-app")
 
 		err = c.InstallTestApp(ctx)

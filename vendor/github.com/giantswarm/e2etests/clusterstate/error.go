@@ -28,3 +28,7 @@ var waitError = &microerror.Error{
 func IsWait(err error) bool {
 	return microerror.Cause(err) == waitError
 }
+
+var executionFailedError = &microerror.Error{
+	Kind: "executionFailedError",
+}

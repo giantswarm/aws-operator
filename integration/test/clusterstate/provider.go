@@ -3,6 +3,7 @@
 package clusterstate
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -125,4 +126,55 @@ func (p *Provider) ReplaceMaster() error {
 	}
 
 	return nil
+}
+
+func (p *Provider) GetClusterAZs(ctx context.Context) ([]string, error) {
+	i := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("tag:Name"),
+				Values: []*string{
+					aws.String(fmt.Sprintf("%s-worker", p.clusterID)),
+				},
+			},
+			{
+				Name: aws.String("instance-state-name"),
+				Values: []*string{
+					aws.String("running"),
+				},
+			},
+		},
+	}
+
+	o, err := p.awsClient.EC2.DescribeInstances(i)
+	if err != nil {
+		return []string{}, microerror.Mask(err)
+	}
+
+	var zones []string
+	for _, instance := range o.Reservations[0].Instances {
+		subnetOutput, err := p.awsClient.EC2.DescribeSubnets(&ec2.DescribeSubnetsInput{
+			SubnetIds: []*string{instance.SubnetId},
+		})
+		if err != nil {
+			return []string{}, microerror.Mask(err)
+		}
+		zones = append(zones, *subnetOutput.Subnets[0].AvailabilityZone)
+	}
+
+	return zones, nil
+}
+
+func (p *Provider) ExpectedAZs() ([]string, error) {
+	customObject, err := p.g8sClient.ProviderV1alpha1().AWSConfigs("default").Get(p.clusterID, metav1.GetOptions{})
+	if err != nil {
+		return []string{}, microerror.Mask(err)
+	}
+
+	stringAZs := make([]string, 0, len(customObject.Status.AWS.AvailabilityZones))
+	for _, a := range customObject.Status.AWS.AvailabilityZones {
+		stringAZs = append(stringAZs, a.Name)
+	}
+
+	return stringAZs, nil
 }

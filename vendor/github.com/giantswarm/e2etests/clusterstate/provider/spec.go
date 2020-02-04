@@ -1,6 +1,10 @@
 package provider
 
-import "k8s.io/client-go/kubernetes"
+import (
+	"context"
+
+	"k8s.io/client-go/kubernetes"
+)
 
 type Clients interface {
 	// K8sClient returns a properly configured control plane client for the
@@ -11,4 +15,6 @@ type Clients interface {
 type Interface interface {
 	RebootMaster() error
 	ReplaceMaster() error
+	GetClusterAZs(ctx context.Context) ([]string, error)
+	ExpectedAZs() ([]string, error)
 }
