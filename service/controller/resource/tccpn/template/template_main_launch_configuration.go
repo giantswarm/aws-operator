@@ -2,12 +2,12 @@ package template
 
 const TemplateMainLaunchConfiguration = `
 {{- define "launch_configuration" -}}
-  NodePoolLaunchConfiguration:
+  ControlPlaneNodesLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: false
       BlockDeviceMappings:
-      - DeviceName: /dev/xvdh
+      - DeviceName: /dev/xvdc
         Ebs:
           DeleteOnTermination: true
           Encrypted: true
@@ -25,12 +25,12 @@ const TemplateMainLaunchConfiguration = `
           Encrypted: true
           VolumeSize: {{ .LaunchConfiguration.BlockDeviceMapping.Logging.Volume.Size }}
           VolumeType: gp2
-      IamInstanceProfile: !Ref NodePoolInstanceProfile
+      IamInstanceProfile: !Ref ControlPlaneNodesInstanceProfile
       ImageId: {{ .LaunchConfiguration.Instance.Image }}
       InstanceType: {{ .LaunchConfiguration.Instance.Type }}
       InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
       SecurityGroups:
-      - !Ref GeneralSecurityGroup
+      - !Ref MasterSecurityGroup
       UserData:
         Fn::Base64: |
           {
@@ -49,7 +49,7 @@ const TemplateMainLaunchConfiguration = `
                 {
                   "name": "docker",
                   "mount": {
-                    "device": "/dev/xvdh",
+                    "device": "/dev/xvdc",
                     "wipeFilesystem": true,
                     "label": "docker",
                     "format": "xfs"

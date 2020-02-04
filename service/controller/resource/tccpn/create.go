@@ -3,11 +3,9 @@ package tccpn
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
@@ -224,18 +222,28 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 }
 
 func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
+	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
+		AvailabilityZone: key.MasterAvailabilityZone(cr),
+		ClusterID:        key.ClusterID(&cr),
+		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(key.MasterAvailabilityZone(cr))),
+	}
+
+	return autoScalingGroup, nil
+}
+
+func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainEtcdVolume, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		AvailabilityZones: key.MasterAvailabilityZone(cr),
-		Cluster:           key.ClusterID(&cr),
-		Subnet:            key.SanitizeCFResourceName(key.PrivateSubnetName(key.MasterAvailabilityZone(cr))),
+	etcdVolume := &template.ParamsMainEtcdVolume{
+		AvailabilityZone: key.MasterAvailabilityZone(cr),
+		Name:             key.VolumeNameEtcd(cr),
+		SnapshotID:       cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID,
 	}
 
-	return autoScalingGroup, nil
+	return etcdVolume, nil
 }
 
 func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, encrypterBackend string) (*template.ParamsMainIAMPolicies, error) {
@@ -247,7 +255,7 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
-			Cluster:          key.ClusterID(&cr),
+			ClusterID:        key.ClusterID(&cr),
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:         key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
@@ -299,13 +307,8 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 }
 
 func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	outputs := &template.ParamsMainOutputs{
-		InstanceType key.MasterInstanceType(cr),
+		InstanceType:    key.MasterInstanceType(cr),
 		OperatorVersion: key.OperatorVersion(&cr),
 	}
 
@@ -316,6 +319,10 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		etcdVolume, err := newEtcdVolume(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -334,6 +341,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 
 		params = &template.ParamsMain{
 			AutoScalingGroup:    autoScalingGroup,
+			EtcdVolume:          etcdVolume,
 			IAMPolicies:         iamPolicies,
 			LaunchConfiguration: launchConfiguration,
 			Outputs:             outputs,
@@ -341,25 +349,4 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	}
 
 	return params, nil
-}
-
-func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
-	for _, g := range groups {
-		if awstags.ValueForKey(g.Tags, "Name") == name {
-			return *g.GroupId
-		}
-	}
-
-	return ""
-}
-
-func workerCountRatio(workers int, ratio float32) string {
-	value := float32(workers) * ratio
-	rounded := int(value + 0.5)
-
-	if rounded == 0 {
-		rounded = 1
-	}
-
-	return strconv.Itoa(rounded)
 }
