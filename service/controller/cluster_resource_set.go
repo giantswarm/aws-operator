@@ -38,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpencryption"
@@ -184,6 +185,18 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var snapshotIDResource resource.Interface
+	{
+		c := snapshotid.Config{
+			Logger: config.Logger,
+		}
+
+		snapshotIDResource, err = snapshotid.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -575,6 +588,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		snapshotIDResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
