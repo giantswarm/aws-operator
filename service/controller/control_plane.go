@@ -44,7 +44,7 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 			ResourceSets: resourceSets,
 
 			// Name is used to compute finalizer names. This results in something
-			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
+			// like operatorkit.giantswarm.io/aws-operator-control-plane-controller.
 			Name: project.Name() + "-control-plane-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSControlPlane)
