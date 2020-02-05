@@ -38,7 +38,7 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha3.NewAWSControlPlaneCRD(),
+			CRD:          infrastructurev1alpha2.NewAWSControlPlaneCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,

@@ -38,8 +38,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "hamasterspec"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
