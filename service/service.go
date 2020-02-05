@@ -315,7 +315,7 @@ func New(config Config) (*Service, error) {
 
 		bootOnce:                    sync.Once{},
 		clusterController:           clusterController,
-		ControlPlaneController:      controlPlaneController,
+		controlPlaneController:      controlPlaneController,
 		drainerController:           drainerController,
 		machineDeploymentController: machineDeploymentController,
 		operatorCollector:           operatorCollector,

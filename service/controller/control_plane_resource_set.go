@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -10,6 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -35,7 +37,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -71,7 +73,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToMachineDeployment(obj)
+		cr, err := key.ToControlPlane(obj)
 		if err != nil {
 			return false
 		}
@@ -103,4 +105,20 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	}
 
 	return resourceSet, nil
+}
+
+func newControlPlaneToClusterFunc(g8sClient versioned.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+	return func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+		cr, err := key.ToControlPlane(obj)
+		if err != nil {
+			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+		}
+
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
+		if err != nil {
+			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+		}
+
+		return *m, nil
+	}
 }
