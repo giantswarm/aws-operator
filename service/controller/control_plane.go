@@ -47,7 +47,7 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
 			Name: project.Name() + "-control-plane-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSMachineDeployment)
+				return new(infrastructurev1alpha2.AWSControlPlane)
 			},
 		}
 
