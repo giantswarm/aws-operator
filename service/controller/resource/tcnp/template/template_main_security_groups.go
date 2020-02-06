@@ -37,6 +37,9 @@ const TemplateMainSecurityGroups = `
         FromPort: 10301
         ToPort: 10301
         CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+      Tags:
+        - Key: Name
+          Value: {{ .SecurityGroups.ClusterID }}-worker
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
   GeneralInternalAPIIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -47,7 +50,7 @@ const TemplateMainSecurityGroups = `
       IpProtocol: tcp
       FromPort: 443
       ToPort: 443
-      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

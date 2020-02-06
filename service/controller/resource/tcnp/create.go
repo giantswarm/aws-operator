@@ -410,6 +410,7 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	}
 
 	securityGroups := &template.ParamsMainSecurityGroups{
+		ClusterID: key.ClusterID(&cr),
 		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
 			VPC: template.ParamsMainSecurityGroupsControlPlaneVPC{
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,

@@ -581,7 +581,7 @@ Resources:
         CidrIp: 10.1.0.0/16
       Tags:
         - Key: Name
-          Value:  8y5ck-master
+          Value: 8y5ck-master
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
