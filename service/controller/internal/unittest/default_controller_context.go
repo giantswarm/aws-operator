@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 
-func DefaultContext() context.Context {
+func DefaultControllerContext() controllercontext.Context {
 	cc := controllercontext.Context{
 		Spec: controllercontext.ContextSpec{
 			TenantCluster: controllercontext.ContextSpecTenantCluster{
@@ -224,7 +224,11 @@ func DefaultContext() context.Context {
 			},
 		},
 	}
+	return cc
+}
 
+func DefaultContext() context.Context {
+	cc := DefaultControllerContext()
 	return controllercontext.NewContext(context.Background(), cc)
 }
 
