@@ -15,18 +15,18 @@ const (
 
 type Config struct {
 	G8sClient versioned.Interface
-	Detection *changedetection.TCNP
+	Detection *changedetection.TCCPN
 	Logger    micrologger.Logger
 
 	EncrypterBackend string
 	InstallationName string
 }
 
-// Resource implements the TCNP resource, which stands for Tenant Cluster Data
-// Plane. We manage a dedicated Cloud Formation stack for each node pool.
+// Resource implements the TCCPN resource, which stands for Tenant Cluster Control
+// Plane Node. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
 	g8sClient versioned.Interface
-	detection *changedetection.TCNP
+	detection *changedetection.TCCPN
 	logger    micrologger.Logger
 
 	encrypterBackend string

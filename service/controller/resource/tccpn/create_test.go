@@ -33,13 +33,13 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name             string
 		ctx              context.Context
-		cr               infrastructurev1alpha2.AWSMachineDeployment
+		cr               infrastructurev1alpha2.AWSControlPlane
 		encrypterBackend string
 	}{
 		{
 			name:             "case 0: basic test with encrypter backend KMS",
 			ctx:              unittest.DefaultContext(),
-			cr:               unittest.DefaultMachineDeployment(),
+			cr:               unittest.DefaultControlPlane(),
 			encrypterBackend: encrypter.KMSBackend,
 		},
 	}
