@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Giant Swarm GmbH.
+Copyright 2020 Giant Swarm GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import (
 type InfrastructureV1alpha2Interface interface {
 	RESTClient() rest.Interface
 	AWSClustersGetter
+	AWSControlPlanesGetter
 	AWSMachineDeploymentsGetter
+	G8sControlPlanesGetter
 }
 
 // InfrastructureV1alpha2Client is used to interact with features provided by the infrastructure.giantswarm.io group.
@@ -39,8 +41,16 @@ func (c *InfrastructureV1alpha2Client) AWSClusters(namespace string) AWSClusterI
 	return newAWSClusters(c, namespace)
 }
 
+func (c *InfrastructureV1alpha2Client) AWSControlPlanes(namespace string) AWSControlPlaneInterface {
+	return newAWSControlPlanes(c, namespace)
+}
+
 func (c *InfrastructureV1alpha2Client) AWSMachineDeployments(namespace string) AWSMachineDeploymentInterface {
 	return newAWSMachineDeployments(c, namespace)
+}
+
+func (c *InfrastructureV1alpha2Client) G8sControlPlanes(namespace string) G8sControlPlaneInterface {
+	return newG8sControlPlanes(c, namespace)
 }
 
 // NewForConfig creates a new InfrastructureV1alpha2Client for the given config.
