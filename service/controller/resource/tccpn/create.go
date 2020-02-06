@@ -21,7 +21,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
+	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -33,30 +33,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
-		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
+
+		if len(cc.Status.TenantCluster.TCCPN.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		}
 
-		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "EtcdVolumeSnapshotID not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
-			return nil
-		}
-
-		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-			return nil
-		}
-
-		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 	}
@@ -68,10 +56,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.StackNameTCCPN(&cr)),
 		}
 
+		//TODO LH if no snapshot id on tenant cluster don't proceed.
+
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack")
-
+			//??
 			err = r.createStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -102,16 +92,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		scale, err := r.detection.ShouldScale(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
 		update, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		if scale || update {
+		if update {
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
