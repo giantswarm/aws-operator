@@ -3,7 +3,7 @@ package template
 const TemplateMainOutputs = `
 {{- define "outputs" -}}
   InstanceType:
-    Value: {{ .Outputs.Instance.Type }}
+    Value: {{ .Outputs.InstanceType }}
   OperatorVersion:
     Value: {{ .Outputs.OperatorVersion }}
 {{- end -}}

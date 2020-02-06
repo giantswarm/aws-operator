@@ -5,13 +5,13 @@ const TemplateMainEtcdVolume = `
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
-      AvailabilityZone: {{ $v.EtcdVolume.AvailabilityZone }}
+      AvailabilityZone: {{ .EtcdVolume.AvailabilityZone }}
       Encrypted: true
       Size: 100
-      SnapshotId: {{ $v.EtcdVolume.SnapshotID }}
+      SnapshotId: {{ .EtcdVolume.SnapshotID }}
       Tags:
       - Key: Name
-        Value: {{ $v.EtcdVolume.Name }}
+        Value: {{ .EtcdVolume.Name }}
       VolumeType: gp2
 {{- end -}}
 `
