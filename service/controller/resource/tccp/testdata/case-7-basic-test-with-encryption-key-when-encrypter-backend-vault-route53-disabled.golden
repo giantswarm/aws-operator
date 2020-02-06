@@ -177,6 +177,9 @@ Resources:
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
+      Tags:
+      - Key: Name
+        Value: 8y5ck
       VpcId: !Ref VPC
   PublicInternetGatewayRouteEuCentral1a:
     Type: AWS::EC2::Route

@@ -14,6 +14,9 @@ const TemplateMainInternetGateway = `
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
+      Tags:
+      - Key: Name
+        Value: {{ $v.ClusterID }}
       VpcId: !Ref VPC
   {{- range $v.InternetGateways }}
   {{ .InternetGatewayRoute }}:
