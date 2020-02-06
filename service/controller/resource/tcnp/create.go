@@ -383,6 +383,7 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainRouteTablesListItem{
 			AvailabilityZone: a.Name,
+			ClusterID:        key.ClusterID(&cr),
 			Name:             key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
 			Route: template.ParamsMainRouteTablesListItemRoute{
 				Name: key.SanitizeCFResourceName(key.NATRouteName(a.Name)),
