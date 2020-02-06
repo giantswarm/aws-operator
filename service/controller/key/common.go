@@ -77,6 +77,15 @@ func KubeletLabelsTCCP(getter LabelsGetter) string {
 	return labels
 }
 
+func KubeletLabelsTCCPN(getter LabelsGetter) string {
+	var labels string
+
+	labels = ensureLabel(labels, label.Provider, "aws")
+	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
+
+	return labels
+}
+
 func KubeletLabelsTCNP(getter LabelsGetter) string {
 	var labels string
 
@@ -165,6 +174,15 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 	partition := RegionARN(region)
 
 	return fmt.Sprintf("arn:%s:iam::%s:role/gs-cluster-%s-role-*", partition, accountID, clusterID)
+}
+
+// S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded
+// for the TCCP stack.
+//
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
+//
+func S3ObjectPathTCCP(getter LabelsGetter) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
 }
 
 // S3ObjectPathTCCPN computes the S3 object path to the cloud config uploaded

@@ -296,7 +296,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			LabelsFunc:         key.KubeletLabelsTCCP,
 			Logger:             config.Logger,
 			G8sClient:          config.G8sClient,
-			PathFunc:           key.S3ObjectPathTCCPN,
+			PathFunc:           key.S3ObjectPathTCCP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
 
