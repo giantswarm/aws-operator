@@ -33,14 +33,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
-
-		if len(cc.Status.TenantCluster.TCCPN.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-			return nil
-		}
-
 		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "EtcdVolumeSnapshotID not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -55,8 +47,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCCPN(&cr)),
 		}
-
-		//TODO LH if no snapshot id on tenant cluster don't proceed.
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
@@ -108,7 +98,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -155,14 +145,14 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSMachineDeployment) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSControlPlane) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCPN
 	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -207,32 +197,32 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
+func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		AvailabilityZone: key.MasterAvailabilityZone(cr),
+		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
 		ClusterID:        key.ClusterID(&cr),
-		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(key.MasterAvailabilityZone(cr))),
+		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0])),
 	}
 
 	return autoScalingGroup, nil
 }
 
-func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainEtcdVolume, error) {
+func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	etcdVolume := &template.ParamsMainEtcdVolume{
-		AvailabilityZone: key.MasterAvailabilityZone(cr),
-		Name:             key.VolumeNameEtcd(cr),
+		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
+		Name:             key.VolumeNameEtcdCP(cr),
 		SnapshotID:       cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID,
 	}
 
 	return etcdVolume, nil
 }
 
-func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, encrypterBackend string) (*template.ParamsMainIAMPolicies, error) {
+func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -255,7 +245,7 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	return iamPolicies, nil
 }
 
-func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLaunchConfiguration, error) {
+func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchConfiguration, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -265,12 +255,12 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
 			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
-					Size: key.MachineDeploymentDockerVolumeSizeGB(cr),
+					Size: 100,
 				},
 			},
 			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
-					Size: key.MachineDeploymentKubeletVolumeSizeGB(cr),
+					Size: 100,
 				},
 			},
 			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
@@ -282,7 +272,7 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		Instance: template.ParamsMainLaunchConfigurationInstance{
 			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Monitoring: true,
-			Type:       key.MachineDeploymentInstanceType(cr),
+			Type:       key.ControlPlaneInstanceType(cr),
 		},
 		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
 			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr)),
@@ -292,16 +282,16 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	return launchConfiguration, nil
 }
 
-func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
+func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
 	outputs := &template.ParamsMainOutputs{
-		InstanceType:    key.MasterInstanceType(cr),
+		InstanceType:    key.ControlPlaneInstanceType(cr),
 		OperatorVersion: key.OperatorVersion(&cr),
 	}
 
 	return outputs, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, encrypterBackend string) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)

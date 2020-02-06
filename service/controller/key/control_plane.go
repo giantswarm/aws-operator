@@ -1,6 +1,8 @@
 package key
 
 import (
+	"fmt"
+
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 )
@@ -26,4 +28,8 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	c := p.DeepCopy()
 
 	return *c, nil
+}
+
+func VolumeNameEtcdCP(cluster infrastructurev1alpha2.AWSControlPlane) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(&cluster))
 }

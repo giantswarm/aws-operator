@@ -23,7 +23,7 @@ type ParamsMainLaunchConfigurationBlockDeviceMappingDocker struct {
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume struct {
-	Size string
+	Size int
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingKubelet struct {
@@ -31,7 +31,7 @@ type ParamsMainLaunchConfigurationBlockDeviceMappingKubelet struct {
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume struct {
-	Size string
+	Size int
 }
 
 type ParamsMainLaunchConfigurationBlockDeviceMappingLogging struct {
