@@ -350,6 +350,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1a
       Tags:
+        - Key: Name
+          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1a
   NATEIPEuCentral1a:
@@ -367,6 +369,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1b
       Tags:
+        - Key: Name
+          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1b
   NATEIPEuCentral1b:
@@ -384,6 +388,8 @@ Resources:
         - AllocationId
       SubnetId: !Ref PublicSubnetEuCentral1c
       Tags:
+        - Key: Name
+          Value: 8y5ck
         - Key: giantswarm.io/availability-zone
           Value: eu-central-1c
   NATEIPEuCentral1c:
