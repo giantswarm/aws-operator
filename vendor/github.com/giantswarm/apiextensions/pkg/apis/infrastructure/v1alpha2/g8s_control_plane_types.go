@@ -15,14 +15,14 @@ const g8sControlPlaneCRDYAML = `
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: g8sControlPlanes.core.giantswarm.io
+  name: g8scontrolplanes.infrastructure.giantswarm.io
 spec:
   group: infrastructure.giantswarm.io
   scope: Namespaced
   names:
     kind: G8sControlPlane
-    plural: g8sControlPlanes
-    singular: g8sControlPlane
+    plural: g8scontrolplanes
+    singular: g8scontrolplane
   subresources:
     status: {}
   versions:
@@ -83,7 +83,7 @@ func NewG8sControlPlaneTypeMeta() metav1.TypeMeta {
 //	metadata:
 //    labels:
 //      aws-operator.giantswarm.io/version: 6.2.0
-//      cluster-operator.giantswarm.io/version:0.17.0
+//      cluster-operator.giantswarm.io/version: 0.17.0
 //      giantswarm.io/cluster: "8y5kc"
 //      giantswarm.io/organization: "giantswarm"
 //      release.giantswarm.io/version: 7.3.1

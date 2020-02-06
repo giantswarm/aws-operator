@@ -74,15 +74,20 @@ func NewAWSControlPlaneTypeMeta() metav1.TypeMeta {
 //
 //     apiVersion: infrastructure.giantswarm.io/v1alpha2
 //     kind: AWSControlPlane
-//	   metadata:
+//     metadata:
 //       annotations:
-//		   giantswarm.io/docs:
+//         giantswarm.io/docs:
 //       labels:
 //         aws-operator.giantswarm.io/version: 6.2.0
 //         giantswarm.io/cluster: "8y5kc"
 //         giantswarm.io/organization: "giantswarm"
 //         release.giantswarm.io/version: 7.3.1
 //       name: 8y5kc
+//       ownerReference:
+//         kind: G8sControlPlane
+//         namespace: default
+//         name: 8y5kc
+//         apiVersion: infrastructure.giantswarm.io/v1alpha2
 //     spec:
 //       availabilityZones:
 //         - eu-central-1a
