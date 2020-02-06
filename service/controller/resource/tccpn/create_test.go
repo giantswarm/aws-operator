@@ -38,7 +38,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	}{
 		{
 			name:             "case 0: basic test with encrypter backend KMS",
-			ctx:              unittest.DefaultContext(),
+			ctx:              unittest.DefaultContextControlPlane(),
 			cr:               unittest.DefaultControlPlane(),
 			encrypterBackend: encrypter.KMSBackend,
 		},
@@ -75,6 +75,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			if !bytes.Equal([]byte(templateBody), goldenFile) {
 				t.Fatalf("\n\n%s\n", cmp.Diff(string(goldenFile), templateBody))
 			}
+
 		})
 	}
 }
