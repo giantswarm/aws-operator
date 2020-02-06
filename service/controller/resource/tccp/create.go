@@ -321,7 +321,7 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alp
 	// https://github.com/giantswarm/giantswarm/issues/7665
 
 	c := template.SmallCloudconfigConfig{
-		S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr)),
+		S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCP(&cr)),
 	}
 	rendered, err := pkgtemplate.Render(key.CloudConfigSmallTemplates(), c)
 	if err != nil {
