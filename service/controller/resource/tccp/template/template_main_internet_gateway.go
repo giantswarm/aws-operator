@@ -5,6 +5,10 @@ const TemplateMainInternetGateway = `
 {{- $v := .InternetGateway -}}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: {{ $v.ClusterID }}
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
