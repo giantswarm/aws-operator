@@ -177,6 +177,10 @@ Resources:
       Device: /dev/xvdf
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: 8y5ck
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn:
@@ -186,9 +190,6 @@ Resources:
     Properties:
       InternetGatewayId:
         Ref: InternetGateway
-      Tags:
-      - Key: Name
-        Value: 8y5ck
       VpcId: !Ref VPC
   PublicInternetGatewayRouteEuCentral1a:
     Type: AWS::EC2::Route
