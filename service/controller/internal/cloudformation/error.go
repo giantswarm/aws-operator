@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -49,11 +50,16 @@ func IsStackNotFound(err error) bool {
 		return false
 	}
 
-	if strings.Contains(microerror.Cause(err).Error(), "does not exist") {
+	c := microerror.Cause(err)
+
+	fmt.Printf("%#v\n", c)
+	fmt.Printf("%#v\n", c.Error())
+
+	if strings.Contains(c.Error(), "does not exist") {
 		return true
 	}
 
-	if microerror.Cause(err) == stackNotFoundError {
+	if c == stackNotFoundError {
 		return true
 	}
 
