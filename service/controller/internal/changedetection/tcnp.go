@@ -3,6 +3,7 @@ package changedetection
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/ec2"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
@@ -80,6 +81,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(md)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(md)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&md)
+	securityGroupEqual := securityGroupListEqual(cc.Spec.TenantCluster.TCNP.SecurityGroups, cc.Status.TenantCluster.TCNP.SecurityGroups)
 
 	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to worker instance docker volume size changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(md)))
@@ -93,6 +95,23 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to operator version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&md)))
 		return true, nil
 	}
+	if !securityGroupEqual {
+		t.logger.LogCtx(ctx, "level", "debug", "message", "detected tenant cluster node pool should update due to node pool security groups")
+		return true, nil
+	}
 
 	return false, nil
+}
+
+func securityGroupListEqual(s1 []*ec2.SecurityGroup, s2 []*ec2.SecurityGroup) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := 0; i < len(s1); i++ {
+		if s1[i].GroupId != s2[i].GroupId {
+			return false
+		}
+	}
+
+	return true
 }

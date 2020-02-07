@@ -78,5 +78,17 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Master.ID }}
+  {{- range .SecurityGroups.TenantCluster.NodePools -}}
+  NodePoolToNodePoolRule-{{ .ID }}:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the other NodePool Security Group to the this Node Pool General Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: {{ .ID }}
+  {{- end -}}
 {{- end -}}
 `

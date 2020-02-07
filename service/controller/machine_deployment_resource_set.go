@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -310,6 +311,18 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpSecurityGroupsResource resource.Interface
+	{
+		c := tcnpsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		tcnpSecurityGroupsResource, err = tcnpsecuritygroups.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpSubnetsResource resource.Interface
 	{
 		c := tccpsubnets.Config{
@@ -423,6 +436,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tcnpAZsResource,
 		tcnpOutputsResource,
 		tcnpEncryptionResource,
+		tcnpSecurityGroupsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
