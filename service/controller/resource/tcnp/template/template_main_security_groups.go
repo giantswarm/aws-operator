@@ -50,7 +50,7 @@ const TemplateMainSecurityGroups = `
       IpProtocol: tcp
       FromPort: 443
       ToPort: 443
-      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
