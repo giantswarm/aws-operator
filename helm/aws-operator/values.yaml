@@ -7,9 +7,12 @@ flag:
       labelselector:
         version: ""
 image:
-  registry: "quay.io"
   name: "giantswarm/aws-operator"
   tag: "[[ .Version ]]"
+Installation:
+  V1:
+    Registry:
+      Domain: quay.io
 pod:
   user:
     id: 1000
