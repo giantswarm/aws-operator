@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
+	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
