@@ -386,6 +386,7 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainRouteTablesListItem{
 			AvailabilityZone: a.Name,
+			ClusterID:        key.ClusterID(&cr),
 			Name:             key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
 			Route: template.ParamsMainRouteTablesListItemRoute{
 				Name: key.SanitizeCFResourceName(key.NATRouteName(a.Name)),
@@ -417,6 +418,7 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	}
 
 	securityGroups := &template.ParamsMainSecurityGroups{
+		ClusterID: key.ClusterID(&cr),
 		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
 			VPC: template.ParamsMainSecurityGroupsControlPlaneVPC{
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,

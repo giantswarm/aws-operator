@@ -1,6 +1,7 @@
 package template
 
 type ParamsMainSecurityGroups struct {
+	ClusterID     string
 	ControlPlane  ParamsMainSecurityGroupsControlPlane
 	TenantCluster ParamsMainSecurityGroupsTenantCluster
 }
