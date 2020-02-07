@@ -55,20 +55,20 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("tag:giantswarm.io/cluster"),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
 						aws.String(key.ClusterID(&cr)),
 					},
 				},
 				{
-					Name: aws.String("tag:giantswarm.io/stack"),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
 					Values: []*string{
-						aws.String("tcnp"),
+						aws.String(key.StackTCNP),
 					},
 				},
 			},
 		}
-
+		key.AWSTags()
 		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSecurityGroups(i)
 		if err != nil {
 			return microerror.Mask(err)
