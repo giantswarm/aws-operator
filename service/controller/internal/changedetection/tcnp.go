@@ -3,8 +3,8 @@ package changedetection
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/ec2"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"

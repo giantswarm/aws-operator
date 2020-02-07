@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -39,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 )
 
 func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
