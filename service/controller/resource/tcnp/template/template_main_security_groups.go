@@ -37,6 +37,9 @@ const TemplateMainSecurityGroups = `
         FromPort: 10301
         ToPort: 10301
         CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+      Tags:
+        - Key: Name
+          Value: {{ .SecurityGroups.ClusterID }}-worker
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress

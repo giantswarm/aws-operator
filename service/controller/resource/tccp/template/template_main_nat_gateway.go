@@ -15,6 +15,8 @@ const TemplateMainNatGateway = `
         - AllocationId
       SubnetId: !Ref {{ .PublicSubnetName }}
       Tags:
+        - Key: Name
+          Value: {{ .ClusterID }}
         - Key: giantswarm.io/availability-zone
           Value: {{ .AvailabilityZone }}
   {{ .NATEIPName }}:
