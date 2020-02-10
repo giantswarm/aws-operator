@@ -68,7 +68,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				},
 			},
 		}
-		key.AWSTags()
 		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSecurityGroups(i)
 		if err != nil {
 			return microerror.Mask(err)
