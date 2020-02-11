@@ -318,7 +318,7 @@ Resources:
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
-      SourceSecurityGroupId: SgTest1
+      SourceSecurityGroupId: sg-test1
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
