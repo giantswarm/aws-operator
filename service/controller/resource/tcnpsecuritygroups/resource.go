@@ -84,13 +84,10 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 	var securityGroupIDs []string
 	{
-		// list single security group of this very node pool
-		// get all ingress rules from this security group
-		// put all security groups referenced in the ingress rules into controller context status
 		var sg *ec2.SecurityGroup
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding general np security group for machine deployment %#q", key.MachineDeploymentID(&cr)))
 
-		// use tag filter from previous security groups list
+		// TODO use tag filter from previous security groups list
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
 				{

@@ -82,6 +82,9 @@ func DefaultContext() context.Context {
 							},
 						},
 					},
+					SecurityGroups: []*ec2.SecurityGroup{{
+						GroupId: aws.String("sg-test1"),
+					}},
 				},
 			},
 		},

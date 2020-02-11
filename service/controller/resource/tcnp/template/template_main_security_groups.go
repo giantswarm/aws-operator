@@ -81,7 +81,7 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Master.ID }}
-  {{ range .SecurityGroups.TenantCluster.NodePools -}}
+  {{ range .SecurityGroups.TenantCluster.NodePools }}
   NodePoolToNodePoolRule-{{ .ID }}:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

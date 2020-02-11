@@ -309,6 +309,16 @@ Resources:
       ToPort: -1
       SourceSecurityGroupId: master-security-group-id
   
+  NodePoolToNodePoolRule-sg-test1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the other NodePool Security Group to the this Node Pool General Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: sg-test1
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
