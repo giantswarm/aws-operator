@@ -35,7 +35,8 @@ type ParamsMainSecurityGroupsTenantClusterMaster struct {
 }
 
 type ParamsMainSecurityGroupsTenantClusterNodePool struct {
-	ID string
+	ID           string
+	ResourceName string
 }
 
 type ParamsMainSecurityGroupsTenantClusterVPC struct {

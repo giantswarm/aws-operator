@@ -232,7 +232,6 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
-
 	return nil
 }
 
@@ -424,7 +423,7 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 
 	var nodePoolsSecurityGroups []template.ParamsMainSecurityGroupsTenantClusterNodePool
 	for _, sg := range cc.Spec.TenantCluster.TCNP.SecurityGroups {
-		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: key.SanitizeCFResourceName(*sg.GroupId)})
+		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: *sg.GroupId, ResourceName: key.SanitizeCFResourceName(*sg.GroupId)})
 
 	}
 
