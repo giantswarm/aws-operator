@@ -123,7 +123,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		}
 
 		if len(o.SecurityGroups) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find  worker security group for tenant cluster %#q yet", key.ClusterID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find  worker security group for machine deployment %#q yet", key.MachineDeploymentID(&cr)))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
@@ -139,6 +139,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				securityGroupIDs = append(securityGroupIDs, *sgRule.UserIdGroupPairs[0].GroupId)
 			}
 		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finded %d general node pool worker security groups ingress rules for machine deployment %#q", len(securityGroupIDs), key.MachineDeploymentID(&cr)))
 	}
 
 	{
