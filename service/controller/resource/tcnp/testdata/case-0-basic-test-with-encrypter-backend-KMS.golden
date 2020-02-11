@@ -309,6 +309,7 @@ Resources:
       ToPort: -1
       SourceSecurityGroupId: master-security-group-id
   
+  
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
