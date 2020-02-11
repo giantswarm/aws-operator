@@ -225,7 +225,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			StackName:    aws.String(key.StackNameTCNP(&cr)),
 			TemplateBody: aws.String(templateBody),
 		}
-
+		fmt.Printf("%s\n", templateBody)
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
 		if err != nil {
 			return microerror.Mask(err)

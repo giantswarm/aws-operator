@@ -75,7 +75,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 		groups = o.SecurityGroups
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found np security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d np security groups for machine deployment%#q", len(groups), key.MachineDeploymentID(&cr)))
 	}
 
 	{
@@ -88,7 +88,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		// get all ingress rules from this security group
 		// put all security groups referenced in the ingress rules into controller context status
 		var sg *ec2.SecurityGroup
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding general np security group for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding general np security group for machine deployment %#q", key.MachineDeploymentID(&cr)))
 
 		// use tag filter from previous security groups list
 		i := &ec2.DescribeSecurityGroupsInput{
