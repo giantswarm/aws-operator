@@ -135,8 +135,8 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		for _, sgRule := range sg.IpPermissions {
 			// we are only interested in ingress rules that uses security groups IDs reference
 			// sgRule.UserIdGroupPairs is empty for IP CIDR based rules
-			if len(sgRule.UserIdGroupPairs) == 1 {
-				securityGroupIDs = append(securityGroupIDs, *sgRule.UserIdGroupPairs[0].GroupId)
+			for _, gp := range sgRule.UserIdGroupPairs {
+				securityGroupIDs = append(securityGroupIDs, *gp.GroupId)
 			}
 		}
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finded %d general node pool worker security groups ingress rules for machine deployment %#q", len(securityGroupIDs), key.MachineDeploymentID(&cr)))
