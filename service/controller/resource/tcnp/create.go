@@ -425,7 +425,8 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 
 	var nodePoolsSecurityGroups []template.ParamsMainSecurityGroupsTenantClusterNodePool
 	for _, sg := range cc.Spec.TenantCluster.TCNP.SecurityGroups {
-		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: *sg.GroupId})
+		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: key.SanitizeCFResourceName(*sg.GroupId)})
+
 	}
 
 	securityGroups := &template.ParamsMainSecurityGroups{
