@@ -103,9 +103,9 @@ type ContextStatusTenantClusterTCCPVPC struct {
 }
 
 type ContextStatusTenantClusterTCNP struct {
-	ASG            ContextStatusTenantClusterTCNPASG
+	ASG              ContextStatusTenantClusterTCNPASG
 	SecurityGroupIDs []string
-	WorkerInstance ContextStatusTenantClusterTCNPWorkerInstance
+	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
 }
 
 type ContextStatusTenantClusterTCNPASG struct {

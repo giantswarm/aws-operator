@@ -110,7 +110,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-			if len(cc.Spec.TenantCluster.TCNP.SecurityGroups) == 0 {
+		if len(cc.Spec.TenantCluster.TCNP.SecurityGroups) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "node pools general security groups not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil

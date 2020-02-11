@@ -108,7 +108,7 @@ func securityGroupListEqual(currentSecurityGroupIDs []string, nodePoolsSecurityG
 	for _, npsg := range nodePoolsSecurityGroups {
 		found := false
 		// try find if node pool security ID in the current security id list
-		for i:=0; i < len(currentSecurityGroupIDs); i++ {
+		for i := 0; i < len(currentSecurityGroupIDs); i++ {
 			if *npsg.GroupId == currentSecurityGroupIDs[i] {
 				found = true
 				break
