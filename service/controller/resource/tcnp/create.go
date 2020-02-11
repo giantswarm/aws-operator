@@ -184,9 +184,6 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	// update node pool security group spec
-	cc.Spec.TenantCluster.TCNP.SecurityGroups = cc.Status.TenantCluster.TCNP.SecurityGroups
-
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")

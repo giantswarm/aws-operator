@@ -81,7 +81,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(md)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(md)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&md)
-	securityGroupEqual := securityGroupListEqual(cc.Spec.TenantCluster.TCNP.SecurityGroups, cc.Status.TenantCluster.TCNP.SecurityGroups)
+	securityGroupEqual := securityGroupListEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroups)
 
 	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to worker instance docker volume size changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(md)))
@@ -103,15 +103,20 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 	return false, nil
 }
 
-func securityGroupListEqual(s1 []*ec2.SecurityGroup, s2 []*ec2.SecurityGroup) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-	for i := 0; i < len(s1); i++ {
-		if s1[i].GroupId != s2[i].GroupId {
+func securityGroupListEqual(currentSecurityGroupIDs []string, nodePoolsSecurityGroups []*ec2.SecurityGroup) bool {
+	// lets iterate over all node pools general security groups and see if all of them are included in current security groupID list
+	for _, npsg := range nodePoolsSecurityGroups {
+		found := false
+		// try find if node pool security ID in the current security id list
+		for i:=0; i < len(currentSecurityGroupIDs); i++ {
+			if *npsg.GroupId == currentSecurityGroupIDs[i] {
+				found = true
+				break
+			}
+		}
+		if !found {
 			return false
 		}
 	}
-
 	return true
 }
