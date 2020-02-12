@@ -182,7 +182,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			// sgRule.UserIdGroupPairs is empty for IP CIDR based rules
 			for _, gp := range sgRule.UserIdGroupPairs {
 				// only NodePool to NodePool ingress rules are important
-				if strings.Contains(*gp.Description, "NodePoolToNodePool") {
+				if if gp != nil && strings.Contains(*gp.Description, "NodePoolToNodePool") {
 					currentSecurityGroupIDs = append(currentSecurityGroupIDs, *gp.GroupId)
 				}
 			}
