@@ -1,7 +1,6 @@
 package controllercontext
 
 import (
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"net"
 )
 
@@ -48,7 +47,7 @@ type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 
 type ContextSpecTenantClusterTCNP struct {
 	AvailabilityZones []ContextSpecTenantClusterTCNPAvailabilityZone
-	SecurityGroups    []*ec2.SecurityGroup
+	SecurityGroupIDs  []string
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZone struct {

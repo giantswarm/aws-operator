@@ -110,7 +110,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if len(cc.Spec.TenantCluster.TCNP.SecurityGroups) == 0 {
+		if len(cc.Spec.TenantCluster.TCNP.SecurityGroupIDs) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "node pools general security groups not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
@@ -422,8 +422,8 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	}
 
 	var nodePoolsSecurityGroups []template.ParamsMainSecurityGroupsTenantClusterNodePool
-	for _, sg := range cc.Spec.TenantCluster.TCNP.SecurityGroups {
-		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: *sg.GroupId, ResourceName: key.SanitizeCFResourceName(*sg.GroupId)})
+	for _, securityGroupID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
+		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: securityGroupID, ResourceName: key.SanitizeCFResourceName(securityGroupID)})
 
 	}
 

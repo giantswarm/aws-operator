@@ -3,6 +3,7 @@ package tcnpsecuritygroups
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -48,9 +49,9 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		return microerror.Mask(err)
 	}
 
-	var groups []*ec2.SecurityGroup
+	var desiredSecurityGroupIDs []string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding all np security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding all np security desiredSecurityGroupIDs for tenant cluster %#q", key.ClusterID(&cr)))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -73,21 +74,68 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			return microerror.Mask(err)
 		}
 
-		groups = o.SecurityGroups
+		// check if the node pools is not being deleted
+		// we check for ec2 instances for that node pool machine deployment
+		for _, sg := range o.SecurityGroups {
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d np security groups for machine deployment%#q", len(groups), key.MachineDeploymentID(&cr)))
+			var stackName string
+			{
+				for _, tag := range sg.Tags {
+					if *tag.Key == key.TagStack {
+						stackName = *tag.Value
+						break
+					}
+				}
+			}
+			// ignore security group for this node pool machine deployment
+			if stackName == key.StackNameTCNP(&cr) {
+				continue
+			}
+
+			i := &ec2.DescribeInstancesInput{
+				Filters: []*ec2.Filter{
+					{
+						Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+						Values: []*string{
+							aws.String(stackName),
+						},
+					},
+					{
+						Name: aws.String("instance-state-name"),
+						Values: []*string{
+							aws.String(ec2.InstanceStateNamePending),
+							aws.String(ec2.InstanceStateNameRunning),
+							aws.String(ec2.InstanceStateNameStopped),
+							aws.String(ec2.InstanceStateNameStopping),
+						},
+					},
+				},
+			}
+
+			o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			// add security group to the list only if the node pool machine deployment has any running instances
+			// if there are no running or pending instances the node pool machine deployment might be deleted
+			// and we want to remove the sg rules as well
+			if len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0 {
+				desiredSecurityGroupIDs = append(desiredSecurityGroupIDs, *sg.GroupId)
+			}
+		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d np security desiredSecurityGroupIDs for machine deployment%#q", len(desiredSecurityGroupIDs), key.MachineDeploymentID(&cr)))
 	}
 
 	{
-		cc.Spec.TenantCluster.TCNP.SecurityGroups = groups
+		cc.Spec.TenantCluster.TCNP.SecurityGroupIDs = desiredSecurityGroupIDs
 	}
 
-	var securityGroupIDs []string
+	var currentSecurityGroupIDs []string
 	{
 		var sg *ec2.SecurityGroup
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding general np security group for machine deployment %#q", key.MachineDeploymentID(&cr)))
 
-		// TODO use tag filter from previous security groups list
+		// TODO use tag filter from previous security desiredSecurityGroupIDs list
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
 				{
@@ -116,7 +164,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		}
 
 		if len(o.SecurityGroups) > 1 {
-			return microerror.Maskf(executionFailedError, "expected one security groups, got %d", len(o.SecurityGroups))
+			return microerror.Maskf(executionFailedError, "expected one security desiredSecurityGroupIDs, got %d", len(o.SecurityGroups))
 		}
 
 		if len(o.SecurityGroups) < 1 {
@@ -128,19 +176,22 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 		sg = o.SecurityGroups[0]
 
-		// iterate over all security groups ingress rules
+		// iterate over all security desiredSecurityGroupIDs ingress rules
 		for _, sgRule := range sg.IpPermissions {
-			// we are only interested in ingress rules that uses security groups IDs reference
+			// we are only interested in ingress rules that uses security desiredSecurityGroupIDs IDs reference
 			// sgRule.UserIdGroupPairs is empty for IP CIDR based rules
 			for _, gp := range sgRule.UserIdGroupPairs {
-				securityGroupIDs = append(securityGroupIDs, *gp.GroupId)
+				// only NodePool to NodePool ingress rules are important
+				if strings.Contains(*gp.Description, "NodePoolToNodePool") {
+					currentSecurityGroupIDs = append(currentSecurityGroupIDs, *gp.GroupId)
+				}
 			}
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finded %d general node pool worker security groups ingress rules for machine deployment %#q", len(securityGroupIDs), key.MachineDeploymentID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finded %d general node pool worker security desiredSecurityGroupIDs ingress rules for machine deployment %#q", len(currentSecurityGroupIDs), key.MachineDeploymentID(&cr)))
 	}
 
 	{
-		cc.Status.TenantCluster.TCNP.SecurityGroupIDs = securityGroupIDs
+		cc.Status.TenantCluster.TCNP.SecurityGroupIDs = currentSecurityGroupIDs
 	}
 
 	return nil
