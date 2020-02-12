@@ -89,7 +89,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			}
 			// ignore security group for this node pool machine deployment
 			if stackName == key.StackNameTCNP(&cr) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping sg %s for stack %s", sg.GroupId, stackName), stackName)
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping sg %s for stack %s", *sg.GroupId, stackName), stackName)
 
 				continue
 			}
