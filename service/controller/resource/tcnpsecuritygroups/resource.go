@@ -78,17 +78,17 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		// we check for ec2 instances for that node pool machine deployment
 		for _, sg := range o.SecurityGroups {
 
-			var stackName string
+			var machineDeploymentID string
 			{
 				for _, tag := range sg.Tags {
-					if *tag.Key == key.TagStack {
-						stackName = *tag.Value
+					if *tag.Key == key.TagMachineDeployment {
+						machineDeploymentID = *tag.Value
 						break
 					}
 				}
 			}
 			// ignore security group for this node pool machine deployment
-			if stackName == key.StackNameTCNP(&cr) {
+			if machineDeploymentID == key.MachineDeploymentID(&cr) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping sg %s for stack %s", *sg.GroupId, stackName), stackName)
 
 				continue
@@ -97,9 +97,9 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			i := &ec2.DescribeInstancesInput{
 				Filters: []*ec2.Filter{
 					{
-						Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+						Name: aws.String(fmt.Sprintf("tag:%s", key.TagMachineDeployment)),
 						Values: []*string{
-							aws.String(stackName),
+							aws.String(machineDeploymentID),
 						},
 					},
 					{
