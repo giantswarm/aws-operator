@@ -116,8 +116,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d ec2 instances for machineDeployment %s", len(o.Reservations[0].Instances), machineDeploymentID))
-
 			// add security group to the list only if the node pool machine deployment has any running instances
 			// if there are no running or pending instances the node pool machine deployment might be deleted
 			// and we want to remove the sg rules as well
