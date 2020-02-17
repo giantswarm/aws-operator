@@ -3,6 +3,8 @@ package changedetection
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"sort"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
@@ -80,7 +82,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(md)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(md)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&md)
-	securityGroupEqual := securityGroupListEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
+	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
 
 	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to worker instance docker volume size changes from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(md)))
@@ -94,7 +96,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should update due to operator version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&md)))
 		return true, nil
 	}
-	if !securityGroupEqual {
+	if !securityGroupsEqual {
 		t.logger.LogCtx(ctx, "level", "debug", "message", "detected tenant cluster node pool should update due to node pool security groups")
 		return true, nil
 	}
@@ -102,25 +104,9 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSMa
 	return false, nil
 }
 
-func securityGroupListEqual(currentSecurityGroupIDs []string, desiredSecurityGroups []string) bool {
+func securityGroupsEqual(cur []string, des []string) bool {
+	sort.Strings(cur)
+	sort.Strings(des)
 
-	if len(currentSecurityGroupIDs) != len(desiredSecurityGroups) {
-		return false
-	}
-
-	// lets iterate over all node pools general security groups and see if all of them are included in current security groupID list
-	for _, securityGroupID := range desiredSecurityGroups {
-		found := false
-		// try find if node pool security ID in the current security id list
-		for i := 0; i < len(currentSecurityGroupIDs); i++ {
-			if securityGroupID == currentSecurityGroupIDs[i] {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-	return true
+	return reflect.DeepEqual(cur, des)
 }
