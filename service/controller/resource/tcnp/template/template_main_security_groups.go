@@ -86,7 +86,7 @@ const TemplateMainSecurityGroups = `
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
     Properties:
-      Description: NodePoolToNodePool - Allow traffic from the other NodePool Security Group to the this Node Pool General Security Group.
+      Description: Allow traffic from other Node Pool Security Groups to this Node Pool's Security Group.
       GroupId: !Ref GeneralSecurityGroup
       IpProtocol: -1
       FromPort: -1
