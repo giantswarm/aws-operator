@@ -148,7 +148,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSControlPlane) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCPN
-	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
+	tags[key.TagControlPlane] = key.ControlPlaneID(&cr)
 	return awstags.NewCloudFormation(tags)
 }
 
