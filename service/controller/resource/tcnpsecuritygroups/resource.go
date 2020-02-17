@@ -51,7 +51,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 	var desiredSecurityGroupIDs []string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding all np security desiredSecurityGroupIDs for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding desired node pool security groups for tenant cluster %#q", key.ClusterID(&cr)))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -77,7 +77,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		// check if the node pools is not being deleted
 		// we check for ec2 instances for that node pool machine deployment
 		for _, sg := range o.SecurityGroups {
-
 			var machineDeploymentID string
 			{
 				for _, tag := range sg.Tags {
@@ -116,10 +115,10 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			if err != nil {
 				return microerror.Mask(err)
 			}
+
 			// add security group to the list only if the node pool machine deployment has any running instances
 			// if there are no running or pending instances the node pool machine deployment might be deleted
 			// and we want to remove the sg rules as well
-
 			if len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0 {
 				desiredSecurityGroupIDs = append(desiredSecurityGroupIDs, *sg.GroupId)
 			}
@@ -188,7 +187,8 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				}
 			}
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finded %d general node pool worker security desiredSecurityGroupIDs ingress rules for machine deployment %#q", len(currentSecurityGroupIDs), key.MachineDeploymentID(&cr)))
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d current node pool security groups for cluster %#q", len(currentSecurityGroupIDs), key.ClusterID(&cr)))
 	}
 
 	{
