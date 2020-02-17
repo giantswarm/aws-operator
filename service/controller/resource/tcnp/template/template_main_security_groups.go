@@ -86,6 +86,10 @@ const TemplateMainSecurityGroups = `
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
     Properties:
+      # The rule description is used for identifying the ingress rule. Thus it
+      # must not change. Otherwise the tcnpsecuritygroups resource will not be
+      # able to properly find the current and desired state of the ingress
+      # rules.
       Description: Allow traffic from other Node Pool Security Groups to this Node Pool's Security Group.
       GroupId: !Ref GeneralSecurityGroup
       IpProtocol: -1
