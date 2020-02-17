@@ -38,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 )
 
 func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -310,6 +311,18 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpSecurityGroupsResource resource.Interface
+	{
+		c := tcnpsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		tcnpSecurityGroupsResource, err = tcnpsecuritygroups.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpSubnetsResource resource.Interface
 	{
 		c := tccpsubnets.Config{
@@ -423,6 +436,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tcnpAZsResource,
 		tcnpOutputsResource,
 		tcnpEncryptionResource,
+		tcnpSecurityGroupsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.

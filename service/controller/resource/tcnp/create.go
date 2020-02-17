@@ -211,7 +211,6 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			StackName:    aws.String(key.StackNameTCNP(&cr)),
 			TemplateBody: aws.String(templateBody),
 		}
-
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
@@ -219,7 +218,6 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
-
 	return nil
 }
 
@@ -409,6 +407,16 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		return nil, microerror.Mask(err)
 	}
 
+	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
+	for _, ID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
+		np := template.ParamsMainSecurityGroupsTenantClusterNodePool{
+			ID:           ID,
+			ResourceName: key.SanitizeCFResourceName(ID),
+		}
+
+		nodePools = append(nodePools, np)
+	}
+
 	securityGroups := &template.ParamsMainSecurityGroups{
 		ClusterID: key.ClusterID(&cr),
 		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
@@ -423,6 +431,7 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},
+			NodePools: nodePools,
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},
