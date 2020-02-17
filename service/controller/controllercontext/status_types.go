@@ -38,6 +38,7 @@ type ContextStatusTenantCluster struct {
 	HostedZoneNameServers string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
+	TCCPN                 ContextStatusTenantClusterTCCPN
 	TCNP                  ContextStatusTenantClusterTCNP
 	OperatorVersion       string
 }
@@ -99,6 +100,59 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
+	ID                  string
+	PeeringConnectionID string
+}
+
+type ContextStatusTenantClusterTCCPN struct {
+	ASG                      ContextStatusTenantClusterTCCPNASG
+	AvailabilityZones        []ContextStatusTenantClusterTCCPNAvailabilityZone
+	DockerVolumeResourceName string
+	EtcdVolumeSnapshotID     string
+	Image                    string
+	IsTransitioning          bool
+	ResourceName             string
+	Type                     string
+	VPC                      ContextStatusTenantClusterTCCPNVPC
+}
+
+type ContextStatusTenantClusterTCCPNASG struct {
+	DesiredCapacity int
+	MaxSize         int
+	MinSize         int
+	Name            string
+}
+
+type ContextStatusTenantClusterTCCPNAvailabilityZone struct {
+	Name       string
+	Subnet     ContextStatusTenantClusterTCCPNAvailabilityZoneSubnet
+	RouteTable ContextStatusTenantClusterTCCPNAvailabilityZoneRouteTable
+}
+
+type ContextStatusTenantClusterTCCPNAvailabilityZoneSubnet struct {
+	Private ContextStatusTenantClusterTCCPNAvailabilityZoneSubnetPrivate
+	Public  ContextStatusTenantClusterTCCPNAvailabilityZoneSubnetPublic
+}
+
+type ContextStatusTenantClusterTCCPNAvailabilityZoneSubnetPrivate struct {
+	CIDR net.IPNet
+	ID   string
+}
+
+type ContextStatusTenantClusterTCCPNAvailabilityZoneSubnetPublic struct {
+	CIDR net.IPNet
+	ID   string
+}
+
+type ContextStatusTenantClusterTCCPNAvailabilityZoneRouteTable struct {
+	Public ContextStatusTenantClusterTCCPNAvailabilityZoneRouteTablePublic
+}
+
+type ContextStatusTenantClusterTCCPNAvailabilityZoneRouteTablePublic struct {
+	ID string
+}
+
+type ContextStatusTenantClusterTCCPNVPC struct {
 	ID                  string
 	PeeringConnectionID string
 }

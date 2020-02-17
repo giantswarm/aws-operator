@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 )
 
 type controlPlaneResourceSetConfig struct {
@@ -26,7 +27,8 @@ type controlPlaneResourceSetConfig struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	HostAWSConfig aws.Config
+	HostAWSConfig  aws.Config
+	Route53Enabled bool
 }
 
 func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controller.ResourceSet, error) {
@@ -48,8 +50,23 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpnOutputsResource resource.Interface
+	{
+		c := tccpnoutputs.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		tccpnOutputsResource, err = tccpnoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		awsClientResource,
+		tccpnOutputsResource,
 	}
 
 	{
