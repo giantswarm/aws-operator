@@ -123,7 +123,8 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				desiredSecurityGroupIDs = append(desiredSecurityGroupIDs, *sg.GroupId)
 			}
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d np security desiredSecurityGroupIDs for machine deployment%#q", len(desiredSecurityGroupIDs), key.MachineDeploymentID(&cr)))
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d desired node pool security groups for cluster %#q", len(desiredSecurityGroupIDs), key.ClusterID(&cr)))
 	}
 
 	{
@@ -133,7 +134,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 	var currentSecurityGroupIDs []string
 	{
 		var sg *ec2.SecurityGroup
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding general np security group for machine deployment %#q", key.MachineDeploymentID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding current node pool security groups for tenant cluster %#q", key.ClusterID(&cr)))
 
 		// TODO use tag filter from previous security desiredSecurityGroupIDs list
 		i := &ec2.DescribeSecurityGroupsInput{
