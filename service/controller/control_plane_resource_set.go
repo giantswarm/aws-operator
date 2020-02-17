@@ -5,30 +5,71 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 )
 
 type controlPlaneResourceSetConfig struct {
-	G8sClient versioned.Interface
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	G8sClient     versioned.Interface
+	K8sClient     kubernetes.Interface
+	Logger        micrologger.Logger
+	CertsSearcher certs.Interface
+
+	RandomKeysSearcher randomkeys.Interface
+
+	InstallationName string
+
+	CalicoCIDR                int
+	CalicoMTU                 int
+	CalicoSubnet              string
+	ClusterIPRange            string
+	DockerDaemonCIDR          string
+	EncrypterBackend          string
+	IgnitionPath              string
+	ImagePullProgressDeadline string
+	NetworkSetupDockerImage   string
+	PodInfraContainerImage    string
+	RegistryDomain            string
+	SSHUserList               string
+	SSOPublicKey              string
+	VaultAddress              string
 
 	HostAWSConfig  aws.Config
 	Route53Enabled bool
+}
+
+func (c controlPlaneResourceSetConfig) GetEncrypterBackend() string {
+	return c.EncrypterBackend
+}
+
+func (c controlPlaneResourceSetConfig) GetInstallationName() string {
+	return c.InstallationName
+}
+
+func (c controlPlaneResourceSetConfig) GetLogger() micrologger.Logger {
+	return c.Logger
+}
+
+func (c controlPlaneResourceSetConfig) GetVaultAddress() string {
+	return c.VaultAddress
 }
 
 func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controller.ResourceSet, error) {
@@ -50,6 +91,65 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var encrypterObject encrypter.Interface
+	{
+		encrypterObject, err = newEncrypterObject(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpnCloudConfig *cloudconfig.TCCPN
+	{
+		c := cloudconfig.TCCPNConfig{
+			Config: cloudconfig.Config{
+				Encrypter: encrypterObject,
+				Logger:    config.Logger,
+
+				CalicoCIDR:                config.CalicoCIDR,
+				CalicoMTU:                 config.CalicoMTU,
+				CalicoSubnet:              config.CalicoSubnet,
+				ClusterIPRange:            config.ClusterIPRange,
+				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				IgnitionPath:              config.IgnitionPath,
+				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
+				PodInfraContainerImage:    config.PodInfraContainerImage,
+				RegistryDomain:            config.RegistryDomain,
+				SSHUserList:               config.SSHUserList,
+				SSOPublicKey:              config.SSOPublicKey,
+			},
+		}
+
+		tccpnCloudConfig, err = cloudconfig.NewTCCPN(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3ObjectResource resource.Interface
+	{
+		c := s3object.Config{
+			CertsSearcher:      config.CertsSearcher,
+			CloudConfig:        tccpnCloudConfig,
+			LabelsFunc:         key.KubeletLabelsTCCPN,
+			Logger:             config.Logger,
+			G8sClient:          config.G8sClient,
+			PathFunc:           key.S3ObjectPathTCCPN,
+			RandomKeysSearcher: config.RandomKeysSearcher,
+		}
+
+		ops, err := s3object.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		s3ObjectResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnOutputsResource resource.Interface
 	{
 		c := tccpnoutputs.Config{
@@ -66,6 +166,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 
 	resources := []resource.Interface{
 		awsClientResource,
+		s3ObjectResource,
 		tccpnOutputsResource,
 	}
 
