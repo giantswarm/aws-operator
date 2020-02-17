@@ -90,7 +90,7 @@ const TemplateMainSecurityGroups = `
       # must not change. Otherwise the tcnpsecuritygroups resource will not be
       # able to properly find the current and desired state of the ingress
       # rules.
-      Description: Allow traffic from other Node Pool Security Groups to this Node Pool's Security Group.
+      Description: Allow traffic from other Node Pool Security Groups to the Security Group of this Node Pool.
       GroupId: !Ref GeneralSecurityGroup
       IpProtocol: -1
       FromPort: -1

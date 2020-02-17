@@ -191,7 +191,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				// it must not change. Otherwise the tcnpsecuritygroups resource will
 				// not be able to properly find the current and desired state of the
 				// ingress rules.
-				if gp.Description != nil && strings.Contains(*gp.Description, "Allow traffic from other Node Pool Security Groups to this Node Pool's Security Group.") {
+				if gp.Description != nil && strings.Contains(*gp.Description, "Allow traffic from other Node Pool Security Groups to the Security Group of this Node Pool.") {
 					current = append(current, *gp.GroupId)
 				}
 			}
