@@ -51,7 +51,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 	var desiredSecurityGroupIDs []string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding desired node pool security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding desired node pool security groups for machine deployment %#q", key.MachineDeploymentID(&cr)))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -124,7 +124,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d desired node pool security groups for cluster %#q", len(desiredSecurityGroupIDs), key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d desired node pool security groups for machine deployment %#q", len(desiredSecurityGroupIDs), key.MachineDeploymentID(&cr)))
 	}
 
 	{
@@ -134,7 +134,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 	var currentSecurityGroupIDs []string
 	{
 		var sg *ec2.SecurityGroup
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding current node pool security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding current node pool security groups for machine deployment %#q", key.MachineDeploymentID(&cr)))
 
 		// TODO use tag filter from previous security desiredSecurityGroupIDs list
 		i := &ec2.DescribeSecurityGroupsInput{
@@ -169,7 +169,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		}
 
 		if len(o.SecurityGroups) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find  worker security group for machine deployment %#q yet", key.MachineDeploymentID(&cr)))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find current node pool security group for machine deployment %#q yet", key.MachineDeploymentID(&cr)))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
@@ -189,7 +189,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d current node pool security groups for cluster %#q", len(currentSecurityGroupIDs), key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d current node pool security groups for machine deployment %#q", len(currentSecurityGroupIDs), key.MachineDeploymentID(&cr)))
 	}
 
 	{
