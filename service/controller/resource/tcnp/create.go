@@ -407,10 +407,14 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		return nil, microerror.Mask(err)
 	}
 
-	var nodePoolsSecurityGroups []template.ParamsMainSecurityGroupsTenantClusterNodePool
-	for _, securityGroupID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
-		nodePoolsSecurityGroups = append(nodePoolsSecurityGroups, template.ParamsMainSecurityGroupsTenantClusterNodePool{ID: securityGroupID, ResourceName: key.SanitizeCFResourceName(securityGroupID)})
+	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
+	for _, ID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
+		np := template.ParamsMainSecurityGroupsTenantClusterNodePool{
+			ID:           ID,
+			ResourceName: key.SanitizeCFResourceName(ID),
+		}
 
+		nodePools = append(nodePools, np)
 	}
 
 	securityGroups := &template.ParamsMainSecurityGroups{
@@ -427,7 +431,7 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},
-			NodePools: nodePoolsSecurityGroups,
+			NodePools: nodePools,
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},
