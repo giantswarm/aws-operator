@@ -196,10 +196,15 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	}
 
 	resources := []resource.Interface{
+		// All these resources only fetch information from remote APIs and put them
+		// into the controller context.
 		awsClientResource,
+		tccpnOutputsResource,
+
+		// All these resources implement certain business logic and operate based on
+		// the information given in the controller context.
 		s3ObjectResource,
 		tccpnResource,
-		tccpnOutputsResource,
 	}
 
 	{
