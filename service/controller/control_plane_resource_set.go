@@ -19,11 +19,13 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 )
 
@@ -127,6 +129,18 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpnChangeDetection *changedetection.TCCPN
+	{
+		c := changedetection.TCCPNConfig{
+			Logger: config.Logger,
+		}
+
+		tccpnChangeDetection, err = changedetection.NewTCCPN(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
@@ -150,6 +164,23 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpnResource resource.Interface
+	{
+		c := tccpn.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			Detection:        tccpnChangeDetection,
+			EncrypterBackend: config.EncrypterBackend,
+			InstallationName: config.InstallationName,
+		}
+
+		tccpnResource, err = tccpn.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnOutputsResource resource.Interface
 	{
 		c := tccpnoutputs.Config{
@@ -167,6 +198,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	resources := []resource.Interface{
 		awsClientResource,
 		s3ObjectResource,
+		tccpnResource,
 		tccpnOutputsResource,
 	}
 
