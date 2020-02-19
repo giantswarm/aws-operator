@@ -41,9 +41,11 @@ jobs:
 workflows:
   build:
     jobs:
-      - build:
+      - architect/go-build:
+          name: go-build-aws-operator
+          binary: aws-operator
           filters:
-            # Trigger the job also on git tag.
+            # Needed to trigger job also on git tag.
             tags:
               only: /^v.*/
 
