@@ -20,7 +20,7 @@ workflows:
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           requires:
-            - architect/go-build
+            - go-build-aws-operator
           filters:
             # Trigger the job also on git tag.
             tags:
@@ -29,7 +29,7 @@ workflows:
       - hold-push-aws-operator-to-aliyun-pr:
           type: approval
           requires:
-            - architect/go-build
+            - go-build-aws-operator
           filters:
             # Do not trigger the job on merge to master.
             branches:
@@ -55,7 +55,7 @@ workflows:
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           requires:
-            - architect/go-build
+            - go-build-aws-operator
           filters:
             # Trigger the job on merge to master.
             branches:
