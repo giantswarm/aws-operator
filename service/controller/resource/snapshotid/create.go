@@ -46,9 +46,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 	count := len(o.Snapshots)
 	if count == 0 {
-		return microerror.Maskf(notExistsError, "snapshot")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the snapshotID is not available yet")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		return nil
 	}
-	if count != 1 {
+	if count > 1 {
 		return microerror.Maskf(executionFailedError, "expected one snapshot, got %d", count)
 	}
 
