@@ -30,10 +30,14 @@ func (e *baseExtension) templateData() templateData {
 	}
 
 	data := templateData{
-		AWSRegion:     key.Region(e.cluster),
-		EncrypterType: encrypterType,
-		VaultAddress:  vaultAddress,
-		EncryptionKey: e.encryptionKey,
+		AWSRegion:           key.Region(e.cluster),
+		EncrypterType:       encrypterType,
+		VaultAddress:        vaultAddress,
+		EncryptionKey:       e.encryptionKey,
+		MasterENIAddresses:  []string{"TODO"},
+		MasterENIGateways:   []string{"TODO"},
+		MasterENISubnetSize: "TODO",
+		MasterID:            0,
 	}
 
 	return data

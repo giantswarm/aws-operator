@@ -280,6 +280,32 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0644,
 		},
+		{
+			AssetContent: cloudconfig.Etcd3ExtraConfig,
+			Path:         "/etc/systemd/system/etcd3.d/10-require-attach-dep.conf",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			AssetContent: cloudconfig.SystemdNetworkdEth1Network,
+			Path:         "/etc/systemd/network/10-eth1.network",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
 	}
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
@@ -390,11 +416,23 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
+		// Attach etcd3 dependencies (EBS and ENI).
+		{
+			AssetContent: cloudconfig.Etcd3AttachDepService,
+			Name:         "etcd3-attach-dependencies.service",
+			Enabled:      true,
+		},
+		// Automount etcd EBS volume.
+		{
+			AssetContent: cloudconfig.AutomountEtcdVolume,
+			Name:         "var-lib-etcd.automount",
+			Enabled:      true,
+		},
 		// Mount etcd EBS volume.
 		{
 			AssetContent: cloudconfig.MountEtcdVolume,
 			Name:         "var-lib-etcd.mount",
-			Enabled:      true,
+			Enabled:      false,
 		},
 		// Mount log EBS volume.
 		{
