@@ -24,6 +24,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
@@ -142,6 +143,19 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var regionResource resource.Interface
+	{
+		c := region.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		regionResource, err = region.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
@@ -214,6 +228,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		awsClientResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
+		regionResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
