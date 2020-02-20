@@ -23,6 +23,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding the cluster ha master SnapshotID")
+
 	i := &ec2.DescribeSnapshotsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -56,7 +58,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	//store the snapshot id
 	snapshot := o.Snapshots[0]
-	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = aws.StringValue(snapshot.SnapshotId)
+	snapshotID := aws.StringValue(snapshot.SnapshotId)
+	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = snapshotID
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the cluster ha master SnapshotID : %s", snapshotID))
 
 	return nil
 }
