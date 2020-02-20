@@ -17,7 +17,7 @@ func NewVersionBundle() versionbundle.Bundle {
 			},
 			{
 				Component:   "aws-operator",
-				Description: "Fix network traffic between Node Pools.",
+				Description: "Allow network traffic between Node Pools.",
 				Kind:        versionbundle.KindFixed,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2141",
