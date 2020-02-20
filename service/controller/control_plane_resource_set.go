@@ -41,6 +41,8 @@ type controlPlaneResourceSetConfig struct {
 
 	InstallationName string
 
+	//TODO LH this should be put somewhere common
+	APIWhitelist              tccpn.APIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string
@@ -197,6 +199,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
+			APIWhitelist:     config.APIWhitelist,
 			Detection:        tccpnChangeDetection,
 			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,

@@ -18,6 +18,8 @@ type ControlPlaneConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
+	//TODO LH this should be moved somewhere common
+	APIWhitelist              ClusterConfigAPIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string

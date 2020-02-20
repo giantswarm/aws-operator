@@ -18,6 +18,7 @@ type Config struct {
 	Detection *changedetection.TCCPN
 	Logger    micrologger.Logger
 
+	APIWhitelist     APIWhitelist
 	EncrypterBackend string
 	InstallationName string
 }
@@ -29,6 +30,7 @@ type Resource struct {
 	detection *changedetection.TCCPN
 	logger    micrologger.Logger
 
+	apiWhitelist     APIWhitelist
 	encrypterBackend string
 	installationName string
 }
@@ -43,7 +45,12 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-
+	if config.APIWhitelist.Private.Enabled && config.APIWhitelist.Private.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Private.SubnetList must not be empty when %T.APIWhitelist.Private is enabled", config)
+	}
+	if config.APIWhitelist.Public.Enabled && config.APIWhitelist.Public.SubnetList == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
+	}
 	if config.EncrypterBackend == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
 	}
@@ -56,6 +63,7 @@ func New(config Config) (*Resource, error) {
 		detection: config.Detection,
 		logger:    config.Logger,
 
+		apiWhitelist:     config.APIWhitelist,
 		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 	}
