@@ -30,40 +30,32 @@ EOF
 }
 
 kms_keys_assets_decrypt() {
-AWS_CLI_IMAGE="quay.io/coreos/awscli:025a357f05242fdad6a81e8a6b520098aa65a600"
+AWS_CLI_IMAGE="{{.RegistryDomain}}/giantswarm/awscli:1.18.3"
 
-while ! rkt fetch --trust-keys-from-https=true ${AWS_CLI_IMAGE};
+while ! docker pull ${AWS_CLI_IMAGE};
 do
-        echo "Failed to fetch rkt image ${AWS_CLI_IMAGE}, retrying in 5 sec."
+        echo "Failed to fetch docker image ${AWS_CLI_IMAGE}, retrying in 5 sec."
         sleep 5s
 done
-echo "Successfully fetched rkt image ${AWS_CLI_IMAGE}."
+echo "Successfully fetched docker image ${AWS_CLI_IMAGE}."
 
-rkt run \
-  --volume=keys,kind=host,source=/etc/kubernetes/encryption,readOnly=false \
-  --mount=volume=keys,target=/etc/kubernetes/encryption \
-  --uuid-file-save=/var/run/coreos/decrypt-keys-assets.uuid \
-  --volume=dns,kind=host,source=/etc/resolv.conf,readOnly=true --mount volume=dns,target=/etc/resolv.conf \
-  --net=host \
-  --trust-keys-from-https \
-  ${AWS_CLI_IMAGE} --exec=/bin/bash -- \
-    -ec \
-    'echo decrypting keys assets
-    shopt -s nullglob
+
+docker run --net=host -v /etc/kubernetes/encryption:/etc/kubernetes/encryption \
+        --entrypoint=/bin/sh \
+        ${AWS_CLI_IMAGE} \
+        -ec \
+        'echo decrypting tls assets
     for encKey in $(find /etc/kubernetes/encryption -name "*.enc"); do
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
-      /usr/bin/aws \
+      aws \
         --region {{.AWSRegion}} kms decrypt \
         --ciphertext-blob fileb://$encKey \
         --output text \
         --query Plaintext \
       | base64 -d > $f
       mv -f $f ${encKey%.enc}
-    done;
-    echo done.'
-
-rkt rm --uuid-file=/var/run/coreos/decrypt-keys-assets.uuid || :
+    done;'
 }
 
 main() {
