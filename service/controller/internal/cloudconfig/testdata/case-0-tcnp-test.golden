@@ -151,7 +151,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKCnRva2VuX3BhdGg9L3Zhci90b2tlbgoKdmF1bHRfdGxzX2Fzc2V0c19kZWNyeXB0KCkgewogICAgZWNobyBkZWNyeXB0aW5nIHRscyBhc3NldHMKICAgIHNob3B0IC1zIG51bGxnbG9iCiAgICBmb3IgZW5jS2V5IGluICQoZmluZCAvZXRjL2t1YmVybmV0ZXMvc3NsIC1uYW1lICIqLnBlbS5lbmMiKTsgZG8KICAgICAgZWNobyBkZWNyeXB0aW5nICRlbmNLZXkKICAgICAgZj0kKG1rdGVtcCAkZW5jS2V5LlhYWFhYWFhYKQogICAgICBjYXQgPDxFT0YgPiBkYXRhLmpzb24KewogICJjaXBoZXJ0ZXh0IjogIiQoY2F0ICRlbmNLZXkpIgp9CkVPRgogICAgICBjdXJsIC1rIFwKICAgICAgICAtLWhlYWRlciAiWC1WYXVsdC1Ub2tlbjogJChjYXQgJHRva2VuX3BhdGgpIiBcCiAgICAgICAgLS1zaWxlbnQgXAogICAgICAgIC0tcmVxdWVzdCBQT1NUIFwKICAgICAgICAtLWRhdGEgQGRhdGEuanNvbiBcCiAgICAgICAgL3YxL3RyYW5zaXQvZGVjcnlwdC8gfCBcCiAgICAgICAganEgLXIgLmRhdGEucGxhaW50ZXh0IHwgYmFzZTY0IC1kID4gJGYKICAgICAgbXYgLWYgJGYgJHtlbmNLZXklLmVuY30KICAgICAgcm0gLWYgZGF0YS5qc29uCiAgICBkb25lOwogICAgZWNobyBkb25lLgoKfQoKa21zX3Rsc19hc3NldHNfZGVjcnlwdCgpIHsKQVdTX0NMSV9JTUFHRT0iL2dpYW50c3dhcm0vYXdzY2xpOjEuMTguMyIKCndoaWxlICEgZG9ja2VyIHB1bGwgJHtBV1NfQ0xJX0lNQUdFfTsKZG8KICAgICAgICBlY2hvICJGYWlsZWQgdG8gZmV0Y2ggZG9ja2VyIGltYWdlICR7QVdTX0NMSV9JTUFHRX0sIHJldHJ5aW5nIGluIDUgc2VjLiIKICAgICAgICBzbGVlcCA1cwpkb25lCmVjaG8gIlN1Y2Nlc3NmdWxseSBmZXRjaGVkIGRvY2tlciBpbWFnZSAke0FXU19DTElfSU1BR0V9LiIKCgpkb2NrZXIgcnVuIC0tbmV0PWhvc3QgLXYgL2V0Yy9rdWJlcm5ldGVzL3NzbDovZXRjL2t1YmVybmV0ZXMvc3NsIFwKICAgICAgICAtLWVudHJ5cG9pbnQ9L2Jpbi9zaCBcCiAgICAgICAgJHtBV1NfQ0xJX0lNQUdFfSBcCiAgICAgICAgLWVjIFwKICAgICAgICAnZWNobyBkZWNyeXB0aW5nIHRscyBhc3NldHMKICAgIGZvciBlbmNLZXkgaW4gJChmaW5kIC9ldGMva3ViZXJuZXRlcy9zc2wgLW5hbWUgIioucGVtLmVuYyIpOyBkbwogICAgICBlY2hvIGRlY3J5cHRpbmcgJGVuY0tleQogICAgICBmPSQobWt0ZW1wICRlbmNLZXkuWFhYWFhYWFgpCiAgICAgIGF3cyBcCiAgICAgICAgLS1yZWdpb24gZXUtY2VudHJhbC0xIGttcyBkZWNyeXB0IFwKICAgICAgICAtLWNpcGhlcnRleHQtYmxvYiBmaWxlYjovLyRlbmNLZXkgXAogICAgICAgIC0tb3V0cHV0IHRleHQgXAogICAgICAgIC0tcXVlcnkgUGxhaW50ZXh0IFwKICAgICAgfCBiYXNlNjQgLWQgPiAkZgogICAgICBtdiAtZiAkZiAke2VuY0tleSUuZW5jfQogICAgZG9uZTsnCn0KCgptYWluKCkgewoKICBrbXNfdGxzX2Fzc2V0c19kZWNyeXB0CgoKY2hvd24gLVIgZXRjZDpldGNkIC9ldGMva3ViZXJuZXRlcy9zc2wvZXRjZAp9CgptYWluCg==",
+          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKa21zX3Rsc19hc3NldHNfZGVjcnlwdCgpIHsKQVdTX0NMSV9JTUFHRT0iL2dpYW50c3dhcm0vYXdzY2xpOjEuMTguMyIKCndoaWxlICEgZG9ja2VyIHB1bGwgJHtBV1NfQ0xJX0lNQUdFfTsKZG8KICAgICAgICBlY2hvICJGYWlsZWQgdG8gZmV0Y2ggZG9ja2VyIGltYWdlICR7QVdTX0NMSV9JTUFHRX0sIHJldHJ5aW5nIGluIDUgc2VjLiIKICAgICAgICBzbGVlcCA1cwpkb25lCmVjaG8gIlN1Y2Nlc3NmdWxseSBmZXRjaGVkIGRvY2tlciBpbWFnZSAke0FXU19DTElfSU1BR0V9LiIKCgpkb2NrZXIgcnVuIC0tbmV0PWhvc3QgLXYgL2V0Yy9rdWJlcm5ldGVzL3NzbDovZXRjL2t1YmVybmV0ZXMvc3NsIFwKICAgICAgICAtLWVudHJ5cG9pbnQ9L2Jpbi9zaCBcCiAgICAgICAgJHtBV1NfQ0xJX0lNQUdFfSBcCiAgICAgICAgLWVjIFwKICAgICAgICAnZWNobyBkZWNyeXB0aW5nIHRscyBhc3NldHMKICAgIGZvciBlbmNLZXkgaW4gJChmaW5kIC9ldGMva3ViZXJuZXRlcy9zc2wgLW5hbWUgIioucGVtLmVuYyIpOyBkbwogICAgICBlY2hvIGRlY3J5cHRpbmcgJGVuY0tleQogICAgICBmPSQobWt0ZW1wICRlbmNLZXkuWFhYWFhYWFgpCiAgICAgIGF3cyBcCiAgICAgICAgLS1yZWdpb24gZXUtY2VudHJhbC0xIGttcyBkZWNyeXB0IFwKICAgICAgICAtLWNpcGhlcnRleHQtYmxvYiBmaWxlYjovLyRlbmNLZXkgXAogICAgICAgIC0tb3V0cHV0IHRleHQgXAogICAgICAgIC0tcXVlcnkgUGxhaW50ZXh0IFwKICAgICAgfCBiYXNlNjQgLWQgPiAkZgogICAgICBtdiAtZiAkZiAke2VuY0tleSUuZW5jfQogICAgZG9uZTsnCn0KCgptYWluKCkgewogIGttc190bHNfYXNzZXRzX2RlY3J5cHQKICBjaG93biAtUiBldGNkOmV0Y2QgL2V0Yy9rdWJlcm5ldGVzL3NzbC9ldGNkCn0KCm1haW4K",
           "verification": {}
         },
         "filesystem": "root",
@@ -160,21 +160,6 @@
           "name": "root"
         },
         "path": "/opt/bin/decrypt-tls-assets",
-        "user": {
-          "name": "root"
-        }
-      },
-      {
-        "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKCg==",
-          "verification": {}
-        },
-        "filesystem": "root",
-        "mode": 448,
-        "group": {
-          "name": "root"
-        },
-        "path": "/opt/bin/vault-aws-authorizer",
         "user": {
           "name": "root"
         }
@@ -340,11 +325,6 @@
         "contents": "\n[Unit]\nDescription=Decrypt TLS certificates\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service vault-aws-authorizer.service\nRequires=wait-for-domains.service vault-aws-authorizer.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/decrypt-tls-assets\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "decrypt-tls-assets.service"
-      },
-      {
-        "contents": "\n[Unit]\nDescription=Token decryption retrieval\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service\nRequires=wait-for-domains.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/vault-aws-authorizer\n[Install]\nWantedBy=multi-user.target\n",
-        "enabled": true,
-        "name": "vault-aws-authorizer.service"
       },
       {
         "contents": "\n[Unit]\nDescription=Mount persistent volume on /var/lib/docker\n[Mount]\nWhat=/dev/disk/by-label/docker\nWhere=/var/lib/docker\nType=xfs\n[Install]\nRequiredBy=local-fs.target\n",

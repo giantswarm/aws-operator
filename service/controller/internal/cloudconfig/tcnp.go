@@ -132,20 +132,6 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0700,
 		},
 		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
-			Path:         "/opt/bin/vault-aws-authorizer",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0700,
-		},
-
-		{
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner: k8scloudconfig.Owner{
@@ -226,11 +212,6 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerService,
-			Name:         "vault-aws-authorizer.service",
 			Enabled:      true,
 		},
 		{

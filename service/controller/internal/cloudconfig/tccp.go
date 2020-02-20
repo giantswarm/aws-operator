@@ -212,19 +212,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: FilePermission,
 		},
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
-			Path:         "/opt/bin/vault-aws-authorizer",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
 		// on KVM because of dependencies on hardware LB configuration.
 		{
@@ -373,12 +360,6 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
-			Enabled:      true,
-		},
-
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerService,
-			Name:         "vault-aws-authorizer.service",
 			Enabled:      true,
 		},
 		{

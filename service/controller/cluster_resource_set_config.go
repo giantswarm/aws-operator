@@ -33,7 +33,6 @@ type clusterResourceSetConfig struct {
 	CalicoSubnet               string
 	ClusterIPRange             string
 	DockerDaemonCIDR           string
-	EncrypterBackend           string
 	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -52,10 +51,6 @@ type clusterResourceSetConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-}
-
-func (c clusterResourceSetConfig) GetEncrypterBackend() string {
-	return c.EncrypterBackend
 }
 
 func (c clusterResourceSetConfig) GetInstallationName() string {
