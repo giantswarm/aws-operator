@@ -194,3 +194,102 @@ Resources:
               ]
             }
           }
+  MasterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 8y5ck-master
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        Description: Allow all traffic to the master instance.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      -
+        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Only allow ssh traffic from the control plane.
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.1.0.0/16
+      Tags:
+        - Key: Name
+          Value:  8y5ck-master
+  EtcdELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 8y5ck-etcd-elb
+      VpcId: 
+      SecurityGroupIngress:
+      
+      -
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 0.0.0.0/0
+      
+      -
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 10.1.0.0/16
+      
+      Tags:
+        - Key: Name
+          Value: 8y5ck-etcd-elb
+  MasterAllowCalicoIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowEtcdIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 2379
+      ToPort: 2379
+      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
+  VPCDefaultSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow outbound traffic from loopback address.
+      GroupId: !GetAtt VPC.DefaultSecurityGroup
+      IpProtocol: -1
+      CidrIp: 127.0.0.1/32

@@ -95,5 +95,6 @@ type securityConfig struct {
 	APIWhitelist                    APIWhitelist
 	ControlPlaneNATGatewayAddresses []*ec2.Address
 	ControlPlaneVPCCidr             string
-	CustomObject                    infrastructurev1alpha2.AWSCluster
+	ProviderCIDR                    string
+	CustomObject                    infrastructurev1alpha2.AWSControlPlane
 }

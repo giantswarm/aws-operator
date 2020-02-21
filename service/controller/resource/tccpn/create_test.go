@@ -20,6 +20,17 @@ import (
 
 var update = flag.Bool("update", false, "update .golden CF template file")
 
+var apiWhitelist = APIWhitelist{
+	Public: Whitelist{
+		Enabled:    false,
+		SubnetList: "",
+	},
+	Private: Whitelist{
+		Enabled:    false,
+		SubnetList: "",
+	},
+}
+
 // Test_Controller_Resource_TCCPN_Template_Render tests tenant cluster
 // CloudFormation template rendering. It is meant to be used as a tool to easily
 // check resulting CF template and prevent from accidental CF template changes.
@@ -35,18 +46,20 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		ctx              context.Context
 		cr               infrastructurev1alpha2.AWSControlPlane
 		encrypterBackend string
+		apiWhitelist     APIWhitelist
 	}{
 		{
 			name:             "case 0: basic test with encrypter backend KMS",
 			ctx:              unittest.DefaultContextControlPlane(),
 			cr:               unittest.DefaultControlPlane(),
 			encrypterBackend: encrypter.KMSBackend,
+			apiWhitelist:     apiWhitelist,
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, tc.encrypterBackend)
+			params, err := newTemplateParams(tc.ctx, tc.cr, tc.encrypterBackend, tc.apiWhitelist)
 			if err != nil {
 				t.Fatal(err)
 			}

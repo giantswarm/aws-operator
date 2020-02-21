@@ -8,4 +8,5 @@ type ParamsMain struct {
 	IAMPolicies         *ParamsMainIAMPolicies
 	LaunchConfiguration *ParamsMainLaunchConfiguration
 	Outputs             *ParamsMainOutputs
+	SecurityGroups      *ParamsMainSecurityGroups
 }

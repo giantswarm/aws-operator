@@ -291,7 +291,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, apiWhiteList APIWhitelist) (*template.ParamsMainSecurityGroups, error) {
+func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -303,7 +303,9 @@ func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			APIWhitelist:                    apiWhiteList,
 			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
 			ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
-			CustomObject:                    cr,
+			//TODO LH no idea if this is good or not .. was cluster.Status.Provider.Network.CIDR in tccp cluster
+			ProviderCIDR: cc.Status.ControlPlane.VPC.CIDR,
+			CustomObject: cr,
 		}
 	}
 
@@ -315,10 +317,12 @@ func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	var securityGroups *template.ParamsMainSecurityGroups
 	{
 		securityGroups = &template.ParamsMainSecurityGroups{
-			MasterSecurityGroupName:   key.SecurityGroupName(&cfg.CustomObject, "master"),
-			MasterSecurityGroupRules:  masterRules,
-			EtcdELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
-			EtcdELBSecurityGroupRules: getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
+			APIWhitelistEnabled:        cfg.APIWhitelist.Public.Enabled,
+			PrivateAPIWhitelistEnabled: cfg.APIWhitelist.Private.Enabled,
+			MasterSecurityGroupName:    key.SecurityGroupName(&cfg.CustomObject, "master"),
+			MasterSecurityGroupRules:   masterRules,
+			EtcdELBSecurityGroupName:   key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
+			EtcdELBSecurityGroupRules:  getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
 		}
 	}
 
@@ -348,6 +352,10 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		securityGroups, err := newSecurityGroupsParams(ctx, cr, apiWhiteList)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 
 		params = &template.ParamsMain{
 			AutoScalingGroup:    autoScalingGroup,
@@ -355,6 +363,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			IAMPolicies:         iamPolicies,
 			LaunchConfiguration: launchConfiguration,
 			Outputs:             outputs,
+			SecurityGroups:      securityGroups,
 		}
 	}
 
@@ -412,7 +421,7 @@ func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.Secu
 	return append(publicAPIRules, otherRules...), nil
 }
 
-func getEtcdRules(customObject infrastructurev1alpha2.AWSCluster, hostClusterCIDR string) []template.SecurityGroupRule {
+func getEtcdRules(customObject infrastructurev1alpha2.AWSControlPlane, hostClusterCIDR string) []template.SecurityGroupRule {
 	return []template.SecurityGroupRule{
 		{
 			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
@@ -443,7 +452,8 @@ func getKubernetesPublicAPIRules(cfg securityConfig, hostClusterCIDR string) ([]
 				Description: "Allow traffic from tenant cluster CIDR.",
 				Port:        key.KubernetesSecurePort,
 				Protocol:    tcpProtocol,
-				SourceCIDR:  key.StatusClusterNetworkCIDR(cfg.CustomObject),
+				//TODO LH what value needs to go in here for tccpn ?
+				SourceCIDR: cfg.ProviderCIDR,
 			},
 		}
 

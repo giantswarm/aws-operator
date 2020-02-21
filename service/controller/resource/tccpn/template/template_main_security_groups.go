@@ -35,7 +35,7 @@ const TemplateMainSecurityGroups = `
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: {{ $v.EtcdELBSecurityGroupName }}
-      VpcId: {{ $v.??VPCID }}
+      VpcId: {{ $v.VPCID }}
       SecurityGroupIngress:
       {{ range $v.EtcdELBSecurityGroupRules }}
       -

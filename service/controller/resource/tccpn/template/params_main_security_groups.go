@@ -1,10 +1,13 @@
 package template
 
 type ParamsMainSecurityGroups struct {
-	MasterSecurityGroupName   string
-	MasterSecurityGroupRules  []SecurityGroupRule
-	EtcdELBSecurityGroupName  string
-	EtcdELBSecurityGroupRules []SecurityGroupRule
+	APIWhitelistEnabled        bool
+	PrivateAPIWhitelistEnabled bool
+	MasterSecurityGroupName    string
+	MasterSecurityGroupRules   []SecurityGroupRule
+	EtcdELBSecurityGroupName   string
+	EtcdELBSecurityGroupRules  []SecurityGroupRule
+	VPCID                      string
 }
 
 type SecurityGroupRule struct {
