@@ -9,18 +9,10 @@ func NewVersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Fix AWS resource tags.",
+				Description: "TODO",
 				Kind:        versionbundle.KindFixed,
 				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2137",
-				},
-			},
-			{
-				Component:   "aws-operator",
-				Description: "Allow network traffic between Node Pools.",
-				Kind:        versionbundle.KindFixed,
-				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2141",
+					"TODO",
 				},
 			},
 		},
