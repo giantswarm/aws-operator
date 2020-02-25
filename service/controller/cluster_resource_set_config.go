@@ -44,6 +44,7 @@ type clusterResourceSetConfig struct {
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	DeleteLoggingBucket        bool
+	KubernetesDomain           string
 	NetworkSetupDockerImage    string
 	Route53Enabled             bool
 	RouteTables                string

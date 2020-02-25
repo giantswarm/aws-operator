@@ -81,6 +81,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				KubernetesDomain:          config.KubernetesDomain,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,

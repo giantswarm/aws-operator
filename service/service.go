@@ -166,6 +166,7 @@ func New(config Config) (*Service, error) {
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
+			KubernetesDomain:           config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.Domain),
 			LabelSelector: controller.ClusterConfigLabelSelector{
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),

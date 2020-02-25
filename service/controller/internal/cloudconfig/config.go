@@ -20,6 +20,7 @@ type Config struct {
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	KubeletExtraArgs          []string
+	KubernetesDomain          string
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string

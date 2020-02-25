@@ -8,9 +8,9 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "aws-operator",
-				Description: "TODO",
-				Kind:        versionbundle.KindFixed,
+				Component:   "ignition",
+				Description: "Make internal Kubernetes domain configurable.",
+				Kind:        versionbundle.KindChanged,
 				URLs: []string{
 					"TODO",
 				},

@@ -44,6 +44,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	KubernetesDomain           string
 	LabelSelector              ClusterConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
