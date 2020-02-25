@@ -52,7 +52,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack")
-			//??
 			err = r.createStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
