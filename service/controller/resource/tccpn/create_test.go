@@ -20,17 +20,6 @@ import (
 
 var update = flag.Bool("update", false, "update .golden CF template file")
 
-var apiWhitelist = APIWhitelist{
-	Public: Whitelist{
-		Enabled:    false,
-		SubnetList: "",
-	},
-	Private: Whitelist{
-		Enabled:    false,
-		SubnetList: "",
-	},
-}
-
 // Test_Controller_Resource_TCCPN_Template_Render tests tenant cluster
 // CloudFormation template rendering. It is meant to be used as a tool to easily
 // check resulting CF template and prevent from accidental CF template changes.
@@ -41,6 +30,18 @@ var apiWhitelist = APIWhitelist{
 //  go test ./service/controller/resource/tccpn -run Test_Controller_Resource_TCCPN_Template_Render -update
 //
 func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
+
+	apiWhitelist := APIWhitelist{
+		Public: Whitelist{
+			Enabled:    false,
+			SubnetList: "",
+		},
+		Private: Whitelist{
+			Enabled:    false,
+			SubnetList: "",
+		},
+	}
+
 	testCases := []struct {
 		name             string
 		ctx              context.Context
