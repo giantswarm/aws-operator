@@ -12,7 +12,7 @@ func NewVersionBundle() versionbundle.Bundle {
 				Description: "Make internal Kubernetes domain configurable.",
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
-					"TODO",
+					"https://github.com/giantswarm/aws-operator/pull/2150",
 				},
 			},
 		},
