@@ -2,11 +2,11 @@ package template
 
 type ParamsMainSecurityGroups struct {
 	APIWhitelistEnabled        bool
-	PrivateAPIWhitelistEnabled bool
-	MasterSecurityGroupName    string
-	MasterSecurityGroupRules   []SecurityGroupRule
 	EtcdELBSecurityGroupName   string
 	EtcdELBSecurityGroupRules  []SecurityGroupRule
+	MasterSecurityGroupName    string
+	MasterSecurityGroupRules   []SecurityGroupRule
+	PrivateAPIWhitelistEnabled bool
 	VPCID                      string
 }
 
