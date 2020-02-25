@@ -60,7 +60,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	snapshot := o.Snapshots[0]
 	snapshotID := aws.StringValue(snapshot.SnapshotId)
 	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = snapshotID
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the cluster ha master SnapshotID : %s", snapshotID))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the tenant cluster snapshot id %#q", snapshotID))
 
 	return nil
 }
