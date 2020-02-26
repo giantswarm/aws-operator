@@ -322,6 +322,7 @@ func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			MasterSecurityGroupRules:   masterRules,
 			EtcdELBSecurityGroupName:   key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
 			EtcdELBSecurityGroupRules:  getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
+			VPCID:                      cc.Status.ControlPlane.VPC.ID,
 		}
 	}
 

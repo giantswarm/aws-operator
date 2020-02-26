@@ -198,7 +198,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: 8y5ck-master
-      VpcId: !Ref VPC
+      VpcId: vpc-testid
       SecurityGroupIngress:
       
       -
@@ -250,7 +250,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: 8y5ck-etcd-elb
-      VpcId: 
+      VpcId: vpc-testid
       SecurityGroupIngress:
       
       -

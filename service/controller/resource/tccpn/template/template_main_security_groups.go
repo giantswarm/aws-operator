@@ -7,7 +7,7 @@ const TemplateMainSecurityGroups = `
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: {{ $v.MasterSecurityGroupName }}
-      VpcId: !Ref VPC
+      VpcId: {{ $v.VPCID }}
       SecurityGroupIngress:
       {{ range $v.MasterSecurityGroupRules }}
       -
