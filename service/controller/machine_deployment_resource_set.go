@@ -106,6 +106,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				ClusterDomain:             config.ClusterDomain,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,

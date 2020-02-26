@@ -31,6 +31,13 @@ func NewVersionBundle() versionbundle.Bundle {
 					"https://github.com/giantswarm/aws-operator/pull/2148",
 				},
 			},
+			{
+				Component:   "ignition",
+				Description: "Cherrypicked Make internal Kubernetes domain configurable.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2150",
+			},
 		},
 		Components: []versionbundle.Component{
 			{
