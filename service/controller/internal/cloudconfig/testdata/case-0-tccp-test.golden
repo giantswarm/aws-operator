@@ -704,7 +704,7 @@
         "name": "nvme-set-timeouts.service"
       },
       {
-        "contents": "\n[Unit]\nDescription=Decrypt TLS certificates\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service vault-aws-authorizer.service\nRequires=wait-for-domains.service vault-aws-authorizer.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/decrypt-tls-assets\n\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "\n[Unit]\nDescription=Decrypt TLS certificates\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service\nRequires=wait-for-domains.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/decrypt-tls-assets\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "decrypt-tls-assets.service"
       },

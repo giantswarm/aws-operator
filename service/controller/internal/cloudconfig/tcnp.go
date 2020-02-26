@@ -62,9 +62,10 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.Extension = &WorkerExtension{
 			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
 			baseExtension: baseExtension{
-				cluster:       cr,
-				encrypter:     t.config.Encrypter,
-				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+				cluster:        cr,
+				encrypter:      t.config.Encrypter,
+				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				registryDomain: t.config.RegistryDomain,
 			},
 			cc:           cc,
 			clusterCerts: clusterCerts,
