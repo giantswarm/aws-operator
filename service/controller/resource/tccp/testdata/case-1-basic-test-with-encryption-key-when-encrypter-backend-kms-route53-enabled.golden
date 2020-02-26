@@ -158,8 +158,6 @@ Resources:
     Type: AWS::EC2::Volume
     Properties:
 
-      Encrypted: true
-
       Size: 50
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
@@ -170,8 +168,6 @@ Resources:
     Type: AWS::EC2::Volume
     Properties:
 
-      Encrypted: true
-
       Size: 100
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
@@ -181,8 +177,6 @@ Resources:
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
-
-      Encrypted: true
 
       Size: 100
       VolumeType: gp2
