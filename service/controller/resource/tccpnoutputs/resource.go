@@ -19,9 +19,6 @@ type Config struct {
 // information from Cloud Formation stack outputs of the Tenant Cluster Control
 // Plane Node stack.
 //
-// The TCCPN manages the VPC Peering Connection. The peering connection ID is
-// added to the controller context and used in the CPF stack.
-//
 type Resource struct {
 	logger micrologger.Logger
 
