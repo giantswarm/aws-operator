@@ -32,16 +32,12 @@ import (
 )
 
 type controlPlaneResourceSetConfig struct {
-	G8sClient     versioned.Interface
-	K8sClient     kubernetes.Interface
-	Logger        micrologger.Logger
-	CertsSearcher certs.Interface
-
+	G8sClient          versioned.Interface
+	K8sClient          kubernetes.Interface
+	Logger             micrologger.Logger
+	CertsSearcher      certs.Interface
 	RandomKeysSearcher randomkeys.Interface
 
-	InstallationName string
-
-	//TODO LH this should be put somewhere common
 	APIWhitelist              tccpn.APIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
@@ -51,15 +47,15 @@ type controlPlaneResourceSetConfig struct {
 	EncrypterBackend          string
 	IgnitionPath              string
 	ImagePullProgressDeadline string
+	InstallationName          string
+	HostAWSConfig             aws.Config
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
-
-	HostAWSConfig  aws.Config
-	Route53Enabled bool
 }
 
 func (c controlPlaneResourceSetConfig) GetEncrypterBackend() string {

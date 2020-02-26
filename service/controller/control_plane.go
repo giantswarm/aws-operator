@@ -18,7 +18,6 @@ type ControlPlaneConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
-	//TODO LH this should be moved somewhere common
 	APIWhitelist              ClusterConfigAPIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
@@ -26,18 +25,17 @@ type ControlPlaneConfig struct {
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
 	EncrypterBackend          string
+	HostAWSConfig             aws.Config
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	InstallationName          string
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
-
-	HostAWSConfig  aws.Config
-	Route53Enabled bool
 }
 
 type ControlPlane struct {
@@ -132,15 +130,14 @@ func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.Resou
 			IgnitionPath:              config.IgnitionPath,
 			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 			InstallationName:          config.InstallationName,
+			HostAWSConfig:             config.HostAWSConfig,
 			NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 			PodInfraContainerImage:    config.PodInfraContainerImage,
 			RegistryDomain:            config.RegistryDomain,
+			Route53Enabled:            config.Route53Enabled,
 			SSHUserList:               config.SSHUserList,
 			SSOPublicKey:              config.SSOPublicKey,
 			VaultAddress:              config.VaultAddress,
-
-			HostAWSConfig:  config.HostAWSConfig,
-			Route53Enabled: config.Route53Enabled,
 		}
 
 		resourceSet, err = newControlPlaneResourceSet(c)
