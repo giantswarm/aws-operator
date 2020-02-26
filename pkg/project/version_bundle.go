@@ -37,6 +37,7 @@ func NewVersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2150",
+				},
 			},
 		},
 		Components: []versionbundle.Component{
