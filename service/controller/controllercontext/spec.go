@@ -1,6 +1,8 @@
 package controllercontext
 
-import "net"
+import (
+	"net"
+)
 
 type ContextSpec struct {
 	TenantCluster ContextSpecTenantCluster
@@ -45,6 +47,7 @@ type ContextSpecTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 
 type ContextSpecTenantClusterTCNP struct {
 	AvailabilityZones []ContextSpecTenantClusterTCNPAvailabilityZone
+	SecurityGroupIDs  []string
 }
 
 type ContextSpecTenantClusterTCNPAvailabilityZone struct {

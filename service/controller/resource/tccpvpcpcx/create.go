@@ -64,7 +64,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc peering connection id for tenant cluster %#q", key.ClusterID(&cr)))
 
 		if len(vpcPCXs) > 1 {
-			return microerror.Maskf(executionFailedError, "expected one vpc, got %d", len(vpcPCXs))
+			return microerror.Maskf(executionFailedError, "expected one vpc peering connection, got %d", len(vpcPCXs))
 		}
 
 		if len(vpcPCXs) < 1 {
@@ -74,7 +74,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc id peering connection id %#q for tenant cluster %#q", *vpcPCXs[0].VpcPeeringConnectionId, key.ClusterID(&cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc peering connection id %#q for tenant cluster %#q", *vpcPCXs[0].VpcPeeringConnectionId, key.ClusterID(&cr)))
 
 		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = *vpcPCXs[0].VpcPeeringConnectionId
 	}

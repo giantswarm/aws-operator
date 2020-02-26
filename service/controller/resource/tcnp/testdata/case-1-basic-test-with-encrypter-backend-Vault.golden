@@ -309,6 +309,21 @@ Resources:
       ToPort: -1
       SourceSecurityGroupId: master-security-group-id
   
+  NodePoolToNodePoolRuleSgTest1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      # The rule description is used for identifying the ingress rule. Thus it
+      # must not change. Otherwise the tcnpsecuritygroups resource will not be
+      # able to properly find the current and desired state of the ingress
+      # rules.
+      Description: Allow traffic from other Node Pool Security Groups to the Security Group of this Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: sg-test1
+  
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
