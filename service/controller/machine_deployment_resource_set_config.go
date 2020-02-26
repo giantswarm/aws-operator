@@ -35,7 +35,7 @@ type machineDeploymentResourceSetConfig struct {
 	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	KubernetesDomain           string
+	ClusterDomain              string
 	NetworkSetupDockerImage    string
 	PodInfraContainerImage     string
 	ProjectName                string
