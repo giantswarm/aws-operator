@@ -48,7 +48,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 	count := len(o.Snapshots)
 	if count == 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the snapshotID is not available yet")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster snapshot id is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
 	}
