@@ -9,11 +9,9 @@ func NewVersionBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "TODO",
-				Kind:        versionbundle.KindFixed,
-				URLs: []string{
-					"TODO",
-				},
+				Description: "Add KMS support for China region.",
+				Kind:        versionbundle.KindAdded,
+				URLs:        []string{},
 			},
 		},
 		Components: []versionbundle.Component{
