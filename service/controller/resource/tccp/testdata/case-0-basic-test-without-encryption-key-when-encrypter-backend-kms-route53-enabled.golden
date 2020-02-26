@@ -476,6 +476,15 @@ Resources:
       Type: CNAME
       ResourceRecords:
         - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+  IngressWildcardInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: '*.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      TTL: '300'
+      Type: CNAME
+      ResourceRecords:
+        - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
   
   PublicRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
