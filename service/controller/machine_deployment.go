@@ -142,6 +142,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
 			CalicoSubnet:               config.CalicoSubnet,
+			ClusterDomain:              config.ClusterDomain,
 			ClusterIPRange:             config.ClusterIPRange,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,
 			EncrypterBackend:           config.EncrypterBackend,
@@ -153,11 +154,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-<<<<<<< HEAD
-			KubernetesDomain:           config.KubernetesDomain,
-=======
-			ClusterDomain:              config.ClusterDomain,
->>>>>>> domain-test
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			ProjectName:                project.Name(),
