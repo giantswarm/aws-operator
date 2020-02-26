@@ -11,7 +11,9 @@ func NewVersionBundle() versionbundle.Bundle {
 				Component:   "aws-operator",
 				Description: "Add KMS support for China region.",
 				Kind:        versionbundle.KindAdded,
-				URLs:        []string{},
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2145",
+				},
 			},
 		},
 		Components: []versionbundle.Component{

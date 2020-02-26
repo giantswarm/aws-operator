@@ -28,7 +28,6 @@ type MachineDeploymentConfig struct {
 	ClusterIPRange             string
 	DeleteLoggingBucket        bool
 	DockerDaemonCIDR           string
-	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
@@ -143,7 +142,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			CalicoSubnet:               config.CalicoSubnet,
 			ClusterIPRange:             config.ClusterIPRange,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,
-			EncrypterBackend:           config.EncrypterBackend,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
 			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
