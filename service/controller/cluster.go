@@ -44,7 +44,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	KubernetesDomain           string
+	ClusterDomain              string
 	LabelSelector              ClusterConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
@@ -183,6 +183,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
 			CalicoSubnet:               config.CalicoSubnet,
+			ClusterDomain:              config.ClusterDomain,
 			ClusterIPRange:             config.ClusterIPRange,
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,
@@ -196,7 +197,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
-			KubernetesDomain:           config.KubernetesDomain,
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			RegistryDomain:             config.RegistryDomain,
