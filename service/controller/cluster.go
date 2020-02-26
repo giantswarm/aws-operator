@@ -196,6 +196,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			IncludeTags:                config.IncludeTags,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
+			KubernetesDomain:           config.KubernetesDomain,
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			RegistryDomain:             config.RegistryDomain,

@@ -37,6 +37,7 @@ type MachineDeploymentConfig struct {
 	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	KubernetesDomain           string
 	LabelSelector              MachineDeploymentConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
@@ -152,6 +153,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
 			InstallationName:           config.InstallationName,
 			IPAMNetworkRange:           config.IPAMNetworkRange,
+			KubernetesDomain:           config.KubernetesDomain,
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
 			ProjectName:                project.Name(),
