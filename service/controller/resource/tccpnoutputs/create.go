@@ -12,14 +12,8 @@ import (
 )
 
 const (
-	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	HostedZoneNameServersKey      = "HostedZoneNameServers"
-	MasterImageIDKey              = "MasterImageID"
-	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
-	MasterInstanceTypeKey         = "MasterInstanceType"
-	OperatorVersion               = "OperatorVersion"
-	VPCIDKey                      = "VPCID"
-	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
+	InstanceTypeKey = "InstanceType"
+	OperatorVersion = "OperatorVersion"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -72,43 +66,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, DockerVolumeResourceNameKey)
+		v, err := cloudFormation.GetOutputValue(outputs, InstanceTypeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.TCCPN.DockerVolumeResourceName = v
-	}
-
-	if r.route53Enabled {
-		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.HostedZoneNameServers = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterImageIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCPN.Image = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceResourceNameKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCPN.ResourceName = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceTypeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCPN.Type = v
+		cc.Status.TenantCluster.TCCPN.InstanceType = v
 	}
 
 	{
@@ -117,22 +79,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.OperatorVersion = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCPN.VPC.ID = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 	}
 
 	return nil
