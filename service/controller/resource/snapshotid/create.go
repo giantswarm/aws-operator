@@ -23,7 +23,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding the cluster ha master SnapshotID")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster snapshot id")
 
 	i := &ec2.DescribeSnapshotsInput{
 		Filters: []*ec2.Filter{
@@ -48,7 +48,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 	count := len(o.Snapshots)
 	if count == 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the snapshotID is not available yet")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster snapshot id is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
 	}
