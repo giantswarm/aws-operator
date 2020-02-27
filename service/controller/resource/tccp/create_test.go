@@ -49,7 +49,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			route53Enabled: true,
 		},
 		{
-			name:           "case 1: basic test with encryption key when encrypter backend kms, route53 enabled",
+			name:           "case 1: basic test with encryption key, route53 enabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
 			errorMatcher:   nil,
