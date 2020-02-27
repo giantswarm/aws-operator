@@ -9,6 +9,19 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v5.2.0] - Unreleased
+
+### Changed
+
+- Reserve ports `30000-32767` from ephemeral port range for `kube-apiserver` use.
+
+## [v5.1.0] - 2020-01-21
+
+### Changed
+
+- Lowercase $(hostname) to match k8s node name e.g. when using with kubectl.
+- Extend ignition with debug options.
+
 ## [v5.0.0] - 2020-01-02
 
 ### Changed
@@ -54,7 +67,7 @@ version directory, and  then changes are introduced.
 - Update Kubernetes to 1.14.10, includes fixes for CVE-2019-11253 and some Azure fixes.
 - Increase `fs.inotify.max_user_instances` to 8192.
 
-## [v4.8.0] 
+## [v4.8.0]
 
 ### Added
 
@@ -487,6 +500,8 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
+[v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0
 [v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
 [v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
 [v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_1

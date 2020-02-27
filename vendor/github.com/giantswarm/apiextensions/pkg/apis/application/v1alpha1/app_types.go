@@ -139,43 +139,43 @@ func NewAppTypeMeta() metav1.TypeMeta {
 
 // App CRs might look something like the following.
 //
-//    apiVersion: application.giantswarm.io/v1alpha1
-//    kind: App
-//    metadata:
-//      name: "prometheus"
-//      labels:
-//        app-operator.giantswarm.io/version: "1.0.0"
+//     apiVersion: application.giantswarm.io/v1alpha1
+//     kind: App
+//     metadata:
+//       name: "prometheus"
+//       labels:
+//         app-operator.giantswarm.io/version: "1.0.0"
 //
-//    spec:
-//      catalog: "giantswarm"
-//      name: "prometheus"
-//      namespace: "monitoring"
-//      version: "1.0.0"
-//      config:
-//        configMap:
-//          name: "prometheus-values"
-//          namespace: "monitoring"
-//        secret:
-//          name: "prometheus-secrets"
-//          namespace: "monitoring"
-//        kubeConfig:
-//          inCluster: false
-//          context:
-//            name: "giantswarm-12345"
-//          secret:
-//            name: "giantswarm-12345"
-//            namespace: "giantswarm"
-//          userConfig:
-//            configMap:
-//              name: "prometheus-user-values"
-//              namespace: "monitoring"
+//     spec:
+//       catalog: "giantswarm"
+//       name: "prometheus"
+//       namespace: "monitoring"
+//       version: "1.0.0"
+//       config:
+//         configMap:
+//           name: "prometheus-values"
+//           namespace: "monitoring"
+//         secret:
+//           name: "prometheus-secrets"
+//           namespace: "monitoring"
+//         kubeConfig:
+//           inCluster: false
+//           context:
+//             name: "giantswarm-12345"
+//           secret:
+//             name: "giantswarm-12345"
+//             namespace: "giantswarm"
+//           userConfig:
+//             configMap:
+//               name: "prometheus-user-values"
+//               namespace: "monitoring"
 //
-//    status:
-// 	appVersion: "2.4.3" # Optional value from Chart.yaml with the version of the deployed app.
-//      release:
-//        lastDeployed: "2018-11-30T21:06:20Z"
-//        status: "DEPLOYED"
-//      version: "1.1.0" # Required value from Chart.yaml with the version of the chart.
+//     status:
+//       appVersion: "2.4.3" # Optional value from Chart.yaml with the version of the deployed app.
+//       release:
+//         lastDeployed: "2018-11-30T21:06:20Z"
+//         status: "DEPLOYED"
+//       version: "1.1.0" # Required value from Chart.yaml with the version of the chart.
 //
 type App struct {
 	metav1.TypeMeta   `json:",inline"`
