@@ -1,59 +1,43 @@
+// Package microerror provides project wide helper functions for a more convenient
+// and efficient error handling.
 package microerror
 
-import (
-	"fmt"
-	"runtime"
-
-	"errors"
+var (
+	handler Handler = NewErrgoHandler(ErrgoHandlerConfig{
+		CallDepth: 1,
+	})
 )
 
-// Cause is here only for backward compatibility purposes and should not be used.
+// New returns a new error with the given error message. It is a drop-in
+// replacement for errors.New from the standard library.
+func New(s string) error {
+	return handler.New(s)
+}
+
+// Newf returns a new error with the given printf-formatted error message.
+func Newf(f string, v ...interface{}) error {
+	return handler.Newf(f, v...)
+}
+
+// Cause returns the cause of the given error. If the cause of the err can not
+// be found it returns the err itself.
 //
-// NOTE: Use errors.Is/errors.As instead.
+// Cause is the usual way to diagnose errors that may have been wrapped by Mask
+// or Maskf.
 func Cause(err error) error {
-	// If type of err is Error then this is the cause. This also covers all
-	// calls that initiated with Maskf because Maskf takes only Error type.
-	var eerr *Error
-	if errors.As(err, &eerr) {
-		return eerr
-	}
-
-	// Now this is known that the masking was initiated with Mask so unwrap
-	// all stackedError and return what's unwrapped from the one at the
-	// bottom of the stack.
-	var serr *stackedError
-	for errors.As(err, &serr) {
-		err = serr.Unwrap()
-	}
-
-	return err
+	return handler.Cause(err)
 }
 
-func Maskf(err *Error, f string, v ...interface{}) error {
-	aerr := &annotatedError{
-		annotation: fmt.Sprintf(f, v...),
-		underlying: err,
-	}
-
-	return mask(aerr)
-}
-
+// Mask is a simple error masker. Masked errors act as tracers within the
+// source code. Inspecting an masked error shows where the error was passed
+// through within the code base. This is gold for debugging and bug hunting.
 func Mask(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	return mask(err)
+	return handler.Mask(err)
 }
 
-func mask(err error) error {
-	_, file, line, _ := runtime.Caller(2)
-
-	return &stackedError{
-		stackEntry: StackEntry{
-			File: file,
-			Line: line,
-		},
-		underlying: err,
-	}
+// Maskf is like Mask. In addition to that it takes a format string and
+// variadic arguments like fmt.Sprintf. The format string and variadic
+// arguments are used to annotate the given errgo error.
+func Maskf(err error, f string, v ...interface{}) error {
+	return handler.Maskf(err, f, v...)
 }
