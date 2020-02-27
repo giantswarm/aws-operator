@@ -42,7 +42,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		errorMatcher   func(error) bool
 	}{
 		{
-			name:           "case 0: basic test without encryption key when encrypter backend kms, route53 enabled",
+			name:           "case 0: basic test without encryption key, route53 enabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
 			errorMatcher:   nil,
@@ -56,14 +56,14 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			route53Enabled: true,
 		},
 		{
-			name:           "case 2: basic test without encryption key when encrypter backend kms, route53 disabled",
+			name:           "case 2: basic test without encryption key, route53 disabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
 			errorMatcher:   nil,
 			route53Enabled: false,
 		},
 		{
-			name:           "case 3: basic test with encryption key when encrypter backend kms, route53 disabled",
+			name:           "case 3: basic test with encryption key, route53 disabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
 			errorMatcher:   nil,

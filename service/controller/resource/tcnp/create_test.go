@@ -35,7 +35,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 		cr   infrastructurev1alpha2.AWSMachineDeployment
 	}{
 		{
-			name: "case 0: basic test with encrypter backend KMS",
+			name: "case 0: basic test",
 			ctx:  unittest.DefaultContext(),
 			cr:   unittest.DefaultMachineDeployment(),
 		},
