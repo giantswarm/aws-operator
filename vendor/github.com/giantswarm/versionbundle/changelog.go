@@ -2,6 +2,7 @@ package versionbundle
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/giantswarm/microerror"
 )
@@ -9,23 +10,17 @@ import (
 type kind string
 
 const (
-	// KindAdded being used in a changelog describes an authority's component got
-	// added.
+	// KindAdded is used in changelogs for new features.
 	KindAdded kind = "added"
-	// KindChanged being used in a changelog describes an authority's component got
-	// changed.
+	// KindChanged is used in changelogs for changes in existing functionality.
 	KindChanged kind = "changed"
-	// KindDeprecated being used in a changelog describes an authority's component got
-	// deprecated.
+	// KindDeprecated is used in a changelogs for soon-to-be removed features.
 	KindDeprecated kind = "deprecated"
-	// KindFixed being used in a changelog describes an authority's component got
-	// fixed.
+	// KindFixed is used in changelogs for any bug fixes.
 	KindFixed kind = "fixed"
-	// KindRemoved being used in a changelog describes an authority's component got
-	// removed.
+	// KindRemoved is used in changelogs for now removed features.
 	KindRemoved kind = "removed"
-	// KindSecurity being used in a changelog describes an authority's component got
-	// adapted for security reasons.
+	// KindSecurity is used in chnagelogs in case of vulnerabilities.
 	KindSecurity kind = "security"
 )
 
@@ -48,7 +43,9 @@ type Changelog struct {
 	// version bundles the given component must exist, either within the same
 	// authority or within another authority within the infrastructure. That is,
 	// Aggregate must know about it to be able to properly merge version bundles.
-	Component string `json:"component" yaml:"component"`
+	Component string `json:"component,omitempty" yaml:"component,omitempty"`
+	// ComponentVersion is the upstream version of the exposed component.
+	ComponentVersion string `json:"componentVersion,omitempty" yaml:"componentVersion,omitempty"`
 	// Description is some text describing the changelog entry. This information
 	// is intended to be useful for humans.
 	Description string `json:"description" yaml:"description"`
@@ -58,6 +55,8 @@ type Changelog struct {
 	// URLs is a list of links which contain additional information to the
 	// changelog entry such as upstream changelogs or pull requests.
 	URLs []string `json:"urls" yaml:"urls"`
+	// Version is the Giant Swarm version of the component.
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 }
 
 func (c Changelog) String() string {
@@ -103,4 +102,14 @@ func CopyChangelogs(changelogs []Changelog) []Changelog {
 	}
 
 	return copy
+}
+
+func NewKind(kindType string) (kind, error) {
+	converted := kind(strings.ToLower(kindType))
+	for _, k := range validKinds {
+		if converted == k {
+			return converted, nil
+		}
+	}
+	return kind(""), microerror.Maskf(executionFailedError, "kind must be one of %#v", validKinds)
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
@@ -185,9 +186,12 @@ func (s *Service) allFromInterface(value interface{}) ([]string, error) {
 			var paths []string
 
 			for k, v := range stringMap {
-				ps, err := s.allFromInterface(v)
-				if err != nil {
-					return nil, microerror.Mask(err)
+				var ps []string
+				if reflect.TypeOf(v).String() != "string" {
+					ps, err = s.allFromInterface(v)
+					if err != nil {
+						return nil, microerror.Mask(err)
+					}
 				}
 
 				k := s.separatorExpression.ReplaceAllString(k, fmt.Sprintf(`\%s`, s.separator))

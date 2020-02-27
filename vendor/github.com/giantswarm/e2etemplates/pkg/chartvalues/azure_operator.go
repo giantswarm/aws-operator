@@ -16,7 +16,8 @@ type AzureOperatorConfigProvider struct {
 }
 
 type AzureOperatorConfigProviderAzure struct {
-	Location string
+	Location        string
+	HostClusterCidr string
 }
 
 type AzureOperatorConfigSecret struct {
@@ -33,7 +34,8 @@ type AzureOperatorConfigSecretAzureOperatorSecretYaml struct {
 }
 
 type AzureOperatorConfigSecretAzureOperatorSecretYamlService struct {
-	Azure AzureOperatorConfigSecretAzureOperatorSecretYamlServiceAzure
+	Azure  AzureOperatorConfigSecretAzureOperatorSecretYamlServiceAzure
+	Tenant AzureOperatorConfigSecretAzureOperatorSecretYamlServiceTenant
 }
 
 type AzureOperatorConfigSecretAzureOperatorSecretYamlServiceAzure struct {
@@ -51,6 +53,20 @@ type AzureOperatorConfigSecretAzureOperatorSecretYamlServiceAzureTemplate struct
 type AzureOperatorConfigSecretAzureOperatorSecretYamlServiceAzureTemplateURI struct {
 	// Version is currently the Github/CircleCI SHA.
 	Version string
+}
+
+type AzureOperatorConfigSecretAzureOperatorSecretYamlServiceTenant struct {
+	Ignition AzureOperatorConfigSecretAzureOperatorSecretYamlServiceTenantIgnition
+}
+
+type AzureOperatorConfigSecretAzureOperatorSecretYamlServiceTenantIgnition struct {
+	Debug AzureOperatorConfigSecretAzureOperatorSecretYamlServiceTenantIgnitionDebug
+}
+
+type AzureOperatorConfigSecretAzureOperatorSecretYamlServiceTenantIgnitionDebug struct {
+	Enabled    bool
+	LogsPrefix string
+	LogsToken  string
 }
 
 type AzureOperatorConfigSecretRegistry struct {

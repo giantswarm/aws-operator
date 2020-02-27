@@ -22,11 +22,10 @@ Installation:
           EndpointBase: k8s.{{ .CommonDomain }}
     Secret:
       CertOperator:
-        SecretYaml: |
-          service:
-            vault:
-              config:
-                token: {{ .Vault.Token }}
+        Service:
+          Vault:
+            Config:
+              Token: {{ .Vault.Token }}
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"{{ .RegistryPullSecret }}\"}}}"

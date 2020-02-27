@@ -12,12 +12,14 @@ const releaseTimestampFormat = "2006-01-02T15:04:05.000000Z"
 
 type ReleaseConfig struct {
 	Active  bool
+	Apps    []App
 	Bundles []Bundle
 	Date    time.Time
 	Version string
 }
 
 type Release struct {
+	apps       []App
 	bundles    []Bundle
 	changelogs []Changelog
 	components []Component
@@ -51,6 +53,7 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 
 	r := Release{
 		active:     config.Active,
+		apps:       config.Apps,
 		bundles:    config.Bundles,
 		changelogs: changelogs,
 		components: components,
@@ -63,6 +66,10 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 
 func (r Release) Active() bool {
 	return r.active
+}
+
+func (r Release) Apps() []App {
+	return CopyApps(r.apps)
 }
 
 func (r Release) Bundles() []Bundle {

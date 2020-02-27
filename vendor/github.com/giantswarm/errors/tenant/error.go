@@ -16,12 +16,18 @@ var (
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/nodes.* (unexpected )?EOF`),
 		// A regular expression representing EOF errors for the tenant API domain.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/namespaces/*/.* (unexpected )?EOF`),
+		// A regular expression representing EOF errors for the tenant API domain.
+		// These may occur when initializing controller runtime clients.
+		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api\?timeout.*: EOF`),
 		// A regular expression representing TLS errors related to establishing
 		// connections to tenant clusters while the tenant API is not fully up.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*/api/v1/nodes.* net/http: (TLS handshake timeout|request canceled).*?`),
 		// A regular expression representing timeout errors related to establishing
 		// TCP connections to tenant clusters while the tenant API is not fully up.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..* dial tcp .* i/o timeout`),
+		// A regular expression representing timeout errors related to awaiting headers
+		// from the tenant API connection.
+		regexp.MustCompile(`[Get|Patch|Post] https://api\..* .* \(Client.Timeout exceeded while awaiting headers\)`),
 		// A regular expression representing the kind of transient errors related to
 		// certificates returned while the tenant API is not fully up.
 		regexp.MustCompile(`[Get|Patch|Post] https://api\..*: x509: (certificate is valid for ingress.local, not api\..*|certificate has expired or is not yet valid.*|certificate signed by unknown authority \(possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate.*?\))`),
