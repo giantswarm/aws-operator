@@ -57,6 +57,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if !exists {
+			// It may happen that creating the AWSControlPlane CR works while creating
+			// the G8sControlPlane CR fails. In this case the id is empty and in any
+			// case has to be taken from the already created AWSControlPlane CR.
+			if id == "" {
+				id, err = r.idFromAWSControlPlaneCR(ctx, cr)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
 			err := r.createG8sControlPlaneCR(ctx, cr, id)
 			if err != nil {
 				return microerror.Mask(err)
@@ -119,6 +129,23 @@ func (r *Resource) g8sControlPlaneCRExists(ctx context.Context, cr infrastructur
 	}
 
 	return true, nil
+}
+
+func (r *Resource) idFromAWSControlPlaneCR(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (string, error) {
+	o := metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
+	}
+
+	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).List(o)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if len(list.Items) != 1 {
+		return "", microerror.Maskf(executionFailedError, "there must be one %T CR during the migration in order to re-use the Control Plane ID", infrastructurev1alpha2.AWSControlPlane{})
+	}
+
+	return list.Items[0].GetName(), nil
 }
 
 func (r *Resource) uniqueControlPlaneID(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (string, error) {
