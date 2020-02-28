@@ -126,13 +126,11 @@ func (r *Resource) uniqueControlPlaneID(ctx context.Context, cr infrastructurev1
 		id := entityid.New()
 
 		_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Get(id, metav1.GetOptions{})
-		if apierrors.IsAlreadyExists(err) {
-			continue
+		if apierrors.IsNotFound(err) {
+			return id, nil
 		} else if err != nil {
 			return "", microerror.Mask(err)
 		}
-
-		return id, nil
 	}
 
 	return "", microerror.Mask(idSpaceExhaustedError)
