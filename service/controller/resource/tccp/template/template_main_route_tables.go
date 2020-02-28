@@ -9,6 +9,8 @@ const TemplateMainRouteTables = `
     Properties:
       VpcId: !Ref VPC
       Tags:
+      - Key: Name
+        Value: {{ $v.ClusterID }}-public
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
@@ -20,6 +22,8 @@ const TemplateMainRouteTables = `
     Properties:
       VpcId: !Ref VPC
       Tags:
+      - Key: Name
+        Value: {{ $v.ClusterID }}-private
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type

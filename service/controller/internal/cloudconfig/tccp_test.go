@@ -70,6 +70,7 @@ func Test_Controller_CloudConfig_TCCP_Template_Render(t *testing.T) {
 						CalicoCIDR:                18,
 						CalicoMTU:                 1430,
 						CalicoSubnet:              "172.18.128.0",
+						ClusterDomain:             "cluster.local",
 						ClusterIPRange:            "172.18.192.0/22",
 						DockerDaemonCIDR:          "172.18.224.1/19",
 						IgnitionPath:              ignitionPath,

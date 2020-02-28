@@ -82,6 +82,7 @@ func DefaultContext() context.Context {
 							},
 						},
 					},
+					SecurityGroupIDs: []string{"sg-test1"},
 				},
 			},
 		},
@@ -191,6 +192,15 @@ func DefaultContext() context.Context {
 								{
 									Key:   aws.String("Name"),
 									Value: aws.String("8y5ck-ingress"),
+								},
+							},
+						},
+						{
+							GroupId: aws.String("internal-api-security-group-id"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("8y5ck-internal-api"),
 								},
 							},
 						},

@@ -22,6 +22,7 @@ type Config struct {
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	KubeletExtraArgs          []string
+	ClusterDomain             string
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
@@ -53,6 +54,9 @@ func (c Config) Validate() error {
 	}
 	if c.CalicoSubnet == "" {
 		return microerror.Maskf(invalidConfigError, "%T.CalicoSubnet must not be empty", c)
+	}
+	if c.ClusterDomain == "" {
+		return microerror.Maskf(invalidConfigError, "%T.ClusterDomain must not be empty", c)
 	}
 	if c.ClusterIPRange == "" {
 		return microerror.Maskf(invalidConfigError, "%T.ClusterIPRange must not be empty", c)

@@ -49,11 +49,13 @@ func IsStackNotFound(err error) bool {
 		return false
 	}
 
-	if strings.Contains(microerror.Cause(err).Error(), "does not exist") {
+	c := microerror.Cause(err)
+
+	if strings.Contains(c.Error(), "does not exist") {
 		return true
 	}
 
-	if microerror.Cause(err) == stackNotFoundError {
+	if c == stackNotFoundError {
 		return true
 	}
 

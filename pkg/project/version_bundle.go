@@ -8,27 +8,35 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "cloudformation",
-				Description: "Bring back name tags to AWS resources like VPCs, Subnets and EC2 Instances.",
+				Component:   "aws-operator",
+				Description: "Cherrypicked Fix AWS resource tags.",
 				Kind:        versionbundle.KindFixed,
 				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2059",
+					"https://github.com/giantswarm/aws-operator/pull/2148",
 				},
 			},
 			{
-				Component:   "clusterapi",
-				Description: "Cluster API types upgraded to v1alpha2.",
+				Component:   "aws-operator",
+				Description: "Cherrypicked Allow network traffic between Node Pools.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2148",
+				},
+			},
+			{
+				Component:   "aws-operator",
+				Description: "Cherrypicked Fix internal security groups.",
+				Kind:        versionbundle.KindFixed,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2148",
+				},
+			},
+			{
+				Component:   "ignition",
+				Description: "Cherrypicked Make internal Kubernetes domain configurable.",
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2080",
-				},
-			},
-			{
-				Component:   "kubelet",
-				Description: "Label nodes with operator version instead of release version.",
-				Kind:        versionbundle.KindFixed,
-				URLs: []string{
-					"https://github.com/giantswarm/aws-operator/pull/2064",
+					"https://github.com/giantswarm/aws-operator/pull/2150",
 				},
 			},
 		},

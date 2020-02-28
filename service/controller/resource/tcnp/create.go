@@ -207,7 +207,6 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			StackName:    aws.String(key.StackNameTCNP(&cr)),
 			TemplateBody: aws.String(templateBody),
 		}
-
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
@@ -215,7 +214,6 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
-
 	return nil
 }
 
@@ -383,6 +381,7 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		r := template.ParamsMainRouteTablesListItem{
 			AvailabilityZone: a.Name,
+			ClusterID:        key.ClusterID(&cr),
 			Name:             key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
 			Route: template.ParamsMainRouteTablesListItemRoute{
 				Name: key.SanitizeCFResourceName(key.NATRouteName(a.Name)),
@@ -408,16 +407,31 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		return nil, microerror.Mask(err)
 	}
 
+	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
+	for _, ID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
+		np := template.ParamsMainSecurityGroupsTenantClusterNodePool{
+			ID:           ID,
+			ResourceName: key.SanitizeCFResourceName(ID),
+		}
+
+		nodePools = append(nodePools, np)
+	}
+
 	securityGroups := &template.ParamsMainSecurityGroups{
+		ClusterID: key.ClusterID(&cr),
 		ControlPlane: template.ParamsMainSecurityGroupsControlPlane{
 			VPC: template.ParamsMainSecurityGroupsControlPlaneVPC{
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,
 			},
 		},
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
+			InternalAPI: template.ParamsMainSecurityGroupsTenantClusterInternalAPI{
+				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "internal-api")),
+			},
 			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},
+			NodePools: nodePools,
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
 			},
