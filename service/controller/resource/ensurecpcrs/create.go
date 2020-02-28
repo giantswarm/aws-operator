@@ -6,10 +6,16 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs/entityid"
+)
+
+const (
+	maxIDGenRetries = 5
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -18,6 +24,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	var id string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring %#q CR exists", fmt.Sprintf("%T", infrastructurev1alpha2.AWSControlPlane{})))
 
@@ -27,7 +34,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if !exists {
-			err := r.createAWSControlPlaneCR(ctx, cr)
+			id, err = r.uniqueControlPlaneID(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err := r.createAWSControlPlaneCR(ctx, cr, id)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -45,7 +57,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if !exists {
-			err := r.createG8sControlPlaneCR(ctx, cr)
+			err := r.createG8sControlPlaneCR(ctx, cr, id)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -57,11 +69,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, id string) error {
 	return nil
 }
 
-func (r *Resource) createG8sControlPlaneCR(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) createG8sControlPlaneCR(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, id string) error {
 	return nil
 }
 
@@ -107,4 +119,21 @@ func (r *Resource) g8sControlPlaneCRExists(ctx context.Context, cr infrastructur
 	}
 
 	return true, nil
+}
+
+func (r *Resource) uniqueControlPlaneID(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (string, error) {
+	for retries := 0; retries < maxIDGenRetries; retries++ {
+		id := entityid.New()
+
+		_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Get(id, metav1.GetOptions{})
+		if apierrors.IsAlreadyExists(err) {
+			continue
+		} else if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		return id, nil
+	}
+
+	return "", microerror.Mask(idSpaceExhaustedError)
 }
