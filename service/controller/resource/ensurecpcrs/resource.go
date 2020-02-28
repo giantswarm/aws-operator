@@ -20,6 +20,15 @@ type Resource struct {
 	logger    micrologger.Logger
 }
 
+// New provides an operatorkit resource implementation in order to ensure
+// existing Node Pool clusters have proper G8sControlPlane CRs on AWS. This
+// includes AWSControlPlane CRs which are linked in the infrastructure reference
+// of the G8sControlPlane CR. Note that this resource implementation does only
+// exist for migration purposes and can be removed in major versions 9.x.x of
+// aws-operator.
+//
+//     https://github.com/giantswarm/giantswarm/issues/9172
+//
 func New(config Config) (*Resource, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
