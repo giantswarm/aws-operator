@@ -6,21 +6,12 @@ import (
 )
 
 const (
-	// asgMaxBatchSizeRatio is the % of instances to be updated during a
-	// rolling update.
-	asgMaxBatchSizeRatio = 0.3
-	// asgMinInstancesRatio is the % of instances to keep in service during a
-	// rolling update.
-	asgMinInstancesRatio = 0.7
 	// defaultEBSVolumeMountPoint is the path for mounting the EBS volume.
 	defaultEBSVolumeMountPoint = "/dev/xvdh"
 	// defaultEBSVolumeSize is expressed in GB.
 	defaultEBSVolumeSize = "100"
 	// defaultEBSVolumeType is the EBS volume type.
 	defaultEBSVolumeType = "gp2"
-	// rollingUpdatePauseTime is how long to pause ASG operations after creating
-	// new instances. This allows time for new nodes to join the cluster.
-	rollingUpdatePauseTime = "PT15M"
 	// logEBSVolumeMountPoint is the path for mounting the log EBS volume
 	logEBSVolumeMountPoint = "/dev/xvdf"
 	// kubeletEBSVolumeMountPoint is the path for mounting the log EBS volume
