@@ -9,6 +9,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs/entityid"
@@ -80,6 +81,40 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 }
 
 func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, id string) error {
+	cp := &infrastructurev1alpha2.AWSControlPlane{
+		TypeMeta: infrastructurev1alpha2.NewAWSControlPlaneTypeMeta(),
+		ObjectMeta: metav1.ObjectMeta{
+			Annotations: map[string]string{
+				annotation.Docs: "https://godoc.org/github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2#AWSControlPlane",
+			},
+			Labels: map[string]string{
+				label.OperatorVersion: key.OperatorVersion(&cr),
+				label.Cluster:         key.ClusterID(&cr),
+				label.Organization:    key.OrganizationID(&cr),
+				label.Release:         key.ReleaseVersion(&cr),
+			},
+			Name: id,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: infrastructurev1alpha2.NewG8sControlPlaneTypeMeta().APIVersion,
+					Kind:       infrastructurev1alpha2.NewG8sControlPlaneTypeMeta().Kind,
+					Name:       id,
+				},
+			},
+		},
+		Spec: infrastructurev1alpha2.AWSControlPlaneSpec{
+			AvailabilityZones: []string{
+				key.MasterAvailabilityZone(cr),
+			},
+			InstanceType: key.MasterInstanceType(cr),
+		},
+	}
+
+	_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Create(cp)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	return nil
 }
 
