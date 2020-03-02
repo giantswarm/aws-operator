@@ -97,13 +97,6 @@ func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructur
 				label.Release:         key.ReleaseVersion(&cr),
 			},
 			Name: id,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: infrastructurev1alpha2.NewG8sControlPlaneTypeMeta().APIVersion,
-					Kind:       infrastructurev1alpha2.NewG8sControlPlaneTypeMeta().Kind,
-					Name:       id,
-				},
-			},
 		},
 		Spec: infrastructurev1alpha2.AWSControlPlaneSpec{
 			AvailabilityZones: []string{
