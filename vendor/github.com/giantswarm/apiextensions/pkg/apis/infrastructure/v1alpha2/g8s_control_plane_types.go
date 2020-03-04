@@ -2,15 +2,9 @@ package v1alpha2
 
 import (
 	"github.com/ghodss/yaml"
-<<<<<<< HEAD
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/kubernetes/pkg/apis/core"
-=======
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
->>>>>>> master
 )
 
 const (
@@ -32,8 +26,6 @@ spec:
   subresources:
     status: {}
   versions:
-<<<<<<< HEAD
-=======
   - name: v1alpha1
     served: false
     storage: false
@@ -43,9 +35,8 @@ spec:
           spec:
             properties:
               replicas:
-                type: int
+                type: integer
             type: object
->>>>>>> master
   - name: v1alpha2
     served: true
     storage: true
@@ -55,7 +46,10 @@ spec:
           spec:
             properties:
               replicas:
-                type: int
+                type: integer
+                enum:
+                  - 1
+                  - 3
               infrastructureRef:
                 properties:
                   kind:
@@ -95,31 +89,6 @@ func NewG8sControlPlaneTypeMeta() metav1.TypeMeta {
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-<<<<<<< HEAD
-// G8sControlPlane defines the ControlPlane (Master nodes) of a
-// Giant Swarm Tenant Cluster
-//
-//	apiVersion: infrastructure.giantswarm.io/v1alpha2
-//	kind: G8sControlPlane
-//	metadata:
-//    labels:
-//      aws-operator.giantswarm.io/version: 6.2.0
-//      cluster-operator.giantswarm.io/version: 0.17.0
-//      giantswarm.io/cluster: "8y5kc"
-//      giantswarm.io/organization: "giantswarm"
-//      release.giantswarm.io/version: 7.3.1
-//    name: 8y5kc
-//	spec:
-//    replicas: 3
-//    infrastructureRef:
-//      kind: AWSControlPlane
-//      namespace: default
-//      name: 5f3kb
-//      apiVersion: infrastructure.giantswarm.io/v1alpha2
-//  status:
-//    replicas: 3
-//    readyReplicas: 3
-=======
 // G8sControlPlane defines the Control Plane Nodes (Kubernetes Master Nodes) of
 // a Giant Swarm Tenant Cluster
 //
@@ -145,7 +114,6 @@ func NewG8sControlPlaneTypeMeta() metav1.TypeMeta {
 //     status:
 //       readyReplicas: 3
 //       replicas: 3
->>>>>>> master
 //
 type G8sControlPlane struct {
 	metav1.TypeMeta   `json:",inline"`
