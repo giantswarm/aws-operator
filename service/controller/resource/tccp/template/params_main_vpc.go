@@ -9,5 +9,11 @@ type ParamsMainVPC struct {
 	PeerRoleArn      string
 	Region           string
 	RegionARN        string
-	RouteTableNames  []RouteTableName
+	RouteTableNames  []ParamsMainVPCRouteTableName
+}
+
+type ParamsMainVPCRouteTableName struct {
+	AvailabilityZone    string
+	ResourceName        string
+	VPCPeeringRouteName string
 }

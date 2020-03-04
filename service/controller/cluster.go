@@ -44,6 +44,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	ClusterDomain              string
 	LabelSelector              ClusterConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
@@ -159,10 +160,8 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 	{
 		c := clusterResourceSetConfig{
 			CertsSearcher:      certsSearcher,
-			CtrlClient:         config.K8sClient.CtrlClient(),
-			G8sClient:          config.K8sClient.G8sClient(),
 			HostAWSConfig:      config.HostAWSConfig,
-			K8sClient:          config.K8sClient.K8sClient(),
+			K8sClient:          config.K8sClient,
 			Locker:             config.Locker,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
@@ -182,6 +181,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
 			CalicoSubnet:               config.CalicoSubnet,
+			ClusterDomain:              config.ClusterDomain,
 			ClusterIPRange:             config.ClusterIPRange,
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,

@@ -200,6 +200,8 @@ Resources:
     Properties:
       VpcId: vpc-id
       Tags:
+      - Key: Name
+        Value: 8y5ck-private
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
@@ -215,6 +217,8 @@ Resources:
     Properties:
       VpcId: vpc-id
       Tags:
+      - Key: Name
+        Value: 8y5ck-private
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
@@ -260,6 +264,9 @@ Resources:
         FromPort: 10301
         ToPort: 10301
         CidrIp: 10.1.0.0/16
+      Tags:
+        - Key: Name
+          Value: 8y5ck-worker
       VpcId: vpc-id
   GeneralInternalAPIIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -270,7 +277,7 @@ Resources:
       IpProtocol: tcp
       FromPort: 443
       ToPort: 443
-      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
@@ -301,6 +308,21 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: master-security-group-id
+  
+  NodePoolToNodePoolRuleSgTest1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      # The rule description is used for identifying the ingress rule. Thus it
+      # must not change. Otherwise the tcnpsecuritygroups resource will not be
+      # able to properly find the current and desired state of the ingress
+      # rules.
+      Description: Allow traffic from other Node Pool Security Groups to the Security Group of this Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: sg-test1
   
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet

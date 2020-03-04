@@ -98,9 +98,9 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/microendpoint"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/microerror"
+  version = "=0.1.0"
 
 [[constraint]]
   branch = "master"

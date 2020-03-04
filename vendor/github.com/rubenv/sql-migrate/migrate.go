@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path"
 	"regexp"
 	"sort"
@@ -31,6 +32,11 @@ type MigrationSet struct {
 	TableName string
 	// SchemaName schema that the migration table be referenced.
 	SchemaName string
+	// IgnoreUnknown skips the check to see if there is a migration
+	// ran in the database that is not in MigrationSource.
+	//
+	// This should be used sparingly as it is removing a safety check.
+	IgnoreUnknown bool
 }
 
 var migSet = MigrationSet{}
@@ -100,6 +106,14 @@ func SetSchema(name string) {
 	}
 }
 
+// SetIgnoreUnknown sets the flag that skips database check to see if there is a
+// migration in the database that is not in migration source.
+//
+// This should be used sparingly as it is removing a safety check.
+func SetIgnoreUnknown(v bool) {
+	migSet.IgnoreUnknown = v
+}
+
 type Migration struct {
 	Id   string
 	Up   []string
@@ -157,12 +171,28 @@ type MigrationRecord struct {
 	AppliedAt time.Time `db:"applied_at"`
 }
 
+type OracleDialect struct {
+	gorp.OracleDialect
+}
+
+func (d OracleDialect) IfTableNotExists(command, schema, table string) string {
+	return command
+}
+
+func (d OracleDialect) IfSchemaNotExists(command, schema string) string {
+	return command
+}
+
+func (d OracleDialect) IfTableExists(command, schema, table string) string {
+	return command
+}
+
 var MigrationDialects = map[string]gorp.Dialect{
 	"sqlite3":  gorp.SqliteDialect{},
 	"postgres": gorp.PostgresDialect{},
 	"mysql":    gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8"},
 	"mssql":    gorp.SqlServerDialect{},
-	"oci8":     gorp.OracleDialect{},
+	"oci8":     OracleDialect{},
 }
 
 type MigrationSource interface {
@@ -228,14 +258,9 @@ func findMigrations(dir http.FileSystem) ([]*Migration, error) {
 
 	for _, info := range files {
 		if strings.HasSuffix(info.Name(), ".sql") {
-			file, err := dir.Open(info.Name())
+			migration, err := migrationFromFile(dir, info)
 			if err != nil {
-				return nil, fmt.Errorf("Error while opening %s: %s", info.Name(), err)
-			}
-
-			migration, err := ParseMigration(info.Name(), file)
-			if err != nil {
-				return nil, fmt.Errorf("Error while parsing %s: %s", info.Name(), err)
+				return nil, err
 			}
 
 			migrations = append(migrations, migration)
@@ -246,6 +271,20 @@ func findMigrations(dir http.FileSystem) ([]*Migration, error) {
 	sort.Sort(byId(migrations))
 
 	return migrations, nil
+}
+
+func migrationFromFile(dir http.FileSystem, info os.FileInfo) (*Migration, error) {
+	file, err := dir.Open(info.Name())
+	if err != nil {
+		return nil, fmt.Errorf("Error while opening %s: %s", info.Name(), err)
+	}
+	defer func() { _ = file.Close() }()
+
+	migration, err := ParseMigration(info.Name(), file)
+	if err != nil {
+		return nil, fmt.Errorf("Error while parsing %s: %s", info.Name(), err)
+	}
+	return migration, nil
 }
 
 // Migrations from a bindata asset set.
@@ -418,6 +457,10 @@ func (ms MigrationSet) ExecMax(db *sql.DB, dialect string, m MigrationSource, di
 		}
 
 		for _, stmt := range migration.Queries {
+			// remove the semicolon from stmt, fix ORA-00922 issue in database oracle
+			stmt = strings.TrimSuffix(stmt, "\n")
+			stmt = strings.TrimSuffix(stmt, " ")
+			stmt = strings.TrimSuffix(stmt, ";")
 			if _, err := executor.Exec(stmt); err != nil {
 				if trans, ok := executor.(*gorp.Transaction); ok {
 					_ = trans.Rollback()
@@ -500,13 +543,15 @@ func (ms MigrationSet) PlanMigration(db *sql.DB, dialect string, m MigrationSour
 
 	// Make sure all migrations in the database are among the found migrations which
 	// are to be applied.
-	migrationsSearch := make(map[string]struct{})
-	for _, migration := range migrations {
-		migrationsSearch[migration.Id] = struct{}{}
-	}
-	for _, existingMigration := range existingMigrations {
-		if _, ok := migrationsSearch[existingMigration.Id]; !ok {
-			return nil, nil, newPlanError(existingMigration, "unknown migration in database")
+	if !ms.IgnoreUnknown {
+		migrationsSearch := make(map[string]struct{})
+		for _, migration := range migrations {
+			migrationsSearch[migration.Id] = struct{}{}
+		}
+		for _, existingMigration := range existingMigrations {
+			if _, ok := migrationsSearch[existingMigration.Id]; !ok {
+				return nil, nil, newPlanError(existingMigration, "unknown migration in database")
+			}
 		}
 	}
 
@@ -698,11 +743,20 @@ Check https://github.com/go-sql-driver/mysql#parsetime for more info.`)
 
 	// Create migration database map
 	dbMap := &gorp.DbMap{Db: db, Dialect: d}
-	dbMap.AddTableWithNameAndSchema(MigrationRecord{}, ms.SchemaName, ms.getTableName()).SetKeys(false, "Id")
+	table := dbMap.AddTableWithNameAndSchema(MigrationRecord{}, ms.SchemaName, ms.getTableName()).SetKeys(false, "Id")
 	//dbMap.TraceOn("", log.New(os.Stdout, "migrate: ", log.Lmicroseconds))
+
+	if dialect == "oci8" {
+		table.ColMap("Id").SetMaxSize(4000)
+	}
 
 	err := dbMap.CreateTablesIfNotExists()
 	if err != nil {
+		// Oracle database does not support `if not exists`, so use `ORA-00955:` error code
+		// to check if the table exists.
+		if dialect == "oci8" && strings.HasPrefix(err.Error(), "ORA-00955:") {
+			return dbMap, nil
+		}
 		return nil, err
 	}
 

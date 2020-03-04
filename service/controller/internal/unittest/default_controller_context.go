@@ -82,6 +82,7 @@ func DefaultControllerContext() controllercontext.Context {
 							},
 						},
 					},
+					SecurityGroupIDs: []string{"sg-test1"},
 				},
 			},
 		},
