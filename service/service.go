@@ -211,6 +211,7 @@ func New(config Config) (*Service, error) {
 			CalicoCIDR:                config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:              config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
+			ClusterDomain:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DockerDaemonCIDR:          config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
 			EncrypterBackend:          config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
