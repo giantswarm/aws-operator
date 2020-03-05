@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -387,6 +388,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				Private: config.APIWhitelist.Private,
 				Public:  config.APIWhitelist.Public,
 			},
+			CIDRBlockAWSCNI:    fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 			Detection:          tccpChangeDetection,
 			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
