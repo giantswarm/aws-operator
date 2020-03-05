@@ -4,15 +4,13 @@ metadata:
   name: {{ tpl .Values.resource.default.name  . }}
   namespace: {{ tpl .Values.resource.default.namespace  . }}
   labels:
-    app: {{ .Values.project.name }}
-    version: {{ .Values.project.version }}
+    {{- include "aws-operator.labels" . | nindent 4 }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: {{ .Values.project.name }}
-      version: {{ .Values.project.version }}
+      {{- include "aws-operator.selectorLabels" . | nindent 6 }}
   strategy:
     type: RollingUpdate
   template:
@@ -20,8 +18,7 @@ spec:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        app: {{ .Values.project.name }}
-        version: {{ .Values.project.version }}
+        {{- include "aws-operator.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
       - name: {{ .Values.project.name }}-configmap

@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: {{ tpl .Values.resource.default.name  . }}
   namespace: {{ tpl .Values.resource.default.namespace  . }}
+  labels:
+    {{- include "aws-operator.labels" . | nindent 4 }}
 data:
   config.yaml: |
     server:
