@@ -93,6 +93,7 @@ func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructur
 			Labels: map[string]string{
 				label.OperatorVersion: key.OperatorVersion(&cr),
 				label.Cluster:         key.ClusterID(&cr),
+				label.ControlPlane:    id,
 				label.Organization:    key.OrganizationID(&cr),
 				label.Release:         key.ReleaseVersion(&cr),
 			},
@@ -146,6 +147,7 @@ func (r *Resource) createG8sControlPlaneCR(ctx context.Context, cr infrastructur
 			Labels: map[string]string{
 				label.ClusterOperatorVersion: ov,
 				label.Cluster:                key.ClusterID(&cr),
+				label.ControlPlane:           id,
 				label.Organization:           key.OrganizationID(&cr),
 				label.Release:                key.ReleaseVersion(&cr),
 			},
