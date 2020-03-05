@@ -21,12 +21,13 @@ package v1alpha2
 import (
 	"time"
 
-	v1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	scheme "github.com/giantswarm/apiextensions/pkg/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
+
+	v1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	scheme "github.com/giantswarm/apiextensions/pkg/clientset/versioned/scheme"
 )
 
 // AWSMachineDeploymentsGetter has a method to return a AWSMachineDeploymentInterface.
