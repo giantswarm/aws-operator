@@ -22,6 +22,7 @@ type ControlPlaneConfig struct {
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string
+	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
 	EncrypterBackend          string
@@ -124,6 +125,7 @@ func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.Resou
 			CalicoCIDR:                config.CalicoCIDR,
 			CalicoMTU:                 config.CalicoMTU,
 			CalicoSubnet:              config.CalicoSubnet,
+			ClusterDomain:             config.ClusterDomain,
 			ClusterIPRange:            config.ClusterIPRange,
 			DockerDaemonCIDR:          config.DockerDaemonCIDR,
 			EncrypterBackend:          config.EncrypterBackend,
