@@ -198,6 +198,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			G8sClient:     config.K8sClient.G8sClient(),
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)

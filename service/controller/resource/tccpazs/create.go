@@ -122,13 +122,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
+		_, awsCNISubnet, err := net.ParseCIDR(r.cidrBlockAWSCNI)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		// Parse TCCP network CIDR.
 		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		azMapping, err = r.ensureAZsAreAssignedWithSubnet(ctx, *tccpSubnet, azMapping)
+		azMapping, err = r.ensureAZsAreAssignedWithSubnet(ctx, *awsCNISubnet, *tccpSubnet, azMapping)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -147,11 +152,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 // ensureAZsAreAssignedWithSubnet iterates over AZ-mapping map, removes
 // subnets that are already in use from available subnets' list and then assigns
 // one to AZs that doesn't have subnet assigned yet.
-func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubnet net.IPNet, azMapping map[string]mapping) (map[string]mapping, error) {
+func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISubnet net.IPNet, tccpSubnet net.IPNet, azMapping map[string]mapping) (map[string]mapping, error) {
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
 	clusterAZSubnets, err := ipam.Split(tccpSubnet, MaxAZs)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	// According to the IPAM limitations we split the AWS CNI CIDR by 4. This is
+	// so we assign one of its split to each availability zone.
+	awsCNISubnets, err := ipam.Split(awsCNISubnet, MaxAZs)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -166,23 +178,38 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 	}
 
 	// Remove already allocated networks from clusterAZSubnets before assigning
-	// remaining subnets to AZs without themout them.
+	// remaining subnets to AZs without them.
 	for _, az := range azNames {
 		mapping := azMapping[az]
 
 		// Check if mapping of given availability zone already contain value.
 		if !mapping.subnetsEmpty() {
-			// Calculate the parent network from public subnet (always
-			// present for functional AZ).
-			parentNet := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
+			{
+				// Calculate the parent network from public subnet (always
+				// present for functional AZ).
+				parentNet := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has subnet allocated: %q", az, parentNet.String()))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has allocated public subnet %q", az, parentNet.String()))
 
-			// Filter out already allocated AZ subnet from available AZ
-			// size networks.
-			clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
-				return !reflect.DeepEqual(n, parentNet)
-			})
+				// Filter out already allocated AZ subnet from available AZ
+				// size networks.
+				clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
+					return !reflect.DeepEqual(n, parentNet)
+				})
+			}
+
+			// Unlike the public/private subnets the AWS CNI CIDRs are not split
+			// twice. We only have at max 4 and not 8. This means we do not have to
+			// filter out the parents, but the subnets being taken already themselves.
+			{
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q already has allocated aws-cni subnet %q", az, mapping.AWSCNI.Subnet.CIDR.String()))
+
+				// Filter out already allocated AZ subnet from available AZ
+				// size networks.
+				awsCNISubnets = ipam.Filter(awsCNISubnets, func(n net.IPNet) bool {
+					return !reflect.DeepEqual(n, mapping.AWSCNI.Subnet.CIDR)
+				})
+			}
 		}
 	}
 
@@ -195,18 +222,26 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, tccpSubne
 			if len(clusterAZSubnets) > 0 {
 				// Pick first available AZ subnet and split it to public
 				// and private.
-				ss, err := ipam.Split(clusterAZSubnets[0], 2)
+				clusterAZSubnet, err := ipam.Split(clusterAZSubnets[0], 2)
 				if err != nil {
 					return nil, microerror.Mask(err)
 				}
+				// The AWS CNI CIDRs are not divided into public/private per AZ. We only
+				// split by the IPAM limit. So here we simply take the first free CIDR
+				// and remove it below.
+				awsCNISubnet := awsCNISubnets[0]
 
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have subnet allocation - allocated: %q", az, clusterAZSubnets[0].String()))
 
-				// Update available AZ mapping.
+				// Update available AZ mapping by removing the CIDR we are about to
+				// allocate.
+				awsCNISubnets = awsCNISubnets[1:]
 				clusterAZSubnets = clusterAZSubnets[1:]
 
-				mapping.Public.Subnet.CIDR = ss[0]
-				mapping.Private.Subnet.CIDR = ss[1]
+				mapping.AWSCNI.Subnet.CIDR = awsCNISubnet
+				mapping.Public.Subnet.CIDR = clusterAZSubnet[0]
+				mapping.Private.Subnet.CIDR = clusterAZSubnet[1]
+
 				azMapping[az] = mapping
 			} else {
 				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
@@ -282,6 +317,9 @@ func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string
 		m := azMapping[*s.AvailabilityZone]
 
 		switch t := awstags.ValueForKey(s.Tags, key.TagSubnetType); {
+		case t == "aws-cni":
+			m.AWSCNI.Subnet.ID = *s.SubnetId
+			m.AWSCNI.Subnet.CIDR = *cidr
 		case t == "public":
 			m.Public.Subnet.ID = *s.SubnetId
 			m.Public.Subnet.CIDR = *cidr
@@ -316,6 +354,9 @@ func newAZSpec(azMapping map[string]mapping) []controllercontext.ContextSpecTena
 		az := controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 			Name: name,
 			Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
+				AWSCNI: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI{
+					CIDR: sp.AWSCNI.Subnet.CIDR,
+				},
 				Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 					CIDR: sp.Private.Subnet.CIDR,
 					ID:   sp.Private.Subnet.ID,

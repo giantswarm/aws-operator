@@ -639,7 +639,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			ctx := controllercontext.NewContext(context.Background(), controllercontext.Context{})
-			azs, err := r.ensureAZsAreAssignedWithSubnet(ctx, tc.tccpSubnet, tc.inputAZs)
+			azs, err := r.ensureAZsAreAssignedWithSubnet(ctx, tc.awsCNISubnet, tc.tccpSubnet, tc.inputAZs)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:

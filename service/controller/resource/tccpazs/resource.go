@@ -17,12 +17,16 @@ type Config struct {
 	G8sClient     versioned.Interface
 	Logger        micrologger.Logger
 	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+
+	CIDRBlockAWSCNI string
 }
 
 type Resource struct {
 	g8sClient     versioned.Interface
 	logger        micrologger.Logger
 	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+
+	cidrBlockAWSCNI string
 }
 
 func New(config Config) (*Resource, error) {
@@ -36,10 +40,16 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 	}
 
+	if config.CIDRBlockAWSCNI == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CIDRBlockAWSCNI must not be empty", config)
+	}
+
 	r := &Resource{
 		g8sClient:     config.G8sClient,
 		logger:        config.Logger,
 		toClusterFunc: config.ToClusterFunc,
+
+		cidrBlockAWSCNI: config.CIDRBlockAWSCNI,
 	}
 
 	return r, nil

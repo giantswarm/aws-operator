@@ -28,7 +28,7 @@ const TemplateMainNatGateway = `
   {{ .NATRouteName }}:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref {{ .PrivateRouteTableName }}
+      RouteTableId: !Ref {{ .RouteTableName }}
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: {{ .NATGWName }}
