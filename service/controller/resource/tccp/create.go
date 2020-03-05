@@ -885,6 +885,7 @@ func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha2.A
 	{
 		vpc = &template.ParamsMainVPC{
 			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
+			CIDRBlockAWSCNI:  r.cidrBlockAWSCNI,
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,

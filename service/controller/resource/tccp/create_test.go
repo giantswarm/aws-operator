@@ -133,6 +133,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 					Detection: d,
 					Logger:    microloggertest.New(),
 
+					CIDRBlockAWSCNI:  "172.17.0.1/16",
 					EncrypterBackend: tc.encrypterBackend,
 					Route53Enabled:   tc.route53Enabled,
 				}

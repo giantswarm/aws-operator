@@ -748,6 +748,11 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck
+  VPCCIDRBlockAWSCNI:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      CidrBlock: 172.17.0.1/16
+      VpcId: !Ref VPC
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
