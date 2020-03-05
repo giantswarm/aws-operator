@@ -787,6 +787,7 @@ func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr infrastructur
 			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
 			APIInternalELBSecurityGroupRules: internalAPIRules,
 			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
+			AWSCNISecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "aws-cni"),
 			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
 			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
 			MasterSecurityGroupRules:         masterRules,
