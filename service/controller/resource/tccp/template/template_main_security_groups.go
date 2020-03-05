@@ -64,6 +64,14 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.APIInternalELBSecurityGroupName }}
+  AWSCNISecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "AWS CNI Security Group configured to the ENIConfig CRD."
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: {{ $v.AWSCNISecurityGroupName }}
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
