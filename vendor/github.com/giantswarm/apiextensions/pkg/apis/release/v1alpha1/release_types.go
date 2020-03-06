@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	kindRelease    = "Release"
-	releaseCRDYAML = `apiVersion: apiextensions.k8s.io/v1beta1
+	crDocsAnnotation         = "giantswarm.io/docs"
+	kindRelease              = "Release"
+	releaseDocumentationLink = "https://pkg.go.dev/github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1?tab=doc#Release"
+	releaseCRDYAML           = `apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: releases.release.giantswarm.io
@@ -25,7 +27,7 @@ spec:
     - name: Age
       type: date
       description: Time since release creation
-      JSONPath: .metadata.creationTimestamp
+      JSONPath: .spec.date
   group: release.giantswarm.io
   names:
     kind: Release
@@ -53,6 +55,9 @@ spec:
           description: |
             Spec holds the data defining the desired state of a release.
           properties:
+            date:
+              type: string
+              format: date-time
             apps:
               description: |
                 Apps is a list of Giant Swarm-managed apps which will be installed by default
@@ -111,16 +116,11 @@ spec:
                 supported release.
               pattern: ^(active|deprecated|wip)$
               type: string
-            version:
-              description: |
-                Semantic version of the release.
-              pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$
-              type: string
           required:
           - components
           - apps
           - state
-          - version
+          - date
           type: object
       required:
       - metadata
@@ -160,6 +160,17 @@ func NewReleaseTypeMeta() metav1.TypeMeta {
 	}
 }
 
+func NewReleaseCR() *Release {
+	return &Release{
+		ObjectMeta: metav1.ObjectMeta{
+			Annotations: map[string]string{
+				crDocsAnnotation: releaseDocumentationLink,
+			},
+		},
+		TypeMeta: NewReleaseTypeMeta(),
+	}
+}
+
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -179,10 +190,10 @@ type ReleaseSpec struct {
 	Apps []ReleaseSpecApp `json:"apps" yaml:"apps"`
 	// Components describes components used in this release.
 	Components []ReleaseSpecComponent `json:"components" yaml:"components"`
+	// Date that the release became active.
+	Date *DeepCopyTime `json:"date" yaml:"date"`
 	// State indicates the availability of the release: deprecated, active, or wip.
 	State ReleaseState `json:"state" yaml:"state"`
-	// Version is the version of the release.
-	Version string `json:"version" yaml:"version"`
 }
 
 type ReleaseSpecComponent struct {
@@ -194,7 +205,7 @@ type ReleaseSpecComponent struct {
 
 type ReleaseSpecApp struct {
 	// Version of the upstream component used in the app.
-	ComponentVersion string `json:"componentVersion" yaml:"componentVersion"`
+	ComponentVersion string `json:"componentVersion,omitempty" yaml:"componentVersion,omitempty"`
 	// Name of the app.
 	Name string `json:"name" yaml:"name"`
 	// Version of the app.
