@@ -19,9 +19,10 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha2 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/infrastructure/v1alpha2"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
+
+	v1alpha2 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/infrastructure/v1alpha2"
 )
 
 type FakeInfrastructureV1alpha2 struct {

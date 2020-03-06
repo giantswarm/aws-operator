@@ -35,7 +35,7 @@ spec:
           spec:
             properties:
               replicas:
-                type: int
+                type: integer
             type: object
   - name: v1alpha2
     served: true
@@ -46,7 +46,10 @@ spec:
           spec:
             properties:
               replicas:
-                type: int
+                type: integer
+                enum:
+                  - 1
+                  - 3
               infrastructureRef:
                 properties:
                   kind:
