@@ -272,7 +272,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fd191c286282099da73c83c39afb2014a1dfcdfbd9c2d3cafbb2d74d32a00dc3"
+  digest = "1:f7adec36810298860d9689c68d80cf630da522afc83d20a7d3174dbb9273a33d"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -298,7 +298,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "587191200b98a812afbc9b38f6590a7bc86ced71"
+  revision = "fcf5f1f78bafb08acab31ba059af7783715ae2b1"
 
 [[projects]]
   branch = "master"
@@ -2280,9 +2280,11 @@
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/dynamic",
