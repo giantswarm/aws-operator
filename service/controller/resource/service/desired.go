@@ -28,10 +28,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Name:      "master",
 			Namespace: key.ClusterID(&cr),
 			Labels: map[string]string{
-				label.App:           "master",
-				label.Cluster:       key.ClusterID(&cr),
-				label.Organization:  key.OrganizationID(&cr),
-				label.VersionBundle: key.OperatorVersion(&cr),
+				label.App:          "master",
+				label.Cluster:      key.ClusterID(&cr),
+				label.Organization: key.OrganizationID(&cr),
 			},
 			Annotations: map[string]string{
 				AnnotationEtcdDomain:        key.ClusterEtcdEndpointWithPort(cr),
