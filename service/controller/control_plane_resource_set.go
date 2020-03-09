@@ -29,6 +29,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 )
 
 type controlPlaneResourceSetConfig struct {
@@ -223,12 +224,26 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpVPCIDResource resource.Interface
+	{
+		c := tccpvpcid.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+		}
+
+		tccpVPCIDResource, err = tccpvpcid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
+		tccpVPCIDResource,
 		regionResource,
 
 		// All these resources implement certain business logic and operate based on
