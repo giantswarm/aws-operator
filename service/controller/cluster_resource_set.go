@@ -46,6 +46,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 )
@@ -214,6 +215,18 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpEncryptionResource, err = tccpencryption.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSecurityGroupsResource resource.Interface
+	{
+		c := tccpsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -608,6 +621,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		ipamResource,
 		bridgeZoneResource,
 		tccpEncryptionResource,
+		tccpSecurityGroupsResource,
 		s3BucketResource,
 		s3ObjectResource,
 		tccpAZsResource,
