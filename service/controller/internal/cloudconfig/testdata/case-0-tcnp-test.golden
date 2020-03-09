@@ -68,7 +68,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQptYXhQb2RzOiAxMTAKcnVudGltZUNncm91cHM6IC9rdWJlcmVzZXJ2ZWQuc2xpY2UKc3lzdGVtUmVzZXJ2ZWQ6CiAgY3B1OiAyNTBtCiAgbWVtb3J5OiAzODRNaQpzeXN0ZW1SZXNlcnZlZENncm91cDogL3N5c3RlbS5zbGljZQphdXRoZW50aWNhdGlvbjoKICBhbm9ueW1vdXM6CiAgICBlbmFibGVkOiB0cnVlICMgRGVmYXVsdHMgdG8gZmFsc2UgYXMgb2YgMS4xMAogIHdlYmhvb2s6CiAgICBlbmFibGVkOiBmYWxzZSAjIERlYWZ1bHRzIHRvIHRydWUgYXMgb2YgMS4xMAphdXRob3JpemF0aW9uOgogIG1vZGU6IEFsd2F5c0FsbG93ICMgRGVhZnVsdHMgdG8gd2ViaG9vayBhcyBvZiAxLjEwCmZlYXR1cmVHYXRlczoKICBUVExBZnRlckZpbmlzaGVkOiB0cnVlCg==",
+          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQpydW50aW1lQ2dyb3VwczogL2t1YmVyZXNlcnZlZC5zbGljZQpzeXN0ZW1SZXNlcnZlZDoKICBjcHU6IDI1MG0KICBtZW1vcnk6IDM4NE1pCnN5c3RlbVJlc2VydmVkQ2dyb3VwOiAvc3lzdGVtLnNsaWNlCmF1dGhlbnRpY2F0aW9uOgogIGFub255bW91czoKICAgIGVuYWJsZWQ6IHRydWUgIyBEZWZhdWx0cyB0byBmYWxzZSBhcyBvZiAxLjEwCiAgd2ViaG9vazoKICAgIGVuYWJsZWQ6IGZhbHNlICMgRGVhZnVsdHMgdG8gdHJ1ZSBhcyBvZiAxLjEwCmF1dGhvcml6YXRpb246CiAgbW9kZTogQWx3YXlzQWxsb3cgIyBEZWFmdWx0cyB0byB3ZWJob29rIGFzIG9mIDEuMTAKZmVhdHVyZUdhdGVzOgogIFRUTEFmdGVyRmluaXNoZWQ6IHRydWUK",
           "verification": {}
         },
         "filesystem": "root",
@@ -86,7 +86,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,YXBpVmVyc2lvbjoga3ViZXByb3h5LmNvbmZpZy5rOHMuaW8vdjFhbHBoYTEKY2xpZW50Q29ubmVjdGlvbjoKICBrdWJlY29uZmlnOiAvZXRjL2t1YmVybmV0ZXMvY29uZmlnL3Byb3h5LWt1YmVjb25maWcueWFtbApraW5kOiBLdWJlUHJveHlDb25maWd1cmF0aW9uCm1vZGU6IGlwdGFibGVzCnJlc291cmNlQ29udGFpbmVyOiAva3ViZS1wcm94eQ==",
+          "source": "data:text/plain;charset=utf-8;base64,YXBpVmVyc2lvbjoga3ViZXByb3h5LmNvbmZpZy5rOHMuaW8vdjFhbHBoYTEKY2xpZW50Q29ubmVjdGlvbjoKICBrdWJlY29uZmlnOiAvZXRjL2t1YmVybmV0ZXMvY29uZmlnL3Byb3h5LWt1YmVjb25maWcueWFtbApraW5kOiBLdWJlUHJveHlDb25maWd1cmF0aW9uCm1vZGU6IGlwdGFibGVzCnJlc291cmNlQ29udGFpbmVyOiAva3ViZS1wcm94eQpjbHVzdGVyQ0lEUjogMTcyLjE4LjEyOC4wLzE4Cm1ldHJpY3NCaW5kQWRkcmVzczogMC4wLjAuMDoxMDI0OQo=",
           "verification": {}
         },
         "filesystem": "root",
@@ -391,7 +391,7 @@
       {
         "contents": "[Unit]\nDescription=Apply os hardening\n[Service]\nType=oneshot\nExecStartPre=-/bin/bash -c \"gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel\"\nExecStartPre=/bin/bash -c \"until [ -f '/etc/sysctl.d/hardening.conf' ]; do echo Waiting for sysctl file; sleep 1s;done;\"\nExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
-        "name": "os-hardening.service"
+        "name": "os-hardeing.service"
       },
       {
         "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
@@ -411,7 +411,7 @@
       {
         "dropins": [
           {
-            "contents": "[Service]\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironment=\"DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid\"\nEnvironment=\"DOCKER_OPT_BIP=--bip=172.18.224.1/19\"\nEnvironment=\"DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false\"\n",
+            "contents": "[Service]\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironment=\"DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid\"\nEnvironment=\"DOCKER_OPT_BIP=--bip=172.18.224.1/19\"\nEnvironment=\"DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false --metrics-addr=0.0.0.0:9393 --experimental=true\"\n",
             "name": "10-giantswarm-extra-args.conf"
           }
         ],
@@ -429,7 +429,7 @@
         "name": "k8s-setup-download-hyperkube.service"
       },
       {
-        "contents": "[Unit]\nWants=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service\nAfter=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service\nDescription=k8s-kubelet\nStartLimitIntervalSec=0\n[Service]\nTimeoutStartSec=300\nRestart=always\nRestartSec=0\nTimeoutStopSec=10\nSlice=kubereserved.slice\nCPUAccounting=true\nMemoryAccounting=true\nEnvironment=\"ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem\"\nEnvironment=\"ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem\"\nEnvironment=\"ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem\"\nEnvironmentFile=/etc/network-environment\nExecStart=/opt/bin/hyperkube kubelet \\\n  --node-ip=${DEFAULT_IPV4} \\\n  --config=/etc/kubernetes/config/kubelet.yaml \\\n  --enable-server \\\n  --logtostderr=true \\\n  --cloud-provider=aws \\\n  --image-pull-progress-deadline=1m \\\n  --network-plugin=cni \\\n  --register-node=true \\\n  --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \\\n  --node-labels=\"node.kubernetes.io/worker,role=worker,ip=${DEFAULT_IPV4},k1=v1,k2=v2\" \\\n  \n  --cni-bin-dir=/opt/cni/bin \\\n  --v=2\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nWants=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service\nAfter=k8s-setup-network-env.service k8s-setup-kubelet-config.service k8s-setup-download-hyperkube.service\nDescription=k8s-kubelet\nStartLimitIntervalSec=0\n[Service]\nTimeoutStartSec=300\nRestart=always\nRestartSec=0\nTimeoutStopSec=10\nSlice=kubereserved.slice\nCPUAccounting=true\nMemoryAccounting=true\nEnvironment=\"ETCD_CA_CERT_FILE=/etc/kubernetes/ssl/etcd/client-ca.pem\"\nEnvironment=\"ETCD_CERT_FILE=/etc/kubernetes/ssl/etcd/client-crt.pem\"\nEnvironment=\"ETCD_KEY_FILE=/etc/kubernetes/ssl/etcd/client-key.pem\"\nEnvironmentFile=/etc/network-environment\nExecStart=/opt/bin/hyperkube kubelet \\\n  --node-ip=${DEFAULT_IPV4} \\\n  --config=/etc/kubernetes/config/kubelet.yaml \\\n  --enable-server \\\n  --logtostderr=true \\\n  --cloud-provider=aws \\\n  --image-pull-progress-deadline=1m \\\n  --network-plugin=cni \\\n  --register-node=true \\\n  --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \\\n  --node-labels=\"node.kubernetes.io/worker,role=worker,ip=${DEFAULT_IPV4},k1=v1,k2=v2\" \\\n  --v=2\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-kubelet.service"
       },
