@@ -433,6 +433,7 @@
   packages = [
     "ignition/v_2_2_0",
     "v_5_0_0",
+    "v_5_2_0",
   ]
   pruneopts = "T"
   revision = "e804c697c21088274a617add1f9ac21ded960a0d"
@@ -547,6 +548,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "5e18457bd062f9a11d11fe5719ccf28101945ce0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:bac1b910eab21bd91745a425c69f1cdd4690aa308e7d724cc981a11c1688d6d4"
+  name = "github.com/giantswarm/tenantcluster"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c51c578f6c29d87ba4ce32395b5b092020115e1"
 
 [[projects]]
   branch = "master"
@@ -2242,12 +2251,14 @@
     "github.com/giantswarm/e2etests/ipam",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/update",
+    "github.com/giantswarm/errors/tenant",
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
     "github.com/giantswarm/k8scloudconfig/v_5_0_0",
+    "github.com/giantswarm/k8scloudconfig/v_5_2_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -2268,6 +2279,7 @@
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
+    "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/to",
     "github.com/giantswarm/versionbundle",
     "github.com/google/go-cmp/cmp",
