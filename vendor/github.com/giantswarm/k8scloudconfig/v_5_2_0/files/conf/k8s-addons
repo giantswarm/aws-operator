@@ -96,21 +96,24 @@ CNI_FILE="aws-cni.yaml calico-policy-only.yaml"
 CNI_FILE="calico-all.yaml"
 {{ end -}}
 
-while
-    $KUBECTL apply -f /srv/$CNI_FILE
-    [ "$?" -ne "0" ]
+for manifest in ${CNI_FILE}
 do
-    echo "failed to apply /srv/$manifest, retrying in 5 sec"
-    sleep 5s
+    while
+        $KUBECTL apply -f /srv/$manifest
+        [ "$?" -ne "0" ]
+    do
+        echo "failed to apply /srv/$manifest, retrying in 5 sec"
+        sleep 5s
+    done
 done
 
 {{ if eq .Cluster.Kubernetes.CloudProvider "aws" -}}
 echo "Waiting for aws-node to be ready..."
-$KUBECTL -n kube-system wait --for=condition=ready --timeout=10m ds/aws-node
+$KUBECTL -n kube-system -l k8s-app=aws-node wait --for=condition=Ready --timeout=10m pods
 {{ end -}}
 
 echo "Waiting for calico-node to be ready..."
-$KUBECTL -n kube-system wait --for=condition=ready --timeout=10m ds/calico-node
+$KUBECTL -n kube-system -l k8s-app=calico-node wait --for=condition=Ready --timeout=10m pods
 
 {{ end -}}
 

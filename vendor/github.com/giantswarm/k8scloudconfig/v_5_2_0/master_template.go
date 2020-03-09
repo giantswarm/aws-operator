@@ -294,7 +294,6 @@ systemd:
         --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
         --node-labels="node.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
         {{ if eq .Cluster.Kubernetes.CloudProvider "aws" }}
-        --cni-config-dir=/etc/cni/net.d \
         --cni-bin-dir=/opt/cni/bin \
         {{ end -}}
         --v=2
