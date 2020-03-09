@@ -272,7 +272,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fd191c286282099da73c83c39afb2014a1dfcdfbd9c2d3cafbb2d74d32a00dc3"
+  digest = "1:f7adec36810298860d9689c68d80cf630da522afc83d20a7d3174dbb9273a33d"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -298,7 +298,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "587191200b98a812afbc9b38f6590a7bc86ced71"
+  revision = "fcf5f1f78bafb08acab31ba059af7783715ae2b1"
 
 [[projects]]
   branch = "master"
@@ -428,14 +428,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:694ed06fec92c37ff3710d58a31dc642578b65180d9356064a5070ad6ed2c5bb"
+  digest = "1:5bba02bc1790dbff03346539cac799d3b132b2a49427c98b9ac62cce4e85fdf0"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_5_0_0",
+    "v_5_2_0",
   ]
   pruneopts = "T"
-  revision = "e804c697c21088274a617add1f9ac21ded960a0d"
+  revision = "6ecc07e665c3e854dfa8be102a8c6446d1d9dc3c"
 
 [[projects]]
   branch = "master"
@@ -455,7 +456,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:568716a2e87ca3f4fb9bce7f65b8491a2ab92c97adee4b2b750b1d76c709b183"
+  digest = "1:a4aed1ecd42d811ea6ab995570be14a7e1d1fb7eaae45d76f6f2841d6124f7b8"
   name = "github.com/giantswarm/microendpoint"
   packages = [
     "endpoint/healthz",
@@ -464,7 +465,7 @@
     "service/version",
   ]
   pruneopts = "UT"
-  revision = "e991deac265373d9347b96ecc56b13f228be144f"
+  revision = "f65c434d637c8e4f2388ccfdbe3098237685a065"
 
 [[projects]]
   digest = "1:701a5f5a7297ced0c7b9aeeba6a40ef47663b956d56e7acd09fe0d1c31eb1e4b"
@@ -498,8 +499,7 @@
   revision = "866ec4bc8b6e16bfd5765d143e5b2fec260a60fd"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e2dc8a54bcf321d010fadd18592db80c2e409db853defee2422460ea1037cc2c"
+  digest = "1:4e616fe01d486048e77342e2c5e638f8744ec6da802335633740aafb057f50d8"
   name = "github.com/giantswarm/micrologger"
   packages = [
     ".",
@@ -507,7 +507,8 @@
     "microloggertest",
   ]
   pruneopts = "UT"
-  revision = "9743faecb1ef47792e2add0cf766ff1a4e9ca78a"
+  revision = "c4d217562e3d493e3ff571707346a5a2653475cb"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -547,6 +548,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "5e18457bd062f9a11d11fe5719ccf28101945ce0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:bac1b910eab21bd91745a425c69f1cdd4690aa308e7d724cc981a11c1688d6d4"
+  name = "github.com/giantswarm/tenantcluster"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c51c578f6c29d87ba4ce32395b5b092020115e1"
 
 [[projects]]
   branch = "master"
@@ -2242,12 +2251,14 @@
     "github.com/giantswarm/e2etests/ipam",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/update",
+    "github.com/giantswarm/errors/tenant",
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
     "github.com/giantswarm/k8scloudconfig/v_5_0_0",
+    "github.com/giantswarm/k8scloudconfig/v_5_2_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -2268,6 +2279,7 @@
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
+    "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/to",
     "github.com/giantswarm/versionbundle",
     "github.com/google/go-cmp/cmp",
@@ -2280,9 +2292,11 @@
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/dynamic",

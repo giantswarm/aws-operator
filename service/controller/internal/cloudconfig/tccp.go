@@ -8,7 +8,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -270,6 +270,19 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			AssetContent: storageClass,
 			Path:         "/srv/default-storage-class.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			AssetContent: cloudconfig.AwsCNIManifest,
+			Path:         "/srv/aws-cni.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,

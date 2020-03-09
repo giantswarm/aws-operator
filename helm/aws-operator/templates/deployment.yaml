@@ -14,7 +14,7 @@ spec:
       app: {{ .Values.project.name }}
       version: {{ .Values.project.version }}
   strategy:
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       annotations:

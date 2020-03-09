@@ -72,7 +72,16 @@ Resources:
             Condition:
               StringEquals:
                 autoscaling:ResourceTag/giantswarm.io/cluster: "8y5ck"
-
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
           # Following rules are required to make the AWS CNI work. See also
           # https://github.com/aws/amazon-vpc-cni-k8s#setup.
           - Effect: Allow
@@ -562,6 +571,14 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-internal-api
+  AWSCNISecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "AWS CNI Security Group configured to the ENIConfig CRD."
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: 8y5ck-aws-cni
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup

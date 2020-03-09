@@ -61,7 +61,16 @@ const TemplateMainIAMPolicies = `
             Condition:
               StringEquals:
                 autoscaling:ResourceTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
-
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
           # Following rules are required to make the AWS CNI work. See also
           # https://github.com/aws/amazon-vpc-cni-k8s#setup.
           - Effect: Allow

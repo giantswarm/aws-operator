@@ -57,6 +57,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
+						aws.String(key.SecurityGroupName(&cr, "aws-cni")),
 						aws.String(key.SecurityGroupName(&cr, "internal-api")),
 						aws.String(key.SecurityGroupName(&cr, "master")),
 					},
@@ -71,11 +72,11 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 		groups = o.SecurityGroups
 
-		if len(groups) > 2 {
+		if len(groups) > 3 {
 			return microerror.Maskf(executionFailedError, "expected two security groups, got %d", len(groups))
 		}
 
-		if len(groups) < 2 {
+		if len(groups) < 3 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find security groups for tenant cluster %#q yet", key.ClusterID(&cr)))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 

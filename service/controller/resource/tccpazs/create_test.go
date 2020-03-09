@@ -33,11 +33,11 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.3.0/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.3.32/27"),
 				},
@@ -67,15 +67,15 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.3.0/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.3.32/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.5.0/24"),
 				},
@@ -142,23 +142,23 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.3.0/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1a"),
 					CidrBlock:        aws.String("10.100.3.32/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1b"),
 					CidrBlock:        aws.String("10.100.3.64/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1b"),
 					CidrBlock:        aws.String("10.100.3.96/27"),
 				},
-				&ec2.Subnet{
+				{
 					AvailabilityZone: aws.String("eu-central-1b"),
 					CidrBlock:        aws.String("10.100.5.0/24"),
 				},
