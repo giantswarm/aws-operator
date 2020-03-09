@@ -228,7 +228,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
 		tccpVPCIDResource, err = tccpvpcid.New(c)
