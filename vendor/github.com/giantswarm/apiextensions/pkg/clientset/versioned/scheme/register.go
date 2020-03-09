@@ -26,6 +26,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
 	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/application/v1alpha1"
+	backupv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/backup/v1alpha1"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/example/v1alpha1"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -38,6 +39,7 @@ var Codecs = serializer.NewCodecFactory(Scheme)
 var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
 	applicationv1alpha1.AddToScheme,
+	backupv1alpha1.AddToScheme,
 	corev1alpha1.AddToScheme,
 	examplev1alpha1.AddToScheme,
 	infrastructurev1alpha2.AddToScheme,

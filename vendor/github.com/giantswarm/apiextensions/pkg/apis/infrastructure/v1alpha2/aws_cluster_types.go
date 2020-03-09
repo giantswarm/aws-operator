@@ -7,7 +7,9 @@ import (
 )
 
 const (
-	kindAWSCluster = "AWSCluster"
+	crDocsAnnotation            = "giantswarm.io/docs"
+	kindAWSCluster              = "AWSCluster"
+	awsClusterDocumentationLink = "https://pkg.go.dev/github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2?tab=doc#AWSCluster"
 )
 
 const awsClusterCRDYAML = `
@@ -26,31 +28,56 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
+      description: |
+        Defines a tenant cluster in a Giant Swarm AWS installation.
+        Introduced with release vX.X, reconciled by TODO-operator.
       properties:
         spec:
           properties:
             cluster:
+              description: |
+                Provides cluster specification details.
               properties:
                 description:
+                  description: |
+                    User-friendly description that should explain the purpose of the
+                    cluster.
                   maxLength: 100
                   type: string
                 dns:
+                  description: |
+                    DNS configuration details.
                   properties:
                     domain:
+                      description: |
+                        Base domain for several endpoints of this cluster.
                       type: string
                     provider:
+                      description: |
+                        AWS-specific configuration details.
                       properties:
                         master:
+                          description: |
+                            Master node configuration details.
                           properties:
                             availabilityZone:
+                              description: |
+                                Name of the AWS Availability Zone to place the master node in.
                               type: string
                             instanceType:
+                              description: |
+                                EC2 instance type to use for the master node.
                               type: string
                           type: object
                         region:
+                          description: |
+                            AWS region the cluster is to be running in.
                           type: string
                       type: object
                   type: object
+                oidc:
+                  description: |
+                    Configuration for OpenID Connect (OIDC) authentication.
               type: object
           type: object
   version: v1alpha2
@@ -73,6 +100,18 @@ func NewAWSClusterTypeMeta() metav1.TypeMeta {
 	return metav1.TypeMeta{
 		APIVersion: SchemeGroupVersion.String(),
 		Kind:       kindAWSCluster,
+	}
+}
+
+// NewAWSClusterCR returns an AWSCluster Custom Resource.
+func NewAWSClusterCR() *AWSCluster {
+	return &AWSCluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Annotations: map[string]string{
+				crDocsAnnotation: awsClusterDocumentationLink,
+			},
+		},
+		TypeMeta: NewAWSClusterTypeMeta(),
 	}
 }
 
