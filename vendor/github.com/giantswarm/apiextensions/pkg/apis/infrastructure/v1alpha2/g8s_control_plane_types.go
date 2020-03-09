@@ -17,53 +17,46 @@ kind: CustomResourceDefinition
 metadata:
   name: g8scontrolplanes.infrastructure.giantswarm.io
 spec:
+  conversion:
+    strategy: None
   group: infrastructure.giantswarm.io
-  scope: Namespaced
   names:
     kind: G8sControlPlane
     plural: g8scontrolplanes
     singular: g8scontrolplane
+  scope: Namespaced
   subresources:
     status: {}
   versions:
-  - name: v1alpha1
-    served: false
-    storage: false
-    schema:
-      openAPIV3Schema:
-        properties:
-          spec:
-            properties:
-              replicas:
-                type: integer
-            type: object
-  - name: v1alpha2
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        properties:
-          spec:
-            properties:
-              replicas:
-                type: integer
-                enum:
-                  - 1
-                  - 3
-              infrastructureRef:
-                properties:
-                  kind:
-                    type: string
-                  namespace:
-                    type: string
-                  name:
-                    type: string
-                  apiVersion:
-                    type: string
-                type: object
-            type: object
-  conversion:
-    strategy: None
+    - name: v1alpha1
+      served: false
+      storage: false
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                infrastructureRef:
+                  type: object
+                  properties:
+                    apiVersion:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                replicas:
+                  type: integer
+                  enum:
+                    - 1
+                    - 3
 `
 
 var g8sControlPlaneCRD *apiextensionsv1beta1.CustomResourceDefinition
