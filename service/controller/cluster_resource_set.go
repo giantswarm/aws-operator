@@ -48,6 +48,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 )
 
 func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -588,6 +589,19 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: config.Tenant,
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -601,6 +615,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		tccpOutputsResource,
 		tccpSubnetsResource,
 		regionResource,
+		tenantClientsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.

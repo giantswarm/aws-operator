@@ -1,6 +1,9 @@
 package controllercontext
 
 import (
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/giantswarm/aws-operator/client/aws"
 )
 
@@ -15,4 +18,6 @@ type ContextClientControlPlane struct {
 
 type ContextClientTenantCluster struct {
 	AWS aws.Clients
+	G8s versioned.Interface
+	K8s kubernetes.Interface
 }
