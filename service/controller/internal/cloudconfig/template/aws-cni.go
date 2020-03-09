@@ -1,4 +1,5 @@
 package cloudconfig
+
 const AwsCNIManifest = `
 # Vendored from https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/master/config/v1.6/aws-k8s-cni.yaml
 
