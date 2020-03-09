@@ -455,7 +455,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:568716a2e87ca3f4fb9bce7f65b8491a2ab92c97adee4b2b750b1d76c709b183"
+  digest = "1:a4aed1ecd42d811ea6ab995570be14a7e1d1fb7eaae45d76f6f2841d6124f7b8"
   name = "github.com/giantswarm/microendpoint"
   packages = [
     "endpoint/healthz",
@@ -464,7 +464,7 @@
     "service/version",
   ]
   pruneopts = "UT"
-  revision = "e991deac265373d9347b96ecc56b13f228be144f"
+  revision = "f65c434d637c8e4f2388ccfdbe3098237685a065"
 
 [[projects]]
   digest = "1:701a5f5a7297ced0c7b9aeeba6a40ef47663b956d56e7acd09fe0d1c31eb1e4b"
@@ -498,8 +498,7 @@
   revision = "866ec4bc8b6e16bfd5765d143e5b2fec260a60fd"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e2dc8a54bcf321d010fadd18592db80c2e409db853defee2422460ea1037cc2c"
+  digest = "1:4e616fe01d486048e77342e2c5e638f8744ec6da802335633740aafb057f50d8"
   name = "github.com/giantswarm/micrologger"
   packages = [
     ".",
@@ -507,7 +506,8 @@
     "microloggertest",
   ]
   pruneopts = "UT"
-  revision = "9743faecb1ef47792e2add0cf766ff1a4e9ca78a"
+  revision = "c4d217562e3d493e3ff571707346a5a2653475cb"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
