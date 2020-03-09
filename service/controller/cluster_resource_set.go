@@ -119,6 +119,10 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			CertsSearcher: config.CertsSearcher,
 			Logger:        config.Logger,
 
+			// TODO use a dedicated aws-operator key-pair.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/9327
+			//
 			CertID: certs.ClusterOperatorAPICert,
 		}
 
