@@ -33,6 +33,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
@@ -598,6 +599,18 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var eniConfigCRsResource resource.Interface
+	{
+		c := eniconfigcrs.Config{
+			Logger: config.Logger,
+		}
+
+		eniConfigCRsResource, err = eniconfigcrs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var ensureCPCRsResource resource.Interface
 	{
 		c := ensurecpcrs.Config{
@@ -668,6 +681,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		tccpfResource,
 		serviceResource,
 		endpointsResource,
+		eniConfigCRsResource,
 		ensureCPCRsResource,
 		secretFinalizerResource,
 
