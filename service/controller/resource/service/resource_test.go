@@ -25,10 +25,9 @@ func Test_toService(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -50,10 +49,9 @@ func Test_toService(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -78,10 +76,9 @@ func Test_toService(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -135,10 +132,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -160,10 +156,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -189,10 +184,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -214,10 +208,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy456",
-						label.Organization:  "org2",
-						label.VersionBundle: "1.2.4",
+						label.App:          "master",
+						label.Cluster:      "xy456",
+						label.Organization: "org2",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -243,10 +236,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -268,10 +260,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy456",
@@ -297,10 +288,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -322,10 +312,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -356,10 +345,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",
@@ -382,10 +370,9 @@ func Test_isServiceModified(t *testing.T) {
 					Name:      "master",
 					Namespace: "xy123",
 					Labels: map[string]string{
-						label.App:           "master",
-						label.Cluster:       "xy123",
-						label.Organization:  "org1",
-						label.VersionBundle: "1.2.3",
+						label.App:          "master",
+						label.Cluster:      "xy123",
+						label.Organization: "org1",
 					},
 					Annotations: map[string]string{
 						AnnotationPrometheusCluster: "xy123",

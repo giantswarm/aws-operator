@@ -2,9 +2,9 @@ package v1alpha2
 
 import (
 	"github.com/ghodss/yaml"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/kubernetes/pkg/apis/core"
 )
 
 const (
@@ -17,39 +17,46 @@ kind: CustomResourceDefinition
 metadata:
   name: g8scontrolplanes.infrastructure.giantswarm.io
 spec:
+  conversion:
+    strategy: None
   group: infrastructure.giantswarm.io
-  scope: Namespaced
   names:
     kind: G8sControlPlane
     plural: g8scontrolplanes
     singular: g8scontrolplane
+  scope: Namespaced
   subresources:
     status: {}
   versions:
-  - name: v1alpha2
-    served: true
-    storage: true
-    schema:
-      openAPIV3Schema:
-        properties:
-          spec:
-            properties:
-              replicas:
-                type: int
-              infrastructureRef:
-                properties:
-                  kind:
-                    type: string
-                  namespace:
-                    type: string
-                  name:
-                    type: string
-                  apiVersion:
-                    type: string
-                type: object
-            type: object
-  conversion:
-    strategy: None
+    - name: v1alpha1
+      served: false
+      storage: false
+    - name: v1alpha2
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                infrastructureRef:
+                  type: object
+                  properties:
+                    apiVersion:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                replicas:
+                  type: integer
+                  enum:
+                    - 1
+                    - 3
 `
 
 var g8sControlPlaneCRD *apiextensionsv1beta1.CustomResourceDefinition
@@ -75,29 +82,31 @@ func NewG8sControlPlaneTypeMeta() metav1.TypeMeta {
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// G8sControlPlane defines the ControlPlane (Master nodes) of a
-// Giant Swarm Tenant Cluster
+// G8sControlPlane defines the Control Plane Nodes (Kubernetes Master Nodes) of
+// a Giant Swarm Tenant Cluster
 //
-//	apiVersion: infrastructure.giantswarm.io/v1alpha2
-//	kind: G8sControlPlane
-//	metadata:
-//    labels:
-//      aws-operator.giantswarm.io/version: 6.2.0
-//      cluster-operator.giantswarm.io/version: 0.17.0
-//      giantswarm.io/cluster: "8y5kc"
-//      giantswarm.io/organization: "giantswarm"
-//      release.giantswarm.io/version: 7.3.1
-//    name: 8y5kc
-//	spec:
-//    replicas: 3
-//    infrastructureRef:
-//      kind: AWSControlPlane
-//      namespace: default
-//      name: 5f3kb
-//      apiVersion: infrastructure.giantswarm.io/v1alpha2
-//  status:
-//    replicas: 3
-//    readyReplicas: 3
+//     apiVersion: infrastructure.giantswarm.io/v1alpha2
+//     kind: G8sControlPlane
+//     metadata:
+//       annotations:
+//         giantswarm.io/docs: https://docs.giantswarm.io/reference/g8scontrolplanes.infrastructure.giantswarm.io/v1alpha2/
+//       labels:
+//         aws-operator.giantswarm.io/version: "6.2.0"
+//         cluster-operator.giantswarm.io/version: "0.17.0"
+//         giantswarm.io/cluster: 8y5kc
+//         giantswarm.io/organization: giantswarm
+//         release.giantswarm.io/version: "7.3.1"
+//       name: 8y5kc
+//     spec:
+//       infrastructureRef:
+//         apiVersion: infrastructure.giantswarm.io/v1alpha2
+//         kind: AWSControlPlane
+//         name: 5f3kb
+//         namespace: default
+//       replicas: 3
+//     status:
+//       readyReplicas: 3
+//       replicas: 3
 //
 type G8sControlPlane struct {
 	metav1.TypeMeta   `json:",inline"`

@@ -12,10 +12,9 @@ import (
 	"github.com/giantswarm/micrologger"
 )
 
-const indexReleaseTimestampFormat = "2006-01-02T15:04:05.00Z"
-
 type IndexRelease struct {
 	Active      bool        `yaml:"active"`
+	Apps        []App       `yaml:"apps"`
 	Authorities []Authority `yaml:"authorities"`
 	Date        time.Time   `yaml:"date"`
 	Version     string      `yaml:"version"`
@@ -56,6 +55,7 @@ func buildReleases(logger micrologger.Logger, indexReleases []IndexRelease, bund
 
 		rc := ReleaseConfig{
 			Active:  ir.Active,
+			Apps:    ir.Apps,
 			Bundles: bundles,
 			Date:    ir.Date,
 			Version: ir.Version,

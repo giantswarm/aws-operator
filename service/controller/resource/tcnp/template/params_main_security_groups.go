@@ -1,6 +1,7 @@
 package template
 
 type ParamsMainSecurityGroups struct {
+	ClusterID     string
 	ControlPlane  ParamsMainSecurityGroupsControlPlane
 	TenantCluster ParamsMainSecurityGroupsTenantCluster
 }
@@ -17,6 +18,7 @@ type ParamsMainSecurityGroupsTenantCluster struct {
 	Ingress     ParamsMainSecurityGroupsTenantClusterIngress
 	InternalAPI ParamsMainSecurityGroupsTenantClusterInternalAPI
 	Master      ParamsMainSecurityGroupsTenantClusterMaster
+	NodePools   []ParamsMainSecurityGroupsTenantClusterNodePool
 	VPC         ParamsMainSecurityGroupsTenantClusterVPC
 }
 
@@ -30,6 +32,11 @@ type ParamsMainSecurityGroupsTenantClusterInternalAPI struct {
 
 type ParamsMainSecurityGroupsTenantClusterMaster struct {
 	ID string
+}
+
+type ParamsMainSecurityGroupsTenantClusterNodePool struct {
+	ID           string
+	ResourceName string
 }
 
 type ParamsMainSecurityGroupsTenantClusterVPC struct {

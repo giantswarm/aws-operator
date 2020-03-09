@@ -30,7 +30,7 @@ const TemplateMainSecurityGroups = `
       {{- end }}
       Tags:
         - Key: Name
-          Value:  {{ $v.MasterSecurityGroupName }}
+          Value: {{ $v.MasterSecurityGroupName }}
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

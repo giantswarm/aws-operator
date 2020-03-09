@@ -37,6 +37,9 @@ const TemplateMainSecurityGroups = `
         FromPort: 10301
         ToPort: 10301
         CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+      Tags:
+        - Key: Name
+          Value: {{ .SecurityGroups.ClusterID }}-worker
       VpcId: {{ .SecurityGroups.TenantCluster.VPC.ID }}
   GeneralInternalAPIIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -47,7 +50,7 @@ const TemplateMainSecurityGroups = `
       IpProtocol: tcp
       FromPort: 443
       ToPort: 443
-      SourceSecurityGroupId: !Ref GeneralSecurityGroup 
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
   GeneralMasterIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
@@ -78,5 +81,21 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Master.ID }}
+  {{ range .SecurityGroups.TenantCluster.NodePools }}
+  NodePoolToNodePoolRule{{ .ResourceName }}:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      # The rule description is used for identifying the ingress rule. Thus it
+      # must not change. Otherwise the tcnpsecuritygroups resource will not be
+      # able to properly find the current and desired state of the ingress
+      # rules.
+      Description: Allow traffic from other Node Pool Security Groups to the Security Group of this Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: {{ .ID }}
+  {{- end -}}
 {{- end -}}
 `

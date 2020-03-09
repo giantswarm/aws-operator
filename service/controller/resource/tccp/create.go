@@ -428,10 +428,11 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 		return nil, microerror.Mask(err)
 	}
 
-	var gateways []template.Gateway
+	var gateways []template.ParamsMainNATGatewayGateway
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		gw := template.Gateway{
+		gw := template.ParamsMainNATGatewayGateway{
 			AvailabilityZone: az.Name,
+			ClusterID:        key.ClusterID(&cr),
 			NATGWName:        key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
 			NATEIPName:       key.SanitizeCFResourceName(key.NATEIPName(az.Name)),
 			PublicSubnetName: key.SanitizeCFResourceName(key.PublicSubnetName(az.Name)),
@@ -439,13 +440,13 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 		gateways = append(gateways, gw)
 	}
 
-	var natRoutes []template.NATRoute
+	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		if az.Name != key.MasterAvailabilityZone(cr) {
 			continue
 		}
 
-		nr := template.NATRoute{
+		nr := template.ParamsMainNATGatewayNATRoute{
 			NATGWName:             key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
 			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
 			PrivateRouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
@@ -515,9 +516,9 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 		return nil, microerror.Mask(err)
 	}
 
-	var publicRouteTableNames []template.RouteTableName
+	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		rtName := template.RouteTableName{
+		rtName := template.ParamsMainRouteTablesRouteTableName{
 			AvailabilityZone:    az.Name,
 			ResourceName:        key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
@@ -525,13 +526,13 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 		publicRouteTableNames = append(publicRouteTableNames, rtName)
 	}
 
-	var privateRouteTableNames []template.RouteTableName
+	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		if az.Name != key.MasterAvailabilityZone(cr) {
 			continue
 		}
 
-		rtName := template.RouteTableName{
+		rtName := template.ParamsMainRouteTablesRouteTableName{
 			AvailabilityZone:    az.Name,
 			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
@@ -542,6 +543,7 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	var routeTables *template.ParamsMainRouteTables
 	{
 		routeTables = &template.ParamsMainRouteTables{
+			ClusterID:              key.ClusterID(&cr),
 			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
 			PrivateRouteTableNames: privateRouteTableNames,
 			PublicRouteTableNames:  publicRouteTableNames,
@@ -866,9 +868,9 @@ func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha2.A
 		return nil, microerror.Mask(err)
 	}
 
-	var routeTableNames []template.RouteTableName
+	var routeTableNames []template.ParamsMainVPCRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		rtName := template.RouteTableName{
+		rtName := template.ParamsMainVPCRouteTableName{
 			ResourceName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 		}
 		routeTableNames = append(routeTableNames, rtName)
@@ -878,7 +880,7 @@ func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha2.A
 			continue
 		}
 
-		rtName := template.RouteTableName{
+		rtName := template.ParamsMainVPCRouteTableName{
 			ResourceName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 		}
 		routeTableNames = append(routeTableNames, rtName)
