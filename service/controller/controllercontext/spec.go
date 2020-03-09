@@ -30,6 +30,7 @@ type ContextSpecTenantClusterTCCPAvailabilityZoneSubnet struct {
 
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI struct {
 	CIDR net.IPNet
+	ID   string
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {

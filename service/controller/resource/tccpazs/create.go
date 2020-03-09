@@ -356,6 +356,7 @@ func newAZSpec(azMapping map[string]mapping) []controllercontext.ContextSpecTena
 			Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 				AWSCNI: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI{
 					CIDR: sp.AWSCNI.Subnet.CIDR,
+					ID:   sp.AWSCNI.Subnet.ID,
 				},
 				Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 					CIDR: sp.Private.Subnet.CIDR,
