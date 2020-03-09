@@ -280,6 +280,19 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0644,
 		},
+		{
+			AssetContent: cloudconfig.AwsCNIManifest,
+			Path:         "/srv/aws-cni.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
 	}
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
