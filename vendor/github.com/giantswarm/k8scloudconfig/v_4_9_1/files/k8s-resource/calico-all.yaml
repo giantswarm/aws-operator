@@ -7,13 +7,9 @@
 #  - Added resource limits to install-cni.
 #  - Added 'priorityClassName: system-cluster-critical' to calico daemonset.
 #
-# Calico Version v3.9.1
+# Originally intended for Calico version v3.9.1
 # https://docs.projectcalico.org/v3.9/release-notes/
-# This manifest includes the following component versions:
-#   calico/node:v3.9.1
-#   calico/cni:v3.9.1
-#   calico/kube-controllers:v3.9.1
-
+#
 # This ConfigMap is used to configure a self-hosted Calico installation.
 kind: ConfigMap
 apiVersion: v1
@@ -317,7 +313,7 @@ spec:
         # This container installs the CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: {{ .RegistryDomain }}/giantswarm/cni:v3.9.1
+          image: {{ .Images.CalicoCNI }}
           command: ["/install-cni.sh"]
           env:
             # Name of the CNI config file to create.
@@ -363,7 +359,7 @@ spec:
         # container programs network policy and routes on each
         # host.
         - name: calico-node
-          image: {{ .RegistryDomain }}/giantswarm/node:v3.9.1
+          image: {{ .Images.CalicoNode }}
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
@@ -552,7 +548,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: calico-kube-controllers
-          image: {{ .RegistryDomain }}/giantswarm/kube-controllers:v3.9.1
+          image: {{ .Images.CalicoKubeControllers }}
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS

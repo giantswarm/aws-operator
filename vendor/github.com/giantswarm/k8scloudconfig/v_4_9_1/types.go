@@ -40,12 +40,14 @@ type Params struct {
 	// ImagePullProgressDeadline is the duration after which image pulling is
 	// cancelled if no progress has been made.
 	ImagePullProgressDeadline string
-	Node                      v1alpha1.ClusterNode
+	// Container images used in the ignition templates
+	Images Images
+	Node   v1alpha1.ClusterNode
 	// RegistryDomain is the host of the docker image registry to use.
 	RegistryDomain string
 	SSOPublicKey   string
-	// Container images used in the cloud-config templates
-	Images Images
+	// Versions of components used in the ignition templates
+	Versions Versions
 }
 
 func (p *Params) Validate() error {
@@ -53,8 +55,17 @@ func (p *Params) Validate() error {
 }
 
 type Images struct {
+	CalicoCNI             string
+	CalicoKubeControllers string
+	CalicoNode            string
+	Etcd                  string
+	Hyperkube             string
+	KubernetesAPIHealthz  string
+}
+
+type Versions struct {
+	Calico     string
 	Kubernetes string
-	Etcd       string
 }
 
 type Hyperkube struct {

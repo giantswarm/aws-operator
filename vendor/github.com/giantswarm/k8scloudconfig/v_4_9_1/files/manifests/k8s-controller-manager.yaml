@@ -13,7 +13,7 @@ spec:
   priorityClassName: system-node-critical
   containers:
   - name: k8s-controller-manager
-    image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+    image: {{ .Images.Hyperkube }}
     command:
     - /hyperkube
     - kube-controller-manager

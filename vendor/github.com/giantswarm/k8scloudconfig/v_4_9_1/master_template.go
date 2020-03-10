@@ -162,7 +162,7 @@ systemd:
       CPUAccounting=true
       MemoryAccounting=true
       Slice=kubereserved.slice
-      Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
+      Environment=IMAGE={{ .Images.Etcd }}
       Environment=NAME=%p.service
       EnvironmentFile=/etc/network-environment
       ExecStartPre=-/usr/bin/docker stop  $NAME
@@ -209,7 +209,7 @@ systemd:
       [Service]
       Type=oneshot
       EnvironmentFile=/etc/network-environment
-      Environment=IMAGE={{ .RegistryDomain }}/{{ .Images.Etcd }}
+      Environment=IMAGE={{ .Images.Etcd }}
       Environment=NAME=%p.service
       ExecStartPre=-/usr/bin/docker stop  $NAME
       ExecStartPre=-/usr/bin/docker rm  $NAME
@@ -257,7 +257,7 @@ systemd:
       MemoryAccounting=true
       Slice=kubereserved.slice
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
+      Environment="IMAGE={{ .Images.Hyperkube }}"
       Environment="NAME=%p.service"
       Environment="PATH=/opt/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       ExecStartPre=/usr/bin/docker pull $IMAGE
