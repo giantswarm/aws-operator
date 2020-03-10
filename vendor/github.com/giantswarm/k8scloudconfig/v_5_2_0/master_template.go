@@ -74,7 +74,7 @@ systemd:
       ExecStart=/opt/wait-for-domains
       [Install]
       WantedBy=multi-user.target
-  - name: os-hardeing.service
+  - name: os-hardening.service
     enabled: true
     contents: |
       [Unit]
@@ -123,7 +123,7 @@ systemd:
           Slice=kubereserved.slice
           Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
           Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-          Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false --metrics-addr=0.0.0.0:9393 --experimental=true"
+          Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
     enabled: true
     contents: |
@@ -293,6 +293,9 @@ systemd:
         --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
         --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
         --node-labels="node.kubernetes.io/master,role=master,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+        {{ if eq .Cluster.Kubernetes.CloudProvider "aws" }}
+        --cni-bin-dir=/opt/cni/bin \
+        {{ end -}}
         --v=2
       [Install]
       WantedBy=multi-user.target
@@ -382,11 +385,24 @@ storage:
         source: "data:text/plain;base64,{{ index .Files "conf/trusted-user-ca-keys.pem" }}"
 
     {{- if not .DisableCalico }}
+    {{- if eq .Cluster.Kubernetes.CloudProvider "aws" }}
+    - path: /srv/aws-cni.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/aws-cni.yaml" }}"
+    - path: /srv/calico-policy-only.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/calico-policy-only.yaml" }}"
+    {{- else }}
     - path: /srv/calico-all.yaml
       filesystem: root
       mode: 0644
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "k8s-resource/calico-all.yaml" }}"
+    {{- end }}
     {{- end }}
 
     {{- if not .DisableIngressControllerService }}

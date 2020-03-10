@@ -67,7 +67,7 @@ systemd:
       ExecStart=/opt/wait-for-domains
       [Install]
       WantedBy=multi-user.target
-  - name: os-hardeing.service
+  - name: os-hardening.service
     enabled: true
     contents: |
       [Unit]
@@ -116,7 +116,7 @@ systemd:
           Slice=kubereserved.slice
           Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
           Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-          Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false --metrics-addr=0.0.0.0:9393 --experimental=true"
+          Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
   - name: k8s-setup-network-env.service
     enabled: true
     contents: |
@@ -190,6 +190,9 @@ systemd:
         --register-node=true \
         --kubeconfig=/etc/kubernetes/kubeconfig/kubelet.yaml \
         --node-labels="node.kubernetes.io/worker,role=worker,ip=${DEFAULT_IPV4},{{.Cluster.Kubernetes.Kubelet.Labels}}" \
+        {{ if eq .Cluster.Kubernetes.CloudProvider "aws" }}
+        --cni-bin-dir=/opt/cni/bin \
+        {{ end -}}
         --v=2
       [Install]
       WantedBy=multi-user.target
