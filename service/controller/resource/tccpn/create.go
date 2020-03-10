@@ -197,10 +197,15 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 }
 
 func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
 		ClusterID:        key.ClusterID(&cr),
-		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0])),
+		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(cc.Spec.TenantCluster.TCCP.AvailabilityZones[0].Name)),
 	}
 
 	return autoScalingGroup, nil
