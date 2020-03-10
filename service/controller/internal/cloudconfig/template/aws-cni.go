@@ -128,12 +128,18 @@ spec:
               value: "true"
             ## Deviation from original manifest - 3
             ## setting custom ENI config annotation
-            - name: ENI_CONFIG_ANNOTATION_DEF
+            - name: ENI_CONFIG_LABEL_DEF
               value: "failure-domain.beta.kubernetes.io/zone"
             - name: MY_NODE_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+			## Deviation from original manifest - 4
+            ## prewarm IP to limit AWS api calls
+            - name: WARM_IP_TARGET
+              value: 20
+            - name: MINIMUM_IP_TARGET
+              value: 5
           resources:
             requests:
               cpu: 10m
