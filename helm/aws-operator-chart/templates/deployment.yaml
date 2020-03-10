@@ -1,13 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aws-operator
-  namespace: {{ .Values.namespace }}
+  name: {{ tpl .Values.resource.default.name  . }}
+  namespace: {{ tpl .Values.resource.default.namespace  . }}
   labels:
-    app: aws-operator
+    app: {{ tpl .Values.resource.default.name  . }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.resource.default.name  . }}
   strategy:
     type: RollingUpdate
   template:
@@ -15,36 +18,36 @@ spec:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        app: aws-operator
+        app: {{ tpl .Values.resource.default.name  . }}
     spec:
       volumes:
-      - name: aws-operator-configmap
+      - name: {{ .Values.project.name }}-configmap
         configMap:
-          name: aws-operator-configmap
+          name: {{ tpl .Values.resource.default.name  . }}
           items:
           - key: config.yaml
             path: config.yaml
-      - name: aws-operator-secret
+      - name: {{ .Values.project.name }}-secret
         secret:
-          secretName: aws-operator-secret
+          secretName: {{ tpl .Values.resource.default.name  . }}
           items:
           - key: secret.yaml
             path: secret.yaml
       - name: certs
         hostPath:
           path: /etc/ssl/certs/ca-certificates.crt
-      serviceAccountName: aws-operator
+      serviceAccountName: {{ tpl .Values.resource.default.name  . }}
       securityContext:
-        runAsUser: {{ .Values.userID }}
-        runAsGroup: {{ .Values.groupID }}
+        runAsUser: {{ .Values.pod.user.id }}
+        runAsGroup: {{ .Values.pod.group.id }}
       containers:
-      - name: aws-operator
-        image: quay.io/giantswarm/aws-operator:[[ .SHA ]]
+      - name: {{ .Values.project.name }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         volumeMounts:
-        - name: aws-operator-configmap
-          mountPath: /var/run/aws-operator/configmap/
-        - name: aws-operator-secret
-          mountPath: /var/run/aws-operator/secret/
+        - name: {{ .Values.project.name }}-configmap
+          mountPath: /var/run/{{ .Values.project.name }}/configmap/
+        - name: {{ .Values.project.name }}-secret
+          mountPath: /var/run/{{ .Values.project.name }}/secret/
           readOnly: true
         - name: certs
           mountPath: /etc/ssl/certs/ca-certificates.crt
@@ -53,8 +56,8 @@ spec:
           containerPort: 8000
         args:
         - daemon
-        - --config.dirs=/var/run/aws-operator/configmap/
-        - --config.dirs=/var/run/aws-operator/secret/
+        - --config.dirs=/var/run/{{ .Values.project.name }}/configmap/
+        - --config.dirs=/var/run/{{ .Values.project.name }}/secret/
         - --config.files=config
         - --config.files=secret
         livenessProbe:
@@ -77,4 +80,4 @@ spec:
             cpu: 250m
             memory: 250Mi
       imagePullSecrets:
-      - name: aws-operator-pull-secret
+      - name: {{ tpl .Values.resource.pullSecret.name . }}
