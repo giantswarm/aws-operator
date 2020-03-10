@@ -45,7 +45,14 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-		params.Versions.Kubernetes = fmt.Sprintf("%s/giantswarm/hyperkube:%s", c.registryDomain, "1.15.4")
+		params.Versions.Calico = calicoVersion
+		params.Versions.Kubernetes = kubernetesVersion
+		params.Images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:%s", c.registryDomain, calicoVersion)
+		params.Images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:%s", c.registryDomain, calicoVersion)
+		params.Images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:%s", c.registryDomain, calicoVersion)
+		params.Images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-healthz:%s", c.registryDomain, kubernetesAPIHealthzVersion)
+		params.Images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:%s", c.registryDomain, etcdVersion)
+		params.Images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:%s", c.registryDomain, kubernetesVersion)
 		params.SSOPublicKey = c.SSOPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
