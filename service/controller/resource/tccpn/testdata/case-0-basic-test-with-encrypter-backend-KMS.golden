@@ -120,7 +120,7 @@ Resources:
       InstanceProfileName: gs-cluster-8y5ck-profile-tccpn
       Roles:
         - Ref: ControlPlaneNodesRole
-  ControlPlaneNodesLaunchConfiguration:
+  ControlPlaneNodeLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: false

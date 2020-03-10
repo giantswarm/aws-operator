@@ -2,7 +2,7 @@ package template
 
 const TemplateMainLaunchConfiguration = `
 {{- define "launch_configuration" -}}
-  ControlPlaneNodesLaunchConfiguration:
+  ControlPlaneNodeLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: false
