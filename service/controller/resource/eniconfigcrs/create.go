@@ -13,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -52,10 +51,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					annotation.Docs: "https://godoc.org/github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1#ENIConfig",
-				},
-				Labels: map[string]string{
-					label.Cluster:      key.ClusterID(&cr),
-					label.Organization: key.OrganizationID(&cr),
 				},
 				Name:      az.Name,
 				Namespace: corev1.NamespaceDefault,
