@@ -134,12 +134,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-			## Deviation from original manifest - 4
+            ## Deviation from original manifest - 4
             ## prewarm IP to limit AWS api calls
             - name: WARM_IP_TARGET
-              value: 20
+              value: "20"
             - name: MINIMUM_IP_TARGET
-              value: 5
+              value: "5"
           resources:
             requests:
               cpu: 10m
