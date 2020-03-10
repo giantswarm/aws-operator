@@ -3,6 +3,7 @@ package tenantclients
 import (
 	"context"
 
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1"
 	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
@@ -39,8 +40,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var k8sClient k8sclient.Interface
 	{
 		c := k8sclient.ClientsConfig{
-			Logger:     r.logger,
+			Logger: r.logger,
+
 			RestConfig: rest.CopyConfig(restConfig),
+			SchemeBuilder: k8sclient.SchemeBuilder{
+				// The Tenant Clients are used to connect to manage ENIConfig CRs within
+				// the Tenant Cluster in order to properly configure the AWS CNI.
+				// Therefore it is important to add its specific scheme builders.
+				v1alpha1.AddToScheme,
+			},
 		}
 
 		k8sClient, err = k8sclient.NewClients(c)
