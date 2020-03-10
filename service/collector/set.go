@@ -107,6 +107,21 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var natCollector *NAT
+	{
+		c := NATConfig{
+			Helper: h,
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		natCollector, err = NewNAT(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var trustedAdvisorCollector *TrustedAdvisor
 	{
 		c := TrustedAdvisorConfig{
@@ -143,6 +158,7 @@ func NewSet(config SetConfig) (*Set, error) {
 				asgCollector,
 				ec2InstancesCollector,
 				elbCollector,
+				natCollector,
 				vpcCollector,
 			},
 			Logger: config.Logger,
