@@ -43,8 +43,6 @@ type Params struct {
 	// Container images used in the ignition templates
 	Images Images
 	Node   v1alpha1.ClusterNode
-	// RegistryDomain is the host of the docker image registry to use.
-	RegistryDomain string
 	SSOPublicKey   string
 	// Versions of components used in the ignition templates
 	Versions Versions

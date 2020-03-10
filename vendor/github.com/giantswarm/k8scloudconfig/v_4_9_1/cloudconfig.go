@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	defaultRegistryDomain            = "quay.io"
 	defaultImagePullProgressDeadline = "1m"
 	etcdPort                         = 443
 )
@@ -31,7 +30,6 @@ func DefaultCloudConfigConfig() CloudConfigConfig {
 func DefaultParams() Params {
 	return Params{
 		EtcdPort:                  etcdPort,
-		RegistryDomain:            defaultRegistryDomain,
 		ImagePullProgressDeadline: defaultImagePullProgressDeadline,
 	}
 }
