@@ -34,6 +34,24 @@ func Test_DesiredState(t *testing.T) {
 		},
 	}
 
+	release := releasev1alpha1.NewReleaseCR()
+	release.ObjectMeta.Name = "v1.0.0"
+	release.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
+		{
+			Name:    "kubernetes",
+			Version: "1.15.4",
+		},
+		{
+			Name:    "calico",
+			Version: "3.9.1",
+		},
+		{
+			Name:    "etcd",
+			Version: "3.3.15",
+		},
+	}
+	clientset := fake.NewSimpleClientset(release)
+
 	masterKeyPattern := "cloudconfig/v[\\d_]+/master"
 	workerKeyPattern := "cloudconfig/v[\\d_]+/worker"
 
@@ -63,11 +81,11 @@ calico-cni: {{ .Images.CalicoCNI }}
 calico-node: {{ .Images.CalicoNode }}
 calico-kube-controllers: {{ .Images.CalicoKubeControllers }}
 `,
-			expectedBody: `hyperkube: quay.io/giantswarm/hyperkube:1.15.4
-etcd: quay.io/giantswarm/etcd:3.3.15
-calico-cni: quay.io/giantswarm/cni:3.9.1
-calico-node: quay.io/giantswarm/node:3.9.1
-calico-kube-controllers: quay.io/giantswarm/kube-controllers:3.9.1
+			expectedBody: `hyperkube: example.com/giantswarm/hyperkube:1.15.4
+etcd: example.com/giantswarm/etcd:3.3.15
+calico-cni: example.com/giantswarm/cni:3.9.1
+calico-node: example.com/giantswarm/node:3.9.1
+calico-kube-controllers: example.com/giantswarm/kube-controllers:3.9.1
 `,
 			expectedBucket: "myaccountid-g8s-test-cluster",
 		},
@@ -78,27 +96,9 @@ calico-kube-controllers: quay.io/giantswarm/kube-controllers:3.9.1
 			awsClients := aws.Clients{
 				KMS: &KMSClientMock{},
 			}
-
 			cloudconfig := &CloudConfigMock{
 				template: tc.template,
 			}
-			release := releasev1alpha1.NewReleaseCR()
-			release.ObjectMeta.Name = "v1.0.0"
-			release.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
-				{
-					Name:    "kubernetes",
-					Version: "1.15.4",
-				},
-				{
-					Name:    "calico",
-					Version: "3.9.1",
-				},
-				{
-					Name:    "etcd",
-					Version: "3.3.15",
-				},
-			}
-			clientset := fake.NewSimpleClientset(release)
 
 			var err error
 			var newResource *Resource
@@ -109,6 +109,7 @@ calico-kube-controllers: quay.io/giantswarm/kube-controllers:3.9.1
 					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
+					RegistryDomain:     "example.com",
 				}
 
 				newResource, err = New(c)

@@ -158,6 +158,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
+					RegistryDomain:     "example.com",
 				}
 
 				newResource, err = New(c)

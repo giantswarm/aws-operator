@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/certs"
+	gscerts "github.com/giantswarm/certs"
 	"github.com/giantswarm/k8scloudconfig/v_4_9_1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
@@ -57,7 +57,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				return nil, err
 			}
 			versions.Kubernetes = component.Version
-			images.Hyperkube = fmt.Sprintf("quay.io/giantswarm/hyperkube:%s", versions.Kubernetes)
+			images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:%s", r.registryDomain, versions.Kubernetes)
 		}
 
 		{
@@ -65,7 +65,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			if err != nil {
 				return nil, err
 			}
-			images.Etcd = fmt.Sprintf("quay.io/giantswarm/etcd:%s", component.Version)
+			images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:%s", r.registryDomain, component.Version)
 		}
 
 		{
@@ -74,15 +74,15 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				return nil, err
 			}
 			versions.Calico = component.Version
-			images.CalicoNode = fmt.Sprintf("quay.io/giantswarm/node:%s", component.Version)
-			images.CalicoCNI = fmt.Sprintf("quay.io/giantswarm/cni:%s", component.Version)
-			images.CalicoKubeControllers = fmt.Sprintf("quay.io/giantswarm/kube-controllers:%s", component.Version)
+			images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:%s", r.registryDomain, component.Version)
+			images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:%s", r.registryDomain, component.Version)
+			images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:%s", r.registryDomain, component.Version)
 		}
 
-		images.KubernetesAPIHealthz = fmt.Sprintf("quay.io/giantswarm/k8s-api-health:%s", kubernetesAPIHealthzVersion)
+		images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-health:%s", r.registryDomain, kubernetesAPIHealthzVersion)
 	}
 
-	var clusterCerts certs.Cluster
+	var clusterCerts gscerts.Cluster
 	var clusterKeys randomkeys.Cluster
 	{
 		g := &errgroup.Group{}

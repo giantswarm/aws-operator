@@ -26,6 +26,7 @@ type Config struct {
 	G8sClient          versioned.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
+	RegistryDomain     string
 }
 
 // Resource implements the cloudformation resource.
@@ -35,6 +36,7 @@ type Resource struct {
 	g8sClient          versioned.Interface
 	logger             micrologger.Logger
 	randomKeysSearcher randomkeys.Interface
+	registryDomain     string
 }
 
 // New creates a new configured cloudformation resource.
@@ -54,6 +56,9 @@ func New(config Config) (*Resource, error) {
 	if config.RandomKeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RandomKeySearcher must not be empty", config)
 	}
+	if config.RegistryDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
+	}
 
 	r := &Resource{
 		certsSearcher:      config.CertsSearcher,
@@ -61,6 +66,7 @@ func New(config Config) (*Resource, error) {
 		g8sClient:          config.G8sClient,
 		logger:             config.Logger,
 		randomKeysSearcher: config.RandomKeysSearcher,
+		registryDomain:     config.RegistryDomain,
 	}
 
 	return r, nil
