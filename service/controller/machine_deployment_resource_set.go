@@ -306,7 +306,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
-			Logger: config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
