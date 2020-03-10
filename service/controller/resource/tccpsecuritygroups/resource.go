@@ -47,7 +47,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

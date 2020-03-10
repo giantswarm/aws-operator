@@ -248,7 +248,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
-			Logger: config.Logger,
+			ToClusterFunc: key.ToCluster,
+			Logger:        config.Logger,
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
