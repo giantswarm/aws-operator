@@ -525,6 +525,39 @@ Resources:
       ResourceRecords:
         - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
   
+  AWSCNIRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-aws-cni
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: aws-cni
+  AWSCNIRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-aws-cni
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: aws-cni
+  AWSCNIRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-aws-cni
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: aws-cni
   PublicRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:

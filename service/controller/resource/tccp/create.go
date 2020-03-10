@@ -559,8 +559,10 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	var routeTables *template.ParamsMainRouteTables
 	{
 		routeTables = &template.ParamsMainRouteTables{
-			ClusterID:              key.ClusterID(&cr),
-			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
+			ClusterID:       key.ClusterID(&cr),
+			HostClusterCIDR: cc.Status.ControlPlane.VPC.CIDR,
+
+			AWSCNIRouteTableNames:  awsCNIRouteTableNames,
 			PrivateRouteTableNames: privateRouteTableNames,
 			PublicRouteTableNames:  publicRouteTableNames,
 		}
