@@ -65,7 +65,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			if err != nil {
 				return nil, err
 			}
-			images.Etcd = fmt.Sprintf("quay.io/giantswarm/hyperkube:%s", component.Version)
+			images.Etcd = fmt.Sprintf("quay.io/giantswarm/etcd:%s", component.Version)
 		}
 
 		{

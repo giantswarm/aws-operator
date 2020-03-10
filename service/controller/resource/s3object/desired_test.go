@@ -6,22 +6,29 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	v1alpha12 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 
 func Test_DesiredState(t *testing.T) {
 	t.Parallel()
-	clusterTpo := &v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
+	clusterTpo := &providerv1alpha1.AWSConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				label.ReleaseVersion: "v1.0.0",
+			},
+		},
+		Spec: providerv1alpha1.AWSConfigSpec{
+			Cluster: providerv1alpha1.Cluster{
 				ID: "test-cluster",
 			},
 		},
@@ -34,15 +41,34 @@ func Test_DesiredState(t *testing.T) {
 	workerKeyRegexp := regexp.MustCompile(workerKeyPattern)
 
 	testCases := []struct {
-		obj            *v1alpha1.AWSConfig
+		obj            *providerv1alpha1.AWSConfig
 		description    string
 		expectedBucket string
 		expectedBody   string
+		template       string
 	}{
 		{
-			description:    "basic match",
+			description:    "case 0: basic match",
 			obj:            clusterTpo,
 			expectedBody:   "mybody-",
+			template:       "mybody-",
+			expectedBucket: "myaccountid-g8s-test-cluster",
+		},
+		{
+			description: "case 1: template hyperkube",
+			obj:         clusterTpo,
+			template: `hyperkube: {{ .Images.Hyperkube }}
+etcd: {{ .Images.Etcd }}
+calico-cni: {{ .Images.CalicoCNI }}
+calico-node: {{ .Images.CalicoNode }}
+calico-kube-controllers: {{ .Images.CalicoKubeControllers }}
+`,
+			expectedBody: `hyperkube: quay.io/giantswarm/hyperkube:1.15.4
+etcd: quay.io/giantswarm/etcd:3.3.15
+calico-cni: quay.io/giantswarm/cni:3.9.1
+calico-node: quay.io/giantswarm/node:3.9.1
+calico-kube-controllers: quay.io/giantswarm/kube-controllers:3.9.1
+`,
 			expectedBucket: "myaccountid-g8s-test-cluster",
 		},
 	}
@@ -54,10 +80,11 @@ func Test_DesiredState(t *testing.T) {
 			}
 
 			cloudconfig := &CloudConfigMock{
-				template: tc.expectedBody,
+				template: tc.template,
 			}
-			release := v1alpha12.NewReleaseCR()
-			release.Spec.Components = []v1alpha12.ReleaseSpecComponent{
+			release := releasev1alpha1.NewReleaseCR()
+			release.ObjectMeta.Name = "v1.0.0"
+			release.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
 				{
 					Name:    "kubernetes",
 					Version: "1.15.4",
