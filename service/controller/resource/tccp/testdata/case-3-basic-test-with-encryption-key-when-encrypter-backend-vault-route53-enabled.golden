@@ -744,6 +744,8 @@ Resources:
   
   AWSCNISubnetEuCentral1a:
     Type: AWS::EC2::Subnet
+    DependsOn:
+    - VPCCIDRBlockAWSCNI
     Properties:
       AvailabilityZone: eu-central-1a
       CidrBlock: <nil>
@@ -760,6 +762,8 @@ Resources:
       SubnetId: !Ref AWSCNISubnetEuCentral1a
   AWSCNISubnetEuCentral1b:
     Type: AWS::EC2::Subnet
+    DependsOn:
+    - VPCCIDRBlockAWSCNI
     Properties:
       AvailabilityZone: eu-central-1b
       CidrBlock: <nil>
@@ -776,6 +780,8 @@ Resources:
       SubnetId: !Ref AWSCNISubnetEuCentral1b
   AWSCNISubnetEuCentral1c:
     Type: AWS::EC2::Subnet
+    DependsOn:
+    - VPCCIDRBlockAWSCNI
     Properties:
       AvailabilityZone: eu-central-1c
       CidrBlock: <nil>

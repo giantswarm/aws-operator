@@ -6,6 +6,8 @@ const TemplateMainSubnets = `
   {{- range $v.AWSCNISubnets }}
   {{ .Name }}:
     Type: AWS::EC2::Subnet
+    DependsOn:
+    - VPCCIDRBlockAWSCNI
     Properties:
       AvailabilityZone: {{ .AvailabilityZone }}
       CidrBlock: {{ .CIDR }}
