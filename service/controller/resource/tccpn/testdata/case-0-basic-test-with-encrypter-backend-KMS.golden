@@ -286,10 +286,3 @@ Resources:
       FromPort: 2379
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
-  VPCDefaultSecurityGroupEgress:
-    Type: AWS::EC2::SecurityGroupEgress
-    Properties:
-      Description: Allow outbound traffic from loopback address.
-      GroupId: !GetAtt VPC.DefaultSecurityGroup
-      IpProtocol: -1
-      CidrIp: 127.0.0.1/32
