@@ -69,6 +69,14 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  digest = "1:d8bf00757b72dcea682e6bdfcc064fbbca10f9892d2fbcb16c4313488d6be708"
+  name = "github.com/aws/amazon-vpc-cni-k8s"
+  packages = ["pkg/apis/crd/v1alpha1"]
+  pruneopts = "UT"
+  revision = "927b76ac57f577466ae6149230b6c8649d2dbc1b"
+  version = "v1.6.0"
+
+[[projects]]
   digest = "1:d58ffcbefd213f04d243c9e1802265e2731ab2abfcb7b4d3121e66b999dac804"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -326,6 +334,17 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "3f774da07e59f9446507f506cae152c93ad2e46c"
+
+[[projects]]
+  digest = "1:32a7e7db4aa2436c57ccf96af8425362e0e18929741487f0f5d5ff66c602cebe"
+  name = "github.com/giantswarm/cluster-operator"
+  packages = [
+    "pkg/label",
+    "service/controller/key",
+  ]
+  pruneopts = "UT"
+  revision = "9b7b9ff56119513f05295f9da72bbd191bd8fdcc"
+  version = "v2.1.4"
 
 [[projects]]
   branch = "master"
@@ -1019,6 +1038,14 @@
   pruneopts = "UT"
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
   version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:bde6c3a610bd01ea7e2c8d9c7fd1116531fb6619f46f73f4f2ea16adb70da6be"
+  name = "github.com/operator-framework/operator-sdk"
+  packages = ["pkg/util/k8sutil"]
+  pruneopts = "UT"
+  revision = "e5a0ab096e1a7c0e6b937d2b41707eccb82c3c77"
+  version = "v0.0.7"
 
 [[projects]]
   digest = "1:808cdddf087fb64baeae67b8dfaee2069034d9704923a3cb8bd96a995421a625"
@@ -2212,6 +2239,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",
@@ -2244,6 +2272,7 @@
     "github.com/giantswarm/apprclient",
     "github.com/giantswarm/backoff",
     "github.com/giantswarm/certs",
+    "github.com/giantswarm/cluster-operator/service/controller/key",
     "github.com/giantswarm/e2e-harness/pkg/framework",
     "github.com/giantswarm/e2e-harness/pkg/harness",
     "github.com/giantswarm/e2e-harness/pkg/release",
