@@ -9,6 +9,51 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v5.2.0] - Unreleased
+
+### Changed
+
+- Reserve ports `30000-32767` from ephemeral port range for `kube-apiserver` use.
+- Make provisioning idempotent by generating `/boot/coreos/first_boot` file on every boot.
+- Enable ':9393/metrics' prometheus endpoint in docker daemon.
+
+## [v5.1.1] - Unreleased
+
+### Changed
+
+- Update Kubernetes to `1.16.7`.
+
+## [v5.1.0] - 2020-01-21
+
+### Changed
+
+- Lowercase $(hostname) to match k8s node name e.g. when using with kubectl.
+- Extend ignition with debug options.
+
+## [v5.0.0] - 2020-01-02
+
+### Changed
+
+- Moved kubelet from container to host process (`--containerized` flag is removed in Kubernetes 1.16).
+- Changed `restricted` PodSecurityPolicy to restrict the allowed range of user IDs for PODs.
+- Update Kubernetes to `1.16.3`.
+- Update Calico to `3.10.1` along with corresponding RBAC rules.
+- Update etcd to `3.3.17`.
+- Update `calicoctl` (debug tool) to `3.10.1`.
+- Update `crictl` (debug tool) to `1.16.1`.
+- Clean up k8s-addons (use system `kubectl`, avoid `kubectl get cs`).
+- Apply kubelet restricted role labels using new systemd service.
+- Increase `fs.inotify.max_user_instances` to 8192.
+- Change Priority Class for `calico-node` to `system-node-critical`.
+- Use registry domain for k8s-api-healthz and wait for domains script for AWS China.
+
+### Added
+
+- Add eviction hard setting for image file system in kubelet.
+- Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
+
+## [v4.9.1] - 2020-03-10
+
 ## [v4.9.0] - 2019-10-17
 
 ### Changed
@@ -25,13 +70,14 @@ version directory, and  then changes are introduced.
 - Use `/bin/calico-node -felix-live` for `calico-node` liveness probe instead of `httpGet`.
 - Generally minimize differences between [Calico v3.9 yaml](https://docs.projectcalico.org/v3.9/manifests/calico.yaml) and `calico-all.yaml`.
 
-## [v4.8.1] 
+## [v4.8.1] - 2019-12-31
 
 ### Changed
 
-- Update kubernetes to 1.14.8, includes fixes for CVE-2019-11253
+- Update Kubernetes to 1.14.10, includes fixes for CVE-2019-11253 and some Azure fixes.
+- Increase `fs.inotify.max_user_instances` to 8192.
 
-## [v4.8.0] 
+## [v4.8.0]
 
 ### Added
 
@@ -464,6 +510,11 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
+[v5.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_1
+[v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0
+[v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
+[v4.9.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_1
 [v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
 [v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_1
 [v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0

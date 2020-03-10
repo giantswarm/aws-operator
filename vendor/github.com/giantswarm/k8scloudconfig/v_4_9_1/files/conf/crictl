@@ -1,0 +1,4 @@
+runtime-endpoint: unix:///var/run/dockershim/dockershim.sock
+image-endpoint: unix:///var/run/dockershim/dockershim.sock
+timeout: 10
+debug: false
