@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	v1alpha12 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
@@ -54,6 +56,22 @@ func Test_DesiredState(t *testing.T) {
 			cloudconfig := &CloudConfigMock{
 				template: tc.expectedBody,
 			}
+			release := v1alpha12.NewReleaseCR()
+			release.Spec.Components = []v1alpha12.ReleaseSpecComponent{
+				{
+					Name:    "kubernetes",
+					Version: "1.15.4",
+				},
+				{
+					Name:    "calico",
+					Version: "3.9.1",
+				},
+				{
+					Name:    "etcd",
+					Version: "3.3.15",
+				},
+			}
+			clientset := fake.NewSimpleClientset(release)
 
 			var err error
 			var newResource *Resource
@@ -61,6 +79,7 @@ func Test_DesiredState(t *testing.T) {
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
+					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 				}

@@ -3,9 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_1"
 	"github.com/giantswarm/microerror"
@@ -16,7 +14,7 @@ import (
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
+func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTemplateData) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -27,7 +25,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
-			customObject:  customObject,
+			customObject:  data.CustomObject,
 			encrypter:     c.encrypter,
 			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
@@ -36,23 +34,17 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, customObject v1alph
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = customObject.Spec.Cluster
+		params.Cluster = data.CustomObject.Spec.Cluster
 		params.Extension = &WorkerExtension{
 			baseExtension: be,
 			ctlCtx:        cc,
 
-			ClusterCerts: clusterCerts,
+			ClusterCerts: data.ClusterCerts,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-		params.Versions.Calico = calicoVersion
-		params.Versions.Kubernetes = kubernetesVersion
-		params.Images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:%s", c.registryDomain, calicoVersion)
-		params.Images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:%s", c.registryDomain, calicoVersion)
-		params.Images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:%s", c.registryDomain, calicoVersion)
-		params.Images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-healthz:%s", c.registryDomain, kubernetesAPIHealthzVersion)
-		params.Images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:%s", c.registryDomain, etcdVersion)
-		params.Images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:%s", c.registryDomain, kubernetesVersion)
+		params.Versions = data.Versions
+		params.Images = data.Images
 		params.SSOPublicKey = c.SSOPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)

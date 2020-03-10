@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	v1alpha12 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
@@ -56,6 +58,8 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			cloudconfig := &CloudConfigMock{}
+			release := &v1alpha12.Release{}
+			clientset := fake.NewSimpleClientset(release)
 
 			var err error
 			var newResource *Resource
@@ -63,6 +67,7 @@ func Test_CurrentState(t *testing.T) {
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
+					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 				}

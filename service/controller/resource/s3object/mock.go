@@ -11,9 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs"
-	"github.com/giantswarm/randomkeys"
+
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 )
 
 // nopCloser is required to implement the ReadCloser interface required by
@@ -71,11 +70,11 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, randomKeys randomkeys.Cluster) (string, error) {
+func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
 	return c.template, nil
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
+func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
 	return c.template, nil
 }
 

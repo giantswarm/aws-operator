@@ -3,29 +3,19 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_4_9_1"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
 )
 
-const (
-	calicoVersion = "3.9.1"
-	etcdVersion = "3.3.15"
-	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
-	kubernetesVersion = "1.15.4"
-)
-
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTemplateData) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -33,7 +23,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 		return "", microerror.Mask(err)
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, data.ClusterKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -41,37 +31,31 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, customObject v1alph
 	var params k8scloudconfig.Params
 	{
 		be := baseExtension{
-			customObject:  customObject,
+			customObject:  data.CustomObject,
 			encrypter:     c.encrypter,
 			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
 
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = customObject.Spec.Cluster
+		params.Cluster = data.CustomObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
-		params.EtcdPort = customObject.Spec.Cluster.Etcd.Port
+		params.EtcdPort = data.CustomObject.Spec.Cluster.Etcd.Port
 		params.Extension = &MasterExtension{
 			baseExtension: be,
 			ctlCtx:        cc,
 
-			ClusterCerts:     clusterCerts,
+			ClusterCerts:     data.ClusterCerts,
 			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-		params.Versions.Calico = calicoVersion
-		params.Versions.Kubernetes = kubernetesVersion
-		params.Images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:%s", c.registryDomain, calicoVersion)
-		params.Images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:%s", c.registryDomain, calicoVersion)
-		params.Images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:%s", c.registryDomain, calicoVersion)
-		params.Images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-healthz:%s", c.registryDomain, kubernetesAPIHealthzVersion)
-		params.Images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:%s", c.registryDomain, etcdVersion)
-		params.Images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:%s", c.registryDomain, kubernetesVersion)
+		params.Versions = data.Versions
+		params.Images = data.Images
 		params.SSOPublicKey = c.SSOPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)

@@ -330,6 +330,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
 			CloudConfig:        cloudConfig,
+			G8sClient:          config.G8sClient,
 			Logger:             config.Logger,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
