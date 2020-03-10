@@ -34,13 +34,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	// get security group ID
+	// We need to configure our security group ID to all the ENIConfig CRs.
+	// Therefore we look it up from the controller context, where it is already
+	// available.
 	var securityGroupID string
 	{
 		securityGroupID = idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "aws-cni"))
 	}
 
-	// compute desired ENIConfig CRs
+	// Now we compute the desired state of the ENIConfig CRs, so we can apply them
+	// to the Tenant Cluster.
 	var eniConfigs []*v1alpha1.ENIConfig
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		ec := &v1alpha1.ENIConfig{
@@ -66,8 +69,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		eniConfigs = append(eniConfigs, ec)
 	}
 
-	// create each
-	// if one already exists, update it
+	// Here we create the ENIConfig CRs if they do not exist. If they are already
+	// present, we update them according to our desired state. This is some simple
+	// fire and forget approach for now.
 	for _, ec := range eniConfigs {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring ENIConfig CR")
 
