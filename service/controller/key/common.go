@@ -152,6 +152,10 @@ func PublicSubnetRouteTableAssociationName(az string) string {
 	return fmt.Sprintf("PublicSubnetRouteTableAssociation-%s", az)
 }
 
+func ReleaseVersion(getter LabelsGetter) string {
+	return getter.GetLabels()[label.Release]
+}
+
 func RegionARN(region string) string {
 	regionARN := "aws"
 
