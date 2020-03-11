@@ -77,7 +77,9 @@ func (c *Collector) Collect(ctx context.Context, endpoints []*url.URL) error {
 
 				res, err := c.restClient.NewRequest().Get(e.String())
 				if err != nil {
-					return microerror.Mask(err)
+					c.logger.Log("endpoint", e.String(), "level", "error", "message", "requesting version bundles from endpoint failed", "stack", microerror.Stack(err))
+					c.logger.Log("endpoint", e.String(), "level", "debug", "message", "some releases may not be computed correctly")
+					return nil
 				}
 
 				c.logger.Log("endpoint", e.String(), "level", "debug", "message", "requested version bundles from endpoint")

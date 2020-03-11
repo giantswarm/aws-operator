@@ -25,16 +25,17 @@
 #   unused-packages = true
 
 
+
 [[constraint]]
   name = "github.com/coreos/go-semver"
   version = "0.2.0"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microerror"
+  version = "~v0.1.0"
 
 [[constraint]]
-  branch = "master"
+  version = "~0.1.1"
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
@@ -43,11 +44,9 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/kylelemons/godebug"
-
-[[constraint]]
-  branch = "master"
   name = "golang.org/x/sync"
+
+
 
 [prune]
   go-tests = true
