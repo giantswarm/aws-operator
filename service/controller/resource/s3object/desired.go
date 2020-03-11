@@ -79,7 +79,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 
 		images.Kubectl = fmt.Sprintf("%s/giantswarm/docker-kubectl:%s", r.registryDomain, kubectlVersion)
-		images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-health:%s", r.registryDomain, kubernetesAPIHealthzVersion)
+		images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-healthz:%s", r.registryDomain, kubernetesAPIHealthzVersion)
 	}
 
 	var clusterCerts gscerts.Cluster
