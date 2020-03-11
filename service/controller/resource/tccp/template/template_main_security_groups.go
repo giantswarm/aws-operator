@@ -72,6 +72,16 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.AWSCNISecurityGroupName }}
+  PodsAllowPodsCNIIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: AWSCNISecurityGroup
+    Properties:
+      Description: Allow traffic from pod to pod.
+      GroupId: !Ref AWSCNISecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref AWSCNISecurityGroup
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -81,6 +91,16 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowPodsCNIIngressRule:
+      Type: AWS::EC2::SecurityGroupIngress
+      DependsOn: MasterSecurityGroup
+      Properties:
+        Description: Allow traffic from pod to master.
+        GroupId: !Ref MasterSecurityGroup
+        IpProtocol: -1
+        FromPort: -1
+        ToPort: -1
+        SourceSecurityGroupId: !Ref AWSCNISecurityGroup
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
