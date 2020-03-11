@@ -272,7 +272,7 @@
 
 [[projects]]
   branch = "fix-awscluster-crd-yaml"
-  digest = "1:8af9e2df1b8703395b449a6747f9666817fcbaf392010c9585b970e3a8bfe635"
+  digest = "1:520f23cf3864e25b4caa486502c80a7af1041985674074543ffbda3715d32970"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -301,7 +301,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "460165d82a8cfa1779ffa783fa55a325c84d41df"
+  revision = "8988eff1b87f15f14b8dcca814c6c51382238df4"
 
 [[projects]]
   branch = "master"
