@@ -24,7 +24,7 @@ func Test_DesiredState(t *testing.T) {
 	clusterTpo := &providerv1alpha1.AWSConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				label.ReleaseVersion: "v1.0.0",
+				label.ReleaseVersion: "1.0.0",
 			},
 		},
 		Spec: providerv1alpha1.AWSConfigSpec{
