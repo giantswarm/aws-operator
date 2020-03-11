@@ -199,7 +199,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		c := tccpazs.Config{
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
