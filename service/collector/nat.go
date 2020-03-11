@@ -19,9 +19,13 @@ const (
 	labelVPC = "vpc"
 )
 
+const (
+	subsystemNAT = "nat"
+)
+
 var (
 	natDesc *prometheus.Desc = prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, subsystemVPC, "info"),
+		prometheus.BuildFQName(namespace, subsystemNAT, "info"),
 		"VPC information.",
 		[]string{
 			labelAccountID,
