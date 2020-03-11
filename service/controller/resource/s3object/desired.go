@@ -20,6 +20,7 @@ import (
 )
 
 const (
+	kubectlVersion = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
 	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
 )
 
@@ -34,7 +35,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	var images v_4_9_1.Images
-	var versions v_4_9_1.Versions
 	{
 		releaseVersion := customObject.Labels[label.ReleaseVersion]
 		releaseName := fmt.Sprintf("v%s", releaseVersion)
@@ -57,8 +57,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			if err != nil {
 				return nil, err
 			}
-			versions.Kubernetes = component.Version
-			images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:%s", r.registryDomain, versions.Kubernetes)
+			images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:v%s", r.registryDomain, component.Version)
 		}
 
 		{
@@ -66,7 +65,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			if err != nil {
 				return nil, err
 			}
-			images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:%s", r.registryDomain, component.Version)
+			images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:v%s", r.registryDomain, component.Version)
 		}
 
 		{
@@ -74,12 +73,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			if err != nil {
 				return nil, err
 			}
-			versions.Calico = component.Version
-			images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:%s", r.registryDomain, component.Version)
-			images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:%s", r.registryDomain, component.Version)
-			images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:%s", r.registryDomain, component.Version)
+			images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:v%s", r.registryDomain, component.Version)
+			images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:v%s", r.registryDomain, component.Version)
+			images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:v%s", r.registryDomain, component.Version)
 		}
 
+		images.Kubectl =  fmt.Sprintf("%s/giantswarm/docker-kubectl:%s", r.registryDomain, kubectlVersion)
 		images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-health:%s", r.registryDomain, kubernetesAPIHealthzVersion)
 	}
 
@@ -124,7 +123,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			ClusterCerts: clusterCerts,
 			ClusterKeys:  clusterKeys,
 			Images:       images,
-			Versions:     versions,
 		}
 		g.Go(func() error {
 			b, err := r.cloudConfig.NewMasterTemplate(ctx, data)

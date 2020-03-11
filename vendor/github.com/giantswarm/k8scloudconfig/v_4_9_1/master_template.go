@@ -362,18 +362,6 @@ systemd:
       [Install]
       WantedBy=multi-user.target
 
-  - name: debug-tools.service
-    enabled: true
-    contents: |
-      [Unit]
-      Description=Install calicoctl and crictl tools
-      After=network.target
-      [Service]
-      Type=oneshot
-      ExecStart=/opt/install-debug-tools
-      [Install]
-      WantedBy=multi-user.target
-
 storage:
   files:
     - path: /etc/ssh/trusted-user-ca-keys.pem
@@ -578,12 +566,6 @@ storage:
       mode: 0600
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/ip_vs.conf" }}"
-
-    - path: /opt/install-debug-tools
-      filesystem: root
-      mode: 0544
-      contents:
-        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/install-debug-tools" }}"
 
     - path: /etc/calico/calicoctl.cfg
       filesystem: root

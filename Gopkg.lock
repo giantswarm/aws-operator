@@ -417,14 +417,14 @@
 
 [[projects]]
   branch = "template-491"
-  digest = "1:203d755d6c8eba235b52512f4937257d57d3668c854b749cdaa202d3cf72b164"
+  digest = "1:6c54855a2c444e9398d361ee7567d3793d050c36533bf0ced8ebb588b90d0bf5"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_4_9_1",
   ]
   pruneopts = "T"
-  revision = "3d38257ee68fb9abe8eee6ad0df07f338bdd6418"
+  revision = "97ec22db9750830aa481fbbda5bc77eaf2baa737"
 
 [[projects]]
   branch = "master"
@@ -2125,7 +2125,6 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/rest",
-    "k8s.io/client-go/testing",
     "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1",
     "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset",
   ]

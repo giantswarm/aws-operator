@@ -41,11 +41,9 @@ type Params struct {
 	// cancelled if no progress has been made.
 	ImagePullProgressDeadline string
 	// Container images used in the ignition templates
-	Images Images
-	Node   v1alpha1.ClusterNode
-	SSOPublicKey   string
-	// Versions of components used in the ignition templates
-	Versions Versions
+	Images       Images
+	Node         v1alpha1.ClusterNode
+	SSOPublicKey string
 }
 
 func (p *Params) Validate() error {
@@ -58,12 +56,8 @@ type Images struct {
 	CalicoNode            string
 	Etcd                  string
 	Hyperkube             string
+	Kubectl               string
 	KubernetesAPIHealthz  string
-}
-
-type Versions struct {
-	Calico     string
-	Kubernetes string
 }
 
 type Hyperkube struct {

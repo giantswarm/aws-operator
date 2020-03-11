@@ -43,7 +43,6 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTempla
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-		params.Versions = data.Versions
 		params.Images = data.Images
 		params.SSOPublicKey = c.SSOPublicKey
 

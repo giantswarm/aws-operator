@@ -21,5 +21,4 @@ type IgnitionTemplateData struct {
 	ClusterCerts certs.Cluster
 	ClusterKeys  randomkeys.Cluster
 	Images       v_4_9_1.Images
-	Versions     v_4_9_1.Versions
 }

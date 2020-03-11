@@ -81,11 +81,11 @@ calico-cni: {{ .Images.CalicoCNI }}
 calico-node: {{ .Images.CalicoNode }}
 calico-kube-controllers: {{ .Images.CalicoKubeControllers }}
 `,
-			expectedBody: `hyperkube: example.com/giantswarm/hyperkube:1.15.4
-etcd: example.com/giantswarm/etcd:3.3.15
-calico-cni: example.com/giantswarm/cni:3.9.1
-calico-node: example.com/giantswarm/node:3.9.1
-calico-kube-controllers: example.com/giantswarm/kube-controllers:3.9.1
+			expectedBody: `hyperkube: example.com/giantswarm/hyperkube:v1.15.4
+etcd: example.com/giantswarm/etcd:v3.3.15
+calico-cni: example.com/giantswarm/cni:v3.9.1
+calico-node: example.com/giantswarm/node:v3.9.1
+calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 `,
 			expectedBucket: "myaccountid-g8s-test-cluster",
 		},
