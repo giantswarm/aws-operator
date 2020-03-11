@@ -19,8 +19,8 @@ Common labels
 {{- define "aws-operator.labels" -}}
 helm.sh/chart: {{ include "aws-operator.chart" . }}
 {{ include "aws-operator.selectorLabels" . }}
-{{ include "aws-operator.name" . }}.giantswarm.io/branch: {{ .Values.project.branch }}
-{{ include "aws-operator.name" . }}.giantswarm.io/commit: {{ .Values.project.commit }}
+app.giantswarm.io/branch: {{ .Values.project.branch }}
+app.giantswarm.io/commit: {{ .Values.project.commit }}
 app.kubernetes.io/name: {{ include "aws-operator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
