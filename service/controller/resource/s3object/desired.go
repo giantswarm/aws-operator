@@ -37,7 +37,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	var versions v_4_9_1.Versions
 	{
 		releaseVersion := customObject.Labels[label.ReleaseVersion]
-		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseVersion, metav1.GetOptions{})
+		releaseName := fmt.Sprintf("v%s", releaseVersion)
+		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
