@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	kubectlVersion = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
+	kubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
 	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
 )
 
@@ -78,7 +78,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:v%s", r.registryDomain, component.Version)
 		}
 
-		images.Kubectl =  fmt.Sprintf("%s/giantswarm/docker-kubectl:%s", r.registryDomain, kubectlVersion)
+		images.Kubectl = fmt.Sprintf("%s/giantswarm/docker-kubectl:%s", r.registryDomain, kubectlVersion)
 		images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-health:%s", r.registryDomain, kubernetesAPIHealthzVersion)
 	}
 
