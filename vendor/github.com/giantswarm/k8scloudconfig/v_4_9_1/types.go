@@ -50,6 +50,14 @@ func (p *Params) Validate() error {
 	return nil
 }
 
+type Versions struct {
+	Calico               string
+	Etcd                 string
+	Kubectl              string
+	Kubernetes           string
+	KubernetesAPIHealthz string
+}
+
 type Images struct {
 	CalicoCNI             string
 	CalicoKubeControllers string

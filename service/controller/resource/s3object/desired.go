@@ -34,53 +34,23 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	var images v_4_9_1.Images
+	var release *v1alpha1.Release
 	{
 		releaseVersion := customObject.Labels[label.ReleaseVersion]
 		releaseName := fmt.Sprintf("v%s", releaseVersion)
-		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-
-		findComponent := func(name string) (*v1alpha1.ReleaseSpecComponent, error) {
-			for _, component := range release.Spec.Components {
-				if component.Name == name {
-					return &component, nil
-				}
-			}
-			return nil, componentNotFoundError
-		}
-
-		{
-			component, err := findComponent("kubernetes")
-			if err != nil {
-				return nil, err
-			}
-			images.Hyperkube = fmt.Sprintf("%s/giantswarm/hyperkube:v%s", r.registryDomain, component.Version)
-		}
-
-		{
-			component, err := findComponent("etcd")
-			if err != nil {
-				return nil, err
-			}
-			images.Etcd = fmt.Sprintf("%s/giantswarm/etcd:v%s", r.registryDomain, component.Version)
-		}
-
-		{
-			component, err := findComponent("calico")
-			if err != nil {
-				return nil, err
-			}
-			images.CalicoNode = fmt.Sprintf("%s/giantswarm/node:v%s", r.registryDomain, component.Version)
-			images.CalicoCNI = fmt.Sprintf("%s/giantswarm/cni:v%s", r.registryDomain, component.Version)
-			images.CalicoKubeControllers = fmt.Sprintf("%s/giantswarm/kube-controllers:v%s", r.registryDomain, component.Version)
-		}
-
-		images.Kubectl = fmt.Sprintf("%s/giantswarm/docker-kubectl:%s", r.registryDomain, kubectlVersion)
-		images.KubernetesAPIHealthz = fmt.Sprintf("%s/giantswarm/k8s-api-healthz:%s", r.registryDomain, kubernetesAPIHealthzVersion)
 	}
+
+	versions, err := v_4_9_1.ExtractComponentVersions(release.Spec.Components)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	versions.Kubectl = kubectlVersion
+	versions.KubernetesAPIHealthz = kubernetesAPIHealthzVersion
+	images := v_4_9_1.BuildImages(r.registryDomain, versions)
 
 	var clusterCerts gscerts.Cluster
 	var clusterKeys randomkeys.Cluster
