@@ -34,5 +34,6 @@ Selector labels
 */}}
 {{- define "aws-operator.selectorLabels" -}}
 app: {{ include "aws-operator.name" . }}
-{{ include "aws-operator.name" . }}.giantswarm.io/version: {{ .Chart.AppVersion }}
+version: {{ .Chart.Version }}
+app.giantswarm.io/version: {{ .Chart.AppVersion }}
 {{- end -}}
