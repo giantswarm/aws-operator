@@ -63,8 +63,7 @@ done
 
 # create kube-proxy configmap
 while
-    $KUBECTL create configmap kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml -o yaml --dry-run \
-    | $KUBECTL apply -n kube-system -f -
+    $KUBECTL create configmap -n kube-system kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml
     [ "$?" -ne "0" ]
 do
     echo "failed to configure kube-proxy from /srv/kube-proxy-config.yaml, retrying in 5 sec"
