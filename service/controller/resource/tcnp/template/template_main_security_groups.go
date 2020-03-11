@@ -70,7 +70,7 @@ const TemplateMainSecurityGroups = `
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
-      SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.Master.ID }}
+      SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.AWSCNI.ID }}
   InternalIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

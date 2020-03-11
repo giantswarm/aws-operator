@@ -213,6 +213,15 @@ func DefaultContext() context.Context {
 								},
 							},
 						},
+						{
+							GroupId: aws.String("awscni-security-group-id"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("8y5ck-aws-cni"),
+								},
+							},
+						},
 					},
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
 						ID:                  "vpc-id",

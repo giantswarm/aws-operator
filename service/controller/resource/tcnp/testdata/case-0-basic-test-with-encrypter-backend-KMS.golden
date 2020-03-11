@@ -320,7 +320,7 @@ Resources:
       IpProtocol: -1
       FromPort: -1
       ToPort: -1
-      SourceSecurityGroupId: master-security-group-id
+      SourceSecurityGroupId: awscni-security-group-id
   InternalIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
