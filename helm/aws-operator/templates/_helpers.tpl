@@ -24,6 +24,7 @@ app.giantswarm.io/commit: {{ .Values.project.commit }}
 app.kubernetes.io/name: {{ include "aws-operator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
+app.giantswarm.io/version: {{ .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -35,5 +36,4 @@ Selector labels
 {{- define "aws-operator.selectorLabels" -}}
 app: {{ include "aws-operator.name" . }}
 version: {{ .Chart.Version }}
-app.giantswarm.io/version: {{ .Chart.AppVersion }}
 {{- end -}}
