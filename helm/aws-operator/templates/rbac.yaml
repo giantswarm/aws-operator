@@ -76,9 +76,9 @@ rules:
     verbs:
       - "*"
   - apiGroups:
-      - releases.giantswarm.io
+      - release.giantswarm.io
     resources:
-      - release
+      - releases
     verbs:
       - get
   # TODO drop create and delete permissions for namespaces when
