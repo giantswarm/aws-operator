@@ -72,6 +72,16 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.AWSCNISecurityGroupName }}
+  PodsIngressRuleFromMAsters:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: AWSCNISecurityGroup
+    Properties:
+      Description: Allow traffic from masters to pods.
+      GroupId: !Ref AWSCNISecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref MasterSecurityGroup
   PodsAllowPodsCNIIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: AWSCNISecurityGroup
