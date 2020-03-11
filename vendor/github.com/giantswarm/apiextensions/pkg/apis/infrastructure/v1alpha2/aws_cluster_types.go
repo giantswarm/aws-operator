@@ -30,7 +30,7 @@ spec:
     openAPIV3Schema:
       description: |
         Defines a tenant cluster in a Giant Swarm AWS installation.
-        Introduced with release vX.X, reconciled by TODO-operator.
+        Introduced with release v10.x.x, reconciled by aws-operator.
       properties:
         spec:
           properties:
