@@ -40,7 +40,7 @@ required = [
 
 [[override]]
   name = "github.com/giantswarm/apiextensions"
-  version = "~0.1.0"
+  branch = "fix-awscluster-crd-yaml"
 
 [[constraint]]
   branch = "master"

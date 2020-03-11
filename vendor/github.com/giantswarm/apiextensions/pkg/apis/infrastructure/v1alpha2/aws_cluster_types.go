@@ -26,13 +26,15 @@ spec:
   scope: Namespaced
   subresources:
     status: {}
+  version: v1alpha2
   validation:
     openAPIV3Schema:
       description: |
         Defines a tenant cluster in a Giant Swarm AWS installation.
-        Introduced with release vX.X, reconciled by TODO-operator.
+        Introduced with release v10.x.x, reconciled by aws-operator.
       properties:
         spec:
+          type: object
           properties:
             cluster:
               description: |
@@ -47,40 +49,38 @@ spec:
                 dns:
                   description: |
                     DNS configuration details.
+                  type: object
                   properties:
                     domain:
                       description: |
                         Base domain for several endpoints of this cluster.
                       type: string
-                    provider:
-                      description: |
-                        AWS-specific configuration details.
-                      properties:
-                        master:
-                          description: |
-                            Master node configuration details.
-                          properties:
-                            availabilityZone:
-                              description: |
-                                Name of the AWS Availability Zone to place the master node in.
-                              type: string
-                            instanceType:
-                              description: |
-                                EC2 instance type to use for the master node.
-                              type: string
-                          type: object
-                        region:
-                          description: |
-                            AWS region the cluster is to be running in.
-                          type: string
-                      type: object
-                  type: object
                 oidc:
                   description: |
                     Configuration for OpenID Connect (OIDC) authentication.
+                  type: object
+            provider:
+              description: |
+                AWS-specific configuration details.
               type: object
-          type: object
-  version: v1alpha2
+              properties:
+                master:
+                  description: |
+                    Master node configuration details.
+                  type: object
+                  properties:
+                    availabilityZone:
+                      description: |
+                        Name of the AWS Availability Zone to place the master node in.
+                      type: string
+                    instanceType:
+                      description: |
+                        EC2 instance type to use for the master node.
+                      type: string
+                region:
+                  description: |
+                    AWS region the cluster is to be running in.
+                  type: string
 `
 
 var awsClusterCRD *apiextensionsv1beta1.CustomResourceDefinition
