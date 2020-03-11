@@ -305,12 +305,8 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-<<<<<<< HEAD
-  revision = "d8ebc17c10508339579f04c0d06c384d61786a74"
-=======
   revision = "4fafaaae7e2eb887a8a268213f28a518a1618c3d"
   version = "v0.1.0"
->>>>>>> master
 
 [[projects]]
   branch = "master"
