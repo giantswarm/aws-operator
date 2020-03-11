@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "aws-operator.name" -}}
-{{- default .Chart.Name .Values.project.name | trunc 63 | trimSuffix "-" -}}
+{{- default .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*

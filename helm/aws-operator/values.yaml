@@ -19,8 +19,6 @@ pod:
   group:
     id: 1000
 project:
-  name: "aws-operator"
-  version: "[[ .Version ]]"
   branch: "[[ .Branch ]]"
   commit: "[[ .SHA ]]"
 # Resource names are truncated to 47 characters. Kubernetes allows 63 characters
