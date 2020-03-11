@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	providerv1alpha1"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
