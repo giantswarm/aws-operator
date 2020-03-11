@@ -28,6 +28,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
@@ -193,6 +194,20 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpAZsResource resource.Interface
+	{
+		c := tccpazs.Config{
+			G8sClient:     config.G8sClient,
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+		}
+
+		tccpAZsResource, err = tccpazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
@@ -265,6 +280,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		s3ObjectResource,
+		tccpAZsResource,
 		tccpnResource,
 	}
 
