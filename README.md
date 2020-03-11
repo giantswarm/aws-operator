@@ -11,7 +11,13 @@ The aws-operator manages Kubernetes clusters running on AWS.
     - Contains all versions of legacy controllers (reconciling AWSConfig CRs) up
       to and including v5.4.0.
 - `legacy`
-    - From version v5.5.0 up to and including v5.x.x.
+    - In version range >= v5.5.0 and < v6.0.0.
+    - Used for development of features for legacy (i.e. non-node pools) clusters.
+    - Contains only the latest version of legacy controllers (reconciling
+      AWSConfig CRs).
+- `legacy-1-15`
+    - In version range >= v5.5.0 and < v5.6.0.
+    - Includes Kubernetes 1.15 only.
     - Contains only the latest version of legacy controllers (reconciling
       AWSConfig CRs).
 - `master`
@@ -148,4 +154,3 @@ for details.
 ## Credit
 - https://golang.org
 - https://github.com/giantswarm/microkit
- 
