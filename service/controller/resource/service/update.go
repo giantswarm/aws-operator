@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/resource/crud"
@@ -24,8 +23,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updated services")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "no need to update services")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not update service")
 	}
+
 	return nil
 }
 
@@ -58,7 +58,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out which services have to be updated")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the service has to be updated")
 
 	if isServiceModified(desiredService, currentService) {
 		// Make a copy and set the resource version so the service can be updated.
@@ -67,12 +67,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			serviceToUpdate.ObjectMeta.ResourceVersion = currentService.ObjectMeta.ResourceVersion
 			serviceToUpdate.Spec.ClusterIP = currentService.Spec.ClusterIP
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found service '%s' that has to be updated", desiredService.GetName()))
+		r.logger.LogCtx(ctx, "level", "debug", "message", "the service has to be updated")
 
 		return serviceToUpdate, nil
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "no services needs update")
-
-		return nil, nil
 	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", "the service does not have to be updated")
+
+	return nil, nil
 }

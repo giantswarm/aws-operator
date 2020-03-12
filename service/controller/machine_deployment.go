@@ -36,6 +36,7 @@ type MachineDeploymentConfig struct {
 	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	ClusterDomain              string
 	LabelSelector              MachineDeploymentConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
@@ -140,6 +141,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
 			CalicoSubnet:               config.CalicoSubnet,
+			ClusterDomain:              config.ClusterDomain,
 			ClusterIPRange:             config.ClusterIPRange,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,

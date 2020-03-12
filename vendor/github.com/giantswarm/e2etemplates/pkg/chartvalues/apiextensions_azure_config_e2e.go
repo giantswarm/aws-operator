@@ -11,6 +11,8 @@ type APIExtensionsAzureConfigE2EConfig struct {
 	ClusterName               string
 	CommonDomain              string
 	CommonDomainResourceGroup string
+	SSHPublicKey              string
+	SSHUser                   string
 	VersionBundleVersion      string
 }
 
@@ -64,6 +66,12 @@ func NewAPIExtensionsAzureConfigE2E(config APIExtensionsAzureConfigE2EConfig) (s
 	}
 	if config.CommonDomainResourceGroup == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.CommonDomainResourceGroup must not be empty", config)
+	}
+	if config.SSHPublicKey == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.SSHPublicKey must not be empty", config)
+	}
+	if config.SSHUser == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.SSHUser must not be empty", config)
 	}
 	if config.VersionBundleVersion == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.VersionBundleVersion must not be empty", config)

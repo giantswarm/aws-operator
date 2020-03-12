@@ -10,8 +10,12 @@ import (
 )
 
 var (
-	reInit    = regexp.MustCompile(`init·\d+$`) // main.init·1
-	reClosure = regexp.MustCompile(`func·\d+$`) // main.func·001
+	reInit1 = regexp.MustCompile(`init·\d+$`)  // main.init·1
+	reInit2 = regexp.MustCompile(`init\.\d+$`) // main.init.1
+
+	reClosure1 = regexp.MustCompile(`func·\d+$`)                // main.func·001
+	reClosure2 = regexp.MustCompile(`glob\.\.func\d+(\.\d+)*$`) // main.glob..func1
+	reClosure3 = regexp.MustCompile(`\w+\.func\d+(\.\d+)*$`)    // main.FuncName.func1
 )
 
 // caller types:
@@ -29,11 +33,23 @@ func callerName(skip int) string {
 		return ""
 	}
 	name := runtime.FuncForPC(pc).Name()
-	if reInit.MatchString(name) {
-		return reInit.ReplaceAllString(name, "init")
+
+	if reInit1.MatchString(name) {
+		return reInit1.ReplaceAllString(name, "init")
 	}
-	if reClosure.MatchString(name) {
-		return reClosure.ReplaceAllString(name, "func")
+	if reInit2.MatchString(name) {
+		return reInit2.ReplaceAllString(name, "init")
 	}
+
+	if reClosure1.MatchString(name) {
+		return reClosure1.ReplaceAllString(name, "func")
+	}
+	if reClosure2.MatchString(name) {
+		return reClosure2.ReplaceAllString(name, "func")
+	}
+	if reClosure3.MatchString(name) {
+		return regexp.MustCompile(`func\d+(\.\d+)?$`).ReplaceAllString(name, "func") //+ "##"
+	}
+
 	return name
 }

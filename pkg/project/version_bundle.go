@@ -13,6 +13,11 @@ func NewVersionBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindAdded,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2145",
+				Component:   "ignition",
+				Description: "Make internal Kubernetes domain configurable.",
+				Kind:        versionbundle.KindChanged,
+				URLs: []string{
+					"https://github.com/giantswarm/aws-operator/pull/2150",
 				},
 			},
 		},
@@ -39,6 +44,6 @@ func NewVersionBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    Name(),
-		Version: BundleVersion(),
+		Version: Version(),
 	}
 }
