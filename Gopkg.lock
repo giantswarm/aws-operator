@@ -455,12 +455,12 @@
   revision = "e991deac265373d9347b96ecc56b13f228be144f"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d80347cb345b2986422040821735ae0efba8b8093b765b146b90796d926b85b4"
+  digest = "1:701a5f5a7297ced0c7b9aeeba6a40ef47663b956d56e7acd09fe0d1c31eb1e4b"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e0ebc4ecf5a515b8f2a33257d08962e387120a77"
+  revision = "e8fe0fa9c0097ca80d8b773e1d728843447f9233"
+  version = "v0.1.0"
 
 [[projects]]
   branch = "master"
@@ -486,8 +486,7 @@
   revision = "429e22e73d3e1ccfbc9311baa3ea9526423debdf"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c313924ca7110c452a83502384552f4dd2ed25dd0f3ab8aa8a34707315243561"
+  digest = "1:4e616fe01d486048e77342e2c5e638f8744ec6da802335633740aafb057f50d8"
   name = "github.com/giantswarm/micrologger"
   packages = [
     ".",
@@ -495,7 +494,8 @@
     "microloggertest",
   ]
   pruneopts = "UT"
-  revision = "d866337f739365a54de5924b8a7b29df17693ef8"
+  revision = "c4d217562e3d493e3ff571707346a5a2653475cb"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -507,10 +507,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:44980ab16c9f93bcc8f5647d46346147ea30898e942b1fb9ec920b6b8d36c126"
+  digest = "1:e35bb8852e24edcf07a8ebf2f0a488ff21a8686ab105963a5d712c77e24bf005"
   name = "github.com/giantswarm/operatorkit"
   packages = [
     "controller",
+    "controller/collector",
     "controller/context/finalizerskeptcontext",
     "controller/context/reconciliationcanceledcontext",
     "controller/context/resourcecanceledcontext",
@@ -525,7 +526,7 @@
     "resource/wrapper/retryresource",
   ]
   pruneopts = "UT"
-  revision = "a813aec7407ebf158fea264babb9b0303bcb5747"
+  revision = "748c399a1bba09ef0227617d1e313c2723e16c5f"
 
 [[projects]]
   branch = "master"
@@ -1980,14 +1981,16 @@
   revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
 
 [[projects]]
-  digest = "1:8053263951e435c10bfb257f59063caafdb5f7de5ee35336383c84949bb84a25"
+  digest = "1:1467ce430fe64e79b42e62d087dbcc58aaaa6d862f92f5d4daae68545af8507e"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
+    "pkg/builder",
     "pkg/cache",
     "pkg/cache/internal",
     "pkg/client",
     "pkg/client/apiutil",
     "pkg/controller",
+    "pkg/conversion",
     "pkg/event",
     "pkg/handler",
     "pkg/healthz",
@@ -2007,6 +2010,7 @@
     "pkg/source/internal",
     "pkg/webhook",
     "pkg/webhook/admission",
+    "pkg/webhook/conversion",
     "pkg/webhook/internal/certwatcher",
     "pkg/webhook/internal/metrics",
   ]
