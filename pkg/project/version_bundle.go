@@ -8,11 +8,15 @@ func NewVersionBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
+
 				Component:   "aws-operator",
 				Description: "Add KMS support for China region.",
 				Kind:        versionbundle.KindAdded,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/2145",
+				},
+			},
+			{
 				Component:   "ignition",
 				Description: "Make internal Kubernetes domain configurable.",
 				Kind:        versionbundle.KindChanged,
