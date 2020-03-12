@@ -132,7 +132,7 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			switch *tag.Key {
 			case tagCluster:
 				cluster = *tag.Value
-			case tagInstallation:
+			case key.TagInstallation:
 				installation = *tag.Value
 			case tagName:
 				name = *tag.Value

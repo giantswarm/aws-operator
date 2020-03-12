@@ -2,6 +2,7 @@ package natgatewayaddresses
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -10,6 +11,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -64,7 +66,7 @@ func (r *Resource) addNATGatewayAddressesToContext(ctx context.Context, cr infra
 		i := &ec2.DescribeAddressesInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("tag:giantswarm.io/installation"),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagInstallation)),
 					Values: []*string{
 						aws.String(r.installation),
 					},
