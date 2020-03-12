@@ -10,7 +10,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubnetEuCentral1a
+        - !Ref PrivateSubnetEuCentral1b
       AvailabilityZones:
         - eu-central-1b
       DesiredCapacity: 1
