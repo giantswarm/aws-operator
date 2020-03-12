@@ -18,7 +18,6 @@ type Config struct {
 	Detection *changedetection.TCNP
 	Logger    micrologger.Logger
 
-	EncrypterBackend string
 	InstallationName string
 }
 
@@ -29,7 +28,6 @@ type Resource struct {
 	detection *changedetection.TCNP
 	logger    micrologger.Logger
 
-	encrypterBackend string
 	installationName string
 }
 
@@ -44,9 +42,6 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
-	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
@@ -56,7 +51,6 @@ func New(config Config) (*Resource, error) {
 		detection: config.Detection,
 		logger:    config.Logger,
 
-		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 	}
 

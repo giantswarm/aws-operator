@@ -388,7 +388,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				Public:  config.APIWhitelist.Public,
 			},
 			Detection:          tccpChangeDetection,
-			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
 			PublicRouteTables:  config.RouteTables,
@@ -432,7 +431,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := tccpf.Config{
 			Logger: config.Logger,
 
-			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
 		}
