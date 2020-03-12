@@ -140,6 +140,10 @@ spec:
               value: "20"
             - name: MINIMUM_IP_TARGET
               value: "5"
+            ## Deviation from original manifest - 5
+            ## disable SNAT as we setup NATGW in the route tables
+            - name: AWS_VPC_K8S_CNI_EXTERNALSNAT
+              value: "true"
           resources:
             requests:
               cpu: 10m
