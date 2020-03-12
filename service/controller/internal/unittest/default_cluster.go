@@ -41,6 +41,38 @@ func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 	return cr
 }
 
+func DefaultClusterChina() infrastructurev1alpha2.AWSCluster {
+	cr := infrastructurev1alpha2.AWSCluster{
+		ObjectMeta: v1.ObjectMeta{
+			Labels: map[string]string{
+				label.Cluster:         "8y5ck",
+				label.OperatorVersion: "7.3.0",
+			},
+		},
+		Spec: infrastructurev1alpha2.AWSClusterSpec{
+			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{
+				Description: "Test china cluster for template rendering unit test.",
+				DNS: infrastructurev1alpha2.AWSClusterSpecClusterDNS{
+					Domain: "gauss.cn-north-1.aws.gigantic.io",
+				},
+			},
+			Provider: infrastructurev1alpha2.AWSClusterSpecProvider{
+				CredentialSecret: infrastructurev1alpha2.AWSClusterSpecProviderCredentialSecret{
+					Name:      "default-credential-secret",
+					Namespace: "default",
+				},
+				Master: infrastructurev1alpha2.AWSClusterSpecProviderMaster{
+					AvailabilityZone: "cn-north-1a",
+					InstanceType:     "m5.xlarge",
+				},
+				Region: "cn-north-1",
+			},
+		},
+	}
+
+	return cr
+}
+
 func ClusterWithAZ(cluster infrastructurev1alpha2.AWSCluster, az string) infrastructurev1alpha2.AWSCluster {
 	region := az[0 : len(az)-1]
 

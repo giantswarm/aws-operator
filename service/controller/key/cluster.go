@@ -91,6 +91,10 @@ func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time)
 	return getResourcenameWithTimeHash("DockerVolume", cr, t)
 }
 
+func IsChinaRegion(awsRegion string) bool {
+	return strings.HasPrefix(awsRegion, "cn-")
+}
+
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Spec.Provider.Master.AvailabilityZone
 }

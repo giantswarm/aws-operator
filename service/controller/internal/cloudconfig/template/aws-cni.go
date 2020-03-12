@@ -101,7 +101,11 @@ spec:
       tolerations:
         - operator: Exists
       containers:
+        {{- if .IsChinaRegion }}
+        - image: 961992271922.dkr.ecr.{{.AWSRegion}}.amazonaws.com.cn/amazon-k8s-cni:v1.6.0
+        {{- else }}
         - image: 602401143452.dkr.ecr.{{.AWSRegion}}.amazonaws.com/amazon-k8s-cni:v1.6.0
+        {{- end }}
           imagePullPolicy: Always
           ports:
             - containerPort: 61678
