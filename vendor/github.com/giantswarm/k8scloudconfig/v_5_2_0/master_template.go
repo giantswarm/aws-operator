@@ -86,6 +86,20 @@ systemd:
       ExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf
       [Install]
       WantedBy=multi-user.target
+  - name: k8s-setup-kubelet-environment.service
+    enabled: true
+    contents: |
+      [Unit]
+      Description=k8s-setup-kubelet-environment Service
+      After=k8s-setup-network-env.service docker.service
+      Requires=k8s-setup-network-env.service docker.service
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=0
+      ExecStart=/opt/bin/setup-kubelet-environment
+      [Install]
+      WantedBy=multi-user.target
   - name: k8s-setup-kubelet-config.service
     enabled: true
     contents: |
