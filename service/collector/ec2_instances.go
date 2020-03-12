@@ -6,11 +6,13 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
+
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -171,7 +173,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		input := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String(fmt.Sprintf("tag:%s", tagInstallation)),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagInstallation)),
 					Values: []*string{
 						aws.String(e.installationName),
 					},
@@ -212,7 +214,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			switch *tag.Key {
 			case tagCluster:
 				cluster = *tag.Value
-			case tagInstallation:
+			case key.TagInstallation:
 				installation = *tag.Value
 			case tagOrganization:
 				organization = *tag.Value
