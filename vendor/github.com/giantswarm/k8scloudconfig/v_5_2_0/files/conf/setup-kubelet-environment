@@ -2,7 +2,7 @@
 EnvFile="/etc/kubelet-environment"
 
 # set max pods variable
-{{ if eq .Cluster.Kubernetes.Provider "aws" }}
+{{ if eq .Cluster.Kubernetes.CloudProvider "aws" }}
 instance_size=$(curl http://169.254.169.254/latest/meta-data/instance-type 2>/dev/null| cut -d\. -f2)
 
 if [[ "${instance_size}" =~ ^(4xlarge|8xlarge|9xlarge|12xlarge|16xlarge|18xlarge|24xlarge)$ ]]; then
