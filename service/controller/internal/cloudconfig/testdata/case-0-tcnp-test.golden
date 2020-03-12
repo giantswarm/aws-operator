@@ -68,7 +68,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQptYXhQb2RzOiAxMTAKcnVudGltZUNncm91cHM6IC9rdWJlcmVzZXJ2ZWQuc2xpY2UKc3lzdGVtUmVzZXJ2ZWQ6CiAgY3B1OiAyNTBtCiAgbWVtb3J5OiAzODRNaQpzeXN0ZW1SZXNlcnZlZENncm91cDogL3N5c3RlbS5zbGljZQphdXRoZW50aWNhdGlvbjoKICBhbm9ueW1vdXM6CiAgICBlbmFibGVkOiB0cnVlICMgRGVmYXVsdHMgdG8gZmFsc2UgYXMgb2YgMS4xMAogIHdlYmhvb2s6CiAgICBlbmFibGVkOiBmYWxzZSAjIERlYWZ1bHRzIHRvIHRydWUgYXMgb2YgMS4xMAphdXRob3JpemF0aW9uOgogIG1vZGU6IEFsd2F5c0FsbG93ICMgRGVhZnVsdHMgdG8gd2ViaG9vayBhcyBvZiAxLjEwCmZlYXR1cmVHYXRlczoKICBUVExBZnRlckZpbmlzaGVkOiB0cnVlCg==",
+          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQptYXhQb2RzOiAke0FXU19NQVhfUE9EU30KcnVudGltZUNncm91cHM6IC9rdWJlcmVzZXJ2ZWQuc2xpY2UKc3lzdGVtUmVzZXJ2ZWQ6CiAgY3B1OiAyNTBtCiAgbWVtb3J5OiAzODRNaQpzeXN0ZW1SZXNlcnZlZENncm91cDogL3N5c3RlbS5zbGljZQphdXRoZW50aWNhdGlvbjoKICBhbm9ueW1vdXM6CiAgICBlbmFibGVkOiB0cnVlICMgRGVmYXVsdHMgdG8gZmFsc2UgYXMgb2YgMS4xMAogIHdlYmhvb2s6CiAgICBlbmFibGVkOiBmYWxzZSAjIERlYWZ1bHRzIHRvIHRydWUgYXMgb2YgMS4xMAphdXRob3JpemF0aW9uOgogIG1vZGU6IEFsd2F5c0FsbG93ICMgRGVhZnVsdHMgdG8gd2ViaG9vayBhcyBvZiAxLjEwCmZlYXR1cmVHYXRlczoKICBUVExBZnRlckZpbmlzaGVkOiB0cnVlCg==",
           "verification": {}
         },
         "filesystem": "root",
@@ -128,6 +128,15 @@
         "filesystem": "root",
         "mode": 420,
         "path": "/etc/ssh/sshd_config"
+      },
+      {
+        "contents": {
+          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKRW52RmlsZT0iL2V0Yy9rdWJlbGV0LWVudmlyb25tZW50IgoKIyBzZXQgbWF4IHBvZHMgdmFyaWFibGUK",
+          "verification": {}
+        },
+        "filesystem": "root",
+        "mode": 356,
+        "path": "/opt/bin/setup-kubelet-environment"
       },
       {
         "contents": {
@@ -394,7 +403,12 @@
         "name": "os-hardening.service"
       },
       {
-        "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=k8s-setup-kubelet-environment Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nExecStart=/opt/bin/setup-kubelet-environment\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "k8s-setup-kubelet-environment.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nEnvironmentFile=/etc/kubelet-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-setup-kubelet-config.service"
       },
@@ -411,7 +425,7 @@
       {
         "dropins": [
           {
-            "contents": "[Service]\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironment=\"DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid\"\nEnvironment=\"DOCKER_OPT_BIP=--bip=172.18.224.1/19\"\nEnvironment=\"DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false\"\n",
+            "contents": "[Service]\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironment=\"DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid\"\nEnvironment=\"DOCKER_OPT_BIP=--bip=172.18.224.1/19\"\nEnvironment=\"DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false --metrics-addr=0.0.0.0:9393 --experimental=true\"\n",
             "name": "10-giantswarm-extra-args.conf"
           }
         ],

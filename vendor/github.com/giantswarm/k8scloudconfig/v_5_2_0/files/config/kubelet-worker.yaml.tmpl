@@ -20,7 +20,7 @@ kubeReserved:
   memory: 768Mi
   ephemeral-storage: 1024Mi
 kubeReservedCgroup: /kubereserved.slice
-maxPods: 110
+maxPods: ${AWS_MAX_PODS}
 runtimeCgroups: /kubereserved.slice
 systemReserved:
   cpu: 250m

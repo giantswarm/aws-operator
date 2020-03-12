@@ -98,6 +98,7 @@ systemd:
       RemainAfterExit=yes
       TimeoutStartSec=0
       EnvironmentFile=/etc/network-environment
+      EnvironmentFile=/etc/kubelet-environment
       ExecStart=/bin/bash -c '/usr/bin/envsubst </etc/kubernetes/config/kubelet.yaml.tmpl >/etc/kubernetes/config/kubelet.yaml'
       [Install]
       WantedBy=multi-user.target
@@ -123,7 +124,7 @@ systemd:
           Slice=kubereserved.slice
           Environment="DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
           Environment="DOCKER_OPT_BIP=--bip={{.Cluster.Docker.Daemon.CIDR}}"
-          Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false"
+          Environment="DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false --metrics-addr=0.0.0.0:9393 --experimental=true"
   - name: k8s-setup-network-env.service
     enabled: true
     contents: |
@@ -487,6 +488,11 @@ storage:
       mode: 0544
       contents:
         source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/k8s-addons" }}"
+    - path: /opt/bin/setup-kubelet-environment
+      filesystem: root
+      mode: 0544
+      contents:
+        source: "data:text/plain;charset=utf-8;base64,{{  index .Files "conf/setup-kubelet-environment" }}"
 
     - path: /etc/kubernetes/kubeconfig/addons.yaml
       filesystem: root
