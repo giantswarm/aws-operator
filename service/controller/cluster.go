@@ -32,7 +32,6 @@ type ClusterConfig struct {
 	ClusterIPRange             string
 	DeleteLoggingBucket        bool
 	DockerDaemonCIDR           string
-	EncrypterBackend           string
 	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -185,7 +184,6 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			ClusterIPRange:             config.ClusterIPRange,
 			DeleteLoggingBucket:        config.DeleteLoggingBucket,
 			DockerDaemonCIDR:           config.DockerDaemonCIDR,
-			EncrypterBackend:           config.EncrypterBackend,
 			GuestAvailabilityZones:     config.GuestAvailabilityZones,
 			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
 			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,

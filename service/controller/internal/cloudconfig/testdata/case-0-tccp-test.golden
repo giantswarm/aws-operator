@@ -388,7 +388,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKCnRva2VuX3BhdGg9L3Zhci90b2tlbgoKdmF1bHRfdGxzX2Fzc2V0c19kZWNyeXB0KCkgewogICAgZWNobyBkZWNyeXB0aW5nIHRscyBhc3NldHMKICAgIHNob3B0IC1zIG51bGxnbG9iCiAgICBmb3IgZW5jS2V5IGluICQoZmluZCAvZXRjL2t1YmVybmV0ZXMvc3NsIC1uYW1lICIqLnBlbS5lbmMiKTsgZG8KICAgICAgZWNobyBkZWNyeXB0aW5nICRlbmNLZXkKICAgICAgZj0kKG1rdGVtcCAkZW5jS2V5LlhYWFhYWFhYKQogICAgICBjYXQgPDxFT0YgPiBkYXRhLmpzb24KewogICJjaXBoZXJ0ZXh0IjogIiQoY2F0ICRlbmNLZXkpIgp9CkVPRgogICAgICBjdXJsIC1rIFwKICAgICAgICAtLWhlYWRlciAiWC1WYXVsdC1Ub2tlbjogJChjYXQgJHRva2VuX3BhdGgpIiBcCiAgICAgICAgLS1zaWxlbnQgXAogICAgICAgIC0tcmVxdWVzdCBQT1NUIFwKICAgICAgICAtLWRhdGEgQGRhdGEuanNvbiBcCiAgICAgICAgL3YxL3RyYW5zaXQvZGVjcnlwdC8gfCBcCiAgICAgICAganEgLXIgLmRhdGEucGxhaW50ZXh0IHwgYmFzZTY0IC1kID4gJGYKICAgICAgbXYgLWYgJGYgJHtlbmNLZXklLmVuY30KICAgICAgcm0gLWYgZGF0YS5qc29uCiAgICBkb25lOwogICAgZWNobyBkb25lLgoKfQoKa21zX3Rsc19hc3NldHNfZGVjcnlwdCgpIHsKQVdTX0NMSV9JTUFHRT0icXVheS5pby9jb3Jlb3MvYXdzY2xpOjAyNWEzNTdmMDUyNDJmZGFkNmE4MWU4YTZiNTIwMDk4YWE2NWE2MDAiCgp3aGlsZSAhIHJrdCBmZXRjaCAtLXRydXN0LWtleXMtZnJvbS1odHRwcz10cnVlICR7QVdTX0NMSV9JTUFHRX07CmRvCiAgICAgICAgZWNobyAiRmFpbGVkIHRvIGZldGNoIHJrdCBpbWFnZSAke0FXU19DTElfSU1BR0V9LCByZXRyeWluZyBpbiA1IHNlYy4iCiAgICAgICAgc2xlZXAgNXMKZG9uZQplY2hvICJTdWNjZXNzZnVsbHkgZmV0Y2hlZCBya3QgaW1hZ2UgJHtBV1NfQ0xJX0lNQUdFfS4iCgpya3QgcnVuIFwKICAtLXZvbHVtZT1zc2wsa2luZD1ob3N0LHNvdXJjZT0vZXRjL2t1YmVybmV0ZXMvc3NsLHJlYWRPbmx5PWZhbHNlIFwKICAtLW1vdW50PXZvbHVtZT1zc2wsdGFyZ2V0PS9ldGMva3ViZXJuZXRlcy9zc2wgXAogIC0tdXVpZC1maWxlLXNhdmU9L3Zhci9ydW4vY29yZW9zL2RlY3J5cHQtdGxzLWFzc2V0cy51dWlkIFwKICAtLXZvbHVtZT1kbnMsa2luZD1ob3N0LHNvdXJjZT0vZXRjL3Jlc29sdi5jb25mLHJlYWRPbmx5PXRydWUgLS1tb3VudCB2b2x1bWU9ZG5zLHRhcmdldD0vZXRjL3Jlc29sdi5jb25mIFwKICAtLW5ldD1ob3N0IFwKICAtLXRydXN0LWtleXMtZnJvbS1odHRwcyBcCiAgJHtBV1NfQ0xJX0lNQUdFfSAtLWV4ZWM9L2Jpbi9iYXNoIC0tIFwKICAgIC1lYyBcCiAgICAnZWNobyBkZWNyeXB0aW5nIHRscyBhc3NldHMKICAgIHNob3B0IC1zIG51bGxnbG9iCiAgICBmb3IgZW5jS2V5IGluICQoZmluZCAvZXRjL2t1YmVybmV0ZXMvc3NsIC1uYW1lICIqLnBlbS5lbmMiKTsgZG8KICAgICAgZWNobyBkZWNyeXB0aW5nICRlbmNLZXkKICAgICAgZj0kKG1rdGVtcCAkZW5jS2V5LlhYWFhYWFhYKQogICAgICAvdXNyL2Jpbi9hd3MgXAogICAgICAgIC0tcmVnaW9uIGV1LWNlbnRyYWwtMSBrbXMgZGVjcnlwdCBcCiAgICAgICAgLS1jaXBoZXJ0ZXh0LWJsb2IgZmlsZWI6Ly8kZW5jS2V5IFwKICAgICAgICAtLW91dHB1dCB0ZXh0IFwKICAgICAgICAtLXF1ZXJ5IFBsYWludGV4dCBcCiAgICAgIHwgYmFzZTY0IC1kID4gJGYKICAgICAgbXYgLWYgJGYgJHtlbmNLZXklLmVuY30KICAgIGRvbmU7JwoKcmt0IHJtIC0tdXVpZC1maWxlPS92YXIvcnVuL2NvcmVvcy9kZWNyeXB0LXRscy1hc3NldHMudXVpZCB8fCA6Cn0KCgptYWluKCkgewoKICBrbXNfdGxzX2Fzc2V0c19kZWNyeXB0CgoKY2hvd24gLVIgZXRjZDpldGNkIC9ldGMva3ViZXJuZXRlcy9zc2wvZXRjZAp9CgptYWluCg==",
+          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKa21zX3Rsc19hc3NldHNfZGVjcnlwdCgpIHsKQVdTX0NMSV9JTUFHRT0icXVheS5pby9naWFudHN3YXJtL2F3c2NsaToxLjE4LjMiCgp3aGlsZSAhIGRvY2tlciBwdWxsICR7QVdTX0NMSV9JTUFHRX07CmRvCiAgICAgICAgZWNobyAiRmFpbGVkIHRvIGZldGNoIGRvY2tlciBpbWFnZSAke0FXU19DTElfSU1BR0V9LCByZXRyeWluZyBpbiA1IHNlYy4iCiAgICAgICAgc2xlZXAgNXMKZG9uZQplY2hvICJTdWNjZXNzZnVsbHkgZmV0Y2hlZCBkb2NrZXIgaW1hZ2UgJHtBV1NfQ0xJX0lNQUdFfS4iCgoKZG9ja2VyIHJ1biAtLW5ldD1ob3N0IC12IC9ldGMva3ViZXJuZXRlcy9zc2w6L2V0Yy9rdWJlcm5ldGVzL3NzbCBcCiAgICAgICAgLS1lbnRyeXBvaW50PS9iaW4vc2ggXAogICAgICAgICR7QVdTX0NMSV9JTUFHRX0gXAogICAgICAgIC1lYyBcCiAgICAgICAgJ2VjaG8gZGVjcnlwdGluZyB0bHMgYXNzZXRzCiAgICBmb3IgZW5jS2V5IGluICQoZmluZCAvZXRjL2t1YmVybmV0ZXMvc3NsIC1uYW1lICIqLnBlbS5lbmMiKTsgZG8KICAgICAgZWNobyBkZWNyeXB0aW5nICRlbmNLZXkKICAgICAgZj0kKG1rdGVtcCAkZW5jS2V5LlhYWFhYWFhYKQogICAgICBhd3MgXAogICAgICAgIC0tcmVnaW9uIGV1LWNlbnRyYWwtMSBrbXMgZGVjcnlwdCBcCiAgICAgICAgLS1jaXBoZXJ0ZXh0LWJsb2IgZmlsZWI6Ly8kZW5jS2V5IFwKICAgICAgICAtLW91dHB1dCB0ZXh0IFwKICAgICAgICAtLXF1ZXJ5IFBsYWludGV4dCBcCiAgICAgIHwgYmFzZTY0IC1kID4gJGYKICAgICAgbXYgLWYgJGYgJHtlbmNLZXklLmVuY30KICAgIGRvbmU7Jwp9CgoKbWFpbigpIHsKICBrbXNfdGxzX2Fzc2V0c19kZWNyeXB0CiAgY2hvd24gLVIgZXRjZDpldGNkIC9ldGMva3ViZXJuZXRlcy9zc2wvZXRjZAp9CgptYWluCg==",
           "verification": {}
         },
         "filesystem": "root",
@@ -403,7 +403,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKCnRva2VuX3BhdGg9L3Zhci90b2tlbgoKdmF1bHRfa2V5c19hc3NldHNfZGVjcnlwdCgpIHsKICAgIGVjaG8gZGVjcnlwdGluZyBrZXlzIGFzc2V0cwogICAgc2hvcHQgLXMgbnVsbGdsb2IKICAgIGZvciBlbmNLZXkgaW4gJChmaW5kIC9ldGMva3ViZXJuZXRlcy9lbmNyeXB0aW9uIC1uYW1lICIqLmVuYyIpOyBkbwogICAgICBlY2hvIGRlY3J5cHRpbmcgJGVuY0tleQogICAgICBmPSQobWt0ZW1wICRlbmNLZXkuWFhYWFhYWFgpCiAgICAgIGNhdCA8PEVPRiA+IGRhdGEuanNvbgp7CiAgImNpcGhlcnRleHQiOiAiJChjYXQgJGVuY0tleSkiCn0KRU9GCiAgICAgIGN1cmwgLWsgXAogICAgICAgIC0taGVhZGVyICJYLVZhdWx0LVRva2VuOiAkKGNhdCAkdG9rZW5fcGF0aCkiIFwKICAgICAgICAtLXNpbGVudCBcCiAgICAgICAgLS1yZXF1ZXN0IFBPU1QgXAogICAgICAgIC0tZGF0YSBAZGF0YS5qc29uIFwKICAgICAgICAvdjEvdHJhbnNpdC9kZWNyeXB0LyB8IFwKICAgICAgICBqcSAtciAuZGF0YS5wbGFpbnRleHQgfCBiYXNlNjQgLWQgPiAkZgogICAgICBtdiAtZiAkZiAke2VuY0tleSUuZW5jfQogICAgICBybSAtZiBkYXRhLmpzb24KICAgIGRvbmU7CiAgICBlY2hvIGRvbmUuCgp9CgprbXNfa2V5c19hc3NldHNfZGVjcnlwdCgpIHsKQVdTX0NMSV9JTUFHRT0icXVheS5pby9jb3Jlb3MvYXdzY2xpOjAyNWEzNTdmMDUyNDJmZGFkNmE4MWU4YTZiNTIwMDk4YWE2NWE2MDAiCgp3aGlsZSAhIHJrdCBmZXRjaCAtLXRydXN0LWtleXMtZnJvbS1odHRwcz10cnVlICR7QVdTX0NMSV9JTUFHRX07CmRvCiAgICAgICAgZWNobyAiRmFpbGVkIHRvIGZldGNoIHJrdCBpbWFnZSAke0FXU19DTElfSU1BR0V9LCByZXRyeWluZyBpbiA1IHNlYy4iCiAgICAgICAgc2xlZXAgNXMKZG9uZQplY2hvICJTdWNjZXNzZnVsbHkgZmV0Y2hlZCBya3QgaW1hZ2UgJHtBV1NfQ0xJX0lNQUdFfS4iCgpya3QgcnVuIFwKICAtLXZvbHVtZT1rZXlzLGtpbmQ9aG9zdCxzb3VyY2U9L2V0Yy9rdWJlcm5ldGVzL2VuY3J5cHRpb24scmVhZE9ubHk9ZmFsc2UgXAogIC0tbW91bnQ9dm9sdW1lPWtleXMsdGFyZ2V0PS9ldGMva3ViZXJuZXRlcy9lbmNyeXB0aW9uIFwKICAtLXV1aWQtZmlsZS1zYXZlPS92YXIvcnVuL2NvcmVvcy9kZWNyeXB0LWtleXMtYXNzZXRzLnV1aWQgXAogIC0tdm9sdW1lPWRucyxraW5kPWhvc3Qsc291cmNlPS9ldGMvcmVzb2x2LmNvbmYscmVhZE9ubHk9dHJ1ZSAtLW1vdW50IHZvbHVtZT1kbnMsdGFyZ2V0PS9ldGMvcmVzb2x2LmNvbmYgXAogIC0tbmV0PWhvc3QgXAogIC0tdHJ1c3Qta2V5cy1mcm9tLWh0dHBzIFwKICAke0FXU19DTElfSU1BR0V9IC0tZXhlYz0vYmluL2Jhc2ggLS0gXAogICAgLWVjIFwKICAgICdlY2hvIGRlY3J5cHRpbmcga2V5cyBhc3NldHMKICAgIHNob3B0IC1zIG51bGxnbG9iCiAgICBmb3IgZW5jS2V5IGluICQoZmluZCAvZXRjL2t1YmVybmV0ZXMvZW5jcnlwdGlvbiAtbmFtZSAiKi5lbmMiKTsgZG8KICAgICAgZWNobyBkZWNyeXB0aW5nICRlbmNLZXkKICAgICAgZj0kKG1rdGVtcCAkZW5jS2V5LlhYWFhYWFhYKQogICAgICAvdXNyL2Jpbi9hd3MgXAogICAgICAgIC0tcmVnaW9uIGV1LWNlbnRyYWwtMSBrbXMgZGVjcnlwdCBcCiAgICAgICAgLS1jaXBoZXJ0ZXh0LWJsb2IgZmlsZWI6Ly8kZW5jS2V5IFwKICAgICAgICAtLW91dHB1dCB0ZXh0IFwKICAgICAgICAtLXF1ZXJ5IFBsYWludGV4dCBcCiAgICAgIHwgYmFzZTY0IC1kID4gJGYKICAgICAgbXYgLWYgJGYgJHtlbmNLZXklLmVuY30KICAgIGRvbmU7CiAgICBlY2hvIGRvbmUuJwoKcmt0IHJtIC0tdXVpZC1maWxlPS92YXIvcnVuL2NvcmVvcy9kZWNyeXB0LWtleXMtYXNzZXRzLnV1aWQgfHwgOgp9CgptYWluKCkgewoKICBrbXNfa2V5c19hc3NldHNfZGVjcnlwdAoKCmNob3duIC1SIGV0Y2Q6ZXRjZCAvZXRjL2t1YmVybmV0ZXMvc3NsL2V0Y2QKfQoKbWFpbgo=",
+          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKa21zX2tleXNfYXNzZXRzX2RlY3J5cHQoKSB7CkFXU19DTElfSU1BR0U9InF1YXkuaW8vZ2lhbnRzd2FybS9hd3NjbGk6MS4xOC4zIgoKd2hpbGUgISBkb2NrZXIgcHVsbCAke0FXU19DTElfSU1BR0V9OwpkbwogICAgICAgIGVjaG8gIkZhaWxlZCB0byBmZXRjaCBkb2NrZXIgaW1hZ2UgJHtBV1NfQ0xJX0lNQUdFfSwgcmV0cnlpbmcgaW4gNSBzZWMuIgogICAgICAgIHNsZWVwIDVzCmRvbmUKZWNobyAiU3VjY2Vzc2Z1bGx5IGZldGNoZWQgZG9ja2VyIGltYWdlICR7QVdTX0NMSV9JTUFHRX0uIgoKCmRvY2tlciBydW4gLS1uZXQ9aG9zdCAtdiAvZXRjL2t1YmVybmV0ZXMvZW5jcnlwdGlvbjovZXRjL2t1YmVybmV0ZXMvZW5jcnlwdGlvbiBcCiAgICAgICAgLS1lbnRyeXBvaW50PS9iaW4vc2ggXAogICAgICAgICR7QVdTX0NMSV9JTUFHRX0gXAogICAgICAgIC1lYyBcCiAgICAgICAgJ2VjaG8gZGVjcnlwdGluZyB0bHMgYXNzZXRzCiAgICBmb3IgZW5jS2V5IGluICQoZmluZCAvZXRjL2t1YmVybmV0ZXMvZW5jcnlwdGlvbiAtbmFtZSAiKi5lbmMiKTsgZG8KICAgICAgZWNobyBkZWNyeXB0aW5nICRlbmNLZXkKICAgICAgZj0kKG1rdGVtcCAkZW5jS2V5LlhYWFhYWFhYKQogICAgICBhd3MgXAogICAgICAgIC0tcmVnaW9uIGV1LWNlbnRyYWwtMSBrbXMgZGVjcnlwdCBcCiAgICAgICAgLS1jaXBoZXJ0ZXh0LWJsb2IgZmlsZWI6Ly8kZW5jS2V5IFwKICAgICAgICAtLW91dHB1dCB0ZXh0IFwKICAgICAgICAtLXF1ZXJ5IFBsYWludGV4dCBcCiAgICAgIHwgYmFzZTY0IC1kID4gJGYKICAgICAgbXYgLWYgJGYgJHtlbmNLZXklLmVuY30KICAgIGRvbmU7Jwp9CgptYWluKCkgewogIGttc19rZXlzX2Fzc2V0c19kZWNyeXB0CiAgY2hvd24gLVIgZXRjZDpldGNkIC9ldGMva3ViZXJuZXRlcy9zc2wvZXRjZAp9CgptYWluCg==",
           "verification": {}
         },
         "filesystem": "root",
@@ -442,21 +442,6 @@
           "name": "root"
         },
         "path": "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
-        "user": {
-          "name": "root"
-        }
-      },
-      {
-        "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2ggLWUKCg==",
-          "verification": {}
-        },
-        "filesystem": "root",
-        "mode": 448,
-        "group": {
-          "name": "root"
-        },
-        "path": "/opt/bin/vault-aws-authorizer",
         "user": {
           "name": "root"
         }
@@ -759,7 +744,7 @@
         "name": "nvme-set-timeouts.service"
       },
       {
-        "contents": "\n[Unit]\nDescription=Decrypt TLS certificates\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service vault-aws-authorizer.service\nRequires=wait-for-domains.service vault-aws-authorizer.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/decrypt-tls-assets\n\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "\n[Unit]\nDescription=Decrypt TLS certificates\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service\nRequires=wait-for-domains.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/decrypt-tls-assets\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "decrypt-tls-assets.service"
       },
@@ -767,11 +752,6 @@
         "contents": "\n[Unit]\nDescription=Decrypt Keys assets\nBefore=k8s-kubelet.service\nAfter=decrypt-tls-assets.service\nRequires=decrypt-tls-assets.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/decrypt-keys-assets\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "decrypt-keys-assets.service"
-      },
-      {
-        "contents": "\n[Unit]\nDescription=Token decryption retrieval\nBefore=k8s-kubelet.service\nAfter=wait-for-domains.service\nRequires=wait-for-domains.service\n\n[Service]\nType=oneshot\nExecStart=/opt/bin/vault-aws-authorizer\n[Install]\nWantedBy=multi-user.target\n",
-        "enabled": true,
-        "name": "vault-aws-authorizer.service"
       },
       {
         "contents": "\n[Unit]\nDescription=set proper hostname for k8s\nRequires=wait-for-domains.service\nAfter=wait-for-domains.service\nBefore=k8s-kubelet.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash -c \"hostnamectl set-hostname $(curl http://169.254.169.254/latest/meta-data/local-hostname)\"\n\n[Install]\nWantedBy=multi-user.target\n",
