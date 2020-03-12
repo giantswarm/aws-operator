@@ -271,12 +271,7 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-<<<<<<< HEAD
-  branch = "master"
-  digest = "1:715bf3eea7e345a7c9915bf9c2e91e97687e81e328a1ce8767ec0441e28feabe"
-=======
   digest = "1:718acd69418c2d3e570ee058007a575e99a3e05888f4a7bb02bd4fc796945d8d"
->>>>>>> master
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
