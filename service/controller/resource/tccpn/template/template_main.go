@@ -12,5 +12,6 @@ Resources:
   {{ template "iam_policies" . }}
   {{ template "launch_configuration" . }}
   {{ template "security_groups" . }}
+  {{ template "subnets" . }}
 {{ end }}
 `

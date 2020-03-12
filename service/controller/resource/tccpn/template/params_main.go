@@ -9,4 +9,5 @@ type ParamsMain struct {
 	LaunchConfiguration *ParamsMainLaunchConfiguration
 	Outputs             *ParamsMainOutputs
 	SecurityGroups      *ParamsMainSecurityGroups
+	Subnets             *ParamsMainSubnets
 }

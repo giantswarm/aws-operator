@@ -3,6 +3,7 @@ package tccpn
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -329,6 +330,62 @@ func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSC
 
 	return securityGroups, nil
 }
+func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainSubnets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+
+	sort.Slice(zones, func(i, j int) bool {
+		return zones[i].Name < zones[j].Name
+	})
+
+	var publicSubnets []template.Subnet
+	for _, az := range zones {
+		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
+		snet := template.Subnet{
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Public.CIDR.String(),
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: template.RouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+		}
+		publicSubnets = append(publicSubnets, snet)
+	}
+
+	var privateSubnets []template.Subnet
+	for _, az := range zones {
+		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
+		snet := template.Subnet{
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Private.CIDR.String(),
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: template.RouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+		}
+		privateSubnets = append(privateSubnets, snet)
+	}
+
+	var subnets *template.ParamsMainSubnets
+	{
+		subnets = &template.ParamsMainSubnets{
+			PublicSubnets:  publicSubnets,
+			PrivateSubnets: privateSubnets,
+		}
+	}
+
+	return subnets, nil
+}
 
 func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string, apiWhiteList APIWhitelist) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
@@ -357,6 +414,10 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		subnets, err := newSubnetsParams(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 
 		params = &template.ParamsMain{
 			AutoScalingGroup:    autoScalingGroup,
@@ -365,6 +426,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			LaunchConfiguration: launchConfiguration,
 			Outputs:             outputs,
 			SecurityGroups:      securityGroups,
+			Subnets:             subnets,
 		}
 	}
 
