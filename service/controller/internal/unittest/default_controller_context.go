@@ -17,7 +17,7 @@ func DefaultContext() context.Context {
 				TCCP: controllercontext.ContextSpecTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 						{
-							Name: "cn-north-1a",
+							Name: "eu-central-1a",
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -30,7 +30,7 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
-							Name: "cn-north-1b",
+							Name: "eu-central-1b",
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -43,7 +43,7 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
-							Name: "cn-north-1c",
+							Name: "eu-central-1c",
 							Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.128/27"),
@@ -60,9 +60,9 @@ func DefaultContext() context.Context {
 				TCNP: controllercontext.ContextSpecTenantClusterTCNP{
 					AvailabilityZones: []controllercontext.ContextSpecTenantClusterTCNPAvailabilityZone{
 						{
-							Name: "cn-north-1a",
+							Name: "eu-central-1a",
 							NATGateway: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway{
-								ID: "nat-gateway-id-cn-north-1a",
+								ID: "nat-gateway-id-eu-central-1a",
 							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
@@ -71,9 +71,9 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
-							Name: "cn-north-1c",
+							Name: "eu-central-1c",
 							NATGateway: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneNATGateway{
-								ID: "nat-gateway-id-cn-north-1c",
+								ID: "nat-gateway-id-eu-central-1c",
 							},
 							Subnet: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextSpecTenantClusterTCNPAvailabilityZoneSubnetPrivate{
@@ -121,7 +121,7 @@ func DefaultContext() context.Context {
 			TenantCluster: controllercontext.ContextStatusTenantCluster{
 				AWS: controllercontext.ContextStatusTenantClusterAWS{
 					AccountID: "tenant-account",
-					Region:    "cn-north-1",
+					Region:    "eu-central-1",
 				},
 				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
 				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
@@ -130,7 +130,7 @@ func DefaultContext() context.Context {
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
-							Name: "cn-north-1a",
+							Name: "eu-central-1a",
 							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 									ID: "public-route-table-id-1a",
@@ -148,7 +148,7 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
-							Name: "cn-north-1b",
+							Name: "eu-central-1b",
 							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 									ID: "public-route-table-id-1b",
@@ -166,7 +166,7 @@ func DefaultContext() context.Context {
 							},
 						},
 						{
-							Name: "cn-north-1c",
+							Name: "eu-central-1c",
 							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
 								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
 									ID: "public-route-table-id-1c",
