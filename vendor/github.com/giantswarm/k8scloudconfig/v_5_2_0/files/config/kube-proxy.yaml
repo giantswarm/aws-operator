@@ -4,7 +4,7 @@ clientConnection:
 kind: KubeProxyConfiguration
 mode: iptables
 resourceContainer: /kube-proxy
-{{- if and (ne .Cluster.Kubernetes.Provider "aws") (not .DisableCalico) }}
+{{- if and (ne .Cluster.Kubernetes.CloudProvider "aws") (not .DisableCalico) }}
 clusterCIDR: {{ .Cluster.Calico.Subnet }}/{{ .Cluster.Calico.CIDR }}
 {{- end }}
 metricsBindAddress: 0.0.0.0:10249
