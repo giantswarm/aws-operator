@@ -437,7 +437,7 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 
 	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
+		if az.Name == key.MasterAvailabilityZone(cr) {
 			{
 				nr := template.ParamsMainNATGatewayNATRoute{
 					NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
