@@ -437,8 +437,16 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 
 	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
+		if az.Name == key.MasterAvailabilityZone(cr) {
+			{
+				nr := template.ParamsMainNATGatewayNATRoute{
+					NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+					NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
+					RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+				}
+
+				natRoutes = append(natRoutes, nr)
+			}
 		}
 
 		{
@@ -451,15 +459,6 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 			natRoutes = append(natRoutes, nr)
 		}
 
-		{
-			nr := template.ParamsMainNATGatewayNATRoute{
-				NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
-				NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-			}
-
-			natRoutes = append(natRoutes, nr)
-		}
 	}
 
 	var natGateway *template.ParamsMainNATGateway

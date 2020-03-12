@@ -432,13 +432,13 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  AWSCNINATRouteEuCentral1b:
+  AWSCNINATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1b
+      RouteTableId: !Ref AWSCNIRouteTableEuCentral1a
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: NATGatewayEuCentral1b
+        Ref: NATGatewayEuCentral1a
   NATRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
@@ -446,6 +446,20 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1b
+  AWSCNINATRouteEuCentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AWSCNIRouteTableEuCentral1b
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGatewayEuCentral1b
+  AWSCNINATRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AWSCNIRouteTableEuCentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGatewayEuCentral1c
   HostedZone:
     Type: 'AWS::Route53::HostedZone'
     Properties:
