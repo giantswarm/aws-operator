@@ -205,7 +205,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSContr
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
 		ClusterID:        key.ClusterID(&cr),
-		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(cc.Spec.TenantCluster.TCCP.AvailabilityZones[0].Name)),
+		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0])),
 	}
 
 	return autoScalingGroup, nil
