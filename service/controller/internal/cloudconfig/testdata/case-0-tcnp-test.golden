@@ -408,7 +408,7 @@
         "name": "k8s-setup-kubelet-environment.service"
       },
       {
-        "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nEnvironmentFile=/etc/kubelet-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service k8s-setup-kubelet-environment.service\nRequires=k8s-setup-network-env.service docker.service k8s-setup-kubelet-environment.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nEnvironmentFile=/etc/kubelet-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-setup-kubelet-config.service"
       },

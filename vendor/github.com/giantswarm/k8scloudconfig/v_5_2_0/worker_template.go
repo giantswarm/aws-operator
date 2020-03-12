@@ -98,8 +98,8 @@ systemd:
     contents: |
       [Unit]
       Description=k8s-setup-kubelet-config Service
-      After=k8s-setup-network-env.service docker.service
-      Requires=k8s-setup-network-env.service docker.service
+      After=k8s-setup-network-env.service docker.service k8s-setup-kubelet-environment.service
+      Requires=k8s-setup-network-env.service docker.service k8s-setup-kubelet-environment.service
       [Service]
       Type=oneshot
       RemainAfterExit=yes
