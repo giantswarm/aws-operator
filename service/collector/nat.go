@@ -4,6 +4,7 @@ import (
 	//"github.com/aws/aws-sdk-go/service/ec2"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/servicequotas"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -12,6 +13,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 )
 
@@ -125,7 +127,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	// 	return microerror.Mask(err)
 	// }
 
-	fmt.Printf("Service Quota NAT GW: %f", *od.Quota.Value)
+	fmt.Printf("Service Quota NAT GW: %f \n", *od.Quota.Value)
 
 	il := &servicequotas.ListServiceQuotasInput{
 		ServiceCode: &VPCServiceCode,
@@ -135,7 +137,63 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 	for _, sq := range ol.Quotas {
-		fmt.Printf("Service quotas define %s: %f", *sq.QuotaName, *sq.Value)
+		if *sq.QuotaCode == NATQuotaCode {
+			fmt.Printf("NAT quota: %f \n", *sq.Value)
+		}
+	}
+
+	iv := &ec2.DescribeVpcsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("tag:giantswarm.io/organization"),
+				Values: []*string{
+					aws.String("giantswarm"),
+				},
+			},
+		},
+	}
+	rv, err := awsClients.EC2.DescribeVpcs(iv)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	for _, vpc := range rv.Vpcs {
+		in := &ec2.DescribeNatGatewaysInput{
+			Filter: []*ec2.Filter{
+				{
+					Name: aws.String("vpc-id"),
+					Values: []*string{
+						vpc.VpcId,
+					},
+				},
+			},
+		}
+
+		var azs map[string]int
+		rn, err := awsClients.EC2.DescribeNatGateways(in)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		for _, nat := range rn.NatGateways {
+			is := &ec2.DescribeSubnetsInput{
+				SubnetIds: []*string{
+					nat.SubnetId,
+				},
+			}
+			rs, err := awsClients.EC2.DescribeSubnets(is)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			for _, sub := range rs.Subnets {
+				zoneID := *sub.AvailabilityZoneId
+				if _, ok := azs[zoneID]; ok {
+					azs[zoneID] = azs[zoneID] + 1
+				} else {
+					azs[zoneID] = 0
+				}
+				fmt.Printf("Subnet AZ: %s \n", *sub.AvailabilityZoneId)
+			}
+		}
 	}
 
 	return nil
