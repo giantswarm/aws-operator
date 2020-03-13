@@ -3,6 +3,8 @@ Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   DockerVolumeResourceName:
     Value: DockerVolume8Y5CK78968
+  HostedZoneNameServers:
+    Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   MasterImageID:
     Value: ami-038cea5071a5ee580
   MasterInstanceResourceName:
@@ -39,6 +41,9 @@ Resources:
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
+          - Effect: "Allow"
+            Action: "kms:Decrypt"
+            Resource: "8y5ck"
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
@@ -92,6 +97,37 @@ Resources:
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
+  Route53ManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 8y5ck-Route53Manager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt IAMManagerRole.Arn
+          Action: "sts:AssumeRole"
+  Route53ManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: 8y5ck-Route53Manager-Policy
+      Roles:
+        - Ref: "Route53ManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "route53:ChangeResourceRecordSets"
+            Resource:
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone' ] ]
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone' ] ]
+          - Effect: "Allow"
+            Action:
+              - "route53:ListHostedZones"
+              - "route53:ListResourceRecordSets"
+            Resource: "*"
+
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -365,7 +401,87 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1b
-  
+  HostedZone:
+    Type: 'AWS::Route53::HostedZone'
+    Properties:
+      Name: '8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+  InternalHostedZone:
+    Type: 'AWS::Route53::HostedZone'
+    Properties:
+      Name: '8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneConfig:
+        Comment: "Internal hosted zone for internal network"
+      VPCs:
+        - VPCId: !Ref VPC
+          VPCRegion: 'eu-central-1'
+  ApiRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'api.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'HostedZone'
+      Type: A
+  ApiPublicInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'internal-api.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'HostedZone'
+      Type: A
+  ApiPrivateInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
+        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'api.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      Type: A
+  EtcdInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt EtcdLoadBalancer.DNSName
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'etcd.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      Type: A
+  EtcdRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt EtcdLoadBalancer.DNSName
+        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
+        EvaluateTargetHealth: false
+      Name: 'etcd.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'HostedZone'
+      Type: A
+  IngressWildcardRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: '*.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'HostedZone'
+      TTL: '300'
+      Type: CNAME
+      ResourceRecords:
+        - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+  IngressWildcardInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: '*.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      TTL: '300'
+      Type: CNAME
+      ResourceRecords:
+        - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
   
   PublicRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
