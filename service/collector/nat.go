@@ -111,11 +111,11 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-	i := &servicequotas.GetAWSDefaultServiceQuotaInput{
+	id := &servicequotas.GetAWSDefaultServiceQuotaInput{
 		QuotaCode:   &NATQuotaCode,
 		ServiceCode: &VPCServiceCode,
 	}
-	o, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(i)
+	od, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(id)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -125,8 +125,18 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	// 	return microerror.Mask(err)
 	// }
 
-	fmt.Print("Service Quota NAT GW: ")
-	fmt.Println(o.Quota.Value)
+	fmt.Printf("Service Quota NAT GW: %f", *od.Quota.Value)
+
+	il := &servicequotas.ListServiceQuotasInput{
+		ServiceCode: &VPCServiceCode,
+	}
+	ol, err := awsClients.ServiceQuotas.ListServiceQuotas(il)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	for _, sq := range ol.Quotas {
+		fmt.Printf("Service quotas define %s: %f", *sq.QuotaName, *sq.Value)
+	}
 
 	return nil
 }
