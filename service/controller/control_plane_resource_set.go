@@ -48,7 +48,6 @@ type controlPlaneResourceSetConfig struct {
 	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
-	EncrypterBackend          string
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	InstallationName          string
@@ -60,10 +59,6 @@ type controlPlaneResourceSetConfig struct {
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
-}
-
-func (c controlPlaneResourceSetConfig) GetEncrypterBackend() string {
-	return c.EncrypterBackend
 }
 
 func (c controlPlaneResourceSetConfig) GetInstallationName() string {
@@ -216,7 +211,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 
 			APIWhitelist:     config.APIWhitelist,
 			Detection:        tccpnChangeDetection,
-			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 		}
 

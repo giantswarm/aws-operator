@@ -13,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 )
@@ -109,7 +108,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.apiWhitelist)
+		params, err := newTemplateParams(ctx, cr, r.apiWhitelist)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -162,7 +161,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.apiWhitelist)
+		params, err := newTemplateParams(ctx, cr, r.apiWhitelist)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -223,7 +222,7 @@ func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlan
 	return etcdVolume, nil
 }
 
-func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string) (*template.ParamsMainIAMPolicies, error) {
+func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -234,12 +233,9 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			ClusterID:        key.ClusterID(&cr),
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
 			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:         key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-		}
-
-		if encrypterBackend == encrypter.KMSBackend {
-			iamPolicies.KMSKeyARN = cc.Status.TenantCluster.Encryption.Key
 		}
 	}
 
@@ -387,7 +383,7 @@ func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlP
 	return subnets, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string, apiWhiteList APIWhitelist) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
@@ -398,7 +394,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		iamPolicies, err := newIAMPolicies(ctx, cr, encrypterBackend)
+		iamPolicies, err := newIAMPolicies(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
