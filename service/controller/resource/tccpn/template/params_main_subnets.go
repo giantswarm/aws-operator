@@ -6,6 +6,7 @@ type Subnet struct {
 	Name                  string
 	MapPublicIPOnLaunch   bool
 	RouteTableAssociation RouteTableAssociation
+	VPCID                 string
 }
 
 type RouteTableAssociation struct {

@@ -351,6 +351,7 @@ func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlP
 				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
+			VPCID: cc.Status.TenantCluster.TCCP.VPC.ID,
 		}
 		publicSubnets = append(publicSubnets, snet)
 	}
@@ -368,6 +369,7 @@ func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlP
 				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 				SubnetName:     snetName,
 			},
+			VPCID: cc.Status.TenantCluster.TCCP.VPC.ID,
 		}
 		privateSubnets = append(privateSubnets, snet)
 	}

@@ -17,7 +17,7 @@ const TemplateMainSubnets = `
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: {{ .VPCID }}
   {{ .RouteTableAssociation.Name }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -38,7 +38,7 @@ const TemplateMainSubnets = `
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: {{ .VPCID }}
   {{ .RouteTableAssociation.Name  }}:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:

@@ -300,7 +300,7 @@ Resources:
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: vpc-id
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -319,7 +319,7 @@ Resources:
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: vpc-id
   PublicSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -338,7 +338,7 @@ Resources:
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: vpc-id
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -357,7 +357,7 @@ Resources:
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: vpc-id
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -376,7 +376,7 @@ Resources:
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: vpc-id
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -395,7 +395,7 @@ Resources:
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
-      VpcId: !Ref VPC
+      VpcId: vpc-id
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
