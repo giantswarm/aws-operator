@@ -43,6 +43,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		i := &ec2.DescribeVpcPeeringConnectionsInput{
 			Filters: []*ec2.Filter{
 				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+					Values: []*string{
+						aws.String(key.ClusterID(&cr)),
+					},
+				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCCP),
+					},
+				},
+				{
 					Name: aws.String("requester-vpc-info.vpc-id"),
 					Values: []*string{
 						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),

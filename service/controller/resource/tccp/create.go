@@ -18,7 +18,6 @@ import (
 	pkgtemplate "github.com/giantswarm/aws-operator/pkg/template"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 )
@@ -152,13 +151,6 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	if r.encrypterBackend == encrypter.VaultBackend {
-		err = r.encrypterRoleManager.EnsureCreatedAuthorizedIAMRoles(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
@@ -264,16 +256,13 @@ func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			ClusterID:         key.ClusterID(&cr),
 			EC2ServiceDomain:  key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			KMSKeyARN:         cc.Status.TenantCluster.Encryption.Key,
 			MasterPolicyName:  key.PolicyNameMaster(cr),
 			MasterProfileName: key.ProfileNameMaster(cr),
 			MasterRoleName:    key.RoleNameMaster(cr),
 			RegionARN:         key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			Route53Enabled:    r.route53Enabled,
 			S3Bucket:          key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-		}
-
-		if r.encrypterBackend == encrypter.KMSBackend {
-			iamPolicies.KMSKeyARN = cc.Status.TenantCluster.Encryption.Key
 		}
 	}
 
@@ -333,9 +322,8 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alp
 				ID: key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			},
 			Master: template.ParamsMainInstanceMaster{
-				AZ:               key.MasterAvailabilityZone(cr),
-				CloudConfig:      base64.StdEncoding.EncodeToString([]byte(rendered)),
-				EncrypterBackend: r.encrypterBackend,
+				AZ:          key.MasterAvailabilityZone(cr),
+				CloudConfig: base64.StdEncoding.EncodeToString([]byte(rendered)),
 				DockerVolume: template.ParamsMainInstanceMasterDockerVolume{
 					Name:         key.VolumeNameDocker(cr),
 					ResourceName: key.DockerVolumeResourceName(cr, t),
