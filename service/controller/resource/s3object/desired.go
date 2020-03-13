@@ -19,11 +19,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-const (
-	kubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
-	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
-)
-
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	customObject, err := key.ToCustomObject(obj)
 	if err != nil {
@@ -48,8 +43,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	versions.Kubectl = kubectlVersion
-	versions.KubernetesAPIHealthz = kubernetesAPIHealthzVersion
+
+	defaultVersions := key.DefaultVersions()
+	versions.Kubectl = defaultVersions.Kubectl
+	versions.KubernetesAPIHealthz = defaultVersions.KubernetesAPIHealthz
 	images := v_4_9_1.BuildImages(r.registryDomain, versions)
 
 	var clusterCerts gscerts.Cluster

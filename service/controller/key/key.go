@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/k8scloudconfig/v_4_9_1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -104,6 +105,11 @@ const (
 	KindWorker      = "worker"
 	KindEtcd        = "etcd-elb"
 	KindInternalAPI = "internal-api"
+)
+
+const (
+	kubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
+	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -212,6 +218,13 @@ func ClusterTags(customObject v1alpha1.AWSConfig, installationName string) map[s
 
 func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
+}
+
+func DefaultVersions() v_4_9_1.Versions {
+	return v_4_9_1.Versions{
+		Kubectl:              kubectlVersion,
+		KubernetesAPIHealthz: kubernetesAPIHealthzVersion,
+	}
 }
 
 func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {

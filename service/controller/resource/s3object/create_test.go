@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	v1alpha12 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
@@ -18,9 +18,9 @@ import (
 
 func Test_Resource_S3Object_newCreate(t *testing.T) {
 	t.Parallel()
-	clusterTpo := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
+	clusterTpo := providerv1alpha1.AWSConfig{
+		Spec: providerv1alpha1.AWSConfigSpec{
+			Cluster: providerv1alpha1.Cluster{
 				ID: "test-cluster",
 			},
 		},
@@ -28,7 +28,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 
 	testCases := []struct {
 		description   string
-		obj           v1alpha1.AWSConfig
+		obj           providerv1alpha1.AWSConfig
 		currentState  map[string]BucketObjectState
 		desiredState  map[string]BucketObjectState
 		expectedState map[string]BucketObjectState
@@ -154,7 +154,7 @@ func Test_Resource_S3Object_newCreate(t *testing.T) {
 	}
 	cloudConfig := &CloudConfigMock{}
 
-	release := &v1alpha12.Release{}
+	release := &releasev1alpha1.Release{}
 	clientset := fake.NewSimpleClientset(release)
 
 	var err error
