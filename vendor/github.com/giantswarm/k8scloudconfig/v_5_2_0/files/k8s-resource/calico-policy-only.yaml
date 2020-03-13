@@ -117,7 +117,7 @@ spec:
       serviceAccountName: calico-node
       priorityClassName: system-node-critical
       containers:
-        - image: quay.io/giantswarm/typha:v3.10.1
+        - image: {{ .RegistryDomain }}/giantswarm/typha:v3.10.1
           name: calico-typha
           ports:
             - containerPort: 5473
@@ -427,7 +427,7 @@ spec:
         # This container installs the CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: quay.io/giantswarm/cni:v3.10.1
+          image: {{ .RegistryDomain }}/giantswarm/cni:v3.10.1
           command: ["/install-cni.sh"]
           env:
             # Name of the CNI config file to create.
@@ -461,7 +461,7 @@ spec:
         # container programs network policy and routes on each
         # host.
         - name: calico-node
-          image: quay.io/giantswarm/node:v3.10.1
+          image: {{ .RegistryDomain }}/giantswarm/node:v3.10.1
           env:
             # Use Kubernetes API as the backing datastore.
             - name: DATASTORE_TYPE
