@@ -78,7 +78,7 @@ const TemplateMainIAMPolicies = `
             Action:
               - ec2:CreateTags
             Resource:
-              - arn:aws:ec2:*:*:network-interface/*
+              - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:network-interface/*
 
   NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
