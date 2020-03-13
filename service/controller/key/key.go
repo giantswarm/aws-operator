@@ -740,7 +740,7 @@ func ImageID(customObject v1alpha1.AWSConfig, osVersion string) (string, error) 
 
 	versionAMIInfo, ok := amiInfo[osVersion]
 	if !ok {
-		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
+		return "", microerror.Maskf(invalidConfigError, "no image id for version '%s'", osVersion)
 	}
 
 	for _, regionAMIInfo := range versionAMIInfo.AMIs {
