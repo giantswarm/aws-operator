@@ -7,33 +7,20 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type baseExtension struct {
-	cluster       infrastructurev1alpha2.AWSCluster
-	encrypter     encrypter.Interface
-	encryptionKey string
+	registryDomain string
+	cluster        infrastructurev1alpha2.AWSCluster
+	encrypter      encrypter.Interface
+	encryptionKey  string
 }
 
 func (e *baseExtension) templateData() templateData {
-	var encrypterType string
-	var vaultAddress string
-
-	v, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		encrypterType = encrypter.VaultBackend
-		vaultAddress = v.Address()
-	} else {
-		encrypterType = encrypter.KMSBackend
-	}
-
 	data := templateData{
-		AWSRegion:     key.Region(e.cluster),
-		EncrypterType: encrypterType,
-		VaultAddress:  vaultAddress,
-		EncryptionKey: e.encryptionKey,
+		AWSRegion:      key.Region(e.cluster),
+		RegistryDomain: e.registryDomain,
 	}
 
 	return data

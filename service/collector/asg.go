@@ -2,11 +2,13 @@ package collector
 
 import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
+
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -153,7 +155,7 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				switch *tag.Key {
 				case tagCluster:
 					cluster = *tag.Value
-				case tagInstallation:
+				case key.TagInstallation:
 					installation = *tag.Value
 				case tagOrganization:
 					organization = *tag.Value

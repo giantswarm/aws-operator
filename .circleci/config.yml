@@ -59,15 +59,6 @@ workflows:
             tags:
               only: /^v.*/
 
-      - hold-push-aws-operator-to-aliyun-pr:
-          type: approval
-          requires:
-            - build
-          filters:
-            # Do not trigger the job on merge to master.
-            branches:
-              ignore: master
-
       - architect/push-to-docker:
           name: push-aws-operator-to-aliyun-pr
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
@@ -75,7 +66,7 @@ workflows:
           password_envar: "ALIYUN_PASSWORD"
           # Push to Aliyun should execute for non-master branches only once manually approved.
           requires:
-            - hold-push-aws-operator-to-aliyun-pr
+            - build
           filters:
             # Do not trigger the job on merge to master.
             branches:

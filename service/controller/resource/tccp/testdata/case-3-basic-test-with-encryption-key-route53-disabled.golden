@@ -40,6 +40,9 @@ Resources:
             Action: "ec2:*"
             Resource: "*"
           - Effect: "Allow"
+            Action: "kms:Decrypt"
+            Resource: "8y5ck"
+          - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
@@ -122,8 +125,6 @@ Resources:
     Type: AWS::EC2::Volume
     Properties:
 
-      Encrypted: true
-
       Size: 50
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
@@ -134,8 +135,6 @@ Resources:
     Type: AWS::EC2::Volume
     Properties:
 
-      Encrypted: true
-
       Size: 100
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
@@ -145,8 +144,6 @@ Resources:
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
-
-      Encrypted: true
 
       Size: 100
       VolumeType: gp2

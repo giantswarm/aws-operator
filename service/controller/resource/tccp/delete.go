@@ -13,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -120,13 +119,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)
-	}
-
-	if r.encrypterBackend == encrypter.VaultBackend {
-		err = r.encrypterRoleManager.EnsureDeletedAuthorizedIAMRoles(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
 	}
 
 	return nil

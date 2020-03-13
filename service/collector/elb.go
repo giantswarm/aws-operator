@@ -5,13 +5,13 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -200,7 +200,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 					lb.Tags[*t.Key] = *t.Value
 				}
 
-				if lb.Tags[tagInstallation] != e.installationName {
+				if lb.Tags[key.TagInstallation] != e.installationName {
 					continue
 				}
 
@@ -239,7 +239,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				lb.Name,
 				account,
 				lb.Tags[tagCluster],
-				lb.Tags[tagInstallation],
+				lb.Tags[key.TagInstallation],
 				lb.Tags[tagOrganization],
 			)
 		}
