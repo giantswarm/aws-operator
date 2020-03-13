@@ -3,6 +3,7 @@ package v_4_9_1
 import (
 	"fmt"
 
+	"github.com/Masterminds/semver"
 	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 )
 
@@ -26,6 +27,12 @@ func ExtractComponentVersions(releaseComponents []v1alpha1.ReleaseSpecComponent)
 		if err != nil {
 			return Versions{}, err
 		}
+		// cri-tools is released for each k8s minor version
+		parsedVersion, err := semver.NewVersion(component.Version)
+		if err != nil {
+			return Versions{}, err
+		}
+		versions.CRITools = fmt.Sprintf("v%d.%d.0", parsedVersion.Major(), parsedVersion.Minor())
 		versions.Kubernetes = fmt.Sprintf("v%s", component.Version)
 	}
 

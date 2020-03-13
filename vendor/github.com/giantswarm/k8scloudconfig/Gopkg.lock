@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:f313598719f69ec4edbcd75b0f2ef1c8ed9e00f6ff3d7583ac3966db2d70d326"
+  name = "github.com/Masterminds/semver"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "910aa146bd66780c2815d652b92a7fc5331e533c"
+  version = "v3.0.3"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -202,6 +210,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Masterminds/semver",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1",
     "github.com/giantswarm/microerror",
