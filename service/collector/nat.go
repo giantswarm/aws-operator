@@ -170,6 +170,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		}
 
 		var azs map[string]int
+		azs = make(map[string]int)
 		rn, err := awsClients.EC2.DescribeNatGateways(in)
 		if err != nil {
 			return microerror.Mask(err)
