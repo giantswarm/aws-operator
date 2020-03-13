@@ -91,7 +91,7 @@ const TemplateMainIAMPolicies = `
             Action:
               - ec2:CreateTags
             Resource:
-              - arn:aws:ec2:*:*:network-interface/*
+              - arn:{{ $v.RegionARN }}:ec2:*:*:network-interface/*
 
   IAMManagerRole:
     Type: "AWS::IAM::Role"
