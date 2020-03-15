@@ -118,8 +118,6 @@ spec:
           env:
             - name: AWS_VPC_K8S_CNI_LOGLEVEL
               value: DEBUG
-            - name: AWS_VPC_K8S_CNI_VETHPREFIX
-              value: cali
             - name: AWS_VPC_ENI_MTU
               value: "9001"
             ## Deviation from original manifest - 2
@@ -144,6 +142,10 @@ spec:
             ## disable SNAT as we setup NATGW in the route tables
             - name: AWS_VPC_K8S_CNI_EXTERNALSNAT
               value: "true"
+            ## Deviation from original manifest - 6
+            ## Explicit interface naming
+            - name: AWS_VPC_K8S_CNI_VETHPREFIX
+              value: eni
           resources:
             requests:
               cpu: 10m
