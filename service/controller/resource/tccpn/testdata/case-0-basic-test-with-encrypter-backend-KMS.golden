@@ -222,8 +222,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: peering-connection-id
+      VpcPeeringConnectionId: peering-connection-id
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
