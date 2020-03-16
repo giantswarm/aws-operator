@@ -288,7 +288,54 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMainSecurityGroups, error) {
+func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainRouteTables, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone:    az.Name,
+			ResourceName:        key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
+		}
+		publicRouteTableNames = append(publicRouteTableNames, rtName)
+	}
+
+	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone:    az.Name,
+			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
+		}
+		privateRouteTableNames = append(privateRouteTableNames, rtName)
+	}
+
+	var routeTables *template.ParamsMainRouteTables
+	{
+		routeTables = &template.ParamsMainRouteTables{
+			ClusterID:              key.ClusterID(&cr),
+			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
+			PrivateRouteTableNames: privateRouteTableNames,
+			PublicRouteTableNames:  publicRouteTableNames,
+			VPCID:                  cc.Status.TenantCluster.TCCP.VPC.ID,
+		}
+	}
+
+	return routeTables, nil
+}
+
+func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -326,7 +373,7 @@ func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSC
 
 	return securityGroups, nil
 }
-func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainSubnets, error) {
+func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainSubnets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -340,6 +387,10 @@ func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlP
 
 	var publicSubnets []template.Subnet
 	for _, az := range zones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := template.Subnet{
 			AvailabilityZone:    az.Name,
@@ -358,6 +409,10 @@ func newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlP
 
 	var privateSubnets []template.Subnet
 	for _, az := range zones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+
 		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet := template.Subnet{
 			AvailabilityZone:    az.Name,
@@ -408,11 +463,15 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		securityGroups, err := newSecurityGroupsParams(ctx, cr, apiWhiteList)
+		routeTables, err := newRouteTables(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		subnets, err := newSubnetsParams(ctx, cr)
+		securityGroups, err := newSecurityGroups(ctx, cr, apiWhiteList)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		subnets, err := newSubnets(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -423,6 +482,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			IAMPolicies:         iamPolicies,
 			LaunchConfiguration: launchConfiguration,
 			Outputs:             outputs,
+			RouteTables:         routeTables,
 			SecurityGroups:      securityGroups,
 			Subnets:             subnets,
 		}

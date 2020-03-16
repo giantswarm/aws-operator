@@ -194,6 +194,36 @@ Resources:
               ]
             }
           }
+  
+  PublicRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-id
+      Tags:
+      - Key: Name
+        Value: 8y5ck-public
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: public
+  PrivateRouteTableEuCentral1b:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-id
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1b
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  VPCPeeringRouteEuCentral1b:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: VPCPeeringConnection
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -287,25 +317,6 @@ Resources:
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
   
-  PublicSubnetEuCentral1a:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.3.32/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PublicSubnetEuCentral1a
-      - Key: giantswarm.io/subnet-type
-        Value: public
-      - Key: kubernetes.io/role/elb
-        Value: 1
-      VpcId: vpc-id
-  PublicSubnetRouteTableAssociationEuCentral1a:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1a
-      SubnetId: !Ref PublicSubnetEuCentral1a
   PublicSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -325,44 +336,6 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1b
       SubnetId: !Ref PublicSubnetEuCentral1b
-  PublicSubnetEuCentral1c:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.3.160/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PublicSubnetEuCentral1c
-      - Key: giantswarm.io/subnet-type
-        Value: public
-      - Key: kubernetes.io/role/elb
-        Value: 1
-      VpcId: vpc-id
-  PublicSubnetRouteTableAssociationEuCentral1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1c
-      SubnetId: !Ref PublicSubnetEuCentral1c
-  PrivateSubnetEuCentral1a:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1a
-      CidrBlock: 10.100.3.0/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1a
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
-      VpcId: vpc-id
-  PrivateSubnetRouteTableAssociationEuCentral1a:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1a
-      SubnetId: !Ref PrivateSubnetEuCentral1a
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
@@ -382,22 +355,3 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
       SubnetId: !Ref PrivateSubnetEuCentral1b
-  PrivateSubnetEuCentral1c:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: 10.100.3.128/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1c
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
-      VpcId: vpc-id
-  PrivateSubnetRouteTableAssociationEuCentral1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      SubnetId: !Ref PrivateSubnetEuCentral1c
