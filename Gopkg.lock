@@ -69,6 +69,14 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  digest = "1:d8bf00757b72dcea682e6bdfcc064fbbca10f9892d2fbcb16c4313488d6be708"
+  name = "github.com/aws/amazon-vpc-cni-k8s"
+  packages = ["pkg/apis/crd/v1alpha1"]
+  pruneopts = "UT"
+  revision = "927b76ac57f577466ae6149230b6c8649d2dbc1b"
+  version = "v1.6.0"
+
+[[projects]]
   digest = "1:d58ffcbefd213f04d243c9e1802265e2731ab2abfcb7b4d3121e66b999dac804"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -432,14 +440,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:694ed06fec92c37ff3710d58a31dc642578b65180d9356064a5070ad6ed2c5bb"
+  digest = "1:d8b5413ce60a336f975bb54451c9fa4167471efbeacea8d9e966499ae043ba61"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_5_0_0",
+    "v_5_2_0",
   ]
   pruneopts = "T"
-  revision = "e804c697c21088274a617add1f9ac21ded960a0d"
+  revision = "992435a55223b3383e12f45549c939be076d8433"
 
 [[projects]]
   branch = "master"
@@ -551,6 +559,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "5e18457bd062f9a11d11fe5719ccf28101945ce0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:bac1b910eab21bd91745a425c69f1cdd4690aa308e7d724cc981a11c1688d6d4"
+  name = "github.com/giantswarm/tenantcluster"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c51c578f6c29d87ba4ce32395b5b092020115e1"
 
 [[projects]]
   branch = "master"
@@ -1010,6 +1026,14 @@
   pruneopts = "UT"
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
   version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:bde6c3a610bd01ea7e2c8d9c7fd1116531fb6619f46f73f4f2ea16adb70da6be"
+  name = "github.com/operator-framework/operator-sdk"
+  packages = ["pkg/util/k8sutil"]
+  pruneopts = "UT"
+  revision = "e5a0ab096e1a7c0e6b937d2b41707eccb82c3c77"
+  version = "v0.0.7"
 
 [[projects]]
   digest = "1:808cdddf087fb64baeae67b8dfaee2069034d9704923a3cb8bd96a995421a625"
@@ -2203,6 +2227,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",
@@ -2246,12 +2271,13 @@
     "github.com/giantswarm/e2etests/ipam",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/update",
+    "github.com/giantswarm/errors/tenant",
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
-    "github.com/giantswarm/k8scloudconfig/v_5_0_0",
+    "github.com/giantswarm/k8scloudconfig/v_5_2_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -2272,6 +2298,7 @@
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
+    "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/to",
     "github.com/giantswarm/versionbundle",
     "github.com/google/go-cmp/cmp",

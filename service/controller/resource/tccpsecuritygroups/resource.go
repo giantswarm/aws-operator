@@ -19,20 +19,25 @@ const (
 )
 
 type Config struct {
-	Logger micrologger.Logger
+	Logger        micrologger.Logger
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
-	logger micrologger.Logger
+	logger        micrologger.Logger
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-
+	if config.ToClusterFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
+	}
 	r := &Resource{
-		logger: config.Logger,
+		logger:        config.Logger,
+		toClusterFunc: config.ToClusterFunc,
 	}
 
 	return r, nil
@@ -42,7 +47,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -57,6 +62,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 				{
 					Name: aws.String("tag:Name"),
 					Values: []*string{
+						aws.String(key.SecurityGroupName(&cr, "aws-cni")),
 						aws.String(key.SecurityGroupName(&cr, "internal-api")),
 						aws.String(key.SecurityGroupName(&cr, "master")),
 					},
@@ -71,11 +77,11 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 		groups = o.SecurityGroups
 
-		if len(groups) > 2 {
+		if len(groups) > 3 {
 			return microerror.Maskf(executionFailedError, "expected two security groups, got %d", len(groups))
 		}
 
-		if len(groups) < 2 {
+		if len(groups) < 3 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find security groups for tenant cluster %#q yet", key.ClusterID(&cr)))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 

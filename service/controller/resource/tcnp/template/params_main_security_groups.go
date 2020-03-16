@@ -20,6 +20,7 @@ type ParamsMainSecurityGroupsTenantCluster struct {
 	Master      ParamsMainSecurityGroupsTenantClusterMaster
 	NodePools   []ParamsMainSecurityGroupsTenantClusterNodePool
 	VPC         ParamsMainSecurityGroupsTenantClusterVPC
+	AWSCNI      ParamsMainSecurityGroupsTenantClusterAWSCNI
 }
 
 type ParamsMainSecurityGroupsTenantClusterIngress struct {
@@ -31,6 +32,10 @@ type ParamsMainSecurityGroupsTenantClusterInternalAPI struct {
 }
 
 type ParamsMainSecurityGroupsTenantClusterMaster struct {
+	ID string
+}
+
+type ParamsMainSecurityGroupsTenantClusterAWSCNI struct {
 	ID string
 }
 
