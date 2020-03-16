@@ -6,6 +6,7 @@ type ParamsMainRouteTables struct {
 	PrivateRouteTableNames []ParamsMainRouteTablesRouteTableName
 	PublicRouteTableNames  []ParamsMainRouteTablesRouteTableName
 	VPCID                  string
+	PeeringConnectionID    string
 }
 
 type ParamsMainRouteTablesRouteTableName struct {

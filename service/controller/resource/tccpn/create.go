@@ -329,6 +329,7 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 			PrivateRouteTableNames: privateRouteTableNames,
 			PublicRouteTableNames:  publicRouteTableNames,
 			VPCID:                  cc.Status.TenantCluster.TCCP.VPC.ID,
+			PeeringConnectionID:    cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
 		}
 	}
 
