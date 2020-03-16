@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/aws-operator/flag"
@@ -23,7 +23,7 @@ var (
 func main() {
 	err := mainE(context.Background())
 	if err != nil {
-		panic(fmt.Sprintf("%#v", err))
+		panic(microerror.Stack(err))
 	}
 }
 
@@ -41,26 +41,21 @@ func mainE(ctx context.Context) error {
 	}
 
 	// We define a server factory to create the custom server once all command
-	// line flags are parsed and all microservice configuration is storted out.
+	// line flags are parsed and all microservice configuration is sorted out.
 	serverFactory := func(v *viper.Viper) microserver.Server {
 		// Create a new custom service which implements business logic.
 		var newService *service.Service
 		{
 			c := service.Config{
-				Flag:   f,
 				Logger: logger,
-				Viper:  v,
 
-				Description: project.Description(),
-				GitCommit:   project.GitSHA(),
-				ProjectName: project.Name(),
-				Source:      project.Source(),
-				Version:     project.Version(),
+				Flag:  f,
+				Viper: v,
 			}
 
 			newService, err = service.New(c)
 			if err != nil {
-				panic(fmt.Sprintf("%#v", microerror.Mask(err)))
+				panic(microerror.Stack(err))
 			}
 
 			go newService.Boot(ctx)
@@ -72,14 +67,13 @@ func mainE(ctx context.Context) error {
 			c := server.Config{
 				Logger:  logger,
 				Service: newService,
-				Viper:   v,
 
-				ProjectName: project.Name(),
+				Viper: v,
 			}
 
 			newServer, err = server.New(c)
 			if err != nil {
-				panic(err)
+				panic(microerror.Stack(err))
 			}
 		}
 
@@ -98,7 +92,7 @@ func mainE(ctx context.Context) error {
 			Name:           project.Name(),
 			Source:         project.Source(),
 			Version:        project.Version(),
-			VersionBundles: service.NewVersionBundles(),
+			VersionBundles: []versionbundle.Bundle{project.NewVersionBundle()},
 		}
 
 		newCommand, err = command.New(c)
@@ -113,27 +107,26 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Secret, "", "Secret of the AWS access key for the  account to create guest clusters in.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Session, "", "Session token of the AWS access key for the  account to create guest clusters in. (Can be empty)")
 	daemonCommand.PersistentFlags().StringSlice(f.Service.AWS.AvailabilityZones, []string{}, "Availability zones as a slice.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.Encrypter, "kms", "Encryption backend to use.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "Session token of the AWS access key for the host cluster account. If empty, guest cluster token is used.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphan AWS resources.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphaned AWS resources.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.RouteTables, "", "Names of the public route tables in control plane separated by commas, required for accessing public ELBs from tenant nodes.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.VaultAddress, "", "Server address for Vault encryption.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.VPCPeerID, "", "Control Plane VPC ID to peer Tenant Clusters with.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.AdvancedMonitoringEC2, false, "Advanced EC2 monitoring.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.LoggingBucket.Delete, false, "Should be logging bucket deleted.")
-	daemonCommand.PersistentFlags().Bool(f.Service.AWS.Route53.Enabled, true, "Should Route53 be enabled.")
+	daemonCommand.PersistentFlags().Bool(f.Service.AWS.Route53.Enabled, true, "Should Route 53 be enabled.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.PodInfraContainerImage, "", "Image to be used for the pause container. If empty, default image from gcr.io/google_containers/pause-amd64 is used.")
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.IncludeTags, true, "Should resource tags be included (especially for restricted regions, like S3 buckets in China regions).")
 	daemonCommand.PersistentFlags().Int(f.Service.AWS.S3AccessLogsExpiration, 365, "S3 access logs expiration policy.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.TrustedAdvisor.Enabled, "", "Whether trusted advisor metrics collection is enabled.")
 
-	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.CIDR, 0, "Calico cidr of guest clusters.")
+	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.CIDR, 0, "Calico CIDR of guest clusters.")
 	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.MTU, 0, "Calico MTU of guest clusters.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Calico.Subnet, "", "Calico subnet of guest clusters.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Docker.Daemon.CIDR, "", "CIDR of the Docker daemon bridge configured in guest clusters.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.API.ClusterIPRange, "", "Service IP range within guest clusters.")
+	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.ClusterDomain, "", "Internal Kubernetes domain.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline, "1m", "If no progress is made before this deadline image pulling is cancelled.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image, "", "Full docker image of networksetup.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.SSH.UserList, "", "Comma separated list of ssh users and their public key in format `username:publickey`, being installed in the guest cluster nodes.")

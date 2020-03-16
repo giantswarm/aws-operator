@@ -11,7 +11,6 @@ type AWS struct {
 	AccessKey              accesskey.AccessKey
 	AdvancedMonitoringEC2  string
 	AvailabilityZones      string
-	Encrypter              string
 	HostAccessKey          accesskey.AccessKey
 	IncludeTags            string
 	LoggingBucket          loggingbucket.LoggingBucket
@@ -22,5 +21,4 @@ type AWS struct {
 	S3AccessLogsExpiration string
 	TrustedAdvisor         trustedadvisor.TrustedAdvisor
 	VaultAddress           string
-	VPCPeerID              string
 }

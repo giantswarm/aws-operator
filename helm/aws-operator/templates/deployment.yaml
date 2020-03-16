@@ -1,21 +1,27 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ tpl .Values.resource.default.name  . }}
   namespace: {{ tpl .Values.resource.default.namespace  . }}
   labels:
-    app: {{ tpl .Values.resource.default.name  . }}
+    app: {{ .Values.project.name }}
+    version: {{ .Values.project.version }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ .Values.project.name }}
+      version: {{ .Values.project.version }}
   strategy:
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        app: {{ tpl .Values.resource.default.name  . }}
+        app: {{ .Values.project.name }}
+        version: {{ .Values.project.version }}
     spec:
       volumes:
       - name: {{ .Values.project.name }}-configmap
@@ -39,7 +45,7 @@ spec:
         runAsGroup: {{ .Values.pod.group.id }}
       containers:
       - name: {{ .Values.project.name }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.Installation.V1.Registry.Domain }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         volumeMounts:
         - name: {{ .Values.project.name }}-configmap
           mountPath: /var/run/{{ .Values.project.name }}/configmap/

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Giant Swarm GmbH.
+Copyright 2020 Giant Swarm GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,44 +19,43 @@ limitations under the License.
 package versioned
 
 import (
-	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1"
-	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
-	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1"
-	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1"
+	"fmt"
+
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
+
+	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1"
+	backupv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/backup/v1alpha1"
+	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
+	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/infrastructure/v1alpha2"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1"
 )
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Application() applicationv1alpha1.ApplicationV1alpha1Interface
+	BackupV1alpha1() backupv1alpha1.BackupV1alpha1Interface
 	CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Core() corev1alpha1.CoreV1alpha1Interface
 	ExampleV1alpha1() examplev1alpha1.ExampleV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Example() examplev1alpha1.ExampleV1alpha1Interface
+	InfrastructureV1alpha2() infrastructurev1alpha2.InfrastructureV1alpha2Interface
 	ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Provider() providerv1alpha1.ProviderV1alpha1Interface
 	ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Release() releasev1alpha1.ReleaseV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	applicationV1alpha1 *applicationv1alpha1.ApplicationV1alpha1Client
-	coreV1alpha1        *corev1alpha1.CoreV1alpha1Client
-	exampleV1alpha1     *examplev1alpha1.ExampleV1alpha1Client
-	providerV1alpha1    *providerv1alpha1.ProviderV1alpha1Client
-	releaseV1alpha1     *releasev1alpha1.ReleaseV1alpha1Client
+	applicationV1alpha1    *applicationv1alpha1.ApplicationV1alpha1Client
+	backupV1alpha1         *backupv1alpha1.BackupV1alpha1Client
+	coreV1alpha1           *corev1alpha1.CoreV1alpha1Client
+	exampleV1alpha1        *examplev1alpha1.ExampleV1alpha1Client
+	infrastructureV1alpha2 *infrastructurev1alpha2.InfrastructureV1alpha2Client
+	providerV1alpha1       *providerv1alpha1.ProviderV1alpha1Client
+	releaseV1alpha1        *releasev1alpha1.ReleaseV1alpha1Client
 }
 
 // ApplicationV1alpha1 retrieves the ApplicationV1alpha1Client
@@ -64,20 +63,13 @@ func (c *Clientset) ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha
 	return c.applicationV1alpha1
 }
 
-// Deprecated: Application retrieves the default version of ApplicationClient.
-// Please explicitly pick a version.
-func (c *Clientset) Application() applicationv1alpha1.ApplicationV1alpha1Interface {
-	return c.applicationV1alpha1
+// BackupV1alpha1 retrieves the BackupV1alpha1Client
+func (c *Clientset) BackupV1alpha1() backupv1alpha1.BackupV1alpha1Interface {
+	return c.backupV1alpha1
 }
 
 // CoreV1alpha1 retrieves the CoreV1alpha1Client
 func (c *Clientset) CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface {
-	return c.coreV1alpha1
-}
-
-// Deprecated: Core retrieves the default version of CoreClient.
-// Please explicitly pick a version.
-func (c *Clientset) Core() corev1alpha1.CoreV1alpha1Interface {
 	return c.coreV1alpha1
 }
 
@@ -86,10 +78,9 @@ func (c *Clientset) ExampleV1alpha1() examplev1alpha1.ExampleV1alpha1Interface {
 	return c.exampleV1alpha1
 }
 
-// Deprecated: Example retrieves the default version of ExampleClient.
-// Please explicitly pick a version.
-func (c *Clientset) Example() examplev1alpha1.ExampleV1alpha1Interface {
-	return c.exampleV1alpha1
+// InfrastructureV1alpha2 retrieves the InfrastructureV1alpha2Client
+func (c *Clientset) InfrastructureV1alpha2() infrastructurev1alpha2.InfrastructureV1alpha2Interface {
+	return c.infrastructureV1alpha2
 }
 
 // ProviderV1alpha1 retrieves the ProviderV1alpha1Client
@@ -97,20 +88,8 @@ func (c *Clientset) ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interfac
 	return c.providerV1alpha1
 }
 
-// Deprecated: Provider retrieves the default version of ProviderClient.
-// Please explicitly pick a version.
-func (c *Clientset) Provider() providerv1alpha1.ProviderV1alpha1Interface {
-	return c.providerV1alpha1
-}
-
 // ReleaseV1alpha1 retrieves the ReleaseV1alpha1Client
 func (c *Clientset) ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface {
-	return c.releaseV1alpha1
-}
-
-// Deprecated: Release retrieves the default version of ReleaseClient.
-// Please explicitly pick a version.
-func (c *Clientset) Release() releasev1alpha1.ReleaseV1alpha1Interface {
 	return c.releaseV1alpha1
 }
 
@@ -123,9 +102,14 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 }
 
 // NewForConfig creates a new Clientset for the given config.
+// If config's RateLimiter is not set and QPS and Burst are acceptable,
+// NewForConfig will generate a rate-limiter in configShallowCopy.
 func NewForConfig(c *rest.Config) (*Clientset, error) {
 	configShallowCopy := *c
 	if configShallowCopy.RateLimiter == nil && configShallowCopy.QPS > 0 {
+		if configShallowCopy.Burst <= 0 {
+			return nil, fmt.Errorf("Burst is required to be greater than 0 when RateLimiter is not set and QPS is set to greater than 0")
+		}
 		configShallowCopy.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(configShallowCopy.QPS, configShallowCopy.Burst)
 	}
 	var cs Clientset
@@ -134,11 +118,19 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
+	cs.backupV1alpha1, err = backupv1alpha1.NewForConfig(&configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
 	cs.coreV1alpha1, err = corev1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
 	cs.exampleV1alpha1, err = examplev1alpha1.NewForConfig(&configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
+	cs.infrastructureV1alpha2, err = infrastructurev1alpha2.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +155,10 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
 	cs.applicationV1alpha1 = applicationv1alpha1.NewForConfigOrDie(c)
+	cs.backupV1alpha1 = backupv1alpha1.NewForConfigOrDie(c)
 	cs.coreV1alpha1 = corev1alpha1.NewForConfigOrDie(c)
 	cs.exampleV1alpha1 = examplev1alpha1.NewForConfigOrDie(c)
+	cs.infrastructureV1alpha2 = infrastructurev1alpha2.NewForConfigOrDie(c)
 	cs.providerV1alpha1 = providerv1alpha1.NewForConfigOrDie(c)
 	cs.releaseV1alpha1 = releasev1alpha1.NewForConfigOrDie(c)
 
@@ -176,8 +170,10 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.applicationV1alpha1 = applicationv1alpha1.New(c)
+	cs.backupV1alpha1 = backupv1alpha1.New(c)
 	cs.coreV1alpha1 = corev1alpha1.New(c)
 	cs.exampleV1alpha1 = examplev1alpha1.New(c)
+	cs.infrastructureV1alpha2 = infrastructurev1alpha2.New(c)
 	cs.providerV1alpha1 = providerv1alpha1.New(c)
 	cs.releaseV1alpha1 = releasev1alpha1.New(c)
 

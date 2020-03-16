@@ -33,7 +33,7 @@ const awsOperatorTemplate = `Installation:
         UserList: '{{ .SSH.UserList }}'
       Update:
         Enabled: true
-    Name: ci-aws-operator
+    Name: '{{ .InstallationName }}'
     Provider:
       AWS:
         AvailabilityZones:
@@ -49,7 +49,6 @@ const awsOperatorTemplate = `Installation:
         Encrypter: '{{ .Provider.AWS.Encrypter }}'
         TrustedAdvisor:
           Enabled: false
-        VPCPeerID: '{{ .Provider.AWS.VPCPeerID }}'
     Registry:
       Domain: quay.io
     Secret:
@@ -71,4 +70,8 @@ const awsOperatorTemplate = `Installation:
     Security:
       RestrictAccess:
         Enabled: false
+        GSAPI: false
+        GuestAPI:
+          Private: false
+          Public: false
 `

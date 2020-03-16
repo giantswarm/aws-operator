@@ -31,7 +31,7 @@ Installation:
         # TODO rename to EnvironmentName. See https://github.com/giantswarm/giantswarm/issues/4124.
         Cloud: AZUREPUBLICCLOUD
         HostCluster:
-          CIDR: "10.0.0.0/16"
+          CIDR: "{{ .Provider.Azure.HostClusterCidr }}"
           ResourceGroup: "godsmack"
           VirtualNetwork: "godsmack"
           VirtualNetworkGateway: "godsmack-vpn-gateway"
@@ -52,6 +52,12 @@ Installation:
               template:
                 uri:
                   version: {{ .Secret.AzureOperator.SecretYaml.Service.Azure.Template.URI.Version }}
+            tenant:
+              ignition:
+                debug:
+                  enabled: {{ .Secret.AzureOperator.SecretYaml.Service.Tenant.Ignition.Debug.Enabled }}
+                  logsprefix: {{ .Secret.AzureOperator.SecretYaml.Service.Tenant.Ignition.Debug.LogsPrefix }}
+                  logstoken: {{ .Secret.AzureOperator.SecretYaml.Service.Tenant.Ignition.Debug.LogsToken }}
       Registry:
         PullSecret:
           DockerConfigJSON: "{\"auths\":{\"quay.io\":{\"auth\":\"{{ .Secret.Registry.PullSecret.DockerConfigJSON }}\"}}}"

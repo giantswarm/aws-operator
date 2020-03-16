@@ -4,15 +4,23 @@ metadata:
   name: {{ tpl .Values.resource.default.name  . }}
 rules:
   - apiGroups:
-      - cluster.giantswarm.io
+      - infrastructure.giantswarm.io
     resources:
-      - awses
+      - awsclusters
+      - awsclusters/status
+      - awscontrolplanes
+      - awscontrolplanes/status
+      - g8scontrolplanes
+      - g8scontrolplanes/status
+      - awsmachinedeployments
+      - awsmachinedeployments/status
     verbs:
       - "*"
   - apiGroups:
       - cluster.k8s.io
     resources:
       - clusters
+      - clusters/status
     verbs:
       - get
       - list
@@ -20,9 +28,19 @@ rules:
       - update
       - watch
   - apiGroups:
+      - cluster.x-k8s.io
+    resources:
+      - clusters
+      - clusters/status
+      - machinedeployments
+      - machinedeployments/status
+    verbs:
+      - "*"
+  - apiGroups:
       - cluster.k8s.io
     resources:
       - machinedeployments
+      - machinedeployments/status
     verbs:
       - delete
       - get
@@ -73,19 +91,12 @@ rules:
       - drainerconfigs
     verbs:
       - "*"
-  # TODO drop create and delete permissions for namespaces when
-  # legacy bundles are gone and clusterapi bundle v29 is the latest version.
-  #
-  #     https://github.com/giantswarm/giantswarm/issues/6829
-  #
   - apiGroups:
       - ""
     resources:
       - namespaces
     verbs:
       - get
-      - create
-      - delete
       - update
   - apiGroups:
       - ""

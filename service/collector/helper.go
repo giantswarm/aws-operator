@@ -6,12 +6,12 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/service/accountid"
-	"github.com/giantswarm/aws-operator/service/controller/legacy/v29/credential"
+	"github.com/giantswarm/aws-operator/service/internal/accountid"
+	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
 
 type helperConfig struct {
@@ -61,17 +61,15 @@ func newHelper(config helperConfig) (*helper, error) {
 func (h *helper) GetARNs() ([]string, error) {
 	var arns []string
 
-	// List AWSConfigs.
-	awsConfigClient := h.g8sClient.ProviderV1alpha1().AWSConfigs("")
-	awsConfigs, err := awsConfigClient.List(v1.ListOptions{})
+	clusterCRList, err := h.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
-	for _, awsConfig := range awsConfigs.Items {
-		arn, err := credential.GetARN(h.k8sClient, &awsConfig)
+	for _, clusterCR := range clusterCRList.Items {
+		arn, err := credential.GetARN(h.k8sClient, clusterCR)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
 		if credential.IsCredentialNameEmptyError(err) {

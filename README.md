@@ -4,7 +4,22 @@
 
 The aws-operator manages Kubernetes clusters running on AWS.
 
-## Getting Project
+## Branches
+
+- `thiccc`
+    - Up to and including version v5.4.0.
+    - Contains all versions of legacy controllers (reconciling AWSConfig CRs) up
+      to and including v5.4.0.
+- `legacy`
+    - From version v5.5.0 up to and including v5.x.x.
+    - Contains only the latest version of legacy controllers (reconciling
+      AWSConfig CRs).
+- `master`
+    - From version v6.0.0.
+    - Contains only the latest version of controllers (reconciling cluster API
+      objects).
+
+## Getting the Project
 
 Download the latest release:
 https://github.com/giantswarm/aws-operator/releases/latest
@@ -123,10 +138,13 @@ data:
 See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting patches, the
 contribution workflow as well as reporting bugs.
 
+
 ## License
 
 aws-operator is under the Apache 2.0 license. See the [LICENSE](LICENSE) file
 for details.
+
+
 
 ## Credit
 - https://golang.org

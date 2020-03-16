@@ -11,23 +11,29 @@ type APIExtensionsAzureConfigE2EConfig struct {
 	ClusterName               string
 	CommonDomain              string
 	CommonDomainResourceGroup string
+	SSHPublicKey              string
+	SSHUser                   string
 	VersionBundleVersion      string
 }
 
 type APIExtensionsAzureConfigE2EConfigAzure struct {
-	CalicoSubnetCIDR string
-	CIDR             string
-	Location         string
-	MasterSubnetCIDR string
-	VMSizeMaster     string
-	VMSizeWorker     string
-	VPNSubnetCIDR    string
-	WorkerSubnetCIDR string
+	AvailabilityZones []int
+	CalicoSubnetCIDR  string
+	CIDR              string
+	Location          string
+	MasterSubnetCIDR  string
+	VMSizeMaster      string
+	VMSizeWorker      string
+	VPNSubnetCIDR     string
+	WorkerSubnetCIDR  string
 }
 
 // NewAPIExtensionsAzureConfigE2E renders values required by
 // apiextensions-azure-config-e2e-chart.
 func NewAPIExtensionsAzureConfigE2E(config APIExtensionsAzureConfigE2EConfig) (string, error) {
+	if config.Azure.AvailabilityZones == nil {
+		return "", microerror.Maskf(invalidConfigError, "%T.Azure.AvailabilityZones must not be empty", config)
+	}
 	if config.Azure.CalicoSubnetCIDR == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.Azure.CalicoSubnetCIDR must not be empty", config)
 	}
@@ -60,6 +66,12 @@ func NewAPIExtensionsAzureConfigE2E(config APIExtensionsAzureConfigE2EConfig) (s
 	}
 	if config.CommonDomainResourceGroup == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.CommonDomainResourceGroup must not be empty", config)
+	}
+	if config.SSHPublicKey == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.SSHPublicKey must not be empty", config)
+	}
+	if config.SSHUser == "" {
+		return "", microerror.Maskf(invalidConfigError, "%T.SSHUser must not be empty", config)
 	}
 	if config.VersionBundleVersion == "" {
 		return "", microerror.Maskf(invalidConfigError, "%T.VersionBundleVersion must not be empty", config)

@@ -134,7 +134,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	vpcID, err := ensureHostVPCCreated(ctx, config)
+	err = ensureHostVPCCreated(ctx, config)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -142,6 +142,7 @@ func installAWSOperator(ctx context.Context, config Config) error {
 	var values string
 	{
 		c := chartvalues.AWSOperatorConfig{
+			InstallationName: fmt.Sprintf("cp-peer-%s", env.ClusterID()),
 			Provider: chartvalues.AWSOperatorConfigProvider{
 				AWS: chartvalues.AWSOperatorConfigProviderAWS{
 					Encrypter:       "kms",

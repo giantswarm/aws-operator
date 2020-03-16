@@ -10,7 +10,7 @@ const (
 )
 
 var (
-	controllerErrorGauge = prometheus.NewGauge(
+	errorGauge = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Namespace: PrometheusNamespace,
 			Subsystem: PrometheusSubsystem,
@@ -18,7 +18,7 @@ var (
 			Help:      "Number of reconciliation errors.",
 		},
 	)
-	controllerHistogram = prometheus.NewHistogramVec(
+	eventHistogram = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Namespace: PrometheusNamespace,
 			Subsystem: PrometheusSubsystem,
@@ -30,6 +30,6 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(controllerErrorGauge)
-	prometheus.MustRegister(controllerHistogram)
+	prometheus.MustRegister(errorGauge)
+	prometheus.MustRegister(eventHistogram)
 }

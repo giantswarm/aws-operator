@@ -8,7 +8,6 @@ import (
 )
 
 type Authority struct {
-	Endpoint *URL   `yaml:"endpoint"`
 	Name     string `yaml:"name"`
 	Provider string `yaml:"provider"`
 	Version  string `yaml:"version"`

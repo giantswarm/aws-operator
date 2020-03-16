@@ -6,20 +6,45 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/afero"
 )
 
 // PullChartTarball downloads a tarball from the provided tarball URL,
 // returning the file path.
 func (c *Client) PullChartTarball(ctx context.Context, tarballURL string) (string, error) {
+	eventName := "pull_chart_tarball"
+
+	t := prometheus.NewTimer(histogram.WithLabelValues(eventName))
+	defer t.ObserveDuration()
+
+	chartTarballPath, err := c.pullChartTarball(ctx, tarballURL)
+	if err != nil {
+		errorGauge.WithLabelValues(eventName).Inc()
+		return "", microerror.Mask(err)
+	}
+
+	return chartTarballPath, nil
+}
+
+func (c *Client) pullChartTarball(ctx context.Context, tarballURL string) (string, error) {
 	req, err := c.newRequest("GET", tarballURL)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+
+	u, err := url.Parse(tarballURL)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	// Set host header to prevent 404 responses from GitHub Pages.
+	req.Host = u.Host
 
 	chartTarballPath, err := c.doFile(ctx, req)
 	if err != nil {
@@ -36,7 +61,9 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 
 	o := func() error {
 		resp, err := c.httpClient.Do(req)
-		if err != nil {
+		if isNoSuchHostError(err) {
+			return backoff.Permanent(microerror.Maskf(pullChartFailedError, "no such host %#q", req.Host))
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 		defer resp.Body.Close()
@@ -47,11 +74,12 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			// Github pages 404 produces full HTML page which
-			// obscures the logs.
+
+			// Github Pages 404 produces full HTML page which obscures the logs.
 			if resp.StatusCode == http.StatusNotFound {
-				return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String()))
+				return backoff.Permanent(microerror.Maskf(pullChartNotFoundError, fmt.Sprintf("got StatusCode %d for url %#q", resp.StatusCode, req.URL.String())))
 			}
+
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("got StatusCode %d for url %#q with body %s", resp.StatusCode, req.URL.String(), buf.String()))
 		}
 
@@ -71,7 +99,7 @@ func (c *Client) doFile(ctx context.Context, req *http.Request) (string, error) 
 		return nil
 	}
 
-	b := backoff.NewMaxRetries(10, 5*time.Second)
+	b := backoff.NewMaxRetries(3, 5*time.Second)
 	n := backoff.NewNotifier(c.logger, ctx)
 
 	err := backoff.RetryNotify(o, b, n)

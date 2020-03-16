@@ -22,7 +22,7 @@
 
 
 [[constraint]]
-  branch = "master"
+  version = "~0.1.0"
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
@@ -32,3 +32,7 @@
 [[constraint]]
   name = "github.com/go-stack/stack"
   version = "1.7.0"
+
+[[constraint]]
+  name = "github.com/google/go-cmp"
+  version = "0.3.1"
