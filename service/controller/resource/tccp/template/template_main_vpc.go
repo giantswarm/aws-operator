@@ -14,6 +14,7 @@ const TemplateMainVPC = `
         Value: {{ $v.ClusterID }}
   VPCCIDRBlockAWSCNI:
     Type: AWS::EC2::VPCCidrBlock
+    DependsOn: VPCPeeringConnection
     Properties:
       CidrBlock: {{ $v.CIDRBlockAWSCNI }}
       VpcId: !Ref VPC
