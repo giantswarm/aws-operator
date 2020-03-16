@@ -156,7 +156,7 @@ systemd:
       MemoryAccounting=true
       Slice=kubereserved.slice
       EnvironmentFile=/etc/network-environment
-      Environment="IMAGE={{ .RegistryDomain }}/{{ .Images.Kubernetes }}"
+      Environment="IMAGE={{ .Images.Hyperkube }}"
       Environment="NAME=%p.service"
       Environment="PATH=/opt/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       ExecStartPre=/usr/bin/docker pull $IMAGE

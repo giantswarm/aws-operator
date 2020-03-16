@@ -35,7 +35,7 @@ spec:
       serviceAccountName: kube-proxy
       containers:
         - name: kube-proxy
-          image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+          image: {{ .Images.Hyperkube }}
           command:
           - /hyperkube
           - kube-proxy

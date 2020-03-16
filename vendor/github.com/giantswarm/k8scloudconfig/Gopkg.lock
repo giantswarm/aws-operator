@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:f313598719f69ec4edbcd75b0f2ef1c8ed9e00f6ff3d7583ac3966db2d70d326"
+  name = "github.com/Masterminds/semver"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "910aa146bd66780c2815d652b92a7fc5331e533c"
+  version = "v3.0.3"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -10,9 +18,20 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:dd877dd4a8f41be1bca6b7e495f4b33dd71e44fa18547c4e49bcbf0cba4cdb31"
+  branch = "master"
+  digest = "1:08188cf7ce7027b22e88cc23da27f17349a0ba7746271a60cbe0a70266c2346f"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
+
+[[projects]]
+  digest = "1:4b368d430e89696818f3f7e6a4aa1b1aa83b1e620aa78371844af26505dea67d"
   name = "github.com/giantswarm/apiextensions"
-  packages = ["pkg/apis/provider/v1alpha1"]
+  packages = [
+    "pkg/apis/provider/v1alpha1",
+    "pkg/apis/release/v1alpha1",
+  ]
   pruneopts = "UT"
   revision = "4fafaaae7e2eb887a8a268213f28a518a1618c3d"
   version = "v0.1.0"
@@ -179,11 +198,21 @@
   pruneopts = "UT"
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
+[[projects]]
+  digest = "1:36d2b2cb1fa6e4a731e38c3582c203213cdbc52c5f202af07db6dc6eeaec88dc"
+  name = "sigs.k8s.io/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9fc95527decd95bb9d28cc2eab08179b2d0f6971"
+  version = "v1.2.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Masterminds/semver",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
+    "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1",
     "github.com/giantswarm/microerror",
     "github.com/stretchr/testify/assert",
     "gopkg.in/yaml.v2",

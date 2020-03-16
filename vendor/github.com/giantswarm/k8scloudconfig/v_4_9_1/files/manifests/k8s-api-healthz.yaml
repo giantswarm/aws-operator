@@ -18,7 +18,7 @@ spec:
       command:
         - /k8s-api-healthz
         - --api-endpoint="https://$(HOST_IP):443/healthz"
-      image: quay.io/giantswarm/k8s-api-healthz:1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac
+      image: {{ .Images.KubernetesAPIHealthz }}
       resources:
         requests:
           cpu: 50m

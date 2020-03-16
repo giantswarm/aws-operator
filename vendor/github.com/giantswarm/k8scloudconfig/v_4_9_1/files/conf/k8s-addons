@@ -1,21 +1,20 @@
 #!/bin/bash
 
 export KUBECONFIG=/etc/kubernetes/kubeconfig/addons.yaml
-# kubectl 1.12.2
-KUBECTL={{ .RegistryDomain }}/giantswarm/docker-kubectl:f5cae44c480bd797dc770dd5f62d40b74063c0d7
+export KUBECTL="/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes {{ .Images.Kubectl }}"
 
 /usr/bin/docker pull $KUBECTL
 
 # wait for healthy master
-while [ "$(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+while [ "$($KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
 # label namespaces (required for network egress policies)
 NAMESPACES="default kube-system" 
 for namespace in ${NAMESPACES}
 do
-    if ! /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get namespaces -l name=${namespace} | grep ${namespace}; then
+    if ! $KUBECTL get namespaces -l name=${namespace} | grep ${namespace}; then
         while
-            /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL label namespace ${namespace} name=${namespace}
+            $KUBECTL label namespace ${namespace} name=${namespace}
             [ "$?" -ne "0" ]
         do
             echo "failed to label namespace ${namespace}, retrying in 5 sec"
@@ -35,7 +34,7 @@ SECURITY_FILES="${SECURITY_FILES} psp_binding.yaml"
 for manifest in $SECURITY_FILES
 do
     while
-        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        $KUBECTL apply -f /srv/$manifest
         [ "$?" -ne "0" ]
     do
         echo "failed to apply /srv/$manifest, retrying in 5 sec"
@@ -45,10 +44,10 @@ done
 
 # check for other master and remove it
 THIS_MACHINE=$(cat /etc/hostname)
-for master in $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
+for master in $($KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
 do
     if [ "$master" != "$THIS_MACHINE" ]; then
-        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete node $master
+        $KUBECTL delete node $master
     fi
 done
 
@@ -64,8 +63,7 @@ done
 
 # create kube-proxy configmap
 while
-    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv $KUBECTL create configmap kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml -o yaml --dry-run \
-    | /usr/bin/docker run  -i --log-driver=none -a stdin -a stdout -a stderr -e KUBECONFIG=${KUBECONFIG} -v /etc/kubernetes:/etc/kubernetes --net=host --rm $KUBECTL apply -n kube-system -f -
+    $KUBECTL create configmap -n kube-system kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml
     [ "$?" -ne "0" ]
 do
     echo "failed to configure kube-proxy from /srv/kube-proxy-config.yaml, retrying in 5 sec"
@@ -77,7 +75,7 @@ PROXY_MANIFESTS="kube-proxy-sa.yaml kube-proxy-ds.yaml"
 for manifest in $PROXY_MANIFESTS
 do
     while
-        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        $KUBECTL apply -f /srv/$manifest
         [ "$?" -ne "0" ]
     do
         echo "failed to apply /srv/$manifest, retrying in 5 sec"
@@ -87,7 +85,7 @@ done
 echo "kube-proxy successfully installed"
 
 # restart ds to apply config from configmap
-/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
+$KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
 
 {{ if not .DisableCalico -}}
 
@@ -95,7 +93,7 @@ echo "kube-proxy successfully installed"
 CALICO_FILE="calico-all.yaml"
 
 while
-    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$CALICO_FILE
+    $KUBECTL apply -f /srv/$CALICO_FILE
     [ "$?" -ne "0" ]
 do
     echo "failed to apply /srv/$manifest, retrying in 5 sec"
@@ -105,9 +103,9 @@ done
 # wait for healthy calico - we check for pods - desired vs ready
 while
     # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
-    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
+    $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
     RET_CODE_1=$?
-    eval $(/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /etc/kubernetes:/etc/kubernetes $KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
+    eval $($KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
     RET_CODE_2=$?
     [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
 do
@@ -120,7 +118,7 @@ done
 # apply default storage class
 if [ -f /srv/default-storage-class.yaml ]; then
     while
-        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/default-storage-class.yaml
+        $KUBECTL apply -f /srv/default-storage-class.yaml
         [ "$?" -ne "0" ]
     do
         echo "failed to apply /srv/default-storage-class.yaml, retrying in 5 sec"
@@ -134,7 +132,7 @@ fi
 PRIORITY_CLASSES_FILE="priority_classes.yaml"
 
 while
-    /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$PRIORITY_CLASSES_FILE
+    $KUBECTL apply -f /srv/$PRIORITY_CLASSES_FILE
     [ "$?" -ne "0" ]
 do
     echo "failed to apply /srv/$PRIORITY_CLASSES_FILE, retrying in 5 sec"
@@ -153,7 +151,7 @@ MANIFESTS="${MANIFESTS} ingress-controller-svc.yaml"
 for manifest in $MANIFESTS
 do
     while
-        /usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes $KUBECTL apply -f /srv/$manifest
+        $KUBECTL apply -f /srv/$manifest
         [ "$?" -ne "0" ]
     do
         echo "failed to apply /srv/$manifest, retrying in 5 sec"

@@ -13,7 +13,7 @@ spec:
   priorityClassName: system-node-critical
   containers:
   - name: k8s-api-server
-    image: {{ .RegistryDomain }}/{{ .Images.Kubernetes }}
+    image: {{ .Images.Hyperkube }}
     env:
     - name: HOST_IP
       valueFrom:
