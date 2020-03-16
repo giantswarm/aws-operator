@@ -52,6 +52,13 @@
     "files": [
       {
         "contents": {
+          "verification": {}
+        },
+        "filesystem": "root",
+        "path": "/boot/coreos/first_boot"
+      },
+      {
+        "contents": {
           "source": "data:text/plain;base64,dXNlcjpzc2gtcnNhIGJhc2U2ND09Cg==",
           "verification": {}
         },
@@ -61,7 +68,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQpydW50aW1lQ2dyb3VwczogL2t1YmVyZXNlcnZlZC5zbGljZQpzeXN0ZW1SZXNlcnZlZDoKICBjcHU6IDI1MG0KICBtZW1vcnk6IDM4NE1pCnN5c3RlbVJlc2VydmVkQ2dyb3VwOiAvc3lzdGVtLnNsaWNlCmF1dGhlbnRpY2F0aW9uOgogIGFub255bW91czoKICAgIGVuYWJsZWQ6IHRydWUgIyBEZWZhdWx0cyB0byBmYWxzZSBhcyBvZiAxLjEwCiAgd2ViaG9vazoKICAgIGVuYWJsZWQ6IGZhbHNlICMgRGVhZnVsdHMgdG8gdHJ1ZSBhcyBvZiAxLjEwCmF1dGhvcml6YXRpb246CiAgbW9kZTogQWx3YXlzQWxsb3cgIyBEZWFmdWx0cyB0byB3ZWJob29rIGFzIG9mIDEuMTAKZmVhdHVyZUdhdGVzOgogIFRUTEFmdGVyRmluaXNoZWQ6IHRydWUK",
+          "source": "data:text/plain;charset=utf-8;base64,a2luZDogS3ViZWxldENvbmZpZ3VyYXRpb24KYXBpVmVyc2lvbjoga3ViZWxldC5jb25maWcuazhzLmlvL3YxYmV0YTEKYWRkcmVzczogJHtERUZBVUxUX0lQVjR9CnBvcnQ6IDEwMjUwCmhlYWx0aHpCaW5kQWRkcmVzczogJHtERUZBVUxUX0lQVjR9CmhlYWx0aHpQb3J0OiAxMDI0OApjbHVzdGVyRE5TOgogIC0gMTcyLjE4LjE5Mi4xMApjbHVzdGVyRG9tYWluOiBjbHVzdGVyLmxvY2FsCmV2aWN0aW9uU29mdDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiNTAwTWkiCmV2aWN0aW9uSGFyZDoKICBtZW1vcnkuYXZhaWxhYmxlOiAiMjAwTWkiCiAgaW1hZ2Vmcy5hdmFpbGFibGU6ICIxNSUiCmV2aWN0aW9uU29mdEdyYWNlUGVyaW9kOgogIG1lbW9yeS5hdmFpbGFibGU6ICI1cyIKZXZpY3Rpb25NYXhQb2RHcmFjZVBlcmlvZDogNjAKa3ViZVJlc2VydmVkOgogIGNwdTogMjUwbQogIG1lbW9yeTogNzY4TWkKICBlcGhlbWVyYWwtc3RvcmFnZTogMTAyNE1pCmt1YmVSZXNlcnZlZENncm91cDogL2t1YmVyZXNlcnZlZC5zbGljZQptYXhQb2RzOiAke01BWF9QT0RTfQpydW50aW1lQ2dyb3VwczogL2t1YmVyZXNlcnZlZC5zbGljZQpzeXN0ZW1SZXNlcnZlZDoKICBjcHU6IDI1MG0KICBtZW1vcnk6IDM4NE1pCnN5c3RlbVJlc2VydmVkQ2dyb3VwOiAvc3lzdGVtLnNsaWNlCmF1dGhlbnRpY2F0aW9uOgogIGFub255bW91czoKICAgIGVuYWJsZWQ6IHRydWUgIyBEZWZhdWx0cyB0byBmYWxzZSBhcyBvZiAxLjEwCiAgd2ViaG9vazoKICAgIGVuYWJsZWQ6IGZhbHNlICMgRGVhZnVsdHMgdG8gdHJ1ZSBhcyBvZiAxLjEwCmF1dGhvcml6YXRpb246CiAgbW9kZTogQWx3YXlzQWxsb3cgIyBEZWFmdWx0cyB0byB3ZWJob29rIGFzIG9mIDEuMTAKZmVhdHVyZUdhdGVzOgogIFRUTEFmdGVyRmluaXNoZWQ6IHRydWUK",
           "verification": {}
         },
         "filesystem": "root",
@@ -79,7 +86,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,YXBpVmVyc2lvbjoga3ViZXByb3h5LmNvbmZpZy5rOHMuaW8vdjFhbHBoYTEKY2xpZW50Q29ubmVjdGlvbjoKICBrdWJlY29uZmlnOiAvZXRjL2t1YmVybmV0ZXMvY29uZmlnL3Byb3h5LWt1YmVjb25maWcueWFtbApraW5kOiBLdWJlUHJveHlDb25maWd1cmF0aW9uCm1vZGU6IGlwdGFibGVzCnJlc291cmNlQ29udGFpbmVyOiAva3ViZS1wcm94eQpjbHVzdGVyQ0lEUjogMTcyLjE4LjEyOC4wLzE4Cm1ldHJpY3NCaW5kQWRkcmVzczogMC4wLjAuMDoxMDI0OQo=",
+          "source": "data:text/plain;charset=utf-8;base64,YXBpVmVyc2lvbjoga3ViZXByb3h5LmNvbmZpZy5rOHMuaW8vdjFhbHBoYTEKY2xpZW50Q29ubmVjdGlvbjoKICBrdWJlY29uZmlnOiAvZXRjL2t1YmVybmV0ZXMvY29uZmlnL3Byb3h5LWt1YmVjb25maWcueWFtbApraW5kOiBLdWJlUHJveHlDb25maWd1cmF0aW9uCm1vZGU6IGlwdGFibGVzCnJlc291cmNlQ29udGFpbmVyOiAva3ViZS1wcm94eQptZXRyaWNzQmluZEFkZHJlc3M6IDAuMC4wLjA6MTAyNDkK",
           "verification": {}
         },
         "filesystem": "root",
@@ -124,7 +131,16 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,ZnMuaW5vdGlmeS5tYXhfdXNlcl93YXRjaGVzID0gMTYzODQKIyBEZWZhdWx0IGlzIDEyOCwgZG91YmxpbmcgZm9yIG5vZGVzIHdpdGggbWFueSBwb2RzCiMgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9naWFudHN3YXJtL2dpYW50c3dhcm0vaXNzdWVzLzc3MTEKZnMuaW5vdGlmeS5tYXhfdXNlcl9pbnN0YW5jZXMgPSA4MTkyCmtlcm5lbC5rcHRyX3Jlc3RyaWN0ID0gMgprZXJuZWwuc3lzcnEgPSAwCm5ldC5pcHY0LmNvbmYuYWxsLmxvZ19tYXJ0aWFucyA9IDEKbmV0LmlwdjQuY29uZi5hbGwuc2VuZF9yZWRpcmVjdHMgPSAwCm5ldC5pcHY0LmNvbmYuZGVmYXVsdC5hY2NlcHRfcmVkaXJlY3RzID0gMApuZXQuaXB2NC5jb25mLmRlZmF1bHQubG9nX21hcnRpYW5zID0gMQpuZXQuaXB2NC50Y3BfdGltZXN0YW1wcyA9IDAKbmV0LmlwdjYuY29uZi5hbGwuYWNjZXB0X3JlZGlyZWN0cyA9IDAKbmV0LmlwdjYuY29uZi5kZWZhdWx0LmFjY2VwdF9yZWRpcmVjdHMgPSAwCiMgSW5jcmVhc2VkIG1tYXBmcyBiZWNhdXNlIHNvbWUgYXBwbGljYXRpb25zLCBsaWtlIEVTLCBuZWVkIGhpZ2hlciBsaW1pdCB0byBzdG9yZSBkYXRhIHByb3Blcmx5CnZtLm1heF9tYXBfY291bnQgPSAyNjIxNDQKIyBJbmdyZXNzIGNvbnRyb2xsZXIgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnRzCiMgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9rdWJlcm5ldGVzL2luZ3Jlc3MtbmdpbngvaXNzdWVzLzE5MzkKbmV0LmNvcmUuc29tYXhjb25uPTMyNzY4Cm5ldC5pcHY0LmlwX2xvY2FsX3BvcnRfcmFuZ2U9MTAyNCA2NTUzNQpuZXQuaXB2NC5jb25mLmFsbC5ycF9maWx0ZXIgPSAxCm5ldC5pcHY0LmNvbmYuYWxsLmFycF9pZ25vcmUgPSAxCm5ldC5pcHY0LmNvbmYuYWxsLmFycF9hbm5vdW5jZSA9IDIK",
+          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKRW52RmlsZT0iL2V0Yy9rdWJlbGV0LWVudmlyb25tZW50IgoKIyBzZXQgbWF4IHBvZHMgdmFyaWFibGUKCiMgVGhlIG1heGltdW0gbnVtYmVyIG9mIHBvZHMgb24gQVdTIHdpdGggYXdzLWNuaSBpcyBkZWZpbmVkIGJ5IG1heGltdW0gRU5JIGZvciBpbnN0YW5jZSBhbmQgbWF4aW11bSBJUHMgcGVyIEVOSS4gQ2hlY2sgdGhpcyBsaW5rCiMgVGhpcyBpcyBqdXN0IHNpbXBsaWZ5aW5nIHRoZSB3aG9sZSBmb3JtdWxhLiBTbWFsbCBpbnN0YW5jZXMgY2FuIGhhdmUgbGVzcyBFTklzIGFuZCBsZXNzIElQcyBwZXIgRU5JLgojIGh0dHBzOi8vZ2l0aHViLmNvbS9hd3MvYW1hem9uLXZwYy1jbmktazhzI2VuaS1hbGxvY2F0aW9uCiMgaHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FXU0VDMi9sYXRlc3QvVXNlckd1aWRlL3VzaW5nLWVuaS5odG1sCgppbnN0YW5jZV9zaXplPSQoY3VybCBodHRwOi8vMTY5LjI1NC4xNjkuMjU0L2xhdGVzdC9tZXRhLWRhdGEvaW5zdGFuY2UtdHlwZSAyPi9kZXYvbnVsbHwgY3V0IC1kXC4gLWYyKQoKaWYgW1sgIiR7aW5zdGFuY2Vfc2l6ZX0iID1+IF4oNHhsYXJnZXw4eGxhcmdlfDl4bGFyZ2V8MTJ4bGFyZ2V8MTZ4bGFyZ2V8MTh4bGFyZ2V8MjR4bGFyZ2UpJCBdXTsgdGhlbgoJTUFYX1BPRFM9MTEwCmVsc2UgCglNQVhfUE9EUz00MApmaQoKCmVjaG8gIk1BWF9QT0RTPSR7TUFYX1BPRFN9IiA+PiAke0VudkZpbGV9Cg==",
+          "verification": {}
+        },
+        "filesystem": "root",
+        "mode": 356,
+        "path": "/opt/bin/setup-kubelet-environment"
+      },
+      {
+        "contents": {
+          "source": "data:text/plain;charset=utf-8;base64,ZnMuaW5vdGlmeS5tYXhfdXNlcl93YXRjaGVzID0gMTYzODQKIyBEZWZhdWx0IGlzIDEyOCwgZG91YmxpbmcgZm9yIG5vZGVzIHdpdGggbWFueSBwb2RzCiMgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9naWFudHN3YXJtL2dpYW50c3dhcm0vaXNzdWVzLzc3MTEKZnMuaW5vdGlmeS5tYXhfdXNlcl9pbnN0YW5jZXMgPSA4MTkyCmtlcm5lbC5rcHRyX3Jlc3RyaWN0ID0gMgprZXJuZWwuc3lzcnEgPSAwCm5ldC5pcHY0LmNvbmYuYWxsLmxvZ19tYXJ0aWFucyA9IDEKbmV0LmlwdjQuY29uZi5hbGwuc2VuZF9yZWRpcmVjdHMgPSAwCm5ldC5pcHY0LmNvbmYuZGVmYXVsdC5hY2NlcHRfcmVkaXJlY3RzID0gMApuZXQuaXB2NC5jb25mLmRlZmF1bHQubG9nX21hcnRpYW5zID0gMQpuZXQuaXB2NC50Y3BfdGltZXN0YW1wcyA9IDAKbmV0LmlwdjYuY29uZi5hbGwuYWNjZXB0X3JlZGlyZWN0cyA9IDAKbmV0LmlwdjYuY29uZi5kZWZhdWx0LmFjY2VwdF9yZWRpcmVjdHMgPSAwCiMgSW5jcmVhc2VkIG1tYXBmcyBiZWNhdXNlIHNvbWUgYXBwbGljYXRpb25zLCBsaWtlIEVTLCBuZWVkIGhpZ2hlciBsaW1pdCB0byBzdG9yZSBkYXRhIHByb3Blcmx5CnZtLm1heF9tYXBfY291bnQgPSAyNjIxNDQKIyBJbmdyZXNzIGNvbnRyb2xsZXIgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnRzCiMgU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9rdWJlcm5ldGVzL2luZ3Jlc3MtbmdpbngvaXNzdWVzLzE5MzkKbmV0LmNvcmUuc29tYXhjb25uPTMyNzY4Cm5ldC5pcHY0LmlwX2xvY2FsX3BvcnRfcmFuZ2U9MTAyNCA2NTUzNQojIFJlc2VydmVkIHRvIGF2b2lkIGNvbmZsaWN0cyB3aXRoIGt1YmUtYXBpc2VydmVyLCB3aGljaCBhbGxvY2F0ZXMgd2l0aGluIHRoaXMgcmFuZ2UKbmV0LmlwdjQuaXBfbG9jYWxfcmVzZXJ2ZWRfcG9ydHM9MzAwMDAtMzI3NjcKbmV0LmlwdjQuY29uZi5hbGwucnBfZmlsdGVyID0gMQpuZXQuaXB2NC5jb25mLmFsbC5hcnBfaWdub3JlID0gMQpuZXQuaXB2NC5jb25mLmFsbC5hcnBfYW5ub3VuY2UgPSAyCg==",
           "verification": {}
         },
         "filesystem": "root",
@@ -364,10 +380,15 @@
       {
         "contents": "[Unit]\nDescription=Apply os hardening\n[Service]\nType=oneshot\nExecStartPre=-/bin/bash -c \"gpasswd -d core rkt; gpasswd -d core docker; gpasswd -d core wheel\"\nExecStartPre=/bin/bash -c \"until [ -f '/etc/sysctl.d/hardening.conf' ]; do echo Waiting for sysctl file; sleep 1s;done;\"\nExecStart=/usr/sbin/sysctl -p /etc/sysctl.d/hardening.conf\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
-        "name": "os-hardeing.service"
+        "name": "os-hardening.service"
       },
       {
-        "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=k8s-setup-kubelet-environment Service\nAfter=k8s-setup-network-env.service docker.service\nRequires=k8s-setup-network-env.service docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nExecStart=/opt/bin/setup-kubelet-environment\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "k8s-setup-kubelet-environment.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=k8s-setup-kubelet-config Service\nAfter=k8s-setup-network-env.service docker.service k8s-setup-kubelet-environment.service\nRequires=k8s-setup-network-env.service docker.service k8s-setup-kubelet-environment.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironmentFile=/etc/network-environment\nEnvironmentFile=/etc/kubelet-environment\nExecStart=/bin/bash -c '/usr/bin/envsubst \u003c/etc/kubernetes/config/kubelet.yaml.tmpl \u003e/etc/kubernetes/config/kubelet.yaml'\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-setup-kubelet-config.service"
       },
@@ -384,7 +405,7 @@
       {
         "dropins": [
           {
-            "contents": "[Service]\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironment=\"DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid\"\nEnvironment=\"DOCKER_OPT_BIP=--bip=172.18.224.1/19\"\nEnvironment=\"DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false\"\n",
+            "contents": "[Service]\nCPUAccounting=true\nMemoryAccounting=true\nSlice=kubereserved.slice\nEnvironment=\"DOCKER_CGROUPS=--exec-opt native.cgroupdriver=cgroupfs --cgroup-parent=/kubereserved.slice --log-opt max-size=25m --log-opt max-file=2 --log-opt labels=io.kubernetes.container.hash,io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid\"\nEnvironment=\"DOCKER_OPT_BIP=--bip=172.18.224.1/19\"\nEnvironment=\"DOCKER_OPTS=--live-restore --icc=false --userland-proxy=false --metrics-addr=0.0.0.0:9393 --experimental=true\"\n",
             "name": "10-giantswarm-extra-args.conf"
           }
         ],
@@ -407,7 +428,7 @@
         "name": "k8s-kubelet.service"
       },
       {
-        "contents": "[Unit]\nDescription=Adds labels to the node after kubelet startup\nAfter=k8s-kubelet.service\nWants=k8s-kubelet.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nEnvironment=\"KUBECTL=/opt/bin/hyperkube kubectl --kubeconfig /etc/kubernetes/kubeconfig/kubelet.yaml\"\nExecStart=/bin/sh -c '\\\n  while [ \"$($KUBECTL get nodes $(hostname)| wc -l)\" -lt \"1\" ]; do echo \"Waiting for healthy k8s\" \u0026\u0026 sleep 20s;done; \\\n  $KUBECTL label nodes --overwrite $(hostname) node-role.kubernetes.io/worker=\"\"; \\\n  $KUBECTL label nodes --overwrite $(hostname) kubernetes.io/role=worker'\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=Adds labels to the node after kubelet startup\nAfter=k8s-kubelet.service\nWants=k8s-kubelet.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nEnvironment=\"KUBECTL=/opt/bin/hyperkube kubectl --kubeconfig /etc/kubernetes/kubeconfig/kubelet.yaml\"\nExecStart=/bin/sh -c '\\\n  while [ \"$($KUBECTL get nodes $(hostname | tr '[:upper:]' '[:lower:]')| wc -l)\" -lt \"1\" ]; do echo \"Waiting for healthy k8s\" \u0026\u0026 sleep 20s;done; \\\n  $KUBECTL label nodes --overwrite $(hostname | tr '[:upper:]' '[:lower:]') node-role.kubernetes.io/worker=\"\"; \\\n  $KUBECTL label nodes --overwrite $(hostname | tr '[:upper:]' '[:lower:]') kubernetes.io/role=worker'\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-label-node.service"
       },

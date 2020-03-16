@@ -425,16 +425,28 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 
 	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
+		if az.Name == key.MasterAvailabilityZone(cr) {
+			{
+				nr := template.ParamsMainNATGatewayNATRoute{
+					NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+					NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
+					RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+				}
+
+				natRoutes = append(natRoutes, nr)
+			}
 		}
 
-		nr := template.ParamsMainNATGatewayNATRoute{
-			NATGWName:             key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
-			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
-			PrivateRouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+		{
+			nr := template.ParamsMainNATGatewayNATRoute{
+				NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+				NATRouteName:   key.SanitizeCFResourceName(key.AWSCNINATRouteName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+			}
+
+			natRoutes = append(natRoutes, nr)
 		}
-		natRoutes = append(natRoutes, nr)
+
 	}
 
 	var natGateway *template.ParamsMainNATGateway
@@ -499,12 +511,20 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 		return nil, microerror.Mask(err)
 	}
 
+	var awsCNIRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone: az.Name,
+			ResourceName:     key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+		}
+		awsCNIRouteTableNames = append(awsCNIRouteTableNames, rtName)
+	}
+
 	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone:    az.Name,
-			ResourceName:        key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
+			AvailabilityZone: az.Name,
+			ResourceName:     key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 		}
 		publicRouteTableNames = append(publicRouteTableNames, rtName)
 	}
@@ -526,8 +546,10 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	var routeTables *template.ParamsMainRouteTables
 	{
 		routeTables = &template.ParamsMainRouteTables{
-			ClusterID:              key.ClusterID(&cr),
-			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
+			ClusterID:       key.ClusterID(&cr),
+			HostClusterCIDR: cc.Status.ControlPlane.VPC.CIDR,
+
+			AWSCNIRouteTableNames:  awsCNIRouteTableNames,
 			PrivateRouteTableNames: privateRouteTableNames,
 			PublicRouteTableNames:  publicRouteTableNames,
 		}
@@ -775,6 +797,7 @@ func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr infrastructur
 			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
 			APIInternalELBSecurityGroupRules: internalAPIRules,
 			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
+			AWSCNISecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "aws-cni"),
 			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
 			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
 			MasterSecurityGroupRules:         masterRules,
@@ -797,15 +820,31 @@ func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alph
 		return zones[i].Name < zones[j].Name
 	})
 
-	var publicSubnets []template.Subnet
+	var awsCNISubnets []template.ParamsMainSubnetsSubnet
+	for _, az := range zones {
+		snetName := key.SanitizeCFResourceName(key.AWSCNISubnetName(az.Name))
+		snet := template.ParamsMainSubnetsSubnet{
+			AvailabilityZone: az.Name,
+			CIDR:             az.Subnet.AWSCNI.CIDR.String(),
+			Name:             snetName,
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.AWSCNISubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+		}
+		awsCNISubnets = append(awsCNISubnets, snet)
+	}
+
+	var publicSubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
-		snet := template.Subnet{
+		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Public.CIDR.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: template.RouteTableAssociation{
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
 				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
 				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 				SubnetName:     snetName,
@@ -814,19 +853,19 @@ func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alph
 		publicSubnets = append(publicSubnets, snet)
 	}
 
-	var privateSubnets []template.Subnet
+	var privateSubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
 		if az.Name != key.MasterAvailabilityZone(cr) {
 			continue
 		}
 
 		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
-		snet := template.Subnet{
+		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
 			CIDR:                az.Subnet.Private.CIDR.String(),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: template.RouteTableAssociation{
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
 				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
 				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 				SubnetName:     snetName,
@@ -838,6 +877,7 @@ func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alph
 	var subnets *template.ParamsMainSubnets
 	{
 		subnets = &template.ParamsMainSubnets{
+			AWSCNISubnets:  awsCNISubnets,
 			PublicSubnets:  publicSubnets,
 			PrivateSubnets: privateSubnets,
 		}
@@ -873,6 +913,7 @@ func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha2.A
 	{
 		vpc = &template.ParamsMainVPC{
 			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
+			CIDRBlockAWSCNI:  r.cidrBlockAWSCNI,
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,

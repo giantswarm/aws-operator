@@ -4,12 +4,10 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
+	cr, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}

@@ -39,6 +39,7 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	APIWhitelist       APIWhitelist
+	CIDRBlockAWSCNI    string
 	Detection          *changedetection.TCCP
 	InstallationName   string
 	InstanceMonitoring bool
@@ -53,6 +54,7 @@ type Resource struct {
 	logger               micrologger.Logger
 
 	apiWhiteList       APIWhitelist
+	cidrBlockAWSCNI    string
 	detection          *changedetection.TCCP
 	installationName   string
 	instanceMonitoring bool
@@ -78,6 +80,10 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
 	}
 
+	if config.CIDRBlockAWSCNI == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CIDRBlockAWSCNI must not be empty", config)
+	}
+
 	r := &Resource{
 		g8sClient:            config.G8sClient,
 		detection:            config.Detection,
@@ -85,6 +91,7 @@ func New(config Config) (*Resource, error) {
 		logger:               config.Logger,
 
 		apiWhiteList:       config.APIWhitelist,
+		cidrBlockAWSCNI:    config.CIDRBlockAWSCNI,
 		installationName:   config.InstallationName,
 		instanceMonitoring: config.InstanceMonitoring,
 		publicRouteTables:  config.PublicRouteTables,
