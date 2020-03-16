@@ -440,14 +440,14 @@
 
 [[projects]]
   branch = "aws-cni"
-  digest = "1:e13911ea0a2c65e037f12150ede748c82b772bffb11e37ffb87466593d49317c"
+  digest = "1:f3e8df5e84d2f52d7f1d3ff1aa8c33b8c99b27dc17342a85940092183f7a65dc"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_5_2_0",
   ]
   pruneopts = "T"
-  revision = "d504e4bb0b5a5e3e511e2369002d349cbdb8e637"
+  revision = "525d197a38db00ccc494fa7a52c0ae8ab1b6f1b5"
 
 [[projects]]
   branch = "master"
