@@ -14,7 +14,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_4_9_0"
+	CloudConfigVersion = "v_5_2_0"
 	CloudProvider      = "aws"
 )
 
@@ -88,6 +88,10 @@ func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 
 func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time) string {
 	return getResourcenameWithTimeHash("DockerVolume", cr, t)
+}
+
+func IsChinaRegion(awsRegion string) bool {
+	return strings.HasPrefix(awsRegion, "cn-")
 }
 
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {

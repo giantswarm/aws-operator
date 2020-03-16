@@ -9,7 +9,29 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v5.0.0] - 2019-11-12
+## [v5.2.0]
+
+### Changed
+
+- Reserve ports `30000-32767` from ephemeral port range for `kube-apiserver` use.
+- Make provisioning idempotent by generating `/boot/coreos/first_boot` file on every boot.
+- Use [AWS VPC CNI](https://github.com/aws/amazon-vpc-cni-k8s) for pod networking and Calico for ensuring network policies.
+- Enable ':9393/metrics' prometheus endpoint in docker daemon.
+
+## [v5.1.1] - Unreleased
+
+### Changed
+
+- Update Kubernetes to `1.16.7`.
+
+## [v5.1.0] - 2020-01-21
+
+### Changed
+
+- Lowercase $(hostname) to match k8s node name e.g. when using with kubectl.
+- Extend ignition with debug options.
+
+## [v5.0.0] - 2020-01-02
 
 ### Changed
 
@@ -21,6 +43,8 @@ version directory, and  then changes are introduced.
 
 - Add eviction hard setting for image file system in kubelet.
 - Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
+
+## [v4.9.1] - 2020-03-10
 
 ## [v4.9.0] - 2019-10-17
 
@@ -478,7 +502,11 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
+[v5.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_1
+[v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0
 [v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
+[v4.9.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_1
 [v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
 [v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_1
 [v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0

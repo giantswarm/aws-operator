@@ -30,10 +30,12 @@ func (e *baseExtension) templateData() templateData {
 	}
 
 	data := templateData{
-		AWSRegion:     key.Region(e.cluster),
-		EncrypterType: encrypterType,
-		VaultAddress:  vaultAddress,
-		EncryptionKey: e.encryptionKey,
+		AWSRegion:      key.Region(e.cluster),
+		EncryptionKey:  e.encryptionKey,
+		EncrypterType:  encrypterType,
+		IsChinaRegion:  key.IsChinaRegion(awsRegion),
+		RegistryDomain: e.registryDomain,
+		VaultAddress:   vaultAddress,
 	}
 
 	return data
