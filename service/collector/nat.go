@@ -1,24 +1,19 @@
 package collector
 
 import (
-	//"github.com/aws/aws-sdk-go/service/ec2"
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/servicequotas"
-
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
+	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-	clientaws "github.com/giantswarm/aws-operator/client/aws"
 )
 
 const (
 	labelVPC = "vpc"
+	labelAZ  = "availability_zone"
 )
 
 const (
@@ -28,17 +23,14 @@ const (
 var (
 	natDesc *prometheus.Desc = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, subsystemNAT, "info"),
-		"VPC information.",
+		"NAT limits information.",
 		[]string{
 			labelAccountID,
-			labelCluster,
-			labelInstallation,
-			labelOrganization,
 			labelVPC,
+			labelAZ,
 		},
 		nil,
 	)
-	NATQuotaCode   string = "L-FE5A380F"
 	VPCServiceCode string = "vpc"
 )
 
@@ -113,33 +105,9 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-	id := &servicequotas.GetAWSDefaultServiceQuotaInput{
-		QuotaCode:   &NATQuotaCode,
-		ServiceCode: &VPCServiceCode,
-	}
-	od, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(id)
+	accountID, err := v.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)
-	}
-
-	// accountID, err := v.helper.AWSAccountID(awsClients)
-	// if err != nil {
-	// 	return microerror.Mask(err)
-	// }
-
-	fmt.Printf("Service Quota NAT GW: %f \n", *od.Quota.Value)
-
-	il := &servicequotas.ListServiceQuotasInput{
-		ServiceCode: &VPCServiceCode,
-	}
-	ol, err := awsClients.ServiceQuotas.ListServiceQuotas(il)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	for _, sq := range ol.Quotas {
-		if *sq.QuotaCode == NATQuotaCode {
-			fmt.Printf("NAT quota: %f \n", *sq.Value)
-		}
 	}
 
 	iv := &ec2.DescribeVpcsInput{
@@ -169,8 +137,8 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			},
 		}
 
-		var azs map[string]int
-		azs = make(map[string]int)
+		var azs map[string]float64
+		azs = make(map[string]float64)
 		rn, err := awsClients.EC2.DescribeNatGateways(in)
 		if err != nil {
 			return microerror.Mask(err)
@@ -190,11 +158,22 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				if _, ok := azs[zoneID]; ok {
 					azs[zoneID] = azs[zoneID] + 1
 				} else {
-					azs[zoneID] = 0
+					azs[zoneID] = 1
 				}
-				fmt.Printf("Subnet AZ: %s \n", *sub.AvailabilityZoneId)
 			}
 		}
+
+		for azName, azValue := range azs {
+			ch <- prometheus.MustNewConstMetric(
+				ServiceQuotaDesc,
+				prometheus.GaugeValue,
+				azValue,
+				accountID,
+				*vpc.VpcId,
+				azName,
+			)
+		}
+
 	}
 
 	return nil
