@@ -43,8 +43,8 @@ required = [
   name = "github.com/docker/distribution"
 
 [[override]]
-  branch = "master"
   name = "github.com/giantswarm/apiextensions"
+  version = "~0.1.0"
 
 [[constraint]]
   branch = "master"
@@ -63,7 +63,7 @@ required = [
   name = "github.com/giantswarm/e2e-harness"
 
 [[constraint]]
-  branch = "update_vendors"
+  branch = "master"
   name = "github.com/giantswarm/e2eclients"
 
 [[constraint]]

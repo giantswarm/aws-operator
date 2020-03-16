@@ -31,7 +31,6 @@ var (
 		},
 		nil,
 	)
-	VPCServiceCode string = "vpc"
 )
 
 type NATConfig struct {
