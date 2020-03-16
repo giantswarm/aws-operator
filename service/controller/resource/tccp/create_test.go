@@ -95,7 +95,8 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 					Detection: d,
 					Logger:    microloggertest.New(),
 
-					Route53Enabled: tc.route53Enabled,
+					CIDRBlockAWSCNI: "172.17.0.1/16",
+					Route53Enabled:  tc.route53Enabled,
 				}
 
 				r, err = New(c)
