@@ -416,7 +416,7 @@
   revision = "079149b6a5df4f16247dd3c1b7c06fb14c03bcca"
 
 [[projects]]
-  branch = "template-491"
+  branch = "master"
   digest = "1:bc6f5ffa704462854bca2ce2707a80b5edbe9ac69d35fead4c62bed1a7d7c8a0"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
@@ -424,7 +424,7 @@
     "v_4_9_1",
   ]
   pruneopts = "T"
-  revision = "39ad3142d9bda4a74a9eb8e0646565e79493c31c"
+  revision = "70a424f613848b2c263c4a0d6140ee71221542fa"
 
 [[projects]]
   branch = "master"
