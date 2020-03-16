@@ -450,10 +450,6 @@ spec:
               value: "Warning"
             - name: FELIX_HEALTHENABLED
               value: "true"
-            - name: FELIX_IPTABLESMANGLEALLOWACTION
-              value: Return
-            - name: FELIX_INTERFACEPREFIX
-              value: eni
             - name: FELIX_PROMETHEUSMETRICSENABLED
               value: "true"
           securityContext:
