@@ -12,9 +12,10 @@ import (
 )
 
 type baseExtension struct {
-	cluster       infrastructurev1alpha2.AWSCluster
-	encrypter     encrypter.Interface
-	encryptionKey string
+	registryDomain string
+	cluster        infrastructurev1alpha2.AWSCluster
+	encrypter      encrypter.Interface
+	encryptionKey  string
 }
 
 func (e *baseExtension) templateData() templateData {
@@ -29,8 +30,10 @@ func (e *baseExtension) templateData() templateData {
 		encrypterType = encrypter.KMSBackend
 	}
 
+	awsRegion := key.Region(e.cluster)
+
 	data := templateData{
-		AWSRegion:      key.Region(e.cluster),
+		AWSRegion:      awsRegion,
 		EncryptionKey:  e.encryptionKey,
 		EncrypterType:  encrypterType,
 		IsChinaRegion:  key.IsChinaRegion(awsRegion),

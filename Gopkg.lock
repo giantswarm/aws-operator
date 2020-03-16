@@ -69,6 +69,14 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
+  name = "github.com/Sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
+  version = "v1.4.2"
+
+[[projects]]
   digest = "1:d8bf00757b72dcea682e6bdfcc064fbbca10f9892d2fbcb16c4313488d6be708"
   name = "github.com/aws/amazon-vpc-cni-k8s"
   packages = ["pkg/apis/crd/v1alpha1"]
@@ -279,11 +287,11 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5dddf1342f30cbdda064c87827164becfead1b5a35ef9029190cc3cb6d73376f"
+  digest = "1:520f23cf3864e25b4caa486502c80a7af1041985674074543ffbda3715d32970"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
+    "pkg/apis/backup/v1alpha1",
     "pkg/apis/core/v1alpha1",
     "pkg/apis/example/v1alpha1",
     "pkg/apis/infrastructure/v1alpha2",
@@ -294,6 +302,8 @@
     "pkg/clientset/versioned/scheme",
     "pkg/clientset/versioned/typed/application/v1alpha1",
     "pkg/clientset/versioned/typed/application/v1alpha1/fake",
+    "pkg/clientset/versioned/typed/backup/v1alpha1",
+    "pkg/clientset/versioned/typed/backup/v1alpha1/fake",
     "pkg/clientset/versioned/typed/core/v1alpha1",
     "pkg/clientset/versioned/typed/core/v1alpha1/fake",
     "pkg/clientset/versioned/typed/example/v1alpha1",
@@ -306,7 +316,8 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "29482fb3d774cedee3578619809e04274372bf9b"
+  revision = "9552ed6bec737d139a14042569f7f96bc32d5a00"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -475,12 +486,12 @@
   revision = "e991deac265373d9347b96ecc56b13f228be144f"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d80347cb345b2986422040821735ae0efba8b8093b765b146b90796d926b85b4"
+  digest = "1:701a5f5a7297ced0c7b9aeeba6a40ef47663b956d56e7acd09fe0d1c31eb1e4b"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e0ebc4ecf5a515b8f2a33257d08962e387120a77"
+  revision = "e8fe0fa9c0097ca80d8b773e1d728843447f9233"
+  version = "v0.1.0"
 
 [[projects]]
   branch = "master"
@@ -506,8 +517,7 @@
   revision = "429e22e73d3e1ccfbc9311baa3ea9526423debdf"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c313924ca7110c452a83502384552f4dd2ed25dd0f3ab8aa8a34707315243561"
+  digest = "1:4e616fe01d486048e77342e2c5e638f8744ec6da802335633740aafb057f50d8"
   name = "github.com/giantswarm/micrologger"
   packages = [
     ".",
@@ -515,7 +525,8 @@
     "microloggertest",
   ]
   pruneopts = "UT"
-  revision = "d866337f739365a54de5924b8a7b29df17693ef8"
+  revision = "c4d217562e3d493e3ff571707346a5a2653475cb"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -2242,6 +2253,7 @@
     "github.com/aws/aws-sdk-go/service/support",
     "github.com/aws/aws-sdk-go/service/support/supportiface",
     "github.com/docker/distribution/reference",
+    "github.com/ghodss/yaml",
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
@@ -2304,6 +2316,7 @@
     "k8s.io/apimachinery/pkg/labels",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
+    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apiserver/pkg/endpoints/request",
     "k8s.io/client-go/dynamic",

@@ -42,9 +42,9 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/apiextensions"
+  version = "~0.1.0"
 
 [[constraint]]
   branch = "master"
@@ -104,16 +104,16 @@ required = [
 
 [[constraint]]
   branch = "master"
-  name = "github.com/giantswarm/microerror"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/giantswarm/microkit"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/micrologger"
+  version = "~0.1.0"
 
+[[override]]
+  name = "github.com/giantswarm/microerror"
+  version = "~0.1.0"
+  
 [[override]]
   branch = "master"
   name = "github.com/giantswarm/operatorkit"

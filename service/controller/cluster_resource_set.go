@@ -34,7 +34,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
@@ -612,19 +611,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var ensureCPCRsResource resource.Interface
-	{
-		c := ensurecpcrs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ensureCPCRsResource, err = ensurecpcrs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -683,7 +669,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		serviceResource,
 		endpointsResource,
 		eniConfigCRsResource,
-		ensureCPCRsResource,
 		secretFinalizerResource,
 
 		// All these resources implement cleanup functionality only being executed

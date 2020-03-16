@@ -37,7 +37,16 @@ version directory, and  then changes are introduced.
 
 - Moved kubelet from container to host process (`--containerized` flag is removed in Kubernetes 1.16).
 - Changed `restricted` PodSecurityPolicy to restrict the allowed range of user IDs for PODs.
+- Update Kubernetes to `1.16.3`.
+- Update Calico to `3.10.1` along with corresponding RBAC rules.
+- Update etcd to `3.3.17`.
+- Update `calicoctl` (debug tool) to `3.10.1`.
+- Update `crictl` (debug tool) to `1.16.1`.
+- Clean up k8s-addons (use system `kubectl`, avoid `kubectl get cs`).
+- Apply kubelet restricted role labels using new systemd service.
 - Increase `fs.inotify.max_user_instances` to 8192.
+- Change Priority Class for `calico-node` to `system-node-critical`.
+- Use registry domain for k8s-api-healthz and wait for domains script for AWS China.
 
 ### Added
 
@@ -62,14 +71,14 @@ version directory, and  then changes are introduced.
 - Use `/bin/calico-node -felix-live` for `calico-node` liveness probe instead of `httpGet`.
 - Generally minimize differences between [Calico v3.9 yaml](https://docs.projectcalico.org/v3.9/manifests/calico.yaml) and `calico-all.yaml`.
 
-## [v4.8.1] - 2019-12-04
+## [v4.8.1] - 2019-12-31
 
 ### Changed
 
-- Update kubernetes to 1.14.9, includes fixes for CVE-2019-11253.
+- Update Kubernetes to 1.14.10, includes fixes for CVE-2019-11253 and some Azure fixes.
 - Increase `fs.inotify.max_user_instances` to 8192.
 
-## [v4.8.0] 
+## [v4.8.0]
 
 ### Added
 
