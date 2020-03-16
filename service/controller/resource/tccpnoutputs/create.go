@@ -12,8 +12,10 @@ import (
 )
 
 const (
-	InstanceTypeKey = "InstanceType"
-	OperatorVersion = "OperatorVersion"
+	InstanceTypeKey           = "InstanceType"
+	OperatorVersion           = "OperatorVersion"
+	VPCIDKey                  = "VPCID"
+	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -79,6 +81,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.OperatorVersion = v
+	}
+
+	{
+		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.TCCP.VPC.ID = v
+	}
+
+	{
+		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = v
 	}
 
 	return nil
