@@ -1399,7 +1399,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-0180d1fecf4988a5f",
+			expectedImageID: "ami-026f7fae59b401ac0",
 			osVersion:       "2345.3.0",
 		},
 	}
