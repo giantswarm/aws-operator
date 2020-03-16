@@ -32,6 +32,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 )
 
 type controlPlaneResourceSetConfig struct {
@@ -154,6 +155,19 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpVPCPCXResource resource.Interface
+	{
+		c := tccpvpcpcx.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
@@ -268,6 +282,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		tccpnOutputsResource,
 		snapshotIDResource,
 		tccpVPCIDResource,
+		tccpVPCPCXResource,
 		cpVPCResource,
 		regionResource,
 
