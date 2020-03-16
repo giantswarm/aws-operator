@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Giant Swarm GmbH.
+Copyright 2020 Giant Swarm GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,12 @@ limitations under the License.
 package fake
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/discovery"
+	fakediscovery "k8s.io/client-go/discovery/fake"
+	"k8s.io/client-go/testing"
+
 	clientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1"
 	fakeapplicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1/fake"
@@ -30,11 +36,6 @@ import (
 	fakeproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1/fake"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1"
 	fakereleasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1/fake"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/discovery"
-	fakediscovery "k8s.io/client-go/discovery/fake"
-	"k8s.io/client-go/testing"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.
@@ -49,7 +50,7 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 		}
 	}
 
-	cs := &Clientset{}
+	cs := &Clientset{tracker: o}
 	cs.discovery = &fakediscovery.FakeDiscovery{Fake: &cs.Fake}
 	cs.AddReactor("*", "*", testing.ObjectReaction(o))
 	cs.AddWatchReactor("*", func(action testing.Action) (handled bool, ret watch.Interface, err error) {
@@ -71,10 +72,15 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 type Clientset struct {
 	testing.Fake
 	discovery *fakediscovery.FakeDiscovery
+	tracker   testing.ObjectTracker
 }
 
 func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 	return c.discovery
+}
+
+func (c *Clientset) Tracker() testing.ObjectTracker {
+	return c.tracker
 }
 
 var _ clientset.Interface = &Clientset{}
@@ -84,18 +90,8 @@ func (c *Clientset) ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha
 	return &fakeapplicationv1alpha1.FakeApplicationV1alpha1{Fake: &c.Fake}
 }
 
-// Application retrieves the ApplicationV1alpha1Client
-func (c *Clientset) Application() applicationv1alpha1.ApplicationV1alpha1Interface {
-	return &fakeapplicationv1alpha1.FakeApplicationV1alpha1{Fake: &c.Fake}
-}
-
 // CoreV1alpha1 retrieves the CoreV1alpha1Client
 func (c *Clientset) CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface {
-	return &fakecorev1alpha1.FakeCoreV1alpha1{Fake: &c.Fake}
-}
-
-// Core retrieves the CoreV1alpha1Client
-func (c *Clientset) Core() corev1alpha1.CoreV1alpha1Interface {
 	return &fakecorev1alpha1.FakeCoreV1alpha1{Fake: &c.Fake}
 }
 
@@ -104,27 +100,12 @@ func (c *Clientset) ExampleV1alpha1() examplev1alpha1.ExampleV1alpha1Interface {
 	return &fakeexamplev1alpha1.FakeExampleV1alpha1{Fake: &c.Fake}
 }
 
-// Example retrieves the ExampleV1alpha1Client
-func (c *Clientset) Example() examplev1alpha1.ExampleV1alpha1Interface {
-	return &fakeexamplev1alpha1.FakeExampleV1alpha1{Fake: &c.Fake}
-}
-
 // ProviderV1alpha1 retrieves the ProviderV1alpha1Client
 func (c *Clientset) ProviderV1alpha1() providerv1alpha1.ProviderV1alpha1Interface {
 	return &fakeproviderv1alpha1.FakeProviderV1alpha1{Fake: &c.Fake}
 }
 
-// Provider retrieves the ProviderV1alpha1Client
-func (c *Clientset) Provider() providerv1alpha1.ProviderV1alpha1Interface {
-	return &fakeproviderv1alpha1.FakeProviderV1alpha1{Fake: &c.Fake}
-}
-
 // ReleaseV1alpha1 retrieves the ReleaseV1alpha1Client
 func (c *Clientset) ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface {
-	return &fakereleasev1alpha1.FakeReleaseV1alpha1{Fake: &c.Fake}
-}
-
-// Release retrieves the ReleaseV1alpha1Client
-func (c *Clientset) Release() releasev1alpha1.ReleaseV1alpha1Interface {
 	return &fakereleasev1alpha1.FakeReleaseV1alpha1{Fake: &c.Fake}
 }

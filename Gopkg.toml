@@ -37,7 +37,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[override]]
-  branch = "backport-release"
+  branch = "legacy-1-15"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
