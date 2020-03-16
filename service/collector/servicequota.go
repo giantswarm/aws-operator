@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	ServiceQuotaDesc *prometheus.Desc = prometheus.NewDesc(
+	serviceQuotaDesc *prometheus.Desc = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, subsystemServiceQuota, "info"),
 		"Service Quota information.",
 		[]string{
@@ -97,7 +97,7 @@ func (v *ServiceQuota) Collect(ch chan<- prometheus.Metric) error {
 }
 
 func (v *ServiceQuota) Describe(ch chan<- *prometheus.Desc) error {
-	ch <- ServiceQuotaDesc
+	ch <- serviceQuotaDesc
 	return nil
 }
 
@@ -132,7 +132,7 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 	}
 
 	ch <- prometheus.MustNewConstMetric(
-		ServiceQuotaDesc,
+		serviceQuotaDesc,
 		prometheus.GaugeValue,
 		NATQuotaValue,
 		accountID,

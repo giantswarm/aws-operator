@@ -165,7 +165,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 		for azName, azValue := range azs {
 			ch <- prometheus.MustNewConstMetric(
-				ServiceQuotaDesc,
+				natDesc,
 				prometheus.GaugeValue,
 				azValue,
 				accountID,
