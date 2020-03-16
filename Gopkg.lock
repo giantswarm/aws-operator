@@ -336,17 +336,6 @@
   revision = "3f774da07e59f9446507f506cae152c93ad2e46c"
 
 [[projects]]
-  digest = "1:32a7e7db4aa2436c57ccf96af8425362e0e18929741487f0f5d5ff66c602cebe"
-  name = "github.com/giantswarm/cluster-operator"
-  packages = [
-    "pkg/label",
-    "service/controller/key",
-  ]
-  pruneopts = "UT"
-  revision = "9b7b9ff56119513f05295f9da72bbd191bd8fdcc"
-  version = "v2.1.4"
-
-[[projects]]
   branch = "master"
   digest = "1:4da39fa5b025e0e8747a0d0df1b1d2328a5ab4a66dcad7b1ad9b41354b575d2d"
   name = "github.com/giantswarm/e2e-harness"
@@ -450,16 +439,15 @@
   revision = "9944e04ab86aa5606e5466d2880f808d81f46ad7"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5bba02bc1790dbff03346539cac799d3b132b2a49427c98b9ac62cce4e85fdf0"
+  branch = "aws-cni"
+  digest = "1:e13911ea0a2c65e037f12150ede748c82b772bffb11e37ffb87466593d49317c"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_5_0_0",
     "v_5_2_0",
   ]
   pruneopts = "T"
-  revision = "6ecc07e665c3e854dfa8be102a8c6446d1d9dc3c"
+  revision = "d504e4bb0b5a5e3e511e2369002d349cbdb8e637"
 
 [[projects]]
   branch = "master"
@@ -2272,7 +2260,6 @@
     "github.com/giantswarm/apprclient",
     "github.com/giantswarm/backoff",
     "github.com/giantswarm/certs",
-    "github.com/giantswarm/cluster-operator/service/controller/key",
     "github.com/giantswarm/e2e-harness/pkg/framework",
     "github.com/giantswarm/e2e-harness/pkg/harness",
     "github.com/giantswarm/e2e-harness/pkg/release",
@@ -2290,7 +2277,6 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
-    "github.com/giantswarm/k8scloudconfig/v_5_0_0",
     "github.com/giantswarm/k8scloudconfig/v_5_2_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
