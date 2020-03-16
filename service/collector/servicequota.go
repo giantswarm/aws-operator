@@ -28,7 +28,9 @@ var (
 		},
 		nil,
 	)
-	NATQuotaCode = "L-FE5A380F"
+	NATQuotaCode   = "L-FE5A380F"
+	NATQuotaName   = "nat-gateway"
+	VPCServiceCode = "vpc"
 )
 
 type ServiceQuotaConfig struct {
@@ -102,42 +104,50 @@ func (v *ServiceQuota) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-	var NATQuotaValue float64
+	accountID, err := v.helper.AWSAccountID(awsClients)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		serviceQuotaDesc,
+		prometheus.GaugeValue,
+		natQuotaValue,
+		accountID,
+		NATQuotaName,
+	)
+
+	return nil
+}
+
+func getDefaultVPCQuotaFor(quotaCode string, awsClients clientaws.Clients) (float64, error) {
 	id := &servicequotas.GetAWSDefaultServiceQuotaInput{
 		QuotaCode:   &NATQuotaCode,
 		ServiceCode: &VPCServiceCode,
 	}
 	od, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(id)
 	if err != nil {
-		return microerror.Mask(err)
+		return 0, microerror.Mask(err)
 	}
-	NATQuotaValue = *od.Quota.Value
-
-	accountID, err := v.helper.AWSAccountID(awsClients)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	natQuotaValue := *od.Quota.Value
 
 	il := &servicequotas.ListServiceQuotasInput{
 		ServiceCode: &VPCServiceCode,
 	}
 	ol, err := awsClients.ServiceQuotas.ListServiceQuotas(il)
 	if err != nil {
-		return microerror.Mask(err)
+		return 0, microerror.Mask(err)
 	}
 	for _, sq := range ol.Quotas {
 		if *sq.QuotaCode == NATQuotaCode {
-			NATQuotaValue = *sq.Value
+			natQuotaValue = *sq.Value
 		}
 	}
 
-	ch <- prometheus.MustNewConstMetric(
-		serviceQuotaDesc,
-		prometheus.GaugeValue,
-		NATQuotaValue,
-		accountID,
-		*od.Quota.QuotaName,
-	)
-
-	return nil
+	return natQuotaValue, nil
 }
