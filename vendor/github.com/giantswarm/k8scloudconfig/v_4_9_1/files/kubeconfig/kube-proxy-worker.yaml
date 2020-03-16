@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Config
+users:
+- name: proxy
+  user:
+    client-certificate: /etc/kubernetes/ssl/worker-crt.pem
+    client-key: /etc/kubernetes/ssl/worker-key.pem
+clusters:
+- name: local
+  cluster:
+    certificate-authority: /etc/kubernetes/ssl/worker-ca.pem
+    server: https://{{.Cluster.Kubernetes.API.Domain}}
+contexts:
+- context:
+    cluster: local
+    user: proxy
+  name: service-account-context
+current-context: service-account-context
