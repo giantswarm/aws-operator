@@ -71,36 +71,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack outputs")
 	}
 
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, DockerVolumeResourceNameKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.DockerVolumeResourceName = v
-	}
-
 	if r.route53Enabled {
 		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.HostedZoneNameServers = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterImageIDKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.Image = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceResourceNameKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.ResourceName = v
 	}
 
 	{
