@@ -283,7 +283,6 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-  branch = "master"
   digest = "1:520f23cf3864e25b4caa486502c80a7af1041985674074543ffbda3715d32970"
   name = "github.com/giantswarm/apiextensions"
   packages = [
@@ -314,6 +313,7 @@
   ]
   pruneopts = "UT"
   revision = "9552ed6bec737d139a14042569f7f96bc32d5a00"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -353,16 +353,12 @@
   revision = "b2048d8645c15ac583a270c57b95855426e48958"
 
 [[projects]]
-  branch = "update_vendors"
+  branch = "master"
   digest = "1:08c7c55cf4dde5b8052d687a4eeff0d5796309f3e49b5f00e3c19dc62f033584"
   name = "github.com/giantswarm/e2eclients"
   packages = ["aws"]
   pruneopts = "UT"
-<<<<<<< HEAD
-  revision = "bad08e7d2d693bab6cfc26598f4bae53f383909c"
-=======
   revision = "3d3a1e431d6556d3c9999751d7ce3bd5984495ca"
->>>>>>> master
 
 [[projects]]
   branch = "master"
