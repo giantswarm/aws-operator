@@ -33,8 +33,7 @@ const TemplateMainRouteTables = `
     Properties:
       RouteTableId: !Ref {{ .ResourceName }}
       DestinationCidrBlock: {{ $v.HostClusterCIDR }}
-      VpcPeeringConnectionId:
-        Ref: {{ $v.PeeringConnectionID }}
+      VpcPeeringConnectionId: {{ $v.PeeringConnectionID }}
   {{- end }}
 {{- end -}}
 `
