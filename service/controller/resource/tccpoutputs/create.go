@@ -12,14 +12,11 @@ import (
 )
 
 const (
-	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
-	HostedZoneNameServersKey      = "HostedZoneNameServers"
-	MasterImageIDKey              = "MasterImageID"
-	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
-	MasterInstanceTypeKey         = "MasterInstanceType"
-	OperatorVersion               = "OperatorVersion"
-	VPCIDKey                      = "VPCID"
-	VPCPeeringConnectionIDKey     = "VPCPeeringConnectionID"
+	HostedZoneNameServersKey  = "HostedZoneNameServers"
+	MasterInstanceTypeKey     = "MasterInstanceType"
+	OperatorVersion           = "OperatorVersion"
+	VPCIDKey                  = "VPCID"
+	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
