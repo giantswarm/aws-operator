@@ -107,6 +107,21 @@ func NewSet(config SetConfig) (*Set, error) {
 		}
 	}
 
+	var sqCollector *ServiceQuota
+	{
+		c := ServiceQuotaConfig{
+			Helper: h,
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		sqCollector, err = NewServiceQuota(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var trustedAdvisorCollector *TrustedAdvisor
 	{
 		c := TrustedAdvisorConfig{
@@ -143,6 +158,7 @@ func NewSet(config SetConfig) (*Set, error) {
 				asgCollector,
 				ec2InstancesCollector,
 				elbCollector,
+				sqCollector,
 				vpcCollector,
 			},
 			Logger: config.Logger,
