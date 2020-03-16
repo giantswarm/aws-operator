@@ -136,7 +136,7 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		prometheus.GaugeValue,
 		NATQuotaValue,
 		accountID,
-		NATQuotaCode,
+		*od.Quota.QuotaName,
 	)
 
 	return nil
