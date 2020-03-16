@@ -226,10 +226,7 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 		}
 
 		newConditions = append(newConditions, condition)
-
-		for _, c := range conditions {
-			newConditions = append(newConditions, c)
-		}
+		newConditions = append(newConditions, conditions...)
 	}
 
 	// The new list is sorted to have the first item being the oldest. This is to
@@ -259,7 +256,7 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 			// the grouped item from the list.
 			if len(g) == 0 {
 				g = append(g, c)
-				newConditions = newConditions[1:len(newConditions)]
+				newConditions = newConditions[1:]
 				continue
 			}
 
@@ -267,7 +264,7 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 			if len(g) == 1 {
 				if isConditionPair(g[0], c) {
 					g = append(g, c)
-					newConditions = newConditions[1:len(newConditions)]
+					newConditions = newConditions[1:]
 				}
 				break
 			}
@@ -286,14 +283,14 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 		for _, g := range conditionGroups {
 			if len(p) == 0 {
 				p = append(p, g...)
-				conditionGroups = conditionGroups[1:len(conditionGroups)]
+				conditionGroups = conditionGroups[1:]
 				continue
 			}
 
 			if len(g) >= 1 {
 				if isConditionPair(p[0], g[0]) || isConditionPair(p[1], g[0]) {
 					p = append(p, g...)
-					conditionGroups = conditionGroups[1:len(conditionGroups)]
+					conditionGroups = conditionGroups[1:]
 				}
 			}
 		}
@@ -316,7 +313,7 @@ func withCondition(conditions []CommonClusterStatusCondition, condition CommonCl
 			l = len(p)
 		}
 
-		limittedList = append(limittedList, p[len(p)-l:len(p)]...)
+		limittedList = append(limittedList, p[len(p)-l:]...)
 	}
 
 	// We reverse the list order to have the item with the highest timestamp at
@@ -336,10 +333,7 @@ func withVersion(versions []CommonClusterStatusVersion, version CommonClusterSta
 	}
 
 	// Create a copy to not manipulate the input list.
-	var newVersions []CommonClusterStatusVersion
-	for _, v := range versions {
-		newVersions = append(newVersions, v)
-	}
+	newVersions := append(versions[:0:0], versions...)
 
 	// Sort the versions in a way that the newest version, namely the one with the
 	// highest timestamp, is at the top of the list.
