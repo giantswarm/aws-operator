@@ -9,6 +9,8 @@ import (
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -112,7 +114,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	iv := &ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String("tag:giantswarm.io/organization"),
+				Name: aws.String(key.TagOrganization),
 				Values: []*string{
 					aws.String("giantswarm"),
 				},
