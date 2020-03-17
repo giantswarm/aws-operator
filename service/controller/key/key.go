@@ -735,58 +735,21 @@ func componentName(domainName string) (string, error) {
 }
 
 // ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
+func ImageID(customObject v1alpha1.AWSConfig, osVersion string) (string, error) {
 	region := Region(customObject)
 
-	/*
-		Container Linux AMIs for each active AWS region.
-
-		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
-		NOTE 2: You also need to update the tests.
-
-		service/controller/key/key_test.go
-		service/controller/internal/adapter/adapter_test.go
-		service/controller/resource/cloudformation/main_stack_test.go
-
-		Current Release: CoreOS Container Linux stable 2191.5.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt.
-
-		Script to parse AMIs (Python 3):
-
-		import urllib.request
-		url='https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt'
-		a=urllib.request.urlopen(url).read()
-		print(',\n'.join(['"'+'":"'.join(i.split('='))+'"' for i in a.decode('utf-8').strip().split('|')])+',')
-	*/
-	imageIDs := map[string]string{
-		"ap-northeast-1": "ami-06443443a3ad575e0",
-		"ap-northeast-2": "ami-05385569b790d035a",
-		"ap-south-1":     "ami-05d7bc2359eaaecf1",
-		"ap-southeast-1": "ami-0e69fd5ed05e58e4a",
-		"ap-southeast-2": "ami-0af85d64c1d5aeae6",
-		"ca-central-1":   "ami-00cbc28393f9da64c",
-		"cn-north-1":     "ami-001272d09c87c54fa",
-		"cn-northwest-1": "ami-0c08167b4fb0293c1",
-		"eu-central-1":   "ami-038cea5071a5ee580",
-		"eu-north-1":     "ami-01f28d71d1c924642",
-		"eu-west-1":      "ami-067301c1a68e593f5",
-		"eu-west-2":      "ami-0f5c4ede722171894",
-		"eu-west-3":      "ami-07bf54c1c2b7c368e",
-		"sa-east-1":      "ami-0d1ca6b44a76c404a",
-		"us-east-1":      "ami-06d2804068b372d32",
-		"us-east-2":      "ami-07ee0d30575e363c4",
-		"us-gov-east-1":  "ami-0751c20ce4cb557df",
-		"us-gov-west-1":  "ami-a9571fc8",
-		"us-west-1":      "ami-0d05a67ab67139420",
-		"us-west-2":      "ami-039eb9d6842534000",
-	}
-
-	imageID, ok := imageIDs[region]
+	versionAMIInfo, ok := amiInfo[osVersion]
 	if !ok {
-		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
+		return "", microerror.Maskf(invalidConfigError, "no image id for version '%s'", osVersion)
 	}
 
-	return imageID, nil
+	for _, regionAMIInfo := range versionAMIInfo.AMIs {
+		if regionAMIInfo.Name == region {
+			return regionAMIInfo.HVM, nil
+		}
+	}
+
+	return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,
