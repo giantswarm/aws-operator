@@ -115,7 +115,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	iv := &ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String(key.TagOrganization),
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagOrganization)),
 				Values: []*string{
 					aws.String("giantswarm"),
 				},
