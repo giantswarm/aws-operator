@@ -37,3 +37,6 @@ resource:
     namespace: "giantswarm"
   psp:
     name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-psp'
+  pullSecret:
+    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-pull-secret'
+    namespace: "giantswarm"
