@@ -379,6 +379,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				Public:  config.APIWhitelist.Public,
 			},
 			EncrypterRoleManager: encrypterRoleManager,
+			G8sClient:            config.G8sClient,
 			Logger:               config.Logger,
 
 			Detection:          detectionService,

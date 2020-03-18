@@ -91,6 +91,7 @@ func New(config Config) (*Resource, error) {
 		apiWhiteList:         config.APIWhitelist,
 		detection:            config.Detection,
 		encrypterRoleManager: config.EncrypterRoleManager,
+		g8sClient:            config.G8sClient,
 		logger:               config.Logger,
 
 		encrypterBackend:   config.EncrypterBackend,
