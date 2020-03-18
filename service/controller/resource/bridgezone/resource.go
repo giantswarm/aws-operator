@@ -28,6 +28,12 @@ type Config struct {
 	Route53Enabled bool
 }
 
+// HostedZoneID represents private and public hosted zones of tenant cluster.
+type HostedZoneID struct {
+	Private string
+	Public  string
+}
+
 // Resource is bridgezone resource making sure we have fallback delegation in
 // old DNS structure. TODO This is only for the migration period. TODO When we
 // delete the "intermediate" zone this resource becomes noop and we do not need
@@ -205,23 +211,33 @@ func (r *Resource) Name() string {
 //       ...
 //     }
 //
-func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53, name string) (string, error) {
+func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53, name string) (HostedZoneID, error) {
 	in := &route53.ListHostedZonesByNameInput{
 		DNSName: aws.String(name),
 	}
 
 	out, err := client.ListHostedZonesByName(in)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return HostedZoneID{}, microerror.Mask(err)
 	}
 
-	for _, hostedZone := range out.HostedZones {
-		if *hostedZone.Name == name {
-			return *hostedZone.Id, nil
+	var hostedZoneID HostedZoneID
+	{
+		for _, hostedZone := range out.HostedZones {
+			if *hostedZone.Name == name && *hostedZone.Config.PrivateZone {
+				hostedZoneID.Private = *hostedZone.Id
+			}
+			if *hostedZone.Name == name && !*hostedZone.Config.PrivateZone {
+				hostedZoneID.Public = *hostedZone.Id
+			}
 		}
 	}
 
-	return "", microerror.Maskf(notFoundError, "hosted zone name %#q", name)
+	if hostedZoneID.Private == "" || hostedZoneID.Public == "" {
+		return HostedZoneID{}, microerror.Maskf(notFoundError, "hosted zone name %#q", name)
+	}
+
+	return hostedZoneID, nil
 }
 
 func (r *Resource) getNameServersAndTTL(ctx context.Context, client *route53.Route53, zoneID, name string) (nameServers []string, ttl int64, err error) {

@@ -33,40 +33,40 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	g := &errgroup.Group{}
 
-	var intermediateZoneID string
+	var intermediateZoneID HostedZoneID
 	g.Go(func() error {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone IDs")
 
-		id, err := r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
+		hostedZoneID, err := r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zones not found")
 
 			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
-		intermediateZoneID = id
+		intermediateZoneID = hostedZoneID
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone IDs")
 
 		return nil
 	})
 
-	var finalZoneID string
+	var finalZoneID HostedZoneID
 	g.Go(func() error {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone IDs")
 
-		id, err := r.findHostedZoneID(ctx, guest, finalZone)
+		hostedZoneID, err := r.findHostedZoneID(ctx, guest, finalZone)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "final zones not found")
 
 			return microerror.Mask(err)
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
-		finalZoneID = id
+		finalZoneID = hostedZoneID
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone ID")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone IDs")
 
 		return nil
 	})
@@ -80,11 +80,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var finalZoneRecords []*route53.ResourceRecord
+	var finalPublicZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone name servers")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final public zone name servers")
 
-		nameServers, _, err := r.getNameServersAndTTL(ctx, guest, finalZoneID, finalZone)
+		nameServers, _, err := r.getNameServersAndTTL(ctx, guest, finalZoneID.Public, finalZone)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -94,14 +94,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			v := &route53.ResourceRecord{
 				Value: &copy,
 			}
-			finalZoneRecords = append(finalZoneRecords, v)
+			finalPublicZoneRecords = append(finalPublicZoneRecords, v)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone name servers")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final public zone name servers")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring final zone delegation from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring final public zone delegation from intermediate zone")
 
 		upsert := route53.ChangeActionUpsert
 		ns := route53.RRTypeNs
@@ -116,19 +116,73 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 							Name:            &finalZone,
 							Type:            &ns,
 							TTL:             &ttl,
-							ResourceRecords: finalZoneRecords,
+							ResourceRecords: finalPublicZoneRecords,
 						},
 					},
 				},
 			},
-			HostedZoneId: &intermediateZoneID,
+			HostedZoneId: &intermediateZoneID.Public,
 		}
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final zone delegation from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final public zone delegation from intermediate zone")
+	}
+
+	// if there is private internmediate zone - handle private records for it as well
+	if intermediateZoneID.Private != "" {
+		var finalPrivateZoneRecords []*route53.ResourceRecord
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "getting final private zone name servers")
+
+			nameServers, _, err := r.getNameServersAndTTL(ctx, guest, finalZoneID.Private, finalZone)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			for _, ns := range nameServers {
+				copy := ns
+				v := &route53.ResourceRecord{
+					Value: &copy,
+				}
+				finalPrivateZoneRecords = append(finalPrivateZoneRecords, v)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "got final private zone name servers")
+		}
+
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring final private zone delegation from intermediate zone")
+
+			upsert := route53.ChangeActionUpsert
+			ns := route53.RRTypeNs
+			ttl := int64(300)
+
+			in := &route53.ChangeResourceRecordSetsInput{
+				ChangeBatch: &route53.ChangeBatch{
+					Changes: []*route53.Change{
+						{
+							Action: &upsert,
+							ResourceRecordSet: &route53.ResourceRecordSet{
+								Name:            &finalZone,
+								Type:            &ns,
+								TTL:             &ttl,
+								ResourceRecords: finalPrivateZoneRecords,
+							},
+						},
+					},
+				},
+				HostedZoneId: &intermediateZoneID.Private,
+			}
+			_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final private zone delegation from intermediate zone")
+		}
 	}
 
 	return nil

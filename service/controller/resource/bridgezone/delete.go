@@ -30,7 +30,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var intermediateZoneID string
+	var intermediateZoneID HostedZoneID
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
 
@@ -46,36 +46,36 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
 	}
 
-	var finalZoneTTL int64
-	var finalZoneRecords []*route53.ResourceRecord
+	var finalPublicZoneTTL int64
+	var finalPublicZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone delegation name servers and TTL from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final public zone delegation name servers and TTL from intermediate zone")
 
-		nameServers, ttl, err := r.getNameServersAndTTL(ctx, defaultGuest, intermediateZoneID, finalZone)
+		nameServers, ttl, err := r.getNameServersAndTTL(ctx, defaultGuest, intermediateZoneID.Public, finalZone)
 		if IsNotFound(err) {
 			// Delegation may be already deleted. It must be handled.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone delegation not found in intermediate zone")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "final public zone delegation not found in intermediate zone")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		finalZoneTTL = ttl
+		finalPublicZoneTTL = ttl
 
 		for _, ns := range nameServers {
 			copy := ns
 			v := &route53.ResourceRecord{
 				Value: &copy,
 			}
-			finalZoneRecords = append(finalZoneRecords, v)
+			finalPublicZoneRecords = append(finalPublicZoneRecords, v)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone delegation name servers and TTL from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "got final public zone delegation name servers and TTL from intermediate zone")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of final zone delegation from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of final public zone delegation from intermediate zone")
 
 		delete := route53.ChangeActionDelete
 		ns := route53.RRTypeNs
@@ -88,20 +88,82 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 						ResourceRecordSet: &route53.ResourceRecordSet{
 							Name:            &finalZone,
 							Type:            &ns,
-							TTL:             &finalZoneTTL,
-							ResourceRecords: finalZoneRecords,
+							TTL:             &finalPublicZoneTTL,
+							ResourceRecords: finalPublicZoneRecords,
 						},
 					},
 				},
 			},
-			HostedZoneId: &intermediateZoneID,
+			HostedZoneId: &intermediateZoneID.Public,
 		}
 		_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final zone delegation from intermediate zone")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final public zone delegation from intermediate zone")
+	}
+
+	// if there is private internmediate zone - handle private records for it as well
+	if intermediateZoneID.Private != "" {
+
+		var finalPrivateZoneTTL int64
+		var finalPrivateZoneRecords []*route53.ResourceRecord
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "getting final private zone delegation name servers and TTL from intermediate zone")
+
+			nameServers, ttl, err := r.getNameServersAndTTL(ctx, defaultGuest, intermediateZoneID.Private, finalZone)
+			if IsNotFound(err) {
+				// Delegation may be already deleted. It must be handled.
+				r.logger.LogCtx(ctx, "level", "debug", "message", "final private zone delegation not found in intermediate zone")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				return nil
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+
+			finalPrivateZoneTTL = ttl
+
+			for _, ns := range nameServers {
+				copy := ns
+				v := &route53.ResourceRecord{
+					Value: &copy,
+				}
+				finalPrivateZoneRecords = append(finalPrivateZoneRecords, v)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "got final private zone delegation name servers and TTL from intermediate zone")
+		}
+
+		{
+			r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of final private zone delegation from intermediate zone")
+
+			delete := route53.ChangeActionDelete
+			ns := route53.RRTypeNs
+
+			in := &route53.ChangeResourceRecordSetsInput{
+				ChangeBatch: &route53.ChangeBatch{
+					Changes: []*route53.Change{
+						{
+							Action: &delete,
+							ResourceRecordSet: &route53.ResourceRecordSet{
+								Name:            &finalZone,
+								Type:            &ns,
+								TTL:             &finalPrivateZoneTTL,
+								ResourceRecords: finalPrivateZoneRecords,
+							},
+						},
+					},
+				},
+				HostedZoneId: &intermediateZoneID.Private,
+			}
+			_, err := defaultGuest.ChangeResourceRecordSetsWithContext(ctx, in)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final public zone delegation from intermediate zone")
+		}
 	}
 
 	return nil
