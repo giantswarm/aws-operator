@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 )
 
 // nopCloser is required to implement the ReadCloser interface required by
@@ -71,12 +72,30 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster, randomKeys randomkeys.Cluster) (string, error) {
-	return c.template, nil
+func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
+	template, err := gotemplate.New("master").Parse(c.template)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	var builder strings.Builder
+	err = template.Execute(&builder, data)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	return builder.String(), nil
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, customObject v1alpha1.AWSConfig, clusterCerts certs.Cluster) (string, error) {
-	return c.template, nil
+func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
+	template, err := gotemplate.New("master").Parse(c.template)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	var builder strings.Builder
+	err = template.Execute(&builder, data)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	return builder.String(), nil
 }
 
 type KMSClientMock struct {

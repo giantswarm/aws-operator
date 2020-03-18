@@ -12,10 +12,9 @@ import (
 	"github.com/giantswarm/micrologger"
 )
 
-const indexReleaseTimestampFormat = "2006-01-02T15:04:05.00Z"
-
 type IndexRelease struct {
 	Active      bool        `yaml:"active"`
+	Apps        []App       `yaml:"apps"`
 	Authorities []Authority `yaml:"authorities"`
 	Date        time.Time   `yaml:"date"`
 	Version     string      `yaml:"version"`
@@ -56,6 +55,7 @@ func buildReleases(logger micrologger.Logger, indexReleases []IndexRelease, bund
 
 		rc := ReleaseConfig{
 			Active:  ir.Active,
+			Apps:    ir.Apps,
 			Bundles: bundles,
 			Date:    ir.Date,
 			Version: ir.Version,
@@ -193,10 +193,6 @@ func validateReleaseAuthorities(indexReleases []IndexRelease) error {
 				return microerror.Maskf(invalidReleaseError, "release %s contains authority without Name", release.Version)
 			}
 
-			if authority.Endpoint == nil {
-				return microerror.Maskf(invalidReleaseError, "release %s authority %s doesn't have defined endpoint", release.Version, authority.Name)
-			}
-
 			if authority.Version == "" {
 				return microerror.Maskf(invalidReleaseError, "release %s authority %s doesn't have defined version", release.Version, authority.Name)
 			}
@@ -234,15 +230,18 @@ func validateUniqueReleases(indexReleases []IndexRelease) error {
 		releaseVersions[release.Version] = release.Version
 
 		// Verify release version contents
-		authorities := make([]string, 0, len(release.Authorities))
+		appsAndAuthorities := make([]string, 0, len(release.Apps)+len(release.Authorities))
+		for _, a := range release.Apps {
+			appsAndAuthorities = append(appsAndAuthorities, a.AppID())
+		}
 		for _, a := range release.Authorities {
-			authorities = append(authorities, a.BundleID())
+			appsAndAuthorities = append(appsAndAuthorities, a.BundleID())
 		}
 
-		sort.Strings(authorities)
+		sort.Strings(appsAndAuthorities)
 
 		sha256Hash.Reset()
-		sha256Hash.Write([]byte(strings.Join(authorities, ",")))
+		sha256Hash.Write([]byte(strings.Join(appsAndAuthorities, ",")))
 
 		hexHash := hex.EncodeToString(sha256Hash.Sum(nil))
 		otherVer, exists = releaseChecksums[hexHash]

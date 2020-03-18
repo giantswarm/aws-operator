@@ -172,21 +172,9 @@ func (b Bundle) Validate() error {
 		return microerror.Maskf(invalidBundleError, "name must not be empty")
 	}
 
-	versionSplit := strings.Split(b.Version, ".")
-	if len(versionSplit) != 3 {
-		return microerror.Maskf(invalidBundleError, "version format must be '<major>.<minor>.<patch>'")
-	}
-
-	if !isPositiveNumber(versionSplit[0]) {
-		return microerror.Maskf(invalidBundleError, "major version must be positive number")
-	}
-
-	if !isPositiveNumber(versionSplit[1]) {
-		return microerror.Maskf(invalidBundleError, "minor version must be positive number")
-	}
-
-	if !isPositiveNumber(versionSplit[2]) {
-		return microerror.Maskf(invalidBundleError, "patch version must be positive number")
+	_, err := semver.NewVersion(b.Version)
+	if err != nil {
+		return microerror.Maskf(invalidBundleError, "version parsing failed with error %#q", err)
 	}
 
 	return nil

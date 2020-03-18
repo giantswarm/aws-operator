@@ -8,8 +8,8 @@ func NewBundle() versionbundle.Bundle {
 	return versionbundle.Bundle{
 		Changelogs: []versionbundle.Changelog{
 			{
-				Component:   "TODO",
-				Description: "TODO",
+				Component:   "aws-operator",
+				Description: "Modified to retrieve component versions from releases",
 				Kind:        versionbundle.KindChanged,
 			},
 		},

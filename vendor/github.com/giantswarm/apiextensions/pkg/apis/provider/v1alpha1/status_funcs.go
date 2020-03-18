@@ -115,6 +115,7 @@ func (s StatusCluster) WithUpdatingCondition() []StatusClusterCondition {
 	return withCondition(s.Conditions, StatusClusterTypeUpdated, StatusClusterTypeUpdating, StatusClusterStatusTrue, time.Now())
 }
 
+//nolint:unparam
 func getCondition(conditions []StatusClusterCondition, s string, t string) StatusClusterCondition {
 	for _, c := range conditions {
 		if c.Status == s && c.Type == t {
@@ -125,6 +126,7 @@ func getCondition(conditions []StatusClusterCondition, s string, t string) Statu
 	return StatusClusterCondition{}
 }
 
+//nolint:unparam
 func hasCondition(conditions []StatusClusterCondition, s string, t string) bool {
 	for _, c := range conditions {
 		if c.Status == s && c.Type == t {

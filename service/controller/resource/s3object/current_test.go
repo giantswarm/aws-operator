@@ -4,7 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
@@ -15,9 +17,9 @@ import (
 
 func Test_CurrentState(t *testing.T) {
 	t.Parallel()
-	clusterTpo := &v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			Cluster: v1alpha1.Cluster{
+	clusterTpo := &providerv1alpha1.AWSConfig{
+		Spec: providerv1alpha1.AWSConfigSpec{
+			Cluster: providerv1alpha1.Cluster{
 				ID:      "test-cluster",
 				Version: "myversion",
 			},
@@ -25,7 +27,7 @@ func Test_CurrentState(t *testing.T) {
 	}
 
 	testCases := []struct {
-		obj             *v1alpha1.AWSConfig
+		obj             *providerv1alpha1.AWSConfig
 		description     string
 		expectedS3Error bool
 		expectedKey     string
@@ -56,6 +58,8 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			cloudconfig := &CloudConfigMock{}
+			release := &releasev1alpha1.Release{}
+			clientset := fake.NewSimpleClientset(release)
 
 			var err error
 			var newResource *Resource
@@ -63,8 +67,10 @@ func Test_CurrentState(t *testing.T) {
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
+					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
+					RegistryDomain:     "example.com",
 				}
 
 				newResource, err = New(c)

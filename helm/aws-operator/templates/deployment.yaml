@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ tpl .Values.resource.default.name  . }}
@@ -8,6 +8,9 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.resource.default.name  . }}
   strategy:
     type: RollingUpdate
   template:
@@ -39,7 +42,7 @@ spec:
         runAsGroup: {{ .Values.pod.group.id }}
       containers:
       - name: {{ .Values.project.name }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.Installation.V1.Registry.Domain }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         volumeMounts:
         - name: {{ .Values.project.name }}-configmap
           mountPath: /var/run/{{ .Values.project.name }}/configmap/

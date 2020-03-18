@@ -36,8 +36,8 @@ required = [
   branch = "master"
   name = "github.com/docker/distribution"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  branch = "legacy-1-15"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -92,16 +92,16 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/microendpoint"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  version = "~0.1.0"
   name = "github.com/giantswarm/microerror"
 
 [[constraint]]
   branch = "master"
   name = "github.com/giantswarm/microkit"
 
-[[constraint]]
-  branch = "master"
+[[override]]
+  version = "~0.1.0"
   name = "github.com/giantswarm/micrologger"
 
 [[constraint]]
@@ -124,7 +124,7 @@ required = [
   branch = "master"
   name = "github.com/giantswarm/versionbundle"
 
-[[constraint]]
+[[override]]
   name = "github.com/google/go-cmp"
   version = "0.3.0"
 

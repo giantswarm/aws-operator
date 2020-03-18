@@ -1,6 +1,7 @@
 package versionbundle
 
 import (
+	"reflect"
 	"sort"
 	"time"
 
@@ -11,12 +12,14 @@ const releaseTimestampFormat = "2006-01-02T15:04:05.000000Z"
 
 type ReleaseConfig struct {
 	Active  bool
+	Apps    []App
 	Bundles []Bundle
 	Date    time.Time
 	Version string
 }
 
 type Release struct {
+	apps       []App
 	bundles    []Bundle
 	changelogs []Changelog
 	components []Component
@@ -50,6 +53,7 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 
 	r := Release{
 		active:     config.Active,
+		apps:       config.Apps,
 		bundles:    config.Bundles,
 		changelogs: changelogs,
 		components: components,
@@ -62,6 +66,10 @@ func NewRelease(config ReleaseConfig) (Release, error) {
 
 func (r Release) Active() bool {
 	return r.active
+}
+
+func (r Release) Apps() []App {
+	return CopyApps(r.apps)
 }
 
 func (r Release) Bundles() []Bundle {
@@ -91,7 +99,7 @@ func (r Release) Version() string {
 
 func (r *Release) removeChangelogEntry(clog Changelog) {
 	for i := 0; i < len(r.changelogs); i++ {
-		if clog == r.changelogs[i] {
+		if reflect.DeepEqual(clog, r.changelogs[i]) {
 			r.changelogs = append(r.changelogs[:i], r.changelogs[i+1:]...)
 			break
 		}

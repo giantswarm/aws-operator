@@ -1,7 +1,7 @@
-apiVersion: extensions/v1beta1
+apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: aws-operator-psp
+  name: {{ tpl .Values.resource.psp.name . }}
 spec:
   privileged: false
   fsGroup:
