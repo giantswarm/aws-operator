@@ -1,6 +1,5 @@
 package cloudconfig
 
-
 const Etcd3AttachDepService = `
 [Unit]
 Description=Attach etcd dependencies
@@ -27,4 +26,3 @@ ExecStart=/bin/bash -c "docker run --rm -i \
 [Install]
 WantedBy=multi-user.target
 `
-

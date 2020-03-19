@@ -5,5 +5,3 @@ const Etcd3ExtraConfig = `
 Requires=etcd3-attach-dependencies.service
 After=etcd3-attach-dependencies.service
 `
-
-
