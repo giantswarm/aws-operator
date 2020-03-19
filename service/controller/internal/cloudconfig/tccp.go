@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
@@ -80,7 +81,21 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 	{
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
+		masterID := 0 // for now we have only 1 master
+
+		var masterSubnets []net.IPNet
+		{
+			zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+			for _, az := range zones {
+				if az.Name != key.MasterAvailabilityZone(cr) {
+					continue
+				}
+				masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
+			}
+		}
+
+		g8sConfig := cmaClusterToG8sConfig(t.config, cr, labels)
+		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
@@ -88,11 +103,13 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
 			baseExtension: baseExtension{
-				awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
-				registryDomain: t.config.RegistryDomain,
+				awsConfigSpec:  g8sConfig,
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				masterSubnet:   masterSubnets[masterID],
+				masterID:       masterID,
+				registryDomain: t.config.RegistryDomain,
 			},
 			cc:               cc,
 			clusterCerts:     clusterCerts,
@@ -343,7 +360,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
-	data := e.templateData()
+	data := e.templateDataTCCP()
 
 	for _, fm := range filesMeta {
 		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
@@ -437,7 +454,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 
 	var newUnits []k8scloudconfig.UnitAsset
 
-	data := e.templateData()
+	data := e.templateDataTCCP()
 
 	for _, fm := range unitsMeta {
 		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)

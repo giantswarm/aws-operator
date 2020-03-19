@@ -54,6 +54,9 @@ func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l str
 		},
 		AWS: g8sv1alpha1.AWSConfigSpecAWS{
 			Region: key.Region(cr),
+			VPC: g8sv1alpha1.AWSConfigSpecAWSVPC{
+				PrivateSubnetCIDR: cr.Status.Provider.Network.CIDR,
+			},
 		},
 	}
 }

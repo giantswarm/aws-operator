@@ -6,9 +6,9 @@ type TemplateData struct {
 	AWSRegion           string
 	AWSConfigSpec       g8sv1alpha1.AWSConfigSpec
 	IsChinaRegion       bool
-	MasterENIAddresses  []string
-	MasterENIGateways   []string
-	MasterENISubnetSize string
+	MasterENIAddress    string
+	MasterENIGateway    string
+	MasterENISubnetSize int
 	MasterID            int
 	RegistryDomain      string
 }
