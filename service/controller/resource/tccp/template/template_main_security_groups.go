@@ -9,42 +9,6 @@ const TemplateMainSecurityGroups = `
       GroupDescription: {{ $v.ClusterID }}-master
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      -
-        Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
-        IpProtocol: tcp
-        FromPort: 4194
-        ToPort: 4194
-        CidrIp: $v.ControlPlaneVPCCIDR
-      -
-        Description: "Allow traffic from Control Plane CIDR to 2379 for etcd backup."
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        sourceCIDR: $v.ControlPlaneVPCCIDR
-      -
-        Description: "Allow traffic from Control Plane CIDR to 10250 for kubelet scraping."
-        IpProtocol: tcp
-        FromPort: 10250
-        ToPort: 10250
-        CidrIp: $v.ControlPlaneVPCCIDR
-      -
-        Description: "Allow traffic from Control Plane CIDR to 10300 for node-exporter scraping."
-        IpProtocol: tcp
-        FromPort: 10300
-        ToPort: 10300
-        CidrIp: $v.ControlPlaneVPCCIDR
-      -
-        Description: "Allow traffic from Control Plane CIDR to 10301 for kube-state-metrics scraping."
-        IpProtocol: tcp
-        FromPort: 10301
-        ToPort: 10301
-        CidrIp: $v.ControlPlaneVPCCIDR
-      -
-        Description: "Only allow SSH traffic from the Control Plane."
-        IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: $v.ControlPlaneVPCCIDR
 
       #
       # Public API Whitelist Enabled Rules
@@ -55,7 +19,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        sourceCIDR: $v.ControlPlaneVPCCIDR
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
       -
         Description: "Allow traffic from Tenant Cluster CIDR."
         IpProtocol: tcp
@@ -102,6 +66,43 @@ const TemplateMainSecurityGroups = `
         CidrIp: 0.0.0.0/0
       {{- end }}
 
+      -
+        Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Allow traffic from Control Plane CIDR to 2379 for etcd backup."
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Allow traffic from Control Plane CIDR to 10250 for kubelet scraping."
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Allow traffic from Control Plane CIDR to 10300 for node-exporter scraping."
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Allow traffic from Control Plane CIDR to 10301 for kube-state-metrics scraping."
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Only allow SSH traffic from the Control Plane."
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-master
@@ -122,7 +123,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
-        CidrIp: $v.ControlPlaneVPCCIDR
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-etcd-elb
@@ -142,7 +143,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $v.ControlPlaneVPCCIDR
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
       -
         Description: "Allow traffic from Tenant Cluster CIDR."
         IpProtocol: tcp
