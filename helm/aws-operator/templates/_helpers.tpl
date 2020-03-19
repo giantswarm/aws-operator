@@ -17,23 +17,18 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "aws-operator.labels" -}}
-helm.sh/chart: {{ include "aws-operator.chart" . }}
+helm.sh/chart: {{ include "aws-operator.chart" . | quote }}
 {{ include "aws-operator.selectorLabels" . }}
-app.giantswarm.io/branch: {{ .Values.project.branch }}
-app.giantswarm.io/commit: {{ .Values.project.commit }}
-app.kubernetes.io/name: {{ include "aws-operator.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- if .Chart.AppVersion }}
-{{ include "aws-operator.name" . }}.giantswarm.io/version: {{ .Chart.AppVersion }}
+app.giantswarm.io/branch: {{ .Values.project.branch | quote }}
+app.giantswarm.io/commit: {{ .Values.project.commit | quote }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 {{- end -}}
 
 {{/*
 Selector labels
 */}}
 {{- define "aws-operator.selectorLabels" -}}
-app: {{ include "aws-operator.name" . }}
-version: {{ .Chart.Version }}
+app.kubernetes.io/name: {{ include "aws-operator.name" . | quote }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end -}}
