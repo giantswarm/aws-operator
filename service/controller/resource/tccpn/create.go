@@ -19,6 +19,7 @@ import (
 
 const (
 	capabilityNamesIAM = "CAPABILITY_NAMED_IAM"
+	defaultVolumeSize  = 100
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -31,19 +32,26 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// Ensure some preconditions are met so we have all neccessary information
-	// available to manage the TCNP CF stack.
 	{
 		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "EtcdVolumeSnapshotID not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the Etcd Volume Snapshot ID in the controller context yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		}
-	}
-	{
+
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		// When the TCCP cloud formation stack is transitioning, it means it is
+		// updating in most cases. We do not want to interfere with the current
+		// process and stop here. We will then check on the next reconciliation loop
+		// and continue eventually.
+		if cc.Status.TenantCluster.TCCPN.IsTransitioning {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane nodes cloud formation stack is in transitioning state")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -223,7 +231,7 @@ func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlan
 
 	etcdVolume := &template.ParamsMainEtcdVolume{
 		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
-		Name:             key.VolumeNameEtcdCP(cr),
+		Name:             key.ControlPlaneVolumeNameEtcd(cr),
 		SnapshotID:       cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID,
 	}
 
@@ -260,17 +268,17 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
 			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
-					Size: 100,
+					Size: defaultVolumeSize,
 				},
 			},
 			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
-					Size: 100,
+					Size: defaultVolumeSize,
 				},
 			},
 			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
 				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume{
-					Size: 100,
+					Size: defaultVolumeSize,
 				},
 			},
 		},

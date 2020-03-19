@@ -30,6 +30,6 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	return *c, nil
 }
 
-func VolumeNameEtcdCP(cluster infrastructurev1alpha2.AWSControlPlane) string {
-	return fmt.Sprintf("%s-etcd", ClusterID(&cluster))
+func ControlPlaneVolumeNameEtcd(cr infrastructurev1alpha2.AWSControlPlane) string {
+	return fmt.Sprintf("%s-etcd", ClusterID(&cr))
 }
