@@ -74,6 +74,15 @@ func IsNotExists(err error) bool {
 	return false
 }
 
+var notFoundError = &microerror.Error{
+	Kind: "notFoundError",
+}
+
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return microerror.Cause(err) == notFoundError
+}
+
 var updateInProgressError = &microerror.Error{
 	Kind: "updateInProgressError",
 }

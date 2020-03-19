@@ -2,9 +2,11 @@ package tccpf
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/route53"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
@@ -66,7 +68,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.route53Enabled)
+		cpHostedZoneName := fmt.Sprintf("%s.", key.ClusterBaseDomain(cr))
+		cpHostedZoneID, err := findControlPlaneHostedZoneID(ctx, cc.Client.ControlPlane.AWS.Route53, cpHostedZoneName)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, cpHostedZoneID, r.route53Enabled)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -115,7 +123,26 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, route53Enabled bool) (*template.ParamsMainRecordSets, error) {
+func findControlPlaneHostedZoneID(ctx context.Context, client *route53.Route53, name string) (string, error) {
+	in := &route53.ListHostedZonesByNameInput{
+		DNSName: aws.String(name),
+	}
+
+	out, err := client.ListHostedZonesByName(in)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	for _, hostedZone := range out.HostedZones {
+		if *hostedZone.Name == name && !*hostedZone.Config.PrivateZone {
+			return *hostedZone.Id, nil
+		}
+	}
+
+	return "", microerror.Maskf(notFoundError, "public control-plane hosted zone name %#q", name)
+}
+
+func newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, cpHostedZoneID string, route53Enabled bool) (*template.ParamsMainRecordSets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -126,6 +153,7 @@ func newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSClust
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                 key.ClusterBaseDomain(cr),
 			ClusterID:                  key.ClusterID(&cr),
+			ControlPlaneHostedZoneID:   cpHostedZoneID,
 			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
 			Route53Enabled:             route53Enabled,
 		}
@@ -196,10 +224,10 @@ func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSClus
 	return routeTables, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, encrypterBackend string, route53Enabled bool) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, encrypterBackend string, cpHostedZoneID string, route53Enabled bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		recordSets, err := newRecordSetsParams(ctx, cr, route53Enabled)
+		recordSets, err := newRecordSetsParams(ctx, cr, cpHostedZoneID, route53Enabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

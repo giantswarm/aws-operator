@@ -29,6 +29,8 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 //  go test ./service/controller/resource/tccpf -run Test_Controller_Resource_TCCPF_Template_Render -update
 //
 func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
+	cpHostedZoneID := "/hostedzone/id"
+
 	testCases := []struct {
 		name string
 		ctx  context.Context
@@ -43,7 +45,7 @@ func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, encrypter.KMSBackend, true)
+			params, err := newTemplateParams(tc.ctx, tc.cr, encrypter.KMSBackend, cpHostedZoneID, true)
 			if err != nil {
 				if err != nil {
 					t.Fatal(err)
