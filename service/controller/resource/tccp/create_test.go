@@ -105,7 +105,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				}
 			}
 
-			params, err := r.newTemplateParams(tc.ctx, tc.cr, time.Time{})
+			params, err := r.newParamsMain(tc.ctx, tc.cr, time.Time{})
 			if err != nil {
 				t.Fatal(err)
 			}
