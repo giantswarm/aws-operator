@@ -2,16 +2,16 @@ package collector
 
 import (
 	"time"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
-
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/cache"
 )
@@ -126,7 +126,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	iv := &ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String(key.TagOrganization),
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagOrganization)),
 				Values: []*string{
 					aws.String("giantswarm"),
 				},
