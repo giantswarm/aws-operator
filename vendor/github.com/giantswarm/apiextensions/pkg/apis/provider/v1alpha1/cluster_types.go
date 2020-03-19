@@ -100,10 +100,10 @@ type ClusterKubernetesNetworkSetupKubeProxy struct {
 	ConntrackMin int `json:"conntrackMin" yaml:"conntrackMin"`
 	// NAT timeout for TCP connections in the CLOSE_WAIT state.
 	// Passed to kube-proxy as --conntrack-tcp-timeout-close-wait.
-	TCPCloseWaitTimeout DeepCopyDuration `json:"tcpCloseWaitTimeout" yaml:"tcpCloseWaitTimeout"`
+	TCPCloseWaitTimeout *DeepCopyDuration `json:"tcpCloseWaitTimeout" yaml:"tcpCloseWaitTimeout"`
 	// Idle timeout for established TCP connections (0 to leave as-is).
 	// Passed to kube-proxy as --conntrack-tcp-timeout-established.
-	TCPEstablishedTimeout DeepCopyDuration `json:"tcpEstablishedTimeout" yaml:"tcpEstablishedTimeout"`
+	TCPEstablishedTimeout *DeepCopyDuration `json:"tcpEstablishedTimeout" yaml:"tcpEstablishedTimeout"`
 }
 
 type ClusterKubernetesNetworkSetupDocker struct {
