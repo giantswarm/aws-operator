@@ -32,6 +32,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 )
 
 type controlPlaneResourceSetConfig struct {
@@ -48,7 +49,6 @@ type controlPlaneResourceSetConfig struct {
 	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
-	EncrypterBackend          string
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	InstallationName          string
@@ -60,10 +60,6 @@ type controlPlaneResourceSetConfig struct {
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
-}
-
-func (c controlPlaneResourceSetConfig) GetEncrypterBackend() string {
-	return c.EncrypterBackend
 }
 
 func (c controlPlaneResourceSetConfig) GetInstallationName() string {
@@ -159,6 +155,19 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpVPCPCXResource resource.Interface
+	{
+		c := tccpvpcpcx.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
@@ -199,7 +208,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		c := tccpazs.Config{
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
@@ -216,7 +225,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 
 			APIWhitelist:     config.APIWhitelist,
 			Detection:        tccpnChangeDetection,
-			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 		}
 
@@ -274,6 +282,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		tccpnOutputsResource,
 		snapshotIDResource,
 		tccpVPCIDResource,
+		tccpVPCPCXResource,
 		cpVPCResource,
 		regionResource,
 

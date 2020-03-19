@@ -13,7 +13,6 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 )
@@ -43,24 +42,22 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name             string
-		ctx              context.Context
-		cr               infrastructurev1alpha2.AWSControlPlane
-		encrypterBackend string
-		apiWhitelist     APIWhitelist
+		name         string
+		ctx          context.Context
+		cr           infrastructurev1alpha2.AWSControlPlane
+		apiWhitelist APIWhitelist
 	}{
 		{
-			name:             "case 0: basic test with encrypter backend KMS",
-			ctx:              unittest.DefaultContextControlPlane(),
-			cr:               unittest.DefaultControlPlane(),
-			encrypterBackend: encrypter.KMSBackend,
-			apiWhitelist:     apiWhitelist,
+			name:         "case 0: basic test with encrypter backend KMS",
+			ctx:          unittest.DefaultContextControlPlane(),
+			cr:           unittest.DefaultControlPlane(),
+			apiWhitelist: apiWhitelist,
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, tc.encrypterBackend, tc.apiWhitelist)
+			params, err := newTemplateParams(tc.ctx, tc.cr, tc.apiWhitelist)
 			if err != nil {
 				t.Fatal(err)
 			}

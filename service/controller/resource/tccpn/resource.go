@@ -19,7 +19,6 @@ type Config struct {
 	Logger    micrologger.Logger
 
 	APIWhitelist     APIWhitelist
-	EncrypterBackend string
 	InstallationName string
 }
 
@@ -31,7 +30,6 @@ type Resource struct {
 	logger    micrologger.Logger
 
 	apiWhitelist     APIWhitelist
-	encrypterBackend string
 	installationName string
 }
 
@@ -51,9 +49,6 @@ func New(config Config) (*Resource, error) {
 	if config.APIWhitelist.Public.Enabled && config.APIWhitelist.Public.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
 	}
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
-	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
@@ -64,7 +59,6 @@ func New(config Config) (*Resource, error) {
 		logger:    config.Logger,
 
 		apiWhitelist:     config.APIWhitelist,
-		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 	}
 

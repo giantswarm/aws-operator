@@ -25,7 +25,6 @@ type ControlPlaneConfig struct {
 	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
-	EncrypterBackend          string
 	HostAWSConfig             aws.Config
 	IgnitionPath              string
 	ImagePullProgressDeadline string
@@ -128,7 +127,6 @@ func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.Resou
 			ClusterDomain:             config.ClusterDomain,
 			ClusterIPRange:            config.ClusterIPRange,
 			DockerDaemonCIDR:          config.DockerDaemonCIDR,
-			EncrypterBackend:          config.EncrypterBackend,
 			IgnitionPath:              config.IgnitionPath,
 			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 			InstallationName:          config.InstallationName,

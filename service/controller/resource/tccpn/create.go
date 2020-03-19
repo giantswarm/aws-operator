@@ -3,6 +3,7 @@ package tccpn
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 )
@@ -38,6 +38,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "EtcdVolumeSnapshotID not yet available")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
+			return nil
+		}
+	}
+	{
+		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 	}
@@ -108,7 +115,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.apiWhitelist)
+		params, err := newTemplateParams(ctx, cr, r.apiWhitelist)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -161,7 +168,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.encrypterBackend, r.apiWhitelist)
+		params, err := newTemplateParams(ctx, cr, r.apiWhitelist)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -197,15 +204,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 }
 
 func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
 		ClusterID:        key.ClusterID(&cr),
-		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(cc.Spec.TenantCluster.TCCP.AvailabilityZones[0].Name)),
+		Subnet:           key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0])),
 	}
 
 	return autoScalingGroup, nil
@@ -226,7 +229,7 @@ func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlan
 	return etcdVolume, nil
 }
 
-func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string) (*template.ParamsMainIAMPolicies, error) {
+func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -237,12 +240,9 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			ClusterID:        key.ClusterID(&cr),
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
 			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:         key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-		}
-
-		if encrypterBackend == encrypter.KMSBackend {
-			iamPolicies.KMSKeyARN = cc.Status.TenantCluster.Encryption.Key
 		}
 	}
 
@@ -295,7 +295,55 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMainSecurityGroups, error) {
+func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainRouteTables, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone:    az.Name,
+			ResourceName:        key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
+		}
+		publicRouteTableNames = append(publicRouteTableNames, rtName)
+	}
+
+	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone:    az.Name,
+			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
+		}
+		privateRouteTableNames = append(privateRouteTableNames, rtName)
+	}
+
+	var routeTables *template.ParamsMainRouteTables
+	{
+		routeTables = &template.ParamsMainRouteTables{
+			ClusterID:              key.ClusterID(&cr),
+			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
+			PrivateRouteTableNames: privateRouteTableNames,
+			PublicRouteTableNames:  publicRouteTableNames,
+			VPCID:                  cc.Status.TenantCluster.TCCP.VPC.ID,
+			PeeringConnectionID:    cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
+		}
+	}
+
+	return routeTables, nil
+}
+
+func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -333,8 +381,74 @@ func newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSC
 
 	return securityGroups, nil
 }
+func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainSubnets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, encrypterBackend string, apiWhiteList APIWhitelist) (*template.ParamsMain, error) {
+	zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+
+	sort.Slice(zones, func(i, j int) bool {
+		return zones[i].Name < zones[j].Name
+	})
+
+	var publicSubnets []template.Subnet
+	for _, az := range zones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+
+		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
+		snet := template.Subnet{
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Public.CIDR.String(),
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: template.RouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+			VPCID: cc.Status.TenantCluster.TCCP.VPC.ID,
+		}
+		publicSubnets = append(publicSubnets, snet)
+	}
+
+	var privateSubnets []template.Subnet
+	for _, az := range zones {
+		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+			continue
+		}
+
+		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
+		snet := template.Subnet{
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Private.CIDR.String(),
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: template.RouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+			VPCID: cc.Status.TenantCluster.TCCP.VPC.ID,
+		}
+		privateSubnets = append(privateSubnets, snet)
+	}
+
+	var subnets *template.ParamsMainSubnets
+	{
+		subnets = &template.ParamsMainSubnets{
+			PublicSubnets:  publicSubnets,
+			PrivateSubnets: privateSubnets,
+		}
+	}
+
+	return subnets, nil
+}
+
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
@@ -345,7 +459,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		iamPolicies, err := newIAMPolicies(ctx, cr, encrypterBackend)
+		iamPolicies, err := newIAMPolicies(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -357,7 +471,15 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		securityGroups, err := newSecurityGroupsParams(ctx, cr, apiWhiteList)
+		routeTables, err := newRouteTables(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		securityGroups, err := newSecurityGroups(ctx, cr, apiWhiteList)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		subnets, err := newSubnets(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -368,7 +490,9 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			IAMPolicies:         iamPolicies,
 			LaunchConfiguration: launchConfiguration,
 			Outputs:             outputs,
+			RouteTables:         routeTables,
 			SecurityGroups:      securityGroups,
+			Subnets:             subnets,
 		}
 	}
 
