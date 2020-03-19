@@ -1,11 +1,12 @@
 #!/bin/bash
 
-export HOSTNAME=$(hostname | tr '[:upper:]' '[:lower:]')
 export KUBECONFIG=/etc/kubernetes/kubeconfig/addons.yaml
-export KUBECTL="/opt/bin/hyperkube kubectl"
+export KUBECTL="/usr/bin/docker run -e KUBECONFIG=${KUBECONFIG} --net=host --rm -v /srv:/srv -v /etc/kubernetes:/etc/kubernetes {{ .Images.Kubectl }}"
+
+/usr/bin/docker pull $KUBECTL
 
 # wait for healthy master
-while [ "$($KUBECTL get nodes $HOSTNAME -o jsonpath='{.metadata.name}')" != "$HOSTNAME" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
+while [ "$($KUBECTL get cs | grep Healthy | wc -l)" -ne "3" ]; do sleep 1 && echo 'Waiting for healthy k8s'; done
 
 # label namespaces (required for network egress policies)
 NAMESPACES="default kube-system" 
@@ -13,7 +14,7 @@ for namespace in ${NAMESPACES}
 do
     if ! $KUBECTL get namespaces -l name=${namespace} | grep ${namespace}; then
         while
-            $KUBECTL label namespace ${namespace} name=${namespace} --overwrite=true
+            $KUBECTL label namespace ${namespace} name=${namespace}
             [ "$?" -ne "0" ]
         do
             echo "failed to label namespace ${namespace}, retrying in 5 sec"
@@ -42,7 +43,7 @@ do
 done
 
 # check for other master and remove it
-THIS_MACHINE=$HOSTNAME
+THIS_MACHINE=$(cat /etc/hostname)
 for master in $($KUBECTL get nodes --no-headers=true --selector role=master | awk '{print $1}')
 do
     if [ "$master" != "$THIS_MACHINE" ]; then
@@ -62,7 +63,7 @@ done
 
 # create kube-proxy configmap
 while
-    $KUBECTL create configmap kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml -o yaml --dry-run | $KUBECTL apply -n kube-system -f -
+    $KUBECTL create configmap -n kube-system kube-proxy --from-file=kube-proxy.yaml=/srv/kube-proxy-config.yaml
     [ "$?" -ne "0" ]
 do
     echo "failed to configure kube-proxy from /srv/kube-proxy-config.yaml, retrying in 5 sec"
@@ -88,32 +89,29 @@ $KUBECTL delete pods -l k8s-app=kube-proxy -n kube-system
 
 {{ if not .DisableCalico -}}
 
-{{ if eq .Cluster.Kubernetes.CloudProvider "aws" -}}
-## Apply AWS VPC CNI and Calico for ensuring network policies (only on AWS)
-CNI_FILE="aws-cni.yaml calico-policy-only.yaml"
-{{ else -}}
-## Apply Calico with all its components
-CNI_FILE="calico-all.yaml"
-{{ end -}}
+# apply calico
+CALICO_FILE="calico-all.yaml"
 
-for manifest in ${CNI_FILE}
+while
+    $KUBECTL apply -f /srv/$CALICO_FILE
+    [ "$?" -ne "0" ]
 do
-    while
-        $KUBECTL apply -f /srv/$manifest
-        [ "$?" -ne "0" ]
-    do
-        echo "failed to apply /srv/$manifest, retrying in 5 sec"
-        sleep 5s
-    done
+    echo "failed to apply /srv/$manifest, retrying in 5 sec"
+    sleep 5s
 done
 
-{{ if eq .Cluster.Kubernetes.CloudProvider "aws" -}}
-echo "Waiting for aws-node to be ready..."
-$KUBECTL -n kube-system -l k8s-app=aws-node wait --for=condition=Ready --timeout=10m pods
-{{ end -}}
-
-echo "Waiting for calico-node to be ready..."
-$KUBECTL -n kube-system -l k8s-app=calico-node wait --for=condition=Ready --timeout=10m pods
+# wait for healthy calico - we check for pods - desired vs ready
+while
+    # result of this is 'eval [ "$DESIRED_POD_COUNT" -eq "$READY_POD_COUNT" ]'
+    $KUBECTL -n kube-system  get ds calico-node 2>/dev/null >/dev/null
+    RET_CODE_1=$?
+    eval $($KUBECTL -n kube-system get ds calico-node | tail -1 | awk '{print "[ \"" $2"\" -eq \""$4"\" ] "}')
+    RET_CODE_2=$?
+    [ "$RET_CODE_1" -ne "0" ] || [ "$RET_CODE_2" -ne "0" ]
+do
+    echo "Waiting for calico to be ready . . "
+    sleep 3s
+done
 
 {{ end -}}
 
@@ -139,19 +137,6 @@ while
 do
     echo "failed to apply /srv/$PRIORITY_CLASSES_FILE, retrying in 5 sec"
     sleep 5s
-done
-
-# apply network policies:
-NETWORK_POLICIES_FILE="network_policies.yaml"
-NAMESPACES="kube-system giantswarm"
-for namespace in ${NAMESPACES}; do
-    while
-      $KUBECTL apply -f /srv/$NETWORK_POLICIES_FILE -n $namespace
-      [ "$?" -ne "0" ]
-    do
-      echo "failed to apply /srv/$NETWORK_POLICIES_FILE, retrying in 5 sec"
-      sleep 5s
-    done
 done
 
 # apply k8s addons

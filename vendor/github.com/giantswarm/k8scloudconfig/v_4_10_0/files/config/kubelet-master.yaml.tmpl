@@ -7,20 +7,20 @@ healthzPort: 10248
 clusterDNS:
   - {{.Cluster.Kubernetes.DNS.IP}}
 clusterDomain: {{.Cluster.Kubernetes.Domain}}
+staticPodPath: /etc/kubernetes/manifests
 evictionSoft:
   memory.available: "500Mi"
 evictionHard:
   memory.available: "200Mi"
-  imagefs.available: "15%"
 evictionSoftGracePeriod:
   memory.available: "5s"
 evictionMaxPodGracePeriod: 60
 kubeReserved:
-  cpu: 250m
-  memory: 768Mi
+  cpu: 350m
+  memory: 1280Mi
   ephemeral-storage: 1024Mi
 kubeReservedCgroup: /kubereserved.slice
-maxPods: ${MAX_PODS}
+kubeletCgroups: /kubereserved.slice
 runtimeCgroups: /kubereserved.slice
 systemReserved:
   cpu: 250m
@@ -33,5 +33,3 @@ authentication:
     enabled: false # Deafults to true as of 1.10
 authorization:
   mode: AlwaysAllow # Deafults to webhook as of 1.10
-featureGates:
-  TTLAfterFinished: true

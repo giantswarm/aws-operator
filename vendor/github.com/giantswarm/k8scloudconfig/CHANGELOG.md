@@ -9,13 +9,18 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
-## [v5.2.0] - Unreleased
+## [v5.2.0]
 
 ### Changed
 
 - Reserve ports `30000-32767` from ephemeral port range for `kube-apiserver` use.
 - Make provisioning idempotent by generating `/boot/coreos/first_boot` file on every boot.
+- Use [AWS VPC CNI](https://github.com/aws/amazon-vpc-cni-k8s) for pod networking and Calico for ensuring network policies.
 - Enable ':9393/metrics' prometheus endpoint in docker daemon.
+
+### Added
+
+- Add `conntrackMaxPerCore` parameter in `kube-proxy` manifest.
 
 ## [v5.1.1] - Unreleased
 
@@ -53,6 +58,11 @@ version directory, and  then changes are introduced.
 - Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
 
 ## [v4.9.1] - 2020-03-10
+
+### Added
+
+- Add `conntrackMaxPerCore` parameter in `kube-proxy` manifest.
+
 
 ## [v4.9.0] - 2019-10-17
 
