@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/prometheus/client_golang/prometheus"
@@ -11,9 +13,11 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cache"
 )
 
 const (
+	awsNATlocker = "__awsNATlocker__"
 	labelVPC = "vpc"
 	labelAZ  = "availability_zone"
 )
@@ -43,8 +47,9 @@ type NATConfig struct {
 }
 
 type NAT struct {
-	helper *helper
-	logger micrologger.Logger
+	awsAPIcache cache.Float64Cache
+	helper      *helper
+	logger      micrologger.Logger
 
 	installationName string
 }
@@ -62,8 +67,9 @@ func NewNAT(config NATConfig) (*NAT, error) {
 	}
 
 	v := &NAT{
-		helper: config.Helper,
-		logger: config.Logger,
+		awsAPIcache: cache.newFloat64Cache(time.Minute * 30),
+		helper:      config.Helper,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 	}
@@ -106,6 +112,12 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+
+	if _, ok := v.awsAPIcache.Get(awsNATlocker) {
+		return nil
+	}
+	v.awsAPIcache.Set(awsNATlocker, 1)
+
 	accountID, err := v.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)

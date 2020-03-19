@@ -1,11 +1,14 @@
 package collector
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/service/servicequotas"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/internal/cache"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -41,8 +44,9 @@ type ServiceQuotaConfig struct {
 }
 
 type ServiceQuota struct {
-	helper *helper
-	logger micrologger.Logger
+	awsAPIcache cache.Float64Cache
+	helper      *helper
+	logger      micrologger.Logger
 
 	installationName string
 }
@@ -60,8 +64,9 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 	}
 
 	v := &ServiceQuota{
-		helper: config.Helper,
-		logger: config.Logger,
+		awsAPIcache: cache.newFloat64Cache(time.Minute * 60),
+		helper:      config.Helper,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 	}
@@ -109,9 +114,15 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		return microerror.Mask(err)
 	}
 
-	natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
-	if err != nil {
-		return microerror.Mask(err)
+	var natQuotaValue float64
+	if v, ok := v.awsAPIcache.Get(NATQuotaCode); ok {
+		natQuotaValue = v
+	} else {
+		natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		v.awsAPIcache.Set(NATQuotaCode, natQuotaValue)
 	}
 
 	ch <- prometheus.MustNewConstMetric(
