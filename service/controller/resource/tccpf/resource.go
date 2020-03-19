@@ -18,7 +18,6 @@ const (
 type Config struct {
 	Logger micrologger.Logger
 
-	EncrypterBackend string
 	InstallationName string
 	Route53Enabled   bool
 }
@@ -39,14 +38,9 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
-	}
-
 	r := &Resource{
 		logger: config.Logger,
 
-		encrypterBackend: config.EncrypterBackend,
 		installationName: config.InstallationName,
 		route53Enabled:   config.Route53Enabled,
 	}
