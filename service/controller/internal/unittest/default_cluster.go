@@ -9,6 +9,38 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+func ChinaCluster() infrastructurev1alpha2.AWSCluster {
+	cr := infrastructurev1alpha2.AWSCluster{
+		ObjectMeta: v1.ObjectMeta{
+			Labels: map[string]string{
+				label.Cluster:         "8y5ck",
+				label.OperatorVersion: "7.3.0",
+			},
+		},
+		Spec: infrastructurev1alpha2.AWSClusterSpec{
+			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{
+				Description: "Test china cluster for template rendering unit test.",
+				DNS: infrastructurev1alpha2.AWSClusterSpecClusterDNS{
+					Domain: "gauss.cn-north-1.aws.gigantic.io",
+				},
+			},
+			Provider: infrastructurev1alpha2.AWSClusterSpecProvider{
+				CredentialSecret: infrastructurev1alpha2.AWSClusterSpecProviderCredentialSecret{
+					Name:      "default-credential-secret",
+					Namespace: "default",
+				},
+				Master: infrastructurev1alpha2.AWSClusterSpecProviderMaster{
+					AvailabilityZone: "cn-north-1a",
+					InstanceType:     "m5.xlarge",
+				},
+				Region: "cn-north-1",
+			},
+		},
+	}
+
+	return cr
+}
+
 func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 	cr := infrastructurev1alpha2.AWSCluster{
 		ObjectMeta: v1.ObjectMeta{
@@ -34,38 +66,6 @@ func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 					InstanceType:     "m5.xlarge",
 				},
 				Region: "eu-central-1",
-			},
-		},
-	}
-
-	return cr
-}
-
-func DefaultClusterChina() infrastructurev1alpha2.AWSCluster {
-	cr := infrastructurev1alpha2.AWSCluster{
-		ObjectMeta: v1.ObjectMeta{
-			Labels: map[string]string{
-				label.Cluster:         "8y5ck",
-				label.OperatorVersion: "7.3.0",
-			},
-		},
-		Spec: infrastructurev1alpha2.AWSClusterSpec{
-			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{
-				Description: "Test china cluster for template rendering unit test.",
-				DNS: infrastructurev1alpha2.AWSClusterSpecClusterDNS{
-					Domain: "gauss.cn-north-1.aws.gigantic.io",
-				},
-			},
-			Provider: infrastructurev1alpha2.AWSClusterSpecProvider{
-				CredentialSecret: infrastructurev1alpha2.AWSClusterSpecProviderCredentialSecret{
-					Name:      "default-credential-secret",
-					Namespace: "default",
-				},
-				Master: infrastructurev1alpha2.AWSClusterSpecProviderMaster{
-					AvailabilityZone: "cn-north-1a",
-					InstanceType:     "m5.xlarge",
-				},
-				Region: "cn-north-1",
 			},
 		},
 	}
