@@ -10,7 +10,7 @@ type Float64Cache struct {
 	underlying *gocache.Cache
 }
 
-func newFloat64Cache(expiration time.Duration) *float64Cache {
+func NewFloat64Cache(expiration time.Duration) *Float64Cache {
 	c := &Float64Cache{
 		underlying: gocache.New(expiration, expiration/2),
 	}

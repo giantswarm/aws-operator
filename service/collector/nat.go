@@ -18,8 +18,8 @@ import (
 
 const (
 	awsNATlocker = "__awsNATlocker__"
-	labelVPC = "vpc"
-	labelAZ  = "availability_zone"
+	labelVPC     = "vpc"
+	labelAZ      = "availability_zone"
 )
 
 const (
@@ -47,7 +47,7 @@ type NATConfig struct {
 }
 
 type NAT struct {
-	awsAPIcache cache.Float64Cache
+	awsAPIcache *cache.Float64Cache
 	helper      *helper
 	logger      micrologger.Logger
 
@@ -67,7 +67,7 @@ func NewNAT(config NATConfig) (*NAT, error) {
 	}
 
 	v := &NAT{
-		awsAPIcache: cache.newFloat64Cache(time.Minute * 30),
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
 		helper:      config.Helper,
 		logger:      config.Logger,
 
@@ -113,7 +113,7 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
 
-	if _, ok := v.awsAPIcache.Get(awsNATlocker) {
+	if _, ok := v.awsAPIcache.Get(awsNATlocker); ok {
 		return nil
 	}
 	v.awsAPIcache.Set(awsNATlocker, 1)

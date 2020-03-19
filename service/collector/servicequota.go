@@ -44,7 +44,7 @@ type ServiceQuotaConfig struct {
 }
 
 type ServiceQuota struct {
-	awsAPIcache cache.Float64Cache
+	awsAPIcache *cache.Float64Cache
 	helper      *helper
 	logger      micrologger.Logger
 
@@ -64,7 +64,7 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 	}
 
 	v := &ServiceQuota{
-		awsAPIcache: cache.newFloat64Cache(time.Minute * 60),
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 60),
 		helper:      config.Helper,
 		logger:      config.Logger,
 
@@ -115,8 +115,8 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 	}
 
 	var natQuotaValue float64
-	if v, ok := v.awsAPIcache.Get(NATQuotaCode); ok {
-		natQuotaValue = v
+	if val, ok := v.awsAPIcache.Get(NATQuotaCode); ok {
+		natQuotaValue = val
 	} else {
 		natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
 		if err != nil {
