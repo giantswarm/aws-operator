@@ -10,7 +10,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
 
@@ -46,6 +46,14 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 			keys:   unittest.DefaultKeys(),
 			labels: "k1=v1,k2=v2",
 		},
+		{
+			name:   "case 1: tcnp test - china",
+			ctx:    unittest.DefaultContextChina(),
+			cr:     unittest.DefaultClusterChina(),
+			certs:  unittest.DefaultCerts(),
+			keys:   unittest.DefaultKeys(),
+			labels: "k1=v1,k2=v2",
+		},
 	}
 
 	for i, tc := range testCases {
@@ -67,6 +75,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 						CalicoCIDR:                18,
 						CalicoMTU:                 1430,
 						CalicoSubnet:              "172.18.128.0",
+						ClusterDomain:             "cluster.local",
 						ClusterIPRange:            "172.18.192.0/22",
 						DockerDaemonCIDR:          "172.18.224.1/19",
 						IgnitionPath:              ignitionPath,

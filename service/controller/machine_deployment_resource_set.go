@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -106,6 +107,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				ClusterDomain:             config.ClusterDomain,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
@@ -181,6 +183,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
@@ -302,7 +306,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
-			Logger: config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
@@ -342,7 +347,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			Detection: tcnpChangeDetection,
 			Logger:    config.Logger,
 
-			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 		}
 
@@ -472,7 +476,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == project.BundleVersion() {
+		if key.OperatorVersion(&cr) == project.Version() {
 			return true
 		}
 

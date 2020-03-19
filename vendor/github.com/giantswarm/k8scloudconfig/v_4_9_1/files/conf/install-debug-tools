@@ -1,0 +1,16 @@
+#!/bin/bash
+set -eu
+
+mkdir -p /opt/bin
+
+# download calicoctl
+wget https://github.com/projectcalico/calicoctl/releases/download/{{ .Versions.Calico }}/calicoctl-linux-amd64
+mv calicoctl-linux-amd64 /opt/bin/calicoctl
+chmod +x /opt/bin/calicoctl
+
+# download crictl
+wget https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ .Versions.CRITools }}/crictl-{{ .Versions.CRITools }}-linux-amd64.tar.gz
+tar xvf crictl-{{ .Versions.CRITools }}-linux-amd64.tar.gz
+mv crictl /opt/bin/crictl
+chmod +x /opt/bin/crictl
+rm crictl-{{ .Versions.CRITools }}-linux-amd64.tar.gz

@@ -1,20 +1,21 @@
 package template
 
-type Subnet struct {
+type ParamsMainSubnets struct {
+	AWSCNISubnets  []ParamsMainSubnetsSubnet
+	PublicSubnets  []ParamsMainSubnetsSubnet
+	PrivateSubnets []ParamsMainSubnetsSubnet
+}
+
+type ParamsMainSubnetsSubnet struct {
 	AvailabilityZone      string
 	CIDR                  string
 	Name                  string
 	MapPublicIPOnLaunch   bool
-	RouteTableAssociation RouteTableAssociation
+	RouteTableAssociation ParamsMainSubnetsSubnetRouteTableAssociation
 }
 
-type RouteTableAssociation struct {
+type ParamsMainSubnetsSubnetRouteTableAssociation struct {
 	Name           string
 	RouteTableName string
 	SubnetName     string
-}
-
-type ParamsMainSubnets struct {
-	PublicSubnets  []Subnet
-	PrivateSubnets []Subnet
 }

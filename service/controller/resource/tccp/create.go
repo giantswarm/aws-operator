@@ -18,7 +18,6 @@ import (
 	pkgtemplate "github.com/giantswarm/aws-operator/pkg/template"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 )
@@ -152,18 +151,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	if r.encrypterBackend == encrypter.VaultBackend {
-		err = r.encrypterRoleManager.EnsureCreatedAuthorizedIAMRoles(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newTemplateParams(ctx, cr, time.Now())
+		params, err := r.newParamsMain(ctx, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -253,7 +245,73 @@ func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) [
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMain, error) {
+	var params *template.ParamsMain
+	{
+		iamPolicies, err := r.newParamsMainIAMPolicies(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		internetGateway, err := r.newParamsMainInternetGateway(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		instance, err := r.newParamsMainInstance(ctx, cr, t)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		loadBalancers, err := r.newParamsMainLoadBalancers(ctx, cr, t)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		natGateway, err := r.newParamsMainNATGateway(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		outputs, err := r.newParamsMainOutputs(ctx, cr, t)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		recordSets, err := r.newParamsMainRecordSets(ctx, cr, t)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		routeTables, err := r.newParamsMainRouteTables(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		securityGroups, err := r.newParamsMainSecurityGroups(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		subnets, err := r.newParamsMainSubnets(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		vpc, err := r.newParamsMainVPC(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		params = &template.ParamsMain{
+			IAMPolicies:     iamPolicies,
+			InternetGateway: internetGateway,
+			Instance:        instance,
+			LoadBalancers:   loadBalancers,
+			NATGateway:      natGateway,
+			Outputs:         outputs,
+			RecordSets:      recordSets,
+			RouteTables:     routeTables,
+			SecurityGroups:  securityGroups,
+			Subnets:         subnets,
+			VPC:             vpc,
+		}
+	}
+
+	return params, nil
+}
+
+func (r *Resource) newParamsMainIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -264,6 +322,7 @@ func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			ClusterID:         key.ClusterID(&cr),
 			EC2ServiceDomain:  key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			KMSKeyARN:         cc.Status.TenantCluster.Encryption.Key,
 			MasterPolicyName:  key.PolicyNameMaster(cr),
 			MasterProfileName: key.ProfileNameMaster(cr),
 			MasterRoleName:    key.RoleNameMaster(cr),
@@ -271,42 +330,12 @@ func (r *Resource) newIAMPoliciesParams(ctx context.Context, cr infrastructurev1
 			Route53Enabled:    r.route53Enabled,
 			S3Bucket:          key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 		}
-
-		if r.encrypterBackend == encrypter.KMSBackend {
-			iamPolicies.KMSKeyARN = cc.Status.TenantCluster.Encryption.Key
-		}
 	}
 
 	return iamPolicies, nil
 }
 
-func (r *Resource) newInternetGatewayParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainInternetGateway, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var internetGateways []template.ParamsMainInternetGatewayInternetGateway
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		ig := template.ParamsMainInternetGatewayInternetGateway{
-			InternetGatewayRoute: key.SanitizeCFResourceName(key.PublicInternetGatewayRouteName(az.Name)),
-			RouteTable:           key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-		}
-
-		internetGateways = append(internetGateways, ig)
-	}
-
-	var internetGateway *template.ParamsMainInternetGateway
-	{
-		internetGateway = &template.ParamsMainInternetGateway{
-			ClusterID:        key.ClusterID(&cr),
-			InternetGateways: internetGateways,
-		}
-	}
-
-	return internetGateway, nil
-}
-func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
+func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -333,9 +362,8 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alp
 				ID: key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			},
 			Master: template.ParamsMainInstanceMaster{
-				AZ:               key.MasterAvailabilityZone(cr),
-				CloudConfig:      base64.StdEncoding.EncodeToString([]byte(rendered)),
-				EncrypterBackend: r.encrypterBackend,
+				AZ:          key.MasterAvailabilityZone(cr),
+				CloudConfig: base64.StdEncoding.EncodeToString([]byte(rendered)),
 				DockerVolume: template.ParamsMainInstanceMasterDockerVolume{
 					Name:         key.VolumeNameDocker(cr),
 					ResourceName: key.DockerVolumeResourceName(cr, t),
@@ -357,7 +385,35 @@ func (r *Resource) newInstanceParams(ctx context.Context, cr infrastructurev1alp
 	}
 	return instance, nil
 }
-func (r *Resource) newLoadBalancersParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainLoadBalancers, error) {
+
+func (r *Resource) newParamsMainInternetGateway(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainInternetGateway, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var internetGateways []template.ParamsMainInternetGatewayInternetGateway
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		ig := template.ParamsMainInternetGatewayInternetGateway{
+			InternetGatewayRoute: key.SanitizeCFResourceName(key.PublicInternetGatewayRouteName(az.Name)),
+			RouteTable:           key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+		}
+
+		internetGateways = append(internetGateways, ig)
+	}
+
+	var internetGateway *template.ParamsMainInternetGateway
+	{
+		internetGateway = &template.ParamsMainInternetGateway{
+			ClusterID:        key.ClusterID(&cr),
+			InternetGateways: internetGateways,
+		}
+	}
+
+	return internetGateway, nil
+}
+
+func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainLoadBalancers, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -417,7 +473,8 @@ func (r *Resource) newLoadBalancersParams(ctx context.Context, cr infrastructure
 	}
 	return loadBalancers, nil
 }
-func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainNATGateway, error) {
+
+func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainNATGateway, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -437,16 +494,28 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 
 	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
+		if az.Name == key.MasterAvailabilityZone(cr) {
+			{
+				nr := template.ParamsMainNATGatewayNATRoute{
+					NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+					NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
+					RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+				}
+
+				natRoutes = append(natRoutes, nr)
+			}
 		}
 
-		nr := template.ParamsMainNATGatewayNATRoute{
-			NATGWName:             key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
-			NATRouteName:          key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
-			PrivateRouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+		{
+			nr := template.ParamsMainNATGatewayNATRoute{
+				NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+				NATRouteName:   key.SanitizeCFResourceName(key.AWSCNINATRouteName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+			}
+
+			natRoutes = append(natRoutes, nr)
 		}
-		natRoutes = append(natRoutes, nr)
+
 	}
 
 	var natGateway *template.ParamsMainNATGateway
@@ -459,7 +528,8 @@ func (r *Resource) newNATGatewayParams(ctx context.Context, cr infrastructurev1a
 
 	return natGateway, nil
 }
-func (r *Resource) newOutputsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainOutputs, error) {
+
+func (r *Resource) newParamsMainOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainOutputs, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -485,7 +555,8 @@ func (r *Resource) newOutputsParams(ctx context.Context, cr infrastructurev1alph
 
 	return outputs, nil
 }
-func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainRecordSets, error) {
+
+func (r *Resource) newParamsMainRecordSets(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainRecordSets, error) {
 	_, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -505,18 +576,27 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 
 	return recordSets, nil
 }
-func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainRouteTables, error) {
+
+func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
+	var awsCNIRouteTableNames []template.ParamsMainRouteTablesRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		rtName := template.ParamsMainRouteTablesRouteTableName{
+			AvailabilityZone: az.Name,
+			ResourceName:     key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+		}
+		awsCNIRouteTableNames = append(awsCNIRouteTableNames, rtName)
+	}
+
 	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone:    az.Name,
-			ResourceName:        key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
+			AvailabilityZone: az.Name,
+			ResourceName:     key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 		}
 		publicRouteTableNames = append(publicRouteTableNames, rtName)
 	}
@@ -538,8 +618,10 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	var routeTables *template.ParamsMainRouteTables
 	{
 		routeTables = &template.ParamsMainRouteTables{
-			ClusterID:              key.ClusterID(&cr),
-			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
+			ClusterID:       key.ClusterID(&cr),
+			HostClusterCIDR: cc.Status.ControlPlane.VPC.CIDR,
+
+			AWSCNIRouteTableNames:  awsCNIRouteTableNames,
 			PrivateRouteTableNames: privateRouteTableNames,
 			PublicRouteTableNames:  publicRouteTableNames,
 		}
@@ -548,59 +630,218 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	return routeTables, nil
 }
 
-// TODO: The rule management should be moved to templates
-// https://github.com/giantswarm/giantswarm/issues/7665
-
-func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
-	// Allow traffic to the Kubernetes API server depending on the API
-	// whitelisting rules.
-	publicAPIRules, err := getKubernetesPublicAPIRules(cfg, hostClusterCIDR)
+func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainSecurityGroups, error) {
+	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	// Other security group rules for the master.
-	otherRules := []template.SecurityGroupRule{
-		{
-			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
-			Port:        cadvisorPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 2379 for etcd backup.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
-			Port:        kubeletPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10300 for node-exporter scraping.",
-			Port:        nodeExporterPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.",
-			Port:        kubeStateMetricsPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Only allow ssh traffic from the control plane.",
-			Port:        sshPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
+	var cfg securityConfig
+	{
+		cfg = securityConfig{
+			APIWhitelist:                    r.apiWhiteList,
+			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
+			ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
+			CustomObject:                    cr,
+		}
 	}
 
-	return append(publicAPIRules, otherRules...), nil
+	masterRules, err := getMasterRules(cfg, cfg.ControlPlaneVPCCidr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	internalAPIRules, err := getKubernetesPrivateAPIRules(cfg, cfg.ControlPlaneVPCCidr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var securityGroups *template.ParamsMainSecurityGroups
+	{
+		securityGroups = &template.ParamsMainSecurityGroups{
+			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
+			APIInternalELBSecurityGroupRules: internalAPIRules,
+			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
+			AWSCNISecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "aws-cni"),
+			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
+			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
+			MasterSecurityGroupRules:         masterRules,
+			EtcdELBSecurityGroupName:         key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
+			EtcdELBSecurityGroupRules:        getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
+		}
+	}
+
+	return securityGroups, nil
 }
+
+func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainSubnets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+
+	sort.Slice(zones, func(i, j int) bool {
+		return zones[i].Name < zones[j].Name
+	})
+
+	var awsCNISubnets []template.ParamsMainSubnetsSubnet
+	for _, az := range zones {
+		snetName := key.SanitizeCFResourceName(key.AWSCNISubnetName(az.Name))
+		snet := template.ParamsMainSubnetsSubnet{
+			AvailabilityZone: az.Name,
+			CIDR:             az.Subnet.AWSCNI.CIDR.String(),
+			Name:             snetName,
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.AWSCNISubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+		}
+		awsCNISubnets = append(awsCNISubnets, snet)
+	}
+
+	var publicSubnets []template.ParamsMainSubnetsSubnet
+	for _, az := range zones {
+		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
+		snet := template.ParamsMainSubnetsSubnet{
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Public.CIDR.String(),
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+		}
+		publicSubnets = append(publicSubnets, snet)
+	}
+
+	var privateSubnets []template.ParamsMainSubnetsSubnet
+	for _, az := range zones {
+		if az.Name != key.MasterAvailabilityZone(cr) {
+			continue
+		}
+
+		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
+		snet := template.ParamsMainSubnetsSubnet{
+			AvailabilityZone:    az.Name,
+			CIDR:                az.Subnet.Private.CIDR.String(),
+			Name:                snetName,
+			MapPublicIPOnLaunch: false,
+			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+				SubnetName:     snetName,
+			},
+		}
+		privateSubnets = append(privateSubnets, snet)
+	}
+
+	var subnets *template.ParamsMainSubnets
+	{
+		subnets = &template.ParamsMainSubnets{
+			AWSCNISubnets:  awsCNISubnets,
+			PublicSubnets:  publicSubnets,
+			PrivateSubnets: privateSubnets,
+		}
+	}
+
+	return subnets, nil
+}
+
+func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainVPC, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var routeTableNames []template.ParamsMainVPCRouteTableName
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		rtName := template.ParamsMainVPCRouteTableName{
+			ResourceName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+		}
+		routeTableNames = append(routeTableNames, rtName)
+	}
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		if az.Name != key.MasterAvailabilityZone(cr) {
+			continue
+		}
+
+		rtName := template.ParamsMainVPCRouteTableName{
+			ResourceName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
+		}
+		routeTableNames = append(routeTableNames, rtName)
+	}
+
+	var vpc *template.ParamsMainVPC
+	{
+		vpc = &template.ParamsMainVPC{
+			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
+			CIDRBlockAWSCNI:  r.cidrBlockAWSCNI,
+			ClusterID:        key.ClusterID(&cr),
+			InstallationName: r.installationName,
+			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,
+			PeerVPCID:        cc.Status.ControlPlane.VPC.ID,
+			Region:           key.Region(cr),
+			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			PeerRoleArn:      cc.Status.ControlPlane.PeerRole.ARN,
+			RouteTableNames:  routeTableNames,
+		}
+	}
+
+	return vpc, nil
+}
+
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	var templateBody string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
+
+		params, err := r.newParamsMain(ctx, cr, time.Now())
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		templateBody, err = template.Render(params)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane cloud formation stack")
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's control plane cloud formation stack")
+
+		i := &cloudformation.UpdateStackInput{
+			Capabilities: []*string{
+				aws.String(namedIAMCapability),
+			},
+			StackName:    aws.String(key.StackNameTCCP(&cr)),
+			TemplateBody: aws.String(templateBody),
+		}
+
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane cloud formation stack")
+	}
+
+	return nil
+}
+
+// TODO: The rule management should be moved to templates
+// https://github.com/giantswarm/giantswarm/issues/7665
 
 func getEtcdRules(customObject infrastructurev1alpha2.AWSCluster, hostClusterCIDR string) []template.SecurityGroupRule {
 	return []template.SecurityGroupRule{
@@ -617,6 +858,23 @@ func getEtcdRules(customObject infrastructurev1alpha2.AWSCluster, hostClusterCID
 			SourceCIDR:  hostClusterCIDR,
 		},
 	}
+}
+
+func getHostClusterNATGatewayRules(cfg securityConfig) ([]template.SecurityGroupRule, error) {
+	var gatewayRules []template.SecurityGroupRule
+
+	for _, address := range cfg.ControlPlaneNATGatewayAddresses {
+		gatewayRule := template.SecurityGroupRule{
+			Description: "Allow traffic from gateways.",
+			Port:        key.KubernetesSecurePort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
+		}
+
+		gatewayRules = append(gatewayRules, gatewayRule)
+	}
+
+	return gatewayRules, nil
 }
 
 func getKubernetesPrivateAPIRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
@@ -738,274 +996,53 @@ func getKubernetesPublicAPIRules(cfg securityConfig, hostClusterCIDR string) ([]
 	}
 }
 
-func getHostClusterNATGatewayRules(cfg securityConfig) ([]template.SecurityGroupRule, error) {
-	var gatewayRules []template.SecurityGroupRule
+func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
+	// Allow traffic to the Kubernetes API server depending on the API
+	// whitelisting rules.
+	publicAPIRules, err := getKubernetesPublicAPIRules(cfg, hostClusterCIDR)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
-	for _, address := range cfg.ControlPlaneNATGatewayAddresses {
-		gatewayRule := template.SecurityGroupRule{
-			Description: "Allow traffic from gateways.",
-			Port:        key.KubernetesSecurePort,
+	// Other security group rules for the master.
+	otherRules := []template.SecurityGroupRule{
+		{
+			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
+			Port:        cadvisorPort,
 			Protocol:    tcpProtocol,
-			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
-		}
-
-		gatewayRules = append(gatewayRules, gatewayRule)
+			SourceCIDR:  hostClusterCIDR,
+		},
+		{
+			Description: "Allow traffic from control plane CIDR to 2379 for etcd backup.",
+			Port:        etcdPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
+		},
+		{
+			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
+			Port:        kubeletPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
+		},
+		{
+			Description: "Allow traffic from control plane CIDR to 10300 for node-exporter scraping.",
+			Port:        nodeExporterPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
+		},
+		{
+			Description: "Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.",
+			Port:        kubeStateMetricsPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
+		},
+		{
+			Description: "Only allow ssh traffic from the control plane.",
+			Port:        sshPort,
+			Protocol:    tcpProtocol,
+			SourceCIDR:  hostClusterCIDR,
+		},
 	}
 
-	return gatewayRules, nil
-}
-
-func (r *Resource) newSecurityGroupsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainSecurityGroups, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var cfg securityConfig
-	{
-		cfg = securityConfig{
-			APIWhitelist:                    r.apiWhiteList,
-			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
-			ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
-			CustomObject:                    cr,
-		}
-	}
-
-	masterRules, err := getMasterRules(cfg, cfg.ControlPlaneVPCCidr)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	internalAPIRules, err := getKubernetesPrivateAPIRules(cfg, cfg.ControlPlaneVPCCidr)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var securityGroups *template.ParamsMainSecurityGroups
-	{
-		securityGroups = &template.ParamsMainSecurityGroups{
-			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
-			APIInternalELBSecurityGroupRules: internalAPIRules,
-			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
-			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
-			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
-			MasterSecurityGroupRules:         masterRules,
-			EtcdELBSecurityGroupName:         key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
-			EtcdELBSecurityGroupRules:        getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
-		}
-	}
-
-	return securityGroups, nil
-}
-func (r *Resource) newSubnetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainSubnets, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-
-	sort.Slice(zones, func(i, j int) bool {
-		return zones[i].Name < zones[j].Name
-	})
-
-	var publicSubnets []template.Subnet
-	for _, az := range zones {
-		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
-		snet := template.Subnet{
-			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Public.CIDR.String(),
-			Name:                snetName,
-			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: template.RouteTableAssociation{
-				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-				SubnetName:     snetName,
-			},
-		}
-		publicSubnets = append(publicSubnets, snet)
-	}
-
-	var privateSubnets []template.Subnet
-	for _, az := range zones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
-		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
-		snet := template.Subnet{
-			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Private.CIDR.String(),
-			Name:                snetName,
-			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: template.RouteTableAssociation{
-				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-				SubnetName:     snetName,
-			},
-		}
-		privateSubnets = append(privateSubnets, snet)
-	}
-
-	var subnets *template.ParamsMainSubnets
-	{
-		subnets = &template.ParamsMainSubnets{
-			PublicSubnets:  publicSubnets,
-			PrivateSubnets: privateSubnets,
-		}
-	}
-
-	return subnets, nil
-}
-func (r *Resource) newVPCParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainVPC, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var routeTableNames []template.ParamsMainVPCRouteTableName
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		rtName := template.ParamsMainVPCRouteTableName{
-			ResourceName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-		}
-		routeTableNames = append(routeTableNames, rtName)
-	}
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
-		rtName := template.ParamsMainVPCRouteTableName{
-			ResourceName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-		}
-		routeTableNames = append(routeTableNames, rtName)
-	}
-
-	var vpc *template.ParamsMainVPC
-	{
-		vpc = &template.ParamsMainVPC{
-			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
-			ClusterID:        key.ClusterID(&cr),
-			InstallationName: r.installationName,
-			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,
-			PeerVPCID:        cc.Status.ControlPlane.VPC.ID,
-			Region:           key.Region(cr),
-			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			PeerRoleArn:      cc.Status.ControlPlane.PeerRole.ARN,
-			RouteTableNames:  routeTableNames,
-		}
-	}
-
-	return vpc, nil
-}
-
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMain, error) {
-	var params *template.ParamsMain
-	{
-		iamPolicies, err := r.newIAMPoliciesParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		internetGateway, err := r.newInternetGatewayParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		instance, err := r.newInstanceParams(ctx, cr, t)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		loadBalancers, err := r.newLoadBalancersParams(ctx, cr, t)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		natGateway, err := r.newNATGatewayParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		outputs, err := r.newOutputsParams(ctx, cr, t)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		recordSets, err := r.newRecordSetsParams(ctx, cr, t)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		routeTables, err := r.newRouteTablesParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		securityGroups, err := r.newSecurityGroupsParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		subnets, err := r.newSubnetsParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		vpc, err := r.newVPCParams(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		params = &template.ParamsMain{
-			IAMPolicies:     iamPolicies,
-			InternetGateway: internetGateway,
-			Instance:        instance,
-			LoadBalancers:   loadBalancers,
-			NATGateway:      natGateway,
-			Outputs:         outputs,
-			RecordSets:      recordSets,
-			RouteTables:     routeTables,
-			SecurityGroups:  securityGroups,
-			Subnets:         subnets,
-			VPC:             vpc,
-		}
-	}
-
-	return params, nil
-}
-
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	var templateBody string
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane cloud formation stack")
-
-		params, err := r.newTemplateParams(ctx, cr, time.Now())
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		templateBody, err = template.Render(params)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane cloud formation stack")
-	}
-
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's control plane cloud formation stack")
-
-		i := &cloudformation.UpdateStackInput{
-			Capabilities: []*string{
-				aws.String(namedIAMCapability),
-			},
-			StackName:    aws.String(key.StackNameTCCP(&cr)),
-			TemplateBody: aws.String(templateBody),
-		}
-
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane cloud formation stack")
-	}
-
-	return nil
+	return append(publicAPIRules, otherRules...), nil
 }

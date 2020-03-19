@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Giant Swarm GmbH.
+Copyright 2020 Giant Swarm GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha2 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/infrastructure/v1alpha2"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
+
+	v1alpha2 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/infrastructure/v1alpha2"
 )
 
 type FakeInfrastructureV1alpha2 struct {
@@ -32,8 +33,16 @@ func (c *FakeInfrastructureV1alpha2) AWSClusters(namespace string) v1alpha2.AWSC
 	return &FakeAWSClusters{c, namespace}
 }
 
+func (c *FakeInfrastructureV1alpha2) AWSControlPlanes(namespace string) v1alpha2.AWSControlPlaneInterface {
+	return &FakeAWSControlPlanes{c, namespace}
+}
+
 func (c *FakeInfrastructureV1alpha2) AWSMachineDeployments(namespace string) v1alpha2.AWSMachineDeploymentInterface {
 	return &FakeAWSMachineDeployments{c, namespace}
+}
+
+func (c *FakeInfrastructureV1alpha2) G8sControlPlanes(namespace string) v1alpha2.G8sControlPlaneInterface {
+	return &FakeG8sControlPlanes{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

@@ -26,7 +26,6 @@ type machineDeploymentResourceSetConfig struct {
 	CalicoSubnet               string
 	ClusterIPRange             string
 	DockerDaemonCIDR           string
-	EncrypterBackend           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
@@ -35,6 +34,7 @@ type machineDeploymentResourceSetConfig struct {
 	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	ClusterDomain              string
 	NetworkSetupDockerImage    string
 	PodInfraContainerImage     string
 	ProjectName                string
@@ -44,10 +44,6 @@ type machineDeploymentResourceSetConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-}
-
-func (c machineDeploymentResourceSetConfig) GetEncrypterBackend() string {
-	return c.EncrypterBackend
 }
 
 func (c machineDeploymentResourceSetConfig) GetInstallationName() string {

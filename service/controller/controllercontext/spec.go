@@ -23,8 +23,14 @@ type ContextSpecTenantClusterTCCPAvailabilityZone struct {
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnet struct {
+	AWSCNI  ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI
 	Private ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate
 	Public  ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPublic
+}
+
+type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI struct {
+	CIDR net.IPNet
+	ID   string
 }
 
 type ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {

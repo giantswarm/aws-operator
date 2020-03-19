@@ -6,9 +6,8 @@ import (
 	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -88,11 +87,12 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.DisableIngressControllerService = true
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
-			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
 			baseExtension: baseExtension{
-				cluster:       cr,
-				encrypter:     t.config.Encrypter,
-				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+				awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
+				registryDomain: t.config.RegistryDomain,
+				cluster:        cr,
+				encrypter:      t.config.Encrypter,
+				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
 			},
 			cc:               cc,
 			clusterCerts:     clusterCerts,
@@ -135,7 +135,6 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 }
 
 type MasterExtension struct {
-	awsConfigSpec g8sv1alpha1.AWSConfigSpec
 	baseExtension
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
@@ -201,19 +200,6 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
-			Path:         "/opt/bin/vault-aws-authorizer",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
@@ -296,6 +282,19 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			AssetContent: cloudconfig.SystemdNetworkdEth1Network,
 			Path:         "/etc/systemd/network/10-eth1.network",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			AssetContent: cloudconfig.AwsCNIManifest,
+			Path:         "/srv/aws-cni.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
@@ -400,12 +399,6 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "decrypt-keys-assets.service",
 			Enabled:      true,
 		},
-
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerService,
-			Name:         "vault-aws-authorizer.service",
-			Enabled:      true,
-		},
 		{
 			AssetContent: cloudconfig.SetHostname,
 			Name:         "set-hostname.service",
@@ -444,8 +437,10 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 
 	var newUnits []k8scloudconfig.UnitAsset
 
+	data := e.templateData()
+
 	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.awsConfigSpec)
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

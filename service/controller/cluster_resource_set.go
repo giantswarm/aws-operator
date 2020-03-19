@@ -2,8 +2,10 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -11,6 +13,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	"github.com/giantswarm/tenantcluster"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -30,6 +33,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
@@ -44,8 +49,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 )
 
 func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
@@ -81,6 +88,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+				ClusterDomain:             config.ClusterDomain,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
@@ -107,10 +115,29 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tenantCluster tenantcluster.Interface
+	{
+		c := tenantcluster.Config{
+			CertsSearcher: config.CertsSearcher,
+			Logger:        config.Logger,
+
+			// TODO use a dedicated aws-operator key-pair.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/9327
+			//
+			CertID: certs.ClusterOperatorAPICert,
+		}
+
+		tenantCluster, err = tenantcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var clusterChecker *ipam.ClusterChecker
 	{
 		c := ipam.ClusterCheckerConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -123,7 +150,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
 			NetworkRange: config.IPAMNetworkRange,
@@ -138,7 +165,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var clusterPersister *ipam.ClusterPersister
 	{
 		c := ipam.ClusterPersisterConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -163,7 +190,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var apiEndpointResource resource.Interface
 	{
 		c := apiendpoint.Config{
-			CtrlClient: config.CtrlClient,
+			CtrlClient: config.K8sClient.CtrlClient(),
 			Logger:     config.Logger,
 		}
 
@@ -176,7 +203,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
-			K8sClient:     config.K8sClient,
+			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
 
@@ -192,9 +219,11 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.G8sClient,
+			G8sClient:     config.K8sClient.G8sClient(),
 			Logger:        config.Logger,
 			ToClusterFunc: key.ToCluster,
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
@@ -211,6 +240,19 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 
 		tccpEncryptionResource, err = tccpencryption.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSecurityGroupsResource resource.Interface
+	{
+		c := tccpsecuritygroups.Config{
+			ToClusterFunc: key.ToCluster,
+			Logger:        config.Logger,
+		}
+
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -241,7 +283,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	{
 		c := bridgezone.Config{
 			HostAWSConfig: config.HostAWSConfig,
-			K8sClient:     config.K8sClient,
+			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
@@ -282,7 +324,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			CloudConfig:        tccpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCCP,
 			Logger:             config.Logger,
-			G8sClient:          config.G8sClient,
+			G8sClient:          config.K8sClient.G8sClient(),
 			PathFunc:           key.S3ObjectPathTCCP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 		}
@@ -325,7 +367,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var cleanupMachineDeploymentsResource resource.Interface
 	{
 		c := cleanupmachinedeployments.Config{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -377,7 +419,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
-			G8sClient:            config.G8sClient,
+			G8sClient:            config.K8sClient.G8sClient(),
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
@@ -385,8 +427,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				Private: config.APIWhitelist.Private,
 				Public:  config.APIWhitelist.Public,
 			},
+			CIDRBlockAWSCNI:    fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 			Detection:          tccpChangeDetection,
-			EncrypterBackend:   config.EncrypterBackend,
 			InstallationName:   config.InstallationName,
 			InstanceMonitoring: config.AdvancedMonitoringEC2,
 			PublicRouteTables:  config.RouteTables,
@@ -430,7 +472,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := tccpf.Config{
 			Logger: config.Logger,
 
-			EncrypterBackend: config.EncrypterBackend,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
 		}
@@ -511,7 +552,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var secretFinalizerResource resource.Interface
 	{
 		c := secretfinalizer.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -524,7 +565,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var serviceResource resource.Interface
 	{
 		c := service.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -542,7 +583,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var endpointsResource resource.Interface
 	{
 		c := endpoints.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -552,6 +593,31 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 
 		endpointsResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var eniConfigCRsResource resource.Interface
+	{
+		c := eniconfigcrs.Config{
+			Logger: config.Logger,
+		}
+
+		eniConfigCRsResource, err = eniconfigcrs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ensureCPCRsResource resource.Interface
+	{
+		c := ensurecpcrs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		ensureCPCRsResource, err = ensurecpcrs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -571,6 +637,19 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: tenantCluster,
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -584,6 +663,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		tccpOutputsResource,
 		tccpSubnetsResource,
 		regionResource,
+		tenantClientsResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
@@ -591,6 +671,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		ipamResource,
 		bridgeZoneResource,
 		tccpEncryptionResource,
+		tccpSecurityGroupsResource,
 		s3BucketResource,
 		s3ObjectResource,
 		tccpAZsResource,
@@ -599,6 +680,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		tccpfResource,
 		serviceResource,
 		endpointsResource,
+		eniConfigCRsResource,
+		ensureCPCRsResource,
 		secretFinalizerResource,
 
 		// All these resources implement cleanup functionality only being executed
@@ -636,7 +719,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.OperatorVersion(&cr) == project.BundleVersion() {
+		if key.OperatorVersion(&cr) == project.Version() {
 			return true
 		}
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Giant Swarm GmbH.
+Copyright 2020 Giant Swarm GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
+
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 )
 
 // FakeReleases implements ReleaseInterface
@@ -88,17 +89,6 @@ func (c *FakeReleases) Create(release *v1alpha1.Release) (result *v1alpha1.Relea
 func (c *FakeReleases) Update(release *v1alpha1.Release) (result *v1alpha1.Release, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewRootUpdateAction(releasesResource, release), &v1alpha1.Release{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.Release), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeReleases) UpdateStatus(release *v1alpha1.Release) (*v1alpha1.Release, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceAction(releasesResource, "status", release), &v1alpha1.Release{})
 	if obj == nil {
 		return nil, err
 	}

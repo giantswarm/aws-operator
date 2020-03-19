@@ -76,6 +76,15 @@ const TemplateMainRecordSets = `
       Type: CNAME
       ResourceRecords:
         - 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+  IngressWildcardInternalRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: '*.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'InternalHostedZone'
+      TTL: '300'
+      Type: CNAME
+      ResourceRecords:
+        - 'ingress.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
 {{- end -}}
 {{- end -}}
 `

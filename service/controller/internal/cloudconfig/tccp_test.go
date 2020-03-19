@@ -11,7 +11,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
 
@@ -70,6 +70,7 @@ func Test_Controller_CloudConfig_TCCP_Template_Render(t *testing.T) {
 						CalicoCIDR:                18,
 						CalicoMTU:                 1430,
 						CalicoSubnet:              "172.18.128.0",
+						ClusterDomain:             "cluster.local",
 						ClusterIPRange:            "172.18.192.0/22",
 						DockerDaemonCIDR:          "172.18.224.1/19",
 						IgnitionPath:              ignitionPath,

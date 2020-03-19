@@ -6,14 +6,14 @@ const SystemdNetworkdEth1Network = `
 [Match]
 Name=eth1
 [Network]
-Address={{index .MasterENIAddress .MasterID}}/{{.MasterENISubnetSize}}
+Address={{index .MasterENIAddresses .MasterID}}/{{.MasterENISubnetSize}}
 
 [RoutingPolicyRule]
 Table=2
-From={{index .MasterENIAddress .MasterID}}/32
+From={{index .MasterENIAddresses .MasterID}}/32
 
 [Route]
 Destination=0.0.0.0/0
-Gateway={{index .MasterENIGateway .MasterID}}
+Gateway={{index .MasterENIGateways .MasterID}}
 Table=2
 `
