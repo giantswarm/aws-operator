@@ -417,14 +417,14 @@
 
 [[projects]]
   branch = "increase-conntrack"
-  digest = "1:abc1956ae020deeb3178c9193af870f1b197d15f285d2f6ada54f5e5d9a19a2d"
+  digest = "1:3064b24abe385e7e25aef86b10291b9b1e6b3ec340ea48db6326a86ed9e0ebd7"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_4_9_1",
   ]
   pruneopts = "T"
-  revision = "c82c8a4eca8e93401b689a5934b2cf5782152c83"
+  revision = "b0cf8aebdfc1156cc05b9062313bce996c8e4f1b"
 
 [[projects]]
   branch = "master"
