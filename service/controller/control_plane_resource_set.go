@@ -56,7 +56,6 @@ type controlPlaneResourceSetConfig struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
-	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
@@ -238,8 +237,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := tccpnoutputs.Config{
 			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
 		}
 
 		tccpnOutputsResource, err = tccpnoutputs.New(c)

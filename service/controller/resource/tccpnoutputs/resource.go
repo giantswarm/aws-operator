@@ -11,18 +11,13 @@ const (
 
 type Config struct {
 	Logger micrologger.Logger
-
-	Route53Enabled bool
 }
 
 // Resource implements an operatorkit resource and provides a mechanism to fetch
 // information from Cloud Formation stack outputs of the Tenant Cluster Control
-// Plane Node stack.
-//
+// Plane Nodes stack.
 type Resource struct {
 	logger micrologger.Logger
-
-	route53Enabled bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -32,8 +27,6 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		logger: config.Logger,
-
-		route53Enabled: config.Route53Enabled,
 	}
 
 	return r, nil
