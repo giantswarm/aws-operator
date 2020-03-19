@@ -11,34 +11,40 @@ const TemplateMainSecurityGroups = `
       SecurityGroupIngress:
       -
         Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
-        Port: 4194
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        CidrIp: $v.ControlPlaneVPCCIDR
       -
         Description: "Allow traffic from Control Plane CIDR to 2379 for etcd backup."
-        Port: 2379
-        Protocol: tcp
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
         sourceCIDR: $v.ControlPlaneVPCCIDR
       -
         Description: "Allow traffic from Control Plane CIDR to 10250 for kubelet scraping."
-        Port: 10250
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        CidrIp: $v.ControlPlaneVPCCIDR
       -
         Description: "Allow traffic from Control Plane CIDR to 10300 for node-exporter scraping."
-        Port: 10300
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        CidrIp: $v.ControlPlaneVPCCIDR
       -
         Description: "Allow traffic from Control Plane CIDR to 10301 for kube-state-metrics scraping."
-        Port: 10301
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        CidrIp: $v.ControlPlaneVPCCIDR
       -
         Description: "Only allow SSH traffic from the Control Plane."
-        Port: 22
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: $v.ControlPlaneVPCCIDR
 
       #
       # Public API Whitelist Enabled Rules
@@ -46,29 +52,33 @@ const TemplateMainSecurityGroups = `
       {{- if $v.APIWhitelist.Public.Enabled }}
       -
         Description: "Allow traffic from Control Plane CIDR."
-        Port: 443
-        Protocol: tcp
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
         sourceCIDR: $v.ControlPlaneVPCCIDR
       -
         Description: "Allow traffic from Tenant Cluster CIDR."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: $v.TenantClusterVPCCIDR
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: $v.TenantClusterVPCCIDR
 
       {{- range $subnet := $v.APIWhitelist.Public.SubnetList }}
       -
         Description: "Custom Public API Whitelist CIDR."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: $subnet
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: $subnet
       {{- end }}
 
       {{- range $v.ControlPlaneNATGatewayAddresses }}
       -
         Description: "Allow traffic from NAT Gateways."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: {{ .PublicIp }}/32
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: {{ .PublicIp }}/32
       {{- end }}
 
       {{- range .NATGateway.Gateways }}
@@ -86,9 +96,10 @@ const TemplateMainSecurityGroups = `
       {{- else }}
       -
         Description: "Allow all traffic to the master instance."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: 0.0.0.0/0
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
       {{- end }}
 
       Tags:
@@ -102,14 +113,16 @@ const TemplateMainSecurityGroups = `
       SecurityGroupIngress:
       -
         Description: "Allow all Etcd traffic from the VPC to the Etcd load balancer."
-        Port: 2379
-        Protocol: tcp
-        SourceCIDR: 0.0.0.0/0
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: 0.0.0.0/0
       -
         Description: "Allow traffic from Control Plane to Etcd port for backup and metrics."
-        Port: 2379
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 2379
+        ToPort: 2379
+        CidrIp: $v.ControlPlaneVPCCIDR
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-etcd-elb
@@ -126,21 +139,24 @@ const TemplateMainSecurityGroups = `
       {{- if $v.APIWhitelist.Private.Enabled }}
       -
         Description: "Allow traffic from Control Plane CIDR."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: $v.ControlPlaneVPCCIDR
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: $v.ControlPlaneVPCCIDR
       -
         Description: "Allow traffic from Tenant Cluster CIDR."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: $v.TenantClusterVPCCIDR
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: $v.TenantClusterVPCCIDR
 
       {{- range $subnet := $v.APIWhitelist.Private.SubnetList }}
       -
         Description: "Custom Private API Whitelist CIDR."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: $subnet
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: $subnet
       {{- end }}
 
       #
@@ -149,19 +165,22 @@ const TemplateMainSecurityGroups = `
       {{- else }}
       -
         Description: "Allow all traffic to the master instance from A class network."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: "10.0.0.0/8"
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: "10.0.0.0/8"
       -
         Description: "Allow all traffic to the master instance from B class network."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: "172.16.0.0/12"
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: "172.16.0.0/12"
       -
         Description: "Allow all traffic to the master instance from C class network."
-        Port: 443
-        Protocol: tcp
-        SourceCIDR: "192.168.0.0/16"
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: "192.168.0.0/16"
       {{- end }}
 
       Tags:
