@@ -69,10 +69,19 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
-  digest = "1:d58ffcbefd213f04d243c9e1802265e2731ab2abfcb7b4d3121e66b999dac804"
+  digest = "1:d8bf00757b72dcea682e6bdfcc064fbbca10f9892d2fbcb16c4313488d6be708"
+  name = "github.com/aws/amazon-vpc-cni-k8s"
+  packages = ["pkg/apis/crd/v1alpha1"]
+  pruneopts = "UT"
+  revision = "927b76ac57f577466ae6149230b6c8649d2dbc1b"
+  version = "v1.6.0"
+
+[[projects]]
+  digest = "1:19c33516a55408807673f8be85ef03a681ceb1ccad5b78e4aaa04a73c7756359"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
+    "aws/arn",
     "aws/awserr",
     "aws/awsutil",
     "aws/client",
@@ -81,6 +90,7 @@
     "aws/credentials",
     "aws/credentials/ec2rolecreds",
     "aws/credentials/endpointcreds",
+    "aws/credentials/processcreds",
     "aws/credentials/stscreds",
     "aws/csm",
     "aws/defaults",
@@ -89,9 +99,16 @@
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/context",
+    "internal/ini",
+    "internal/s3err",
     "internal/sdkio",
+    "internal/sdkmath",
     "internal/sdkrand",
+    "internal/sdkuri",
     "internal/shareddefaults",
+    "internal/strings",
+    "internal/sync/singleflight",
     "private/protocol",
     "private/protocol/ec2query",
     "private/protocol/eventstream",
@@ -115,15 +132,18 @@
     "service/kms/kmsiface",
     "service/route53",
     "service/s3",
+    "service/s3/internal/arn",
     "service/s3/s3iface",
+    "service/servicequotas",
+    "service/servicequotas/servicequotasiface",
     "service/sts",
     "service/sts/stsiface",
     "service/support",
     "service/support/supportiface",
   ]
   pruneopts = "UT"
-  revision = "2fa5290a6a8f6a664f2dab5337d5f64d0cfd8f68"
-  version = "v1.14.7"
+  revision = "88e01ec3d4d121bd33554f8a187f3b7d8d6f3db7"
+  version = "v1.29.20"
 
 [[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
@@ -271,12 +291,7 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-<<<<<<< HEAD
-  branch = "master"
-  digest = "1:715bf3eea7e345a7c9915bf9c2e91e97687e81e328a1ce8767ec0441e28feabe"
-=======
-  digest = "1:718acd69418c2d3e570ee058007a575e99a3e05888f4a7bb02bd4fc796945d8d"
->>>>>>> master
+  digest = "1:520f23cf3864e25b4caa486502c80a7af1041985674074543ffbda3715d32970"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -305,8 +320,8 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "4fafaaae7e2eb887a8a268213f28a518a1618c3d"
-  version = "v0.1.0"
+  revision = "9552ed6bec737d139a14042569f7f96bc32d5a00"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -351,7 +366,7 @@
   name = "github.com/giantswarm/e2eclients"
   packages = ["aws"]
   pruneopts = "UT"
-  revision = "ea0388753075996907cddfabd8f57f1a66f8fac3"
+  revision = "3d3a1e431d6556d3c9999751d7ce3bd5984495ca"
 
 [[projects]]
   branch = "master"
@@ -437,14 +452,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:694ed06fec92c37ff3710d58a31dc642578b65180d9356064a5070ad6ed2c5bb"
+  digest = "1:d8b5413ce60a336f975bb54451c9fa4167471efbeacea8d9e966499ae043ba61"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_5_0_0",
+    "v_5_2_0",
   ]
   pruneopts = "T"
-  revision = "e804c697c21088274a617add1f9ac21ded960a0d"
+  revision = "992435a55223b3383e12f45549c939be076d8433"
 
 [[projects]]
   branch = "master"
@@ -559,6 +575,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:bac1b910eab21bd91745a425c69f1cdd4690aa308e7d724cc981a11c1688d6d4"
+  name = "github.com/giantswarm/tenantcluster"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c51c578f6c29d87ba4ce32395b5b092020115e1"
+
+[[projects]]
+  branch = "master"
   digest = "1:5613edec666c3b6d357f27b9072806d9f783e405cf167f04d6a9ce48dd4590a9"
   name = "github.com/giantswarm/to"
   packages = ["."]
@@ -580,14 +604,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "cd94540b7d5a064d0b106387f85078c0031271d9"
-
-[[projects]]
-  digest = "1:ef4bd1cd2563d93d3f48352fc24d499a4a2b54c11932814173653ece7db13800"
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "32cf4f7e9c77f151e18b53067b55549b4d1d411d"
-  version = "v1.52.0"
 
 [[projects]]
   digest = "1:83a37f3bd4ccd13469775ef771e943e6c7cfaba6926decff6c83135e56512f08"
@@ -847,11 +863,11 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:e22af8c7518e1eab6f2eab2b7d7558927f816262586cd6ed9f349c97a6c285c4"
+  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0b12d6b5"
+  revision = "c2b33e84"
 
 [[projects]]
   digest = "1:6c41d4f998a03b6604227ccad36edaed6126c397e5d78709ef4814a1145a6757"
@@ -1015,6 +1031,14 @@
   pruneopts = "UT"
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
   version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:bde6c3a610bd01ea7e2c8d9c7fd1116531fb6619f46f73f4f2ea16adb70da6be"
+  name = "github.com/operator-framework/operator-sdk"
+  packages = ["pkg/util/k8sutil"]
+  pruneopts = "UT"
+  revision = "e5a0ab096e1a7c0e6b937d2b41707eccb82c3c77"
+  version = "v0.0.7"
 
 [[projects]]
   digest = "1:808cdddf087fb64baeae67b8dfaee2069034d9704923a3cb8bd96a995421a625"
@@ -2208,6 +2232,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",
@@ -2226,6 +2251,8 @@
     "github.com/aws/aws-sdk-go/service/route53",
     "github.com/aws/aws-sdk-go/service/s3",
     "github.com/aws/aws-sdk-go/service/s3/s3iface",
+    "github.com/aws/aws-sdk-go/service/servicequotas",
+    "github.com/aws/aws-sdk-go/service/servicequotas/servicequotasiface",
     "github.com/aws/aws-sdk-go/service/sts",
     "github.com/aws/aws-sdk-go/service/sts/stsiface",
     "github.com/aws/aws-sdk-go/service/support",
@@ -2251,12 +2278,14 @@
     "github.com/giantswarm/e2etests/ipam",
     "github.com/giantswarm/e2etests/scaling",
     "github.com/giantswarm/e2etests/update",
+    "github.com/giantswarm/errors/tenant",
     "github.com/giantswarm/exporterkit/collector",
     "github.com/giantswarm/helmclient",
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
     "github.com/giantswarm/k8scloudconfig/v_5_0_0",
+    "github.com/giantswarm/k8scloudconfig/v_5_2_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -2277,6 +2306,7 @@
     "github.com/giantswarm/operatorkit/resource/wrapper/metricsresource",
     "github.com/giantswarm/operatorkit/resource/wrapper/retryresource",
     "github.com/giantswarm/randomkeys",
+    "github.com/giantswarm/tenantcluster",
     "github.com/giantswarm/to",
     "github.com/giantswarm/versionbundle",
     "github.com/google/go-cmp/cmp",

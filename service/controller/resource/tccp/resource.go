@@ -39,8 +39,8 @@ type Config struct {
 	Logger               micrologger.Logger
 
 	APIWhitelist       APIWhitelist
+	CIDRBlockAWSCNI    string
 	Detection          *changedetection.TCCP
-	EncrypterBackend   string
 	InstallationName   string
 	InstanceMonitoring bool
 	PublicRouteTables  string
@@ -54,7 +54,7 @@ type Resource struct {
 	logger               micrologger.Logger
 
 	apiWhiteList       APIWhitelist
-	encrypterBackend   string
+	cidrBlockAWSCNI    string
 	detection          *changedetection.TCCP
 	installationName   string
 	instanceMonitoring bool
@@ -79,8 +79,9 @@ func New(config Config) (*Resource, error) {
 	if config.APIWhitelist.Public.Enabled && config.APIWhitelist.Public.SubnetList == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
 	}
-	if config.EncrypterBackend == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.EncrypterBackend must not be empty", config)
+
+	if config.CIDRBlockAWSCNI == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CIDRBlockAWSCNI must not be empty", config)
 	}
 
 	r := &Resource{
@@ -90,7 +91,7 @@ func New(config Config) (*Resource, error) {
 		logger:               config.Logger,
 
 		apiWhiteList:       config.APIWhitelist,
-		encrypterBackend:   config.EncrypterBackend,
+		cidrBlockAWSCNI:    config.CIDRBlockAWSCNI,
 		installationName:   config.InstallationName,
 		instanceMonitoring: config.InstanceMonitoring,
 		publicRouteTables:  config.PublicRouteTables,

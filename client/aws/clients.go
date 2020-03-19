@@ -18,6 +18,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/aws/aws-sdk-go/service/servicequotas"
+	"github.com/aws/aws-sdk-go/service/servicequotas/servicequotasiface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 	"github.com/aws/aws-sdk-go/service/support"
@@ -48,6 +50,7 @@ type Clients struct {
 	KMS            kmsiface.KMSAPI
 	Route53        *route53.Route53
 	S3             s3iface.S3API
+	ServiceQuotas  servicequotasiface.ServiceQuotasAPI
 	STS            stsiface.STSAPI
 	Support        supportiface.SupportAPI
 }
@@ -101,6 +104,7 @@ func newClients(session *session.Session, configs ...*aws.Config) Clients {
 		KMS:            kms.New(session, configs...),
 		Route53:        route53.New(session, configs...),
 		S3:             s3.New(session, configs...),
+		ServiceQuotas:  servicequotas.New(session, configs...),
 		STS:            sts.New(session, configs...),
 		Support:        support.New(session, supportConfigs...),
 	}

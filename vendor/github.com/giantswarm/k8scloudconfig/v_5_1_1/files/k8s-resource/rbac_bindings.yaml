@@ -1,0 +1,95 @@
+## User
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: giantswarm-admin
+subjects:
+- kind: User
+  name: {{.Cluster.Kubernetes.API.Domain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+## Worker
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubelet
+subjects:
+- kind: User
+  name: {{.Cluster.Kubernetes.Kubelet.Domain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:node
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: proxy
+subjects:
+- kind: User
+  name: {{.Cluster.Kubernetes.Kubelet.Domain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:node-proxier
+  apiGroup: rbac.authorization.k8s.io
+---
+## Master
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kube-controller-manager
+subjects:
+- kind: User
+  name: {{.Cluster.Kubernetes.API.Domain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:kube-controller-manager
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kube-scheduler
+subjects:
+- kind: User
+  name: {{.Cluster.Kubernetes.API.Domain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: system:kube-scheduler
+  apiGroup: rbac.authorization.k8s.io
+---
+## node-operator
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: node-operator
+subjects:
+- kind: User
+  name: node-operator.{{.BaseDomain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: node-operator
+  apiGroup: rbac.authorization.k8s.io
+---
+## prometheus-external is prometheus from host cluster
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: prometheus-external
+subjects:
+- kind: User
+  name: prometheus.{{.BaseDomain}}
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: prometheus-external
+  apiGroup: rbac.authorization.k8s.io
