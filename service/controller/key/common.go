@@ -9,6 +9,22 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+func AWSCNINATRouteName(az string) string {
+	return fmt.Sprintf("AWSCNINATRoute-%s", az)
+}
+
+func AWSCNIRouteTableName(az string) string {
+	return fmt.Sprintf("AWSCNIRouteTable-%s", az)
+}
+
+func AWSCNISubnetName(az string) string {
+	return fmt.Sprintf("AWSCNISubnet-%s", az)
+}
+
+func AWSCNISubnetRouteTableAssociationName(az string) string {
+	return fmt.Sprintf("AWSCNISubnetRouteTableAssociation-%s", az)
+}
+
 func AWSTags(getter LabelsGetter, installationName string) map[string]string {
 	TagCloudProvider := ClusterCloudProviderTag(getter)
 
@@ -141,6 +157,10 @@ func PublicRouteTableName(az string) string {
 
 func PublicSubnetRouteTableAssociationName(az string) string {
 	return fmt.Sprintf("PublicSubnetRouteTableAssociation-%s", az)
+}
+
+func ReleaseVersion(getter LabelsGetter) string {
+	return getter.GetLabels()[label.Release]
 }
 
 func RegionARN(region string) string {

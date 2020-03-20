@@ -30,19 +30,12 @@ spec:
   - name: v1alpha1
     served: false
     storage: false
-    schema:
-      openAPIV3Schema:
-        properties:
-          spec:
-            properties:
-              instanceType:
-                type: string
-            type: object
   - name: v1alpha2
     served: true
     storage: true
     schema:
       openAPIV3Schema:
+        type: object
         properties:
           spec:
             properties:
@@ -95,11 +88,10 @@ func NewAWSControlPlaneTypeMeta() metav1.TypeMeta {
 //         giantswarm.io/organization: giantswarm
 //         release.giantswarm.io/version: "7.3.1"
 //       name: 8y5kc
-//       ownerReference:
-//         apiVersion: infrastructure.giantswarm.io/v1alpha2
-//         kind: G8sControlPlane
-//         name: 8y5kc
-//         namespace: default
+//       ownerReferences:
+//         - apiVersion: infrastructure.giantswarm.io/v1alpha2
+//           kind: G8sControlPlane
+//           name: 8y5kc
 //     spec:
 //       availabilityZones:
 //         - eu-central-1a

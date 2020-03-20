@@ -12,7 +12,7 @@ var buildInfo = prometheus.NewGaugeVec(
 		Name:      "build_info",
 		Help:      "A metric with a constant '1' value labeled by commit, golang version, golang os, and golang arch.",
 	},
-	[]string{"commit", "golang_version", "golang_goos", "golang_goarch", "reconciled_version"},
+	[]string{"commit", "golang_version", "golang_goos", "golang_goarch", "version"},
 )
 
 func init() {

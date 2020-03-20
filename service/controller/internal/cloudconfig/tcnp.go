@@ -8,7 +8,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -62,9 +62,10 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.Extension = &WorkerExtension{
 			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
 			baseExtension: baseExtension{
-				cluster:       cr,
-				encrypter:     t.config.Encrypter,
-				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+				cluster:        cr,
+				encrypter:      t.config.Encrypter,
+				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				registryDomain: t.config.RegistryDomain,
 			},
 			cc:           cc,
 			clusterCerts: clusterCerts,
@@ -131,20 +132,6 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0700,
 		},
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
-			Path:         "/opt/bin/vault-aws-authorizer",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0700,
-		},
-
 		{
 			AssetContent: cloudconfig.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
@@ -226,11 +213,6 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerService,
-			Name:         "vault-aws-authorizer.service",
 			Enabled:      true,
 		},
 		{

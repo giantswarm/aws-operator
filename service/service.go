@@ -37,11 +37,12 @@ type Config struct {
 type Service struct {
 	Version *version.Service
 
-	bootOnce                              sync.Once
-	clusterapiClusterController           *controller.Cluster
-	clusterapiDrainerController           *controller.Drainer
-	clusterapiMachineDeploymentController *controller.MachineDeployment
-	operatorCollector                     *collector.Set
+	bootOnce                    sync.Once
+	clusterController           *controller.Cluster
+	controlPlaneController      *controller.ControlPlane
+	drainerController           *controller.Drainer
+	machineDeploymentController *controller.MachineDeployment
+	operatorCollector           *collector.Set
 }
 
 // New creates a new configured service object.
@@ -130,9 +131,8 @@ func New(config Config) (*Service, error) {
 		ipamNetworkRange = *ipnet
 	}
 
-	var clusterapiClusterController *controller.Cluster
+	var clusterController *controller.Cluster
 	{
-
 		c := controller.ClusterConfig{
 			K8sClient: k8sClient,
 			Locker:    kubeLockLocker,
@@ -156,7 +156,6 @@ func New(config Config) (*Service, error) {
 			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
-			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
 			GuestAvailabilityZones:     config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
@@ -186,13 +185,29 @@ func New(config Config) (*Service, error) {
 			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
-		clusterapiClusterController, err = controller.NewCluster(c)
+
+		clusterController, err = controller.NewCluster(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var clusterapiDrainerController *controller.Drainer
+	var controlPlaneController *controller.ControlPlane
+	{
+		c := controller.ControlPlaneConfig{
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
+
+			HostAWSConfig: awsConfig,
+		}
+
+		controlPlaneController, err = controller.NewControlPlane(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var drainerController *controller.Drainer
 	{
 		c := controller.DrainerConfig{
 			K8sClient: k8sClient,
@@ -206,13 +221,13 @@ func New(config Config) (*Service, error) {
 			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
-		clusterapiDrainerController, err = controller.NewDrainer(c)
+		drainerController, err = controller.NewDrainer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var clusterapiMachineDeploymentController *controller.MachineDeployment
+	var machineDeploymentController *controller.MachineDeployment
 	{
 		c := controller.MachineDeploymentConfig{
 			K8sClient: k8sClient,
@@ -226,7 +241,6 @@ func New(config Config) (*Service, error) {
 			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
-			EncrypterBackend:           config.Viper.GetString(config.Flag.Service.AWS.Encrypter),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
 			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
@@ -255,7 +269,7 @@ func New(config Config) (*Service, error) {
 			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
-		clusterapiMachineDeploymentController, err = controller.NewMachineDeployment(c)
+		machineDeploymentController, err = controller.NewMachineDeployment(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -299,11 +313,12 @@ func New(config Config) (*Service, error) {
 	s := &Service{
 		Version: versionService,
 
-		bootOnce:                              sync.Once{},
-		clusterapiClusterController:           clusterapiClusterController,
-		clusterapiDrainerController:           clusterapiDrainerController,
-		clusterapiMachineDeploymentController: clusterapiMachineDeploymentController,
-		operatorCollector:                     operatorCollector,
+		bootOnce:                    sync.Once{},
+		clusterController:           clusterController,
+		controlPlaneController:      controlPlaneController,
+		drainerController:           drainerController,
+		machineDeploymentController: machineDeploymentController,
+		operatorCollector:           operatorCollector,
 	}
 
 	return s, nil
@@ -313,8 +328,9 @@ func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
 		go s.operatorCollector.Boot(ctx)
 
-		go s.clusterapiClusterController.Boot(ctx)
-		go s.clusterapiDrainerController.Boot(ctx)
-		go s.clusterapiMachineDeploymentController.Boot(ctx)
+		go s.clusterController.Boot(ctx)
+		go s.controlPlaneController.Boot(ctx)
+		go s.drainerController.Boot(ctx)
+		go s.machineDeploymentController.Boot(ctx)
 	})
 }

@@ -19,9 +19,17 @@ limitations under the License.
 package fake
 
 import (
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/discovery"
+	fakediscovery "k8s.io/client-go/discovery/fake"
+	"k8s.io/client-go/testing"
+
 	clientset "github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	applicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1"
 	fakeapplicationv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/application/v1alpha1/fake"
+	backupv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/backup/v1alpha1"
+	fakebackupv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/backup/v1alpha1/fake"
 	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1"
 	fakecorev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/core/v1alpha1/fake"
 	examplev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/example/v1alpha1"
@@ -32,11 +40,6 @@ import (
 	fakeproviderv1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/provider/v1alpha1/fake"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1"
 	fakereleasev1alpha1 "github.com/giantswarm/apiextensions/pkg/clientset/versioned/typed/release/v1alpha1/fake"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/discovery"
-	fakediscovery "k8s.io/client-go/discovery/fake"
-	"k8s.io/client-go/testing"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.
@@ -89,6 +92,11 @@ var _ clientset.Interface = &Clientset{}
 // ApplicationV1alpha1 retrieves the ApplicationV1alpha1Client
 func (c *Clientset) ApplicationV1alpha1() applicationv1alpha1.ApplicationV1alpha1Interface {
 	return &fakeapplicationv1alpha1.FakeApplicationV1alpha1{Fake: &c.Fake}
+}
+
+// BackupV1alpha1 retrieves the BackupV1alpha1Client
+func (c *Clientset) BackupV1alpha1() backupv1alpha1.BackupV1alpha1Interface {
+	return &fakebackupv1alpha1.FakeBackupV1alpha1{Fake: &c.Fake}
 }
 
 // CoreV1alpha1 retrieves the CoreV1alpha1Client

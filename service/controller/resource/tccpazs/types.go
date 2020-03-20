@@ -5,6 +5,7 @@ import "net"
 // mapping is temporary type for mapping existing subnets from controllercontext
 // to AZs.
 type mapping struct {
+	AWSCNI       network
 	Public       network
 	Private      network
 	RequiredByCR bool
