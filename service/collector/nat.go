@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	//awsNATlocker is used as temporal lock to decide if AWS NAT API request should be done or not
 	awsNATlocker = "__awsNATlocker__"
 	labelVPC     = "vpc"
 	labelAZ      = "availability_zone"
@@ -67,6 +68,9 @@ func NewNAT(config NATConfig) (*NAT, error) {
 	}
 
 	v := &NAT{
+		//AWS operator creates at this moment one NAT for each private subnet (node pool).
+		//As clusters are not created or changed so often, and the process can take around 20 minutes,
+		//30 minutes for the cache expiration is a coherent value.
 		awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
 		helper:      config.Helper,
 		logger:      config.Logger,
@@ -112,7 +116,6 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-
 	if _, ok := v.awsAPIcache.Get(awsNATlocker); ok {
 		return nil
 	}
