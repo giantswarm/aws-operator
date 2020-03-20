@@ -65,7 +65,7 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 
 	v := &ServiceQuota{
 		//Default quotas are changed by request to AWS support and they are considered
-		//quite static infromation, then 60 minutes for the cache expiration is a coherent value.
+		//quite static information, then 60 minutes for the cache expiration is a coherent value.
 		awsAPIcache: cache.NewFloat64Cache(time.Minute * 720), //2 times per day
 		helper:      config.Helper,
 		logger:      config.Logger,
