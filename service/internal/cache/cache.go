@@ -12,8 +12,8 @@ type Float64Cache struct {
 
 func NewFloat64Cache(expiration time.Duration) *Float64Cache {
 	c := &Float64Cache{
-		//Clean up period is set to half of the expiration, which means values are checked to be
-		//cleaned at least once before the expiration time.
+		// Clean up period is set to half of the expiration, which means values are
+		// checked to be cleaned at least once before the expiration time.
 		underlying: gocache.New(expiration, expiration/2),
 	}
 
