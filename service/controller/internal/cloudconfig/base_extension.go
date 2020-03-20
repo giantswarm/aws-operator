@@ -22,7 +22,7 @@ type baseExtension struct {
 	registryDomain string
 }
 
-func (e *baseExtension) templateDataTCCP() TemplateData {
+func (e *baseExtension) templateDataTCCPN() TemplateData {
 	awsRegion := key.Region(e.cluster)
 
 	eniAddress, gateway, subnetSize := calculateNetworkForENI(e.masterSubnet)

@@ -360,7 +360,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
-	data := e.templateDataTCCP()
+	data := e.templateDataTCCPN()
 
 	for _, fm := range filesMeta {
 		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
@@ -454,7 +454,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 
 	var newUnits []k8scloudconfig.UnitAsset
 
-	data := e.templateDataTCCP()
+	data := e.templateDataTCCPN()
 
 	for _, fm := range unitsMeta {
 		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)

@@ -147,4 +147,3 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 
 	return templateBody, nil
 }
-
