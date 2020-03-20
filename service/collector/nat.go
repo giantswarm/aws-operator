@@ -118,11 +118,14 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+	fmt.Println("Collecting nat info")
 	if _, ok := v.awsAPIcache.Get(awsNATlocker); ok {
+		fmt.Printf("nat cache not empty %t", ok)
 		return nil
 	}
 	v.awsAPIcache.Set(awsNATlocker, 1)
 
+	fmt.Println("nat cache empty, query AWS API")
 	accountID, err := v.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)
@@ -144,6 +147,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	for _, vpc := range rv.Vpcs {
+		fmt.Printf("nat vpc %s", *vpc.VpcId)
 		in := &ec2.DescribeNatGatewaysInput{
 			Filter: []*ec2.Filter{
 				{
@@ -162,6 +166,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			return microerror.Mask(err)
 		}
 		for _, nat := range rn.NatGateways {
+			fmt.Printf("nat subnet %s", *nat.SubnetId)
 			is := &ec2.DescribeSubnetsInput{
 				SubnetIds: []*string{
 					nat.SubnetId,
@@ -180,6 +185,8 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				}
 			}
 		}
+
+		fmt.Printf("nat zones %+v", azs)
 
 		for azName, azValue := range azs {
 			ch <- prometheus.MustNewConstMetric(
