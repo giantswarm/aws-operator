@@ -25,7 +25,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $v.TenantClusterVPCCIDR
+        CidrIp: {{ $v.TenantClusterVPCCIDR }}
 
       {{- range $subnet := $v.APIWhitelist.Public.SubnetList }}
       -
@@ -33,7 +33,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $subnet
+        CidrIp: {{ $subnet }}
       {{- end }}
 
       {{- range $v.ControlPlaneNATGatewayAddresses }}
@@ -157,7 +157,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $subnet
+        CidrIp: {{ $subnet }}
       {{- end }}
 
       #

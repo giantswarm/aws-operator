@@ -73,7 +73,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		{
 			name: "case 4: basic test with api whitelist enabled",
 			cr:   unittest.DefaultCluster(),
-			ctx:  updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
+			ctx:  unittest.DefaultContext(),
 			apiWhitelist: ConfigAPIWhitelistSecurityGroup{
 				Enabled: true,
 				SubnetList: []string{

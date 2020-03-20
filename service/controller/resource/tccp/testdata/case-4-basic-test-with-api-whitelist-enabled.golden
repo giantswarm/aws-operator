@@ -40,9 +40,6 @@ Resources:
             Action: "ec2:*"
             Resource: "*"
           - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "8y5ck"
-          - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
@@ -528,19 +525,19 @@ Resources:
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $v.TenantClusterVPCCIDR
+        CidrIp: 10.0.0.0/24
       -
         Description: "Custom Public API Whitelist CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $subnet
+        CidrIp: 172.10.10.10
       -
         Description: "Custom Public API Whitelist CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $subnet
+        CidrIp: 172.20.20.20
       -
         Description: "Allow NAT gateway IP."
         IpProtocol: tcp
@@ -652,13 +649,13 @@ Resources:
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $subnet
+        CidrIp: 172.10.10.10
       -
         Description: "Custom Private API Whitelist CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $subnet
+        CidrIp: 172.20.20.20
 
       #
       # Private API Whitelist Disabled Rules
@@ -865,7 +862,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 
+      CidrBlock: 10.0.0.0/24
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
