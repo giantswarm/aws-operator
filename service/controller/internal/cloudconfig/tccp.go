@@ -82,13 +82,8 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 
 		var masterSubnets []net.IPNet
 		{
-			zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-			for _, az := range zones {
-				if az.Name != key.MasterAvailabilityZone(cr) {
-					continue
-				}
-				masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
-			}
+			_, net, _ := net.ParseCIDR("10.0.0.0/24")
+			masterSubnets = append(masterSubnets, *net)
 		}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cr, labels)
@@ -103,9 +98,9 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 				awsConfigSpec:  g8sConfig,
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
-				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
-				masterSubnet:   masterSubnets[masterID],
 				masterID:       masterID,
+				masterSubnet:   masterSubnets[masterID],
+				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
 				registryDomain: t.config.RegistryDomain,
 			},
 			cc:               cc,
