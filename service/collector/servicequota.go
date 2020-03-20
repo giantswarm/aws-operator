@@ -146,6 +146,7 @@ func getDefaultVPCQuotaFor(quotaCode string, awsClients clientaws.Clients) (floa
 		QuotaCode:   &NATQuotaCode,
 		ServiceCode: &VPCServiceCode,
 	}
+	//Get the default NAT quota for the specific account
 	od, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(id)
 	if err != nil {
 		return 0, microerror.Mask(err)
@@ -155,9 +156,10 @@ func getDefaultVPCQuotaFor(quotaCode string, awsClients clientaws.Clients) (floa
 	il := &servicequotas.ListServiceQuotasInput{
 		ServiceCode: &VPCServiceCode,
 	}
+	//Get the NAT quota in case it has been modified by AWS support request
 	ol, err := awsClients.ServiceQuotas.ListServiceQuotas(il)
 	if err != nil {
-		return 0, microerror.Mask(err)
+		return natQuotaValue, microerror.Mask(err)
 	}
 	for _, sq := range ol.Quotas {
 		if *sq.QuotaCode == NATQuotaCode {

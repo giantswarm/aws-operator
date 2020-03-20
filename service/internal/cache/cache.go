@@ -23,12 +23,12 @@ func NewFloat64Cache(expiration time.Duration) *Float64Cache {
 func (c *Float64Cache) Get(k string) (float64, bool) {
 	v, exist := c.underlying.Get(k)
 	if v == nil {
-		return 0, false
+		return 0, exist
 	}
 
 	vn, ok := v.(float64)
 	if !ok {
-		return 0, false
+		return 0, exist
 	}
 
 	return vn, exist
