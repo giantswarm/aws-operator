@@ -13,5 +13,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release.
 
-[Unreleased]: https://github.com/giantswarm/operatorkit/compare/v8.2.1...HEAD
-[8.2.1]: https://github.com/giantswarm/operatorkit/releases/tag/v8.2.1
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.2.1...HEAD
+[8.2.1]: https://github.com/giantswarm/aws-operator/releases/tag/v8.2.1
