@@ -1,14 +1,13 @@
 package cloudconfig
 
-const MountEtcdVolume = `
+const AutomountEtcdVolume = `
 [Unit]
 Description=etcd3 data volume
+After=etcd3-attach-dependencies.service
 Before=etcd3.service
 
 [Mount]
-What=/dev/disk/by-label/etcd
 Where=/var/lib/etcd
-Type=ext4
 
 [Install]
 WantedBy=multi-user.target
