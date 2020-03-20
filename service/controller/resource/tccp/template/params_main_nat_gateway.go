@@ -14,7 +14,7 @@ type ParamsMainNATGatewayGateway struct {
 }
 
 type ParamsMainNATGatewayNATRoute struct {
-	NATGWName             string
-	NATRouteName          string
-	PrivateRouteTableName string
+	NATGWName      string
+	NATRouteName   string
+	RouteTableName string
 }

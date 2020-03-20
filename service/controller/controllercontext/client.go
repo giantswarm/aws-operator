@@ -1,6 +1,8 @@
 package controllercontext
 
 import (
+	"github.com/giantswarm/k8sclient"
+
 	"github.com/giantswarm/aws-operator/client/aws"
 )
 
@@ -15,4 +17,5 @@ type ContextClientControlPlane struct {
 
 type ContextClientTenantCluster struct {
 	AWS aws.Clients
+	K8s k8sclient.Interface
 }

@@ -427,6 +427,9 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			Master: template.ParamsMainSecurityGroupsTenantClusterMaster{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			},
+			AWSCNI: template.ParamsMainSecurityGroupsTenantClusterAWSCNI{
+				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "aws-cni")),
+			},
 			NodePools: nodePools,
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
 				ID: cc.Status.TenantCluster.TCCP.VPC.ID,

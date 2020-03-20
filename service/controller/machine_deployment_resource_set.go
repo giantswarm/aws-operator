@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -182,6 +183,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
@@ -303,7 +306,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
-			Logger: config.Logger,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)

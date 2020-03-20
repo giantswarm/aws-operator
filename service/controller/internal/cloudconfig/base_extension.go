@@ -18,8 +18,10 @@ type baseExtension struct {
 }
 
 func (e *baseExtension) templateData() templateData {
+	awsRegion := key.Region(e.cluster)
 	data := templateData{
-		AWSRegion:      key.Region(e.cluster),
+		AWSRegion:      awsRegion,
+		IsChinaRegion:  key.IsChinaRegion(awsRegion),
 		RegistryDomain: e.registryDomain,
 	}
 

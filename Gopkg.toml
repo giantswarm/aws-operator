@@ -32,7 +32,11 @@ required = [
 
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
-  version = "=1.14.7"
+  version = "=1.29.20"
+
+[[constraint]]
+  name = "github.com/aws/amazon-vpc-cni-k8s"
+  version = "v1.6.0"
 
 [[constraint]]
   branch = "master"
@@ -186,6 +190,7 @@ required = [
   source = "gopkg.in/fsnotify/fsnotify.v1"
   name = "gopkg.in/fsnotify.v1"
   version = "v1.4.7"
+
 
 
 [prune]
