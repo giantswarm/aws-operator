@@ -59,7 +59,7 @@ Resources:
       AvailabilityZone: eu-central-1b
       Encrypted: true
       Size: 100
-      SnapshotId: snap-1234567890abcdef0
+      #SnapshotId: snap-1234567890abcdef0
       Tags:
       - Key: Name
         Value: 8y5ck-etcd
