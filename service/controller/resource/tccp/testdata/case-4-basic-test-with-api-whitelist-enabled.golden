@@ -3,8 +3,6 @@ Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   DockerVolumeResourceName:
     Value: DockerVolume8Y5CK78968
-  HostedZoneNameServers:
-    Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   MasterImageID:
     Value: ami-038cea5071a5ee580
   MasterInstanceResourceName:
@@ -41,9 +39,6 @@ Resources:
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
-          - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "8y5ck"
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
@@ -129,37 +124,6 @@ Resources:
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
-  Route53ManagerRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: 8y5ck-Route53Manager-Role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            AWS: !GetAtt IAMManagerRole.Arn
-          Action: "sts:AssumeRole"
-  Route53ManagerRolePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: 8y5ck-Route53Manager-Policy
-      Roles:
-        - Ref: "Route53ManagerRole"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Action: "route53:ChangeResourceRecordSets"
-            Resource:
-              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone' ] ]
-              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone' ] ]
-          - Effect: "Allow"
-            Action:
-              - "route53:ListHostedZones"
-              - "route53:ListResourceRecordSets"
-            Resource: "*"
-
   MasterInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -454,87 +418,7 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1c
-  HostedZone:
-    Type: 'AWS::Route53::HostedZone'
-    Properties:
-      Name: '8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-  InternalHostedZone:
-    Type: 'AWS::Route53::HostedZone'
-    Properties:
-      Name: '8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneConfig:
-        Comment: "Internal hosted zone for internal network"
-      VPCs:
-        - VPCId: !Ref VPC
-          VPCRegion: 'eu-central-1'
-  ApiRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt ApiLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiLoadBalancer.CanonicalHostedZoneNameID
-        EvaluateTargetHealth: false
-      Name: 'api.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'HostedZone'
-      Type: A
-  ApiPublicInternalRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
-        EvaluateTargetHealth: false
-      Name: 'internal-api.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'HostedZone'
-      Type: A
-  ApiPrivateInternalRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt ApiInternalLoadBalancer.DNSName
-        HostedZoneId: !GetAtt ApiInternalLoadBalancer.CanonicalHostedZoneNameID
-        EvaluateTargetHealth: false
-      Name: 'api.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'InternalHostedZone'
-      Type: A
-  EtcdInternalRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt EtcdLoadBalancer.DNSName
-        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
-        EvaluateTargetHealth: false
-      Name: 'etcd.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'InternalHostedZone'
-      Type: A
-  EtcdRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt EtcdLoadBalancer.DNSName
-        HostedZoneId: !GetAtt EtcdLoadBalancer.CanonicalHostedZoneNameID
-        EvaluateTargetHealth: false
-      Name: 'etcd.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'HostedZone'
-      Type: A
-  IngressWildcardRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Name: '*.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'HostedZone'
-      TTL: '300'
-      Type: CNAME
-      ResourceRecords:
-        - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-  IngressWildcardInternalRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Name: '*.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: !Ref 'InternalHostedZone'
-      TTL: '300'
-      Type: CNAME
-      ResourceRecords:
-        - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+  
   
   AWSCNIRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
@@ -627,14 +511,50 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
       #
-      # Public API Whitelist Disabled Rules
+      # Public API Whitelist Enabled Rules
       #
       -
-        Description: "Allow all traffic to the master instance."
+        Description: "Allow traffic from Control Plane CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: 0.0.0.0/0
+        CidrIp: 10.1.0.0/16
+      -
+        Description: "Allow traffic from Tenant Cluster CIDR."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 10.0.0.0/24
+      -
+        Description: "Custom Public API Whitelist CIDR."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 172.10.10.10
+      -
+        Description: "Custom Public API Whitelist CIDR."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 172.20.20.20
+      -
+        Description: "Allow NAT gateway IP."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: !Join [ "/", [ !Ref NATEIPEuCentral1a, "32" ] ]
+      -
+        Description: "Allow NAT gateway IP."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: !Join [ "/", [ !Ref NATEIPEuCentral1b, "32" ] ]
+      -
+        Description: "Allow NAT gateway IP."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: !Join [ "/", [ !Ref NATEIPEuCentral1c, "32" ] ]
 
       -
         Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
@@ -704,26 +624,32 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
       #
-      # Private API Whitelist Disabled Rules
+      # Private API Whitelist Enabled Rules
       #
       -
-        Description: "Allow all traffic to the master instance from A class network."
+        Description: "Allow traffic from Control Plane CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: "10.0.0.0/8"
+        CidrIp: 10.1.0.0/16
       -
-        Description: "Allow all traffic to the master instance from B class network."
+        Description: "Allow traffic from Tenant Cluster CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: "172.16.0.0/12"
+        CidrIp: 10.0.0.0/24
       -
-        Description: "Allow all traffic to the master instance from C class network."
+        Description: "Custom Private API Whitelist CIDR."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: "192.168.0.0/16"
+        CidrIp: 172.10.10.10
+      -
+        Description: "Custom Private API Whitelist CIDR."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 172.20.20.20
 
       Tags:
         - Key: Name
