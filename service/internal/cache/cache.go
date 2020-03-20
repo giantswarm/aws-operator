@@ -21,7 +21,7 @@ func NewFloat64Cache(expiration time.Duration) *Float64Cache {
 }
 
 func (c *Float64Cache) Get(k string) (float64, bool) {
-	v, _ := c.underlying.Get(k)
+	v, exist := c.underlying.Get(k)
 	if v == nil {
 		return 0, false
 	}
@@ -31,7 +31,7 @@ func (c *Float64Cache) Get(k string) (float64, bool) {
 		return 0, false
 	}
 
-	return vn, true
+	return vn, exist
 }
 
 func (c *Float64Cache) Set(k string, v float64) {

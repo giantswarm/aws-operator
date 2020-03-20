@@ -37,3 +37,12 @@ func Test_floatCache_Set(t *testing.T) {
 		}
 	}
 }
+
+func Test_floatCache_NotExist(t *testing.T) {
+	c := NewFloat64Cache(time.Minute * 1)
+
+	_, ok := c.Get("key")
+	if ok {
+		t.Fatalf("not existed key must return false")
+	}
+}
