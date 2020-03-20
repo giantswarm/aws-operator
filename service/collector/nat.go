@@ -112,7 +112,6 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-
 	if _, ok := v.awsAPIcache.Get(awsNATlocker); ok {
 		return nil
 	}
