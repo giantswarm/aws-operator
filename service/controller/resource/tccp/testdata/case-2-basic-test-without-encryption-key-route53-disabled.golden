@@ -510,9 +510,8 @@ Resources:
       GroupDescription: 8y5ck-master
       VpcId: !Ref VPC
       SecurityGroupIngress:
-
       #
-      # Public API Whitelist Enabled Rules
+      # Public API Whitelist Disabled Rules
       #
       -
         Description: "Allow all traffic to the master instance."
@@ -588,9 +587,8 @@ Resources:
       GroupDescription: 8y5ck-internal-api
       VpcId: !Ref VPC
       SecurityGroupIngress:
-
       #
-      # Private API Whitelist Enabled Rules
+      # Private API Whitelist Disabled Rules
       #
       -
         Description: "Allow all traffic to the master instance from A class network."

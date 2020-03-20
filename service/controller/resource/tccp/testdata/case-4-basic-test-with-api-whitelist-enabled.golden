@@ -510,7 +510,6 @@ Resources:
       GroupDescription: 8y5ck-master
       VpcId: !Ref VPC
       SecurityGroupIngress:
-
       #
       # Public API Whitelist Enabled Rules
       #
@@ -556,10 +555,6 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: !Join [ "/", [ !Ref NATEIPEuCentral1c, "32" ] ]
-
-      #
-      # Public API Whitelist Disabled Rules
-      #
 
       -
         Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
@@ -628,7 +623,6 @@ Resources:
       GroupDescription: 8y5ck-internal-api
       VpcId: !Ref VPC
       SecurityGroupIngress:
-
       #
       # Private API Whitelist Enabled Rules
       #
@@ -643,7 +637,7 @@ Resources:
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $v.TenantClusterVPCCIDR
+        CidrIp: 10.0.0.0/24
       -
         Description: "Custom Private API Whitelist CIDR."
         IpProtocol: tcp
@@ -656,10 +650,6 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: 172.20.20.20
-
-      #
-      # Private API Whitelist Disabled Rules
-      #
 
       Tags:
         - Key: Name

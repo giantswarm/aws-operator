@@ -10,10 +10,10 @@ const TemplateMainSecurityGroups = `
       VpcId: !Ref VPC
       SecurityGroupIngress:
 
+      {{- if $v.APIWhitelist.Public.Enabled }}
       #
       # Public API Whitelist Enabled Rules
       #
-      {{- if $v.APIWhitelist.Public.Enabled }}
       -
         Description: "Allow traffic from Control Plane CIDR."
         IpProtocol: tcp
@@ -54,10 +54,10 @@ const TemplateMainSecurityGroups = `
         CidrIp: !Join [ "/", [ !Ref {{ .NATEIPName }}, "32" ] ]
       {{- end }}
 
+      {{- else }}
       #
       # Public API Whitelist Disabled Rules
       #
-      {{- else }}
       -
         Description: "Allow all traffic to the master instance."
         IpProtocol: tcp
@@ -134,10 +134,10 @@ const TemplateMainSecurityGroups = `
       VpcId: !Ref VPC
       SecurityGroupIngress:
 
+      {{- if $v.APIWhitelist.Private.Enabled }}
       #
       # Private API Whitelist Enabled Rules
       #
-      {{- if $v.APIWhitelist.Private.Enabled }}
       -
         Description: "Allow traffic from Control Plane CIDR."
         IpProtocol: tcp
@@ -149,7 +149,7 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: $v.TenantClusterVPCCIDR
+        CidrIp: {{ $v.TenantClusterVPCCIDR }}
 
       {{- range $subnet := $v.APIWhitelist.Private.SubnetList }}
       -
@@ -160,10 +160,10 @@ const TemplateMainSecurityGroups = `
         CidrIp: {{ $subnet }}
       {{- end }}
 
+      {{- else }}
       #
       # Private API Whitelist Disabled Rules
       #
-      {{- else }}
       -
         Description: "Allow all traffic to the master instance from A class network."
         IpProtocol: tcp
