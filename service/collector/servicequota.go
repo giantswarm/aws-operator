@@ -64,9 +64,10 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 	}
 
 	v := &ServiceQuota{
-		//Default quotas are changed by request to AWS support and they are considered
-		//quite static information, then 60 minutes for the cache expiration is a coherent value.
-		awsAPIcache: cache.NewFloat64Cache(time.Minute * 720), //2 times per day
+		// Default quotas are changed by request to AWS support and they are
+		// considered quite static information, then 12 hours for the cache
+		// expiration is a reasonable value.
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 720),
 		helper:      config.Helper,
 		logger:      config.Logger,
 
@@ -116,8 +117,8 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		return microerror.Mask(err)
 	}
 
-	//natQuotaValue reflects the value of number of NAT Gateways can be created by operator
-	//in a specific VPC for each availability zone
+	// natQuotaValue reflects the value of number of NAT Gateways that can be
+	// created by the operator in a specific VPC for each availability zone.
 	var natQuotaValue float64
 	if val, ok := v.awsAPIcache.Get(NATQuotaCode); ok {
 		natQuotaValue = val
