@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -208,6 +209,8 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
