@@ -73,9 +73,10 @@ func NewNAT(config NATConfig) (*NAT, error) {
 		// pool). As clusters are not created nor changed so often, and the process
 		// can take around 20 minutes, 30 minutes for the cache expiration is a
 		// reasonable value.
-		awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
-		helper:      config.Helper,
-		logger:      config.Logger,
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 5),
+		//awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
+		helper: config.Helper,
+		logger: config.Logger,
 
 		installationName: config.InstallationName,
 	}
