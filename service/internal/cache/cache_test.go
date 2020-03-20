@@ -37,18 +37,3 @@ func Test_floatCache_Set(t *testing.T) {
 		}
 	}
 }
-
-func Test_floatCache_Expire(t *testing.T) {
-	c := NewFloat64Cache(time.Second * 1)
-
-	key := "pi"
-	pi := 3.14
-	c.Set(key, pi)
-
-	time.Sleep(time.Second * 1)
-
-	value, _ := c.Get(key)
-	if value == pi {
-		t.Fatalf("cache value must expire")
-	}
-}
