@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -12,11 +13,15 @@ import (
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cache"
 )
 
 const (
-	labelVPC = "vpc"
-	labelAZ  = "availability_zone"
+	// awsNATlocker is used as temporal lock to decide if AWS NAT API request
+	// should be done or not.
+	awsNATlocker = "__awsNATlocker__"
+	labelVPC     = "vpc"
+	labelAZ      = "availability_zone"
 )
 
 const (
@@ -44,8 +49,9 @@ type NATConfig struct {
 }
 
 type NAT struct {
-	helper *helper
-	logger micrologger.Logger
+	awsAPIcache *cache.Float64Cache
+	helper      *helper
+	logger      micrologger.Logger
 
 	installationName string
 }
@@ -63,8 +69,13 @@ func NewNAT(config NATConfig) (*NAT, error) {
 	}
 
 	v := &NAT{
-		helper: config.Helper,
-		logger: config.Logger,
+		// AWS operator creates at this moment one NAT for each private subnet (node
+		// pool). As clusters are not created nor changed so often, and the process
+		// can take around 20 minutes, 30 minutes for the cache expiration is a
+		// reasonable value.
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
+		helper:      config.Helper,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 	}
@@ -107,6 +118,11 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+	if _, ok := v.awsAPIcache.Get(awsNATlocker); ok {
+		return nil
+	}
+	v.awsAPIcache.Set(awsNATlocker, 1)
+
 	accountID, err := v.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)

@@ -1,11 +1,14 @@
 package collector
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/service/servicequotas"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/internal/cache"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -41,8 +44,9 @@ type ServiceQuotaConfig struct {
 }
 
 type ServiceQuota struct {
-	helper *helper
-	logger micrologger.Logger
+	awsAPIcache *cache.Float64Cache
+	helper      *helper
+	logger      micrologger.Logger
 
 	installationName string
 }
@@ -60,8 +64,12 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 	}
 
 	v := &ServiceQuota{
-		helper: config.Helper,
-		logger: config.Logger,
+		// Default quotas are changed by request to AWS support and they are
+		// considered quite static information, then 12 hours for the cache
+		// expiration is a reasonable value.
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 720),
+		helper:      config.Helper,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 	}
@@ -109,9 +117,17 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		return microerror.Mask(err)
 	}
 
-	natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
-	if err != nil {
-		return microerror.Mask(err)
+	// natQuotaValue reflects the value of number of NAT Gateways that can be
+	// created by the operator in a specific VPC for each availability zone.
+	var natQuotaValue float64
+	if val, ok := v.awsAPIcache.Get(NATQuotaCode); ok {
+		natQuotaValue = val
+	} else {
+		natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		v.awsAPIcache.Set(NATQuotaCode, natQuotaValue)
 	}
 
 	ch <- prometheus.MustNewConstMetric(
