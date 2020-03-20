@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -219,6 +221,31 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpSecurityGroupsResource resource.Interface
+	{
+		c := tccpsecuritygroups.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetsResource resource.Interface
+	{
+		c := tccpsubnets.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetsResource, err = tccpsubnets.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
@@ -281,6 +308,8 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		awsClientResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
+		tccpSecurityGroupsResource,
+		tccpSubnetsResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
 		cpVPCResource,

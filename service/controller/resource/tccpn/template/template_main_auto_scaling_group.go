@@ -6,7 +6,7 @@ const TemplateMainAutoScalingGroup = `
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref {{ .AutoScalingGroup.Subnet }}
+        - {{ .AutoScalingGroup.SubnetID }}
       AvailabilityZones:
         - {{ .AutoScalingGroup.AvailabilityZone }}
       DesiredCapacity: 1

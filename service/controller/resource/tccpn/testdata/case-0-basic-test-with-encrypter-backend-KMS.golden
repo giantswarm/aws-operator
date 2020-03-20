@@ -10,7 +10,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubnetEuCentral1b
+        - 
       AvailabilityZones:
         - eu-central-1b
       DesiredCapacity: 1
@@ -148,7 +148,7 @@ Resources:
       InstanceType: m5.xlarge
       InstanceMonitoring: true
       SecurityGroups:
-      - !Ref MasterSecurityGroup
+      -  master-security-group-id
       UserData:
         Fn::Base64: |
           {

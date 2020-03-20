@@ -30,7 +30,7 @@ const TemplateMainLaunchConfiguration = `
       InstanceType: {{ .LaunchConfiguration.Instance.Type }}
       InstanceMonitoring: {{ .LaunchConfiguration.Instance.Monitoring }}
       SecurityGroups:
-      - !Ref MasterSecurityGroup
+      -  {{ .LaunchConfiguration.MasterSecurityGroupID }}
       UserData:
         Fn::Base64: |
           {
