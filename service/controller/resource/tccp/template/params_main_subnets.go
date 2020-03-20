@@ -1,9 +1,8 @@
 package template
 
 type ParamsMainSubnets struct {
-	AWSCNISubnets  []ParamsMainSubnetsSubnet
-	PublicSubnets  []ParamsMainSubnetsSubnet
-	PrivateSubnets []ParamsMainSubnetsSubnet
+	AWSCNISubnets []ParamsMainSubnetsSubnet
+	PublicSubnets []ParamsMainSubnetsSubnet
 }
 
 type ParamsMainSubnetsSubnet struct {

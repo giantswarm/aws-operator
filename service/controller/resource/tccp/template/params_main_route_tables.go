@@ -4,9 +4,8 @@ type ParamsMainRouteTables struct {
 	ClusterID       string
 	HostClusterCIDR string
 
-	AWSCNIRouteTableNames  []ParamsMainRouteTablesRouteTableName
-	PrivateRouteTableNames []ParamsMainRouteTablesRouteTableName
-	PublicRouteTableNames  []ParamsMainRouteTablesRouteTableName
+	AWSCNIRouteTableNames []ParamsMainRouteTablesRouteTableName
+	PublicRouteTableNames []ParamsMainRouteTablesRouteTableName
 }
 
 type ParamsMainRouteTablesRouteTableName struct {

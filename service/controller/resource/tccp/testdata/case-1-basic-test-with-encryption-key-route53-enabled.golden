@@ -602,129 +602,6 @@ Resources:
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: public
-  PrivateRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId:
-        Ref: VPCPeeringConnection
-  MasterSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-master
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        Description: Allow all traffic to the master instance.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 0.0.0.0/0
-      -
-        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
-        IpProtocol: tcp
-        FromPort: 4194
-        ToPort: 4194
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
-        IpProtocol: tcp
-        FromPort: 10250
-        ToPort: 10250
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
-        IpProtocol: tcp
-        FromPort: 10300
-        ToPort: 10300
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
-        IpProtocol: tcp
-        FromPort: 10301
-        ToPort: 10301
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Only allow ssh traffic from the control plane.
-        IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: 10.1.0.0/16
-      Tags:
-        - Key: Name
-          Value: 8y5ck-master
-  EtcdELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-etcd-elb
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 0.0.0.0/0
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-etcd-elb
-  APIInternalELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-internal-api
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-      
-      -
-        Description: Allow all traffic to the master instance from A class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 10.0.0.0/8
-      
-      -
-        Description: Allow all traffic to the master instance from B class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 172.16.0.0/12
-      
-      -
-        Description: Allow all traffic to the master instance from C class network.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 192.168.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-internal-api
   AWSCNISecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -753,34 +630,6 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref AWSCNISecurityGroup
-  MasterAllowCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref MasterSecurityGroup
-  MasterAllowPodsCNIIngressRule:
-      Type: AWS::EC2::SecurityGroupIngress
-      DependsOn: MasterSecurityGroup
-      Properties:
-        Description: Allow traffic from pod to master.
-        GroupId: !Ref MasterSecurityGroup
-        IpProtocol: -1
-        FromPort: -1
-        ToPort: -1
-        SourceSecurityGroupId: !Ref AWSCNISecurityGroup
-  MasterAllowEtcdIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: "tcp"
-      FromPort: 2379
-      ToPort: 2379
-      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
@@ -900,25 +749,6 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTableEuCentral1c
       SubnetId: !Ref PublicSubnetEuCentral1c
-  PrivateSubnetEuCentral1b:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1b
-      CidrBlock: 10.100.3.64/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1b
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
-      VpcId: !Ref VPC
-  PrivateSubnetRouteTableAssociationEuCentral1b:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      SubnetId: !Ref PrivateSubnetEuCentral1b
   
   VPC:
     Type: AWS::EC2::VPC

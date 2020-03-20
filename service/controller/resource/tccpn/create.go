@@ -3,6 +3,7 @@ package tccpn
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"sort"
 	"strings"
 
@@ -43,6 +44,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
 			return nil
 		}
 
@@ -310,19 +318,6 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 		return nil, microerror.Mask(err)
 	}
 
-	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
-			continue
-		}
-		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone:    az.Name,
-			ResourceName:        key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
-		}
-		publicRouteTableNames = append(publicRouteTableNames, rtName)
-	}
-
 	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
@@ -343,7 +338,6 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 			ClusterID:              key.ClusterID(&cr),
 			HostClusterCIDR:        cc.Status.ControlPlane.VPC.CIDR,
 			PrivateRouteTableNames: privateRouteTableNames,
-			PublicRouteTableNames:  publicRouteTableNames,
 			VPCID:                  cc.Status.TenantCluster.TCCP.VPC.ID,
 			PeeringConnectionID:    cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
 		}
@@ -375,16 +369,25 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		return nil, microerror.Mask(err)
 	}
 
+	internalAPIRules, err := getKubernetesPrivateAPIRules(cfg)
+
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var securityGroups *template.ParamsMainSecurityGroups
 	{
 		securityGroups = &template.ParamsMainSecurityGroups{
-			APIWhitelistEnabled:        cfg.APIWhitelist.Public.Enabled,
-			PrivateAPIWhitelistEnabled: cfg.APIWhitelist.Private.Enabled,
-			MasterSecurityGroupName:    key.SecurityGroupName(&cfg.CustomObject, "master"),
-			MasterSecurityGroupRules:   masterRules,
-			EtcdELBSecurityGroupName:   key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
-			EtcdELBSecurityGroupRules:  getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
-			VPCID:                      cc.Status.TenantCluster.TCCP.VPC.ID,
+			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
+			APIInternalELBSecurityGroupRules: internalAPIRules,
+			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
+			AWSCNISecurityGroupID:            idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "aws-cni")),
+			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
+			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
+			MasterSecurityGroupRules:         masterRules,
+			EtcdELBSecurityGroupName:         key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
+			EtcdELBSecurityGroupRules:        getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
+			VPCID:                            cc.Status.TenantCluster.TCCP.VPC.ID,
 		}
 	}
 
@@ -401,28 +404,6 @@ func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	sort.Slice(zones, func(i, j int) bool {
 		return zones[i].Name < zones[j].Name
 	})
-
-	var publicSubnets []template.Subnet
-	for _, az := range zones {
-		if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
-			continue
-		}
-
-		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
-		snet := template.Subnet{
-			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Public.CIDR.String(),
-			Name:                snetName,
-			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: template.RouteTableAssociation{
-				Name:           key.SanitizeCFResourceName(key.PublicSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
-				SubnetName:     snetName,
-			},
-			VPCID: cc.Status.TenantCluster.TCCP.VPC.ID,
-		}
-		publicSubnets = append(publicSubnets, snet)
-	}
 
 	var privateSubnets []template.Subnet
 	for _, az := range zones {
@@ -449,7 +430,6 @@ func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	var subnets *template.ParamsMainSubnets
 	{
 		subnets = &template.ParamsMainSubnets{
-			PublicSubnets:  publicSubnets,
 			PrivateSubnets: privateSubnets,
 		}
 	}
@@ -506,6 +486,67 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 	}
 
 	return params, nil
+}
+
+func getKubernetesPrivateAPIRules(cfg securityConfig) ([]template.SecurityGroupRule, error) {
+	// When public API whitelisting is enabled, add separate security group rule per each subnet.
+	if cfg.APIWhitelist.Private.Enabled {
+		// Allow control-plane CIDR and tenant cluster CIDR.
+		rules := []template.SecurityGroupRule{
+			{
+				Description: "Allow traffic from control plane CIDR.",
+				Port:        key.KubernetesSecurePort,
+				Protocol:    tcpProtocol,
+				SourceCIDR:  cfg.ControlPlaneVPCCidr,
+			},
+			{
+				Description: "Allow traffic from tenant cluster CIDR.",
+				Port:        key.KubernetesSecurePort,
+				Protocol:    tcpProtocol,
+				SourceCIDR:  cfg.ProviderCIDR,
+			},
+		}
+
+		// Whitelist all configured subnets.
+		privateWhitelistSubnets := strings.Split(cfg.APIWhitelist.Private.SubnetList, ",")
+		for _, subnet := range privateWhitelistSubnets {
+			if subnet != "" {
+				subnetRule := template.SecurityGroupRule{
+					Description: "Custom Whitelist CIDR.",
+					Port:        key.KubernetesSecurePort,
+					Protocol:    tcpProtocol,
+					SourceCIDR:  subnet,
+				}
+				rules = append(rules, subnetRule)
+			}
+		}
+
+		return rules, nil
+	} else {
+		// When private API whitelisting is disabled, allow all private subnets traffic.
+		allowAllRule := []template.SecurityGroupRule{
+			{
+				Description: "Allow all traffic to the master instance from A class network.",
+				Port:        key.KubernetesSecurePort,
+				Protocol:    tcpProtocol,
+				SourceCIDR:  "10.0.0.0/8",
+			},
+			{
+				Description: "Allow all traffic to the master instance from B class network.",
+				Port:        key.KubernetesSecurePort,
+				Protocol:    tcpProtocol,
+				SourceCIDR:  "172.16.0.0/12",
+			},
+			{
+				Description: "Allow all traffic to the master instance from C class network.",
+				Port:        key.KubernetesSecurePort,
+				Protocol:    tcpProtocol,
+				SourceCIDR:  "192.168.0.0/16",
+			},
+		}
+
+		return allowAllRule, nil
+	}
 }
 
 func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
@@ -650,4 +691,14 @@ func getHostClusterNATGatewayRules(cfg securityConfig) ([]template.SecurityGroup
 	}
 
 	return gatewayRules, nil
+}
+
+func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
+	for _, g := range groups {
+		if awstags.ValueForKey(g.Tags, "Name") == name {
+			return *g.GroupId
+		}
+	}
+
+	return ""
 }

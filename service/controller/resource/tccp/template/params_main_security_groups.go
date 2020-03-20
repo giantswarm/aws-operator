@@ -1,15 +1,13 @@
 package template
 
 type ParamsMainSecurityGroups struct {
-	APIInternalELBSecurityGroupName  string
-	APIInternalELBSecurityGroupRules []SecurityGroupRule
-	APIWhitelistEnabled              bool
-	AWSCNISecurityGroupName          string
-	PrivateAPIWhitelistEnabled       bool
-	MasterSecurityGroupName          string
-	MasterSecurityGroupRules         []SecurityGroupRule
-	EtcdELBSecurityGroupName         string
-	EtcdELBSecurityGroupRules        []SecurityGroupRule
+	APIWhitelistEnabled        bool
+	AWSCNISecurityGroupName    string
+	PrivateAPIWhitelistEnabled bool
+	MasterSecurityGroupName    string
+	MasterSecurityGroupRules   []SecurityGroupRule
+	EtcdELBSecurityGroupName   string
+	EtcdELBSecurityGroupRules  []SecurityGroupRule
 }
 
 type SecurityGroupRule struct {

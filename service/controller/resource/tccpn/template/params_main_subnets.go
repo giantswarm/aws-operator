@@ -16,6 +16,5 @@ type RouteTableAssociation struct {
 }
 
 type ParamsMainSubnets struct {
-	PublicSubnets  []Subnet
 	PrivateSubnets []Subnet
 }

@@ -605,29 +605,14 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 		publicRouteTableNames = append(publicRouteTableNames, rtName)
 	}
 
-	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
-		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone:    az.Name,
-			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-			VPCPeeringRouteName: key.SanitizeCFResourceName(key.VPCPeeringRouteName(az.Name)),
-		}
-		privateRouteTableNames = append(privateRouteTableNames, rtName)
-	}
-
 	var routeTables *template.ParamsMainRouteTables
 	{
 		routeTables = &template.ParamsMainRouteTables{
 			ClusterID:       key.ClusterID(&cr),
 			HostClusterCIDR: cc.Status.ControlPlane.VPC.CIDR,
 
-			AWSCNIRouteTableNames:  awsCNIRouteTableNames,
-			PrivateRouteTableNames: privateRouteTableNames,
-			PublicRouteTableNames:  publicRouteTableNames,
+			AWSCNIRouteTableNames: awsCNIRouteTableNames,
+			PublicRouteTableNames: publicRouteTableNames,
 		}
 	}
 
@@ -655,23 +640,16 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 		return nil, microerror.Mask(err)
 	}
 
-	internalAPIRules, err := getKubernetesPrivateAPIRules(cfg, cfg.ControlPlaneVPCCidr)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var securityGroups *template.ParamsMainSecurityGroups
 	{
 		securityGroups = &template.ParamsMainSecurityGroups{
-			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
-			APIInternalELBSecurityGroupRules: internalAPIRules,
-			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
-			AWSCNISecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "aws-cni"),
-			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
-			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
-			MasterSecurityGroupRules:         masterRules,
-			EtcdELBSecurityGroupName:         key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
-			EtcdELBSecurityGroupRules:        getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
+			APIWhitelistEnabled:        cfg.APIWhitelist.Public.Enabled,
+			AWSCNISecurityGroupName:    key.SecurityGroupName(&cfg.CustomObject, "aws-cni"),
+			PrivateAPIWhitelistEnabled: cfg.APIWhitelist.Private.Enabled,
+			MasterSecurityGroupName:    key.SecurityGroupName(&cfg.CustomObject, "master"),
+			MasterSecurityGroupRules:   masterRules,
+			EtcdELBSecurityGroupName:   key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
+			EtcdELBSecurityGroupRules:  getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
 		}
 	}
 
@@ -723,33 +701,11 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		publicSubnets = append(publicSubnets, snet)
 	}
 
-	var privateSubnets []template.ParamsMainSubnetsSubnet
-	for _, az := range zones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
-		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
-		snet := template.ParamsMainSubnetsSubnet{
-			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Private.CIDR.String(),
-			Name:                snetName,
-			MapPublicIPOnLaunch: false,
-			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
-				Name:           key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-				SubnetName:     snetName,
-			},
-		}
-		privateSubnets = append(privateSubnets, snet)
-	}
-
 	var subnets *template.ParamsMainSubnets
 	{
 		subnets = &template.ParamsMainSubnets{
-			AWSCNISubnets:  awsCNISubnets,
-			PublicSubnets:  publicSubnets,
-			PrivateSubnets: privateSubnets,
+			AWSCNISubnets: awsCNISubnets,
+			PublicSubnets: publicSubnets,
 		}
 	}
 

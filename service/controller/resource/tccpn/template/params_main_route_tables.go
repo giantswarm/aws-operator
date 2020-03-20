@@ -4,7 +4,6 @@ type ParamsMainRouteTables struct {
 	ClusterID              string
 	HostClusterCIDR        string
 	PrivateRouteTableNames []ParamsMainRouteTablesRouteTableName
-	PublicRouteTableNames  []ParamsMainRouteTablesRouteTableName
 	VPCID                  string
 	PeeringConnectionID    string
 }

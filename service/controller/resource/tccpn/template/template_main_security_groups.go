@@ -31,6 +31,23 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value:  {{ $v.MasterSecurityGroupName }}
+  APIInternalELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: {{ $v.APIInternalELBSecurityGroupName }}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      {{ range $v.APIInternalELBSecurityGroupRules }}
+      -
+        Description: {{ .Description }}
+        IpProtocol: {{ .Protocol }}
+        FromPort: {{ .Port }}
+        ToPort: {{ .Port }}
+        CidrIp: {{ .SourceCIDR }}
+      {{ end }}
+      Tags:
+        - Key: Name
+          Value: {{ $v.APIInternalELBSecurityGroupName }}
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -47,7 +64,7 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.EtcdELBSecurityGroupName }}
-  MasterAllowCalicoIngressRule:
+  MasterAllowAllIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
@@ -56,6 +73,16 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowPodsCNIIngressRule:
+      Type: AWS::EC2::SecurityGroupIngress
+      DependsOn: MasterSecurityGroup
+      Properties:
+        Description: Allow traffic from pod to master.
+        GroupId: !Ref MasterSecurityGroup
+        IpProtocol: -1
+        FromPort: -1
+        ToPort: -1
+        SourceSecurityGroupId: {{ $v.AWSCNISecurityGroupID }}
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup

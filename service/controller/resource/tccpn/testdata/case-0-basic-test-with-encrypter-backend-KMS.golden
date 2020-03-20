@@ -195,17 +195,6 @@ Resources:
             }
           }
   
-  PublicRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: vpc-id
-      Tags:
-      - Key: Name
-        Value: 8y5ck-public
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: public
   PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -275,6 +264,37 @@ Resources:
       Tags:
         - Key: Name
           Value:  8y5ck-master
+  APIInternalELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 8y5ck-internal-api
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      
+      -
+        Description: Allow all traffic to the master instance from A class network.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 10.0.0.0/8
+      
+      -
+        Description: Allow all traffic to the master instance from B class network.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 172.16.0.0/12
+      
+      -
+        Description: Allow all traffic to the master instance from C class network.
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 192.168.0.0/16
+      
+      Tags:
+        - Key: Name
+          Value: 8y5ck-internal-api
   EtcdELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -297,7 +317,7 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
-  MasterAllowCalicoIngressRule:
+  MasterAllowAllIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
     Properties:
@@ -306,6 +326,16 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowPodsCNIIngressRule:
+      Type: AWS::EC2::SecurityGroupIngress
+      DependsOn: MasterSecurityGroup
+      Properties:
+        Description: Allow traffic from pod to master.
+        GroupId: !Ref MasterSecurityGroup
+        IpProtocol: -1
+        FromPort: -1
+        ToPort: -1
+        SourceSecurityGroupId: awscni-security-group-id
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -316,25 +346,6 @@ Resources:
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
   
-  PublicSubnetEuCentral1b:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1b
-      CidrBlock: 10.100.3.96/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PublicSubnetEuCentral1b
-      - Key: giantswarm.io/subnet-type
-        Value: public
-      - Key: kubernetes.io/role/elb
-        Value: 1
-      VpcId: vpc-id
-  PublicSubnetRouteTableAssociationEuCentral1b:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
-      SubnetId: !Ref PublicSubnetEuCentral1b
   PrivateSubnetEuCentral1b:
     Type: AWS::EC2::Subnet
     Properties:
