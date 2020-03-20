@@ -1,8 +1,8 @@
 package collector
 
 import (
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	//awsNATlocker is used as temporal lock to decide if AWS NAT API request should be done or not
+	// awsNATlocker is used as temporal lock to decide if AWS NAT API request
+	// should be done or not.
 	awsNATlocker = "__awsNATlocker__"
 	labelVPC     = "vpc"
 	labelAZ      = "availability_zone"
@@ -68,9 +69,10 @@ func NewNAT(config NATConfig) (*NAT, error) {
 	}
 
 	v := &NAT{
-		//AWS operator creates at this moment one NAT for each private subnet (node pool).
-		//As clusters are not created or changed so often, and the process can take around 20 minutes,
-		//30 minutes for the cache expiration is a coherent value.
+		// AWS operator creates at this moment one NAT for each private subnet (node
+		// pool). As clusters are not created nor changed so often, and the process
+		// can take around 20 minutes, 30 minutes for the cache expiration is a
+		// reasonable value.
 		awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
 		helper:      config.Helper,
 		logger:      config.Logger,
