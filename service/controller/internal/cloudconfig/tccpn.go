@@ -14,7 +14,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -165,13 +164,7 @@ type MasterExtension struct {
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	ctx := context.TODO()
 
-	var storageClass string
-	_, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		storageClass = cloudconfig.InstanceStorageClassContent
-	} else {
-		storageClass = cloudconfig.InstanceStorageClassEncryptedContent
-	}
+	storageClass := cloudconfig.InstanceStorageClassEncryptedContent
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{

@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"bytes"
 	"context"
+	"flag"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -29,6 +30,9 @@ import (
 //
 //  go test ./service/controller/internal/cloudconfig -run Test_Controller_CloudConfig_TCNP_Template_Render -update
 //
+
+var update = flag.Bool("update", false, "update .golden CF template file")
+
 func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name   string
