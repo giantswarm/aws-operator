@@ -26,6 +26,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
@@ -90,6 +91,18 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var accountIDResource resource.Interface
+	{
+		c := accountid.Config{
+			Logger: config.Logger,
+		}
+
+		accountIDResource, err = accountid.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -306,6 +319,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		accountIDResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
 		tccpSecurityGroupsResource,
