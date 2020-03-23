@@ -37,7 +37,7 @@ required = [
   name = "github.com/docker/distribution"
 
 [[override]]
-  branch = "fix-legacy-codegen"
+  branch = "legacy-1-15"
   name = "github.com/giantswarm/apiextensions"
 
 [[constraint]]
@@ -85,7 +85,7 @@ required = [
   name = "github.com/giantswarm/ipam"
 
 [[constraint]]
-  branch = "increase-conntrack"
+  branch = "master"
   name = "github.com/giantswarm/k8scloudconfig"
 
 [[constraint]]
