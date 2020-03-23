@@ -309,9 +309,9 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		tccpnOutputsResource,
 		snapshotIDResource,
 		tccpSecurityGroupsResource,
-		tccpSubnetsResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
+		tccpSubnetsResource,
 		cpVPCResource,
 		regionResource,
 

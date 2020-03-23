@@ -44,6 +44,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if len(cc.Status.TenantCluster.TCCP.Subnets) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "subnet information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
+
+		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
+
 		// When the TCCP cloud formation stack is transitioning, it means it is
 		// updating in most cases. We do not want to interfere with the current
 		// process and stop here. We will then check on the next reconciliation loop
