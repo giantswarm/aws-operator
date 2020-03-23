@@ -1,6 +1,7 @@
 package tccpnencryption
 
 import (
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -8,10 +9,11 @@ import (
 )
 
 const (
-	name = "tccpencryption"
+	name = "tccpnencryption"
 )
 
 type Config struct {
+	G8sClient versioned.Interface
 	Encrypter encrypter.Interface
 	Logger    micrologger.Logger
 }
@@ -24,11 +26,15 @@ type Config struct {
 //     cc.Status.TenantCluster.Encryption.Key
 //
 type Resource struct {
+	g8sClient versioned.Interface
 	encrypter encrypter.Interface
 	logger    micrologger.Logger
 }
 
 func New(config Config) (*Resource, error) {
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
 	if config.Encrypter == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}

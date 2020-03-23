@@ -2,6 +2,9 @@ package tccpnencryption
 
 import (
 	"context"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 
 	"github.com/giantswarm/backoff"
@@ -12,18 +15,29 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	err = r.encrypter.EnsureCreatedEncryptionKey(ctx, cr)
-	if err != nil {
-		return microerror.Mask(err)
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		cp, err := key.ToControlPlane(obj)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(cp.Namespace).Get(key.ClusterID(&cp), metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		cl = *m
 	}
 
 	// For some obscure reasons the encryption key is not immediately available
@@ -34,7 +48,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		var encryptionKey string
 
 		o := func() error {
-			encryptionKey, err = r.encrypter.EncryptionKey(ctx, cr)
+			encryptionKey, err = r.encrypter.EncryptionKey(ctx, cl)
 			if err != nil {
 				return microerror.Mask(err)
 			}
