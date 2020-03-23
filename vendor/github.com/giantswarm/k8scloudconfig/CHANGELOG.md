@@ -9,6 +9,12 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v6.0.0]
+
+### Changed
+
+- Extract images and versions out from k8scloudconfig and make them templatable by importer.
+
 ## [v5.2.0]
 
 ### Changed
@@ -511,6 +517,7 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v6.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_6_0_0
 [v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
 [v5.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_1
 [v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0

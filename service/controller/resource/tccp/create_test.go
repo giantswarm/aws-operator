@@ -38,6 +38,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		name           string
 		cr             infrastructurev1alpha2.AWSCluster
 		ctx            context.Context
+		apiWhitelist   ConfigAPIWhitelistSecurityGroup
 		route53Enabled bool
 		errorMatcher   func(error) bool
 	}{
@@ -69,6 +70,20 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			errorMatcher:   nil,
 			route53Enabled: false,
 		},
+		{
+			name: "case 4: basic test with api whitelist enabled",
+			cr:   unittest.DefaultCluster(),
+			ctx:  unittest.DefaultContext(),
+			apiWhitelist: ConfigAPIWhitelistSecurityGroup{
+				Enabled: true,
+				SubnetList: []string{
+					"172.10.10.10",
+					"172.20.20.20",
+				},
+			},
+			errorMatcher:   nil,
+			route53Enabled: false,
+		},
 	}
 
 	var err error
@@ -95,6 +110,16 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 					Detection: d,
 					Logger:    microloggertest.New(),
 
+					APIWhitelist: ConfigAPIWhitelist{
+						Private: ConfigAPIWhitelistSecurityGroup{
+							Enabled:    tc.apiWhitelist.Enabled,
+							SubnetList: tc.apiWhitelist.SubnetList,
+						},
+						Public: ConfigAPIWhitelistSecurityGroup{
+							Enabled:    tc.apiWhitelist.Enabled,
+							SubnetList: tc.apiWhitelist.SubnetList,
+						},
+					},
 					CIDRBlockAWSCNI: "172.17.0.1/16",
 					Route53Enabled:  tc.route53Enabled,
 				}
