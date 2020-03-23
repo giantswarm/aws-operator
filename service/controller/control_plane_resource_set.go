@@ -187,6 +187,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var tccpnEncryptionResource resource.Interface
 	{
 		c := tccpnencryption.Config{
+			G8sClient: config.G8sClient,
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 		}
