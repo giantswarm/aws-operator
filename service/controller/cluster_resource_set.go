@@ -423,10 +423,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			EncrypterRoleManager: encrypterRoleManager,
 			Logger:               config.Logger,
 
-			APIWhitelist: tccp.APIWhitelist{
-				Private: config.APIWhitelist.Private,
-				Public:  config.APIWhitelist.Public,
-			},
+			APIWhitelist:       config.APIWhitelist,
 			CIDRBlockAWSCNI:    fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 			Detection:          tccpChangeDetection,
 			InstallationName:   config.InstallationName,

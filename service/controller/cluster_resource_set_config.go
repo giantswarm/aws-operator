@@ -23,7 +23,7 @@ type clusterResourceSetConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               tccp.APIWhitelist
+	APIWhitelist               tccp.ConfigAPIWhitelist
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
