@@ -813,6 +813,10 @@ func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1al
 		return nil
 	}
 
+	// ignore snapshotting now
+	// TODO ENABLE IT AGAIN
+	return nil
+
 	r.logger.LogCtx(ctx, "level", "debug", "message", "creating etcd volume snapshot")
 
 	var ebsService ebs.Interface
