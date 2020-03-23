@@ -17,10 +17,6 @@ const TemplateMainAutoScalingGroup = `
       MinSize: {{ .AutoScalingGroup.MinSize }}
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
       LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
-      LoadBalancerNames:
-      - {{ .AutoScalingGroup.LoadBalancers.ApiInternalName }}
-      - {{ .AutoScalingGroup.LoadBalancers.ApiName }}
-      - {{ .AutoScalingGroup.LoadBalancers.EtcdName }}
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle

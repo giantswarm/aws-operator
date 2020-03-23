@@ -233,7 +233,12 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSContr
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
 		ClusterID:        key.ClusterID(&cr),
-		SubnetID:         idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
+		LoadBalancers: template.ParamsMainAutoScalingGroupLoadBalancers{
+			ApiInternalName: key.InternalELBNameAPI(&cr),
+			ApiName:         key.ELBNameAPI(&cr),
+			EtcdName:        key.ELBNameEtcd(&cr),
+		},
+		SubnetID: idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
 
 	fmt.Printf("subnets: %#v\n", cc.Status.TenantCluster.TCCP.Subnets)

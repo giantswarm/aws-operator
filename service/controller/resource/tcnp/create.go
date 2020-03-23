@@ -275,12 +275,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
-		DesiredCapacity: minDesiredNodes,
-		LoadBalancers: template.ParamsMainAutoScalingGroupLoadBalancers{
-			ApiInternalName: key.InternalELBNameAPI(&cr),
-			ApiName:         key.ELBNameAPI(&cr),
-			EtcdName:        key.ELBNameEtcd(&cr),
-		},
+		DesiredCapacity:       minDesiredNodes,
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
