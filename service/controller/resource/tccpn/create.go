@@ -222,6 +222,9 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSContr
 		SubnetID:         idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
 
+	fmt.Printf("subnets: %#v\n", cc.Status.TenantCluster.TCCP.Subnets)
+	fmt.Printf("private subnet name %s\n", key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0])))
+	fmt.Printf("subnet id:%s\n", idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))))
 	return autoScalingGroup, nil
 }
 
