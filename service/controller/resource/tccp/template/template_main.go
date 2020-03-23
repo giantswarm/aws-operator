@@ -8,7 +8,6 @@ Outputs:
   {{ template "outputs" . }}
 Resources:
   {{ template "iam_policies" . }}
-  {{ template "instance" . }}
   {{ template "internet_gateway" . }}
   {{ template "load_balancers" . }}
   {{ template "nat_gateway" . }}
