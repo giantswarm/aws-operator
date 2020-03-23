@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 
@@ -183,6 +184,19 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpnEncryptionResource resource.Interface
+	{
+		c := tccpnencryption.Config{
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
+		}
+
+		tccpnEncryptionResource, err = tccpnencryption.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
@@ -321,6 +335,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		awsClientResource,
 		accountIDResource,
 		tccpnOutputsResource,
+		tccpnEncryptionResource,
 		snapshotIDResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
