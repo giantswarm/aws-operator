@@ -119,26 +119,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
-			err = r.stopMasterInstance(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.detachVolumes(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.snapshotEtcdVolume(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.terminateMasterInstance(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
