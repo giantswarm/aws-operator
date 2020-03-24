@@ -86,7 +86,15 @@ type ClusterKubernetesKubelet struct {
 }
 
 type ClusterKubernetesNetworkSetup struct {
-	Docker ClusterKubernetesNetworkSetupDocker `json:"docker" yaml:"docker"`
+	Docker    ClusterKubernetesNetworkSetupDocker    `json:"docker" yaml:"docker"`
+	KubeProxy ClusterKubernetesNetworkSetupKubeProxy `json:"kubeProxy" yaml:"kubeProxy"`
+}
+
+// ClusterKubernetesNetworkSetupKubeProxy describes values passed to the kube-proxy running in a tenant cluster.
+type ClusterKubernetesNetworkSetupKubeProxy struct {
+	// Maximum number of NAT connections to track per CPU core (0 to leave the limit as-is and ignore conntrack-min).
+	// Passed to kube-proxy as --conntrack-max-per-core.
+	ConntrackMaxPerCore int `json:"conntrackMaxPerCore" yaml:"conntrackMaxPerCore"`
 }
 
 type ClusterKubernetesNetworkSetupDocker struct {

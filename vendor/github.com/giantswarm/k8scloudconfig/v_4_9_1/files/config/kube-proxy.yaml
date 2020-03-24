@@ -5,4 +5,7 @@ kind: KubeProxyConfiguration
 mode: iptables
 resourceContainer: /kube-proxy
 clusterCIDR: {{.Cluster.Calico.Subnet}}/{{.Cluster.Calico.CIDR}}
+{{- if .Cluster.Kubernetes.NetworkSetup.KubeProxy.ConntrackMaxPerCore }}
+conntrackMaxPerCore: {{ .Cluster.Kubernetes.NetworkSetup.KubeProxy.ConntrackMaxPerCore }}
+{{- end }}
 metricsBindAddress: 0.0.0.0:10249
