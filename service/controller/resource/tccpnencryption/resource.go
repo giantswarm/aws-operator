@@ -43,6 +43,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		g8sClient: config.G8sClient,
 		encrypter: config.Encrypter,
 		logger:    config.Logger,
 	}
