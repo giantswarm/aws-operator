@@ -33,9 +33,10 @@ Resources:
           LifecycleHookName: ControlPlaneNode
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
 
-      # 10 seconds after a new node comes into service, the ASG checks the new
+      # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
-      HealthCheckGracePeriod: 10
+      HealthCheckGracePeriod: 60
+      HealthCheckType: "ELB"
 
       MetricsCollection:
         - Granularity: "1Minute"
@@ -182,7 +183,7 @@ Resources:
       IamInstanceProfile: !Ref ControlPlaneNodesInstanceProfile
       ImageId: ami-038cea5071a5ee580
       InstanceType: m5.xlarge
-      InstanceMonitoring: true
+      InstanceMonitoring: false
       SecurityGroups:
       -  master-security-group-id
       UserData:

@@ -29,9 +29,10 @@ const TemplateMainAutoScalingGroup = `
           LifecycleHookName: ControlPlaneNode
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
 
-      # 10 seconds after a new node comes into service, the ASG checks the new
+      # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
-      HealthCheckGracePeriod: 10
+      HealthCheckGracePeriod: 60
+      HealthCheckType: "ELB"
 
       MetricsCollection:
         - Granularity: "1Minute"

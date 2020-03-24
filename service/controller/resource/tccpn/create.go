@@ -326,7 +326,7 @@ func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 		},
 		Instance: template.ParamsMainLaunchConfigurationInstance{
 			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
-			Monitoring: true,
+			Monitoring: false,
 			Type:       key.ControlPlaneInstanceType(cr),
 		},
 		MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
