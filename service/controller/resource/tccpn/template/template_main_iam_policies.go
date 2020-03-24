@@ -77,7 +77,7 @@ const TemplateMainIAMPolicies = `
             Action:
               - ec2:CreateTags
             Resource:
-              - arn:{{ $v.RegionARN }}:ec2:*:*:network-interface/*
+              - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:network-interface/*
   ControlPlaneNodesInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
