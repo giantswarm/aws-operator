@@ -25,15 +25,13 @@ type baseExtension struct {
 func (e *baseExtension) templateDataTCCPN() TemplateData {
 	awsRegion := key.Region(e.cluster)
 
-	eniAddress, gateway, subnetSize := calculateNetworkForENI(e.masterSubnet)
-
 	data := TemplateData{
 		AWSRegion:           awsRegion,
 		AWSConfigSpec:       e.awsConfigSpec,
 		IsChinaRegion:       key.IsChinaRegion(awsRegion),
-		MasterENIAddress:    eniAddress,
-		MasterENIGateway:    gateway,
-		MasterENISubnetSize: subnetSize,
+		MasterENIAddress:    key.ControlPlaneENIIpAddress(e.masterSubnet),
+		MasterENIGateway:    key.ControlPlaneENIGateway(e.masterSubnet),
+		MasterENISubnetSize: key.ControlPlaneENISubnetSize(e.masterSubnet),
 		MasterID:            e.masterID,
 		RegistryDomain:      e.registryDomain,
 	}
@@ -64,25 +62,4 @@ func (e *baseExtension) encrypt(ctx context.Context, data []byte) ([]byte, error
 	}
 
 	return encrypted, nil
-}
-
-func calculateNetworkForENI(ipNet net.IPNet) (string, string, int) {
-	// VPC subnet has reserved first 4 IPs so we need to use the fifth one (counting from zero it is index 4)
-	// https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	eniAddressIP := dupIP(ipNet.IP)
-	eniAddressIP[3] += 4
-
-	// gateway is always first available IP in the subnet
-	gatewayIP := dupIP(ipNet.IP)
-	gatewayIP[3] += 1
-
-	subnetSize, _ := ipNet.Mask.Size()
-
-	return eniAddressIP.String(), gatewayIP.String(), subnetSize
-}
-
-func dupIP(ip net.IP) net.IP {
-	dup := make(net.IP, len(ip))
-	copy(dup, ip)
-	return dup
 }

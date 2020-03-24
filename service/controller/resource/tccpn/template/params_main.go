@@ -4,6 +4,7 @@ package template
 // template.
 type ParamsMain struct {
 	AutoScalingGroup    *ParamsMainAutoScalingGroup
+	ENI                 *ParamsMainENI
 	EtcdVolume          *ParamsMainEtcdVolume
 	IAMPolicies         *ParamsMainIAMPolicies
 	LaunchConfiguration *ParamsMainLaunchConfiguration

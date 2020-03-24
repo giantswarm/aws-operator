@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	"net"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -234,10 +235,34 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSContr
 		SubnetID: idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
 
-	fmt.Printf("subnets: %#v\n", cc.Status.TenantCluster.TCCP.Subnets)
-	fmt.Printf("private subnet name %s\n", key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0])))
-	fmt.Printf("subnet id:%s\n", idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))))
 	return autoScalingGroup, nil
+}
+
+func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainENI, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var masterSubnets []net.IPNet
+	{
+		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+		for _, az := range zones {
+			if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
+				continue
+			}
+			masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
+		}
+	}
+
+	eni := &template.ParamsMainENI{
+		IpAddress:       key.ControlPlaneENIIpAddress(masterSubnets[0]),
+		Name:            key.ControlPlaneENIName(cr),
+		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
+		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
+	}
+
+	return eni, nil
 }
 
 func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
@@ -329,6 +354,10 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		eni, err := newENI(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		etcdVolume, err := newEtcdVolume(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -348,6 +377,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 
 		params = &template.ParamsMain{
 			AutoScalingGroup:    autoScalingGroup,
+			ENI:                 eni,
 			EtcdVolume:          etcdVolume,
 			IAMPolicies:         iamPolicies,
 			LaunchConfiguration: launchConfiguration,

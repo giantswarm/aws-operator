@@ -449,6 +449,17 @@ func DefaultControllerContext() controllercontext.Context {
 							},
 						},
 					},
+					Subnets: []*ec2.Subnet{
+						{
+							SubnetId: aws.String("private-subnet-id-1"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("PrivateSubnetEuCentral1a"),
+								},
+							},
+						},
+					},
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
 						ID:                  "vpc-id",
 						PeeringConnectionID: "peering-connection-id",

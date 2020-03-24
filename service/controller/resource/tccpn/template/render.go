@@ -10,6 +10,7 @@ func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
 		TemplateMainAutoScalingGroup,
+		TemplateMainENI,
 		TemplateMainEtcdVolume,
 		TemplateMainIAMPolicies,
 		TemplateMainLaunchConfiguration,
