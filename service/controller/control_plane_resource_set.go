@@ -338,6 +338,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		tccpnOutputsResource,
 		tccpnEncryptionResource,
 		snapshotIDResource,
+		tccpAZsResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
@@ -348,7 +349,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		s3ObjectResource,
-		tccpAZsResource,
 		tccpnResource,
 	}
 
