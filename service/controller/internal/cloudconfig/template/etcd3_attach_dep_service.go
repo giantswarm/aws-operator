@@ -7,7 +7,7 @@ Requires=network.target
 After=network.target
 
 [Service]
-Environment="IMAGE={{.RegistryDomain}}/giantswarm/aws-attach-etcd-dep:f6a1d8eb340032f9dc2519dd974797487125b1a7"
+Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:f6a1d8eb340032f9dc2519dd974797487125b1a7"
 Environment="NAME=%p.service"
 Type=oneshot
 RemainAfterExit=yes
@@ -18,11 +18,11 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       ${IMAGE} \
       --eni-device-index=1 \
       --eni-tag-key=Name \
-      --eni-tag-value={{.AWSConfigSpec.Cluster.ID}}-master{{.MasterID}}-etcd \
+      --eni-tag-value={{ .MasterENIName }} \
       --volume-device-name=/dev/xvdh \
       --volume-device-filesystem-type=ext4 \
       --volume-tag-key=Name \
-      --volume-tag-value={{.AWSConfigSpec.Cluster.ID}}-master{{.MasterID}}-etcd"
+      --volume-tag-value={{ .MasterEtcdVolumeName }}"
 [Install]
 WantedBy=multi-user.target
 `

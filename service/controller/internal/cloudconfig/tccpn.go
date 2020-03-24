@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"net"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
@@ -38,8 +39,16 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	return t, nil
 }
 
-func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCCPN) Render(ctx context.Context, g8sClient versioned.Interface, obj interface{}, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	cp, err := key.ToControlPlane(obj)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	cr, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cp.Namespace).Get(key.ClusterID(&cp), metav1.GetOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -51,17 +60,17 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 
 	var apiExtraArgs []string
 	{
-		if key.OIDCClientID(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cr)))
+		if key.OIDCClientID(*cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(*cr)))
 		}
-		if key.OIDCIssuerURL(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(cr)))
+		if key.OIDCIssuerURL(*cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(*cr)))
 		}
-		if key.OIDCUsernameClaim(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(cr)))
+		if key.OIDCUsernameClaim(*cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(*cr)))
 		}
-		if key.OIDCGroupsClaim(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(cr)))
+		if key.OIDCGroupsClaim(*cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(*cr)))
 		}
 
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
@@ -86,14 +95,14 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		{
 			zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
 			for _, az := range zones {
-				if az.Name != key.MasterAvailabilityZone(cr) {
+				if az.Name != key.MasterAvailabilityZone(*cr) {
 					continue
 				}
 				masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
 			}
 		}
 
-		g8sConfig := cmaClusterToG8sConfig(t.config, cr, labels)
+		g8sConfig := cmaClusterToG8sConfig(t.config, *cr, labels)
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
@@ -102,12 +111,11 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
 			baseExtension: baseExtension{
-				awsConfigSpec:  g8sConfig,
-				cluster:        cr,
+				cluster:        *cr,
+				controlPlane:   cp,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
 				masterSubnet:   masterSubnets[masterID],
-				masterID:       masterID,
 				registryDomain: t.config.RegistryDomain,
 			},
 			cc:               cc,
