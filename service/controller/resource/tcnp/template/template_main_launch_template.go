@@ -33,6 +33,7 @@ const TemplateMainLaunchTemplate = `
           Enabled: {{ .LaunchTemplate.Instance.Monitoring }}
         NetworkInterfaces:
           - AssociatePublicIpAddress: false
+            DeviceIndex: 0
         SecurityGroupIds:
           - !Ref GeneralSecurityGroup
         UserData:

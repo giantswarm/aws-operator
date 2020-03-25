@@ -178,6 +178,7 @@ Resources:
           Enabled: true
         NetworkInterfaces:
           - AssociatePublicIpAddress: false
+            DeviceIndex: 0
         SecurityGroupIds:
           - !Ref GeneralSecurityGroup
         UserData:
