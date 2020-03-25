@@ -275,12 +275,17 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
-		DesiredCapacity:       minDesiredNodes,
-		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
-		MaxSize:               key.MachineDeploymentScalingMax(cr),
-		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
-		MinSize:               key.MachineDeploymentScalingMin(cr),
-		Subnets:               subnets,
+		DesiredCapacity:                     minDesiredNodes,
+		MaxBatchSize:                        workerCountRatio(minDesiredNodes, 0.3),
+		MaxSize:                             key.MachineDeploymentScalingMax(cr),
+		MinInstancesInService:               workerCountRatio(minDesiredNodes, 0.7),
+		MinSize:                             key.MachineDeploymentScalingMin(cr),
+		Subnets:                             subnets,
+		OnDemandPercentageAboveBaseCapacity: 0,
+		//If spot instance then 0, else 100
+		OnDemandBaseCapacity:    0,
+		SpotAllocationStrategy:  "lowest-price",
+		LaunchTemplateOverrides: []template.LaunchTemplateOverride{},
 	}
 
 	return autoScalingGroup, nil
