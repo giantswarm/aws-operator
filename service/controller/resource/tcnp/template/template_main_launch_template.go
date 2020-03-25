@@ -36,8 +36,6 @@ const TemplateMainLaunchTemplate = `
             DeviceIndex: 0
             Groups:
               - !Ref GeneralSecurityGroup
-        SecurityGroupIds:
-          - !Ref GeneralSecurityGroup
         UserData:
           Fn::Base64: |
             {
