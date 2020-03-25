@@ -257,7 +257,7 @@ func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*te
 
 	eni := &template.ParamsMainENI{
 		IpAddress:       key.ControlPlaneENIIpAddress(masterSubnets[0]),
-		Name:            key.ControlPlaneENIName(cr),
+		Name:            key.ControlPlaneENIName(&cr, 0),
 		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
@@ -273,7 +273,7 @@ func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlan
 
 	etcdVolume := &template.ParamsMainEtcdVolume{
 		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
-		Name:             key.ControlPlaneVolumeNameEtcd(cr),
+		Name:             key.ControlPlaneVolumeNameEtcd(&cr, 0),
 		SnapshotID:       cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID,
 	}
 

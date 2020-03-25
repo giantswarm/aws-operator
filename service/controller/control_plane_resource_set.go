@@ -138,6 +138,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
+			G8sClient: config.G8sClient,
 		}
 
 		tccpnCloudConfig, err = cloudconfig.NewTCCPN(c)

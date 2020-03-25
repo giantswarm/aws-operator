@@ -13,10 +13,10 @@ import (
 
 type baseExtension struct {
 	cluster        infrastructurev1alpha2.AWSCluster
-	controlPlane   infrastructurev1alpha2.AWSControlPlane
 	encrypter      encrypter.Interface
 	encryptionKey  string
 	masterSubnet   net.IPNet
+	masterID       int
 	registryDomain string
 }
 
@@ -29,8 +29,8 @@ func (e *baseExtension) templateDataTCCPN() TemplateData {
 		MasterENIAddress:     key.ControlPlaneENIIpAddress(e.masterSubnet),
 		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
 		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
-		MasterENIName:        key.ControlPlaneENIName(e.controlPlane),
-		MasterEtcdVolumeName: key.ControlPlaneVolumeNameEtcd(e.controlPlane),
+		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
+		MasterEtcdVolumeName: key.ControlPlaneVolumeNameEtcd(&e.cluster, e.masterID),
 		RegistryDomain:       e.registryDomain,
 	}
 

@@ -2,6 +2,8 @@ package s3object
 
 import (
 	"context"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,6 +24,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -29,8 +32,18 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
+	var cluster infrastructurev1alpha2.AWSCluster
 	{
 		g := &errgroup.Group{}
+
+		g.Go(func() error {
+			cr, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(cr.GetNamespace()).Get(key.ClusterID(cr), metav1.GetOptions{})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cluster = *cr
+			return nil
+		})
 
 		g.Go(func() error {
 			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(cr))
@@ -70,7 +83,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	body, err := r.cloudConfig.Render(ctx, r.g8sClient, obj, clusterCerts, clusterKeys, r.labelsFunc(cr))
+	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, r.labelsFunc(cr))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

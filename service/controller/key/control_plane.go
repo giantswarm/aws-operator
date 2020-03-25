@@ -31,10 +31,6 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	return *c, nil
 }
 
-func ControlPlaneVolumeNameEtcd(cr infrastructurev1alpha2.AWSControlPlane) string {
-	return fmt.Sprintf("%s-%s-etcd", ClusterID(&cr), cr.Name)
-}
-
 func ControlPlaneENIIpAddress(ipNet net.IPNet) string {
 	// VPC subnet has reserved first 4 IPs so we need to use the fifth one (counting from zero it is index 4)
 	// https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
@@ -54,14 +50,18 @@ func ControlPlaneENIGateway(ipNet net.IPNet) string {
 	return gatewayAddressIP.String()
 }
 
-func ControlPlaneENIName(cr infrastructurev1alpha2.AWSControlPlane) string {
-	return fmt.Sprintf("%s-%s-eni", ClusterID(&cr), cr.Name)
+func ControlPlaneENIName(getter LabelsGetter, masterID int) string {
+	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), masterID)
 }
 
 func ControlPlaneENISubnetSize(ipNet net.IPNet) int {
 	subnetSize, _ := ipNet.Mask.Size()
 
 	return subnetSize
+}
+
+func ControlPlaneVolumeNameEtcd(getter LabelsGetter, masterID int) string {
+	return fmt.Sprintf("%s-master%d-etcd", ClusterID(getter), masterID)
 }
 
 func dupIP(ip net.IP) net.IP {

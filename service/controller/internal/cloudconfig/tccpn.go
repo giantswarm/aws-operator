@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
@@ -19,11 +20,13 @@ import (
 )
 
 type TCCPNConfig struct {
-	Config Config
+	Config    Config
+	G8sClient versioned.Interface
 }
 
 type TCCPN struct {
-	config Config
+	config    Config
+	g8sClient versioned.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
@@ -31,27 +34,35 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T cannot by nil", config.G8sClient)
+	}
 
 	t := &TCCPN{
-		config: config.Config,
+		config:    config.Config,
+		g8sClient: config.G8sClient,
 	}
 
 	return t, nil
 }
 
-func (t *TCCPN) Render(ctx context.Context, g8sClient versioned.Interface, obj interface{}, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	cp, err := key.ToControlPlane(obj)
+	listOptions := metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("%s=%s", key.TagCluster, key.ClusterID(&cr)),
+	}
+
+	cps, err := t.g8sClient.InfrastructureV1alpha2().AWSControlPlanes(cr.Namespace).List(listOptions)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	cr, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cp.Namespace).Get(key.ClusterID(&cp), metav1.GetOptions{})
-	if err != nil {
-		return nil, microerror.Mask(err)
+	if len(cps.Items) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected 1 control plane cr but found %d", len(cps.Items))
 	}
+	cp := cps.Items[0]
 
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
 	if err != nil {
@@ -60,17 +71,17 @@ func (t *TCCPN) Render(ctx context.Context, g8sClient versioned.Interface, obj i
 
 	var apiExtraArgs []string
 	{
-		if key.OIDCClientID(*cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(*cr)))
+		if key.OIDCClientID(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cr)))
 		}
-		if key.OIDCIssuerURL(*cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(*cr)))
+		if key.OIDCIssuerURL(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(cr)))
 		}
-		if key.OIDCUsernameClaim(*cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(*cr)))
+		if key.OIDCUsernameClaim(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(cr)))
 		}
-		if key.OIDCGroupsClaim(*cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(*cr)))
+		if key.OIDCGroupsClaim(cr) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(cr)))
 		}
 
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
@@ -85,24 +96,24 @@ func (t *TCCPN) Render(ctx context.Context, g8sClient versioned.Interface, obj i
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	masterID := 0 // for now we have only 1 master, TODO get this value via render function as argument
+
+	var masterSubnet net.IPNet
+	{
+		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+		for _, az := range zones {
+			if az.Name == key.ControlPlaneAvailabilityZones(cp)[masterID] {
+				masterSubnet = az.Subnet.Private.CIDR
+				break
+			}
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
 
-		masterID := 0 // for now we have only 1 master
-
-		var masterSubnets []net.IPNet
-		{
-			zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-			for _, az := range zones {
-				if az.Name != key.MasterAvailabilityZone(*cr) {
-					continue
-				}
-				masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
-			}
-		}
-
-		g8sConfig := cmaClusterToG8sConfig(t.config, *cr, labels)
+		g8sConfig := cmaClusterToG8sConfig(t.config, cr, labels)
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
@@ -111,11 +122,11 @@ func (t *TCCPN) Render(ctx context.Context, g8sClient versioned.Interface, obj i
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &MasterExtension{
 			baseExtension: baseExtension{
-				cluster:        *cr,
-				controlPlane:   cp,
+				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
-				masterSubnet:   masterSubnets[masterID],
+				masterSubnet:   masterSubnet,
+				masterID:       masterID,
 				registryDomain: t.config.RegistryDomain,
 			},
 			cc:               cc,
