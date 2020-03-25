@@ -1,9 +1,9 @@
 package v1alpha1
 
 import (
-	"github.com/ghodss/yaml"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -31,6 +31,7 @@ spec:
     openAPIV3Schema:
       description: |
         An AppCatalog defines a collection of apps to install in one or several clusters.
+      type: object
       properties:
         spec:
           type: object

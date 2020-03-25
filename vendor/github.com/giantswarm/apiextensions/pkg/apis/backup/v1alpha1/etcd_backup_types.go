@@ -1,9 +1,9 @@
 package v1alpha1
 
 import (
-	"github.com/ghodss/yaml"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 const etcdBackupCRDYAML = `
@@ -51,6 +51,11 @@ spec:
               format: date-time
             instances:
               type: object
+              properties:
+                v1:
+                  type: object
+                v2:
+                  type: object
           required:
           - status
   additionalPrinterColumns:
@@ -129,6 +134,14 @@ type ETCDInstanceBackupStatus struct {
 	FinishedTimestamp DeepCopyTime `json:"finishedTimestamp,omitempty" yaml:"finishedTimestamp"`
 	// Latest backup error message
 	LatestError string `json:"latestError,omitempty" yaml:"latestError,omitempty"`
+	// Time took by the backup creation process
+	CreationTime int64 `json:"creationTime,omitempty" yaml:"creationTime,omitempty"`
+	// Time took by the backup encryption process
+	EncryptionTime int64 `json:"encryptionTime,omitempty" yaml:"encryptionTime,omitempty"`
+	// Time took by the backup upload process
+	UploadTime int64 `json:"uploadTime,omitempty" yaml:"uploadTime,omitempty"`
+	// Size of the backup file
+	BackupFileSize int64 `json:"backupFileSize,omitempty" yaml:"backupFileSize,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
