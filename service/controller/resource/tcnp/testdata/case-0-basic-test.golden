@@ -174,7 +174,7 @@ Resources:
             VolumeSize: 100
             VolumeType: gp2
         IamInstanceProfile:
-          Arn: !Ref NodePoolInstanceProfile
+          Name: !Ref NodePoolInstanceProfile
         ImageId: ami-038cea5071a5ee580
         InstanceType: m5.2xlarge
         Monitoring:

@@ -26,7 +26,7 @@ const TemplateMainLaunchTemplate = `
             VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Logging.Volume.Size }}
             VolumeType: gp2
         IamInstanceProfile:
-          Arn: !Ref NodePoolInstanceProfile
+          Name: !Ref NodePoolInstanceProfile
         ImageId: {{ .LaunchTemplate.Instance.Image }}
         InstanceType: {{ .LaunchTemplate.Instance.Type }}
         Monitoring:
