@@ -19,7 +19,7 @@ const TemplateMainAutoScalingGroup = `
       MixedInstancesPolicy: 
         LaunchTemplate:
           LaunchTemplateSpecification:
-            LaunchTemplateName: !Ref NodePoolLaunchTemplate
+            LaunchTemplateId: !Ref NodePoolLaunchTemplate
             Version: !GetAtt NodePoolLaunchTemplate.LatestVersionNumber
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
