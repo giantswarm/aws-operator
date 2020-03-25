@@ -20,7 +20,7 @@ const TemplateMainAutoScalingGroup = `
         LaunchTemplate:
           LaunchTemplateSpecification:
             LaunchTemplateName: !Ref NodePoolLaunchTemplate
-            Version: $Default
+            Version: $Latest
           {{- if  .AutoScalingGroup.LaunchTemplateOverrides }}
           Overrides:
           {{- range $s := .AutoScalingGroup.LaunchTemplateOverrides }}
