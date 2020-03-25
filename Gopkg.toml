@@ -44,7 +44,7 @@ required = [
 
 [[override]]
   name = "github.com/giantswarm/apiextensions"
-  version = "~0.1.0"
+  branch = "add-spot-instances"
 
 [[override]]
   name = "github.com/giantswarm/apprclient"
