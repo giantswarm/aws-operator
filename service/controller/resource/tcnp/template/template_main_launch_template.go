@@ -34,6 +34,8 @@ const TemplateMainLaunchTemplate = `
         NetworkInterfaces:
           - AssociatePublicIpAddress: false
             DeviceIndex: 0
+            Groups:
+              - !Ref GeneralSecurityGroup
         SecurityGroupIds:
           - !Ref GeneralSecurityGroup
         UserData:
