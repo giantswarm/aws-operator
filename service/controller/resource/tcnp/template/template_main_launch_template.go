@@ -34,7 +34,7 @@ const TemplateMainLaunchTemplate = `
         NetworkInterfaces:
           - AssociatePublicIpAddress: false
         SecurityGroupIds:
-          q- !Ref GeneralSecurityGroup
+          - !Ref GeneralSecurityGroup
         UserData:
           Fn::Base64: |
             {
