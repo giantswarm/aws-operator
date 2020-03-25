@@ -16,12 +16,12 @@ const TemplateMainAutoScalingGroup = `
       DesiredCapacity: {{ .AutoScalingGroup.DesiredCapacity }}
       MinSize: {{ .AutoScalingGroup.MinSize }}
       MaxSize: {{ .AutoScalingGroup.MaxSize }}
-      MixedInstancesPolicy: 
+      MixedInstancesPolicy:
         LaunchTemplate:
           LaunchTemplateSpecification:
             LaunchTemplateName: !Ref NodePoolLaunchTemplate
             Version: $Default
-          {{ - if  .AutoScalingGroup.LaunchTemplateOverrides }}
+          {{- if  .AutoScalingGroup.LaunchTemplateOverrides }}
           Overrides:
           {{- range $s := .AutoScalingGroup.LaunchTemplateOverrides }}
             - InstanceType: {{ $s.InstanceType }}
