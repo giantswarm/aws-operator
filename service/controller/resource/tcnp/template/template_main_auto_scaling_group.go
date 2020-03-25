@@ -19,8 +19,8 @@ const TemplateMainAutoScalingGroup = `
       MixedInstancesPolicy:
         LaunchTemplate:
           LaunchTemplateSpecification:
-            LaunchTemplateName: !Ref NodePoolLaunchTemplate
-            Version: $Latest
+            LaunchTemplateId: !Ref NodePoolLaunchTemplate
+            Version: !GetAtt NodePoolLaunchTemplate.LatestVersionNumber
           {{- if  .AutoScalingGroup.LaunchTemplateOverrides }}
           Overrides:
           {{- range $s := .AutoScalingGroup.LaunchTemplateOverrides }}
