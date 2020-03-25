@@ -272,9 +272,9 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 
 	var demandBaseCapacity int
 	if cr.Spec.Provider.SpotInstanceConfiguration.Enabled {
-		demandBaseCapacity = 100
-	} else {
 		demandBaseCapacity = 0
+	} else {
+		demandBaseCapacity = 100
 	}
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
