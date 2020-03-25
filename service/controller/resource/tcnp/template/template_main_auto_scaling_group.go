@@ -20,7 +20,7 @@ const TemplateMainAutoScalingGroup = `
         LaunchTemplate:
           LaunchTemplateSpecification:
             LaunchTemplateName: !Ref NodePoolLaunchTemplate
-            Version: $Latest
+            Version: !GetAtt NodePoolLaunchTemplate.LatestVersionNumber
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
