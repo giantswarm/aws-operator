@@ -1,9 +1,9 @@
 package v1alpha2
 
 import (
-	"github.com/ghodss/yaml"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -99,6 +99,15 @@ spec:
                     items:
                       type: string
                     type: array
+                  spotInstanceConfiguration:
+                    description: |
+                      Configuration for the usage of spot instances as the ASG configuration.
+                    properties:
+                      enabled:
+                        description: |
+                          Determines if spot instances should be used.
+                        type: boolean
+                    type: object
                   worker:
                     type: object
                     description: |
@@ -173,6 +182,7 @@ func NewAWSMachineDeploymentCR() *AWSMachineDeployment {
 //       provider:
 //         availabilityZones:
 //           - eu-central-1a
+//         spotInstanceConfiguration:
 //         worker:
 //           instanceType: m4.xlarge
 //
@@ -204,8 +214,13 @@ type AWSMachineDeploymentSpecNodePoolScaling struct {
 }
 
 type AWSMachineDeploymentSpecProvider struct {
-	AvailabilityZones []string                               `json:"availabilityZones" yaml:"availabilityZones"`
-	Worker            AWSMachineDeploymentSpecProviderWorker `json:"worker" yaml:"worker"`
+	AvailabilityZones         []string                                          `json:"availabilityZones" yaml:"availabilityZones"`
+	SpotInstanceConfiguration AWSMachineDeploymentSpecSpotInstanceConfiguration `json:"spotInstanceConfiguration" yaml:"spotInstanceConfiguration"`
+	Worker                    AWSMachineDeploymentSpecProviderWorker            `json:"worker" yaml:"worker"`
+}
+
+type AWSMachineDeploymentSpecSpotInstanceConfiguration struct {
+	Enabled bool `json:"enabled" yaml:"enabled"`
 }
 
 type AWSMachineDeploymentSpecProviderWorker struct {
