@@ -22,7 +22,11 @@ Resources:
       DesiredCapacity: 3
       MinSize: 3
       MaxSize: 5
-      LaunchConfigurationName: !Ref NodePoolLaunchConfiguration
+      MixedInstancesPolicy: 
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref NodePoolLaunchTemplate
+            Version: !GetAtt NodePoolLaunchTemplate.LatestVersionNumber
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
@@ -143,80 +147,85 @@ Resources:
       InstanceProfileName: gs-cluster-8y5ck-profile-al9qy
       Roles:
         - Ref: NodePoolRole
-  NodePoolLaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  NodePoolLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      AssociatePublicIpAddress: false
-      BlockDeviceMappings:
-      - DeviceName: /dev/xvdh
-        Ebs:
-          DeleteOnTermination: true
-          Encrypted: true
-          VolumeSize: 100
-          VolumeType: gp2
-      - DeviceName: /dev/xvdg
-        Ebs:
-          DeleteOnTermination: true
-          Encrypted: true
-          VolumeSize: 100
-          VolumeType: gp2
-      - DeviceName: /dev/xvdf
-        Ebs:
-          DeleteOnTermination: true
-          Encrypted: true
-          VolumeSize: 100
-          VolumeType: gp2
-      IamInstanceProfile: !Ref NodePoolInstanceProfile
-      ImageId: ami-038cea5071a5ee580
-      InstanceType: m5.2xlarge
-      InstanceMonitoring: true
-      SecurityGroups:
-      - !Ref GeneralSecurityGroup
-      UserData:
-        Fn::Base64: |
-          {
-            "ignition": {
-              "version": "2.2.0",
-              "config": {
-                "append": [
+      LaunchTemplateData:
+        BlockDeviceMappings:
+        - DeviceName: /dev/xvdh
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdg
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        IamInstanceProfile:
+          Name: !Ref NodePoolInstanceProfile
+        ImageId: ami-038cea5071a5ee580
+        InstanceType: m5.2xlarge
+        Monitoring:
+          Enabled: true
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeviceIndex: 0
+            Groups:
+              - !Ref GeneralSecurityGroup
+        UserData:
+          Fn::Base64: |
+            {
+              "ignition": {
+                "version": "2.2.0",
+                "config": {
+                  "append": [
+                    {
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_5_2_0/cluster-8y5ck-tcnp-al9qy"
+                    }
+                  ]
+                }
+              },
+              "storage": {
+                "filesystems": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_5_2_0/cluster-8y5ck-tcnp-al9qy"
+                    "name": "docker",
+                    "mount": {
+                      "device": "/dev/xvdh",
+                      "wipeFilesystem": true,
+                      "label": "docker",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "kubelet",
+                    "mount": {
+                      "device": "/dev/xvdg",
+                      "wipeFilesystem": true,
+                      "label": "kubelet",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "log",
+                    "mount": {
+                      "device": "/dev/xvdf",
+                      "wipeFilesystem": true,
+                      "label": "log",
+                      "format": "xfs"
+                    }
                   }
                 ]
               }
-            },
-            "storage": {
-              "filesystems": [
-                {
-                  "name": "docker",
-                  "mount": {
-                    "device": "/dev/xvdh",
-                    "wipeFilesystem": true,
-                    "label": "docker",
-                    "format": "xfs"
-                  }
-                },
-                {
-                  "name": "kubelet",
-                  "mount": {
-                    "device": "/dev/xvdg",
-                    "wipeFilesystem": true,
-                    "label": "kubelet",
-                    "format": "xfs"
-                  }
-                },
-                {
-                  "name": "log",
-                  "mount": {
-                    "device": "/dev/xvdf",
-                    "wipeFilesystem": true,
-                    "label": "log",
-                    "format": "xfs"
-                  }
-                }
-              ]
             }
-          }
   
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
