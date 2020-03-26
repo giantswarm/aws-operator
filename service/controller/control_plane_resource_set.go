@@ -3,9 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnencryption"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -35,7 +32,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 )
