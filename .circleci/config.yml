@@ -38,6 +38,7 @@ jobs:
         paths:
         - ./aws-operator
   copy-k8scloudconfig-magic:
+    machine: true
     steps:
       - run:
           name: "Copy k8scloudconfig files to vendor/github.com/giantswarm/k8scloudconfig/"
