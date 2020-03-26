@@ -47,8 +47,6 @@ workflows:
             tags:
               only: /^v.*/
 
-      - copy-k8scloudconfig-magic
-
       - architect/push-to-docker:
           name: push-aws-operator-to-quay
           image: "quay.io/giantswarm/aws-operator"
