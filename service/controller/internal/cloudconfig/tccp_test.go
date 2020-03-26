@@ -15,9 +15,10 @@ import (
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/giantswarm/micrologger/microloggertest"
+
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
-	"github.com/giantswarm/micrologger/microloggertest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
