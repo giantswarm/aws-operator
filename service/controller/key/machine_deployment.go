@@ -7,6 +7,22 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+)
+
+var (
+	MachineDeploymentLaunchTemplateOverrides = map[string][]template.LaunchTemplateOverride{
+		"m4.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+	}
 )
 
 func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.AWSMachineDeployment) []string {
@@ -31,6 +47,17 @@ func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment)
 
 func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment) int {
 	return cr.Spec.NodePool.Scaling.Min
+}
+
+func MachineDeploymentSpotInstancePools(cr infrastructurev1alpha2.AWSMachineDeployment, overrides []template.LaunchTemplateOverride) int {
+	pools := len(MachineDeploymentAvailabilityZones(cr)) * len(overrides)
+	if pools < 1 {
+		return 1
+	}
+	if pools > 20 {
+		return 20
+	}
+	return pools
 }
 
 func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {

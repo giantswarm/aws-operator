@@ -32,6 +32,7 @@ const TemplateMainAutoScalingGroup = `
           OnDemandBaseCapacity: {{ .AutoScalingGroup.OnDemandBaseCapacity }}
           OnDemandPercentageAboveBaseCapacity: {{ .AutoScalingGroup.OnDemandPercentageAboveBaseCapacity }}
           SpotAllocationStrategy: {{ .AutoScalingGroup.SpotAllocationStrategy }}
+          SpotInstancePools: {{ .AutoScalingGroup.SpotInstancePools }}
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
       # hook referencing the ASG name. In this setting when deleting a Node Pool

@@ -24,6 +24,11 @@ type ParamsMainAutoScalingGroup struct {
 	// group launches instances using Spot pools that are optimally chosen based on
 	// the available Spot capacity.
 	SpotAllocationStrategy string
+	// SpotInstancePools The number of Spot pools to use to allocate your Spot
+	// capacity. The Spot pools are determined from the different instance types
+	// in the Overrides array of LaunchTemplate. The range is 1–20. The default
+	// value is 2.
+	SpotInstancePools int
 	// LaunchTemplateOverrides is an optional setting. Any parameters that you
 	// specify override the same parameters in the launch template. Currently,
 	// the only supported override is instance type. You can specify between 1 and
@@ -42,5 +47,5 @@ type LaunchTemplateOverride struct {
 	// larger instance types are generally weighted more than smaller instance
 	// types. These are the same units that you chose to set the desired capacity
 	// in terms of instances, or a performance attribute such as vCPUs, memory, or I/O.
-	WeightedCapacity string
+	WeightedCapacity int
 }
