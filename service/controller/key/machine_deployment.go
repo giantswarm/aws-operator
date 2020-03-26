@@ -22,6 +22,36 @@ var (
 				WeightedCapacity: 1,
 			},
 		},
+		"m4.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m4.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m5.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
 		"m5.2xlarge": {
 			template.LaunchTemplateOverride{
 				InstanceType:     "m5.2xlarge",
@@ -29,6 +59,176 @@ var (
 			},
 			template.LaunchTemplateOverride{
 				InstanceType:     "m4.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m5.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c4.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c4.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c4.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c4.8xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.8xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.8xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c5.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c5.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c5.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"c5.8xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "c5.8xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "c4.8xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.8xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.8xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.8xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.8xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.8xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.8xlarge",
 				WeightedCapacity: 1,
 			},
 		},
