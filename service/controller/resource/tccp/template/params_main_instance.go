@@ -15,13 +15,13 @@ type ParamsMainInstanceImage struct {
 }
 
 type ParamsMainInstanceMaster struct {
-	AZ               string
-	CloudConfig      string
-	DockerVolume     ParamsMainInstanceMasterDockerVolume
-	EtcdVolume       ParamsMainInstanceMasterEtcdVolume
-	LogVolume        ParamsMainInstanceMasterLogVolume
-	Instance         ParamsMainInstanceMasterInstance
-	PrivateSubnet    string
+	AZ            string
+	CloudConfig   string
+	DockerVolume  ParamsMainInstanceMasterDockerVolume
+	EtcdVolume    ParamsMainInstanceMasterEtcdVolume
+	LogVolume     ParamsMainInstanceMasterLogVolume
+	Instance      ParamsMainInstanceMasterInstance
+	PrivateSubnet string
 }
 
 type ParamsMainInstanceMasterDockerVolume struct {
