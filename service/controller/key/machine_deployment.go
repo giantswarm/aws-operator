@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 )
 
@@ -250,7 +249,7 @@ func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeploymen
 }
 
 func MachineDeploymentLaunchTemplateName(cr infrastructurev1alpha2.AWSMachineDeployment) string {
-	return fmt.Sprintf("%s-%s-LaunchTemplate", key.ClusterID(&cr), key.MachineDeploymentID(&cr))
+	return fmt.Sprintf("%s-%s-LaunchTemplate", ClusterID(&cr), MachineDeploymentID(&cr))
 }
 
 func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {

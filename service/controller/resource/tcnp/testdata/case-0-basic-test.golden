@@ -159,6 +159,7 @@ Resources:
   NodePoolLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
+      LaunchTemplateName: 8y5ck-al9qy-LaunchTemplate
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdh
