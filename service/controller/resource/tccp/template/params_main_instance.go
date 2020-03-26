@@ -17,7 +17,6 @@ type ParamsMainInstanceImage struct {
 type ParamsMainInstanceMaster struct {
 	AZ               string
 	CloudConfig      string
-	EncrypterBackend string
 	DockerVolume     ParamsMainInstanceMasterDockerVolume
 	EtcdVolume       ParamsMainInstanceMasterEtcdVolume
 	LogVolume        ParamsMainInstanceMasterLogVolume
