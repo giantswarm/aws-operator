@@ -294,7 +294,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 		Subnets:                             subnets,
 		OnDemandPercentageAboveBaseCapacity: key.MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr),
 		OnDemandBaseCapacity:                key.MachineDeploymentOnDemandBaseCapacity(cr),
-		SpotInstancePools:                   key.MachineDeploymentSpotInstancePools(cr, launchTemplateOverride),
+		SpotInstancePools:                   key.MachineDeploymentSpotInstancePools(launchTemplateOverride),
 		SpotAllocationStrategy:              "lowest-price",
 		LaunchTemplateOverrides:             launchTemplateOverride,
 	}

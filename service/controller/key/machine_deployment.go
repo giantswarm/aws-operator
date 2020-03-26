@@ -22,6 +22,16 @@ var (
 				WeightedCapacity: 1,
 			},
 		},
+		"m5.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
 	}
 )
 
@@ -49,8 +59,8 @@ func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment)
 	return cr.Spec.NodePool.Scaling.Min
 }
 
-func MachineDeploymentSpotInstancePools(cr infrastructurev1alpha2.AWSMachineDeployment, overrides []template.LaunchTemplateOverride) int {
-	pools := len(MachineDeploymentAvailabilityZones(cr)) * len(overrides)
+func MachineDeploymentSpotInstancePools(overrides []template.LaunchTemplateOverride) int {
+	pools := len(overrides)
 	if pools < 1 {
 		return 1
 	}

@@ -40,7 +40,7 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 				},
 				Worker: infrastructurev1alpha2.AWSMachineDeploymentSpecProviderWorker{
 					InstanceType:          "m5.2xlarge",
-					UseAlikeInstanceTypes: false,
+					UseAlikeInstanceTypes: true,
 				},
 			},
 		},

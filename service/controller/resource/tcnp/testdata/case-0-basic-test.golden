@@ -27,11 +27,16 @@ Resources:
           LaunchTemplateSpecification:
             LaunchTemplateId: !Ref NodePoolLaunchTemplate
             Version: !GetAtt NodePoolLaunchTemplate.LatestVersionNumber
+          Overrides:
+            - InstanceType: m5.2xlarge
+              WeightedCapacity: 1
+            - InstanceType: m4.2xlarge
+              WeightedCapacity: 1
         InstancesDistribution:
           OnDemandBaseCapacity: 0
           OnDemandPercentageAboveBaseCapacity: 100
           SpotAllocationStrategy: lowest-price
-          SpotInstancePools: 1
+          SpotInstancePools: 2
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
       # hook referencing the ASG name. In this setting when deleting a Node Pool
