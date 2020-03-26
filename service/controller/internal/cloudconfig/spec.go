@@ -2,8 +2,8 @@ package cloudconfig
 
 import (
 	"context"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/randomkeys"
 )
