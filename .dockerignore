@@ -1,3 +1,3 @@
 *
 !aws-operator
-!vendor/github.com/giantswarm/k8scloudconfig/
+!go.mod
