@@ -3,6 +3,7 @@ package template
 type ParamsMainLaunchTemplate struct {
 	BlockDeviceMapping ParamsMainLaunchTemplateBlockDeviceMapping
 	Instance           ParamsMainLaunchTemplateInstance
+	Name               string
 	SmallCloudConfig   ParamsMainLaunchTemplateSmallCloudConfig
 }
 

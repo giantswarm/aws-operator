@@ -5,6 +5,7 @@ const TemplateMainLaunchTemplate = `
   NodePoolLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
+      LaunchTemplateName: {{ .LaunchTemplate.Name }}
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdh

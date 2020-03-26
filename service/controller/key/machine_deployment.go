@@ -1,12 +1,14 @@
 package key
 
 import (
+	"fmt"
 	"strconv"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 )
 
@@ -245,6 +247,10 @@ func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDep
 
 func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return cr.Spec.Provider.Worker.InstanceType
+}
+
+func MachineDeploymentLaunchTemplateName(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return fmt.Sprintf("%s-%s-LaunchTemplate", key.ClusterID(&cr), key.MachineDeploymentID(&cr))
 }
 
 func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
