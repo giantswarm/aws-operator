@@ -153,7 +153,6 @@ Resources:
   DockerVolume8Y5CK78968:
     Type: AWS::EC2::Volume
     Properties:
-
       Size: 50
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
@@ -163,7 +162,6 @@ Resources:
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
-
       Size: 100
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
@@ -173,7 +171,6 @@ Resources:
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
-
       Size: 100
       VolumeType: gp2
       AvailabilityZone: eu-central-1b
