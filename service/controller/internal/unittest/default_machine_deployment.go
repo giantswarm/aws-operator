@@ -34,6 +34,9 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 			},
 			Provider: infrastructurev1alpha2.AWSMachineDeploymentSpecProvider{
 				AvailabilityZones: []string{"eu-central-1a", "eu-central-1c"},
+				SpotInstanceConfiguration: infrastructurev1alpha2.AWSMachineDeploymentSpecSpotInstanceConfiguration{
+					Enabled: true,
+				},
 				Worker: infrastructurev1alpha2.AWSMachineDeploymentSpecProviderWorker{
 					InstanceType: "m5.2xlarge",
 				},
