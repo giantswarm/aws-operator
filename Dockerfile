@@ -6,7 +6,7 @@ RUN mkdir -p /opt/aws-operator
 ADD ./aws-operator /opt/aws-operator/aws-operator
 
 RUN mkdir -p /opt/ignition
-ADD vendor/github.com/giantswarm/k8scloudconfig/ /opt/ignition
+ADD .build_k8scloudconfig/ /opt/ignition
 
 WORKDIR /opt/aws-operator
 

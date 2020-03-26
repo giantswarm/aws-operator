@@ -2,48 +2,15 @@ orbs:
   architect: giantswarm/architect@dev:aws-operator-go-build
 
 version: 2.1
-jobs:
-  build:
-    machine: true
-    steps:
-    - checkout
-
-    - run: |
-        wget -q $(curl -sS -H "Authorization: token $RELEASE_TOKEN" https://api.github.com/repos/giantswarm/architect/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./architect
-        ./architect version
-
-    - run: |
-        date +"%Y" > /tmp/year
-        date +"%m" > /tmp/month
-        date +"%d" > /tmp/day
-    - restore_cache:
-        keys:
-        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
-        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}
-        - go-cache-v1-{{ checksum "/tmp/year" }}
-
-    - run: ./architect build
-
-    - store_test_results:
-        path: /tmp/results
-
-    - save_cache:
-        key: go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
-        paths:
-        - /tmp/go/cache
-
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./aws-operator
 
 workflows:
   build:
     jobs:
-      - build:
+      - architect/go-build:
+          name: go-build-aws-operator
+          binary: aws-operator
           filters:
-            # Trigger the job also on git tag.
+            # Trigger job also on git tag.
             tags:
               only: /^v.*/
 
@@ -54,12 +21,11 @@ workflows:
           password_envar: "QUAY_PASSWORD"
           before-build:
             - run:
-                name: "Copy k8scloudconfig files to vendor/github.com/giantswarm/k8scloudconfig/"
+              name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
                 command: |
-                  mkdir -p vendor/github.com/giantswarm/k8scloudconfig/
-                  cp -a $(go list -m -f '{{.Dir}}' $(go list -m all | grep github.com/giantswarm/k8scloudconfig | cut -d ' ' -f 1)) vendor/github.com/giantswarm/k8scloudconfig/
+                  cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
-            - build
+            - go-build-aws-operator
           filters:
             # Trigger the job also on git tag.
             tags:
@@ -71,8 +37,13 @@ workflows:
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           # Push to Aliyun should execute for non-master branches only once manually approved.
+          before-build:
+            - run:
+              name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+                command: |
+                  cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
-            - build
+            - go-build-aws-operator
           filters:
             # Do not trigger the job on merge to master.
             branches:
@@ -84,8 +55,13 @@ workflows:
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
+          before-build:
+            - run:
+              name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+                command: |
+                  cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
-            - build
+            - go-build-aws-operator
           filters:
             # Trigger the job on merge to master.
             branches:
