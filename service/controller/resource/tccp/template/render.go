@@ -10,7 +10,6 @@ func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
 		TemplateMainIAMPolicies,
-		TemplateMainInstance,
 		TemplateMainInternetGateway,
 		TemplateMainLoadBalancers,
 		TemplateMainNatGateway,

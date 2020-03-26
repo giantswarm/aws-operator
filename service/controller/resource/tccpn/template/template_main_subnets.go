@@ -1,3 +1,0 @@
-package template
-
-const TemplateMainSubnets = ``

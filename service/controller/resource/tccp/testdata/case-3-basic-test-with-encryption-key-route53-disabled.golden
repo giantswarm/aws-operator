@@ -10,94 +10,6 @@ Outputs:
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
 Resources:
-  MasterRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: 8y5ck-master-EC2-K8S-Role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            Service: ec2.amazonaws.com
-          Action: "sts:AssumeRole"
-  MasterRolePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: 8y5ck-master-EC2-K8S-Policy
-      Roles:
-        - Ref: "MasterRole"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Action: "ec2:*"
-            Resource: "*"
-          - Effect: "Allow"
-            Action: "kms:Decrypt"
-            Resource: "8y5ck"
-          - Effect: "Allow"
-            Action:
-              - "s3:GetBucketLocation"
-              - "s3:ListAllMyBuckets"
-            Resource: "*"
-          - Effect: "Allow"
-            Action: "s3:ListBucket"
-            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
-          - Effect: "Allow"
-            Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
-          - Effect: "Allow"
-            Action: "elasticloadbalancing:*"
-            Resource: "*"
-          - Effect: "Allow"
-            Action:
-              - "autoscaling:DescribeAutoScalingGroups"
-              - "autoscaling:DescribeAutoScalingInstances"
-              - "autoscaling:DescribeTags"
-              - "autoscaling:DescribeLaunchConfigurations"
-              - "ec2:DescribeLaunchTemplateVersions"
-            Resource: "*"
-          - Effect: "Allow"
-            Action:
-              - "autoscaling:SetDesiredCapacity"
-              - "autoscaling:TerminateInstanceInAutoScalingGroup"
-            Resource: "*"
-            Condition:
-              StringEquals:
-                autoscaling:ResourceTag/giantswarm.io/cluster: "8y5ck"
-          - Effect: "Allow"
-            Action:
-              - "ecr:GetAuthorizationToken"
-              - "ecr:BatchCheckLayerAvailability"
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:GetRepositoryPolicy"
-              - "ecr:DescribeRepositories"
-              - "ecr:ListImages"
-              - "ecr:BatchGetImage"
-            Resource: "*"
-          # Following rules are required to make the AWS CNI work. See also
-          # https://github.com/aws/amazon-vpc-cni-k8s#setup.
-          - Effect: Allow
-            Action:
-              - ec2:AssignPrivateIpAddresses
-              - ec2:AttachNetworkInterface
-              - ec2:CreateNetworkInterface
-              - ec2:DeleteNetworkInterface
-              - ec2:DescribeInstances
-              - ec2:DescribeInstanceTypes
-              - ec2:DescribeTags
-              - ec2:DescribeNetworkInterfaces
-              - ec2:DetachNetworkInterface
-              - ec2:ModifyNetworkInterfaceAttribute
-              - ec2:UnassignPrivateIpAddresses
-            Resource: "*"
-          - Effect: Allow
-            Action:
-              - ec2:CreateTags
-            Resource:
-              - arn:aws:ec2:*:*:network-interface/*
-
   IAMManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -121,12 +33,6 @@ Resources:
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
-  MasterInstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
-    Properties:
-      InstanceProfileName: 8y5ck-master-EC2-K8S-Role
-      Roles:
-        - Ref: "MasterRole"
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
