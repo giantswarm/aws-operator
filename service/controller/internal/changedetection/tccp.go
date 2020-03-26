@@ -53,7 +53,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
 	if !azsEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to availability zone changes in node pools"))
+		t.logger.LogCtx(ctx, "level", "debug", "message", "detected tenant cluster control plane should update due to availability zone changes in node pools")
 		return true, nil
 	}
 	if !masterInstanceEqual {

@@ -6,7 +6,7 @@ import "unicode"
 // dash ('-'). Coalesces multiple dashes into one.
 func NormalizeFileName(s string) string {
 	var result []rune
-	for _, r := range []rune(s) {
+	for _, r := range s {
 		if unicode.IsDigit(r) || unicode.IsLetter(r) {
 			result = append(result, r)
 		} else {

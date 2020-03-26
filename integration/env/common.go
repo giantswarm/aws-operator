@@ -1,7 +1,7 @@
 package env
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec
 	"fmt"
 	"log"
 	"math/rand"
@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -20,11 +21,10 @@ const (
 )
 
 const (
-	EnvVarCircleCI             = "CIRCLECI"
 	EnvVarCircleSHA            = "CIRCLE_SHA1"
-	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN"
+	EnvVarGithubBotToken       = "GITHUB_BOT_TOKEN" //nolint:gosec
 	EnvVarKeepResources        = "KEEP_RESOURCES"
-	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET"
+	EnvVarRegistryPullSecret   = "REGISTRY_PULL_SECRET" //nolint:gosec
 	EnvVarTestedVersion        = "TESTED_VERSION"
 	EnvVarTestDir              = "TEST_DIR"
 	EnvVarVersionBundleVersion = "VERSION_BUNDLE_VERSION"
@@ -37,7 +37,6 @@ const (
 )
 
 var (
-	circleCI             string
 	circleSHA            string
 	clusterID            string
 	registryPullSecret   string
@@ -51,7 +50,6 @@ var (
 func init() {
 	var err error
 
-	circleCI = os.Getenv(EnvVarCircleCI)
 	keepResources = os.Getenv(EnvVarKeepResources)
 
 	circleSHA = os.Getenv(EnvVarCircleSHA)
@@ -148,8 +146,12 @@ func TestHash() string {
 		return ""
 	}
 
-	h := sha1.New()
-	h.Write([]byte(TestDir()))
+	h := sha1.New() //nolint:gosec
+	_, err := h.Write([]byte(TestDir()))
+	if err != nil {
+		panic(microerror.JSON(err))
+	}
+
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	return s
@@ -175,8 +177,8 @@ func generateID(idLength int) string {
 			continue
 		}
 
-		matched, err := regexp.MatchString("^[a-z]+$", id)
-		if err == nil && matched == true {
+		matched, err := regexp.MatchString("^[a-z]+$", id) //nolint:staticcheck
+		if err == nil && matched {
 			// strings is letters only, which we also avoid
 			continue
 		}
