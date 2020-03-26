@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
-	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
@@ -1037,10 +1036,6 @@ func Test_mapSubnets(t *testing.T) {
 			}
 		})
 	}
-}
-
-func isExecutionFailed(err error) bool {
-	return microerror.Cause(err) == executionFailedError
 }
 
 func mustParseCIDR(v string) net.IPNet {
