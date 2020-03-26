@@ -37,6 +37,14 @@ func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) str
 	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
+func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+	return cr.Spec.Provider.InstanceDistribution.OnDemandBaseCapacity
+}
+
+func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+	return cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
+}
+
 func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {
 	if v == nil {
 		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)

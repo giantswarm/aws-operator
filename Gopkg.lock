@@ -292,7 +292,7 @@
 
 [[projects]]
   branch = "add-spot-instances"
-  digest = "1:831793034a18eb03622b9e67598d6f90d1c37bd1ff48eaac9fb773afd8270621"
+  digest = "1:54fed5bc00e454c585ae4cf02f2bb7ca81dd1c3083ba6b7e11de16000a3fe7c0"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -321,7 +321,7 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "d8f448c3fd3b6808d9f00d85b8aaedf5f0f1a76c"
+  revision = "8eb244f5a57dbb652fa4014eb18a483b6ae373a8"
 
 [[projects]]
   digest = "1:f110592f1b0b0409b8de1306844651c270684ca5fce39e1d79ce450b018a0372"

@@ -270,13 +270,6 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 
 	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.TCNP.ASG.DesiredCapacity)
 
-	var onDemandPercentage int
-	if cr.Spec.Provider.SpotInstanceConfiguration.Enabled {
-		onDemandPercentage = 0
-	} else {
-		onDemandPercentage = 100
-	}
-
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.MachineDeploymentAvailabilityZones(cr),
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
@@ -288,8 +281,8 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 		MinInstancesInService:               workerCountRatio(minDesiredNodes, 0.7),
 		MinSize:                             key.MachineDeploymentScalingMin(cr),
 		Subnets:                             subnets,
-		OnDemandPercentageAboveBaseCapacity: onDemandPercentage,
-		OnDemandBaseCapacity:                0,
+		OnDemandPercentageAboveBaseCapacity: key.MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr),
+		OnDemandBaseCapacity:                key.MachineDeploymentOnDemandBaseCapacity(cr),
 		SpotAllocationStrategy:              "lowest-price",
 		LaunchTemplateOverrides:             []template.LaunchTemplateOverride{},
 	}

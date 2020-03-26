@@ -99,14 +99,23 @@ spec:
                     items:
                       type: string
                     type: array
-                  spotInstanceConfiguration:
+                  instanceDistribution:
                     description: |
-                      Configuration for the usage of spot instances as the ASG configuration.
+                      Attributes defining the instance distribution in a node pool.
                     properties:
-                      enabled:
+                      onDemandBaseCapacity:
                         description: |
-                          Determines if spot instances should be used.
-                        type: boolean
+                          Base capacity of on demand machines.
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      onDemandPercentageAboveBaseCapacity:
+                        description: |
+                          Percentage of on demand instances above the base capacity.
+                        format: int32
+                        maximum: 100
+                        minimum: 0
+                        type: integer
                     type: object
                   worker:
                     type: object
@@ -117,6 +126,10 @@ spec:
                         description: |
                           AWS EC2 instance type name to use for the worker nodes in this node pool.
                         type: string
+                      useAlikeInstanceTypes:
+                        description: |
+                          If true, instances alike the instance_type will be used.
+                        type: boolean
   conversion:
     strategy: None
 `
@@ -182,9 +195,12 @@ func NewAWSMachineDeploymentCR() *AWSMachineDeployment {
 //       provider:
 //         availabilityZones:
 //           - eu-central-1a
-//         spotInstanceConfiguration:
+//         instanceDistribution:
+//           onDemandBaseCapacity: 0
+//           onDemandPercentageAboveBaseCapacity: 0
 //         worker:
 //           instanceType: m4.xlarge
+//           useAlikeInstanceTypes: true
 //
 type AWSMachineDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -214,17 +230,19 @@ type AWSMachineDeploymentSpecNodePoolScaling struct {
 }
 
 type AWSMachineDeploymentSpecProvider struct {
-	AvailabilityZones         []string                                          `json:"availabilityZones" yaml:"availabilityZones"`
-	SpotInstanceConfiguration AWSMachineDeploymentSpecSpotInstanceConfiguration `json:"spotInstanceConfiguration" yaml:"spotInstanceConfiguration"`
-	Worker                    AWSMachineDeploymentSpecProviderWorker            `json:"worker" yaml:"worker"`
+	AvailabilityZones    []string                                     `json:"availabilityZones" yaml:"availabilityZones"`
+	InstanceDistribution AWSMachineDeploymentSpecInstanceDistribution `json:"instanceDistribution" yaml:"instanceDistribution"`
+	Worker               AWSMachineDeploymentSpecProviderWorker       `json:"worker" yaml:"worker"`
 }
 
-type AWSMachineDeploymentSpecSpotInstanceConfiguration struct {
-	Enabled bool `json:"enabled" yaml:"enabled"`
+type AWSMachineDeploymentSpecInstanceDistribution struct {
+	OnDemandBaseCapacity                int `json:"onDemandBaseCapacity" yaml:"onDemandBaseCapacity"`
+	OnDemandPercentageAboveBaseCapacity int `json:"onDemandPercentageAboveBaseCapacity" yaml:"onDemandPercentageAboveBaseCapacity"`
 }
 
 type AWSMachineDeploymentSpecProviderWorker struct {
-	InstanceType string `json:"instanceType" yaml:"instanceType"`
+	InstanceType          string `json:"instanceType" yaml:"instanceType"`
+	UseAlikeInstanceTypes bool   `json:"useAlikeInstanceTypes" yaml:"useAlikeInstanceTypes"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
