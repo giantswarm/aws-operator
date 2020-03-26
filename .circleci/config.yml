@@ -1,5 +1,5 @@
 orbs:
-  architect: giantswarm/architect@0.4.3
+  architect: giantswarm/architect@dev:aws-operator-go-build
 
 version: 2.1
 jobs:
@@ -37,14 +37,6 @@ jobs:
         root: .
         paths:
         - ./aws-operator
-  copy-k8scloudconfig-magic:
-    machine: true
-    steps:
-      - run:
-          name: "Copy k8scloudconfig files to vendor/github.com/giantswarm/k8scloudconfig/"
-          command: |
-            mkdir -p vendor/github.com/giantswarm/k8scloudconfig/
-            cp -a $(go list -m -f '{{.Dir}}' $(go list -m all | grep github.com/giantswarm/k8scloudconfig | cut -d ' ' -f 1)) vendor/github.com/giantswarm/k8scloudconfig/
 
 workflows:
   build:
@@ -62,6 +54,12 @@ workflows:
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
+          before-build:
+            - run:
+                name: "Copy k8scloudconfig files to vendor/github.com/giantswarm/k8scloudconfig/"
+                command: |
+                  mkdir -p vendor/github.com/giantswarm/k8scloudconfig/
+                  cp -a $(go list -m -f '{{.Dir}}' $(go list -m all | grep github.com/giantswarm/k8scloudconfig | cut -d ' ' -f 1)) vendor/github.com/giantswarm/k8scloudconfig/
           requires:
             - build
           filters:
