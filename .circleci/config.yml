@@ -21,7 +21,7 @@ workflows:
           password_envar: "QUAY_PASSWORD"
           before-build:
             - run:
-              name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+                name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
                 command: |
                   cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
@@ -39,7 +39,7 @@ workflows:
           # Push to Aliyun should execute for non-master branches only once manually approved.
           before-build:
             - run:
-              name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+                name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
                 command: |
                   cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
@@ -57,7 +57,7 @@ workflows:
           password_envar: "ALIYUN_PASSWORD"
           before-build:
             - run:
-              name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+                name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
                 command: |
                   cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
