@@ -37,6 +37,13 @@ jobs:
         root: .
         paths:
         - ./aws-operator
+  copy-k8scloudconfig-magic:
+    steps:
+      - run:
+          name: "Copy k8scloudconfig files to vendor/github.com/giantswarm/k8scloudconfig/"
+          command: |
+            mkdir -p vendor/github.com/giantswarm/k8scloudconfig/
+            cp -a $(go list -m -f '{{.Dir}}' $(go list -m all | grep github.com/giantswarm/k8scloudconfig | cut -d ' ' -f 1)) vendor/github.com/giantswarm/k8scloudconfig/
 
 workflows:
   build:
@@ -46,6 +53,8 @@ workflows:
             # Trigger the job also on git tag.
             tags:
               only: /^v.*/
+
+      - copy-k8scloudconfig-magic
 
       - architect/push-to-docker:
           name: push-aws-operator-to-quay
