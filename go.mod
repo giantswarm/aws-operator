@@ -20,7 +20,7 @@ require (
 	github.com/giantswarm/helmclient v0.2.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient v0.2.0
-	github.com/giantswarm/k8scloudconfig v0.0.0-20200325205340-f571257e51f7
+	github.com/giantswarm/k8scloudconfig/v6 v6.0.1
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
@@ -46,7 +46,6 @@ require (
 )
 
 replace (
-	github.com/giantswarm/k8scloudconfig => github.com/giantswarm/k8scloudconfig v0.0.0-20200325205340-f571257e51f7
 	k8s.io/api => k8s.io/api v0.0.0-20191114100352-16d7abae0d2a
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20191114105449-027877536833
 	k8s.io/apimachinery => k8s.io/apimachinery v0.16.5-beta.1
