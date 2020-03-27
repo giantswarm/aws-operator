@@ -113,12 +113,14 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	numberOfSpotInstances := 0
 	instanceTypes := []string{}
 
-	for _, instance := range o.Reservations[0].Instances {
-		if instance.InstanceLifecycle != nil && *instance.InstanceLifecycle == "spot" {
-			numberOfSpotInstances++
-		}
-		if instance.InstanceType != nil && !containsString(instanceTypes, *instance.InstanceType) {
-			instanceTypes = append(instanceTypes, *instance.InstanceType)
+	for _, reservation := range o.Reservations {
+		for _, instance := range reservation.Instances {
+			if instance.InstanceLifecycle != nil && *instance.InstanceLifecycle == "spot" {
+				numberOfSpotInstances++
+			}
+			if instance.InstanceType != nil && !containsString(instanceTypes, *instance.InstanceType) {
+				instanceTypes = append(instanceTypes, *instance.InstanceType)
+			}
 		}
 	}
 
