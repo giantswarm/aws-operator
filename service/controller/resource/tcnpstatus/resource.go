@@ -57,7 +57,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		if reflect.DeepEqual(cr.Status.Provider.Worker.InstanceTypes, cc.Status.TenantCluster.TCNP.Instances.InstanceTypes) || cr.Status.Provider.Worker.SpotInstances != cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances {
+		if !reflect.DeepEqual(cr.Status.Provider.Worker.InstanceTypes, cc.Status.TenantCluster.TCNP.Instances.InstanceTypes) || cr.Status.Provider.Worker.SpotInstances != cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances {
 			cr.Status.Provider.Worker.InstanceTypes = cc.Status.TenantCluster.TCNP.Instances.InstanceTypes
 			cr.Status.Provider.Worker.SpotInstances = cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances
 
