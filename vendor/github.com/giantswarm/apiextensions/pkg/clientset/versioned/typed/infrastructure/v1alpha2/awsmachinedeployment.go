@@ -40,6 +40,7 @@ type AWSMachineDeploymentsGetter interface {
 type AWSMachineDeploymentInterface interface {
 	Create(*v1alpha2.AWSMachineDeployment) (*v1alpha2.AWSMachineDeployment, error)
 	Update(*v1alpha2.AWSMachineDeployment) (*v1alpha2.AWSMachineDeployment, error)
+	UpdateStatus(*v1alpha2.AWSMachineDeployment) (*v1alpha2.AWSMachineDeployment, error)
 	Delete(name string, options *v1.DeleteOptions) error
 	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
 	Get(name string, options v1.GetOptions) (*v1alpha2.AWSMachineDeployment, error)
@@ -127,6 +128,22 @@ func (c *aWSMachineDeployments) Update(aWSMachineDeployment *v1alpha2.AWSMachine
 		Namespace(c.ns).
 		Resource("awsmachinedeployments").
 		Name(aWSMachineDeployment.Name).
+		Body(aWSMachineDeployment).
+		Do().
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *aWSMachineDeployments) UpdateStatus(aWSMachineDeployment *v1alpha2.AWSMachineDeployment) (result *v1alpha2.AWSMachineDeployment, err error) {
+	result = &v1alpha2.AWSMachineDeployment{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("awsmachinedeployments").
+		Name(aWSMachineDeployment.Name).
+		SubResource("status").
 		Body(aWSMachineDeployment).
 		Do().
 		Into(result)

@@ -101,6 +101,7 @@ type ContextStatusTenantClusterTCCPVPC struct {
 
 type ContextStatusTenantClusterTCNP struct {
 	ASG              ContextStatusTenantClusterTCNPASG
+	Instances        ContextStatusTenantClusterTCNPInstances
 	SecurityGroupIDs []string
 	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
 }
@@ -110,6 +111,11 @@ type ContextStatusTenantClusterTCNPASG struct {
 	MaxSize         int
 	MinSize         int
 	Name            string
+}
+
+type ContextStatusTenantClusterTCNPInstances struct {
+	InstanceTypes         []string
+	NumberOfSpotInstances int
 }
 
 type ContextStatusTenantClusterTCNPWorkerInstance struct {

@@ -101,6 +101,18 @@ func (c *FakeAWSMachineDeployments) Update(aWSMachineDeployment *v1alpha2.AWSMac
 	return obj.(*v1alpha2.AWSMachineDeployment), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeAWSMachineDeployments) UpdateStatus(aWSMachineDeployment *v1alpha2.AWSMachineDeployment) (*v1alpha2.AWSMachineDeployment, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(awsmachinedeploymentsResource, "status", c.ns, aWSMachineDeployment), &v1alpha2.AWSMachineDeployment{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha2.AWSMachineDeployment), err
+}
+
 // Delete takes name of the aWSMachineDeployment and deletes it. Returns an error if one occurs.
 func (c *FakeAWSMachineDeployments) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
