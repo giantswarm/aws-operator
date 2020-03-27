@@ -104,12 +104,14 @@ spec:
                       Attributes defining the instance distribution in a node pool.
                     properties:
                       onDemandBaseCapacity:
+                        default: 0
                         description: |
                           Base capacity of on demand machines.
                         format: int32
                         minimum: 0
                         type: integer
                       onDemandPercentageAboveBaseCapacity:
+                        default: 100
                         description: |
                           Percentage of on demand instances above the base capacity.
                         format: int32
