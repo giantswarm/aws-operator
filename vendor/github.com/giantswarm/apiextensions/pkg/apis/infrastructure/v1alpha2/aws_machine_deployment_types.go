@@ -130,6 +130,29 @@ spec:
                         description: |
                           If true, instances alike the instance_type will be used.
                         type: boolean
+          status:
+            type: object
+            properties:
+              provider:
+                description: |
+                  Status specific to AWS.
+                type: object
+                properties:
+                  worker:
+                    type: object
+                    description: |
+                      Status of worker nodes.
+                    properties:
+                      instanceTypes:
+                        description: |
+                          AWS EC2 instance types used for the worker nodes in this node pool.
+                        items:
+                          type: string
+                        type: array
+                      spotInstances:
+                        description: |
+                          Number of spot instances used in this node pool.
+                        type: integer
   conversion:
     strategy: None
 `
@@ -201,11 +224,19 @@ func NewAWSMachineDeploymentCR() *AWSMachineDeployment {
 //         worker:
 //           instanceType: m4.xlarge
 //           useAlikeInstanceTypes: true
+//     status:
+//       provider:
+//         worker:
+//           instanceTypes:
+//             - "m4.xlarge"
+//             - "m5.xlarge"
+//           spotInstances: 39
 //
 type AWSMachineDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              AWSMachineDeploymentSpec `json:"spec" yaml:"spec"`
+	Spec              AWSMachineDeploymentSpec   `json:"spec" yaml:"spec"`
+	Status            AWSMachineDeploymentStatus `json:"status" yaml:"status"`
 }
 
 type AWSMachineDeploymentSpec struct {
@@ -243,6 +274,19 @@ type AWSMachineDeploymentSpecInstanceDistribution struct {
 type AWSMachineDeploymentSpecProviderWorker struct {
 	InstanceType          string `json:"instanceType" yaml:"instanceType"`
 	UseAlikeInstanceTypes bool   `json:"useAlikeInstanceTypes" yaml:"useAlikeInstanceTypes"`
+}
+
+type AWSMachineDeploymentStatus struct {
+	Provider AWSMachineDeploymentStatusProvider `json:"provider" yaml:"provider"`
+}
+
+type AWSMachineDeploymentStatusProvider struct {
+	Worker AWSMachineDeploymentStatusProviderWorker `json:"worker" yaml:"worker"`
+}
+
+type AWSMachineDeploymentStatusProviderWorker struct {
+	InstanceTypes []string `json:"instanceTypes" yaml:"instanceTypes"`
+	SpotInstances int      `json:"spotInstances" yaml:"spotInstances"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

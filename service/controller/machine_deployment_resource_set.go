@@ -25,6 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/instancestatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -40,6 +41,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
 )
 
 func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
@@ -383,6 +385,32 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpInstanceStatusResource resource.Interface
+	{
+		c := instancestatus.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		tcnpInstanceStatusResource, err = instancestatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tcnpStatusResource resource.Interface
+	{
+		c := tcnpstatus.Config{
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+		}
+
+		tcnpStatusResource, err = tcnpstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -441,6 +469,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tcnpOutputsResource,
 		tcnpEncryptionResource,
 		tcnpSecurityGroupsResource,
+		tcnpInstanceStatusResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
@@ -448,6 +477,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		ipamResource,
 		tcnpResource,
 		tcnpfResource,
+		tcnpStatusResource,
 	}
 
 	{
