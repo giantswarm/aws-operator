@@ -57,6 +57,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	{
+<<<<<<< HEAD
 		if reflect.DeepEqual(cr.Status.Provider.Worker.InstanceTypes, cc.Status.TenantCluster.TCNP.Instances.InstanceTypes) || cr.Status.Provider.Worker.SpotInstances != cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances {
 			cr.Status.Provider.Worker.InstanceTypes = cc.Status.TenantCluster.TCNP.Instances.InstanceTypes
 			cr.Status.Provider.Worker.SpotInstances = cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances
@@ -65,6 +66,16 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+=======
+		cr.Status.Provider.Worker.InstanceTypes = cc.Status.TenantCluster.TCNP.Instances.InstanceTypes
+		cr.Status.Provider.Worker.SpotInstances = cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances
+	}
+
+	{
+		_, err := r.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(cr.Namespace).UpdateStatus(&cr)
+		if err != nil {
+			return microerror.Mask(err)
+>>>>>>> add-spot-instances
 		}
 	}
 	return nil
