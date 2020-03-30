@@ -21,6 +21,26 @@ workflows:
           password_envar: "QUAY_PASSWORD"
           before-build:
             - run:
+                name: "Create architect container"
+                command: |
+                  docker container create quay.io/giantswarm/architect:latest > .build_architect_container_id
+            - run:
+                name: "Copy architect binary from architect container"
+                command: |
+                  sudo docker cp $(cat .build_architect_container_id):/usr/bin/architect /usr/local/bin/
+            - run:
+                name: "Remove architect container"
+                command: |
+                  docker container rm $(cat .build_architect_container_id)
+            - run:
+                name: "Remove working files"
+                command: |
+                  rm .build_architect_container_id
+            - run:
+                name: "Check architect version"
+                command: |
+                  architect version
+            - run:
                 name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
                 command: |
                   cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
