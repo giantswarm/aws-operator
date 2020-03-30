@@ -264,6 +264,8 @@ func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment)
 	return cr.Spec.NodePool.Scaling.Min
 }
 
+// MachineDeploymentSpotInstancePools ensures that the number of spot instance pools
+// we submit to AWS is within AWS limits of more than 0 and less than 21 pools.
 func MachineDeploymentSpotInstancePools(overrides []template.LaunchTemplateOverride) int {
 	pools := len(overrides)
 	if pools < 1 {

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- TODO add changes here.
+- Add mixed instance support for worker ASGs.
 
 ## [8.2.1] - 2020-03-20
 
