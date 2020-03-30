@@ -28,12 +28,6 @@ version directory, and  then changes are introduced.
 - Use [AWS VPC CNI](https://github.com/aws/amazon-vpc-cni-k8s) for pod networking and Calico for ensuring network policies.
 - Enable ':9393/metrics' prometheus endpoint in docker daemon.
 
-## [v5.1.1] - Unreleased
-
-### Changed
-
-- Update Kubernetes to `1.16.7`.
-
 ## [v5.1.0] - 2020-01-21
 
 ### Changed
@@ -69,6 +63,9 @@ version directory, and  then changes are introduced.
 
 - Add `conntrackMaxPerCore` parameter in `kube-proxy` manifest.
 
+### Removed
+
+- Remove resource limits from calico-node init container.
 
 ## [v4.9.0] - 2019-10-17
 
@@ -528,7 +525,6 @@ chart-operator).
 
 [v6.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_6_0_0
 [v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
-[v5.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_1
 [v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0
 [v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
 [v4.9.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_1

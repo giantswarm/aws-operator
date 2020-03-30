@@ -9,13 +9,14 @@ import (
 
 func BuildImages(registryDomain string, versions Versions) Images {
 	return Images{
-		CalicoCNI:             buildImage(registryDomain, "giantswarm/cni", versions.Calico),
-		CalicoKubeControllers: buildImage(registryDomain, "giantswarm/kube-controllers", versions.Calico),
-		CalicoNode:            buildImage(registryDomain, "giantswarm/node", versions.Calico),
-		Etcd:                  buildImage(registryDomain, "giantswarm/etcd", versions.Etcd),
-		Hyperkube:             buildImage(registryDomain, "giantswarm/hyperkube", versions.Kubernetes),
-		Kubectl:               buildImage(registryDomain, "giantswarm/docker-kubectl", versions.Kubectl),
-		KubernetesAPIHealthz:  buildImage(registryDomain, "giantswarm/k8s-api-healthz", versions.KubernetesAPIHealthz),
+		CalicoCNI:                    buildImage(registryDomain, "giantswarm/cni", versions.Calico),
+		CalicoKubeControllers:        buildImage(registryDomain, "giantswarm/kube-controllers", versions.Calico),
+		CalicoNode:                   buildImage(registryDomain, "giantswarm/node", versions.Calico),
+		Etcd:                         buildImage(registryDomain, "giantswarm/etcd", versions.Etcd),
+		Hyperkube:                    buildImage(registryDomain, "giantswarm/hyperkube", versions.Kubernetes),
+		Kubectl:                      buildImage(registryDomain, "giantswarm/docker-kubectl", versions.Kubectl),
+		KubernetesAPIHealthz:         buildImage(registryDomain, "giantswarm/k8s-api-healthz", versions.KubernetesAPIHealthz),
+		KubernetesNetworkSetupDocker: buildImage(registryDomain, "giantswarm/k8s-setup-network-environment", versions.KubernetesNetworkSetupDocker),
 	}
 }
 
