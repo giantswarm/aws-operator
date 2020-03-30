@@ -1,10 +1,8 @@
 package cloudconfig
 
-const MountEtcdVolume = `
+const MountEtcdVolumeAsgMasters = `
 [Unit]
 Description=etcd3 data volume
-Requires=format-etcd-ebs.service
-After=format-etcd-ebs.service
 Before=etcd3.service
 
 [Mount]

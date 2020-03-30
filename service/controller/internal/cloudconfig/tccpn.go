@@ -120,7 +120,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.EtcdPort = key.EtcdPort
-		params.Extension = &MasterExtension{
+		params.Extension = &HAMasterExtension{
 			baseExtension: baseExtension{
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
@@ -169,7 +169,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	return templateBody, nil
 }
 
-type MasterExtension struct {
+type HAMasterExtension struct {
 	baseExtension
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
@@ -180,7 +180,7 @@ type MasterExtension struct {
 	randomKeyTmplSet RandomKeyTmplSet
 }
 
-func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+func (e *HAMasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	ctx := context.TODO()
 
 	storageClass := cloudconfig.InstanceStorageClassEncryptedContent
@@ -401,7 +401,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	return fileAssets, nil
 }
 
-func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
+func (e *HAMasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		// Create symlinks for nvme disks.
 		// This service should be started only on first boot.
@@ -452,7 +452,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		},
 		// Mount etcd EBS volume.
 		{
-			AssetContent: cloudconfig.MountEtcdVolume,
+			AssetContent: cloudconfig.MountEtcdVolumeAsgMasters,
 			Name:         "var-lib-etcd.mount",
 			Enabled:      false,
 		},
@@ -485,7 +485,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	return newUnits, nil
 }
 
-func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+func (e *HAMasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{}
 
 	return newSections

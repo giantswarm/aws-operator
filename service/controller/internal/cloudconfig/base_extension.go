@@ -36,6 +36,19 @@ func (e *baseExtension) templateDataTCCPN() TemplateData {
 
 	return data
 }
+
+func (e *baseExtension) templateDataTCCP() TemplateData {
+	awsRegion := key.Region(e.cluster)
+
+	data := TemplateData{
+		AWSRegion:      awsRegion,
+		IsChinaRegion:  key.IsChinaRegion(awsRegion),
+		RegistryDomain: e.registryDomain,
+	}
+
+	return data
+}
+
 func (e *baseExtension) templateDataTCNP() TemplateData {
 	awsRegion := key.Region(e.cluster)
 

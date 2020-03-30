@@ -7,6 +7,7 @@ Requires=network.target
 After=network.target
 
 [Service]
+# image is from https://github.com/giantswarm/aws-attach-etcd-dep
 Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:65a157aeb6db5cd4fa925efff792ef6fba4d02f3"
 Environment="NAME=%p.service"
 Type=oneshot

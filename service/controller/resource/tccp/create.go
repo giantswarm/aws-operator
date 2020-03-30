@@ -715,6 +715,10 @@ func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1al
 		return microerror.Mask(err)
 	}
 
+	// QUESTION: When is this executed? since this has to be executed only just before migration to tccpn stack
+	// and master instance needs to be stopped
+	// otherwise it wil have outdated data for etcd
+
 	if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID != "" {
 		// In case there is a snapshot ID, we already created the snapshot and do
 		// not need to do it again.
@@ -722,10 +726,6 @@ func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1al
 		r.logger.LogCtx(ctx, "level", "debug", "message", "etcd volume snapshot already created")
 		return nil
 	}
-
-	// ignore snapshotting now
-	// TODO ENABLE IT AGAIN
-	return nil
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "creating etcd volume snapshot")
 

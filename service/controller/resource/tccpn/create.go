@@ -32,12 +32,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		/*if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
+		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the Etcd Volume Snapshot ID in the controller context yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
-		}*/
+		}
 
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context yet")
