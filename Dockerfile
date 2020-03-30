@@ -13,7 +13,7 @@ RUN mkdir -p /opt/aws-operator
 ADD ./aws-operator /opt/aws-operator/aws-operator
 
 RUN mkdir -p /opt/ignition
-COPY --from=builder /go/pkg/mod/cache/download/github.com/giantswarm/k8scloudconfig /opt/ignition
+COPY --from=builder /opt/k8scloudconfig /opt/ignition
 
 WORKDIR /opt/aws-operator
 
