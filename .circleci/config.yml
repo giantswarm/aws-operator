@@ -1,5 +1,5 @@
 orbs:
-  architect: giantswarm/architect@0.8.3
+  architect: giantswarm/architect@dev:aws-operator-go-build
 
 version: 2.1
 
