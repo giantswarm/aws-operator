@@ -16,6 +16,8 @@ const TemplateMainLoadBalancers = `
         Target: {{ $v.APIElbHealthCheckTarget }}
         Timeout: {{ $v.ELBHealthCheckTimeout }}
         UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
+      Instances:
+      - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
       {{ range $v.APIElbPortsToOpen}}
       - InstancePort: {{ .PortInstance }}
@@ -44,6 +46,8 @@ const TemplateMainLoadBalancers = `
         Target: {{ $v.APIElbHealthCheckTarget }}
         Timeout: {{ $v.ELBHealthCheckTimeout }}
         UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
+      Instances:
+      - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
       {{ range $v.APIElbPortsToOpen}}
       - InstancePort: {{ .PortInstance }}
@@ -71,6 +75,8 @@ const TemplateMainLoadBalancers = `
         Target: {{ $v.EtcdElbHealthCheckTarget }}
         Timeout: {{ $v.ELBHealthCheckTimeout }}
         UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
+      Instances:
+      - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
       {{ range $v.EtcdElbPortsToOpen}}
       - InstancePort: {{ .PortInstance }}

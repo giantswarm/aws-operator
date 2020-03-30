@@ -8,6 +8,12 @@ const TemplateMainOutputs = `
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   {{- end }}
+  MasterImageID:
+    Value: {{ .Outputs.Master.ImageID }}
+  MasterInstanceResourceName:
+    Value: {{ .Outputs.Master.Instance.ResourceName }}
+  MasterInstanceType:
+    Value: {{ .Outputs.Master.Instance.Type }}
   OperatorVersion:
     Value: {{ .Outputs.OperatorVersion }}
   VPCID:

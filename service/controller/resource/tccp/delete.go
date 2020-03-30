@@ -26,6 +26,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	err = r.terminateMasterInstance(ctx, cr)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding machine deployments for the tenant cluster")
 
