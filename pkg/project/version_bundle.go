@@ -13,7 +13,7 @@ func NewBundle() versionbundle.Bundle {
 				Kind:        versionbundle.KindChanged,
 			},
 		},
-		Name:       Name(),
-		Version:    BundleVersion(),
+		Name:    Name(),
+		Version: BundleVersion(),
 	}
 }
