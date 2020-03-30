@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Streamlined image templating for core components for quicker and easier releases in the future.
-- Retrieve component versions from releases instead.
+- Retrieve component versions from `releases`.
 
 [Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.5.1...legacy-1-15
 [5.5.1]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.1
