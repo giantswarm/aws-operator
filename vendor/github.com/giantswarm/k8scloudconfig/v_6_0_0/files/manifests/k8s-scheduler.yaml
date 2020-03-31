@@ -17,9 +17,14 @@ spec:
     command:
     - /hyperkube
     - kube-scheduler
-    - --feature-gates=TTLAfterFinished=true
+    - --feature-gates=TTLAfterFinished=true{{ if eq .Cluster.Kubernetes.CloudProvider "aws" }},AttachVolumeLimit=false{{end}}
     - --config=/etc/kubernetes/config/scheduler.yaml
     - --v=2
+    {{ if eq .Cluster.Kubernetes.CloudProvider "aws"  -}}
+    env:
+     - name: KUBE_MAX_PD_VOLS
+       value: "20"
+    {{ end -}}
     resources:
       requests:
         cpu: 100m

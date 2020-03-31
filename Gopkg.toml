@@ -96,7 +96,7 @@ required = [
 
 [[override]]
   name = "github.com/giantswarm/k8scloudconfig"
-  version = "~0.1.0"
+  branch = "master"
 
 [[override]]
   name = "github.com/giantswarm/microendpoint"
