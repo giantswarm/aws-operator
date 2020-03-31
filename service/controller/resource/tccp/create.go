@@ -2,6 +2,7 @@ package tccp
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"sort"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
+	pkgtemplate "github.com/giantswarm/aws-operator/pkg/template"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -116,6 +118,26 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
+			err = r.stopMasterInstance(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.detachVolumes(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.snapshotEtcdVolume(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.terminateMasterInstance(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -237,6 +259,10 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+		instance, err := r.newParamsMainInstance(ctx, cr, t)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		loadBalancers, err := r.newParamsMainLoadBalancers(ctx, cr, t)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -273,7 +299,7 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 		params = &template.ParamsMain{
 			IAMPolicies:     iamPolicies,
 			InternetGateway: internetGateway,
-			Instance:
+			Instance:        instance,
 			LoadBalancers:   loadBalancers,
 			NATGateway:      natGateway,
 			Outputs:         outputs,
@@ -289,15 +315,78 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 }
 
 func (r *Resource) newParamsMainIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMPolicies, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
-			ClusterID:      key.ClusterID(&cr),
-			Route53Enabled: r.route53Enabled,
+			ClusterID:         key.ClusterID(&cr),
+			EC2ServiceDomain:  key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			KMSKeyARN:         cc.Status.TenantCluster.Encryption.Key,
+			MasterPolicyName:  key.PolicyNameMaster(cr),
+			MasterProfileName: key.ProfileNameMaster(cr),
+			MasterRoleName:    key.RoleNameMaster(cr),
+			RegionARN:         key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			Route53Enabled:    r.route53Enabled,
+			S3Bucket:          key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 		}
 	}
 
 	return iamPolicies, nil
+}
+
+func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	// TODO: The rendering should be moved into the templates
+	// https://github.com/giantswarm/giantswarm/issues/7665
+
+	c := template.SmallCloudconfigConfig{
+		S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCP(&cr)),
+	}
+	rendered, err := pkgtemplate.Render(key.CloudConfigSmallTemplates(), c)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var instance *template.ParamsMainInstance
+	{
+		instance = &template.ParamsMainInstance{
+			Cluster: template.ParamsMainInstanceCluster{
+				ID: key.ClusterID(&cr),
+			},
+			Image: template.ParamsMainInstanceImage{
+				ID: key.ImageID(cc.Status.TenantCluster.AWS.Region),
+			},
+			Master: template.ParamsMainInstanceMaster{
+				AZ:          key.MasterAvailabilityZone(cr),
+				CloudConfig: base64.StdEncoding.EncodeToString([]byte(rendered)),
+				DockerVolume: template.ParamsMainInstanceMasterDockerVolume{
+					Name:         key.VolumeNameDocker(cr),
+					ResourceName: key.DockerVolumeResourceName(cr, t),
+				},
+				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
+					Name: key.VolumeNameEtcd(cr),
+				},
+				LogVolume: template.ParamsMainInstanceMasterLogVolume{
+					Name: key.VolumeNameLog(cr),
+				},
+				Instance: template.ParamsMainInstanceMasterInstance{
+					ResourceName: key.MasterInstanceResourceName(cr, t),
+					Type:         key.MasterInstanceType(cr),
+					Monitoring:   r.instanceMonitoring,
+				},
+				PrivateSubnet: key.SanitizeCFResourceName(key.PrivateSubnetName(key.MasterAvailabilityZone(cr))),
+			},
+		}
+	}
+	return instance, nil
 }
 
 func (r *Resource) newParamsMainInternetGateway(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainInternetGateway, error) {
@@ -693,10 +782,6 @@ func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1al
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	// QUESTION: When is this executed? since this has to be executed only just before migration to tccpn stack
-	// and master instance needs to be stopped
-	// otherwise it wil have outdated data for etcd
 
 	if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID != "" {
 		// In case there is a snapshot ID, we already created the snapshot and do

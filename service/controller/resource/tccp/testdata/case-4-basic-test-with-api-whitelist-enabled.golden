@@ -524,7 +524,7 @@ Resources:
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: 10.0.0.0/24
+        CidrIp: 
       -
         Description: "Custom Public API Whitelist CIDR."
         IpProtocol: tcp
@@ -637,7 +637,7 @@ Resources:
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: 10.0.0.0/24
+        CidrIp: 
       -
         Description: "Custom Private API Whitelist CIDR."
         IpProtocol: tcp
@@ -852,7 +852,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.0.0.0/24
+      CidrBlock: 
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
