@@ -9,7 +9,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/k8scloudconfig/v_6_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -109,8 +109,9 @@ const (
 )
 
 const (
-	kubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
-	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
+	kubectlVersion                           = "1.16.4"
+	kubernetesAPIHealthzVersion              = "0999549a4c334b646288d08bd2c781c6aae2e12f"
+	kubernetesSetupNetworkEnvironmentVersion = "68e90113331feca3b9ffe6a75a601b381ba8c1f7"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -221,10 +222,11 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
-func DefaultVersions() v_6_0_0.Versions {
-	return v_6_0_0.Versions{
-		Kubectl:              kubectlVersion,
-		KubernetesAPIHealthz: kubernetesAPIHealthzVersion,
+func DefaultVersions() k8scloudconfig.Versions {
+	return k8scloudconfig.Versions{
+		Kubectl:                      kubectlVersion,
+		KubernetesAPIHealthz:         kubernetesAPIHealthzVersion,
+		KubernetesNetworkSetupDocker: kubernetesSetupNetworkEnvironmentVersion,
 	}
 }
 
