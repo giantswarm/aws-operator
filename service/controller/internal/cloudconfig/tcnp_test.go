@@ -10,7 +10,6 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
-	"github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
@@ -36,7 +35,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 		ctx    context.Context
 		cr     infrastructurev1alpha2.AWSCluster
 		certs  certs.Cluster
-		images v_6_0_0.Images
+		images k8scloudconfig.Images
 		keys   randomkeys.Cluster
 		labels string
 	}{

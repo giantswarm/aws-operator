@@ -1,9 +1,9 @@
 package unittest
 
-import "github.com/giantswarm/k8scloudconfig/v_6_0_0"
+import k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_6_0_0"
 
-func DefaultImages() v_6_0_0.Images {
-	return v_6_0_0.Images{
+func DefaultImages() k8scloudconfig.Images {
+	return k8scloudconfig.Images{
 		CalicoCNI:                    "1.0.0",
 		CalicoKubeControllers:        "1.0.0",
 		CalicoNode:                   "1.0.0",

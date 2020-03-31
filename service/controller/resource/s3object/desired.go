@@ -9,7 +9,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/certs"
-	"github.com/giantswarm/k8scloudconfig/v_6_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/randomkeys"
@@ -98,16 +98,16 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	var images v_6_0_0.Images
+	var images k8scloudconfig.Images
 	{
-		v, err := v_6_0_0.ExtractComponentVersions(release.Spec.Components)
+		v, err := k8scloudconfig.ExtractComponentVersions(release.Spec.Components)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		v.Kubectl = key.KubectlVersion
 		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
-		images = v_6_0_0.BuildImages(r.registryDomain, v)
+		images = k8scloudconfig.BuildImages(r.registryDomain, v)
 	}
 
 	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, images, r.labelsFunc(cr))
