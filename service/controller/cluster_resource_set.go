@@ -3,8 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"strings"
 
 	"github.com/giantswarm/certs"
@@ -20,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
@@ -41,6 +40,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/service"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"

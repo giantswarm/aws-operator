@@ -274,6 +274,7 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 		params = &template.ParamsMain{
 			IAMPolicies:     iamPolicies,
 			InternetGateway: internetGateway,
+			Instance:
 			LoadBalancers:   loadBalancers,
 			NATGateway:      natGateway,
 			Outputs:         outputs,

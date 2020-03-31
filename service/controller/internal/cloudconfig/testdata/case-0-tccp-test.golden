@@ -508,36 +508,6 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,CltVbml0XQpSZXF1aXJlcz1ldGNkMy1hdHRhY2gtZGVwZW5kZW5jaWVzLnNlcnZpY2UKQWZ0ZXI9ZXRjZDMtYXR0YWNoLWRlcGVuZGVuY2llcy5zZXJ2aWNlCg==",
-          "verification": {}
-        },
-        "filesystem": "root",
-        "mode": 420,
-        "group": {
-          "name": "root"
-        },
-        "path": "/etc/systemd/system/etcd3.d/10-require-attach-dep.conf",
-        "user": {
-          "name": "root"
-        }
-      },
-      {
-        "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,CiMgZW5zdXJlIHRoYXQgdHJhZmZpYyBhcnJpdmluZyBvbiBldGgxIGxlYXZlcyBhZ2FpbiBmcm9tIGV0aDEgdG8gcHJldmVudCBhc3ltZXRyaWMgcm91dGluZwpbTWF0Y2hdCk5hbWU9ZXRoMQpbTmV0d29ya10KQWRkcmVzcz0xMC4wLjAuNC8yNAoKW1JvdXRpbmdQb2xpY3lSdWxlXQpUYWJsZT0yCkZyb209MTAuMC4wLjQvMzIKCltSb3V0ZV0KRGVzdGluYXRpb249MC4wLjAuMC8wCkdhdGV3YXk9MTAuMC4wLjEKVGFibGU9Mgo=",
-          "verification": {}
-        },
-        "filesystem": "root",
-        "mode": 420,
-        "group": {
-          "name": "root"
-        },
-        "path": "/etc/systemd/network/10-eth1.network",
-        "user": {
-          "name": "root"
-        }
-      },
-      {
-        "contents": {
           "source": "data:text/plain;charset=utf-8;base64,CiMgVmVuZG9yZWQgZnJvbSBodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vYXdzL2FtYXpvbi12cGMtY25pLWs4cy9tYXN0ZXIvY29uZmlnL3YxLjYvYXdzLWs4cy1jbmkueWFtbAoKLS0tCmFwaVZlcnNpb246IHJiYWMuYXV0aG9yaXphdGlvbi5rOHMuaW8vdjEKa2luZDogQ2x1c3RlclJvbGUKbWV0YWRhdGE6CiAgbmFtZTogYXdzLW5vZGUKcnVsZXM6CiAgLSBhcGlHcm91cHM6CiAgICAgIC0gY3JkLms4cy5hbWF6b25hd3MuY29tCiAgICByZXNvdXJjZXM6CiAgICAgIC0gIioiCiAgICAgIC0gbmFtZXNwYWNlcwogICAgdmVyYnM6CiAgICAgIC0gIioiCiAgLSBhcGlHcm91cHM6IFsiIl0KICAgIHJlc291cmNlczoKICAgICAgLSBwb2RzCiAgICAgIC0gbm9kZXMKICAgICAgLSBuYW1lc3BhY2VzCiAgICB2ZXJiczogWyJsaXN0IiwgIndhdGNoIiwgImdldCJdCiAgLSBhcGlHcm91cHM6IFsiZXh0ZW5zaW9ucyJdCiAgICByZXNvdXJjZXM6CiAgICAgIC0gZGFlbW9uc2V0cwogICAgdmVyYnM6IFsibGlzdCIsICJ3YXRjaCJdCiAgIyMgRGV2aWF0aW9uIGZyb20gb3JpZ2luYWwgbWFuaWZlc3QgLSAxCiAgIyMgYWRkIFJCQUMgcnVsZXMgdG8gdXNlIHByaXZpbGVnZWQgUFNQCiAgLSBhcGlHcm91cHM6CiAgICAgIC0gZXh0ZW5zaW9ucwogICAgcmVzb3VyY2VzOgogICAgICAtIHBvZHNlY3VyaXR5cG9saWNpZXMKICAgIHJlc291cmNlTmFtZXM6CiAgICAgIC0gcHJpdmlsZWdlZAogICAgdmVyYnM6CiAgICAgIC0gdXNlCgotLS0KYXBpVmVyc2lvbjogdjEKa2luZDogU2VydmljZUFjY291bnQKbWV0YWRhdGE6CiAgbmFtZTogYXdzLW5vZGUKICBuYW1lc3BhY2U6IGt1YmUtc3lzdGVtCgotLS0KYXBpVmVyc2lvbjogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pby92MQpraW5kOiBDbHVzdGVyUm9sZUJpbmRpbmcKbWV0YWRhdGE6CiAgbmFtZTogYXdzLW5vZGUKcm9sZVJlZjoKICBhcGlHcm91cDogcmJhYy5hdXRob3JpemF0aW9uLms4cy5pbwogIGtpbmQ6IENsdXN0ZXJSb2xlCiAgbmFtZTogYXdzLW5vZGUKc3ViamVjdHM6CiAgLSBraW5kOiBTZXJ2aWNlQWNjb3VudAogICAgbmFtZTogYXdzLW5vZGUKICAgIG5hbWVzcGFjZToga3ViZS1zeXN0ZW0KLS0tCmtpbmQ6IERhZW1vblNldAphcGlWZXJzaW9uOiBhcHBzL3YxCm1ldGFkYXRhOgogIG5hbWU6IGF3cy1ub2RlCiAgbmFtZXNwYWNlOiBrdWJlLXN5c3RlbQogIGxhYmVsczoKICAgIGs4cy1hcHA6IGF3cy1ub2RlCnNwZWM6CiAgdXBkYXRlU3RyYXRlZ3k6CiAgICB0eXBlOiBSb2xsaW5nVXBkYXRlCiAgICByb2xsaW5nVXBkYXRlOgogICAgICBtYXhVbmF2YWlsYWJsZTogIjEwJSIKICBzZWxlY3RvcjoKICAgIG1hdGNoTGFiZWxzOgogICAgICBrOHMtYXBwOiBhd3Mtbm9kZQogIHRlbXBsYXRlOgogICAgbWV0YWRhdGE6CiAgICAgIGxhYmVsczoKICAgICAgICBrOHMtYXBwOiBhd3Mtbm9kZQogICAgc3BlYzoKICAgICAgcHJpb3JpdHlDbGFzc05hbWU6IHN5c3RlbS1ub2RlLWNyaXRpY2FsCiAgICAgIGFmZmluaXR5OgogICAgICAgIG5vZGVBZmZpbml0eToKICAgICAgICAgIHJlcXVpcmVkRHVyaW5nU2NoZWR1bGluZ0lnbm9yZWREdXJpbmdFeGVjdXRpb246CiAgICAgICAgICAgIG5vZGVTZWxlY3RvclRlcm1zOgogICAgICAgICAgICAgIC0gbWF0Y2hFeHByZXNzaW9uczoKICAgICAgICAgICAgICAgICAgLSBrZXk6ICJiZXRhLmt1YmVybmV0ZXMuaW8vb3MiCiAgICAgICAgICAgICAgICAgICAgb3BlcmF0b3I6IEluCiAgICAgICAgICAgICAgICAgICAgdmFsdWVzOgogICAgICAgICAgICAgICAgICAgICAgLSBsaW51eAogICAgICAgICAgICAgICAgICAtIGtleTogImJldGEua3ViZXJuZXRlcy5pby9hcmNoIgogICAgICAgICAgICAgICAgICAgIG9wZXJhdG9yOiBJbgogICAgICAgICAgICAgICAgICAgIHZhbHVlczoKICAgICAgICAgICAgICAgICAgICAgIC0gYW1kNjQKICAgICAgICAgICAgICAgICAgLSBrZXk6IGVrcy5hbWF6b25hd3MuY29tL2NvbXB1dGUtdHlwZQogICAgICAgICAgICAgICAgICAgIG9wZXJhdG9yOiBOb3RJbgogICAgICAgICAgICAgICAgICAgIHZhbHVlczoKICAgICAgICAgICAgICAgICAgICAgIC0gZmFyZ2F0ZQogICAgICBzZXJ2aWNlQWNjb3VudE5hbWU6IGF3cy1ub2RlCiAgICAgIGhvc3ROZXR3b3JrOiB0cnVlCiAgICAgIHRvbGVyYXRpb25zOgogICAgICAgIC0gb3BlcmF0b3I6IEV4aXN0cwogICAgICBjb250YWluZXJzOgogICAgICAgIC0gaW1hZ2U6IHF1YXkuaW8vZ2lhbnRzd2FybS9hbWF6b24tazhzLWNuaTp2MS42LjAKICAgICAgICAgIGltYWdlUHVsbFBvbGljeTogQWx3YXlzCiAgICAgICAgICBwb3J0czoKICAgICAgICAgICAgLSBjb250YWluZXJQb3J0OiA2MTY3OAogICAgICAgICAgICAgIG5hbWU6IG1ldHJpY3MKICAgICAgICAgIG5hbWU6IGF3cy1ub2RlCiAgICAgICAgICByZWFkaW5lc3NQcm9iZToKICAgICAgICAgICAgZXhlYzoKICAgICAgICAgICAgICBjb21tYW5kOiBbIi9hcHAvZ3JwYy1oZWFsdGgtcHJvYmUiLCAiLWFkZHI9OjUwMDUxIl0KICAgICAgICAgICAgaW5pdGlhbERlbGF5U2Vjb25kczogMzUKICAgICAgICAgIGxpdmVuZXNzUHJvYmU6CiAgICAgICAgICAgIGV4ZWM6CiAgICAgICAgICAgICAgY29tbWFuZDogWyIvYXBwL2dycGMtaGVhbHRoLXByb2JlIiwgIi1hZGRyPTo1MDA1MSJdCiAgICAgICAgICAgIGluaXRpYWxEZWxheVNlY29uZHM6IDM1CiAgICAgICAgICBlbnY6CiAgICAgICAgICAgIC0gbmFtZTogQVdTX1ZQQ19LOFNfQ05JX0xPR0xFVkVMCiAgICAgICAgICAgICAgdmFsdWU6IERFQlVHCiAgICAgICAgICAgIC0gbmFtZTogQVdTX1ZQQ19FTklfTVRVCiAgICAgICAgICAgICAgdmFsdWU6ICI5MDAxIgogICAgICAgICAgICAjIyBEZXZpYXRpb24gZnJvbSBvcmlnaW5hbCBtYW5pZmVzdCAtIDIKICAgICAgICAgICAgIyMgVGhpcyBjb25maWcgdmFsdWUgaXMgaW1wb3J0YW50IC0gU2VlIGhlcmUgaHR0cHM6Ly9naXRodWIuY29tL2F3cy9hbWF6b24tdnBjLWNuaS1rOHMvYmxvYi9tYXN0ZXIvUkVBRE1FLm1kI2NuaS1jb25maWd1cmF0aW9uLXZhcmlhYmxlcwogICAgICAgICAgICAtIG5hbWU6IEFXU19WUENfSzhTX0NOSV9DVVNUT01fTkVUV09SS19DRkcKICAgICAgICAgICAgICB2YWx1ZTogInRydWUiCiAgICAgICAgICAgICMjIERldmlhdGlvbiBmcm9tIG9yaWdpbmFsIG1hbmlmZXN0IC0gMwogICAgICAgICAgICAjIyBzZXR0aW5nIGN1c3RvbSBFTkkgY29uZmlnIGFubm90YXRpb24KICAgICAgICAgICAgLSBuYW1lOiBFTklfQ09ORklHX0xBQkVMX0RFRgogICAgICAgICAgICAgIHZhbHVlOiAiZmFpbHVyZS1kb21haW4uYmV0YS5rdWJlcm5ldGVzLmlvL3pvbmUiCiAgICAgICAgICAgIC0gbmFtZTogTVlfTk9ERV9OQU1FCiAgICAgICAgICAgICAgdmFsdWVGcm9tOgogICAgICAgICAgICAgICAgZmllbGRSZWY6CiAgICAgICAgICAgICAgICAgIGZpZWxkUGF0aDogc3BlYy5ub2RlTmFtZQogICAgICAgICAgICAjIyBEZXZpYXRpb24gZnJvbSBvcmlnaW5hbCBtYW5pZmVzdCAtIDQKICAgICAgICAgICAgIyMgcHJld2FybSBJUCB0byBsaW1pdCBBV1MgYXBpIGNhbGxzCiAgICAgICAgICAgIC0gbmFtZTogV0FSTV9JUF9UQVJHRVQKICAgICAgICAgICAgICB2YWx1ZTogIjIwIgogICAgICAgICAgICAtIG5hbWU6IE1JTklNVU1fSVBfVEFSR0VUCiAgICAgICAgICAgICAgdmFsdWU6ICI1IgogICAgICAgICAgICAjIyBEZXZpYXRpb24gZnJvbSBvcmlnaW5hbCBtYW5pZmVzdCAtIDUKICAgICAgICAgICAgIyMgZGlzYWJsZSBTTkFUIGFzIHdlIHNldHVwIE5BVEdXIGluIHRoZSByb3V0ZSB0YWJsZXMKICAgICAgICAgICAgLSBuYW1lOiBBV1NfVlBDX0s4U19DTklfRVhURVJOQUxTTkFUCiAgICAgICAgICAgICAgdmFsdWU6ICJ0cnVlIgogICAgICAgICAgICAjIyBEZXZpYXRpb24gZnJvbSBvcmlnaW5hbCBtYW5pZmVzdCAtIDYKICAgICAgICAgICAgIyMgRXhwbGljaXQgaW50ZXJmYWNlIG5hbWluZwogICAgICAgICAgICAtIG5hbWU6IEFXU19WUENfSzhTX0NOSV9WRVRIUFJFRklYCiAgICAgICAgICAgICAgdmFsdWU6IGVuaQogICAgICAgICAgcmVzb3VyY2VzOgogICAgICAgICAgICByZXF1ZXN0czoKICAgICAgICAgICAgICBjcHU6IDEwbQogICAgICAgICAgc2VjdXJpdHlDb250ZXh0OgogICAgICAgICAgICBwcml2aWxlZ2VkOiB0cnVlCiAgICAgICAgICB2b2x1bWVNb3VudHM6CiAgICAgICAgICAgIC0gbW91bnRQYXRoOiAvaG9zdC9vcHQvY25pL2JpbgogICAgICAgICAgICAgIG5hbWU6IGNuaS1iaW4tZGlyCiAgICAgICAgICAgIC0gbW91bnRQYXRoOiAvaG9zdC9ldGMvY25pL25ldC5kCiAgICAgICAgICAgICAgbmFtZTogY25pLW5ldC1kaXIKICAgICAgICAgICAgLSBtb3VudFBhdGg6IC9ob3N0L3Zhci9sb2cKICAgICAgICAgICAgICBuYW1lOiBsb2ctZGlyCiAgICAgICAgICAgIC0gbW91bnRQYXRoOiAvdmFyL3J1bi9kb2NrZXIuc29jawogICAgICAgICAgICAgIG5hbWU6IGRvY2tlcnNvY2sKICAgICAgICAgICAgLSBtb3VudFBhdGg6IC92YXIvcnVuL2RvY2tlcnNoaW0uc29jawogICAgICAgICAgICAgIG5hbWU6IGRvY2tlcnNoaW0KICAgICAgdm9sdW1lczoKICAgICAgICAtIG5hbWU6IGNuaS1iaW4tZGlyCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL29wdC9jbmkvYmluCiAgICAgICAgLSBuYW1lOiBjbmktbmV0LWRpcgogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC9ldGMvY25pL25ldC5kCiAgICAgICAgLSBuYW1lOiBsb2ctZGlyCiAgICAgICAgICBob3N0UGF0aDoKICAgICAgICAgICAgcGF0aDogL3Zhci9sb2cKICAgICAgICAtIG5hbWU6IGRvY2tlcnNvY2sKICAgICAgICAgIGhvc3RQYXRoOgogICAgICAgICAgICBwYXRoOiAvdmFyL3J1bi9kb2NrZXIuc29jawogICAgICAgIC0gbmFtZTogZG9ja2Vyc2hpbQogICAgICAgICAgaG9zdFBhdGg6CiAgICAgICAgICAgIHBhdGg6IC92YXIvcnVuL2RvY2tlcnNoaW0uc29jawoKLS0tCmFwaVZlcnNpb246IGFwaWV4dGVuc2lvbnMuazhzLmlvL3YxYmV0YTEKa2luZDogQ3VzdG9tUmVzb3VyY2VEZWZpbml0aW9uCm1ldGFkYXRhOgogIG5hbWU6IGVuaWNvbmZpZ3MuY3JkLms4cy5hbWF6b25hd3MuY29tCnNwZWM6CiAgc2NvcGU6IENsdXN0ZXIKICBncm91cDogY3JkLms4cy5hbWF6b25hd3MuY29tCiAgdmVyc2lvbnM6CiAgICAtIG5hbWU6IHYxYWxwaGExCiAgICAgIHNlcnZlZDogdHJ1ZQogICAgICBzdG9yYWdlOiB0cnVlCiAgbmFtZXM6CiAgICBwbHVyYWw6IGVuaWNvbmZpZ3MKICAgIHNpbmd1bGFyOiBlbmljb25maWcKICAgIGtpbmQ6IEVOSUNvbmZpZwoKCgo=",
           "verification": {}
         },
@@ -794,18 +764,8 @@
         "name": "var-lib-docker.mount"
       },
       {
-        "contents": "\n[Unit]\nDescription=Attach etcd dependencies\nRequires=network.target\nAfter=network.target\n\n[Service]\nEnvironment=\"IMAGE=quay.io/giantswarm/aws-attach-etcd-dep:f6a1d8eb340032f9dc2519dd974797487125b1a7\"\nEnvironment=\"NAME=%p.service\"\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash -c \"docker run --rm -i \\\n      -v /dev:/dev \\\n      --privileged \\\n      --name ${NAME} \\\n      ${IMAGE} \\\n      --eni-device-index=1 \\\n      --eni-tag-key=Name \\\n      --eni-tag-value=-master0-etcd \\\n      --volume-device-name=/dev/xvdh \\\n      --volume-device-filesystem-type=ext4 \\\n      --volume-tag-key=Name \\\n      --volume-tag-value=-master0-etcd\"\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "\n[Unit]\nDescription=etcd3 data volume\nRequires=format-etcd-ebs.service\nAfter=format-etcd-ebs.service\nBefore=etcd3.service\n\n[Mount]\nWhat=/dev/disk/by-label/etcd\nWhere=/var/lib/etcd\nType=ext4\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
-        "name": "etcd3-attach-dependencies.service"
-      },
-      {
-        "contents": "\n[Unit]\nDescription=etcd3 data volume\nAfter=etcd3-attach-dependencies.service\nBefore=etcd3.service\n\n[Mount]\nWhere=/var/lib/etcd\n\n[Install]\nWantedBy=multi-user.target\n",
-        "enabled": true,
-        "name": "var-lib-etcd.automount"
-      },
-      {
-        "contents": "\n[Unit]\nDescription=etcd3 data volume\nBefore=etcd3.service\n\n[Mount]\nWhat=/dev/disk/by-label/etcd\nWhere=/var/lib/etcd\nType=ext4\n\n[Install]\nWantedBy=multi-user.target\n",
-        "enabled": false,
         "name": "var-lib-etcd.mount"
       },
       {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
@@ -13,6 +12,7 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -85,7 +85,7 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.EtcdPort = key.EtcdPort
-		params.Extension = &HAMasterExtension{
+		params.Extension = &MasterExtension{
 			baseExtension: baseExtension{
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
