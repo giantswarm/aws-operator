@@ -163,6 +163,10 @@ func ReleaseVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Release]
 }
 
+func ReleaseName(releaseVersion string) string {
+	return fmt.Sprintf("v%s", releaseVersion)
+}
+
 func RegionARN(region string) string {
 	regionARN := "aws"
 

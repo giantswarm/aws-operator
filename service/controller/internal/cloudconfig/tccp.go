@@ -8,6 +8,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
@@ -39,7 +40,7 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	return t, nil
 }
 
-func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images v_6_0_0.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -103,7 +104,7 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.SSOPublicKey = t.config.SSOPublicKey
-		params.Images = k8scloudconfig.BuildImages(t.config.RegistryDomain)
+		params.Images = images
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)

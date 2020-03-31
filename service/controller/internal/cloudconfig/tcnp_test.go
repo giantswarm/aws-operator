@@ -10,6 +10,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
@@ -35,6 +36,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 		ctx    context.Context
 		cr     infrastructurev1alpha2.AWSCluster
 		certs  certs.Cluster
+		images v_6_0_0.Images
 		keys   randomkeys.Cluster
 		labels string
 	}{
@@ -43,6 +45,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 			ctx:    unittest.DefaultContext(),
 			cr:     unittest.DefaultCluster(),
 			certs:  unittest.DefaultCerts(),
+			images: unittest.DefaultImages(),
 			keys:   unittest.DefaultKeys(),
 			labels: "k1=v1,k2=v2",
 		},
@@ -51,6 +54,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 			ctx:    unittest.DefaultContextChina(),
 			cr:     unittest.DefaultClusterChina(),
 			certs:  unittest.DefaultCerts(),
+			images: unittest.DefaultImages(),
 			keys:   unittest.DefaultKeys(),
 			labels: "k1=v1,k2=v2",
 		},
@@ -93,7 +97,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 				}
 			}
 
-			templateBody, err := tcnp.Render(tc.ctx, tc.cr, tc.certs, tc.keys, tc.labels)
+			templateBody, err := tcnp.Render(tc.ctx, tc.cr, tc.certs, tc.keys, tc.images, tc.labels)
 			if err != nil {
 				t.Fatal(err)
 			}

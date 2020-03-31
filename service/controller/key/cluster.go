@@ -14,7 +14,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_5_2_0"
+	CloudConfigVersion = "v_6_0_0"
 	CloudProvider      = "aws"
 )
 
@@ -27,6 +27,11 @@ const (
 	EtcdPort             = 2379
 	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443
+)
+
+const (
+	KubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd"
+	KubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.

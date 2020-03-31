@@ -113,7 +113,7 @@
       },
       {
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKZG9tYWlucz0iZXRjZC44eTVjay5rOHMuZ2F1c3MuY24tbm9ydGgtMS5hd3MuZ2lnYW50aWMuaW8gYXBpLjh5NWNrLms4cy5nYXVzcy5jbi1ub3J0aC0xLmF3cy5naWdhbnRpYy5pbyBxdWF5LmlvIgoKZm9yIGRvbWFpbiBpbiAkZG9tYWluczsgZG8KdW50aWwgbnNsb29rdXAgJGRvbWFpbjsgZG8KICAgIGVjaG8gIldhaXRpbmcgZm9yIGRvbWFpbiAkZG9tYWluIHRvIGJlIGF2YWlsYWJsZSIKICAgIHNsZWVwIDUKZG9uZQoKZWNobyAiU3VjY2Vzc2Z1bGx5IHJlc29sdmVkIGRvbWFpbiAkZG9tYWluIgpkb25lCg==",
+          "source": "data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKZG9tYWlucz0iZXRjZC44eTVjay5rOHMuZ2F1c3MuY24tbm9ydGgtMS5hd3MuZ2lnYW50aWMuaW8gYXBpLjh5NWNrLms4cy5nYXVzcy5jbi1ub3J0aC0xLmF3cy5naWdhbnRpYy5pbyA=",
           "verification": {}
         },
         "filesystem": "root",
@@ -418,7 +418,7 @@
         "name": "k8s-setup-network-env.service"
       },
       {
-        "contents": "[Unit]\nDescription=Pulls hyperkube binary from image to local FS\nAfter=docker.service\nRequires=docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironment=\"IMAGE=quay.io/giantswarm/hyperkube:v1.16.3\"\nEnvironment=\"NAME=%p.service\"\nExecStartPre=/bin/bash -c \"/usr/bin/docker create --name $NAME $IMAGE\"\nExecStart=/bin/bash -c \"/usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube\"\nExecStartPost=/bin/bash -c \"/usr/bin/docker rm $NAME\"\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=Pulls hyperkube binary from image to local FS\nAfter=docker.service\nRequires=docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironment=\"IMAGE=1.0.0\"\nEnvironment=\"NAME=%p.service\"\nExecStartPre=/bin/bash -c \"/usr/bin/docker create --name $NAME $IMAGE\"\nExecStart=/bin/bash -c \"/usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube\"\nExecStartPost=/bin/bash -c \"/usr/bin/docker rm $NAME\"\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-setup-download-hyperkube.service"
       },

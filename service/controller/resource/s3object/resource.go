@@ -26,6 +26,7 @@ type Config struct {
 	Logger             micrologger.Logger
 	PathFunc           func(key.LabelsGetter) string
 	RandomKeysSearcher randomkeys.Interface
+	RegistryDomain     string
 }
 
 // Resource implements the CRUD resource interface of operatorkit to manage S3
@@ -46,6 +47,7 @@ type Resource struct {
 	logger             micrologger.Logger
 	pathFunc           func(key.LabelsGetter) string
 	randomKeysSearcher randomkeys.Interface
+	registryDomain     string
 }
 
 // New creates a new configured cloudformation resource.
@@ -71,6 +73,9 @@ func New(config Config) (*Resource, error) {
 	if config.RandomKeysSearcher == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.RandomKeySearcher must not be empty", config)
 	}
+	if config.RegistryDomain == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", config)
+	}
 
 	r := &Resource{
 		certsSearcher:      config.CertsSearcher,
@@ -80,6 +85,7 @@ func New(config Config) (*Resource, error) {
 		logger:             config.Logger,
 		pathFunc:           config.PathFunc,
 		randomKeysSearcher: config.RandomKeysSearcher,
+		registryDomain:     config.RegistryDomain,
 	}
 
 	return r, nil
