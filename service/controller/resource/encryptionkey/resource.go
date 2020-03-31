@@ -1,6 +1,7 @@
-package tccpnencryption
+package encryptionkey
 
 import (
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -9,13 +10,14 @@ import (
 )
 
 const (
-	name = "tccpnencryption"
+	name = "encryptionkey"
 )
 
 type Config struct {
-	G8sClient versioned.Interface
-	Encrypter encrypter.Interface
-	Logger    micrologger.Logger
+	G8sClient     versioned.Interface
+	Encrypter     encrypter.Interface
+	Logger        micrologger.Logger
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 // Resource implements the operatorkit Resource interface to fill the operator's
@@ -26,9 +28,10 @@ type Config struct {
 //     cc.Status.TenantCluster.Encryption.Key
 //
 type Resource struct {
-	g8sClient versioned.Interface
-	encrypter encrypter.Interface
-	logger    micrologger.Logger
+	g8sClient     versioned.Interface
+	encrypter     encrypter.Interface
+	logger        micrologger.Logger
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {

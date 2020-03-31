@@ -223,6 +223,35 @@ func ChinaControllerContext() controllercontext.Context {
 							},
 						},
 					},
+					Subnets: []*ec2.Subnet{
+						{
+							SubnetId: aws.String("subnet-id-eu-central-1a"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("PrivateSubnetEuCentral1a"),
+								},
+							},
+						},
+						{
+							SubnetId: aws.String("subnet-id-eu-central-1b"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("PrivateSubnetEuCentral1b"),
+								},
+							},
+						},
+						{
+							SubnetId: aws.String("subnet-id-eu-central-1c"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("PrivateSubnetEuCentral1c"),
+								},
+							},
+						},
+					},
 					VPC: controllercontext.ContextStatusTenantClusterTCCPVPC{
 						ID:                  "vpc-id",
 						PeeringConnectionID: "peering-connection-id",
@@ -451,11 +480,29 @@ func DefaultControllerContext() controllercontext.Context {
 					},
 					Subnets: []*ec2.Subnet{
 						{
-							SubnetId: aws.String("private-subnet-id-1"),
+							SubnetId: aws.String("subnet-id-eu-central-1a"),
 							Tags: []*ec2.Tag{
 								{
 									Key:   aws.String("Name"),
 									Value: aws.String("PrivateSubnetEuCentral1a"),
+								},
+							},
+						},
+						{
+							SubnetId: aws.String("subnet-id-eu-central-1b"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("PrivateSubnetEuCentral1b"),
+								},
+							},
+						},
+						{
+							SubnetId: aws.String("subnet-id-eu-central-1c"),
+							Tags: []*ec2.Tag{
+								{
+									Key:   aws.String("Name"),
+									Value: aws.String("PrivateSubnetEuCentral1c"),
 								},
 							},
 						},

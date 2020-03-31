@@ -1,4 +1,4 @@
-package tccpnencryption
+package encryptionkey
 
 import (
 	"context"

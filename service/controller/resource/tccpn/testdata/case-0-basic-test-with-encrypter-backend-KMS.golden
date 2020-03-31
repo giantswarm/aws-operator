@@ -10,7 +10,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - 
+        - subnet-id-eu-central-1b
       AvailabilityZones:
         - eu-central-1b
       DesiredCapacity: 1
@@ -63,7 +63,7 @@ Resources:
        Description: A Network interface used for etcd.
        GroupSet:
        - master-security-group-id
-       SubnetId: 
+       SubnetId: subnet-id-eu-central-1b
        PrivateIpAddress: 10.100.3.68
        Tags:
        - Key: Name
@@ -74,7 +74,7 @@ Resources:
       AvailabilityZone: eu-central-1b
       Encrypted: true
       Size: 100
-      #SnapshotId: snap-1234567890abcdef0
+      SnapshotId: snap-1234567890abcdef0
       Tags:
       - Key: Name
         Value: 8y5ck-master0-etcd

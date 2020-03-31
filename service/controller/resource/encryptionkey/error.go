@@ -1,4 +1,4 @@
-package tcnpencryption
+package encryptionkey
 
 import (
 	"github.com/giantswarm/microerror"

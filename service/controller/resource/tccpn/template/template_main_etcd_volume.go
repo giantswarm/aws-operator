@@ -8,7 +8,7 @@ const TemplateMainEtcdVolume = `
       AvailabilityZone: {{ .EtcdVolume.AvailabilityZone }}
       Encrypted: true
       Size: 100
-      #SnapshotId: {{ .EtcdVolume.SnapshotID }}
+      SnapshotId: {{ .EtcdVolume.SnapshotID }}
       Tags:
       - Key: Name
         Value: {{ .EtcdVolume.Name }}

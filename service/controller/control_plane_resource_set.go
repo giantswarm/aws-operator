@@ -27,12 +27,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
@@ -185,15 +185,16 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
-	var tccpnEncryptionResource resource.Interface
+	var encryptionKeyResource resource.Interface
 	{
-		c := tccpnencryption.Config{
-			G8sClient: config.G8sClient,
-			Encrypter: encrypterObject,
-			Logger:    config.Logger,
+		c := encryptionkey.Config{
+			G8sClient:     config.G8sClient,
+			Encrypter:     encrypterObject,
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
-		tccpnEncryptionResource, err = tccpnencryption.New(c)
+		encryptionKeyResource, err = encryptionkey.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -336,8 +337,8 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
+		encryptionKeyResource,
 		tccpnOutputsResource,
-		tccpnEncryptionResource,
 		snapshotIDResource,
 		tccpAZsResource,
 		tccpSecurityGroupsResource,

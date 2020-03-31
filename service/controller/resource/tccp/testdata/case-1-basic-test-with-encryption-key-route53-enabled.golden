@@ -926,7 +926,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 
+      CidrBlock: 10.0.0.0/24
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
