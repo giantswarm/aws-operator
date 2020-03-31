@@ -10,13 +10,11 @@ func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
 		TemplateMainAutoScalingGroup,
+		TemplateMainENI,
 		TemplateMainEtcdVolume,
 		TemplateMainIAMPolicies,
 		TemplateMainLaunchConfiguration,
 		TemplateMainOutputs,
-		TemplateMainRouteTables,
-		TemplateMainSecurityGroups,
-		TemplateMainSubnets,
 	}
 
 	s, err := template.Render(l, v)

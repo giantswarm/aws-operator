@@ -10,13 +10,17 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref PrivateSubnetEuCentral1b
+        - subnet-id-eu-central-1b
       AvailabilityZones:
         - eu-central-1b
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 1
       LaunchConfigurationName: !Ref ControlPlaneNodeLaunchConfiguration
+      LoadBalancerNames:
+      - 8y5ck-api-internal
+      - 8y5ck-api
+      - 8y5ck-etcd
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
@@ -29,9 +33,9 @@ Resources:
           LifecycleHookName: ControlPlaneNode
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
 
-      # 10 seconds after a new node comes into service, the ASG checks the new
+      # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
-      HealthCheckGracePeriod: 10
+      HealthCheckGracePeriod: 60
 
       MetricsCollection:
         - Granularity: "1Minute"
@@ -53,6 +57,17 @@ Resources:
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
+  MasterEni:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+       Description: A Network interface used for etcd.
+       GroupSet:
+       - master-security-group-id
+       SubnetId: subnet-id-eu-central-1b
+       PrivateIpAddress: 10.100.3.68
+       Tags:
+       - Key: Name
+         Value: 8y5ck-master0-eni
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
@@ -62,7 +77,7 @@ Resources:
       SnapshotId: snap-1234567890abcdef0
       Tags:
       - Key: Name
-        Value: 8y5ck-etcd
+        Value: 8y5ck-master0-etcd
       VolumeType: gp2
   ControlPlaneNodesRole:
     Type: AWS::IAM::Role
@@ -114,6 +129,27 @@ Resources:
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
+          # Following rules are required to make the AWS CNI work. See also
+          # https://github.com/aws/amazon-vpc-cni-k8s#setup.
+          - Effect: Allow
+            Action:
+              - ec2:AssignPrivateIpAddresses
+              - ec2:AttachNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceTypes
+              - ec2:DescribeTags
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DetachNetworkInterface
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:UnassignPrivateIpAddresses
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource:
+              - arn:aws:ec2:*:*:network-interface/*
   ControlPlaneNodesInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -146,9 +182,9 @@ Resources:
       IamInstanceProfile: !Ref ControlPlaneNodesInstanceProfile
       ImageId: ami-038cea5071a5ee580
       InstanceType: m5.xlarge
-      InstanceMonitoring: true
+      InstanceMonitoring: false
       SecurityGroups:
-      - !Ref MasterSecurityGroup
+      -  master-security-group-id
       UserData:
         Fn::Base64: |
           {
@@ -194,163 +230,3 @@ Resources:
               ]
             }
           }
-  
-  PublicRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: vpc-id
-      Tags:
-      - Key: Name
-        Value: 8y5ck-public
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: public
-  PrivateRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: vpc-id
-      Tags:
-      - Key: Name
-        Value: 8y5ck-private
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: private
-  VPCPeeringRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      DestinationCidrBlock: 10.1.0.0/16
-      VpcPeeringConnectionId: peering-connection-id
-  MasterSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-master
-      VpcId: vpc-id
-      SecurityGroupIngress:
-      
-      -
-        Description: Allow all traffic to the master instance.
-        IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
-        CidrIp: 0.0.0.0/0
-      -
-        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
-        IpProtocol: tcp
-        FromPort: 4194
-        ToPort: 4194
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
-        IpProtocol: tcp
-        FromPort: 10250
-        ToPort: 10250
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
-        IpProtocol: tcp
-        FromPort: 10300
-        ToPort: 10300
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
-        IpProtocol: tcp
-        FromPort: 10301
-        ToPort: 10301
-        CidrIp: 10.1.0.0/16
-      -
-        Description: Only allow ssh traffic from the control plane.
-        IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: 10.1.0.0/16
-      Tags:
-        - Key: Name
-          Value:  8y5ck-master
-  EtcdELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: 8y5ck-etcd-elb
-      VpcId: vpc-id
-      SecurityGroupIngress:
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 0.0.0.0/0
-      
-      -
-        IpProtocol: tcp
-        FromPort: 2379
-        ToPort: 2379
-        CidrIp: 10.1.0.0/16
-      
-      Tags:
-        - Key: Name
-          Value: 8y5ck-etcd-elb
-  MasterAllowCalicoIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref MasterSecurityGroup
-  MasterAllowEtcdIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: "tcp"
-      FromPort: 2379
-      ToPort: 2379
-      SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
-  
-  PublicSubnetEuCentral1b:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1b
-      CidrBlock: 10.100.3.96/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PublicSubnetEuCentral1b
-      - Key: giantswarm.io/subnet-type
-        Value: public
-      - Key: kubernetes.io/role/elb
-        Value: 1
-      VpcId: vpc-id
-  PublicSubnetRouteTableAssociationEuCentral1b:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTableEuCentral1b
-      SubnetId: !Ref PublicSubnetEuCentral1b
-  PrivateSubnetEuCentral1b:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: eu-central-1b
-      CidrBlock: 10.100.3.64/27
-      MapPublicIpOnLaunch: false
-      Tags:
-      - Key: Name
-        Value: PrivateSubnetEuCentral1b
-      - Key: giantswarm.io/subnet-type
-        Value: private
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
-      VpcId: vpc-id
-  PrivateSubnetRouteTableAssociationEuCentral1b:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PrivateRouteTableEuCentral1b
-      SubnetId: !Ref PrivateSubnetEuCentral1b

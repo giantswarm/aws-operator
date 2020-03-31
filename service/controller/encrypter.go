@@ -25,5 +25,4 @@ func newEncrypterObject(getter encrypterConfigGetter) (encrypter.Interface, erro
 
 func newEncrypterRoleManager(getter encrypterConfigGetter) (encrypter.RoleManager, error) {
 	return nil, nil
-
 }

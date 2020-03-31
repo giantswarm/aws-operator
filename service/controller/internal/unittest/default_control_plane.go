@@ -19,6 +19,7 @@ func DefaultContextControlPlane() context.Context {
 func DefaultControlPlane() infrastructurev1alpha2.AWSControlPlane {
 	cr := infrastructurev1alpha2.AWSControlPlane{
 		ObjectMeta: v1.ObjectMeta{
+			Name: "a2wax",
 			Labels: map[string]string{
 				label.Cluster:         "8y5ck",
 				label.OperatorVersion: "7.3.0",

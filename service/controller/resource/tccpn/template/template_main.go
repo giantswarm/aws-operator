@@ -8,11 +8,9 @@ Outputs:
   {{ template "outputs" . }}
 Resources:
   {{ template "auto_scaling_group" . }}
+  {{ template "eni" . }}
   {{ template "etcd_volume" . }}
   {{ template "iam_policies" . }}
   {{ template "launch_configuration" . }}
-  {{ template "route_tables" . }}
-  {{ template "security_groups" . }}
-  {{ template "subnets" . }}
 {{ end }}
 `

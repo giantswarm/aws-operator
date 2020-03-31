@@ -4,26 +4,29 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type TCCPNConfig struct {
-	Config Config
+	Config    Config
+	G8sClient versioned.Interface
 }
 
 type TCCPN struct {
-	config Config
+	config    Config
+	g8sClient versioned.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
@@ -31,9 +34,13 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T cannot by nil", config.G8sClient)
+	}
 
 	t := &TCCPN{
-		config: config.Config,
+		config:    config.Config,
+		g8sClient: config.G8sClient,
 	}
 
 	return t, nil
@@ -44,6 +51,18 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	listOptions := metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("%s=%s", key.TagCluster, key.ClusterID(&cr)),
+	}
+
+	cps, err := t.g8sClient.InfrastructureV1alpha2().AWSControlPlanes(cr.Namespace).List(listOptions)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	if len(cps.Items) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected 1 control plane cr but found %d", len(cps.Items))
+	}
+	cp := cps.Items[0]
 
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
 	if err != nil {
@@ -77,23 +96,38 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	masterID := 0 // for now we have only 1 master, TODO get this value via render function as argument
+
+	var masterSubnet net.IPNet
+	{
+		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
+		for _, az := range zones {
+			if az.Name == key.ControlPlaneAvailabilityZones(cp)[masterID] {
+				masterSubnet = az.Subnet.Private.CIDR
+				break
+			}
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
+		g8sConfig := cmaClusterToG8sConfig(t.config, cr, labels)
+		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.EtcdPort = key.EtcdPort
-		params.Extension = &MasterExtension{
-			awsConfigSpec: cmaClusterToG8sConfig(t.config, cr, labels),
+		params.Extension = &HAMasterExtension{
 			baseExtension: baseExtension{
-				registryDomain: t.config.RegistryDomain,
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				masterSubnet:   masterSubnet,
+				masterID:       masterID,
+				registryDomain: t.config.RegistryDomain,
 			},
 			cc:               cc,
 			clusterCerts:     clusterCerts,
@@ -135,8 +169,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	return templateBody, nil
 }
 
-type MasterExtension struct {
-	awsConfigSpec g8sv1alpha1.AWSConfigSpec
+type HAMasterExtension struct {
 	baseExtension
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
@@ -147,16 +180,10 @@ type MasterExtension struct {
 	randomKeyTmplSet RandomKeyTmplSet
 }
 
-func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+func (e *HAMasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	ctx := context.TODO()
 
-	var storageClass string
-	_, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		storageClass = cloudconfig.InstanceStorageClassContent
-	} else {
-		storageClass = cloudconfig.InstanceStorageClassEncryptedContent
-	}
+	storageClass := cloudconfig.InstanceStorageClassEncryptedContent
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
@@ -269,6 +296,32 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0644,
 		},
 		{
+			AssetContent: cloudconfig.Etcd3ExtraConfig,
+			Path:         "/etc/systemd/system/etcd3.d/10-require-attach-dep.conf",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			AssetContent: cloudconfig.SystemdNetworkdEth1Network,
+			Path:         "/etc/systemd/network/10-eth1.network",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
 			AssetContent: cloudconfig.AwsCNIManifest,
 			Path:         "/srv/aws-cni.yaml",
 			Owner: k8scloudconfig.Owner{
@@ -319,7 +372,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
-	data := e.templateData()
+	data := e.templateDataTCCPN()
 
 	for _, fm := range filesMeta {
 		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
@@ -348,7 +401,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	return fileAssets, nil
 }
 
-func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
+func (e *HAMasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		// Create symlinks for nvme disks.
 		// This service should be started only on first boot.
@@ -385,11 +438,23 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
+		// Attach etcd3 dependencies (EBS and ENI).
+		{
+			AssetContent: cloudconfig.Etcd3AttachDepService,
+			Name:         "etcd3-attach-dependencies.service",
+			Enabled:      true,
+		},
+		// Automount etcd EBS volume.
+		{
+			AssetContent: cloudconfig.AutomountEtcdVolume,
+			Name:         "var-lib-etcd.automount",
+			Enabled:      true,
+		},
 		// Mount etcd EBS volume.
 		{
-			AssetContent: cloudconfig.MountEtcdVolume,
+			AssetContent: cloudconfig.MountEtcdVolumeAsgMasters,
 			Name:         "var-lib-etcd.mount",
-			Enabled:      true,
+			Enabled:      false,
 		},
 		// Mount log EBS volume.
 		{
@@ -401,8 +466,10 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 
 	var newUnits []k8scloudconfig.UnitAsset
 
+	data := e.templateDataTCCPN()
+
 	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, e.awsConfigSpec)
+		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -418,7 +485,7 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	return newUnits, nil
 }
 
-func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+func (e *HAMasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{}
 
 	return newSections

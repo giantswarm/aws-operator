@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -23,14 +24,18 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 )
@@ -92,6 +97,18 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var accountIDResource resource.Interface
+	{
+		c := accountid.Config{
+			Logger: config.Logger,
+		}
+
+		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encrypterObject encrypter.Interface
 	{
 		encrypterObject, err = newEncrypterObject(config)
@@ -121,6 +138,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
+			G8sClient: config.G8sClient,
 		}
 
 		tccpnCloudConfig, err = cloudconfig.NewTCCPN(c)
@@ -167,6 +185,21 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var encryptionKeyResource resource.Interface
+	{
+		c := encryptionkey.Config{
+			G8sClient:     config.G8sClient,
+			Encrypter:     encrypterObject,
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		encryptionKeyResource, err = encryptionkey.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
@@ -208,9 +241,36 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			G8sClient:     config.G8sClient,
 			Logger:        config.Logger,
 			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSecurityGroupsResource resource.Interface
+	{
+		c := tccpsecuritygroups.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetsResource resource.Interface
+	{
+		c := tccpsubnets.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetsResource, err = tccpsubnets.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -276,17 +336,21 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		accountIDResource,
+		encryptionKeyResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
+		tccpAZsResource,
+		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
+		tccpSubnetsResource,
 		cpVPCResource,
 		regionResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		s3ObjectResource,
-		tccpAZsResource,
 		tccpnResource,
 	}
 

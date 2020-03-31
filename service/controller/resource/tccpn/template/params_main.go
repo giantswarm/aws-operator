@@ -4,11 +4,9 @@ package template
 // template.
 type ParamsMain struct {
 	AutoScalingGroup    *ParamsMainAutoScalingGroup
+	ENI                 *ParamsMainENI
 	EtcdVolume          *ParamsMainEtcdVolume
 	IAMPolicies         *ParamsMainIAMPolicies
 	LaunchConfiguration *ParamsMainLaunchConfiguration
 	Outputs             *ParamsMainOutputs
-	RouteTables         *ParamsMainRouteTables
-	SecurityGroups      *ParamsMainSecurityGroups
-	Subnets             *ParamsMainSubnets
 }

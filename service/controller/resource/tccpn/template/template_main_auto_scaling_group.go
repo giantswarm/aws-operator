@@ -6,13 +6,17 @@ const TemplateMainAutoScalingGroup = `
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref {{ .AutoScalingGroup.Subnet }}
+        - {{ .AutoScalingGroup.SubnetID }}
       AvailabilityZones:
         - {{ .AutoScalingGroup.AvailabilityZone }}
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 1
       LaunchConfigurationName: !Ref ControlPlaneNodeLaunchConfiguration
+      LoadBalancerNames:
+      - {{ .AutoScalingGroup.LoadBalancers.ApiInternalName }}
+      - {{ .AutoScalingGroup.LoadBalancers.ApiName }}
+      - {{ .AutoScalingGroup.LoadBalancers.EtcdName }}
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
@@ -25,9 +29,9 @@ const TemplateMainAutoScalingGroup = `
           LifecycleHookName: ControlPlaneNode
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
 
-      # 10 seconds after a new node comes into service, the ASG checks the new
+      # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
-      HealthCheckGracePeriod: 10
+      HealthCheckGracePeriod: 60
 
       MetricsCollection:
         - Granularity: "1Minute"
