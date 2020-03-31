@@ -30,8 +30,12 @@ const (
 )
 
 const (
-	KubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd"
-	KubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
+	// KubectlVersion is the version of kubectl used on a node to interact with
+	// kubernets. The project is here: https://github.com/giantswarm/docker-kubectl
+	KubectlVersion = "1.16.4"
+	// KubernetesAPIHealthzVersion is a SHA representing the version of
+	// https://github.com/giantswarm/k8s-api-healthz/ used.
+	KubernetesAPIHealthzVersion = "0999549a4c334b646288d08bd2c781c6aae2e12f"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.
