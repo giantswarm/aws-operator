@@ -44,11 +44,15 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.ToClusterFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 
+	}
 	r := &Resource{
-		g8sClient: config.G8sClient,
-		encrypter: config.Encrypter,
-		logger:    config.Logger,
+		g8sClient:     config.G8sClient,
+		encrypter:     config.Encrypter,
+		logger:        config.Logger,
+		toClusterFunc: config.ToClusterFunc,
 	}
 
 	return r, nil
