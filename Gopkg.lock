@@ -263,7 +263,7 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-  digest = "1:563b512507b12d48276d0ecedecfe83801e8ffc006a05f3f64312f737d62ccad"
+  digest = "1:520f23cf3864e25b4caa486502c80a7af1041985674074543ffbda3715d32970"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -274,14 +274,22 @@
     "pkg/apis/provider/v1alpha1",
     "pkg/apis/release/v1alpha1",
     "pkg/clientset/versioned",
+    "pkg/clientset/versioned/fake",
     "pkg/clientset/versioned/scheme",
     "pkg/clientset/versioned/typed/application/v1alpha1",
+    "pkg/clientset/versioned/typed/application/v1alpha1/fake",
     "pkg/clientset/versioned/typed/backup/v1alpha1",
+    "pkg/clientset/versioned/typed/backup/v1alpha1/fake",
     "pkg/clientset/versioned/typed/core/v1alpha1",
+    "pkg/clientset/versioned/typed/core/v1alpha1/fake",
     "pkg/clientset/versioned/typed/example/v1alpha1",
+    "pkg/clientset/versioned/typed/example/v1alpha1/fake",
     "pkg/clientset/versioned/typed/infrastructure/v1alpha2",
+    "pkg/clientset/versioned/typed/infrastructure/v1alpha2/fake",
     "pkg/clientset/versioned/typed/provider/v1alpha1",
+    "pkg/clientset/versioned/typed/provider/v1alpha1/fake",
     "pkg/clientset/versioned/typed/release/v1alpha1",
+    "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
   revision = "9552ed6bec737d139a14042569f7f96bc32d5a00"
@@ -417,15 +425,15 @@
   revision = "f75fead2ae064a2ae20a117cc1cd1d2f6d050641"
 
 [[projects]]
-  branch = "master"
-  digest = "1:6a3f00998009fd4e9fbbc3050d8f8d5c5d82b5aeeb88e2cb7ae73be6d925ed66"
+  digest = "1:43b68f4e77ac094f072817162eb425b4e14b205e6755d0e747aa8c25007bd586"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_5_0_0",
+    "v_6_0_0",
   ]
   pruneopts = "T"
-  revision = "ead4746e4fdaa113c56755a0e291c9274722b8d8"
+  revision = "3e566b1810ccec3dea6ad8de43f40c7aefab7840"
+  version = "v0.1.1"
 
 [[projects]]
   branch = "master"
@@ -1194,11 +1202,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a6918666d02b6496294c4bb4be17fae297e1c32e985abad7a3e2d41b5e272162"
+  digest = "1:d2141fada30071732b202a4e797bcf97c8b7b91a9bbb26e8735e4c640c731c51"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
+    "html",
+    "html/atom",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -2097,7 +2107,9 @@
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
+    "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned",
+    "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake",
     "github.com/giantswarm/apprclient",
     "github.com/giantswarm/backoff",
     "github.com/giantswarm/certs",
@@ -2120,7 +2132,7 @@
     "github.com/giantswarm/k8sclient/k8scrdclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
-    "github.com/giantswarm/k8scloudconfig/v_5_0_0",
+    "github.com/giantswarm/k8scloudconfig/v_6_0_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
@@ -2149,6 +2161,7 @@
     "github.com/spf13/afero",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
+    "golang.org/x/net/html",
     "golang.org/x/sync/errgroup",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",

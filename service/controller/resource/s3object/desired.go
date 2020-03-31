@@ -2,14 +2,20 @@ package s3object
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	gscerts "github.com/giantswarm/certs"
+	"github.com/giantswarm/k8scloudconfig/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -23,7 +29,27 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	var clusterCerts certs.Cluster
+	var release *v1alpha1.Release
+	{
+		releaseVersion := customObject.Labels[label.ReleaseVersion]
+		releaseName := fmt.Sprintf("v%s", releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	versions, err := v_6_0_0.ExtractComponentVersions(release.Spec.Components)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	defaultVersions := key.DefaultVersions()
+	versions.Kubectl = defaultVersions.Kubectl
+	versions.KubernetesAPIHealthz = defaultVersions.KubernetesAPIHealthz
+	images := v_6_0_0.BuildImages(r.registryDomain, versions)
+
+	var clusterCerts gscerts.Cluster
 	var clusterKeys randomkeys.Cluster
 	{
 		g := &errgroup.Group{}
@@ -59,8 +85,14 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
 
+		data := cloudconfig.IgnitionTemplateData{
+			CustomObject: customObject,
+			ClusterCerts: clusterCerts,
+			ClusterKeys:  clusterKeys,
+			Images:       images,
+		}
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewMasterTemplate(ctx, customObject, clusterCerts, clusterKeys)
+			b, err := r.cloudConfig.NewMasterTemplate(ctx, data)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -78,7 +110,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewWorkerTemplate(ctx, customObject, clusterCerts)
+			b, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
 			if err != nil {
 				return microerror.Mask(err)
 			}

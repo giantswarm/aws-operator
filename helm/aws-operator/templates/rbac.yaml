@@ -2,6 +2,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ tpl .Values.resource.default.name  . }}
+  labels:
+    {{- include "aws-operator.labels" . | nindent 4 }}
 rules:
   - apiGroups:
       - cluster.giantswarm.io
@@ -82,6 +84,12 @@ rules:
       - drainerconfigs
     verbs:
       - "*"
+  - apiGroups:
+      - release.giantswarm.io
+    resources:
+      - releases
+    verbs:
+      - get
   # TODO drop create and delete permissions for namespaces when
   # legacy bundles are gone and clusterapi bundle v29 is the latest version.
   #
@@ -129,6 +137,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: {{ tpl .Values.resource.default.name  . }}
+  labels:
+    {{- include "aws-operator.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
     name: {{ tpl .Values.resource.default.name  . }}
@@ -156,6 +166,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: {{ tpl .Values.resource.psp.name . }}
+  labels:
+    {{- include "aws-operator.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
     name: {{ tpl .Values.resource.default.name  . }}
