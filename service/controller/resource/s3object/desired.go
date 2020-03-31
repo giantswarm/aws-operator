@@ -107,6 +107,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 		v.Kubectl = key.KubectlVersion
 		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
+		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
 		images = k8scloudconfig.BuildImages(r.registryDomain, v)
 	}
 

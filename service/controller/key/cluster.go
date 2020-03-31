@@ -36,6 +36,9 @@ const (
 	// KubernetesAPIHealthzVersion is a SHA representing the version of
 	// https://github.com/giantswarm/k8s-api-healthz/ used.
 	KubernetesAPIHealthzVersion = "0999549a4c334b646288d08bd2c781c6aae2e12f"
+	// K8sSetupNetworkEnvironment is a sha representing the version of
+	// https://github.com/giantswarm/k8s-setup-network-environment used.
+	K8sSetupNetworkEnvironment = "68e90113331feca3b9ffe6a75a601b381ba8c1f7"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.

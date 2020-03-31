@@ -3,7 +3,7 @@
 # k8scloudconfig
 Cloud-init configuration for setting up Kubernetes clusters
 
-# Versioning
+## Versioning
 
 k8scloudconfig library uses semver versioning scheme. Please follow simple rules, when creating new version:
 
@@ -16,3 +16,12 @@ Examples:
 - "Hyperkube upgrade from 1.9.5 to 1.10.1" is a minor version upgrade.
 - "New field `DisableCalico` added to `Params` struct" is a major version upgrade.
 - "Kubelet configuration changed to prevent stuck in terminating state pods" is a patch version upgrade.
+
+## Branches
+
+- `legacy`
+    - All versions matching ~0.1.0.
+    - For dep-based operators.
+- `master`
+    - From version v6.0.0.
+    - For operators using go modules.

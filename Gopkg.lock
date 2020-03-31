@@ -451,15 +451,15 @@
   version = "v0.1.0"
 
 [[projects]]
-  digest = "1:e1846a4a5d7b8670946f08117b9cdc0fe3ada7b0967ce7743bfcab71c891a4c2"
+  branch = "legacy-with-pv-limit"
+  digest = "1:e5c0ad58cf7edb7662271c6fe92c7d40849f8b314ce119a545c815288baccd32"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_5_2_0",
+    "v_6_0_0",
   ]
   pruneopts = "T"
-  revision = "9cb18b446ece3d22a830871724b9ab0db26b52ac"
-  version = "v0.1.0"
+  revision = "a9f4f9c0cfc1175e646ce5ebb8e4dc515cb135ae"
 
 [[projects]]
   digest = "1:99cfa02ec294c967a352cca2cef3bc8bd18fbd2ba03124d5eb01bbc18128c716"
@@ -2261,6 +2261,7 @@
     "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2",
     "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1",
+    "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1",
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned",
     "github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake",
     "github.com/giantswarm/apprclient",
@@ -2283,7 +2284,7 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8sclient/k8srestconfig",
-    "github.com/giantswarm/k8scloudconfig/v_5_2_0",
+    "github.com/giantswarm/k8scloudconfig/v_6_0_0",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
