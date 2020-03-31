@@ -20,7 +20,7 @@ const (
 	// legacyClusterIDLabel is the label used in the secret to identify a secret
 	// containing the certificate.
 	//
-	// TODO use clusterIDLabel instead when all cert secrets have it.
+	// TODO use clusterLabel instead when all cert secrets have it.
 	legacyClusterIDLabel = "clusterID"
 
 	SecretNamespace = "default"
@@ -37,6 +37,7 @@ func (c Cert) String() string {
 const (
 	APICert                Cert = "api"
 	AppOperatorAPICert     Cert = "app-operator-api"
+	AWSOperatorAPICert     Cert = "aws-operator-api"
 	CalicoEtcdClientCert   Cert = "calico-etcd-client"
 	ClusterOperatorAPICert Cert = "cluster-operator-api"
 	EtcdCert               Cert = "etcd"
@@ -52,6 +53,7 @@ const (
 var AllCerts = []Cert{
 	APICert,
 	AppOperatorAPICert,
+	AWSOperatorAPICert,
 	CalicoEtcdClientCert,
 	ClusterOperatorAPICert,
 	EtcdCert,

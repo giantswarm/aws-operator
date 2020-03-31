@@ -1,25 +1,18 @@
 package template
 
 type ParamsMainLoadBalancers struct {
-	APIElbHealthCheckTarget          string
-	APIElbName                       string
-	APIInternalElbName               string
-	APIElbPortsToOpen                []ParamsMainLoadBalancersPortPair
-	APIElbScheme                     string
-	APIInternalElbScheme             string
-	APIElbSecurityGroupID            string
-	EtcdElbHealthCheckTarget         string
-	EtcdElbName                      string
-	EtcdElbPortsToOpen               []ParamsMainLoadBalancersPortPair
-	EtcdElbScheme                    string
-	EtcdElbSecurityGroupID           string
-	ELBHealthCheckHealthyThreshold   int
-	ELBHealthCheckInterval           int
-	ELBHealthCheckTimeout            int
-	ELBHealthCheckUnhealthyThreshold int
-	MasterInstanceResourceName       string
-	PublicSubnets                    []string
-	PrivateSubnets                   []string
+	APIElbHealthCheckTarget    string
+	APIElbName                 string
+	APIInternalElbName         string
+	APIElbPortsToOpen          []ParamsMainLoadBalancersPortPair
+	APIElbSecurityGroupID      string
+	EtcdElbHealthCheckTarget   string
+	EtcdElbName                string
+	EtcdElbPortsToOpen         []ParamsMainLoadBalancersPortPair
+	EtcdElbSecurityGroupID     string
+	MasterInstanceResourceName string
+	PublicSubnets              []string
+	PrivateSubnets             []string
 }
 
 type ParamsMainLoadBalancersPortPair struct {

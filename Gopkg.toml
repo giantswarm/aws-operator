@@ -46,85 +46,85 @@ required = [
   name = "github.com/giantswarm/apiextensions"
   version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/apprclient"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/backoff"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/giantswarm/certs"
+  version = "~0.1.0"
 
 [[override]]
-  branch = "master"
+  name = "github.com/giantswarm/backoff"
+  version = "~0.1.0"
+
+[[override]]
+  name = "github.com/giantswarm/certs"
+  version = "~0.1.0"
+
+[[override]]
   name = "github.com/giantswarm/e2e-harness"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/e2eclients"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/e2etemplates"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/e2etests"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/e2esetup"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/exporterkit"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/helmclient"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/ipam"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/k8sclient"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/k8scloudconfig"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/microendpoint"
+  version = "~0.1.0"
 
 [[override]]
   name = "github.com/giantswarm/microerror"
   version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/microkit"
+  version = "~0.1.0"
 
 [[override]]
   name = "github.com/giantswarm/micrologger"
   version = "~0.1.0"
 
 [[override]]
-  branch = "master"
   name = "github.com/giantswarm/operatorkit"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/randomkeys"
+  version = "~0.1.0"
 
-[[constraint]]
-  branch = "master"
+[[override]]
   name = "github.com/giantswarm/versionbundle"
+  version = "~0.1.0"
 
 [[constraint]]
   name = "github.com/google/go-cmp"

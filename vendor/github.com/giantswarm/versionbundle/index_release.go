@@ -230,15 +230,18 @@ func validateUniqueReleases(indexReleases []IndexRelease) error {
 		releaseVersions[release.Version] = release.Version
 
 		// Verify release version contents
-		authorities := make([]string, 0, len(release.Authorities))
+		appsAndAuthorities := make([]string, 0, len(release.Apps)+len(release.Authorities))
+		for _, a := range release.Apps {
+			appsAndAuthorities = append(appsAndAuthorities, a.AppID())
+		}
 		for _, a := range release.Authorities {
-			authorities = append(authorities, a.BundleID())
+			appsAndAuthorities = append(appsAndAuthorities, a.BundleID())
 		}
 
-		sort.Strings(authorities)
+		sort.Strings(appsAndAuthorities)
 
 		sha256Hash.Reset()
-		sha256Hash.Write([]byte(strings.Join(authorities, ",")))
+		sha256Hash.Write([]byte(strings.Join(appsAndAuthorities, ",")))
 
 		hexHash := hex.EncodeToString(sha256Hash.Sum(nil))
 		otherVer, exists = releaseChecksums[hexHash]

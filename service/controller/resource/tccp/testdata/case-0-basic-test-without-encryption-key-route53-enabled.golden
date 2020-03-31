@@ -452,49 +452,53 @@ Resources:
       GroupDescription: 8y5ck-master
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
+      #
+      # Public API Whitelist Disabled Rules
+      #
       -
-        Description: Allow all traffic to the master instance.
+        Description: "Allow all traffic to the master instance."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
         CidrIp: 0.0.0.0/0
+
       -
-        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
+        Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
         IpProtocol: tcp
         FromPort: 4194
         ToPort: 4194
         CidrIp: 10.1.0.0/16
       -
-        Description: Allow traffic from control plane CIDR to 2379 for etcd backup.
+        Description: "Allow traffic from Control Plane CIDR to 2379 for etcd backup."
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
         CidrIp: 10.1.0.0/16
       -
-        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
+        Description: "Allow traffic from Control Plane CIDR to 10250 for kubelet scraping."
         IpProtocol: tcp
         FromPort: 10250
         ToPort: 10250
         CidrIp: 10.1.0.0/16
       -
-        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
+        Description: "Allow traffic from Control Plane CIDR to 10300 for node-exporter scraping."
         IpProtocol: tcp
         FromPort: 10300
         ToPort: 10300
         CidrIp: 10.1.0.0/16
       -
-        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
+        Description: "Allow traffic from Control Plane CIDR to 10301 for kube-state-metrics scraping."
         IpProtocol: tcp
         FromPort: 10301
         ToPort: 10301
         CidrIp: 10.1.0.0/16
       -
-        Description: Only allow ssh traffic from the control plane.
+        Description: "Only allow SSH traffic from the Control Plane."
         IpProtocol: tcp
         FromPort: 22
         ToPort: 22
         CidrIp: 10.1.0.0/16
+
       Tags:
         - Key: Name
           Value: 8y5ck-master
@@ -504,19 +508,18 @@ Resources:
       GroupDescription: 8y5ck-etcd-elb
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
       -
+        Description: "Allow all Etcd traffic from the VPC to the Etcd load balancer."
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
         CidrIp: 0.0.0.0/0
-      
       -
+        Description: "Allow traffic from Control Plane to Etcd port for backup and metrics."
         IpProtocol: tcp
         FromPort: 2379
         ToPort: 2379
         CidrIp: 10.1.0.0/16
-      
       Tags:
         - Key: Name
           Value: 8y5ck-etcd-elb
@@ -526,28 +529,28 @@ Resources:
       GroupDescription: 8y5ck-internal-api
       VpcId: !Ref VPC
       SecurityGroupIngress:
-      
+      #
+      # Private API Whitelist Disabled Rules
+      #
       -
-        Description: Allow all traffic to the master instance from A class network.
+        Description: "Allow all traffic to the master instance from A class network."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: 10.0.0.0/8
-      
+        CidrIp: "10.0.0.0/8"
       -
-        Description: Allow all traffic to the master instance from B class network.
+        Description: "Allow all traffic to the master instance from B class network."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: 172.16.0.0/12
-      
+        CidrIp: "172.16.0.0/12"
       -
-        Description: Allow all traffic to the master instance from C class network.
+        Description: "Allow all traffic to the master instance from C class network."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
-        CidrIp: 192.168.0.0/16
-      
+        CidrIp: "192.168.0.0/16"
+
       Tags:
         - Key: Name
           Value: 8y5ck-internal-api
@@ -749,7 +752,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 
+      CidrBlock: 10.0.0.0/24
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:

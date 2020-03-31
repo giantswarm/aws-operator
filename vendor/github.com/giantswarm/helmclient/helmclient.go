@@ -617,6 +617,8 @@ func (c *Client) updateReleaseFromTarball(ctx context.Context, releaseName, path
 			return backoff.Permanent(microerror.Mask(err))
 		} else if IsEmptyChartTemplates(err) {
 			return backoff.Permanent(microerror.Mask(err))
+		} else if IsTarballNotFound(err) {
+			return backoff.Permanent(microerror.Mask(err))
 		} else if IsYamlConversionFailed(err) {
 			return backoff.Permanent(microerror.Mask(err))
 		} else if err != nil {

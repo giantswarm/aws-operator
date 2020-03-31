@@ -36,6 +36,13 @@ func ChinaCluster() infrastructurev1alpha2.AWSCluster {
 				Region: "cn-north-1",
 			},
 		},
+		Status: infrastructurev1alpha2.AWSClusterStatus{
+			Provider: infrastructurev1alpha2.AWSClusterStatusProvider{
+				Network: infrastructurev1alpha2.AWSClusterStatusProviderNetwork{
+					CIDR: "10.0.0.0/24",
+				},
+			},
+		},
 	}
 
 	return cr

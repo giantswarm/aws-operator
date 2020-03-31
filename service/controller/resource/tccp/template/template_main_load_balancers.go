@@ -11,11 +11,11 @@ const TemplateMainLoadBalancers = `
       ConnectionSettings:
         IdleTimeout: 1200
       HealthCheck:
-        HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
-        Interval: {{ $v.ELBHealthCheckInterval }}
+        HealthyThreshold: 2
+        Interval: 5
         Target: {{ $v.APIElbHealthCheckTarget }}
-        Timeout: {{ $v.ELBHealthCheckTimeout }}
-        UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
+        Timeout: 3
+        UnhealthyThreshold: 2
       Instances:
       - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
@@ -26,7 +26,7 @@ const TemplateMainLoadBalancers = `
         Protocol: TCP
       {{ end }}
       LoadBalancerName: {{ $v.APIInternalElbName }}
-      Scheme: {{ $v.APIInternalElbScheme }}
+      Scheme: internal
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
       Subnets:
@@ -41,11 +41,11 @@ const TemplateMainLoadBalancers = `
       ConnectionSettings:
         IdleTimeout: 1200
       HealthCheck:
-        HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
-        Interval: {{ $v.ELBHealthCheckInterval }}
+        HealthyThreshold: 2
+        Interval: 5
         Target: {{ $v.APIElbHealthCheckTarget }}
-        Timeout: {{ $v.ELBHealthCheckTimeout }}
-        UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
+        Timeout: 3
+        UnhealthyThreshold: 2
       Instances:
       - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
@@ -56,7 +56,7 @@ const TemplateMainLoadBalancers = `
         Protocol: TCP
       {{ end }}
       LoadBalancerName: {{ $v.APIElbName }}
-      Scheme: {{ $v.APIElbScheme }}
+      Scheme: internet-facing
       SecurityGroups:
         - !Ref MasterSecurityGroup
       Subnets:
@@ -70,11 +70,11 @@ const TemplateMainLoadBalancers = `
       ConnectionSettings:
         IdleTimeout: 1200
       HealthCheck:
-        HealthyThreshold: {{ $v.ELBHealthCheckHealthyThreshold }}
-        Interval: {{ $v.ELBHealthCheckInterval }}
+        HealthyThreshold: 2
+        Interval: 5
         Target: {{ $v.EtcdElbHealthCheckTarget }}
-        Timeout: {{ $v.ELBHealthCheckTimeout }}
-        UnhealthyThreshold: {{ $v.ELBHealthCheckUnhealthyThreshold }}
+        Timeout: 3
+        UnhealthyThreshold: 2
       Instances:
       - !Ref {{ $v.MasterInstanceResourceName }}
       Listeners:
@@ -85,7 +85,7 @@ const TemplateMainLoadBalancers = `
         Protocol: TCP
       {{ end }}
       LoadBalancerName: {{ $v.EtcdElbName }}
-      Scheme: {{ $v.EtcdElbScheme }}
+      Scheme: internal
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
