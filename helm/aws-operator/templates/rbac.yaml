@@ -8,7 +8,7 @@ rules:
   - apiGroups:
       - release.giantswarm.io
     resources:
-      - release
+      - releases
     verbs:
       - get
       - list
