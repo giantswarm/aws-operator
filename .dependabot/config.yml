@@ -7,11 +7,4 @@ update_configs:
       - match:
           # Ignore k8s.io dependencies
           dependency_name: "k8s.io/*"
-  - package_manager: "go:modules"
-    directory: "/"
-    update_schedule: "daily"
-    target_branch: "legacy"
-    ignored_updates:
-      - match:
-          # Ignore k8s.io dependencies
-          dependency_name: "k8s.io/*"
+
