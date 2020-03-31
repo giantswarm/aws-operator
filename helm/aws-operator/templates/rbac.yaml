@@ -6,6 +6,14 @@ metadata:
     {{- include "aws-operator.labels" . | nindent 4 }}
 rules:
   - apiGroups:
+      - release.giantswarm.io
+    resources:
+      - release
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - infrastructure.giantswarm.io
     resources:
       - awsclusters
