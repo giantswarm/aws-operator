@@ -8,7 +8,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_5_2_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
