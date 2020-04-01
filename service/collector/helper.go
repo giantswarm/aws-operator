@@ -56,7 +56,7 @@ func newHelper(config helperConfig) (*helper, error) {
 	var store cache.Store
 	{
 		listerWatcher := &ListerWatcher{
-			clusters: config.G8sClient.InfrastructureV1alpha2().AWSClusters(""),
+			clusters: config.G8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll),
 		}
 		store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
 		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, store, 2*time.Minute)
