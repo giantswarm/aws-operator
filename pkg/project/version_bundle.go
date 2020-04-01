@@ -9,7 +9,7 @@ func NewBundle() versionbundle.Bundle {
 		Changelogs: []versionbundle.Changelog{
 			{
 				Component:   "aws-operator",
-				Description: "Modified to retrieve component versions from releases",
+				Description: "TODO",
 				Kind:        versionbundle.KindChanged,
 				URLs: []string{
 					"https://github.com/giantswarm/aws-operator/pull/X",
