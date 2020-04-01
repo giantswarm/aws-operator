@@ -1,0 +1,10 @@
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+clientConnection:
+  kubeconfig: /etc/kubernetes/config/proxy-kubeconfig.yaml
+kind: KubeProxyConfiguration
+mode: iptables
+resourceContainer: /kube-proxy
+{{- if and (ne .Cluster.Kubernetes.CloudProvider "aws") (not .DisableCalico) }}
+clusterCIDR: {{ .Cluster.Calico.Subnet }}/{{ .Cluster.Calico.CIDR }}
+{{- end }}
+metricsBindAddress: 0.0.0.0:10249
