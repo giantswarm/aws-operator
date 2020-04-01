@@ -9,6 +9,32 @@ The latest version is considered WIP and it is a subject of change. All other
 versions are frozen. To freeze current version all files are copied to a new
 version directory, and  then changes are introduced.
 
+## [v6.0.0]
+
+### Changed
+
+- Extract images and versions out from k8scloudconfig and make them templatable by importer.
+
+### Added
+
+- Add `conntrackMaxPerCore` parameter in `kube-proxy` manifest.
+
+## [v5.2.0]
+
+### Changed
+
+- Reserve ports `30000-32767` from ephemeral port range for `kube-apiserver` use.
+- Make provisioning idempotent by generating `/boot/coreos/first_boot` file on every boot.
+- Use [AWS VPC CNI](https://github.com/aws/amazon-vpc-cni-k8s) for pod networking and Calico for ensuring network policies.
+- Enable ':9393/metrics' prometheus endpoint in docker daemon.
+
+## [v5.1.0] - 2020-01-21
+
+### Changed
+
+- Lowercase $(hostname) to match k8s node name e.g. when using with kubectl.
+- Extend ignition with debug options.
+
 ## [v5.0.0] - 2020-01-02
 
 ### Changed
@@ -30,6 +56,16 @@ version directory, and  then changes are introduced.
 
 - Add eviction hard setting for image file system in kubelet.
 - Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
+
+## [v4.9.1] - 2020-03-10
+
+### Added
+
+- Add `conntrackMaxPerCore` parameter in `kube-proxy` manifest.
+
+### Removed
+
+- Remove resource limits from calico-node init container.
 
 ## [v4.9.0] - 2019-10-17
 
@@ -54,7 +90,7 @@ version directory, and  then changes are introduced.
 - Update Kubernetes to 1.14.10, includes fixes for CVE-2019-11253 and some Azure fixes.
 - Increase `fs.inotify.max_user_instances` to 8192.
 
-## [v4.8.0] 
+## [v4.8.0]
 
 ### Added
 
@@ -487,7 +523,11 @@ chart-operator).
 
 ## [v0.1.0]
 
+[v6.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_6_0_0
+[v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
+[v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0
 [v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
+[v4.9.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_1
 [v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
 [v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_1
 [v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0

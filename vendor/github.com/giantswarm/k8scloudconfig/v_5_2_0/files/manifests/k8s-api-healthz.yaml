@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-api-healthz
+  namespace: kube-system
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
+spec:
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  containers:
+    - name: k8s-api-healthz
+      env:
+      - name: HOST_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
+      command:
+        - /k8s-api-healthz
+        - --api-endpoint="https://$(HOST_IP):443/healthz"
+      image:  {{ .RegistryDomain }}/giantswarm/k8s-api-healthz:0999549a4c334b646288d08bd2c781c6aae2e12f
+      resources:
+        requests:
+          cpu: 50m
+          memory: 20Mi
+      volumeMounts:
+      - mountPath: /etc/kubernetes/ssl/
+        name: ssl-certs-kubernetes
+        readOnly: true
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/ssl
+    name: ssl-certs-kubernetes
