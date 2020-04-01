@@ -2,12 +2,15 @@ package collector
 
 import (
 	"fmt"
+	"time"
 
+	v1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/internal/accountid"
@@ -26,6 +29,8 @@ type helper struct {
 	g8sClient versioned.Interface
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
+
+	g8sCache cache.Store
 
 	awsConfig clientaws.Config
 }
@@ -46,10 +51,22 @@ func newHelper(config helperConfig) (*helper, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AWSConfig must not be empty", config)
 	}
 
+	var store cache.Store
+	{
+		listerWatcher := &ListerWatcher{
+			clusters: config.G8sClient.InfrastructureV1alpha2().AWSClusters(""),
+		}
+		store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
+		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, store, 2*time.Minute)
+		reflector.Run(make(<-chan struct{}))
+	}
+
 	h := &helper{
 		g8sClient: config.G8sClient,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
+
+		g8sCache: store,
 
 		awsConfig: config.AWSConfig,
 	}
