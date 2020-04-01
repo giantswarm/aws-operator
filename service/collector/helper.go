@@ -8,11 +8,13 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/internal/accountid"
 	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
@@ -199,4 +201,41 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	}
 
 	return accountID, nil
+}
+
+// IsClusterReconciledByThisVersion checks whether an AWSCluster object with
+// the given name is reconciled by this particular version of aws-operator
+// (based on version found in pkg/project/project.go).
+func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, error) {
+	key := fmt.Sprintf("default/%s", clusterName)
+
+	item, exists, err := h.g8sCache.GetByKey(key)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+	if !exists {
+		return false, microerror.Maskf(executionFailedError, "could not find key in cache: %#q", key)
+	}
+
+	m, err := meta.Accessor(item)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	// This label contains version of operator reconciling this particular
+	// resource. For more information see:
+	// https://github.com/giantswarm/fmt/blob/master/kubernetes/annotations_and_labels.md
+	versionAssigned, ok := m.GetLabels()["aws-operator.giantswarm.io/version"]
+	if !ok {
+		return false, microerror.Maskf(
+			executionFailedError,
+			"could not find aws-operator.giantswarm.io/version for AWSCluster %q/%q",
+			m.GetNamespace(), m.GetName(),
+		)
+	}
+
+	if versionAssigned == project.Version() {
+		return true, nil
+	}
+	return false, nil
 }
