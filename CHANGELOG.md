@@ -11,13 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Enable per-cluster configuration of kube-proxy's `conntrackMaxPerCore` parameter.
 - Support for Flatcar Linux.
 
 ### Changed
 
 - Streamline image templating for core components for quicker and easier releases in the future.
 - Retrieve component versions from `releases`.
+- Update helm chart with modern labels, configuration, and templating.
 
 
 ## [5.6.0] - 2020-01-29

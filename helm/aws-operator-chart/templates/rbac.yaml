@@ -1,9 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ tpl .Values.resource.default.name  . }}
-  labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+  name: aws-operator
 rules:
   - apiGroups:
       - cluster.giantswarm.io
@@ -84,18 +82,19 @@ rules:
       - drainerconfigs
     verbs:
       - "*"
-  - apiGroups:
-      - release.giantswarm.io
-    resources:
-      - releases
-    verbs:
-      - get
+  # TODO drop create and delete permissions for namespaces when
+  # legacy bundles are gone and clusterapi bundle v29 is the latest version.
+  #
+  #     https://github.com/giantswarm/giantswarm/issues/6829
+  #
   - apiGroups:
       - ""
     resources:
       - namespaces
     verbs:
       - get
+      - create
+      - delete
       - update
   - apiGroups:
       - ""
@@ -117,7 +116,7 @@ rules:
     resources:
       - configmaps
     resourceNames:
-      - {{ tpl .Values.resource.default.name  . }}
+      - aws-operator-configmap
     verbs:
       - get
   - nonResourceURLs:
@@ -129,24 +128,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ tpl .Values.resource.default.name  . }}
-  labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+  name: aws-operator
 subjects:
   - kind: ServiceAccount
-    name: {{ tpl .Values.resource.default.name  . }}
-    namespace: {{ tpl .Values.resource.default.namespace  . }}
+    name: aws-operator
+    namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ tpl .Values.resource.default.name  . }}
+  name: aws-operator
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ tpl .Values.resource.psp.name . }}
-  labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+  name: aws-operator-psp
 rules:
   - apiGroups:
       - extensions
@@ -155,19 +150,17 @@ rules:
     verbs:
       - use
     resourceNames:
-      - {{ tpl .Values.resource.psp.name . }}
+      - aws-operator-psp
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ tpl .Values.resource.psp.name . }}
-  labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+  name: aws-operator-psp
 subjects:
   - kind: ServiceAccount
-    name: {{ tpl .Values.resource.default.name  . }}
-    namespace: {{ tpl .Values.resource.default.namespace  . }}
+    name: aws-operator
+    namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ tpl .Values.resource.psp.name . }}
+  name: aws-operator-psp
   apiGroup: rbac.authorization.k8s.io
