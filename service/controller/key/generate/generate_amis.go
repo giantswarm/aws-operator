@@ -4,7 +4,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Masterminds/semver"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,6 +13,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/semver"
 	"golang.org/x/net/html"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
