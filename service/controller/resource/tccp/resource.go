@@ -74,10 +74,10 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	if config.APIWhitelist.Private.Enabled && len(config.APIWhitelist.Private.SubnetList) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Private.SubnetList must not be empty when %T.APIWhitelist.Private is enabled", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Private.SubnetList must not be empty when %T.APIWhitelist.Private is enabled", config, config)
 	}
 	if config.APIWhitelist.Public.Enabled && len(config.APIWhitelist.Public.SubnetList) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config, config)
 	}
 
 	if config.CIDRBlockAWSCNI == "" {
