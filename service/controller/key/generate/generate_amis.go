@@ -20,14 +20,14 @@ import (
 )
 
 const (
-	flatcarDomain = "flatcar-linux.net"
-	flatcarMinimum = "2345.3.1"
-	coreosDomain = "core-os.net"
-	coreosMinimum = "2135.4.0"
-	channel = "stable"
-	arch = "amd64-usr"
+	flatcarDomain     = "flatcar-linux.net"
+	flatcarMinimum    = "2345.3.1"
+	coreosDomain      = "core-os.net"
+	coreosMinimum     = "2135.4.0"
+	channel           = "stable"
+	arch              = "amd64-usr"
 	generatedFilename = "amis.go"
-	generatedPackage = "key"
+	generatedPackage  = "key"
 	generatedTemplate = `package {{ .Package }}
 
 import "encoding/json"
@@ -41,7 +41,8 @@ func init() {
 		panic(err)
 	}
 }
-`)
+`
+)
 
 type sourceFileTemplateData struct {
 	AMIInfoString string
