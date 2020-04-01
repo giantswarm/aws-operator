@@ -1,8 +1,43 @@
-namespace: giantswarm
-
-userID: 1000
-groupID: 1000
+flag:
+  service:
+    feature:
+      labelselector:
+        enabled: false
+    test:
+      labelselector:
+        version: ""
+image:
+  name: "giantswarm/aws-operator"
+  tag: "[[ .Version ]]"
 Installation:
   V1:
     Registry:
       Domain: quay.io
+pod:
+  user:
+    id: 1000
+  group:
+    id: 1000
+project:
+  branch: "[[ .Branch ]]"
+  commit: "[[ .SHA ]]"
+# Resource names are truncated to 47 characters. Kubernetes allows 63 characters
+# limit for resource names. When pods for deployments are created they have
+# additional 16 characters suffix, e.g. "-957c9d6ff-pkzgw" and we want to have
+# room for those suffixes.
+#
+# NOTE: All values under resource key need to be used with `tpl` to render them
+# correctly in the templates. This is because helm doesn't template values.yaml
+# file and it has to be a valid json. Example usage:
+#
+#     {{ tpl .Values.resource.default.name . }}.
+#
+resource:
+  default:
+    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}'
+    namespace: "giantswarm"
+  psp:
+    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-psp'
+  pullSecret:
+    name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-pull-secret'
+    namespace: "giantswarm"
