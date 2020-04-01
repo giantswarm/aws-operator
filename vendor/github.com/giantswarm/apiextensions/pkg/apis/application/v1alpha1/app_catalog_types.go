@@ -31,6 +31,7 @@ spec:
     openAPIV3Schema:
       description: |
         An AppCatalog defines a collection of apps to install in one or several clusters.
+      type: object
       properties:
         spec:
           type: object

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for Flatcar Linux.
+- Enable per-cluster configuration of kube-proxy's `conntrackMaxPerCore` parameter.
 
 ### Changed
 

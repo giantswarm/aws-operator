@@ -263,7 +263,7 @@
   revision = "25d852aebe32c875e9c044af3eef9c7dc6bc777f"
 
 [[projects]]
-  digest = "1:520f23cf3864e25b4caa486502c80a7af1041985674074543ffbda3715d32970"
+  digest = "1:4788a9862da1b867c8c7f916256740a25764572131f8ed3b217f9e5be6d82733"
   name = "github.com/giantswarm/apiextensions"
   packages = [
     "pkg/apis/application/v1alpha1",
@@ -292,8 +292,8 @@
     "pkg/clientset/versioned/typed/release/v1alpha1/fake",
   ]
   pruneopts = "UT"
-  revision = "9552ed6bec737d139a14042569f7f96bc32d5a00"
-  version = "v0.1.1"
+  revision = "09d6963fffb465ce77cb77c9c7269e7c3dddc448"
+  version = "v0.1.2"
 
 [[projects]]
   branch = "master"
@@ -2081,6 +2081,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Masterminds/semver",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",

@@ -31,6 +31,7 @@ spec:
       description: |
         Defines an App resource, which represents an application to be running in a Kubernetes cluster.
         Reconciled by app-operator.
+      type: object
       properties:
         spec:
           type: object
