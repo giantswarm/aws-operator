@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Enabled per-cluster configuration of kube-proxy's `conntrackMaxPerCore` parameter.
+
 ### Changed
 
-- Modified to retrieve component versions from releases.
+- Streamlined image templating for core components for quicker and easier releases in the future.
+- Retrieve component versions from `releases`.
 
 
 ## [5.6.0] - 2020-01-29
@@ -19,13 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated to Kubernetes 1.16.3.
-
-
-## [5.5.1] - 2020-03-30
-
-### Changed
-
-- Modified to retrieve component versions from releases.
 
 
 ## [5.5.0] - 2019-11-01
@@ -41,5 +39,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.6.0...legacy
 [5.6.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.6.0
-[5.5.1]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.1
 [5.5.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.0
