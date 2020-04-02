@@ -180,7 +180,7 @@ workflows:
             tags:
               only: /^v.*/
       - architect/push-to-app-catalog:
-          name: push-aws-operator-to-app-catalog
+          name: push-aws-operator-to-control-plane-app-catalog
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
