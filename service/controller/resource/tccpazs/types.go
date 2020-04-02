@@ -20,6 +20,14 @@ type subnet struct {
 	ID   string
 }
 
-func (m mapping) subnetsEmpty() bool {
-	return (m.Public.Subnet.CIDR.IP == nil && m.Public.Subnet.CIDR.Mask == nil) && (m.Private.Subnet.CIDR.IP == nil && m.Private.Subnet.CIDR.Mask == nil) && (m.AWSCNI.Subnet.CIDR.IP == nil && m.AWSCNI.Subnet.CIDR.Mask == nil)
+func (m mapping) PublicSubnetEmpty() bool {
+	return m.Public.Subnet.CIDR.IP == nil && m.Public.Subnet.CIDR.Mask == nil
+}
+
+func (m mapping) PrivateSubnetEmpty() bool {
+	return m.Private.Subnet.CIDR.IP == nil && m.Private.Subnet.CIDR.Mask == nil
+}
+
+func (m mapping) AWSCNISubnetEmpty() bool {
+	return m.AWSCNI.Subnet.CIDR.IP == nil && m.AWSCNI.Subnet.CIDR.Mask == nil
 }
