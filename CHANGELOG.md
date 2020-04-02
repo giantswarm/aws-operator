@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Added back functionality to push docker images to aliyun.
+
 ## [5.5.1] - 2020-03-30
 
 ### Added
