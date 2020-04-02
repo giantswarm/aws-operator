@@ -11,8 +11,6 @@ rules:
       - releases
     verbs:
       - get
-      - list
-      - watch
   - apiGroups:
       - infrastructure.giantswarm.io
     resources:
