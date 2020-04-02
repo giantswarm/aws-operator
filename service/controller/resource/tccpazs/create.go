@@ -6,7 +6,6 @@ import (
 	"net"
 	"reflect"
 	"sort"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -115,7 +114,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		status := newAZStatus(azMapping)
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc status: %s", azSubnetStatusToString(status)))
+
+		for _, az := range status {
+			r.logger.LogCtx(ctx,
+				"level", "debug",
+				"message", "computed controller context status",
+				"availability-zone", az.Name,
+				"subnet-id", az.Subnet.Public.CIDR,
+				"public-subnet", az.Subnet.Public.CIDR,
+				"private-subnet", az.Subnet.Private.CIDR,
+				"aws-cni-subnet", az.Subnet.AWSCNI.CIDR,
+			)
+		}
 
 		// Add the current AZ state from AWS to the cc status.
 		cc.Status.TenantCluster.TCCP.AvailabilityZones = status
@@ -140,7 +150,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		spec := newAZSpec(azMapping)
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZs for cc spec: %s", azSubnetSpecToString(spec)))
+		for _, az := range spec {
+			r.logger.LogCtx(ctx,
+				"level", "debug",
+				"message", "computed controller context spec",
+				"availability-zone", az.Name,
+				"subnet-id", az.Subnet.Public.CIDR,
+				"public-subnet", az.Subnet.Public.CIDR,
+				"private-subnet", az.Subnet.Private.CIDR,
+				"aws-cni-subnet", az.Subnet.AWSCNI.CIDR,
+			)
+		}
 
 		// Add the desired AZ state to the controllercontext spec.
 		cc.Spec.TenantCluster.TCCP.AvailabilityZones = spec
@@ -271,38 +291,6 @@ func azsFromSubnets(subnets []*ec2.Subnet) []string {
 	}
 
 	return azs
-}
-
-func azSubnetSpecToString(azs []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone) string {
-	var result strings.Builder
-	result.WriteString("availability zone subnet allocations: {")
-	for _, az := range azs {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q, cni: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String(), az.Subnet.AWSCNI.CIDR.String()))
-	}
-
-	if len(azs) > 0 {
-		result.WriteString("\n}")
-	} else {
-		result.WriteString("}")
-	}
-
-	return result.String()
-}
-
-func azSubnetStatusToString(azs []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone) string {
-	var result strings.Builder
-	result.WriteString("availability zone subnet allocations: {")
-	for _, az := range azs {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q, cni: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String(), az.Subnet.AWSCNI.CIDR.String()))
-	}
-
-	if len(azs) > 0 {
-		result.WriteString("\n}")
-	} else {
-		result.WriteString("}")
-	}
-
-	return result.String()
 }
 
 func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string]mapping, error) {
