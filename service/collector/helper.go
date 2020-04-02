@@ -209,7 +209,9 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, error) {
 	key := fmt.Sprintf("default/%s", clusterName)
 
+	logger.Errorf("KUBA helper: searching %q", key)
 	item, exists, err := h.g8sCache.GetByKey(key)
+	logger.Errorf("KUBA helper: item:%+v, exists:%v, err:%v", item, exists, err)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -221,6 +223,7 @@ func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, err
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
+	logger.Errorf("KUBA helper: got accessor; labels: %+v", m.GetLabels())
 
 	// This label contains version of operator reconciling this particular
 	// resource. For more information see:
@@ -234,6 +237,7 @@ func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, err
 		)
 	}
 
+	logger.Errorf("KUBA helper: comparing cluster (%v) to project (%v)", versionAssigned, project.Version())
 	if versionAssigned == project.Version() {
 		return true, nil
 	}

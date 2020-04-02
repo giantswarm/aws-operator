@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
@@ -23,6 +24,7 @@ const (
 )
 
 var (
+	logger         = logrus.New()
 	asgDesiredDesc = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, subsystemASG, "desired_count"),
 		"Gauge about the number of EC2 instances that should be in the ASG.",
@@ -167,10 +169,13 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			ok, err := a.helper.IsClusterReconciledByThisVersion(cluster)
 			if err != nil {
 				return microerror.Mask(err)
+				logger.Errorf("KUBA err: checking %q ended with error %v", cluster, err)
 			}
 			if !ok {
+				logger.Errorf("KUBA continue")
 				continue
 			}
+			logger.Errorf("KUBA ok")
 
 			if installation != a.installationName {
 				continue
