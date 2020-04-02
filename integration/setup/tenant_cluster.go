@@ -232,7 +232,7 @@ func ensureAWSConfigInstalled(ctx context.Context, id string, config Config) err
 		c := chartvalues.APIExtensionsAWSConfigE2EConfig{
 			CommonDomain:         env.CommonDomain(),
 			ClusterName:          id,
-			VersionBundleVersion: project.BundleVersion(),
+			VersionBundleVersion: project.Version(),
 
 			AWS: chartvalues.APIExtensionsAWSConfigE2EConfigAWS{
 				Region:            env.AWSRegion(),
