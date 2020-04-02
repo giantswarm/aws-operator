@@ -195,7 +195,7 @@ workflows:
           app_name: "aws-operator"
           app_collection_repo: "aws-app-collection"
           requires:
-            - push-aws-operator-to-app-catalog
+            - push-aws-operator-to-control-plane-app-catalog
           filters:
             branches:
               ignore: /.*/
