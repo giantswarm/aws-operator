@@ -742,22 +742,20 @@ func componentName(domainName string) (string, error) {
 	return splits[0], nil
 }
 
-// ImageID returns the EC2 AMI for the configured region.
+// ImageID returns the EC2 AMI for the configured region and given version.
 func ImageID(customObject v1alpha1.AWSConfig, osVersion string) (string, error) {
-	region := Region(customObject)
-
-	versionAMIInfo, ok := amiInfo[osVersion]
+	regionAMIs, ok := amiInfo[osVersion]
 	if !ok {
 		return "", microerror.Maskf(invalidConfigError, "no image id for version '%s'", osVersion)
 	}
 
-	for _, regionAMIInfo := range versionAMIInfo.AMIs {
-		if regionAMIInfo.Name == region {
-			return regionAMIInfo.HVM, nil
-		}
+	region := Region(customObject)
+	regionAMI, ok := regionAMIs[region]
+	if !ok {
+		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
 	}
 
-	return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
+	return regionAMI, nil
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,

@@ -4,27 +4,37 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/semver"
 	"golang.org/x/net/html"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-const keyPackage = "key"
-const filename = "amis.go"
-const sourceFileTemplate = `package {{ .Package }}
+const (
+	flatcarDomain     = "flatcar-linux.net"
+	flatcarMinimum    = "2345.3.1"
+	coreosDomain      = "core-os.net"
+	coreosMinimum     = "2135.4.0"
+	channel           = "stable"
+	arch              = "amd64-usr"
+	generatedFilename = "amis.go"
+	generatedPackage  = "key"
+	generatedTemplate = `package {{ .Package }}
 
 import "encoding/json"
 
 var amiJSON = []byte({{ .AMIInfoString }})
-var amiInfo = map[string]AMIInfoList{}
+var amiInfo = map[string]map[string]string{}
 
 func init() {
 	err := json.Unmarshal(amiJSON, &amiInfo)
@@ -33,76 +43,129 @@ func init() {
 	}
 }
 `
+)
 
 type sourceFileTemplateData struct {
 	AMIInfoString string
 	Package       string
 }
 
-func main() {
-	url := "https://stable.release.core-os.net/amd64-usr/"
-	response, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	z := html.NewTokenizer(response.Body)
-
+func scrapeVersions(source io.Reader) ([]string, error) {
+	z := html.NewTokenizer(source)
 	var versions []string
-	end := false
-	for !end {
+	for {
 		tt := z.Next()
 		switch {
 		case tt == html.ErrorToken:
-			end = true
+			return versions, nil
 		case tt == html.StartTagToken:
 			t := z.Token()
-			if t.Data == "a" {
-				versions = append(versions, strings.TrimSuffix(t.Attr[0].Val, "/"))
+			if t.Data != "a" {
+				continue
+			}
+			for _, attr := range t.Attr {
+				if attr.Key != "href" {
+					continue
+				}
+				// Versions to extract look like href="./123.4.5/" or href="123.4.5"
+				// so we trim off suffix and prefix if they exist and then ensure this
+				// is a valid semver version.
+				href := strings.TrimSuffix(attr.Val, "/")
+				if strings.HasPrefix(href, "./") {
+					href = strings.TrimPrefix(href, "./")
+				}
+				if _, err := semver.NewVersion(href); err != nil {
+					break // href is invalid, no need to look at other attrs
+				}
+				versions = append(versions, href)
 			}
 		}
 	}
+}
 
-	versionAMIs := map[string]key.AMIInfoList{}
-	for _, version := range versions {
-		url := fmt.Sprintf("https://stable.release.core-os.net/amd64-usr/%s/coreos_production_ami_all.json", version)
-		response, err := http.Get(url)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if response.StatusCode == 403 {
-			continue
-		}
-		body, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		amis := key.AMIInfoList{}
-		err = json.Unmarshal(body, &amis)
-		if err != nil {
-			log.Fatal(err)
-		}
-		versionAMIs[version] = amis
+func scrapeVersionAMIs(source io.Reader) (map[string]string, error) {
+	body, err := ioutil.ReadAll(source)
+	if err != nil {
+		return nil, err
 	}
 
-	result, err := json.MarshalIndent(versionAMIs, "", "  ")
+	amis := key.AMIInfoList{}
+	err = json.Unmarshal(body, &amis)
+	if err != nil {
+		return nil, err
+	}
+
+	result := map[string]string{}
+	for _, region := range amis.AMIs {
+		result[region.Name] = region.HVM
+	}
+
+	return result, nil
+}
+
+func main() {
+	vendors := map[string]string{
+		"coreos":  coreosDomain,
+		"flatcar": flatcarDomain,
+	}
+	mergedAMIs := map[string]map[string]string{}
+	for vendor, domain := range vendors {
+		var versions []string
+		{
+			url := fmt.Sprintf("https://%s.release.%s/%s/", channel, domain, arch)
+			fmt.Println("scraping", url)
+			response, err := http.Get(url)
+			if err != nil {
+				log.Fatal(err)
+			}
+			versions, err = scrapeVersions(response.Body)
+		}
+
+		for _, version := range versions {
+			var minimumVersion string
+			switch vendor {
+			case "coreos":
+				minimumVersion = coreosMinimum
+			case "flatcar":
+				minimumVersion = flatcarMinimum
+			}
+			if minimumVersion != "" && semver.MustParse(version).LessThan(semver.MustParse(minimumVersion)) {
+				continue
+			}
+			url := fmt.Sprintf("https://%s.release.%s/%s/%s/%s_production_ami_all.json", channel, domain, arch, version, vendor)
+			fmt.Println("scraping", url)
+			response, err := http.Get(url)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if response.StatusCode == 403 {
+				continue
+			}
+			mergedAMIs[version], err = scrapeVersionAMIs(response.Body)
+		}
+	}
+
+	result, err := json.MarshalIndent(mergedAMIs, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	t, err := template.New(filename).Parse(sourceFileTemplate)
+	t, err := template.New(generatedFilename).Parse(generatedTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	path := filepath.Join("..", filename)
-	file, err := os.OpenFile(path, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0755)
+	_, thisSourceFilePath, _, _ := runtime.Caller(0)
+	thisSourceFileDirectory := filepath.Dir(thisSourceFilePath)
+	path := filepath.Join(thisSourceFileDirectory, "..", generatedFilename)
+	file, err := os.OpenFile(path, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	err = t.Execute(file, sourceFileTemplateData{
 		AMIInfoString: fmt.Sprintf("`%s`", result),
-		Package:       keyPackage,
+		Package:       generatedPackage,
 	})
 	if err != nil {
 		log.Fatal(err)
