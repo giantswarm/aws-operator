@@ -268,7 +268,7 @@ func azSubnetSpecToString(azs []controllercontext.ContextSpecTenantClusterTCCPAv
 	var result strings.Builder
 	result.WriteString("availability zone subnet allocations: {")
 	for _, az := range azs {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String()))
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q, cni: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String(), az.Subnet.AWSCNI.CIDR.String()))
 	}
 
 	if len(azs) > 0 {
@@ -284,7 +284,7 @@ func azSubnetStatusToString(azs []controllercontext.ContextStatusTenantClusterTC
 	var result strings.Builder
 	result.WriteString("availability zone subnet allocations: {")
 	for _, az := range azs {
-		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String()))
+		result.WriteString(fmt.Sprintf("\n%q: [pub: %q, private: %q, cni: %q]", az.Name, az.Subnet.Public.CIDR.String(), az.Subnet.Private.CIDR.String(), az.Subnet.AWSCNI.CIDR.String()))
 	}
 
 	if len(azs) > 0 {
@@ -400,6 +400,10 @@ func newAZStatus(azMapping map[string]mapping) []controllercontext.ContextStatus
 		az := controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 			Name: name,
 			Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
+				AWSCNI: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetAWSCNI{
+					CIDR: sp.AWSCNI.Subnet.CIDR,
+					ID:   sp.AWSCNI.Subnet.ID,
+				},
 				Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 					CIDR: sp.Private.Subnet.CIDR,
 					ID:   sp.Private.Subnet.ID,

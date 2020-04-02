@@ -21,5 +21,5 @@ type subnet struct {
 }
 
 func (m mapping) subnetsEmpty() bool {
-	return (m.Public.Subnet.CIDR.IP == nil && m.Public.Subnet.CIDR.Mask == nil) && (m.Private.Subnet.CIDR.IP == nil && m.Private.Subnet.CIDR.Mask == nil)
+	return (m.Public.Subnet.CIDR.IP == nil && m.Public.Subnet.CIDR.Mask == nil) && (m.Private.Subnet.CIDR.IP == nil && m.Private.Subnet.CIDR.Mask == nil) && (m.AWSCNI.Subnet.CIDR.IP == nil && m.AWSCNI.Subnet.CIDR.Mask == nil)
 }
