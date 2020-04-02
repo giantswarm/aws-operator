@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -37,6 +38,7 @@ type Config struct {
 	// EncrypterRoleManager manages role encryption. This can be supported by
 	// different implementations and thus is optional.
 	EncrypterRoleManager encrypter.RoleManager
+	G8sClient            versioned.Interface
 	Logger               micrologger.Logger
 
 	Detection                  *detection.Detection
@@ -53,6 +55,7 @@ type Config struct {
 type Resource struct {
 	apiWhiteList         adapter.APIWhitelist
 	encrypterRoleManager encrypter.RoleManager
+	g8sClient            versioned.Interface
 	logger               micrologger.Logger
 
 	encrypterBackend   string
@@ -68,6 +71,9 @@ func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -80,6 +86,7 @@ func New(config Config) (*Resource, error) {
 		apiWhiteList:         config.APIWhitelist,
 		detection:            config.Detection,
 		encrypterRoleManager: config.EncrypterRoleManager,
+		g8sClient:            config.G8sClient,
 		logger:               config.Logger,
 
 		encrypterBackend:   config.EncrypterBackend,

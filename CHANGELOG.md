@@ -9,8 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Flatcar Linux.
+- Enable per-cluster configuration of kube-proxy's `conntrackMaxPerCore` parameter.
+
 ### Changed
 
+- Streamline image templating for core components for quicker and easier releases in the future.
+- Retrieve component versions from `releases`.
 - Update helm chart with modern labels, configuration, and templating.
 
 
@@ -18,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated to Kubernetes 1.16.3.
+- Update to Kubernetes 1.16.3.
 
 
 ## [5.5.0] - 2019-11-01
@@ -29,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated to Kubernetes 1.15.5.
+- Update to Kubernetes 1.15.5.
 
 
 [Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.6.0...legacy

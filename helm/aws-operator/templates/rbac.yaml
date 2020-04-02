@@ -85,6 +85,12 @@ rules:
     verbs:
       - "*"
   - apiGroups:
+      - release.giantswarm.io
+    resources:
+      - releases
+    verbs:
+      - get
+  - apiGroups:
       - ""
     resources:
       - namespaces

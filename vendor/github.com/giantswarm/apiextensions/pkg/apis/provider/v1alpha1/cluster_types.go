@@ -86,7 +86,24 @@ type ClusterKubernetesKubelet struct {
 }
 
 type ClusterKubernetesNetworkSetup struct {
-	Docker ClusterKubernetesNetworkSetupDocker `json:"docker" yaml:"docker"`
+	Docker    ClusterKubernetesNetworkSetupDocker    `json:"docker" yaml:"docker"`
+	KubeProxy ClusterKubernetesNetworkSetupKubeProxy `json:"kubeProxy" yaml:"kubeProxy"`
+}
+
+// ClusterKubernetesNetworkSetupKubeProxy describes values passed to the kube-proxy running in a tenant cluster.
+type ClusterKubernetesNetworkSetupKubeProxy struct {
+	// Maximum number of NAT connections to track per CPU core (0 to leave the limit as-is and ignore conntrack-min).
+	// Passed to kube-proxy as --conntrack-max-per-core.
+	ConntrackMaxPerCore int `json:"conntrackMaxPerCore" yaml:"conntrackMaxPerCore"`
+	// Minimum number of conntrack entries to allocate, regardless of conntrack-max-per-core (set conntrack-max-per-core=0 to leave the limit as-is).
+	// Passed to kube-proxy as --conntrack-min.
+	ConntrackMin int `json:"conntrackMin" yaml:"conntrackMin"`
+	// NAT timeout for TCP connections in the CLOSE_WAIT state.
+	// Passed to kube-proxy as --conntrack-tcp-timeout-close-wait.
+	TCPCloseWaitTimeout *DeepCopyDuration `json:"tcpCloseWaitTimeout" yaml:"tcpCloseWaitTimeout"`
+	// Idle timeout for established TCP connections (0 to leave as-is).
+	// Passed to kube-proxy as --conntrack-tcp-timeout-established.
+	TCPEstablishedTimeout *DeepCopyDuration `json:"tcpEstablishedTimeout" yaml:"tcpEstablishedTimeout"`
 }
 
 type ClusterKubernetesNetworkSetupDocker struct {
