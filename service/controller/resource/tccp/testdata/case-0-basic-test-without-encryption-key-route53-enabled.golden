@@ -288,8 +288,6 @@ Resources:
         Target: TCP:443
         Timeout: 3
         UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
       Listeners:
       
       - InstancePort: 443
@@ -317,8 +315,6 @@ Resources:
         Target: TCP:443
         Timeout: 3
         UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
       Listeners:
       
       - InstancePort: 443
@@ -349,8 +345,6 @@ Resources:
         Target: TCP:2379
         Timeout: 3
         UnhealthyThreshold: 2
-      Instances:
-      - !Ref MasterInstance8Y5CK78968
       Listeners:
       
       - InstancePort: 2379

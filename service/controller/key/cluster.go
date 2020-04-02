@@ -39,6 +39,7 @@ const (
 	TagCluster                 = "giantswarm.io/cluster"
 	TagClusterType             = "giantswarm.io/cluster-type"
 	TagClusterTypeControlPlane = "control-plane"
+	TagControlPlane            = "giantswarm.io/control-plane"
 	TagInstallation            = "giantswarm.io/installation"
 	TagMachineDeployment       = "giantswarm.io/machine-deployment"
 	TagOrganization            = "giantswarm.io/organization"
@@ -52,6 +53,7 @@ const (
 	StackTCCP  = "tccp"
 	StackTCCPF = "tccpf"
 	StackTCCPI = "tccpi"
+	StackTCCPN = "tccpn"
 	StackTCNP  = "tcnp"
 	StackTCNPF = "tcnpf"
 )

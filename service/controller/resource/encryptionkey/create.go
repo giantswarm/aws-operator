@@ -1,17 +1,13 @@
-package tcnpencryption
+package encryptionkey
 
 import (
 	"context"
 	"time"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -20,25 +16,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha2.AWSCluster
-	{
-		md, err := key.ToMachineDeployment(obj)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(md.Namespace).Get(key.ClusterID(&md), metav1.GetOptions{})
-		if errors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-
-		cl = *m
-	}
+	cl, err := r.toClusterFunc(obj)
 
 	// For some obscure reasons the encryption key is not immediately available
 	// when creating it. On each cluster creation we saw the retry resource

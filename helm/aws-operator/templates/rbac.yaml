@@ -10,10 +10,10 @@ rules:
       - awsclusters/status
       - awscontrolplanes
       - awscontrolplanes/status
-      - g8scontrolplanes
-      - g8scontrolplanes/status
       - awsmachinedeployments
       - awsmachinedeployments/status
+      - g8scontrolplanes
+      - g8scontrolplanes/status
     verbs:
       - "*"
   - apiGroups:

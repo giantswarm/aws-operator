@@ -38,6 +38,7 @@ type ContextStatusTenantCluster struct {
 	HostedZoneNameServers string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
+	TCCPN                 ContextStatusTenantClusterTCCPN
 	TCNP                  ContextStatusTenantClusterTCNP
 	OperatorVersion       string
 }
@@ -98,6 +99,12 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 type ContextStatusTenantClusterTCCPVPC struct {
 	ID                  string
 	PeeringConnectionID string
+}
+
+type ContextStatusTenantClusterTCCPN struct {
+	EtcdVolumeSnapshotID string
+	IsTransitioning      bool
+	InstanceType         string
 }
 
 type ContextStatusTenantClusterTCNP struct {

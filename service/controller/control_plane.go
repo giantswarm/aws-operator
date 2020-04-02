@@ -2,10 +2,12 @@ package controller
 
 import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
+	"github.com/giantswarm/randomkeys"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/aws-operator/client/aws"
@@ -16,7 +18,23 @@ type ControlPlaneConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
-	HostAWSConfig aws.Config
+	APIWhitelist              ClusterConfigAPIWhitelist
+	CalicoCIDR                int
+	CalicoMTU                 int
+	CalicoSubnet              string
+	ClusterDomain             string
+	ClusterIPRange            string
+	DockerDaemonCIDR          string
+	HostAWSConfig             aws.Config
+	IgnitionPath              string
+	ImagePullProgressDeadline string
+	InstallationName          string
+	NetworkSetupDockerImage   string
+	PodInfraContainerImage    string
+	RegistryDomain            string
+	SSHUserList               string
+	SSOPublicKey              string
+	VaultAddress              string
 }
 
 type ControlPlane struct {
@@ -67,14 +85,57 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: config.K8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var randomKeysSearcher randomkeys.Interface
+	{
+		c := randomkeys.Config{
+			K8sClient: config.K8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		randomKeysSearcher, err = randomkeys.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var resourceSet *controller.ResourceSet
 	{
 		c := controlPlaneResourceSetConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
+			G8sClient:          config.K8sClient.G8sClient(),
+			K8sClient:          config.K8sClient.K8sClient(),
+			Logger:             config.Logger,
+			CertsSearcher:      certsSearcher,
+			RandomKeysSearcher: randomKeysSearcher,
 
-			HostAWSConfig: config.HostAWSConfig,
+			CalicoCIDR:                config.CalicoCIDR,
+			CalicoMTU:                 config.CalicoMTU,
+			CalicoSubnet:              config.CalicoSubnet,
+			ClusterDomain:             config.ClusterDomain,
+			ClusterIPRange:            config.ClusterIPRange,
+			DockerDaemonCIDR:          config.DockerDaemonCIDR,
+			IgnitionPath:              config.IgnitionPath,
+			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
+			InstallationName:          config.InstallationName,
+			HostAWSConfig:             config.HostAWSConfig,
+			NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
+			PodInfraContainerImage:    config.PodInfraContainerImage,
+			RegistryDomain:            config.RegistryDomain,
+			SSHUserList:               config.SSHUserList,
+			SSOPublicKey:              config.SSOPublicKey,
+			VaultAddress:              config.VaultAddress,
 		}
 
 		resourceSet, err = newControlPlaneResourceSet(c)

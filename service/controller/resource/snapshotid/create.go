@@ -23,38 +23,48 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	i := &ec2.DescribeSnapshotsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
-				Values: []*string{
-					aws.String(key.ClusterID(cr)),
+	var id string
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster snapshot id")
+
+		i := &ec2.DescribeSnapshotsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+					Values: []*string{
+						aws.String(key.ClusterID(cr)),
+					},
+				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagSnapshot)),
+					Values: []*string{
+						aws.String(key.HAMasterSnapshotIDValue),
+					},
 				},
 			},
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", key.TagSnapshot)),
-				Values: []*string{
-					aws.String(key.HAMasterSnapshotIDValue),
-				},
-			},
-		},
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSnapshots(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(o.Snapshots) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster snapshot id is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		if len(o.Snapshots) > 1 {
+			return microerror.Maskf(executionFailedError, "expected one snapshot, got %d", len(o.Snapshots))
+		}
+
+		id = *o.Snapshots[0].SnapshotId
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the tenant cluster snapshot id %#q", id))
 	}
 
-	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSnapshots(i)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	count := len(o.Snapshots)
-	if count == 0 {
-		return microerror.Maskf(notExistsError, "snapshot")
-	}
-	if count != 1 {
-		return microerror.Maskf(executionFailedError, "expected one snapshot, got %d", count)
-	}
-
-	//store the snapshot id
-	snapshot := o.Snapshots[0]
-	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = aws.StringValue(snapshot.SnapshotId)
+	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = id
 
 	return nil
 }

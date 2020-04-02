@@ -25,6 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionkey"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -36,7 +37,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
@@ -193,15 +193,16 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpEncryptionResource resource.Interface
+	var encryptionKeyResource resource.Interface
 	{
-		c := tcnpencryption.Config{
-			G8sClient: config.G8sClient,
-			Encrypter: encrypterObject,
-			Logger:    config.Logger,
+		c := encryptionkey.Config{
+			G8sClient:     config.G8sClient,
+			Encrypter:     encrypterObject,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
-		tcnpEncryptionResource, err = tcnpencryption.New(c)
+		encryptionKeyResource, err = encryptionkey.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -427,6 +428,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
+		encryptionKeyResource,
 		regionResource,
 		cpRouteTablesResource,
 		cpVPCResource,
@@ -439,7 +441,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tcnpASGStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
-		tcnpEncryptionResource,
 		tcnpSecurityGroupsResource,
 
 		// All these resources implement certain business logic and operate based on

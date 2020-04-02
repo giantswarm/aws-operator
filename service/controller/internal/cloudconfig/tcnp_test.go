@@ -48,8 +48,8 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 		},
 		{
 			name:   "case 1: tcnp test - china",
-			ctx:    unittest.DefaultContextChina(),
-			cr:     unittest.DefaultClusterChina(),
+			ctx:    unittest.ChinaContext(),
+			cr:     unittest.ChinaCluster(),
 			certs:  unittest.DefaultCerts(),
 			keys:   unittest.DefaultKeys(),
 			labels: "k1=v1,k2=v2",
