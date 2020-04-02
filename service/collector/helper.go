@@ -61,6 +61,8 @@ func newHelper(config helperConfig) (*helper, error) {
 		store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
 		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, store, 2*time.Minute)
 		go reflector.Run(make(<-chan struct{}))
+		// force 1st reflector sync
+		listerWatcher.List(metav1.ListOptions{})
 	}
 
 	h := &helper{
