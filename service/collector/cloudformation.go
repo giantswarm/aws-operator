@@ -143,6 +143,16 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			}
 		}
 
+		// Do not publish metrics for this cluster if it's version does not
+		// match pkg/project/project.go version.
+		ok, err := cf.helper.IsClusterReconciledByThisVersion(cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		if !ok {
+			continue
+		}
+
 		if installation != cf.installationName {
 			continue
 		}

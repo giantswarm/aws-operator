@@ -162,6 +162,16 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				}
 			}
 
+			// Do not publish metrics for this cluster if it's version does not
+			// match pkg/project/project.go version.
+			ok, err := a.helper.IsClusterReconciledByThisVersion(cluster)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			if !ok {
+				continue
+			}
+
 			if installation != a.installationName {
 				continue
 			}
