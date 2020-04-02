@@ -209,6 +209,9 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 // the given name is reconciled by this particular version of aws-operator
 // (based on version found in pkg/project/project.go).
 func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, error) {
+	if clusterName == "" {
+		return false, microerror.Maskf(executionFailedError, "empty cluster name")
+	}
 	key := fmt.Sprintf("default/%s", clusterName)
 
 	logger.Errorf("KUBA helper: searching %q", key)
