@@ -168,6 +168,17 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+      - architect/push-to-docker:
+          name: push-aws-operator-to-aliyun
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          requires:
+            - build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
       - architect/push-to-app-catalog:
           name: push-aws-operator-to-app-catalog
           app_catalog: "control-plane-catalog"
