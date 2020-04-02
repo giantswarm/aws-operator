@@ -60,7 +60,7 @@ func newHelper(config helperConfig) (*helper, error) {
 		}
 		store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
 		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, store, 2*time.Minute)
-		reflector.Run(make(<-chan struct{}))
+		go reflector.Run(make(<-chan struct{}))
 	}
 
 	h := &helper{
