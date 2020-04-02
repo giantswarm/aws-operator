@@ -2,7 +2,6 @@ package tccp
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"sort"
 	"time"
@@ -14,7 +13,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	pkgtemplate "github.com/giantswarm/aws-operator/pkg/template"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -315,23 +313,11 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 }
 
 func (r *Resource) newParamsMainIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMPolicies, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
-			ClusterID:         key.ClusterID(&cr),
-			EC2ServiceDomain:  key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:         cc.Status.TenantCluster.Encryption.Key,
-			MasterPolicyName:  key.PolicyNameMaster(cr),
-			MasterProfileName: key.ProfileNameMaster(cr),
-			MasterRoleName:    key.RoleNameMaster(cr),
-			RegionARN:         key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			Route53Enabled:    r.route53Enabled,
-			S3Bucket:          key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
+			ClusterID:      key.ClusterID(&cr),
+			Route53Enabled: r.route53Enabled,
 		}
 	}
 
@@ -339,50 +325,15 @@ func (r *Resource) newParamsMainIAMPolicies(ctx context.Context, cr infrastructu
 }
 
 func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	// TODO: The rendering should be moved into the templates
-	// https://github.com/giantswarm/giantswarm/issues/7665
-
-	c := template.SmallCloudconfigConfig{
-		S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCP(&cr)),
-	}
-	rendered, err := pkgtemplate.Render(key.CloudConfigSmallTemplates(), c)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var instance *template.ParamsMainInstance
 	{
 		instance = &template.ParamsMainInstance{
-			Cluster: template.ParamsMainInstanceCluster{
-				ID: key.ClusterID(&cr),
-			},
-			Image: template.ParamsMainInstanceImage{
-				ID: key.ImageID(cc.Status.TenantCluster.AWS.Region),
-			},
 			Master: template.ParamsMainInstanceMaster{
-				AZ:          key.MasterAvailabilityZone(cr),
-				CloudConfig: base64.StdEncoding.EncodeToString([]byte(rendered)),
-				DockerVolume: template.ParamsMainInstanceMasterDockerVolume{
-					Name:         key.VolumeNameDocker(cr),
-					ResourceName: key.DockerVolumeResourceName(cr, t),
-				},
+				AZ: key.MasterAvailabilityZone(cr),
+
 				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
 					Name: key.VolumeNameEtcd(cr),
 				},
-				LogVolume: template.ParamsMainInstanceMasterLogVolume{
-					Name: key.VolumeNameLog(cr),
-				},
-				Instance: template.ParamsMainInstanceMasterInstance{
-					ResourceName: key.MasterInstanceResourceName(cr, t),
-					Type:         key.MasterInstanceType(cr),
-					Monitoring:   r.instanceMonitoring,
-				},
-				PrivateSubnet: key.SanitizeCFResourceName(key.PrivateSubnetName(key.MasterAvailabilityZone(cr))),
 			},
 		}
 	}
