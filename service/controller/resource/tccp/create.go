@@ -301,7 +301,10 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 
 	var osVersion string
 	{
-		releaseVersion := cr.Labels[label.ReleaseVersion]
+		releaseVersion, ok := cr.Labels[label.ReleaseVersion]
+		if !ok {
+			return "", microerror.Maskf(executionFailedError, "release version label not found")
+		}
 		releaseName := fmt.Sprintf("v%s", releaseVersion)
 		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
 		if err != nil {
@@ -314,7 +317,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 			}
 		}
 		if osVersion == "" {
-			return "", microerror.Mask(executionFailedError)
+			return "", microerror.Maskf(executionFailedError, "containerlinux component version not found on release")
 		}
 	}
 
