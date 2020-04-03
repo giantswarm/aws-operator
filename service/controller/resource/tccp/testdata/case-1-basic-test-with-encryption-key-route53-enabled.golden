@@ -18,29 +18,7 @@ Outputs:
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
 Resources:
-  IAMManagerRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: 8y5ck-IAMManager-Role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            AWS: !GetAtt MasterRole.Arn
-          Action: "sts:AssumeRole"
-  IAMManagerRolePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: 8y5ck-IAMManager-Policy
-      Roles:
-        - Ref: "IAMManagerRole"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Action: "sts:AssumeRole"
-          Resource: "*"
+  
   Route53ManagerRole:
     Type: "AWS::IAM::Role"
     Properties:

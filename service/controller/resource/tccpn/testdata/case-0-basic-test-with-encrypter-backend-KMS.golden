@@ -157,6 +157,29 @@ Resources:
       InstanceProfileName: gs-cluster-8y5ck-profile-tccpn
       Roles:
         - Ref: ControlPlaneNodesRole
+  IAMManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 8y5ck-IAMManager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt ControlPlaneNodesRole.Arn
+          Action: "sts:AssumeRole"
+  IAMManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: 8y5ck-IAMManager-Policy
+      Roles:
+        - Ref: "IAMManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Action: "sts:AssumeRole"
+          Resource: "*"
   ControlPlaneNodeLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
