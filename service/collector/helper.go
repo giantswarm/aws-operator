@@ -5,6 +5,7 @@ import (
 	"time"
 
 	v1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	v1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -53,13 +54,22 @@ func newHelper(config helperConfig) (*helper, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AWSConfig must not be empty", config)
 	}
 
-	var store cache.Store
+	var store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
 	{
-		listerWatcher := &ListerWatcher{
+		listerWatcher := &ClusterListerWatcher{
 			clusters: config.G8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll),
 		}
-		store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
 		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, store, 2*time.Minute)
+		go reflector.Run(make(<-chan struct{}))
+		// force 1st reflector sync
+		listerWatcher.List(metav1.ListOptions{})
+	}
+
+	{
+		listerWatcher := &ConfigListerWatcher{
+			configs: config.G8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll),
+		}
+		reflector := cache.NewReflector(listerWatcher, &v1alpha1.AWSConfig{}, store, 2*time.Minute)
 		go reflector.Run(make(<-chan struct{}))
 		// force 1st reflector sync
 		listerWatcher.List(metav1.ListOptions{})
