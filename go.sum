@@ -236,6 +236,8 @@ github.com/giantswarm/e2etests v0.1.0 h1:VgD3rCoMUytET96eDiySYeVYCVtBQUtP7bO+y/O
 github.com/giantswarm/e2etests v0.1.0/go.mod h1:jfE2zMqSmGC5Infyh/DufFRDriS+CwVAVV+lFb/SLWg=
 github.com/giantswarm/errors v0.2.0 h1:l9bAe0IQBHLkZQVT+h79DTCJQ3tuDFrOfUySVlbKn10=
 github.com/giantswarm/errors v0.2.0/go.mod h1:Oj1LIWs9Uoj6JGtK5HxTb50iZuqe9f60LDI0nLXA5vU=
+github.com/giantswarm/errors v0.2.1 h1:R1sy4QXHEZIP1VxyLQoamFtuyuwInUWS6djaIKC6Y+o=
+github.com/giantswarm/errors v0.2.1/go.mod h1:Oj1LIWs9Uoj6JGtK5HxTb50iZuqe9f60LDI0nLXA5vU=
 github.com/giantswarm/exporterkit v0.2.0 h1:+HTGl4fmT/1OkTox8HbV3JXeavmsZv94+2CDW8cSrq0=
 github.com/giantswarm/exporterkit v0.2.0/go.mod h1:b4fuHVjsvZgznC9OEPfn0y5zvN8SnEKTiI5zTTfck94=
 github.com/giantswarm/helmclient v0.2.0 h1:etBQoz0QN9quIA/blbkIkrfr0CuzwjxA89/1MgE5YoU=
