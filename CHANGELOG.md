@@ -12,10 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switch from dep to Go modules.
-
-
+- Fix subnet allocation for Availability Zones.
+- Switch to AWS CNI
 
 ## [8.2.1] - 2020-03-20
+- Add PV limit per node. The limit is 20 PV per node.
 
 ### Added
 
