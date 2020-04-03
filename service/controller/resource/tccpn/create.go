@@ -261,6 +261,7 @@ func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*te
 		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
+	fmt.Printf("%#v\n", eni)
 
 	return eni, nil
 }
