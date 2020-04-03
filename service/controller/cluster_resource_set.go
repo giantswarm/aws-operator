@@ -667,7 +667,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			return false
 		}
 
-		if key.VersionBundleVersion(customObject) == project.Version() {
+		if key.VersionBundleVersion(customObject) == project.BundleVersion() {
 			return true
 		}
 

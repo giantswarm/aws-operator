@@ -17,6 +17,6 @@ func NewBundle() versionbundle.Bundle {
 			},
 		},
 		Name:    Name(),
-		Version: Version(),
+		Version: BundleVersion(),
 	}
 }
