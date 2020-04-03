@@ -203,7 +203,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 		mapping := azMapping[az]
 
 		// Check if mapping of given availability zone already contain value.
-		if !mapping.PublicSubnetEmpty() && !mapping.PrivateSubnetEmpty() {
+		if !mapping.PublicSubnetEmpty() {
 			// Calculate the parent network from public subnet (always present for
 			// functional AZ).
 			parent := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
