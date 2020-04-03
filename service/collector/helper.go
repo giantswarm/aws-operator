@@ -33,7 +33,8 @@ type helper struct {
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 
-	g8sCache cache.Store
+	awsClustersCache cache.Store
+	awsConfigsCache  cache.Store
 
 	awsConfig clientaws.Config
 }
@@ -54,12 +55,13 @@ func newHelper(config helperConfig) (*helper, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.AWSConfig must not be empty", config)
 	}
 
-	var store = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
+	var clusterStore = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
+	var configStore = cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)
 	{
 		listerWatcher := &ClusterListerWatcher{
 			clusters: config.G8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll),
 		}
-		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, store, 2*time.Minute)
+		reflector := cache.NewReflector(listerWatcher, &v1alpha2.AWSCluster{}, clusterStore, 2*time.Minute)
 		go reflector.Run(make(<-chan struct{}))
 		// force 1st reflector sync
 		listerWatcher.List(metav1.ListOptions{})
@@ -69,7 +71,7 @@ func newHelper(config helperConfig) (*helper, error) {
 		listerWatcher := &ConfigListerWatcher{
 			configs: config.G8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll),
 		}
-		reflector := cache.NewReflector(listerWatcher, &v1alpha1.AWSConfig{}, store, 2*time.Minute)
+		reflector := cache.NewReflector(listerWatcher, &v1alpha1.AWSConfig{}, configStore, 2*time.Minute)
 		go reflector.Run(make(<-chan struct{}))
 		// force 1st reflector sync
 		listerWatcher.List(metav1.ListOptions{})
@@ -80,7 +82,8 @@ func newHelper(config helperConfig) (*helper, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
-		g8sCache: store,
+		awsClustersCache: clusterStore,
+		awsConfigsCache:  configStore,
 
 		awsConfig: config.AWSConfig,
 	}
@@ -224,13 +227,20 @@ func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, err
 	}
 	key := fmt.Sprintf("default/%s", clusterName)
 
+	var item interface{}
+
 	logger.Errorf("KUBA helper: searching %q", key)
-	item, exists, err := h.g8sCache.GetByKey(key)
+	item, exists, err := h.awsClustersCache.GetByKey(key)
 	logger.Errorf("KUBA helper: item:%+v, exists:%v, err:%v", item, exists, err)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 	if !exists {
+		item, exists, err := h.awsConfigsCache.GetByKey(key)
+		logger.Errorf("KUBA helper: item:%+v, exists:%v, err:%v", item, exists, err)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
 		return false, microerror.Maskf(executionFailedError, "could not find key in cache: %#q", key)
 	}
 
