@@ -1,0 +1,287 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Control Plane Nodes Cloud Formation Stack.
+Outputs:
+  InstanceType:
+    Value: m5.xlarge
+  OperatorVersion:
+    Value: 7.3.0
+Resources:
+  ControlPlaneNodeAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: EtcdVolume
+    Properties:
+      VPCZoneIdentifier:
+        - subnet-id-eu-central-1b
+      AvailabilityZones:
+        - eu-central-1b
+      DesiredCapacity: 1
+      MinSize: 1
+      MaxSize: 1
+      LaunchConfigurationName: !Ref ControlPlaneNodeLaunchConfiguration
+      LoadBalancerNames:
+      - 8y5ck-api-internal
+      - 8y5ck-api
+      - 8y5ck-etcd
+
+      # We define a lifecycle hook as part of the ASG in order to drain nodes
+      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
+      # hook referencing the ASG name. In this setting when deleting a Node Pool
+      # the lifecycle hook was never executed. We always want node draining for
+      # reliably managing customer workloads.
+      LifecycleHookSpecificationList:
+        - DefaultResult: CONTINUE
+          HeartbeatTimeout: 3600
+          LifecycleHookName: ControlPlaneNode
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+
+      # 60 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 60
+
+      MetricsCollection:
+        - Granularity: "1Minute"
+
+      Tags:
+        - Key: Name
+          Value: 8y5ck-master
+          PropagateAtLaunch: true
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
+        MinInstancesInService: 1
+
+        # Maximum amount of nodes being rolled at the same time.
+        MaxBatchSize: 1
+
+        # After creating a new instance, pause the rolling update on the ASG for
+        # 15 minutes.
+        PauseTime: PT15M
+  MasterEni:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+       Description: A Network interface used for etcd.
+       GroupSet:
+       - master-security-group-id
+       SubnetId: subnet-id-eu-central-1b
+       PrivateIpAddress: 10.100.3.68
+       Tags:
+       - Key: Name
+         Value: 8y5ck-master0-eni
+  EtcdVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: eu-central-1b
+      Encrypted: true
+      Size: 100
+      SnapshotId: snap-1234567890abcdef0
+      Tags:
+      - Key: Name
+        Value: 8y5ck-master0-etcd
+      VolumeType: gp2
+  ControlPlaneNodesRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: gs-cluster-8y5ck-role-tccpn
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: "sts:AssumeRole"
+  ControlPlaneNodesRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: gs-cluster-8y5ck-policy-tccpn
+      Roles:
+        - Ref: ControlPlaneNodesRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "ec2:Describe*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "ec2:AttachVolume"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "ec2:DetachVolume"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketLocation"
+              - "s3:ListAllMyBuckets"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
+          - Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
+          # Following rules are required to make the AWS CNI work. See also
+          # https://github.com/aws/amazon-vpc-cni-k8s#setup.
+          - Effect: Allow
+            Action:
+              - ec2:AssignPrivateIpAddresses
+              - ec2:AttachNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceTypes
+              - ec2:DescribeTags
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DetachNetworkInterface
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:UnassignPrivateIpAddresses
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource:
+              - arn:aws:ec2:*:*:network-interface/*
+  ControlPlaneNodesInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: gs-cluster-8y5ck-profile-tccpn
+      Roles:
+        - Ref: ControlPlaneNodesRole
+  IAMManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 8y5ck-IAMManager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt ControlPlaneNodesRole.Arn
+          Action: "sts:AssumeRole"
+  IAMManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: 8y5ck-IAMManager-Policy
+      Roles:
+        - Ref: "IAMManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Action: "sts:AssumeRole"
+          Resource: "*"
+  Route53ManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 8y5ck-Route53Manager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt IAMManagerRole.Arn
+          Action: "sts:AssumeRole"
+  Route53ManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: 8y5ck-Route53Manager-Policy
+      Roles:
+        - Ref: "Route53ManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "route53:ChangeResourceRecordSets"
+            Resource:
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone' ] ]
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone' ] ]
+          - Effect: "Allow"
+            Action:
+              - "route53:ListHostedZones"
+              - "route53:ListResourceRecordSets"
+            Resource: "*"
+
+  ControlPlaneNodeLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: false
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvdc
+        Ebs:
+          DeleteOnTermination: true
+          Encrypted: true
+          VolumeSize: 100
+          VolumeType: gp2
+      - DeviceName: /dev/xvdg
+        Ebs:
+          DeleteOnTermination: true
+          Encrypted: true
+          VolumeSize: 100
+          VolumeType: gp2
+      - DeviceName: /dev/xvdf
+        Ebs:
+          DeleteOnTermination: true
+          Encrypted: true
+          VolumeSize: 100
+          VolumeType: gp2
+      IamInstanceProfile: !Ref ControlPlaneNodesInstanceProfile
+      ImageId: ami-038cea5071a5ee580
+      InstanceType: m5.xlarge
+      InstanceMonitoring: false
+      SecurityGroups:
+      -  master-security-group-id
+      UserData:
+        Fn::Base64: |
+          {
+            "ignition": {
+              "version": "2.2.0",
+              "config": {
+                "append": [
+                  {
+                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_5_2_0/cluster-8y5ck-tccpn"
+                  }
+                ]
+              }
+            },
+            "storage": {
+              "filesystems": [
+                {
+                  "name": "docker",
+                  "mount": {
+                    "device": "/dev/xvdc",
+                    "wipeFilesystem": true,
+                    "label": "docker",
+                    "format": "xfs"
+                  }
+                },
+                {
+                  "name": "kubelet",
+                  "mount": {
+                    "device": "/dev/xvdg",
+                    "wipeFilesystem": true,
+                    "label": "kubelet",
+                    "format": "xfs"
+                  }
+                },
+                {
+                  "name": "log",
+                  "mount": {
+                    "device": "/dev/xvdf",
+                    "wipeFilesystem": true,
+                    "label": "log",
+                    "format": "xfs"
+                  }
+                }
+              ]
+            }
+          }

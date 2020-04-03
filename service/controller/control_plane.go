@@ -32,6 +32,7 @@ type ControlPlaneConfig struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
@@ -133,6 +134,7 @@ func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.Resou
 			NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 			PodInfraContainerImage:    config.PodInfraContainerImage,
 			RegistryDomain:            config.RegistryDomain,
+			Route53Enabled:            config.Route53Enabled,
 			SSHUserList:               config.SSHUserList,
 			SSOPublicKey:              config.SSOPublicKey,
 			VaultAddress:              config.VaultAddress,

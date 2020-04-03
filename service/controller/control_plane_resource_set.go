@@ -61,6 +61,7 @@ type controlPlaneResourceSetConfig struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
@@ -285,6 +286,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			APIWhitelist:     config.APIWhitelist,
 			Detection:        tccpnChangeDetection,
 			InstallationName: config.InstallationName,
+			Route53Enabled:   config.Route53Enabled,
 		}
 
 		tccpnResource, err = tccpn.New(c)

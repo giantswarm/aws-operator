@@ -52,6 +52,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+		}
+
 		// When the TCCP cloud formation stack is transitioning, it means it is
 		// updating in most cases. We do not want to interfere with the current
 		// process and stop here. We will then check on the next reconciliation loop
@@ -129,7 +136,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist)
+		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -183,7 +190,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist)
+		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -261,8 +268,6 @@ func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*te
 		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
-	fmt.Printf("eni: %#v\n", eni)
-	fmt.Printf("sec groups: %#v\n", cc.Status.TenantCluster.TCCP.SecurityGroups)
 	return eni, nil
 }
 
@@ -281,7 +286,7 @@ func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlan
 	return etcdVolume, nil
 }
 
-func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
+func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, route53Enabled bool) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -295,6 +300,7 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
 			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:         key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
+			Route53Enabled:   route53Enabled,
 		}
 	}
 
@@ -348,7 +354,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
@@ -363,7 +369,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		iamPolicies, err := newIAMPolicies(ctx, cr)
+		iamPolicies, err := newIAMPolicies(ctx, cr, route53Enabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

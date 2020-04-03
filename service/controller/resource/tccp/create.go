@@ -135,6 +135,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+			fmt.Printf("instance terminated")
 
 			err = r.updateStack(ctx, cr)
 			if err != nil {
@@ -249,10 +250,6 @@ func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) [
 func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		iamPolicies, err := r.newParamsMainIAMPolicies(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 		internetGateway, err := r.newParamsMainInternetGateway(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
@@ -295,7 +292,6 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 		}
 
 		params = &template.ParamsMain{
-			IAMPolicies:     iamPolicies,
 			InternetGateway: internetGateway,
 			Instance:        instance,
 			LoadBalancers:   loadBalancers,
@@ -310,18 +306,6 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 	}
 
 	return params, nil
-}
-
-func (r *Resource) newParamsMainIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMPolicies, error) {
-	var iamPolicies *template.ParamsMainIAMPolicies
-	{
-		iamPolicies = &template.ParamsMainIAMPolicies{
-			ClusterID:      key.ClusterID(&cr),
-			Route53Enabled: r.route53Enabled,
-		}
-	}
-
-	return iamPolicies, nil
 }
 
 func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {

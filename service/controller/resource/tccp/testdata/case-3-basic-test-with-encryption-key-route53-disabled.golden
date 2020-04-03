@@ -16,7 +16,6 @@ Outputs:
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
 Resources:
-  
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:

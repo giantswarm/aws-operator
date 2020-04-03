@@ -42,22 +42,31 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name         string
-		ctx          context.Context
-		cr           infrastructurev1alpha2.AWSControlPlane
-		apiWhitelist APIWhitelist
+		name           string
+		ctx            context.Context
+		cr             infrastructurev1alpha2.AWSControlPlane
+		apiWhitelist   APIWhitelist
+		route53Enabled bool
 	}{
 		{
-			name:         "case 0: basic test with encrypter backend KMS",
-			ctx:          unittest.DefaultContextControlPlane(),
-			cr:           unittest.DefaultControlPlane(),
-			apiWhitelist: apiWhitelist,
+			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
+			ctx:            unittest.DefaultContextControlPlane(),
+			cr:             unittest.DefaultControlPlane(),
+			apiWhitelist:   apiWhitelist,
+			route53Enabled: true,
+		},
+		{
+			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
+			ctx:            unittest.DefaultContextControlPlane(),
+			cr:             unittest.DefaultControlPlane(),
+			apiWhitelist:   apiWhitelist,
+			route53Enabled: false,
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, tc.apiWhitelist)
+			params, err := newTemplateParams(tc.ctx, tc.cr, tc.apiWhitelist, tc.route53Enabled)
 			if err != nil {
 				t.Fatal(err)
 			}
