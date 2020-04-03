@@ -84,5 +84,28 @@ const TemplateMainIAMPolicies = `
       InstanceProfileName: gs-cluster-{{ .IAMPolicies.ClusterID }}-profile-tccpn
       Roles:
         - Ref: ControlPlaneNodesRole
+  IAMManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: {{ .IAMPolicies.ClusterID }}-IAMManager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt ControlPlaneNodesRole.Arn
+          Action: "sts:AssumeRole"
+  IAMManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: {{ .IAMPolicies.ClusterID }}-IAMManager-Policy
+      Roles:
+        - Ref: "IAMManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Action: "sts:AssumeRole"
+          Resource: "*"
 {{- end -}}
 `

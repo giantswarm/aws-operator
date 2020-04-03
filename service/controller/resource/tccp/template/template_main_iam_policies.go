@@ -3,29 +3,6 @@ package template
 const TemplateMainIAMPolicies = `
 {{- define "iam_policies" -}}
 {{- $v := .IAMPolicies -}}
-  IAMManagerRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: {{ $v.ClusterID }}-IAMManager-Role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            AWS: !GetAtt MasterRole.Arn
-          Action: "sts:AssumeRole"
-  IAMManagerRolePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: {{ $v.ClusterID }}-IAMManager-Policy
-      Roles:
-        - Ref: "IAMManagerRole"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Action: "sts:AssumeRole"
-          Resource: "*"
 {{- if $v.Route53Enabled}}
   Route53ManagerRole:
     Type: "AWS::IAM::Role"
