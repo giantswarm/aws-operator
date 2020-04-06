@@ -200,17 +200,20 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 					lb.Tags[*t.Key] = *t.Value
 				}
 
+				if lb.Tags[key.TagInstallation] != e.installationName {
+					continue
+				}
+
 				// Do not publish metrics for this cluster if it's version does not
 				// match pkg/project/project.go version.
-				ok, err := e.helper.IsClusterReconciledByThisVersion(lb.Tags[tagCluster])
+				if lb.Tags[key.TagCluster] == "" {
+					continue
+				}
+				ok, err := e.helper.IsClusterReconciledByThisVersion(lb.Tags[key.TagCluster])
 				if err != nil {
 					return microerror.Mask(err)
 				}
 				if !ok {
-					continue
-				}
-
-				if lb.Tags[key.TagInstallation] != e.installationName {
 					continue
 				}
 

@@ -143,6 +143,14 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			}
 		}
 
+		if installation != cf.installationName {
+			continue
+		}
+
+		if !isOwnStack(stackType) {
+			continue
+		}
+
 		// Do not publish metrics for this cluster if it's version does not
 		// match pkg/project/project.go version.
 		ok, err := cf.helper.IsClusterReconciledByThisVersion(cluster)
@@ -150,14 +158,6 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			return microerror.Mask(err)
 		}
 		if !ok {
-			continue
-		}
-
-		if installation != cf.installationName {
-			continue
-		}
-
-		if !isOwnStack(stackType) {
 			continue
 		}
 

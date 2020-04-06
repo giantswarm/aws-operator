@@ -164,20 +164,17 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 				}
 			}
 
+			if installation != a.installationName {
+				continue
+			}
+
 			// Do not publish metrics for this cluster if it's version does not
 			// match pkg/project/project.go version.
 			ok, err := a.helper.IsClusterReconciledByThisVersion(cluster)
 			if err != nil {
 				return microerror.Mask(err)
-				logger.Errorf("KUBA err: checking %q ended with error %v", cluster, err)
 			}
 			if !ok {
-				logger.Errorf("KUBA continue")
-				continue
-			}
-			logger.Errorf("KUBA ok")
-
-			if installation != a.installationName {
 				continue
 			}
 
