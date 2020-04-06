@@ -220,6 +220,8 @@ github.com/giantswarm/apiextensions v0.2.0 h1:6gnfXFRL/eGqPbYhM7jUckwmulx7jh6qJp
 github.com/giantswarm/apiextensions v0.2.0/go.mod h1:iw66G0WDcrQl9mi2m/6mov2fWTD6ZiT2+FC62b2Mczw=
 github.com/giantswarm/apiextensions v0.2.2-0.20200406193254-1640f09c5087 h1:oBV5VOJIapW81T5+6qbojB0LipXnsO6d7FdFTYYYEmo=
 github.com/giantswarm/apiextensions v0.2.2-0.20200406193254-1640f09c5087/go.mod h1:sdtmW67L+Y+jgF//ra4jbOI238SrPtfGHtckCRyw4Ak=
+github.com/giantswarm/apiextensions v0.2.2-0.20200406201951-2ca08444c517 h1:E++n5HaI3r6HLYzwJ5Gz4Jp5MK0hmz/X0lB1h4N1Z6c=
+github.com/giantswarm/apiextensions v0.2.2-0.20200406201951-2ca08444c517/go.mod h1:sdtmW67L+Y+jgF//ra4jbOI238SrPtfGHtckCRyw4Ak=
 github.com/giantswarm/apprclient v0.2.0 h1:XLi/xt2BE316zCjgG9sJF25gKfIkIkdxPzgWmR8pACI=
 github.com/giantswarm/apprclient v0.2.0/go.mod h1:iAGOReCnEud0xxwhDS/lI50JSUN4zRCB3vlPRqH3IVc=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
@@ -306,6 +308,7 @@ github.com/go-openapi/errors v0.17.0/go.mod h1:LcZQpmvG4wyF5j4IhA73wkLFQg+QJXOQH
 github.com/go-openapi/errors v0.18.0/go.mod h1:LcZQpmvG4wyF5j4IhA73wkLFQg+QJXOQHVjmcZxhka0=
 github.com/go-openapi/errors v0.19.2 h1:a2kIyV3w+OS3S97zxUndRVD46+FhGOUBDFY7nmu4CsY=
 github.com/go-openapi/errors v0.19.2/go.mod h1:qX0BLWsyaKfvhluLejVpVNwNRdXZhEbTA4kxxpKBC94=
+github.com/go-openapi/errors v0.19.4 h1:fSGwO1tSYHFu70NKaWJt5Qh0qoBRtCm/mXS1yhf+0W0=
 github.com/go-openapi/errors v0.19.4/go.mod h1:qX0BLWsyaKfvhluLejVpVNwNRdXZhEbTA4kxxpKBC94=
 github.com/go-openapi/jsonpointer v0.0.0-20160704185906-46af16f9f7b1/go.mod h1:+35s3my2LFTysnkMfxsJBAMHj/DoqoB9knIWoYG/Vk0=
 github.com/go-openapi/jsonpointer v0.17.0/go.mod h1:cOnomiV+CVVwFLk0A/MExoFMjwdsUdVpsRhURCKh+3M=
