@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add VPC ID to AWSCluster CR status.
+
+
+
 ## [8.2.2] - 2020-04-03
 
 ### Changed
