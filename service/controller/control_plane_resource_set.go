@@ -211,6 +211,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCCPN,
 			RandomKeysSearcher: config.RandomKeysSearcher,
+			RegistryDomain:     config.RegistryDomain,
 		}
 
 		ops, err := s3object.New(c)
