@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switch from dep to Go modules.
+- Use architect orb.
 - Fix subnet allocation for Availability Zones.
 - Switch to AWS CNI
 
