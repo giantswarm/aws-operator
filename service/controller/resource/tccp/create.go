@@ -135,7 +135,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			fmt.Printf("instance terminated")
 
 			err = r.updateStack(ctx, cr)
 			if err != nil {
@@ -314,7 +313,6 @@ func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev
 		instance = &template.ParamsMainInstance{
 			Master: template.ParamsMainInstanceMaster{
 				AZ: key.MasterAvailabilityZone(cr),
-
 				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
 					Name: key.VolumeNameEtcd(cr),
 				},
