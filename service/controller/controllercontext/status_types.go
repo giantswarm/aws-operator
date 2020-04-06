@@ -74,8 +74,14 @@ type ContextStatusTenantClusterTCCPAvailabilityZone struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
+	AWSCNI  ContextStatusTenantClusterTCCPAvailabilityZoneSubnetAWSCNI
 	Private ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate
 	Public  ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic
+}
+
+type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetAWSCNI struct {
+	CIDR net.IPNet
+	ID   string
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {

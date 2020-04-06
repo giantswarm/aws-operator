@@ -340,6 +340,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			G8sClient:          config.K8sClient.G8sClient(),
 			PathFunc:           key.S3ObjectPathTCCP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
+			RegistryDomain:     config.RegistryDomain,
 		}
 
 		ops, err := s3object.New(c)
