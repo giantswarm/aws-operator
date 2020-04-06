@@ -239,6 +239,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCNP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
+			RegistryDomain:     config.RegistryDomain,
 		}
 
 		ops, err := s3object.New(c)

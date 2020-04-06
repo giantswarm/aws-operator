@@ -11,20 +11,6 @@
                 "ecr:*",
                 "elasticloadbalancing:*",
                 "events:*",
-                "iam:AddRoleToInstanceProfile",
-                "iam:AttachRolePolicy",
-                "iam:CreateInstanceProfile",
-                "iam:CreatePolicy",
-                "iam:CreatePolicyVersion",
-                "iam:CreateRole",
-                "iam:CreateServiceLinkedRole",
-                "iam:DeleteInstanceProfile",
-                "iam:DeletePolicy",
-                "iam:DeletePolicyVersion",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:DeleteServiceLinkedRole",
-                "iam:DetachRolePolicy",
                 "iam:GetAccount*",
                 "iam:GetInstanceProfile",
                 "iam:GetRole",
@@ -38,11 +24,6 @@
                 "iam:ListPolicies",
                 "iam:ListRolePolicies",
                 "iam:ListRoles",
-                "iam:PassRole",
-                "iam:PutRolePolicy",
-                "iam:RemoveRoleFromInstanceProfile",
-                "iam:UpdateAssumeRolePolicy",
-                "iam:UpdateRoleDescription",
                 "kms:*",
                 "logs:*",
                 "route53:*",
@@ -51,10 +32,88 @@
                 "sts:AssumeRole",
                 "sts:DecodeAuthorizationMessage",
                 "sts:GetFederationToken",
+                "servicequotas:*",
                 "support:*",
                 "trustedadvisor:*"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:AttachRolePolicy",
+                "iam:CreatePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:CreateRole",
+                "iam:DeletePolicy",
+                "iam:DeletePolicyVersion",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:DeleteServiceLinkedRole",
+                "iam:DetachRolePolicy",
+                "iam:PassRole",
+                "iam:PutRolePolicy",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:UpdateRoleDescription"
+            ],
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-EC2-K8S-Role"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:AttachRolePolicy",
+                "iam:CreatePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:CreateRole",
+                "iam:DeletePolicy",
+                "iam:DeletePolicyVersion",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:DeleteServiceLinkedRole",
+                "iam:DetachRolePolicy",
+                "iam:PassRole",
+                "iam:PutRolePolicy",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:UpdateRoleDescription"
+            ],
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-IAMManager-Role"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:AttachRolePolicy",
+                "iam:CreatePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:CreateRole",
+                "iam:DeletePolicy",
+                "iam:DeletePolicyVersion",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:DeleteServiceLinkedRole",
+                "iam:DetachRolePolicy",
+                "iam:PassRole",
+                "iam:PutRolePolicy",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:UpdateRoleDescription"
+            ],
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-Route53Manager-Role"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:AddRoleToInstanceProfile",
+                "iam:CreateInstanceProfile",
+                "iam:DeleteInstanceProfile",
+                "iam:RemoveRoleFromInstanceProfile"
+            ],
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:instance-profile/*-EC2-K8S-Role"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateServiceLinkedRole"
+            ],
+            "Resource": "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/aws-service-role/*"
         }
     ]
 }

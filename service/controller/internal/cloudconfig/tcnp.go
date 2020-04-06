@@ -8,7 +8,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
@@ -37,7 +37,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -71,7 +71,7 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 			clusterCerts: clusterCerts,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
-		params.RegistryDomain = t.config.RegistryDomain
+		params.Images = images
 		params.SSOPublicKey = t.config.SSOPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
