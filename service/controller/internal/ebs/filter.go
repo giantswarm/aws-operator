@@ -44,9 +44,6 @@ func NewEtcdVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) 
 
 func NewPersistentVolumeFilter(cr infrastructurev1alpha2.AWSCluster) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
-		if *t.Key == cloudProviderPersistentVolumeTagKey {
-			return true
-		}
-		return false
+		return *t.Key == cloudProviderPersistentVolumeTagKey
 	}
 }

@@ -4,14 +4,11 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/giantswarm/e2e-harness/pkg/framework"
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -39,7 +36,6 @@ const (
 var (
 	circleCI             string
 	circleSHA            string
-	clusterID            string
 	registryPullSecret   string
 	githubToken          string
 	testDir              string
@@ -97,14 +93,6 @@ func init() {
 	}
 	os.Setenv(EnvVarVersionBundleVersion, VersionBundleVersion())
 
-	// init clusterID
-	rand.Seed(time.Now().UnixNano())
-	var parts []string
-	parts = append(parts, "ci-")
-	parts = append(parts, TestedVersion()[0:1])
-	parts = append(parts, CircleSHA()[0:1])
-	parts = append(parts, generateID(IDLength))
-	clusterID = strings.Join(parts, "")
 }
 
 func CircleSHA() string {
@@ -120,7 +108,7 @@ func CircleSHA() string {
 //     e95 is a randomly generated alphanumeric string.
 //
 func ClusterID() string {
-	return clusterID
+	return "todo"
 }
 
 func KeepResources() bool {
@@ -149,7 +137,10 @@ func TestHash() string {
 	}
 
 	h := sha1.New()
-	h.Write([]byte(TestDir()))
+	_, err := h.Write([]byte(TestDir()))
+	if err != nil {
+		panic(microerror.JSON(err))
+	}
 	s := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	return s
@@ -157,30 +148,4 @@ func TestHash() string {
 
 func VersionBundleVersion() string {
 	return versionBundleVersion
-}
-
-// generateID returns a string to be used as unique cluster ID
-func generateID(idLength int) string {
-	for {
-		letterRunes := []rune(IDChars)
-		b := make([]rune, idLength)
-		for i := range b {
-			b[i] = letterRunes[rand.Intn(len(letterRunes))]
-		}
-
-		id := string(b)
-
-		if _, err := strconv.Atoi(id); err == nil {
-			// string is numbers only, which we want to avoid
-			continue
-		}
-
-		matched, err := regexp.MatchString("^[a-z]+$", id)
-		if err == nil && matched == true {
-			// strings is letters only, which we also avoid
-			continue
-		}
-
-		return id
-	}
 }

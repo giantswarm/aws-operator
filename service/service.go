@@ -326,7 +326,7 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.operatorCollector.Boot(ctx)
+		go s.operatorCollector.Boot(ctx) // nolint:errcheck
 
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
