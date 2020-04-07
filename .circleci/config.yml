@@ -1,5 +1,6 @@
 orbs:
-  architect: giantswarm/architect@dev:aws-operator-go-build
+  #architect: giantswarm/architect@dev:aws-operator-go-build
+  architect: giantswarm/architect@0.8.5
 
 version: 2.1
 
@@ -7,6 +8,7 @@ workflows:
   build:
     jobs:
       - architect/go-build:
+          resource_class: xlarge
           name: go-build-aws-operator
           binary: aws-operator
           filters:
@@ -19,32 +21,32 @@ workflows:
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
-          before-build:
-            - architect/go-cache-restore
-            #- run:
-            #    name: "Create architect container"
-            #    command: |
-            #      docker container create quay.io/giantswarm/architect:latest > .build_architect_container_id
-            #- run:
-            #    name: "Copy architect binary from architect container"
-            #    command: |
-            #      sudo docker cp $(cat .build_architect_container_id):/usr/bin/architect /usr/local/bin/
-            #- run:
-            #    name: "Remove architect container"
-            #    command: |
-            #      docker container rm $(cat .build_architect_container_id)
-            #- run:
-            #    name: "Remove working files"
-            #    command: |
-            #      rm .build_architect_container_id
-            #- run:
-            #    name: "Check architect version"
-            #    command: |
-            #      architect version
-            - run:
-                name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
-                command: |
-                  cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
+          #before-build:
+          #  - architect/go-cache-restore
+          #  #- run:
+          #  #    name: "Create architect container"
+          #  #    command: |
+          #  #      docker container create quay.io/giantswarm/architect:latest > .build_architect_container_id
+          #  #- run:
+          #  #    name: "Copy architect binary from architect container"
+          #  #    command: |
+          #  #      sudo docker cp $(cat .build_architect_container_id):/usr/bin/architect /usr/local/bin/
+          #  #- run:
+          #  #    name: "Remove architect container"
+          #  #    command: |
+          #  #      docker container rm $(cat .build_architect_container_id)
+          #  #- run:
+          #  #    name: "Remove working files"
+          #  #    command: |
+          #  #      rm .build_architect_container_id
+          #  #- run:
+          #  #    name: "Check architect version"
+          #  #    command: |
+          #  #      architect version
+          #  - run:
+          #      name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+          #      command: |
+          #        cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
             - go-build-aws-operator
           filters:
