@@ -33,6 +33,7 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
+	ASG                   ContextStatusTenantClusterASG
 	AWS                   ContextStatusTenantClusterAWS
 	Encryption            ContextStatusTenantClusterEncryption
 	HostedZoneNameServers string
@@ -106,12 +107,11 @@ type ContextStatusTenantClusterTCCPVPC struct {
 }
 
 type ContextStatusTenantClusterTCNP struct {
-	ASG              ContextStatusTenantClusterTCNPASG
 	SecurityGroupIDs []string
 	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
 }
 
-type ContextStatusTenantClusterTCNPASG struct {
+type ContextStatusTenantClusterASG struct {
 	DesiredCapacity int
 	MaxSize         int
 	MinSize         int

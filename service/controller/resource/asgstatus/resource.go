@@ -168,10 +168,10 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		cc.Status.TenantCluster.TCNP.ASG.DesiredCapacity = desiredCapacity
-		cc.Status.TenantCluster.TCNP.ASG.MaxSize = maxSize
-		cc.Status.TenantCluster.TCNP.ASG.MinSize = minSize
-		cc.Status.TenantCluster.TCNP.ASG.Name = asgName
+		cc.Status.TenantCluster.ASG.DesiredCapacity = desiredCapacity
+		cc.Status.TenantCluster.ASG.MaxSize = maxSize
+		cc.Status.TenantCluster.ASG.MinSize = minSize
+		cc.Status.TenantCluster.ASG.Name = asgName
 	}
 
 	return nil
