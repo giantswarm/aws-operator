@@ -6,4 +6,5 @@ type ParamsMainIAMPolicies struct {
 	KMSKeyARN        string
 	RegionARN        string
 	S3Bucket         string
+	Route53Enabled   bool
 }

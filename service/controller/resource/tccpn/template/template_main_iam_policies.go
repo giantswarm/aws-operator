@@ -84,5 +84,60 @@ const TemplateMainIAMPolicies = `
       InstanceProfileName: gs-cluster-{{ .IAMPolicies.ClusterID }}-profile-tccpn
       Roles:
         - Ref: ControlPlaneNodesRole
+  IAMManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: {{ .IAMPolicies.ClusterID }}-IAMManager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt ControlPlaneNodesRole.Arn
+          Action: "sts:AssumeRole"
+  IAMManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: {{ .IAMPolicies.ClusterID }}-IAMManager-Policy
+      Roles:
+        - Ref: "IAMManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Action: "sts:AssumeRole"
+          Resource: "*"
+{{- if .IAMPolicies.Route53Enabled}}
+  Route53ManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: {{ .IAMPolicies.ClusterID }}-Route53Manager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt IAMManagerRole.Arn
+          Action: "sts:AssumeRole"
+  Route53ManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: {{ .IAMPolicies.ClusterID }}-Route53Manager-Policy
+      Roles:
+        - Ref: "Route53ManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "route53:ChangeResourceRecordSets"
+            Resource:
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone' ] ]
+              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone' ] ]
+          - Effect: "Allow"
+            Action:
+              - "route53:ListHostedZones"
+              - "route53:ListResourceRecordSets"
+            Resource: "*"
+{{ end }}
 {{- end -}}
 `

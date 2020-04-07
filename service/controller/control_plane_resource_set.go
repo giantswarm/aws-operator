@@ -61,6 +61,7 @@ type controlPlaneResourceSetConfig struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
 	VaultAddress              string
@@ -210,6 +211,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCCPN,
 			RandomKeysSearcher: config.RandomKeysSearcher,
+			RegistryDomain:     config.RegistryDomain,
 		}
 
 		ops, err := s3object.New(c)
@@ -285,6 +287,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			APIWhitelist:     config.APIWhitelist,
 			Detection:        tccpnChangeDetection,
 			InstallationName: config.InstallationName,
+			Route53Enabled:   config.Route53Enabled,
 		}
 
 		tccpnResource, err = tccpn.New(c)

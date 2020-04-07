@@ -20,6 +20,7 @@ type Config struct {
 
 	APIWhitelist     APIWhitelist
 	InstallationName string
+	Route53Enabled   bool
 }
 
 // Resource implements the TCCPN resource, which stands for Tenant Cluster Control
@@ -31,6 +32,7 @@ type Resource struct {
 
 	apiWhitelist     APIWhitelist
 	installationName string
+	route53Enabled   bool
 }
 
 func New(config Config) (*Resource, error) {
@@ -44,10 +46,10 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 	if config.APIWhitelist.Private.Enabled && config.APIWhitelist.Private.SubnetList == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Private.SubnetList must not be empty when %T.APIWhitelist.Private is enabled", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Private.SubnetList must not be empty when %T.APIWhitelist.Private is enabled", config, config)
 	}
 	if config.APIWhitelist.Public.Enabled && config.APIWhitelist.Public.SubnetList == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config)
+		return nil, microerror.Maskf(invalidConfigError, "%T.APIWhitelist.Public.SubnetList must not be empty when %T.APIWhitelist.Public is enabled", config, config)
 	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
@@ -60,6 +62,7 @@ func New(config Config) (*Resource, error) {
 
 		apiWhitelist:     config.APIWhitelist,
 		installationName: config.InstallationName,
+		route53Enabled:   config.Route53Enabled,
 	}
 
 	return r, nil
