@@ -43,6 +43,13 @@ type ContextStatusTenantCluster struct {
 	OperatorVersion       string
 }
 
+type ContextStatusTenantClusterASG struct {
+	DesiredCapacity int
+	MaxSize         int
+	MinSize         int
+	Name            string
+}
+
 type ContextStatusTenantClusterAWS struct {
 	AccountID string
 	Region    string
@@ -109,13 +116,6 @@ type ContextStatusTenantClusterTCCPVPC struct {
 type ContextStatusTenantClusterTCNP struct {
 	SecurityGroupIDs []string
 	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
-}
-
-type ContextStatusTenantClusterASG struct {
-	DesiredCapacity int
-	MaxSize         int
-	MinSize         int
-	Name            string
 }
 
 type ContextStatusTenantClusterTCNPWorkerInstance struct {
