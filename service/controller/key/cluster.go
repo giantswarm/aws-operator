@@ -3,6 +3,7 @@ package key
 import (
 	"crypto/sha1"
 	"fmt"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"strconv"
 	"strings"
 	"time"
@@ -112,6 +113,38 @@ func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time)
 
 func IsChinaRegion(awsRegion string) bool {
 	return strings.HasPrefix(awsRegion, "cn-")
+}
+
+func IsNewCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
+	// If  condition  list is empty then this is new cluster.
+	if len(cluster.Status.Cluster.Conditions) == 0 {
+		return true
+	}
+	// If versions list is empty then this is a new cluster.
+	if len(cluster.Status.Cluster.Versions) == 0 {
+		return true
+	}
+	// Check if there is transition state Updated or Updating,
+	// this indicates cluster is not new but updated from other version.
+	for _, condition := range cluster.Status.Cluster.Conditions {
+		if condition.Condition == "Updating" {
+			return false
+		}
+		if condition.Condition == "Updated" {
+			return false
+		}
+	}
+
+	// Check if there is transition state from other version,
+	// this indicates cluster is not new but updated from other version.
+	for _, version := range cluster.Status.Cluster.Versions {
+		if version.Version != project.Version() {
+			return false
+		}
+	}
+
+	// No update event is registered in the versions or conditions lists in cr status so this is new cluster.
+	return true
 }
 
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {

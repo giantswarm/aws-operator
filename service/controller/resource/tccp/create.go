@@ -143,6 +143,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
+	if key.IsNewCluster(cr) && cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
+		err = r.snapshotEtcdVolume(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	return nil
 }
 
