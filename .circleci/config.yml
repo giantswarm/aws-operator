@@ -59,11 +59,11 @@ workflows:
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           # Push to Aliyun should execute for non-master branches only once manually approved.
-          before-build:
-            - run:
-                name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
-                command: |
-                  cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
+          #before-build:
+          #  - run:
+          #      name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+          #      command: |
+          #        cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
             - go-build-aws-operator
           filters:
@@ -77,11 +77,11 @@ workflows:
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
-          before-build:
-            - run:
-                name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
-                command: |
-                  cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
+          #before-build:
+          #  - run:
+          #      name: "architect/push-to-docker: Copy k8scloudconfig files to .build_k8scloudconfig"
+          #      command: |
+          #        cp -a $(go list -m -f '{{.Dir}}' all | grep github.com/giantswarm/k8scloudconfig) .build_k8scloudconfig
           requires:
             - go-build-aws-operator
           filters:
