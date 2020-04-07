@@ -5,7 +5,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
@@ -24,7 +23,6 @@ const (
 )
 
 var (
-	logger         = logrus.New()
 	asgDesiredDesc = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, subsystemASG, "desired_count"),
 		"Gauge about the number of EC2 instances that should be in the ASG.",

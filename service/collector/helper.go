@@ -218,37 +218,42 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	return accountID, nil
 }
 
-// IsClusterReconciledByThisVersion checks whether an AWSCluster object with
-// the given name is reconciled by this particular version of aws-operator
-// (based on version found in pkg/project/project.go).
+// IsClusterReconciledByThisVersion checks whether an AWSCluster/AWSConfig
+// object with the given name is reconciled by this particular version of
+// aws-operator (based on version found in pkg/project/project.go).
 func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, error) {
 	if clusterName == "" {
-		return false, microerror.Maskf(executionFailedError, "empty cluster name")
+		return false, nil
 	}
 	key := fmt.Sprintf("default/%s", clusterName)
 
-	var item interface{}
+	var (
+		item   interface{}
+		exists bool
+		err    error
+	)
 
-	logger.Errorf("KUBA helper: searching %q", key)
-	item, exists, err := h.awsClustersCache.GetByKey(key)
-	logger.Errorf("KUBA helper: item:%+v, exists:%v, err:%v", item, exists, err)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-	if !exists {
-		item, exists, err := h.awsConfigsCache.GetByKey(key)
-		logger.Errorf("KUBA helper: item:%+v, exists:%v, err:%v", item, exists, err)
+	for _, store := range []cache.Store{h.awsClustersCache, h.awsConfigsCache} {
+		item, exists, err = store.GetByKey(key)
 		if err != nil {
 			return false, microerror.Mask(err)
 		}
-		return false, microerror.Maskf(executionFailedError, "could not find key in cache: %#q", key)
+		if exists {
+			break
+		}
+	}
+	if !exists {
+		h.logger.Log(
+			"level", "warning",
+			"message", fmt.Sprintf("could not find %#q in cache, skipping metrics collection", key),
+		)
+		return false, nil
 	}
 
 	m, err := meta.Accessor(item)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
-	logger.Errorf("KUBA helper: got accessor; labels: %+v", m.GetLabels())
 
 	// This label contains version of operator reconciling this particular
 	// resource. For more information see:
@@ -262,7 +267,6 @@ func (h *helper) IsClusterReconciledByThisVersion(clusterName string) (bool, err
 		)
 	}
 
-	logger.Errorf("KUBA helper: comparing cluster (%v) to project (%v)", versionAssigned, project.Version())
 	if versionAssigned == project.Version() {
 		return true, nil
 	}
