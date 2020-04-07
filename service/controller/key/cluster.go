@@ -3,13 +3,14 @@ package key
 import (
 	"crypto/sha1"
 	"fmt"
-	"github.com/giantswarm/aws-operator/pkg/project"
 	"strconv"
 	"strings"
 	"time"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
 const (
