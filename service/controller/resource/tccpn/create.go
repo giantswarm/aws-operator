@@ -397,7 +397,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 
 func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	for _, g := range groups {
-		if awstags.ValueForKey(g.Tags, "Name") == name && awstags.ValueForKey(g.Tags, key.TagStack) == key.StackTCCP {
+		if awstags.ValueForKey(g.Tags, "Name") == name {
 			return *g.GroupId
 		}
 	}
@@ -407,7 +407,7 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 
 func idFromSubnets(subnets []*ec2.Subnet, name string) string {
 	for _, s := range subnets {
-		if awstags.ValueForKey(s.Tags, "Name") == name && awstags.ValueForKey(s.Tags, key.TagStack) == key.StackTCCP {
+		if awstags.ValueForKey(s.Tags, "Name") == name {
 			return *s.SubnetId
 		}
 	}

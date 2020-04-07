@@ -67,6 +67,12 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 						aws.String(key.SecurityGroupName(&cr, "master")),
 					},
 				},
+				{
+					Name: aws.String(key.TagStack),
+					Values: []*string{
+						aws.String(key.StackTCCP),
+					},
+				},
 			},
 		}
 
