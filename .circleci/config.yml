@@ -1,6 +1,6 @@
 orbs:
   #architect: giantswarm/architect@dev:aws-operator-go-build
-  architect: giantswarm/architect@0.8.5
+  architect: giantswarm/architect@dev:aws-operator-go-build-v2
 
 version: 2.1
 
@@ -8,7 +8,6 @@ workflows:
   build:
     jobs:
       - architect/go-build:
-          resource_class: xlarge
           name: go-build-aws-operator
           binary: aws-operator
           filters:
