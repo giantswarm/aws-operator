@@ -14,7 +14,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_5_2_0"
+	CloudConfigVersion = "v_6_0_0"
 	CloudProvider      = "aws"
 )
 
@@ -27,6 +27,18 @@ const (
 	EtcdPort             = 2379
 	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443
+)
+
+const (
+	// KubectlVersion is the version of kubectl used on a node to interact with
+	// kubernets. The project is here: https://github.com/giantswarm/docker-kubectl
+	KubectlVersion = "1.16.4"
+	// KubernetesAPIHealthzVersion is a SHA representing the version of
+	// https://github.com/giantswarm/k8s-api-healthz/ used.
+	KubernetesAPIHealthzVersion = "0999549a4c334b646288d08bd2c781c6aae2e12f"
+	// K8sSetupNetworkEnvironment is a sha representing the version of
+	// https://github.com/giantswarm/k8s-setup-network-environment used.
+	K8sSetupNetworkEnvironment = "68e90113331feca3b9ffe6a75a601b381ba8c1f7"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.
