@@ -127,13 +127,8 @@ func IsNewCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
 	}
 	// Check if there is transition state Updated or Updating,
 	// this indicates cluster is not new but updated from other version.
-	for _, condition := range cluster.Status.Cluster.Conditions {
-		if condition.Condition == "Updating" {
-			return false
-		}
-		if condition.Condition == "Updated" {
-			return false
-		}
+	if cluster.Status.Cluster.HasUpdatedCondition() || cluster.Status.Cluster.HasUpdatingCondition() {
+		return false
 	}
 
 	// Check if there is transition state from other version,

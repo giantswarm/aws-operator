@@ -2,7 +2,6 @@ package tccpsubnets
 
 import (
 	"context"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -10,6 +9,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
