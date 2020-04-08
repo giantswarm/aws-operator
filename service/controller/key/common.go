@@ -6,6 +6,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/meta"
+
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
@@ -288,6 +291,19 @@ func StackNameTCNP(getter LabelsGetter) string {
 
 func StackNameTCNPF(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func ToLabelsGetter(v interface{}) (LabelsGetter, error) {
+	if v == nil {
+		return nil, microerror.Maskf(wrongTypeError, "expected 'LabelsGetter', got '%T'", v)
+	}
+
+	m, err := meta.Accessor(v)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return m, nil
 }
 
 func VPCPeeringRouteName(az string) string {
