@@ -16,13 +16,14 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 )
 
-type drainerResourceSetConfig struct {
+type machineDeploymentDrainerResourceSetConfig struct {
 	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
@@ -32,14 +33,28 @@ type drainerResourceSetConfig struct {
 	Route53Enabled bool
 }
 
-func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.ResourceSet, error) {
+func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
+
+	var asgNameResource resource.Interface
+	{
+		c := asgname.Config{
+			Logger: config.Logger,
+
+			TagKey:       key.TagMachineDeployment,
+			TagValueFunc: key.MachineDeploymentID,
+		}
+
+		asgNameResource, err = asgname.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
 	var asgStatusResource resource.Interface
 	{
 		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
+			Logger: config.Logger,
 		}
 
 		asgStatusResource, err = asgstatus.New(c)
@@ -93,6 +108,7 @@ func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.Resourc
 
 	resources := []resource.Interface{
 		awsClientResource,
+		asgNameResource,
 		asgStatusResource,
 		drainerResource,
 		drainFinisherResource,
