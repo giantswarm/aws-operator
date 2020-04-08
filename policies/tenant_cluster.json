@@ -80,7 +80,7 @@
             "Effect": "Allow",
             "Action": [
                 "iam:ListRoleTags",
-                "iam:TagRole",
+                "iam:TagRole"
             ],
             "Resource": [
                 "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/gs-*"
