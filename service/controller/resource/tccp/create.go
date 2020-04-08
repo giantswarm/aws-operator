@@ -143,11 +143,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
+	// TODO remove etcd snapshot migration code
+	// https://github.com/giantswarm/giantswarm/issues/9979
 	if key.IsNewCluster(cr) && cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
 		err = r.snapshotEtcdVolume(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "created etcd volume snapshot for newly created cluster")
 	}
 
 	return nil
