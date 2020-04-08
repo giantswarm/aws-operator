@@ -9,10 +9,6 @@ import (
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 )
 
-const (
-	collidingOperatorLabel = "app.kubernetes.io/version"
-)
-
 type SetConfig struct {
 	Clients k8sclient.Interface
 	Logger  micrologger.Logger

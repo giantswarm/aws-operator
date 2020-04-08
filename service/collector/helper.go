@@ -12,6 +12,7 @@ import (
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/internal/accountid"
 	"github.com/giantswarm/aws-operator/service/internal/credential"
@@ -186,7 +187,7 @@ func (h *helper) ListReconciledClusters() (*infrastructurev1alpha2.AWSClusterLis
 		ctx,
 		clusters,
 		runtimeclient.MatchingLabels{
-			collidingOperatorLabel: project.Version(),
+			label.OperatorVersion: project.Version(),
 		},
 	)
 	return clusters, err
