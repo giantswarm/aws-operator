@@ -1,16 +1,21 @@
 package collector
 
 import (
+	"context"
 	"fmt"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/internal/accountid"
 	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
@@ -25,6 +30,7 @@ type helperConfig struct {
 }
 
 type helper struct {
+	clients   *k8sclient.Clients
 	g8sClient versioned.Interface
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
@@ -33,6 +39,9 @@ type helper struct {
 }
 
 func newHelper(config helperConfig) (*helper, error) {
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -185,4 +194,37 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	}
 
 	return accountID, nil
+}
+
+// ListReconciledClusters provides names of clusters reconciled by this
+// particular operator version. The names are returned in format of a map,
+// instead of a list, for cheaper lookup.
+func (h *helper) ListReconciledClusters() (reconciled map[string]bool) {
+	ctx := context.Background()
+
+	clusterList := &infrastructurev1alpha2.AWSClusterList{}
+	h.clients.CtrlClient().List(
+		ctx,
+		clusterList,
+		runtimeclient.MatchingLabels{
+			collidingOperatorLabel: project.Version(),
+		},
+	)
+	for _, item := range clusterList.Items {
+		reconciled[item.GetName()] = true
+	}
+
+	configList := &providerv1alpha1.AWSConfigList{}
+	h.clients.CtrlClient().List(
+		ctx,
+		configList,
+		runtimeclient.MatchingLabels{
+			collidingOperatorLabel: project.Version(),
+		},
+	)
+	for _, item := range configList.Items {
+		reconciled[item.GetName()] = true
+	}
+
+	return
 }
