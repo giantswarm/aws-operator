@@ -117,7 +117,7 @@ func IsChinaRegion(awsRegion string) bool {
 }
 
 func IsNewCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
-	// If  condition  list is empty then this is new cluster.
+	// If  condition list is empty then this is a new cluster.
 	if len(cluster.Status.Cluster.Conditions) == 0 {
 		return true
 	}
