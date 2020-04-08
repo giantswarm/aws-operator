@@ -6,14 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -21,26 +17,20 @@ const (
 )
 
 type Config struct {
-	G8sClient versioned.Interface
-	Logger    micrologger.Logger
+	Logger micrologger.Logger
 }
 
 type Resource struct {
-	g8sClient versioned.Interface
-	logger    micrologger.Logger
+	logger micrologger.Logger
 }
 
 func New(config Config) (*Resource, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		g8sClient: config.G8sClient,
-		logger:    config.Logger,
+		logger: config.Logger,
 	}
 
 	return r, nil
@@ -51,10 +41,6 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -62,59 +48,13 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		i := &ec2.DescribeInstancesInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
-					Values: []*string{
-						aws.String(key.ClusterID(&cr)),
-					},
-				},
-				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagMachineDeployment)),
-					Values: []*string{
-						aws.String(key.MachineDeploymentID(&cr)),
-					},
-				},
-				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
-					Values: []*string{
-						aws.String(key.StackTCNP),
-					},
-				},
-				{
-					Name: aws.String("instance-state-name"),
-					Values: []*string{
-						aws.String(ec2.InstanceStateNamePending),
-						aws.String(ec2.InstanceStateNameRunning),
-						aws.String(ec2.InstanceStateNameStopped),
-						aws.String(ec2.InstanceStateNameStopping),
-					},
-				},
-			},
-		}
-
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
-		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if len(o.Reservations) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-		if len(o.Reservations[0].Instances) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
+		if cc.Status.TenantCluster.ASG.Name == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
+		asgName = cc.Status.TenantCluster.ASG.Name
 	}
 
 	var asg *autoscaling.Group
@@ -123,7 +63,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
-				&asgName,
+				aws.String(asgName),
 			},
 		}
 
@@ -171,7 +111,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		cc.Status.TenantCluster.ASG.DesiredCapacity = desiredCapacity
 		cc.Status.TenantCluster.ASG.MaxSize = maxSize
 		cc.Status.TenantCluster.ASG.MinSize = minSize
-		cc.Status.TenantCluster.ASG.Name = asgName
 	}
 
 	return nil
