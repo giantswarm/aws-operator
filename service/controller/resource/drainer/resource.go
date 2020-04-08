@@ -162,13 +162,17 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		// In case there aren't EC2 instances in Terminating:Wait state, we cancel
-		// and keep finalizers, so we try again on the next reconciliation loop. We
-		// need to keep finalizers because this might be a delete event.
 		if len(instances) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
+
+			// In case there aren't EC2 instances in Terminating:Wait state, we cancel
+			// and keep finalizers on delete events, so we try again on the next
+			// reconciliation loop.
+			if key.IsDeleted(&md) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}

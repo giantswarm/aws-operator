@@ -21,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
@@ -158,6 +159,33 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var asgNameResource resource.Interface
+	{
+		c := asgname.Config{
+			Logger: config.Logger,
+
+			TagKey:       key.TagMachineDeployment,
+			TagValueFunc: key.MachineDeploymentID,
+		}
+
+		asgNameResource, err = asgname.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var asgStatusResource resource.Interface
+	{
+		c := asgstatus.Config{
+			Logger: config.Logger,
+		}
+
+		asgStatusResource, err = asgstatus.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -357,19 +385,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpASGStatusResource resource.Interface
-	{
-		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		tcnpASGStatusResource, err = asgstatus.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
@@ -437,7 +452,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tccpVPCPCXResource,
 		tccpSubnetsResource,
 		tccpAZsResource,
-		tcnpASGStatusResource,
+		asgNameResource,
+		asgStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
 		tcnpEncryptionResource,
