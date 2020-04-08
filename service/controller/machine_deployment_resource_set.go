@@ -3,22 +3,29 @@ package controller
 import (
 	"context"
 	"fmt"
+	"net"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
@@ -41,14 +48,54 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
+
+type machineDeploymentResourceSetConfig struct {
+	CertsSearcher      certs.Interface
+	G8sClient          versioned.Interface
+	K8sClient          kubernetes.Interface
+	Locker             locker.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
+
+	CalicoCIDR                 int
+	CalicoMTU                  int
+	CalicoSubnet               string
+	ClusterIPRange             string
+	DockerDaemonCIDR           string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	HostAWSConfig              aws.Config
+	IgnitionPath               string
+	ImagePullProgressDeadline  string
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	ClusterDomain              string
+	NetworkSetupDockerImage    string
+	PodInfraContainerImage     string
+	ProjectName                string
+	RegistryDomain             string
+	Route53Enabled             bool
+	RouteTables                string
+	SSHUserList                string
+	SSOPublicKey               string
+	VaultAddress               string
+}
 
 func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var encrypterObject encrypter.Interface
 	{
-		encrypterObject, err = newEncrypterObject(config)
+		c := &kms.EncrypterConfig{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		encrypterObject, err = kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
