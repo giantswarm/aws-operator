@@ -23,6 +23,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
@@ -112,7 +113,13 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 
 	var encrypterObject encrypter.Interface
 	{
-		encrypterObject, err = newEncrypterObject(config)
+		c := &kms.EncrypterConfig{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		encrypterObject, err = kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

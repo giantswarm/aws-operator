@@ -13,7 +13,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -32,11 +31,8 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	// EncrypterRoleManager manages role encryption. This can be supported by
-	// different implementations and thus is optional.
-	EncrypterRoleManager encrypter.RoleManager
-	G8sClient            versioned.Interface
-	Logger               micrologger.Logger
+	G8sClient versioned.Interface
+	Logger    micrologger.Logger
 
 	APIWhitelist       ConfigAPIWhitelist
 	CIDRBlockAWSCNI    string
@@ -49,9 +45,8 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	encrypterRoleManager encrypter.RoleManager
-	g8sClient            versioned.Interface
-	logger               micrologger.Logger
+	g8sClient versioned.Interface
+	logger    micrologger.Logger
 
 	apiWhitelist       ConfigAPIWhitelist
 	cidrBlockAWSCNI    string
@@ -85,10 +80,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		g8sClient:            config.G8sClient,
-		detection:            config.Detection,
-		encrypterRoleManager: config.EncrypterRoleManager,
-		logger:               config.Logger,
+		g8sClient: config.G8sClient,
+		detection: config.Detection,
+		logger:    config.Logger,
 
 		apiWhitelist:       config.APIWhitelist,
 		cidrBlockAWSCNI:    config.CIDRBlockAWSCNI,
