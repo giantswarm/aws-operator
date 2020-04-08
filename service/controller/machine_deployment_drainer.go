@@ -12,32 +12,32 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
-type DrainerConfig struct {
+type MachineDeploymentDrainerConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	HostAWSConfig  aws.Config
-	LabelSelector  DrainerConfigLabelSelector
+	LabelSelector  MachineDeploymentDrainerConfigLabelSelector
 	Route53Enabled bool
 }
 
-type DrainerConfigLabelSelector struct {
+type MachineDeploymentDrainerConfigLabelSelector struct {
 	Enabled          bool
 	OverridenVersion string
 }
 
-type Drainer struct {
+type MachineDeploymentDrainer struct {
 	*controller.Controller
 }
 
-func NewDrainer(config DrainerConfig) (*Drainer, error) {
+func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*MachineDeploymentDrainer, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	var err error
 
-	resourceSets, err := newDrainerResourceSets(config)
+	resourceSets, err := newMachineDeploymentDrainerResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -64,19 +64,19 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		}
 	}
 
-	d := &Drainer{
+	d := &MachineDeploymentDrainer{
 		Controller: operatorkitController,
 	}
 
 	return d, nil
 }
 
-func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
+func newMachineDeploymentDrainerResourceSets(config MachineDeploymentDrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := drainerResourceSetConfig{
+		c := machineDeploymentDrainerResourceSetConfig{
 			G8sClient: config.K8sClient.G8sClient(),
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
@@ -86,7 +86,7 @@ func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, er
 			Route53Enabled: config.Route53Enabled,
 		}
 
-		resourceSet, err = newDrainerResourceSet(c)
+		resourceSet, err = newMachineDeploymentDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

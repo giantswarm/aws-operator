@@ -23,7 +23,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 )
 
-type drainerResourceSetConfig struct {
+type machineDeploymentDrainerResourceSetConfig struct {
 	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
@@ -33,7 +33,7 @@ type drainerResourceSetConfig struct {
 	Route53Enabled bool
 }
 
-func newDrainerResourceSet(config drainerResourceSetConfig) (*controller.ResourceSet, error) {
+func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var asgNameResource resource.Interface
