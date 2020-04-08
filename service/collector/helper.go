@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,6 +16,7 @@ import (
 )
 
 type helperConfig struct {
+	Clients   *k8sclient.Clients
 	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
@@ -47,6 +49,7 @@ func newHelper(config helperConfig) (*helper, error) {
 	}
 
 	h := &helper{
+		clients:   config.Clients,
 		g8sClient: config.G8sClient,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
