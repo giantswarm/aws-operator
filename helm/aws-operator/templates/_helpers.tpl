@@ -14,6 +14,18 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Create a name stem for resource names
+
+When pods for deployments are created they have an additional 16 character
+suffix appended, e.g. "-957c9d6ff-pkzgw". Given that Kubernetes allows 63
+characters for resource names, the stem is truncated to 47 characters to leave
+room for such suffix.
+*/}}
+{{- define "aws-operator.resourceName" -}}
+{{- .Release.Name | replace "." "-" | trunc 47 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "aws-operator.labels" -}}
