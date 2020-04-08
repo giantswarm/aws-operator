@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
@@ -90,7 +89,6 @@ func New(config Config) (*Service, error) {
 			SchemeBuilder: k8sclient.SchemeBuilder{
 				apiv1alpha2.AddToScheme,
 				infrastructurev1alpha2.AddToScheme,
-				providerv1alpha1.AddToScheme,
 			},
 			Logger:     config.Logger,
 			RestConfig: restConfig,
