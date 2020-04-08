@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -56,17 +55,12 @@ func newHelper(config helperConfig) (*helper, error) {
 }
 
 // GetARNs list all unique aws IAM ARN from credential secret.
-func (h *helper) GetARNs() ([]string, error) {
+func (h *helper) GetARNs(clusterList *infrastructurev1alpha2.AWSClusterList) ([]string, error) {
 	var arns []string
-
-	clusterCRList, err := h.clients.G8sClient().InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
 
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
-	for _, clusterCR := range clusterCRList.Items {
+	for _, clusterCR := range clusterList.Items {
 		arn, err := credential.GetARN(h.clients.K8sClient(), clusterCR)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
@@ -97,13 +91,13 @@ func (h *helper) GetARNs() ([]string, error) {
 
 // GetAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
-func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
+func (h *helper) GetAWSClients(clusterList *infrastructurev1alpha2.AWSClusterList) ([]clientaws.Clients, error) {
 	var (
 		clients    []clientaws.Clients
 		clientsMap = make(map[string]clientaws.Clients)
 	)
 
-	arns, err := h.GetARNs()
+	arns, err := h.GetARNs(clusterList)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -182,35 +176,18 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	return accountID, nil
 }
 
-// ListReconciledClusters provides names of clusters reconciled by this
-// particular operator version. The names are returned in format of a map,
-// instead of a list, for cheaper lookup.
-func (h *helper) ListReconciledClusters() (reconciled map[string]bool) {
+// ListReconciledClusters provides a list of clusters reconciled by this
+// particular operator version.
+func (h *helper) ListReconciledClusters() (*infrastructurev1alpha2.AWSClusterList, error) {
 	ctx := context.Background()
 
-	clusterList := &infrastructurev1alpha2.AWSClusterList{}
-	h.clients.CtrlClient().List(
+	clusters := &infrastructurev1alpha2.AWSClusterList{}
+	err := h.clients.CtrlClient().List(
 		ctx,
-		clusterList,
+		clusters,
 		runtimeclient.MatchingLabels{
 			collidingOperatorLabel: project.Version(),
 		},
 	)
-	for _, item := range clusterList.Items {
-		reconciled[item.GetName()] = true
-	}
-
-	configList := &providerv1alpha1.AWSConfigList{}
-	h.clients.CtrlClient().List(
-		ctx,
-		configList,
-		runtimeclient.MatchingLabels{
-			collidingOperatorLabel: project.Version(),
-		},
-	)
-	for _, item := range configList.Items {
-		reconciled[item.GetName()] = true
-	}
-
-	return
+	return clusters, err
 }

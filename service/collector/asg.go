@@ -91,7 +91,12 @@ func NewASG(config ASGConfig) (*ASG, error) {
 
 // Collect is the main metrics collection function.
 func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := a.helper.GetAWSClients()
+	reconciledClusters, err := a.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := a.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -133,7 +138,6 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
-	reconciled := a.helper.ListReconciledClusters()
 	var nextToken *string
 	for {
 		var autoScalingGroups []*autoscaling.Group
@@ -164,10 +168,6 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			}
 
 			if installation != a.installationName {
-				continue
-			}
-
-			if _, ok := reconciled[cluster]; !ok {
 				continue
 			}
 
