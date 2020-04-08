@@ -19,14 +19,14 @@ import (
 )
 
 type helperConfig struct {
-	Clients *k8sclient.Clients
+	Clients k8sclient.Interface
 	Logger  micrologger.Logger
 
 	AWSConfig clientaws.Config
 }
 
 type helper struct {
-	clients *k8sclient.Clients
+	clients k8sclient.Interface
 	logger  micrologger.Logger
 
 	awsConfig clientaws.Config

@@ -14,7 +14,7 @@ const (
 )
 
 type SetConfig struct {
-	Clients *k8sclient.Clients
+	Clients k8sclient.Interface
 	Logger  micrologger.Logger
 
 	AWSConfig             clientaws.Config
