@@ -68,8 +68,9 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var asgName string
 	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding auto scaling group name")
+
 		i := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
@@ -104,7 +105,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if err != nil {
@@ -112,21 +113,19 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(o.Reservations) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 		if len(o.Reservations[0].Instances) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "asg not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgName = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
-	}
+		cc.Status.TenantCluster.ASG.Name = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
 
-	{
-		cc.Status.TenantCluster.ASG.Name = asgName
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found auto scaling group name %#q", cc.Status.TenantCluster.ASG.Name))
 	}
 
 	return nil
