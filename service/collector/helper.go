@@ -6,12 +6,10 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
@@ -21,19 +19,15 @@ import (
 )
 
 type helperConfig struct {
-	Clients   *k8sclient.Clients
-	G8sClient versioned.Interface
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	Clients *k8sclient.Clients
+	Logger  micrologger.Logger
 
 	AWSConfig clientaws.Config
 }
 
 type helper struct {
-	clients   *k8sclient.Clients
-	g8sClient versioned.Interface
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	clients *k8sclient.Clients
+	logger  micrologger.Logger
 
 	awsConfig clientaws.Config
 }
@@ -41,12 +35,6 @@ type helper struct {
 func newHelper(config helperConfig) (*helper, error) {
 	if config.Clients == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
-	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -58,10 +46,8 @@ func newHelper(config helperConfig) (*helper, error) {
 	}
 
 	h := &helper{
-		clients:   config.Clients,
-		g8sClient: config.G8sClient,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		clients: config.Clients,
+		logger:  config.Logger,
 
 		awsConfig: config.AWSConfig,
 	}
@@ -73,7 +59,7 @@ func newHelper(config helperConfig) (*helper, error) {
 func (h *helper) GetARNs() ([]string, error) {
 	var arns []string
 
-	clusterCRList, err := h.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	clusterCRList, err := h.clients.G8sClient().InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -81,7 +67,7 @@ func (h *helper) GetARNs() ([]string, error) {
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
 	for _, clusterCR := range clusterCRList.Items {
-		arn, err := credential.GetARN(h.k8sClient, clusterCR)
+		arn, err := credential.GetARN(h.clients.K8sClient(), clusterCR)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
 		if credential.IsCredentialNameEmptyError(err) {
@@ -96,7 +82,7 @@ func (h *helper) GetARNs() ([]string, error) {
 	}
 
 	// Ensure we check the default guest account for old cluster not having credential.
-	arn, err := credential.GetDefaultARN(h.k8sClient)
+	arn, err := credential.GetDefaultARN(h.clients.K8sClient())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
