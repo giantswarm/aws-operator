@@ -133,6 +133,7 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
+	reconciled := a.helper.ListReconciledClusters()
 	var nextToken *string
 	for {
 		var autoScalingGroups []*autoscaling.Group
@@ -163,6 +164,10 @@ func (a *ASG) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			}
 
 			if installation != a.installationName {
+				continue
+			}
+
+			if _, ok := reconciled[cluster]; !ok {
 				continue
 			}
 
