@@ -146,8 +146,6 @@ type MasterExtension struct {
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	ctx := context.TODO()
 
-	storageClass := cloudconfig.InstanceStorageClassEncryptedContent
-
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
 			AssetContent: cloudconfig.DecryptTLSAssetsScript,
@@ -246,7 +244,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0766,
 		},
 		{
-			AssetContent: storageClass,
+			AssetContent: cloudconfig.InstanceStorageClassEncryptedContent,
 			Path:         "/srv/default-storage-class.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{

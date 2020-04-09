@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf/template"
 )
@@ -168,28 +167,10 @@ func newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSClus
 		}
 	}
 
-	var publicRoutes []template.ParamsMainRouteTablesRoute
-	if encrypterBackend == encrypter.VaultBackend {
-		for _, rt := range cc.Status.ControlPlane.RouteTables {
-			route := template.ParamsMainRouteTablesRoute{
-				RouteTableID: *rt.RouteTableId,
-				// Requester CIDR block, we create the peering connection from the
-				// tenant's CIDR for being able to access Vault's ELB.
-				CidrBlock: key.StatusClusterNetworkCIDR(cr),
-				// The peer connection id is fetched from the cloud formation stack
-				// outputs in the stackoutput resource.
-				PeerConnectionID: cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID,
-			}
-
-			publicRoutes = append(publicRoutes, route)
-		}
-	}
-
 	var routeTables *template.ParamsMainRouteTables
 	{
 		routeTables = &template.ParamsMainRouteTables{
 			PrivateRoutes: privateRoutes,
-			PublicRoutes:  publicRoutes,
 		}
 	}
 

@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const SystemdNetworkdEth1Network = `
 # ensure that traffic arriving on eth1 leaves again from eth1 to prevent asymetric routing

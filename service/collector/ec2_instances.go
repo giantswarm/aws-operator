@@ -99,7 +99,12 @@ func NewEC2Instances(config EC2InstancesConfig) (*EC2Instances, error) {
 
 // Collect is the main metrics collection function.
 func (e *EC2Instances) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := e.helper.GetAWSClients()
+	reconciledClusters, err := e.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := e.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

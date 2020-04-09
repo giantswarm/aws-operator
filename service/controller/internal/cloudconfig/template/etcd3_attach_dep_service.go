@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const Etcd3AttachDepService = `
 [Unit]
