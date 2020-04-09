@@ -52,7 +52,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 
 	var oldKeyScheduledForDeletion bool
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding encryption key")
 
 		_, err := e.describeKey(ctx, cr)
 		if IsKeyNotFound(err) {
@@ -163,7 +163,7 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastru
 
 	var keyID *string
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "finding out encryption key")
+		e.logger.LogCtx(ctx, "level", "debug", "message", "finding encryption key")
 
 		// TODO we should search by tags here in case alias failed to create and cluster was deleted early. Issue: https://github.com/giantswarm/giantswarm/issues/4262.
 		out, err := e.describeKey(ctx, cr)
