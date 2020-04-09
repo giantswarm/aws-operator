@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@0.8.6
+  architect: giantswarm/architect@dev:resource-class
 
 workflows:
   build:
@@ -9,6 +9,7 @@ workflows:
       - architect/go-build:
           name: go-build
           binary: aws-operator
+          resource_class: large
           filters:
             tags:
               only: /^v.*/
