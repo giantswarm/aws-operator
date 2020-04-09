@@ -68,7 +68,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 					},
 				},
 				{
-					Name: aws.String(key.TagStack),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
 					Values: []*string{
 						aws.String(key.StackTCCP),
 					},

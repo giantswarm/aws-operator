@@ -2,6 +2,7 @@ package tccpsubnets
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -63,7 +64,7 @@ func (r *Resource) addSubnetsToContext(ctx context.Context) error {
 					},
 				},
 				{
-					Name: aws.String(key.TagStack),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
 					Values: []*string{
 						aws.String(key.StackTCCP),
 					},
