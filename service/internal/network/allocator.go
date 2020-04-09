@@ -82,7 +82,7 @@ func (i *allocator) Allocate(ctx context.Context, fullRange net.IPNet, netSize n
 
 		subnet, err = ipam.Free(fullRange, netSize, reservedSubnets)
 		if err != nil {
-			return net.IPNet{}, microerror.Maskf(err, "networkRange: %s, allocatedSubnetMask: %s, reservedSubnets: %#v", fullRange.String(), netSize.String(), reservedSubnets)
+			return net.IPNet{}, microerror.Mask(err)
 		}
 
 		i.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found free subnet %#q", subnet.String()))
