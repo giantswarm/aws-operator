@@ -91,7 +91,12 @@ func NewASG(config ASGConfig) (*ASG, error) {
 
 // Collect is the main metrics collection function.
 func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := a.helper.GetAWSClients()
+	reconciledClusters, err := a.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := a.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

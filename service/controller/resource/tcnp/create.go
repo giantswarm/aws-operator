@@ -268,7 +268,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 		subnets = append(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
-	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.TCNP.ASG.DesiredCapacity)
+	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.ASG.DesiredCapacity)
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.MachineDeploymentAvailabilityZones(cr),

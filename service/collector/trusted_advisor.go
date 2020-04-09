@@ -98,7 +98,12 @@ func NewTrustedAdvisor(config TrustedAdvisorConfig) (*TrustedAdvisor, error) {
 }
 
 func (t *TrustedAdvisor) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := t.helper.GetAWSClients()
+	reconciledClusters, err := t.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := t.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

@@ -78,7 +78,12 @@ func NewVPC(config VPCConfig) (*VPC, error) {
 }
 
 func (v *VPC) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := v.helper.GetAWSClients()
+	reconciledClusters, err := v.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := v.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

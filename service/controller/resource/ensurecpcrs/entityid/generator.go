@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/giantswarm/microerror"
 )
 
 const (
@@ -37,8 +39,12 @@ func New() string {
 			continue
 		}
 
-		matched, err := regexp.MatchString("^[a-z]+$", id)
-		if err == nil && matched == true {
+		matched, err := regexp.MatchString("^[a-z]+$", id) // nolint:staticcheck
+		if err != nil {
+			panic(microerror.JSON(err))
+		}
+
+		if matched {
 			// strings is letters only, which we also avoid
 			continue
 		}

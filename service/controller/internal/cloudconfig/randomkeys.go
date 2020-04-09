@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
+	cloudconfigtemplate "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 )
 
@@ -21,7 +21,7 @@ type RandomKeyTmplSet struct {
 func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, key string, clusterKeys randomkeys.Cluster) (RandomKeyTmplSet, error) {
 	var randomKeyTmplSet RandomKeyTmplSet
 	{
-		tmpl, err := template.New("encryption-config").Parse(cloudconfig.EncryptionConfig)
+		tmpl, err := template.New("encryption-config").Parse(cloudconfigtemplate.EncryptionConfig)
 		if err != nil {
 			return RandomKeyTmplSet{}, microerror.Mask(err)
 		}

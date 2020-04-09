@@ -1,4 +1,4 @@
-package apiendpoint
+package asgname
 
 import (
 	"strings"
@@ -36,13 +36,4 @@ func IsNotFound(err error) bool {
 	}
 
 	return false
-}
-
-var tooManyResultsError = &microerror.Error{
-	Kind: "tooManyResultsError",
-}
-
-// IsTooManyResults asserts tooManyResultsError.
-func IsTooManyResults(err error) bool {
-	return microerror.Cause(err) == tooManyResultsError
 }
