@@ -86,7 +86,12 @@ func NewELB(config ELBConfig) (*ELB, error) {
 }
 
 func (e *ELB) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := e.helper.GetAWSClients()
+	reconciledClusters, err := e.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := e.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}
