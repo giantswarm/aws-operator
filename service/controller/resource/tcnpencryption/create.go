@@ -27,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(md.Namespace).Get(key.ClusterID(&md), metav1.GetOptions{})
 		if errors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
@@ -45,7 +45,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		encryptionKey, err := r.encrypter.EncryptionKey(ctx, cl)
 		if r.encrypter.IsKeyNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not yet availabile")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
