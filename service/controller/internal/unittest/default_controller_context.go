@@ -257,9 +257,6 @@ func ChinaControllerContext() controllercontext.Context {
 						PeeringConnectionID: "peering-connection-id",
 					},
 				},
-				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
-					ASG: controllercontext.ContextStatusTenantClusterTCNPASG{},
-				},
 			},
 		},
 	}
@@ -511,9 +508,6 @@ func DefaultControllerContext() controllercontext.Context {
 						ID:                  "vpc-id",
 						PeeringConnectionID: "peering-connection-id",
 					},
-				},
-				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
-					ASG: controllercontext.ContextStatusTenantClusterTCNPASG{},
 				},
 			},
 		},

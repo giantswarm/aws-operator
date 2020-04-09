@@ -3,9 +3,11 @@ package controller
 import (
 	"context"
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -13,13 +15,16 @@ import (
 	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys"
 	"github.com/giantswarm/tenantcluster"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
@@ -54,22 +59,58 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
+
+type clusterResourceSetConfig struct {
+	CertsSearcher      certs.Interface
+	HostAWSConfig      aws.Config
+	K8sClient          k8sclient.Interface
+	Locker             locker.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
+
+	AccessLogsExpiration       int
+	AdvancedMonitoringEC2      bool
+	APIWhitelist               tccp.ConfigAPIWhitelist
+	CalicoCIDR                 int
+	CalicoMTU                  int
+	CalicoSubnet               string
+	ClusterIPRange             string
+	DockerDaemonCIDR           string
+	GuestAvailabilityZones     []string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	IncludeTags                bool
+	IgnitionPath               string
+	ImagePullProgressDeadline  string
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	DeleteLoggingBucket        bool
+	ClusterDomain              string
+	NetworkSetupDockerImage    string
+	Route53Enabled             bool
+	RouteTables                string
+	PodInfraContainerImage     string
+	RegistryDomain             string
+	SSHUserList                string
+	SSOPublicKey               string
+	VaultAddress               string
+}
 
 func newClusterResourceSet(config clusterResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var encrypterObject encrypter.Interface
 	{
-		encrypterObject, err = newEncrypterObject(config)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
+		c := &kms.EncrypterConfig{
+			Logger: config.Logger,
 
-	var encrypterRoleManager encrypter.RoleManager
-	{
-		encrypterRoleManager, err = newEncrypterRoleManager(config)
+			InstallationName: config.InstallationName,
+		}
+
+		encrypterObject, err = kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -433,9 +474,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
-			G8sClient:            config.K8sClient.G8sClient(),
-			EncrypterRoleManager: encrypterRoleManager,
-			Logger:               config.Logger,
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
 			CIDRBlockAWSCNI:    fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
