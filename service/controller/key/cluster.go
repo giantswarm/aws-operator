@@ -64,6 +64,10 @@ const (
 )
 
 const (
+	LifeCycleHookNodePool = "NodePool"
+)
+
+const (
 	RefWorkerASG = "workerAutoScalingGroup"
 )
 

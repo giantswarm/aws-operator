@@ -10,9 +10,11 @@ import (
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -66,11 +68,11 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
-			K8sClient:     config.K8sClient,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
-			CPAWSConfig: config.HostAWSConfig,
+			CPAWSConfig:   config.HostAWSConfig,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		awsClientResource, err = awsclient.New(c)
@@ -82,8 +84,10 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	var drainerResource resource.Interface
 	{
 		c := drainer.ResourceConfig{
-			G8sClient:     config.G8sClient,
-			Logger:        config.Logger,
+			G8sClient: config.G8sClient,
+			Logger:    config.Logger,
+
+			LabelMapFunc:  machineDeploymentDrainerLabelMapFunc,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
@@ -98,6 +102,9 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 		c := drainfinisher.ResourceConfig{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
+
+			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,
+			LifeCycleHookName: key.LifeCycleHookNodePool,
 		}
 
 		drainFinisherResource, err = drainfinisher.NewResource(c)
@@ -167,4 +174,11 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	}
 
 	return resourceSet, nil
+}
+
+func machineDeploymentDrainerLabelMapFunc(cr metav1.Object) map[string]string {
+	return map[string]string{
+		label.Cluster:           key.ClusterID(cr),
+		label.MachineDeployment: key.MachineDeploymentID(cr),
+	}
 }
