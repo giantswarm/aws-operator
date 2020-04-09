@@ -30,16 +30,16 @@ type ResourceConfig struct {
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
-	LabelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
-	ToClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	LabelMapFunc  func(cr metav1.Object) map[string]string
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
-	labelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
-	toClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	labelMapFunc  func(cr metav1.Object) map[string]string
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
@@ -50,8 +50,8 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.LabelSelectorFunc == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.LabelSelectorFunc must not be empty", config)
+	if config.LabelMapFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LabelMapFunc must not be empty", config)
 	}
 	if config.ToClusterFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
@@ -61,8 +61,8 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
-		labelSelectorFunc: config.LabelSelectorFunc,
-		toClusterFunc:     config.ToClusterFunc,
+		labelMapFunc:  config.LabelMapFunc,
+		toClusterFunc: config.ToClusterFunc,
 	}
 
 	return r, nil
@@ -80,7 +80,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 			Annotations: map[string]string{
 				annotation.InstanceID: instanceID,
 			},
-			Labels: r.labelSelectorFunc(cr).MatchLabels,
+			Labels: r.labelMapFunc(cr),
 			Name:   privateDNS,
 		},
 		Spec: g8sv1alpha1.DrainerConfigSpec{

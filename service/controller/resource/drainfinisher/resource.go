@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -26,7 +27,7 @@ type ResourceConfig struct {
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
-	LabelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
+	LabelMapFunc      func(cr metav1.Object) map[string]string
 	LifeCycleHookName string
 }
 
@@ -34,7 +35,7 @@ type Resource struct {
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
-	labelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
+	labelMapFunc      func(cr metav1.Object) map[string]string
 	lifeCycleHookName string
 }
 
@@ -46,8 +47,8 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if config.LabelSelectorFunc == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.LabelSelectorFunc must not be empty", config)
+	if config.LabelMapFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LabelMapFunc must not be empty", config)
 	}
 	if config.LifeCycleHookName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.LifeCycleHookName must not be empty", config)
@@ -57,7 +58,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
-		labelSelectorFunc: config.LabelSelectorFunc,
+		labelMapFunc:      config.LabelMapFunc,
 		lifeCycleHookName: config.LifeCycleHookName,
 	}
 
@@ -141,7 +142,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		n := cr.GetNamespace()
 		o := metav1.ListOptions{
-			LabelSelector: r.labelSelectorFunc(cr).String(),
+			LabelSelector: labels.Set(r.labelMapFunc(cr)).String(),
 		}
 
 		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)

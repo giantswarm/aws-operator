@@ -87,8 +87,8 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
-			LabelSelectorFunc: machineDeploymentDrainerLabelSelectorFunc,
-			ToClusterFunc:     newMachineDeploymentToClusterFunc(config.G8sClient),
+			LabelMapFunc:  machineDeploymentDrainerLabelMapFunc,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
 		}
 
 		drainerResource, err = drainer.NewResource(c)
@@ -103,7 +103,7 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
-			LabelSelectorFunc: machineDeploymentDrainerLabelSelectorFunc,
+			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,
 			LifeCycleHookName: key.LifeCycleHookNodePool,
 		}
 
@@ -176,11 +176,9 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	return resourceSet, nil
 }
 
-func machineDeploymentDrainerLabelSelectorFunc(cr metav1.Object) *metav1.LabelSelector {
-	return &metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			label.Cluster:           key.ClusterID(cr),
-			label.MachineDeployment: key.MachineDeploymentID(cr),
-		},
+func machineDeploymentDrainerLabelMapFunc(cr metav1.Object) map[string]string {
+	return map[string]string{
+		label.Cluster:           key.ClusterID(cr),
+		label.MachineDeployment: key.MachineDeploymentID(cr),
 	}
 }
