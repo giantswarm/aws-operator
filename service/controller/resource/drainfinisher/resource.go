@@ -27,6 +27,7 @@ type ResourceConfig struct {
 	Logger    micrologger.Logger
 
 	LabelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
+	LifeCycleHookName string
 }
 
 type Resource struct {
@@ -34,6 +35,7 @@ type Resource struct {
 	logger    micrologger.Logger
 
 	labelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
+	lifeCycleHookName string
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
@@ -47,12 +49,16 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	if config.LabelSelectorFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.LabelSelectorFunc must not be empty", config)
 	}
+	if config.LifeCycleHookName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LifeCycleHookName must not be empty", config)
+	}
 
 	r := &Resource{
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
 		labelSelectorFunc: config.LabelSelectorFunc,
+		lifeCycleHookName: config.LifeCycleHookName,
 	}
 
 	return r, nil
@@ -62,13 +68,13 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, workerASGName string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing lifecycle hook action for tenant cluster node %#q", instanceID))
+func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgName string) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing life cycle hook action for tenant cluster node %#q", instanceID))
 	i := &autoscaling.CompleteLifecycleActionInput{
-		AutoScalingGroupName:  aws.String(workerASGName),
+		AutoScalingGroupName:  aws.String(asgName),
 		InstanceId:            aws.String(instanceID),
 		LifecycleActionResult: aws.String("CONTINUE"),
-		LifecycleHookName:     aws.String("NodePool"),
+		LifecycleHookName:     aws.String(r.lifeCycleHookName),
 	}
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -77,15 +83,15 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 	}
 
 	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
-	if IsNoActiveLifecycleAction(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found lifecycle hook action for tenant cluster node %#q", instanceID))
+	if IsNoActiveLifeCycleAction(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found life cycle hook action for tenant cluster node %#q", instanceID))
 	} else if err != nil {
 		return microerror.Mask(err)
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for tenant cluster node %#q", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifen cycle hook action for tenant cluster node %#q", instanceID))
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for tenant cluster node %#q", instanceID))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
 
 	return nil
 }
@@ -106,7 +112,7 @@ func (r *Resource) deleteDrainerConfig(ctx context.Context, dc corev1alpha1.Drai
 	return nil
 }
 
-// ensure completes ASG lifecycle hooks for nodes drained by node-operator, and
+// ensure completes ASG life cycle hooks for nodes drained by node-operator, and
 // then deletes drained DrainerConfigs.
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	cr, err := meta.Accessor(obj)
@@ -118,7 +124,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var workerASGName string
+	var asgName string
 	{
 		if cc.Status.TenantCluster.ASG.Name == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "worker auto scaling group name is not available yet")
@@ -126,7 +132,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		workerASGName = cc.Status.TenantCluster.ASG.Name
+		asgName = cc.Status.TenantCluster.ASG.Name
 	}
 
 	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
@@ -186,7 +192,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			err = r.completeLifecycleHook(ctx, instanceID, workerASGName)
+			err = r.completeLifeCycleHook(ctx, instanceID, asgName)
 			if err != nil {
 				return microerror.Mask(err)
 			}

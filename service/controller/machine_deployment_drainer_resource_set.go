@@ -104,6 +104,7 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 			Logger:    config.Logger,
 
 			LabelSelectorFunc: machineDeploymentDrainerLabelSelectorFunc,
+			LifeCycleHookName: key.LifeCycleHookNodePool,
 		}
 
 		drainFinisherResource, err = drainfinisher.NewResource(c)
