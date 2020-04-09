@@ -6,6 +6,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/giantswarm/microerror"
+	"k8s.io/apimachinery/pkg/api/meta"
+
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
@@ -224,7 +227,7 @@ func SanitizeCFResourceName(l ...string) string {
 
 	// Iterate over unicode characters and add numbers and ASCII letters title
 	// cased.
-	for _, r := range []rune(strings.Join(l, "-")) {
+	for _, r := range strings.Join(l, "-") {
 		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
 			if previousWasSkipped {
 				rs = append(rs, unicode.ToTitle(r))
@@ -262,6 +265,19 @@ func StackNameTCNP(getter LabelsGetter) string {
 
 func StackNameTCNPF(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func ToLabelsGetter(v interface{}) (LabelsGetter, error) {
+	if v == nil {
+		return nil, microerror.Maskf(wrongTypeError, "expected 'LabelsGetter', got '%T'", v)
+	}
+
+	m, err := meta.Accessor(v)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return m, nil
 }
 
 func VPCPeeringRouteName(az string) string {

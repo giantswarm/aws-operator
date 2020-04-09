@@ -1,0 +1,51 @@
+---
+Installation:
+  V1:
+    Auth:
+      Vault:
+        Address: ""
+    Guest:
+      Calico:
+        CIDR: ""
+        Subnet: ""
+      Docker:
+        CIDR: ""
+      IPAM:
+        CIDRMask: ""
+        NetworkCIDR: ""
+        PrivateSubnetMask: ""
+        PublicSubnetMask: ""
+      Kubernetes:
+        API:
+          Auth:
+            Provider:
+              OIDC:
+                ClientID: ""
+                IssuerURL: ""
+                UsernameClaim: ""
+                GroupsClaim: ""
+          ClusterIPRange: ""
+          EndpointBase: ""
+        ClusterDomain: ""
+      SSH:
+        UserList: ""
+    Provider:
+      AWS:
+        Route53:
+          Enabled: false
+        S3AccessLogsExpiration: 0
+        TrustedAdvisor:
+          Enabled: false
+      Kind: ""
+    Registry:
+      Domain: ""
+    Secret:
+      AWSOperator:
+        SecretYaml: ""
+      Registry:
+        PullSecret:
+          DockerConfigJSON: ""
+    Security:
+      RestrictAccess:
+        GuestAPI:
+          Public: false

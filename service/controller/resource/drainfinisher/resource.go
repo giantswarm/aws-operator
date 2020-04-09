@@ -108,7 +108,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := cc.Status.TenantCluster.TCNP.ASG.Name
+	workerASGName := cc.Status.TenantCluster.ASG.Name
 	if workerASGName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

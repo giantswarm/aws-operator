@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const NVMESetTimeoutsUnit = `[Unit]
 Description=Set NVME timeouts

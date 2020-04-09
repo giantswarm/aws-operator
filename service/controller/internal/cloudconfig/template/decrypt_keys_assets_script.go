@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const DecryptKeysAssetsScript = `#!/bin/bash -e
 kms_keys_assets_decrypt() {

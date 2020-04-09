@@ -2,7 +2,7 @@ package collector
 
 const (
 	GaugeValue float64 = 1
-	namespace          = "aws_operator"
+	namespace  string  = "aws_operator"
 )
 
 const (
