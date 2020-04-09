@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix aws operator policy for latest node pools version.
+- Make encryption key lookup graceful during cluster creation.
+
 
 
 ## [8.2.3] 2020-04-06
