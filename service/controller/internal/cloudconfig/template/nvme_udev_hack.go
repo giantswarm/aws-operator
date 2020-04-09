@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const NVMEUdevRule = `KERNEL=="nvme[0-9]*n[0-9]*", ENV{DEVTYPE}=="disk", ATTRS{model}=="Amazon Elastic Block Store", PROGRAM="/opt/ebs-nvme-mapping /dev/%k", SYMLINK+="%c"
 `
