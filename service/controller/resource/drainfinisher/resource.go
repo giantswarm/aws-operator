@@ -11,12 +11,11 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -26,11 +25,15 @@ const (
 type ResourceConfig struct {
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
+
+	LabelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
 }
 
 type Resource struct {
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
+
+	labelSelectorFunc func(cr metav1.Object) *metav1.LabelSelector
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
@@ -41,9 +44,15 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.LabelSelectorFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LabelSelectorFunc must not be empty", config)
+	}
+
 	r := &Resource{
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
+
+		labelSelectorFunc: config.LabelSelectorFunc,
 	}
 
 	return r, nil
@@ -77,14 +86,15 @@ func (r *Resource) completeLifecycleHook(ctx context.Context, instanceID, worker
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook action for tenant cluster node %#q", instanceID))
+
 	return nil
 }
 
-func (r *Resource) deleteDrainerConfig(ctx context.Context, drainerConfig corev1alpha1.DrainerConfig) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting drainer config for tenant cluster node %#q", drainerConfig.Name))
+func (r *Resource) deleteDrainerConfig(ctx context.Context, dc corev1alpha1.DrainerConfig) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting drainer config for tenant cluster node %#q", dc.Name))
 
-	n := drainerConfig.GetNamespace()
-	i := drainerConfig.GetName()
+	n := dc.GetNamespace()
+	i := dc.GetName()
 	o := &metav1.DeleteOptions{}
 
 	err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Delete(i, o)
@@ -92,14 +102,14 @@ func (r *Resource) deleteDrainerConfig(ctx context.Context, drainerConfig corev1
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted drainer config for tenant cluster node %#q", drainerConfig.Name))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted drainer config for tenant cluster node %#q", dc.Name))
 	return nil
 }
 
 // ensure completes ASG lifecycle hooks for nodes drained by node-operator, and
 // then deletes drained DrainerConfigs.
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -108,11 +118,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := cc.Status.TenantCluster.ASG.Name
-	if workerASGName == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		return nil
+	var workerASGName string
+	{
+		if cc.Status.TenantCluster.ASG.Name == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "worker auto scaling group name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		workerASGName = cc.Status.TenantCluster.ASG.Name
 	}
 
 	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
@@ -121,7 +135,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		n := cr.GetNamespace()
 		o := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s, %s=%s", label.Cluster, key.ClusterID(&cr), label.MachineDeployment, key.MachineDeploymentID(&cr)),
+			LabelSelector: r.labelSelectorFunc(cr).String(),
 		}
 
 		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
@@ -138,15 +152,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			finalizerskeptcontext.SetKept(ctx)
 		}
 
-		for _, drainerConfig := range drainerConfigs.Items {
-			if drainerConfig.Status.HasDrainedCondition() {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has drained condition", drainerConfig.GetName()))
-				drainedDrainerConfigs = append(drainedDrainerConfigs, drainerConfig)
+		for _, dc := range drainerConfigs.Items {
+			if dc.Status.HasDrainedCondition() {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has drained condition", dc.GetName()))
+				drainedDrainerConfigs = append(drainedDrainerConfigs, dc)
 			}
 
-			if drainerConfig.Status.HasTimeoutCondition() {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has timeout condition", drainerConfig.GetName()))
-				drainedDrainerConfigs = append(drainedDrainerConfigs, drainerConfig)
+			if dc.Status.HasTimeoutCondition() {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has timeout condition", dc.GetName()))
+				drainedDrainerConfigs = append(drainedDrainerConfigs, dc)
 			}
 		}
 
@@ -162,12 +176,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring finished draining for drained nodes")
 
-		for _, drainerConfig := range drainedDrainerConfigs {
+		for _, dc := range drainedDrainerConfigs {
 			// This is a special thing for AWS. We use annotations to transport EC2
 			// instance IDs. Otherwise the lookups of all necessary information
 			// again would be quite a ball ache. Se we take the shortcut leveraging
 			// the k8s API.
-			instanceID, err := instanceIDFromAnnotations(drainerConfig.GetAnnotations())
+			instanceID, err := instanceIDFromAnnotations(dc.GetAnnotations())
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -177,7 +191,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			err = r.deleteDrainerConfig(ctx, drainerConfig)
+			err = r.deleteDrainerConfig(ctx, dc)
 			if err != nil {
 				return microerror.Mask(err)
 			}
