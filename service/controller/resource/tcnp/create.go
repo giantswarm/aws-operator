@@ -279,6 +279,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 			ID: key.ClusterID(&cr),
 		},
 		DesiredCapacity:       minDesiredNodes,
+		LifeCycleHookName:     key.LifeCycleHookNodePool,
 		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
 		MaxSize:               key.MachineDeploymentScalingMax(cr),
 		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),

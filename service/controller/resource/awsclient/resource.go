@@ -18,19 +18,19 @@ const (
 )
 
 type Config struct {
-	K8sClient     kubernetes.Interface
-	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	K8sClient kubernetes.Interface
+	Logger    micrologger.Logger
 
-	CPAWSConfig aws.Config
+	CPAWSConfig   aws.Config
+	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
-	k8sClient     kubernetes.Interface
-	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	k8sClient kubernetes.Interface
+	logger    micrologger.Logger
 
-	cpAWSConfig aws.Config
+	cpAWSConfig   aws.Config
+	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {
@@ -40,16 +40,17 @@ func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
 	if config.ToClusterFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 	}
 
 	r := &Resource{
-		k8sClient:     config.K8sClient,
-		logger:        config.Logger,
-		toClusterFunc: config.ToClusterFunc,
+		k8sClient: config.K8sClient,
+		logger:    config.Logger,
 
-		cpAWSConfig: config.CPAWSConfig,
+		cpAWSConfig:   config.CPAWSConfig,
+		toClusterFunc: config.ToClusterFunc,
 	}
 
 	return r, nil
