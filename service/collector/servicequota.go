@@ -2,12 +2,12 @@ package collector
 
 import (
 	"github.com/aws/aws-sdk-go/service/servicequotas"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 )
 
 const (

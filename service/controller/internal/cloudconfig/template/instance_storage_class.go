@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const InstanceStorageClassContent = `apiVersion: storage.k8s.io/v1
 kind: StorageClass
