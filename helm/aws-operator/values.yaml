@@ -8,7 +8,7 @@ flag:
         version: ""
 image:
   name: "giantswarm/aws-operator"
-  tag: "[[ .Version ]]"
+  tag: "8.2.3-eb6a34fbf1dd7b9585cb96831bb6d6891ee52863"
 Installation:
   V1:
     Registry:
@@ -19,8 +19,8 @@ pod:
   group:
     id: 1000
 project:
-  branch: "[[ .Branch ]]"
-  commit: "[[ .SHA ]]"
+  branch: "architect-orb"
+  commit: "eb6a34fbf1dd7b9585cb96831bb6d6891ee52863"
 # Resource names are truncated to 47 characters. Kubernetes allows 63 characters
 # limit for resource names. When pods for deployments are created they have
 # additional 16 characters suffix, e.g. "-957c9d6ff-pkzgw" and we want to have
