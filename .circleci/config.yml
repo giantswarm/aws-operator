@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@dev:docker-ct
+  architect: giantswarm/architect@dev:resource-class
 
 workflows:
   build:
