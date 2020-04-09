@@ -8,8 +8,8 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	ignition "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_0_0"
+	ignition "github.com/giantswarm/k8scloudconfig/v6/ignition/v_2_2_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_5_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
