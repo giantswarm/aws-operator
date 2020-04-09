@@ -7,7 +7,7 @@ ADD go.mod .
 RUN K8SCCPATH=$(go list -m -f '{{.Path}}' github.com/giantswarm/k8scloudconfig/...) \
     && go mod download -x $K8SCCPATH \
     && K8SCCROOT=$(go list -m -f '{{.Dir}}' github.com/giantswarm/k8scloudconfig/...) \
-    && mv $K8SCCROOT/files /opt/k8scloudconfig
+    && mv $K8SCCROOT /opt/k8scloudconfig
 
 FROM alpine:3.8
 
