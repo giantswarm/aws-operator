@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix aws operator policy for latest node pools version.
+
+
+## [8.2.3] 2020-04-06
+
+### Fixed
+
+- Fix error handling when creating Tenant Cluster API clients.
+
+
+
 ## [8.2.2] - 2020-04-03
 
 ### Changed
@@ -28,8 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.2.2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...HEAD
 
+[8.2.3]: https://github.com/giantswarm/aws-operator/compare/v8.2.2...v8.2.3
 [8.2.2]: https://github.com/giantswarm/aws-operator/compare/v8.2.1...v8.2.2
 
 [8.2.1]: https://github.com/giantswarm/aws-operator/releases/tag/v8.2.1

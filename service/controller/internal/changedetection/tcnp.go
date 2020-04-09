@@ -49,16 +49,16 @@ func (t *TCNP) ShouldScale(ctx context.Context, md infrastructurev1alpha2.AWSMac
 		return false, microerror.Mask(err)
 	}
 
-	asgEmpty := cc.Status.TenantCluster.TCNP.ASG.IsEmpty()
-	asgMaxEqual := cc.Status.TenantCluster.TCNP.ASG.MaxSize == key.MachineDeploymentScalingMax(md)
-	asgMinEqual := cc.Status.TenantCluster.TCNP.ASG.MinSize == key.MachineDeploymentScalingMin(md)
+	asgEmpty := cc.Status.TenantCluster.ASG.IsEmpty()
+	asgMaxEqual := cc.Status.TenantCluster.ASG.MaxSize == key.MachineDeploymentScalingMax(md)
+	asgMinEqual := cc.Status.TenantCluster.ASG.MinSize == key.MachineDeploymentScalingMin(md)
 
 	if !asgEmpty && !asgMaxEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should scale up due to scaling max changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should scale up due to scaling max changes from %d to %d", cc.Status.TenantCluster.ASG.MaxSize, key.MachineDeploymentScalingMax(md)))
 		return true, nil
 	}
 	if !asgEmpty && !asgMinEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should scale down due to scaling min changes from %d to %d", cc.Status.TenantCluster.TCNP.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
+		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster node pool should scale down due to scaling min changes from %d to %d", cc.Status.TenantCluster.ASG.MinSize, key.MachineDeploymentScalingMin(md)))
 		return true, nil
 	}
 
