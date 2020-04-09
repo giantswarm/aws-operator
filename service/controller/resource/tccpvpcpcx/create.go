@@ -29,7 +29,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		if cc.Status.TenantCluster.TCCP.VPC.ID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster vpc id not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster vpc id not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
