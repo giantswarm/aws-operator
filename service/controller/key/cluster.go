@@ -1,7 +1,7 @@
 package key
 
 import (
-	"crypto/sha1"
+	"crypto/sha512"
 	"fmt"
 	"strconv"
 	"strings"
@@ -255,8 +255,11 @@ func ensureLabel(labels string, key string, value string) string {
 func getResourcenameWithTimeHash(prefix string, cluster infrastructurev1alpha2.AWSCluster, t time.Time) string {
 	id := strings.Replace(ClusterID(&cluster), "-", "", -1)
 
-	h := sha1.New()
-	h.Write([]byte(strconv.FormatInt(t.UnixNano(), 10)))
+	h := sha512.New()
+	_, err := h.Write([]byte(strconv.FormatInt(t.UnixNano(), 10)))
+	if err != nil {
+		panic(microerror.JSON(err))
+	}
 	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	upperTimeHash := strings.ToUpper(timeHash)

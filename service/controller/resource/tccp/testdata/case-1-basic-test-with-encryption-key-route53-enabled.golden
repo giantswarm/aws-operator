@@ -2,13 +2,13 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   DockerVolumeResourceName:
-    Value: DockerVolume8Y5CK78968
+    Value: DockerVolume8Y5CK5A167
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   MasterImageID:
     Value: ami-038cea5071a5ee580
   MasterInstanceResourceName:
-    Value: MasterInstance8Y5CK78968
+    Value: MasterInstance8Y5CK5A167
   MasterInstanceType:
     Value: m5.xlarge
   OperatorVersion:
@@ -166,11 +166,11 @@ Resources:
       InstanceProfileName: 8y5ck-master-EC2-K8S-Role
       Roles:
         - Ref: "MasterRole"
-  MasterInstance8Y5CK78968:
+  MasterInstance8Y5CK5A167:
     Type: "AWS::EC2::Instance"
     Description: Master instance
     DependsOn:
-    - DockerVolume8Y5CK78968
+    - DockerVolume8Y5CK5A167
     - EtcdVolume
     Properties:
       AvailabilityZone: eu-central-1b
@@ -186,7 +186,7 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-master
-  DockerVolume8Y5CK78968:
+  DockerVolume8Y5CK5A167:
     Type: AWS::EC2::Volume
     Properties:
       Encrypted: true
@@ -216,22 +216,22 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-log
-  MasterInstance8Y5CK78968DockerMountPoint:
+  MasterInstance8Y5CK5A167DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref MasterInstance8Y5CK78968
-      VolumeId: !Ref DockerVolume8Y5CK78968
+      InstanceId: !Ref MasterInstance8Y5CK5A167
+      VolumeId: !Ref DockerVolume8Y5CK5A167
       Device: /dev/xvdc
-  MasterInstance8Y5CK78968EtcdMountPoint:
+  MasterInstance8Y5CK5A167EtcdMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref MasterInstance8Y5CK78968
+      InstanceId: !Ref MasterInstance8Y5CK5A167
       VolumeId: !Ref EtcdVolume
       Device: /dev/xvdh
-  MasterInstance8Y5CK78968LogMountPoint:
+  MasterInstance8Y5CK5A167LogMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref MasterInstance8Y5CK78968
+      InstanceId: !Ref MasterInstance8Y5CK5A167
       VolumeId: !Ref LogVolume
       Device: /dev/xvdf
   InternetGateway:
@@ -292,7 +292,7 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Instances:
-      - !Ref MasterInstance8Y5CK78968
+      - !Ref MasterInstance8Y5CK5A167
       Listeners:
       
       - InstancePort: 443
@@ -321,7 +321,7 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Instances:
-      - !Ref MasterInstance8Y5CK78968
+      - !Ref MasterInstance8Y5CK5A167
       Listeners:
       
       - InstancePort: 443
@@ -353,7 +353,7 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Instances:
-      - !Ref MasterInstance8Y5CK78968
+      - !Ref MasterInstance8Y5CK5A167
       Listeners:
       
       - InstancePort: 2379

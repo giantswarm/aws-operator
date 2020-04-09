@@ -278,9 +278,8 @@ func New(config Config) (*Service, error) {
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
-			G8sClient: k8sClient.G8sClient(),
-			K8sClient: k8sClient.K8sClient(),
-			Logger:    config.Logger,
+			Clients: k8sClient,
+			Logger:  config.Logger,
 
 			AWSConfig:             awsConfig,
 			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
@@ -326,7 +325,7 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.operatorCollector.Boot(ctx)
+		go s.operatorCollector.Boot(ctx) // nolint:errcheck
 
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
