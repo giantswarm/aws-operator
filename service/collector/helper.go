@@ -189,5 +189,8 @@ func (h *helper) ListReconciledClusters() (*infrastructurev1alpha2.AWSClusterLis
 			label.OperatorVersion: project.Version(),
 		},
 	)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 	return clusters, err
 }
