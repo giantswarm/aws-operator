@@ -1,41 +1,39 @@
 package collector
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/internal/accountid"
 	"github.com/giantswarm/aws-operator/service/internal/credential"
 )
 
 type helperConfig struct {
-	G8sClient versioned.Interface
-	K8sClient kubernetes.Interface
-	Logger    micrologger.Logger
+	Clients k8sclient.Interface
+	Logger  micrologger.Logger
 
 	AWSConfig clientaws.Config
 }
 
 type helper struct {
-	g8sClient versioned.Interface
-	k8sClient kubernetes.Interface
-	logger    micrologger.Logger
+	clients k8sclient.Interface
+	logger  micrologger.Logger
 
 	awsConfig clientaws.Config
 }
 
 func newHelper(config helperConfig) (*helper, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
+	if config.Clients == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Clients must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -47,9 +45,8 @@ func newHelper(config helperConfig) (*helper, error) {
 	}
 
 	h := &helper{
-		g8sClient: config.G8sClient,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		clients: config.Clients,
+		logger:  config.Logger,
 
 		awsConfig: config.AWSConfig,
 	}
@@ -58,18 +55,13 @@ func newHelper(config helperConfig) (*helper, error) {
 }
 
 // GetARNs list all unique aws IAM ARN from credential secret.
-func (h *helper) GetARNs() ([]string, error) {
+func (h *helper) GetARNs(clusterList *infrastructurev1alpha2.AWSClusterList) ([]string, error) {
 	var arns []string
-
-	clusterCRList, err := h.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
 
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
-	for _, clusterCR := range clusterCRList.Items {
-		arn, err := credential.GetARN(h.k8sClient, clusterCR)
+	for _, clusterCR := range clusterList.Items {
+		arn, err := credential.GetARN(h.clients.K8sClient(), clusterCR)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
 		if credential.IsCredentialNameEmptyError(err) {
@@ -84,7 +76,7 @@ func (h *helper) GetARNs() ([]string, error) {
 	}
 
 	// Ensure we check the default guest account for old cluster not having credential.
-	arn, err := credential.GetDefaultARN(h.k8sClient)
+	arn, err := credential.GetDefaultARN(h.clients.K8sClient())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -99,13 +91,13 @@ func (h *helper) GetARNs() ([]string, error) {
 
 // GetAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
-func (h *helper) GetAWSClients() ([]clientaws.Clients, error) {
+func (h *helper) GetAWSClients(clusterList *infrastructurev1alpha2.AWSClusterList) ([]clientaws.Clients, error) {
 	var (
 		clients    []clientaws.Clients
 		clientsMap = make(map[string]clientaws.Clients)
 	)
 
-	arns, err := h.GetARNs()
+	arns, err := h.GetARNs(clusterList)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -182,4 +174,23 @@ func (h *helper) AWSAccountID(awsClients clientaws.Clients) (string, error) {
 	}
 
 	return accountID, nil
+}
+
+// ListReconciledClusters provides a list of clusters reconciled by this
+// particular operator version.
+func (h *helper) ListReconciledClusters() (*infrastructurev1alpha2.AWSClusterList, error) {
+	ctx := context.Background()
+
+	clusters := &infrastructurev1alpha2.AWSClusterList{}
+	err := h.clients.CtrlClient().List(
+		ctx,
+		clusters,
+		runtimeclient.MatchingLabels{
+			label.OperatorVersion: project.Version(),
+		},
+	)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	return clusters, err
 }

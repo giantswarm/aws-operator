@@ -79,7 +79,12 @@ func NewCloudFormation(config CloudFormationConfig) (*CloudFormation, error) {
 
 // Collect is the main metrics collection function.
 func (cf *CloudFormation) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := cf.helper.GetAWSClients()
+	reconciledClusters, err := cf.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := cf.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}
