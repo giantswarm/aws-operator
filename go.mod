@@ -53,6 +53,7 @@ require (
 )
 
 replace (
+	github.com/giantswarm/errors => github.com/giantswarm/errors v0.2.2
 	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.5.0
 	k8s.io/api => k8s.io/api v0.16.6
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.16.6

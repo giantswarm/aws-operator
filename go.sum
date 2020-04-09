@@ -226,8 +226,8 @@ github.com/giantswarm/e2etemplates v0.2.0 h1:xwsa8hSirDF8nFdRJZJROPwjiL1vsuhWltz
 github.com/giantswarm/e2etemplates v0.2.0/go.mod h1:q7aE42HUEdxm6NtLJ/csoMBWoRoIfhdy0WC85aRjLi8=
 github.com/giantswarm/e2etests v0.2.0 h1:yusku+y4BvA+LSwU2TXeIlcVVkKsjrjWikAqseUDLMM=
 github.com/giantswarm/e2etests v0.2.0/go.mod h1:2O8SE/M46Y2D+pC6pU9+56adCXtho/AnleEWo78PrDk=
-github.com/giantswarm/errors v0.2.0 h1:l9bAe0IQBHLkZQVT+h79DTCJQ3tuDFrOfUySVlbKn10=
-github.com/giantswarm/errors v0.2.0/go.mod h1:Oj1LIWs9Uoj6JGtK5HxTb50iZuqe9f60LDI0nLXA5vU=
+github.com/giantswarm/errors v0.2.2 h1:O7shm0kFukHgzuX3iVZvxleu1RZXHFVEro/e8Ge3CgI=
+github.com/giantswarm/errors v0.2.2/go.mod h1:Oj1LIWs9Uoj6JGtK5HxTb50iZuqe9f60LDI0nLXA5vU=
 github.com/giantswarm/exporterkit v0.2.0 h1:+HTGl4fmT/1OkTox8HbV3JXeavmsZv94+2CDW8cSrq0=
 github.com/giantswarm/exporterkit v0.2.0/go.mod h1:b4fuHVjsvZgznC9OEPfn0y5zvN8SnEKTiI5zTTfck94=
 github.com/giantswarm/helmclient v0.2.0 h1:etBQoz0QN9quIA/blbkIkrfr0CuzwjxA89/1MgE5YoU=
