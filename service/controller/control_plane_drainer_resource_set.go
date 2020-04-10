@@ -103,7 +103,7 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 			Logger:    config.Logger,
 
 			LabelMapFunc:      controlPlaneDrainerLabelMapFunc,
-			LifeCycleHookName: key.LifeCycleHookNodePool,
+			LifeCycleHookName: key.LifeCycleHookControlPlane,
 		}
 
 		drainFinisherResource, err = drainfinisher.NewResource(c)

@@ -334,6 +334,7 @@ func New(config Config) (*Service, error) {
 		bootOnce:                           sync.Once{},
 		clusterController:                  clusterController,
 		controlPlaneController:             controlPlaneController,
+		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
 		operatorCollector:                  operatorCollector,
@@ -348,6 +349,7 @@ func (s *Service) Boot(ctx context.Context) {
 
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
+		go s.controlPlaneDrainerController.Boot(ctx)
 		go s.machineDeploymentController.Boot(ctx)
 		go s.machineDeploymentDrainerController.Boot(ctx)
 	})
