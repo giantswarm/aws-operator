@@ -4,9 +4,10 @@ import (
 	"context"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func DefaultContextControlPlane() context.Context {

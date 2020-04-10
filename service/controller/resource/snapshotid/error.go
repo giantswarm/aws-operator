@@ -20,10 +20,6 @@ var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
 
-var notExistsError = &microerror.Error{
-	Kind: "notExistsError",
-}
-
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
