@@ -14,10 +14,10 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -27,14 +27,18 @@ const (
 )
 
 type ResourceConfig struct {
-	G8sClient     versioned.Interface
-	Logger        micrologger.Logger
+	G8sClient versioned.Interface
+	Logger    micrologger.Logger
+
+	LabelMapFunc  func(cr metav1.Object) map[string]string
 	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
-	g8sClient     versioned.Interface
-	logger        micrologger.Logger
+	g8sClient versioned.Interface
+	logger    micrologger.Logger
+
+	labelMapFunc  func(cr metav1.Object) map[string]string
 	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
@@ -45,13 +49,19 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
+	if config.LabelMapFunc == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LabelMapFunc must not be empty", config)
+	}
 	if config.ToClusterFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 	}
 
 	r := &Resource{
-		g8sClient:     config.G8sClient,
-		logger:        config.Logger,
+		g8sClient: config.G8sClient,
+		logger:    config.Logger,
+
+		labelMapFunc:  config.LabelMapFunc,
 		toClusterFunc: config.ToClusterFunc,
 	}
 
@@ -62,20 +72,16 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1alpha2.AWSCluster, md infrastructurev1alpha2.AWSMachineDeployment, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1alpha2.AWSCluster, cr metav1.Object, instanceID, privateDNS string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for ec2 instance %#q", instanceID))
 
-	n := md.GetNamespace()
-	c := &g8sv1alpha1.DrainerConfig{
+	dc := &g8sv1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.InstanceID: instanceID,
 			},
-			Labels: map[string]string{
-				label.Cluster:           key.ClusterID(&md),
-				label.MachineDeployment: key.MachineDeploymentID(&md),
-			},
-			Name: privateDNS,
+			Labels: r.labelMapFunc(cr),
+			Name:   privateDNS,
 		},
 		Spec: g8sv1alpha1.DrainerConfigSpec{
 			Guest: g8sv1alpha1.DrainerConfigSpecGuest{
@@ -83,7 +89,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 					API: g8sv1alpha1.DrainerConfigSpecGuestClusterAPI{
 						Endpoint: key.ClusterAPIEndpoint(cl),
 					},
-					ID: key.ClusterID(&md),
+					ID: key.ClusterID(cr),
 				},
 				Node: g8sv1alpha1.DrainerConfigSpecGuestNode{
 					Name: privateDNS,
@@ -95,7 +101,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 		},
 	}
 
-	_, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Create(c)
+	_, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Create(dc)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -108,7 +114,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 // ensure creates DrainerConfigs for ASG instances in terminating/wait state
 // then lets node-operator to do its job.
 func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
-	md, err := key.ToMachineDeployment(obj)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -121,8 +127,8 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	workerASGName := cc.Status.TenantCluster.TCNP.ASG.Name
-	if workerASGName == "" {
+	asgName := cc.Status.TenantCluster.ASG.Name
+	if asgName == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 		return nil
@@ -134,7 +140,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
-				aws.String(workerASGName),
+				aws.String(asgName),
 			},
 		}
 
@@ -162,13 +168,17 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		// In case there aren't EC2 instances in Terminating:Wait state, we cancel
-		// and keep finalizers, so we try again on the next reconciliation loop. We
-		// need to keep finalizers because this might be a delete event.
 		if len(instances) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
+
+			// In case there aren't EC2 instances in Terminating:Wait state, we cancel
+			// and keep finalizers on delete events, so we try again on the next
+			// reconciliation loop.
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -198,14 +208,11 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			n := cl.GetNamespace()
-			o := metav1.GetOptions{}
-
-			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Get(privateDNS, o)
+			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
 
-				err := r.createDrainerConfig(ctx, cl, md, *instance.InstanceId, privateDNS)
+				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
 				if err != nil {
 					return microerror.Mask(err)
 				}

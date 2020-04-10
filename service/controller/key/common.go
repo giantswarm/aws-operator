@@ -163,6 +163,10 @@ func ReleaseVersion(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Release]
 }
 
+func ReleaseName(releaseVersion string) string {
+	return fmt.Sprintf("v%s", releaseVersion)
+}
+
 func RegionARN(region string) string {
 	regionARN := "aws"
 
@@ -220,7 +224,7 @@ func SanitizeCFResourceName(l ...string) string {
 
 	// Iterate over unicode characters and add numbers and ASCII letters title
 	// cased.
-	for _, r := range []rune(strings.Join(l, "-")) {
+	for _, r := range strings.Join(l, "-") {
 		if unicode.IsDigit(r) || (unicode.IsLetter(r) && utf8.RuneLen(r) == 1) {
 			if previousWasSkipped {
 				rs = append(rs, unicode.ToTitle(r))

@@ -54,10 +54,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// private subnets.
 	var azs []string
 	{
-		for _, az := range key.MachineDeploymentAvailabilityZones(cr) {
-			azs = append(azs, az)
-		}
-
+		azs = append(azs, key.MachineDeploymentAvailabilityZones(cr)...)
 		sort.Strings(azs)
 	}
 
@@ -69,7 +66,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		for i, az := range azs {
 			ng := natGatewayForAvailabilityZone(cc.Status.TenantCluster.TCCP.NATGateways, az)
 			if ng == nil {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "nat gateway information not yet available")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "nat gateway information not available yet")
 				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 				return nil

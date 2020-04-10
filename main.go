@@ -23,7 +23,7 @@ var (
 func main() {
 	err := mainE(context.Background())
 	if err != nil {
-		panic(microerror.Stack(err))
+		panic(microerror.JSON(err))
 	}
 }
 
@@ -55,7 +55,7 @@ func mainE(ctx context.Context) error {
 
 			newService, err = service.New(c)
 			if err != nil {
-				panic(microerror.Stack(err))
+				panic(microerror.JSON(err))
 			}
 
 			go newService.Boot(ctx)
@@ -73,7 +73,7 @@ func mainE(ctx context.Context) error {
 
 			newServer, err = server.New(c)
 			if err != nil {
-				panic(microerror.Stack(err))
+				panic(microerror.JSON(err))
 			}
 		}
 
@@ -161,7 +161,10 @@ func mainE(ctx context.Context) error {
 
 	daemonCommand.PersistentFlags().String(f.Service.Test.LabelSelector.Version, "", "Overrides version value used with aws-operator.giantswarm.io/version label selector. Should be used only for testing.")
 
-	newCommand.CobraCommand().Execute()
+	err = newCommand.CobraCommand().Execute()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }

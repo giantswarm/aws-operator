@@ -2,12 +2,12 @@ package collector
 
 import (
 	"github.com/aws/aws-sdk-go/service/servicequotas"
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 )
 
 const (
@@ -70,7 +70,12 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 }
 
 func (v *ServiceQuota) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := v.helper.GetAWSClients()
+	reconciledClusters, err := v.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := v.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

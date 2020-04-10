@@ -12,7 +12,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		err := r.addSubnetsToContext(ctx)
 		if IsVPCNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane vpc id is not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane vpc id is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil

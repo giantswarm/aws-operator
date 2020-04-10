@@ -2,11 +2,11 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   DockerVolumeResourceName:
-    Value: DockerVolume8Y5CK78968
+    Value: DockerVolume8Y5CK5A167
   MasterImageID:
     Value: ami-038cea5071a5ee580
   MasterInstanceResourceName:
-    Value: MasterInstance8Y5CK78968
+    Value: MasterInstance8Y5CK5A167
   MasterInstanceType:
     Value: m5.xlarge
   OperatorVersion:
@@ -133,11 +133,11 @@ Resources:
       InstanceProfileName: 8y5ck-master-EC2-K8S-Role
       Roles:
         - Ref: "MasterRole"
-  MasterInstance8Y5CK78968:
+  MasterInstance8Y5CK5A167:
     Type: "AWS::EC2::Instance"
     Description: Master instance
     DependsOn:
-    - DockerVolume8Y5CK78968
+    - DockerVolume8Y5CK5A167
     - EtcdVolume
     Properties:
       AvailabilityZone: eu-central-1b
@@ -149,11 +149,11 @@ Resources:
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref PrivateSubnetEuCentral1b
-      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNV8yXzAvY2x1c3Rlci04eTVjay10Y2NwIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRjIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAiZXRjZCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogZmFsc2UsCiAgICAgICAgICAibGFiZWwiOiAiZXRjZCIsCiAgICAgICAgICAiZm9ybWF0IjogImV4dDQiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
+      UserData: ewogICJpZ25pdGlvbiI6IHsKICAgICJ2ZXJzaW9uIjogIjIuMi4wIiwKICAgICJjb25maWciOiB7CiAgICAgICJhcHBlbmQiOiBbCiAgICAgICAgewogICAgICAgICAgInNvdXJjZSI6ICJzMzovL3RlbmFudC1hY2NvdW50LWc4cy04eTVjay92ZXJzaW9uLzcuMy4wL2Nsb3VkY29uZmlnL3ZfNl8wXzAvY2x1c3Rlci04eTVjay10Y2NwIgogICAgICAgIH0KICAgICAgXQogICAgfQogIH0sCiAgInN0b3JhZ2UiOiB7CiAgICAiZmlsZXN5c3RlbXMiOiBbCiAgICAgIHsKICAgICAgICAibmFtZSI6ICJkb2NrZXIiLAogICAgICAgICJtb3VudCI6IHsKICAgICAgICAgICJkZXZpY2UiOiAiL2Rldi94dmRjIiwKICAgICAgICAgICJ3aXBlRmlsZXN5c3RlbSI6IHRydWUsCiAgICAgICAgICAibGFiZWwiOiAiZG9ja2VyIiwKICAgICAgICAgICJmb3JtYXQiOiAieGZzIgogICAgICAgIH0KICAgICAgfSwKICAgICAgewogICAgICAgICJuYW1lIjogImxvZyIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGYiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogdHJ1ZSwKICAgICAgICAgICJsYWJlbCI6ICJsb2ciLAogICAgICAgICAgImZvcm1hdCI6ICJ4ZnMiCiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgIm5hbWUiOiAiZXRjZCIsCiAgICAgICAgIm1vdW50IjogewogICAgICAgICAgImRldmljZSI6ICIvZGV2L3h2ZGgiLAogICAgICAgICAgIndpcGVGaWxlc3lzdGVtIjogZmFsc2UsCiAgICAgICAgICAibGFiZWwiOiAiZXRjZCIsCiAgICAgICAgICAiZm9ybWF0IjogImV4dDQiCiAgICAgICAgfQogICAgICB9CiAgICBdCiAgfQp9Cg==
       Tags:
       - Key: Name
         Value: 8y5ck-master
-  DockerVolume8Y5CK78968:
+  DockerVolume8Y5CK5A167:
     Type: AWS::EC2::Volume
     Properties:
       Encrypted: true
@@ -183,22 +183,22 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-log
-  MasterInstance8Y5CK78968DockerMountPoint:
+  MasterInstance8Y5CK5A167DockerMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref MasterInstance8Y5CK78968
-      VolumeId: !Ref DockerVolume8Y5CK78968
+      InstanceId: !Ref MasterInstance8Y5CK5A167
+      VolumeId: !Ref DockerVolume8Y5CK5A167
       Device: /dev/xvdc
-  MasterInstance8Y5CK78968EtcdMountPoint:
+  MasterInstance8Y5CK5A167EtcdMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref MasterInstance8Y5CK78968
+      InstanceId: !Ref MasterInstance8Y5CK5A167
       VolumeId: !Ref EtcdVolume
       Device: /dev/xvdh
-  MasterInstance8Y5CK78968LogMountPoint:
+  MasterInstance8Y5CK5A167LogMountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId: !Ref MasterInstance8Y5CK78968
+      InstanceId: !Ref MasterInstance8Y5CK5A167
       VolumeId: !Ref LogVolume
       Device: /dev/xvdf
   InternetGateway:
@@ -259,7 +259,7 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Instances:
-      - !Ref MasterInstance8Y5CK78968
+      - !Ref MasterInstance8Y5CK5A167
       Listeners:
       
       - InstancePort: 443
@@ -288,7 +288,7 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Instances:
-      - !Ref MasterInstance8Y5CK78968
+      - !Ref MasterInstance8Y5CK5A167
       Listeners:
       
       - InstancePort: 443
@@ -320,7 +320,7 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Instances:
-      - !Ref MasterInstance8Y5CK78968
+      - !Ref MasterInstance8Y5CK5A167
       Listeners:
       
       - InstancePort: 2379

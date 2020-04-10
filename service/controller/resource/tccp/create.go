@@ -32,8 +32,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		// when aws operator starts it needs to find CP VPC information, so we have to
-		// cancel the resource in case the information is not yet available.
+		// When aws operator starts it needs to find CP VPC information, so we have to
+		// cancel the resource in case the information is not available yet.
 		if cc.Status.ControlPlane.VPC.ID == "" || cc.Status.ControlPlane.VPC.CIDR == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the control plane VPC info is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -45,6 +45,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// to cancel the resource to prevent further TCCP resource actions.
 		if cc.Status.ControlPlane.PeerRole.ARN == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane peer role arn is not yet set up")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		// We need the encryption key for managing the IAM policies. Without the
+		// encryption key we cannot continue so we stop here and try again during
+		// the next reconciliation loop.
+		if cc.Status.TenantCluster.Encryption.Key == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -97,7 +106,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))

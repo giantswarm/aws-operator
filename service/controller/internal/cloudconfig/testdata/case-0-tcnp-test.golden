@@ -418,7 +418,7 @@
         "name": "k8s-setup-network-env.service"
       },
       {
-        "contents": "[Unit]\nDescription=Pulls hyperkube binary from image to local FS\nAfter=docker.service\nRequires=docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironment=\"IMAGE=quay.io/giantswarm/hyperkube:v1.16.3\"\nEnvironment=\"NAME=%p.service\"\nExecStartPre=/bin/bash -c \"/usr/bin/docker create --name $NAME $IMAGE\"\nExecStart=/bin/bash -c \"/usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube\"\nExecStartPost=/bin/bash -c \"/usr/bin/docker rm $NAME\"\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "[Unit]\nDescription=Pulls hyperkube binary from image to local FS\nAfter=docker.service\nRequires=docker.service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nTimeoutStartSec=0\nEnvironment=\"IMAGE=1.0.0\"\nEnvironment=\"NAME=%p.service\"\nExecStartPre=/bin/bash -c \"/usr/bin/docker create --name $NAME $IMAGE\"\nExecStart=/bin/bash -c \"/usr/bin/docker cp $NAME:/hyperkube /opt/bin/hyperkube\"\nExecStartPost=/bin/bash -c \"/usr/bin/docker rm $NAME\"\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "k8s-setup-download-hyperkube.service"
       },

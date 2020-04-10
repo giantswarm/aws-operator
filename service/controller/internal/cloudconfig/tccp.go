@@ -8,13 +8,12 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v_5_2_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -39,7 +38,7 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	return t, nil
 }
 
-func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, labels string) ([]byte, error) {
+func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -102,8 +101,8 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
-		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
+		params.Images = images
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
@@ -149,14 +148,6 @@ type MasterExtension struct {
 
 func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	ctx := context.TODO()
-
-	var storageClass string
-	_, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		storageClass = cloudconfig.InstanceStorageClassContent
-	} else {
-		storageClass = cloudconfig.InstanceStorageClassEncryptedContent
-	}
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
@@ -256,7 +247,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0766,
 		},
 		{
-			AssetContent: storageClass,
+			AssetContent: cloudconfig.InstanceStorageClassEncryptedContent,
 			Path:         "/srv/default-storage-class.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
