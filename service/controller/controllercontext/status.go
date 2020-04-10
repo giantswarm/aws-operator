@@ -51,10 +51,10 @@ type ContextStatusTenantClusterEncryption struct {
 
 type ContextStatusTenantClusterMasterInstance struct {
 	DockerVolumeResourceName string
+	IgnitionHash             string
 	Image                    string
 	ResourceName             string
 	Type                     string
-	CloudConfigVersion       string
 }
 
 type ContextStatusTenantClusterTCCP struct {
@@ -72,7 +72,7 @@ type ContextStatusTenantClusterTCCPVPC struct {
 
 type ContextStatusTenantClusterWorkerInstance struct {
 	DockerVolumeSizeGB string
-	CloudConfigVersion string
+	IgnitionHash       string
 	Image              string
 	Type               string
 }

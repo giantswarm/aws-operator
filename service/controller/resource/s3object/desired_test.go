@@ -52,8 +52,8 @@ func Test_DesiredState(t *testing.T) {
 	}
 	clientset := fake.NewSimpleClientset(release)
 
-	masterKeyPattern := "cloudconfig/v[\\d_]+/master"
-	workerKeyPattern := "cloudconfig/v[\\d_]+/worker"
+	masterKeyPattern := "ignition/master"
+	workerKeyPattern := "ignition/worker"
 
 	masterKeyRegexp := regexp.MustCompile(masterKeyPattern)
 	workerKeyRegexp := regexp.MustCompile(workerKeyPattern)

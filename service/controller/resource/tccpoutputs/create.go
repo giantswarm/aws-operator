@@ -110,11 +110,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.MasterCloudConfigVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.MasterInstance.CloudConfigVersion = v
+		cc.Status.TenantCluster.MasterInstance.IgnitionHash = v
 	}
 
 	{
@@ -168,11 +168,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerCloudConfigVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.WorkerInstance.CloudConfigVersion = v
+		cc.Status.TenantCluster.WorkerInstance.IgnitionHash = v
 	}
 
 	{

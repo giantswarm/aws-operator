@@ -17,10 +17,10 @@ func (a *GuestOutputsAdapter) Adapt(config Config) error {
 	a.Master.ImageID = config.StackState.MasterImageID
 	a.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 	a.Master.Instance.Type = config.StackState.MasterInstanceType
-	a.Master.CloudConfig.Version = config.StackState.MasterCloudConfigVersion
+	a.Master.CloudConfig.Hash = config.StackState.MasterIgnitionHash
 
 	a.Worker.ASG.Ref = key.WorkerASGRef
-	a.Worker.CloudConfig.Version = config.StackState.WorkerCloudConfigVersion
+	a.Worker.CloudConfig.Hash = config.StackState.WorkerIgnitionHash
 	a.Worker.DockerVolumeSizeGB = config.StackState.WorkerDockerVolumeSizeGB
 	a.Worker.ImageID = config.StackState.WorkerImageID
 	a.Worker.InstanceType = config.StackState.WorkerInstanceType
@@ -43,7 +43,7 @@ type GuestOutputsAdapterMasterInstance struct {
 }
 
 type GuestOutputsAdapterMasterCloudConfig struct {
-	Version string
+	Hash string
 }
 
 type GuestOutputsAdapterMasterDockerVolume struct {
@@ -63,7 +63,7 @@ type GuestOutputsAdapterWorkerASG struct {
 }
 
 type GuestOutputsAdapterWorkerCloudConfig struct {
-	Version string
+	Hash string
 }
 
 type GuestOutputsAdapterVersionBundle struct {

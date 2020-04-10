@@ -1190,17 +1190,10 @@ func Test_VersionBundleVersion(t *testing.T) {
 
 func Test_BucketObjectName(t *testing.T) {
 	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
-				Version: "0.1.0",
-			},
-		},
-	}
 	role := "worker"
 
-	e := fmt.Sprintf("version/0.1.0/cloudconfig/%s/worker", CloudConfigVersion)
-	a := BucketObjectName(customObject, role)
+	e := fmt.Sprintf("ignition/worker")
+	a := BucketObjectName(role)
 	if e != a {
 		t.Fatalf("expected %s got %s", e, a)
 	}

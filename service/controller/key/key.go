@@ -1,15 +1,19 @@
 package key
 
 import (
+	"crypto/md5"
 	"crypto/sha1"
 	"fmt"
+	"io"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -19,10 +23,6 @@ import (
 )
 
 const (
-	// CloudConfigVersion defines the version of k8scloudconfig in use.
-	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_6_0_0"
-
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
 
@@ -60,20 +60,20 @@ const (
 
 const (
 	DockerVolumeResourceNameKey   = "DockerVolumeResourceName"
+	MasterIgnitionHashKey         = "MasterIgnitionHash"
 	MasterImageIDKey              = "MasterImageID"
 	MasterInstanceResourceNameKey = "MasterInstanceResourceName"
 	MasterInstanceTypeKey         = "MasterInstanceType"
 	MasterInstanceMonitoring      = "Monitoring"
-	MasterCloudConfigVersionKey   = "MasterCloudConfigVersion"
 	VersionBundleVersionKey       = "VersionBundleVersion"
 	WorkerCountKey                = "WorkerCount"
 	WorkerMaxKey                  = "WorkerMax"
 	WorkerMinKey                  = "WorkerMin"
 	WorkerDockerVolumeSizeKey     = "WorkerDockerVolumeSizeGB"
+	WorkerIgnitionHashKey         = "WorkerIgnitionHash"
 	WorkerImageIDKey              = "WorkerImageID"
 	WorkerInstanceMonitoring      = "Monitoring"
 	WorkerInstanceTypeKey         = "WorkerInstanceType"
-	WorkerCloudConfigVersionKey   = "WorkerCloudConfigVersion"
 )
 
 const (
@@ -137,13 +137,30 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
-// BucketObjectName computes the S3 object path to the actual cloud config.
-//
-//     /version/3.4.0/cloudconfig/v_3_2_5/master
-//     /version/3.4.0/cloudconfig/v_3_2_5/worker
-//
-func BucketObjectName(customObject v1alpha1.AWSConfig, role string) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", VersionBundleVersion(customObject), CloudConfigVersion, role)
+// ReleaseComponentHash returns a value unique to the
+func ReleaseComponentHash(release releasev1alpha1.Release) (string, error) {
+	var componentNames []string
+	componentVersions := map[string]string{}
+	for _, component := range release.Spec.Components {
+		componentNames = append(componentNames, component.Name)
+		componentVersions[component.Name] = component.Version
+	}
+	sort.Strings(componentNames)
+
+	hasher := md5.New()
+	for _, name := range componentNames {
+		_, err := io.WriteString(hasher, fmt.Sprintf("|%s@%s|", name, componentVersions[name]))
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
+	hash := fmt.Sprintf("%x", hasher.Sum(nil)) // []byte as base16
+	return hash, nil
+}
+
+// BucketObjectName computes the S3 object path to the actual cloud config (e.g. ignition/master).
+func BucketObjectName(role string) string {
+	return fmt.Sprintf("ignition/%s", role)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -547,7 +564,7 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 }
 
 func SmallCloudConfigPath(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(customObject, role))
+	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(role))
 }
 
 func SmallCloudConfigS3HTTPURL(customObject v1alpha1.AWSConfig, accountID string, role string) string {

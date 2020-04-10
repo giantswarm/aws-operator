@@ -61,21 +61,15 @@ type StackState struct {
 	Name string
 
 	DockerVolumeResourceName   string
+	MasterIgnitionHash         string
 	MasterImageID              string
 	MasterInstanceType         string
 	MasterInstanceResourceName string
-	// TODO the cloud config versions shouldn't be injected here. These should
-	// actually always only be the ones the operator has hard coded. No other
-	// version should be used here ever.
-	MasterCloudConfigVersion string
-	MasterInstanceMonitoring bool
+	MasterInstanceMonitoring   bool
 
-	// TODO the cloud config versions shouldn't be injected here. These should
-	// actually always only be the ones the operator has hard coded. No other
-	// version should be used here ever.
-	WorkerCloudConfigVersion  string
 	WorkerDesired             int
 	WorkerDockerVolumeSizeGB  string
+	WorkerIgnitionHash        string
 	WorkerKubeletVolumeSizeGB string
 	WorkerLogVolumeSizeGB     string
 	WorkerImageID             string

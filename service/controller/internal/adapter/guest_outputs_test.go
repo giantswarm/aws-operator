@@ -11,17 +11,17 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 	testCases := []struct {
 		Description                      string
 		Config                           Config
-		ExpectedMasterCloudConfigVersion string
+		ExpectedMasterIgnitionHash       string
 	}{
 		{
 			Description: "master CloudConfig version should match the hardcoded value",
 			Config: Config{
 				CustomObject: v1alpha1.AWSConfig{},
 				StackState: StackState{
-					MasterCloudConfigVersion: "foo",
+					MasterIgnitionHash: "foo",
 				},
 			},
-			ExpectedMasterCloudConfigVersion: "foo",
+			ExpectedMasterIgnitionHash: "foo",
 		},
 	}
 
@@ -34,8 +34,8 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.Master.CloudConfig.Version != tc.ExpectedMasterCloudConfigVersion {
-				t.Fatalf("expected %s got %s", tc.ExpectedMasterCloudConfigVersion, a.Master.CloudConfig.Version)
+			if a.Master.CloudConfig.Hash != tc.ExpectedMasterIgnitionHash {
+				t.Fatalf("expected %s got %s", tc.ExpectedMasterIgnitionHash, a.Master.CloudConfig.Hash)
 			}
 		})
 	}
@@ -46,17 +46,17 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 	testCases := []struct {
 		Description                      string
 		Config                           Config
-		ExpectedWorkerCloudConfigVersion string
+		ExpectedWorkerIgnitionHash       string
 	}{
 		{
 			Description: "worker CloudConfig version should match the hardcoded value",
 			Config: Config{
 				CustomObject: v1alpha1.AWSConfig{},
 				StackState: StackState{
-					WorkerCloudConfigVersion: "foo",
+					WorkerIgnitionHash: "foo",
 				},
 			},
-			ExpectedWorkerCloudConfigVersion: "foo",
+			ExpectedWorkerIgnitionHash: "foo",
 		},
 	}
 
@@ -69,8 +69,8 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.Worker.CloudConfig.Version != tc.ExpectedWorkerCloudConfigVersion {
-				t.Fatalf("expected %s got %s", tc.ExpectedWorkerCloudConfigVersion, a.Worker.CloudConfig.Version)
+			if a.Worker.CloudConfig.Hash != tc.ExpectedWorkerIgnitionHash {
+				t.Fatalf("expected %s got %s", tc.ExpectedWorkerIgnitionHash, a.Worker.CloudConfig.Hash)
 			}
 		})
 	}

@@ -299,7 +299,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 		return "", microerror.Mask(err)
 	}
 
-	var osVersion string
+	var image string
 	{
 		releaseVersion, ok := cr.Labels[label.ReleaseVersion]
 		if !ok {
@@ -310,6 +310,8 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
+
+		var osVersion string
 		for _, component := range release.Spec.Components {
 			if component.Name == "containerlinux" {
 				osVersion = component.Version
@@ -319,11 +321,11 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 		if osVersion == "" {
 			return "", microerror.Maskf(executionFailedError, "containerlinux component version not found on release")
 		}
-	}
 
-	im, err := key.ImageID(cr, osVersion)
-	if err != nil {
-		return "", microerror.Mask(err)
+		image, err = key.ImageID(cr, osVersion)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
 	var templateBody string
@@ -344,19 +346,19 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				Name: key.MainGuestStackName(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
-				MasterImageID:              im,
+				MasterIgnitionHash:         cc.Status.TenantCluster.MasterInstance.IgnitionHash,
+				MasterImageID:              image,
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         key.MasterInstanceType(cr),
-				MasterCloudConfigVersion:   key.CloudConfigVersion,
 				MasterInstanceMonitoring:   r.instanceMonitoring,
 
-				WorkerCloudConfigVersion: key.CloudConfigVersion,
+				WorkerIgnitionHash:       cc.Status.TenantCluster.WorkerInstance.IgnitionHash,
 				WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
 				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
 				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
 				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
-				WorkerImageID:             im,
+				WorkerImageID:             image,
 				WorkerInstanceMonitoring:  r.instanceMonitoring,
 				WorkerInstanceType:        key.WorkerInstanceType(cr),
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
