@@ -30,8 +30,8 @@ type machineDeploymentDrainerResourceSetConfig struct {
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	ProjectName    string
+	HostAWSConfig aws.Config
+	ProjectName   string
 }
 
 func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResourceSetConfig) (*controller.ResourceSet, error) {
