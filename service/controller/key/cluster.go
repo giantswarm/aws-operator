@@ -65,8 +65,8 @@ const (
 )
 
 const (
-	LifeCycleHookNodePool     = "NodePool"
 	LifeCycleHookControlPlane = "ControlPlane"
+	LifeCycleHookNodePool     = "NodePool"
 )
 
 const (
