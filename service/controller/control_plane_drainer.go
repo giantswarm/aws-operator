@@ -12,31 +12,31 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
-type MachineDeploymentDrainerConfig struct {
+type ControlPlaneDrainerConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	HostAWSConfig aws.Config
-	LabelSelector MachineDeploymentDrainerConfigLabelSelector
+	LabelSelector ControlPlaneDrainerConfigLabelSelector
 }
 
-type MachineDeploymentDrainerConfigLabelSelector struct {
+type ControlPlaneDrainerConfigLabelSelector struct {
 	Enabled          bool
 	OverridenVersion string
 }
 
-type MachineDeploymentDrainer struct {
+type ControlPlaneDrainer struct {
 	*controller.Controller
 }
 
-func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*MachineDeploymentDrainer, error) {
+func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrainer, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	var err error
 
-	resourceSets, err := newMachineDeploymentDrainerResourceSets(config)
+	resourceSets, err := newControlPlaneDrainerResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -44,7 +44,7 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha2.NewAWSMachineDeploymentCRD(),
+			CRD:          infrastructurev1alpha2.NewAWSControlPlaneCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
@@ -53,7 +53,7 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
 			Name: project.Name() + "-drainer-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSMachineDeployment)
+				return new(infrastructurev1alpha2.AWSControlPlane)
 			},
 		}
 
@@ -63,19 +63,19 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 		}
 	}
 
-	d := &MachineDeploymentDrainer{
+	d := &ControlPlaneDrainer{
 		Controller: operatorkitController,
 	}
 
 	return d, nil
 }
 
-func newMachineDeploymentDrainerResourceSets(config MachineDeploymentDrainerConfig) ([]*controller.ResourceSet, error) {
+func newControlPlaneDrainerResourceSets(config ControlPlaneDrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := machineDeploymentDrainerResourceSetConfig{
+		c := controlPlaneDrainerResourceSetConfig{
 			G8sClient: config.K8sClient.G8sClient(),
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
@@ -84,7 +84,7 @@ func newMachineDeploymentDrainerResourceSets(config MachineDeploymentDrainerConf
 			ProjectName:   project.Name(),
 		}
 
-		resourceSet, err = newMachineDeploymentDrainerResourceSet(c)
+		resourceSet, err = newControlPlaneDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

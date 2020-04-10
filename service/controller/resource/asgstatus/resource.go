@@ -49,7 +49,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var asgName string
 	{
 		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the auto scaling group name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -59,7 +59,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var asg *autoscaling.Group
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ASG %#q", asgName))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding auto scaling group %#q", asgName))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
@@ -73,17 +73,17 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(o.AutoScalingGroups) != 1 {
-			return microerror.Maskf(executionFailedError, "there must be one item for ASG %#q", asgName)
+			return microerror.Maskf(executionFailedError, "there must be one item for auto scaling group %#q", asgName)
 		}
 		asg = o.AutoScalingGroups[0]
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found ASG %#q", asgName))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found auto scaling group %#q", asgName))
 	}
 
 	var desiredCapacity int
 	{
 		if asg.DesiredCapacity == nil {
-			return microerror.Maskf(executionFailedError, "desired capacity must not be empty for ASG %#q", asgName)
+			return microerror.Maskf(executionFailedError, "desired capacity must not be empty for auto scaling group %#q", asgName)
 		}
 		desiredCapacity = int(*asg.DesiredCapacity)
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("desired capacity of %#q is %d", asgName, desiredCapacity))
@@ -92,7 +92,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var maxSize int
 	{
 		if asg.MaxSize == nil {
-			return microerror.Maskf(executionFailedError, "max size must not be empty for ASG %#q", asgName)
+			return microerror.Maskf(executionFailedError, "max size must not be empty for auto scaling group %#q", asgName)
 		}
 		maxSize = int(*asg.MaxSize)
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("max size of %#q is %d", asgName, maxSize))
@@ -101,7 +101,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var minSize int
 	{
 		if asg.MinSize == nil {
-			return microerror.Maskf(executionFailedError, "min size must not be empty for ASG %#q", asgName)
+			return microerror.Maskf(executionFailedError, "min size must not be empty for auto scaling group %#q", asgName)
 		}
 		minSize = int(*asg.MinSize)
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("min size of %#q is %d", asgName, minSize))
