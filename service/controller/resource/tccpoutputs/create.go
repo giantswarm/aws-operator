@@ -13,7 +13,6 @@ import (
 
 const (
 	HostedZoneNameServersKey  = "HostedZoneNameServers"
-	MasterInstanceTypeKey     = "MasterInstanceType"
 	OperatorVersion           = "OperatorVersion"
 	VPCIDKey                  = "VPCID"
 	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
@@ -74,14 +73,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.HostedZoneNameServers = v
-	}
-
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceTypeKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.Type = v
 	}
 
 	{

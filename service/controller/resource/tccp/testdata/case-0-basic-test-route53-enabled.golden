@@ -1,16 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
-  DockerVolumeResourceName:
-    Value: DockerVolume8Y5CK5A167
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
-  MasterImageID:
-    Value: ami-038cea5071a5ee580
-  MasterInstanceResourceName:
-    Value: MasterInstance8Y5CK5A167
-  MasterInstanceType:
-    Value: m5.xlarge
   OperatorVersion:
     Value: 7.3.0
   VPCID:

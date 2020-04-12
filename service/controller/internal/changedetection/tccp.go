@@ -16,8 +16,8 @@ type TCCPConfig struct {
 	Logger micrologger.Logger
 }
 
-// TCCP is a detection service implementation deciding if a tenant cluster
-// control plane should be updated.
+// TCCP is a detection service implementation deciding if the TCCP stack should
+// be updated.
 type TCCP struct {
 	logger micrologger.Logger
 }
@@ -34,12 +34,9 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	return t, nil
 }
 
-// ShouldUpdate determines whether the reconciled tenant cluster control plane
-// should be updated. A tenant cluster control plane is only allowed to update
-// in the following cases.
+// ShouldUpdate determines whether the reconciled TCCP stack should be updated.
 //
 //     The node pool's combined availability zone configuration changes.
-//     The master node's instance type changes.
 //     The operator's version changes.
 //
 func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (bool, error) {
@@ -49,19 +46,22 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	}
 
 	azsEqual := availabilityZonesEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones)
-	masterInstanceEqual := cc.Status.TenantCluster.MasterInstance.Type == key.MasterInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
 	if !azsEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to availability zone changes in node pools"))
-		return true, nil
-	}
-	if !masterInstanceEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to master instance type changes from %#q to %#q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCP stack should update",
+			"reason", "availability zones changed",
+		)
 		return true, nil
 	}
 	if !operatorVersionEqual {
-		t.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected tenant cluster control plane should update due to version bundle version changes from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCP stack should update",
+			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
+		)
 		return true, nil
 	}
 
