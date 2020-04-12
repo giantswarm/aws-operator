@@ -1,4 +1,4 @@
-package encryptionkey
+package encryptionsearcher
 
 import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	name = "encryptionkey"
+	name = "encryptionsearcher"
 )
 
 type Config struct {

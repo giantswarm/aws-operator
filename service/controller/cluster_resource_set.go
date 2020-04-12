@@ -37,6 +37,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
@@ -51,7 +52,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
@@ -286,14 +286,14 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpEncryptionResource resource.Interface
+	var encryptionEnsurerResource resource.Interface
 	{
-		c := tccpencryption.Config{
+		c := encryptionensurer.Config{
 			Encrypter: encrypterObject,
 			Logger:    config.Logger,
 		}
 
-		tccpEncryptionResource, err = tccpencryption.New(c)
+		encryptionEnsurerResource, err = encryptionensurer.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -722,7 +722,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		apiEndpointResource,
 		ipamResource,
 		bridgeZoneResource,
-		tccpEncryptionResource,
+		encryptionEnsurerResource,
 		tccpSecurityGroupsResource,
 		s3BucketResource,
 		s3ObjectResource,

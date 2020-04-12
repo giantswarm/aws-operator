@@ -1,4 +1,4 @@
-package encryptionkey
+package encryptionsearcher
 
 import (
 	"context"
