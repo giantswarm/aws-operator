@@ -33,34 +33,38 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the Etcd Volume Snapshot ID in the controller context yet")
+		if cc.Status.TenantCluster.Encryption.Key == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
 
+		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "etcd volume snapshot id not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.Subnets) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "subnet information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "subnets not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "security groups not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil
 		}
 
-		// When the TCCP cloud formation stack is transitioning, it means it is
+		// When the TCCPN cloud formation stack is transitioning, it means it is
 		// updating in most cases. We do not want to interfere with the current
 		// process and stop here. We will then check on the next reconciliation loop
 		// and continue eventually.

@@ -21,9 +21,10 @@ type Config struct {
 }
 
 // Resource implements the operatorkit Resource interface to fill the operator's
-// controller context with an appropriate encryption key. The resource
-// implementation ensures the creation of the Tenant Cluster's encryption key as
-// well as its deletion. The controller context structure looks as follows.
+// controller context with an appropriate encryption key, assuming it got
+// already created. The encryption key is created by the encryptionensurer
+// resource within the cluster controller. See the controller context structure
+// below.
 //
 //     cc.Status.TenantCluster.Encryption.Key
 //

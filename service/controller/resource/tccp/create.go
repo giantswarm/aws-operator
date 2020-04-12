@@ -47,15 +47,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		// We need the encryption key for managing the IAM policies. Without the
-		// encryption key we cannot continue so we stop here and try again during
-		// the next reconciliation loop.
-		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
 		// When the TCCP cloud formation stack is transitioning, it means it is
 		// updating in most cases. We do not want to interfere with the current
 		// process and stop here. We will then check on the next reconciliation loop

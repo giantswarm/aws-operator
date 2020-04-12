@@ -16,13 +16,14 @@ type Config struct {
 	Logger    micrologger.Logger
 }
 
-// Resource implements the operatorkit Resource interface to fill the operator's
-// controller context with an appropriate encryption key. The resource
+// Resource implements the operatorkit Resource interface to ensure an
+// appropriate encryption key for the Tenant Cluster. The resource
 // implementation ensures the creation of the Tenant Cluster's encryption key as
-// well as its deletion. The controller context structure looks as follows.
-//
-//     cc.Status.TenantCluster.Encryption.Key
-//
+// well as its deletion. The encryptionensurer resource is reconciled upon the
+// AWSCluster CR which defines the TCCP Cloud Formation stack. With the provider
+// specific Cluster CR we ensure the encryption key. Note that the TCNP stack
+// which is managed for Node Pools also needs the encryption key. It is fetched
+// and put into the controller context by the encryptionsearcher resource.
 type Resource struct {
 	encrypter encrypter.Interface
 	logger    micrologger.Logger
