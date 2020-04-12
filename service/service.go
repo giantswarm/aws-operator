@@ -40,6 +40,7 @@ type Service struct {
 	bootOnce                           sync.Once
 	clusterController                  *controller.Cluster
 	controlPlaneController             *controller.ControlPlane
+	controlPlaneDrainerController      *controller.ControlPlaneDrainer
 	machineDeploymentController        *controller.MachineDeployment
 	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
 	operatorCollector                  *collector.Set
@@ -232,6 +233,25 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var controlPlaneDrainerController *controller.ControlPlaneDrainer
+	{
+		c := controller.ControlPlaneDrainerConfig{
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
+
+			HostAWSConfig: awsConfig,
+			LabelSelector: controller.ControlPlaneDrainerConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
+			},
+		}
+
+		controlPlaneDrainerController, err = controller.NewControlPlaneDrainer(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var machineDeploymentController *controller.MachineDeployment
 	{
 		c := controller.MachineDeploymentConfig{
@@ -291,7 +311,6 @@ func New(config Config) (*Service, error) {
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
-			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
 		machineDeploymentDrainerController, err = controller.NewMachineDeploymentDrainer(c)
@@ -340,6 +359,7 @@ func New(config Config) (*Service, error) {
 		bootOnce:                           sync.Once{},
 		clusterController:                  clusterController,
 		controlPlaneController:             controlPlaneController,
+		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
 		operatorCollector:                  operatorCollector,
@@ -354,6 +374,7 @@ func (s *Service) Boot(ctx context.Context) {
 
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
+		go s.controlPlaneDrainerController.Boot(ctx)
 		go s.machineDeploymentController.Boot(ctx)
 		go s.machineDeploymentDrainerController.Boot(ctx)
 	})

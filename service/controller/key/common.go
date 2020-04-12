@@ -50,10 +50,6 @@ func ClusterID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.Cluster]
 }
 
-func ControlPlaneID(getter LabelsGetter) string {
-	return getter.GetLabels()[label.ControlPlane]
-}
-
 func EC2ServiceDomain(region string) string {
 	domain := "ec2.amazonaws.com"
 

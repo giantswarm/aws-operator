@@ -6,10 +6,16 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
 func ControlPlaneAvailabilityZones(cr infrastructurev1alpha2.AWSControlPlane) []string {
 	return cr.Spec.AvailabilityZones
+}
+
+func ControlPlaneID(getter LabelsGetter) string {
+	return getter.GetLabels()[label.ControlPlane]
 }
 
 func ControlPlaneInstanceType(cr infrastructurev1alpha2.AWSControlPlane) string {
