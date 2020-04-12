@@ -1,4 +1,4 @@
-package tccpencryption
+package encryptionensurer
 
 import (
 	"github.com/giantswarm/microerror"
