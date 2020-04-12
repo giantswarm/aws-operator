@@ -21,8 +21,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/resource/drainer"
-	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
+	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
+	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
 )
 
 type controlPlaneDrainerResourceSetConfig struct {
@@ -80,9 +80,9 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 		}
 	}
 
-	var drainerResource resource.Interface
+	var drainerInitializerResource resource.Interface
 	{
-		c := drainer.ResourceConfig{
+		c := drainerinitializer.ResourceConfig{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
@@ -90,15 +90,15 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
-		drainerResource, err = drainer.NewResource(c)
+		drainerInitializerResource, err = drainerinitializer.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var drainFinisherResource resource.Interface
+	var drainerFinalizerResource resource.Interface
 	{
-		c := drainfinisher.ResourceConfig{
+		c := drainerfinalizer.ResourceConfig{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
@@ -106,7 +106,7 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 			LifeCycleHookName: key.LifeCycleHookControlPlane,
 		}
 
-		drainFinisherResource, err = drainfinisher.NewResource(c)
+		drainerFinalizerResource, err = drainerfinalizer.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -116,8 +116,8 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 		awsClientResource,
 		asgNameResource,
 		asgStatusResource,
-		drainerResource,
-		drainFinisherResource,
+		drainerInitializerResource,
+		drainerFinalizerResource,
 	}
 
 	{

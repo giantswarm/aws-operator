@@ -1,4 +1,4 @@
-package drainfinisher
+package drainerfinalizer
 
 import (
 	"context"
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	Name = "drainfinisher"
+	Name = "drainerfinalizer"
 )
 
 type ResourceConfig struct {
