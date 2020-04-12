@@ -471,24 +471,9 @@ func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructur
 }
 
 func (r *Resource) newParamsMainOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainOutputs, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var outputs *template.ParamsMainOutputs
 	{
 		outputs = &template.ParamsMainOutputs{
-			Master: template.ParamsMainOutputsMaster{
-				ImageID: key.ImageID(cc.Status.TenantCluster.AWS.Region),
-				Instance: template.ParamsMainOutputsMasterInstance{
-					ResourceName: key.MasterInstanceResourceName(cr, t),
-					Type:         key.MasterInstanceType(cr),
-				},
-				DockerVolume: template.ParamsMainOutputsMasterDockerVolume{
-					ResourceName: key.DockerVolumeResourceName(cr, t),
-				},
-			},
 			OperatorVersion: key.OperatorVersion(&cr),
 			Route53Enabled:  r.route53Enabled,
 		}

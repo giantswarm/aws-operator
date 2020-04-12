@@ -113,10 +113,6 @@ func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Spec.Provider.CredentialSecret.Namespace
 }
 
-func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time) string {
-	return getResourcenameWithTimeHash("DockerVolume", cr, t)
-}
-
 func IsChinaRegion(awsRegion string) bool {
 	return strings.HasPrefix(awsRegion, "cn-")
 }

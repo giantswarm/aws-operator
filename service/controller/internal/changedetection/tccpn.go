@@ -2,8 +2,11 @@ package changedetection
 
 import (
 	"context"
+	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -12,8 +15,8 @@ type TCCPNConfig struct {
 	Logger micrologger.Logger
 }
 
-// TCCPN is a detection service implementation deciding if a control plane should be
-// updated.
+// TCCPN is a detection service implementation deciding if the TCCPN stack
+// should be updated.
 type TCCPN struct {
 	logger micrologger.Logger
 }
@@ -30,13 +33,37 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	return t, nil
 }
 
-// ShouldUpdate determines whether the reconciled tenant cluster control plane
-// should be updated. A tenant cluster control plane is only allowed to update in
-// the following cases.
+// ShouldUpdate determines whether the reconciled TCCPN stack should be updated.
 //
-// TODO
+//     The master node's instance type changes.
+//     The operator's version changes.
 //
-func (t *TCCPN) ShouldUpdate(ctx context.Context, md infrastructurev1alpha2.AWSControlPlane) (bool, error) {
+func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (bool, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	masterInstanceEqual := cc.Status.TenantCluster.TCCPN.InstanceType == key.ControlPlaneInstanceType(cr)
+	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
+
+	if !masterInstanceEqual {
+		t.logger.LogCtx(
+			ctx,
+			"level", "debug",
+			"message", "detected TCCPN stack should update",
+			"reason", fmt.Sprintf("master instance type changed from %#q to %#q", cc.Status.TenantCluster.TCCPN.InstanceType, key.ControlPlaneInstanceType(cr)),
+		)
+		return true, nil
+	}
+	if !operatorVersionEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCPN stack should update",
+			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
+		)
+		return true, nil
+	}
 
 	return false, nil
 }
