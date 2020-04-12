@@ -1,4 +1,4 @@
-package drainer
+package drainerinitializer
 
 import (
 	"github.com/giantswarm/microerror"

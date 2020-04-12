@@ -32,10 +32,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		// when aws operator starts it needs to find CP VPC information, so we have to
-		// cancel the resource in case the information is not yet available.
+		// When aws operator starts it needs to find CP VPC information, so we have to
+		// cancel the resource in case the information is not available yet.
 		if cc.Status.ControlPlane.VPC.ID == "" || cc.Status.ControlPlane.VPC.CIDR == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the control plane VPC info is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "control plane VPC info not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -44,7 +44,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// with it an ARN for it. As long as the peer role ARN is not present, we have
 		// to cancel the resource to prevent further TCCP resource actions.
 		if cc.Status.ControlPlane.PeerRole.ARN == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane peer role arn is not yet set up")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster's control plane peer role arn not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		// We need the encryption key for managing the IAM policies. Without the
+		// encryption key we cannot continue so we stop here and try again during
+		// the next reconciliation loop.
+		if cc.Status.TenantCluster.Encryption.Key == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -54,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// process and stop here. We will then check on the next reconciliation loop
 		// and continue eventually.
 		if cc.Status.TenantCluster.TCCP.IsTransitioning {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is in transitioning state")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster's control plane cloud formation stack is in transitioning state")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}

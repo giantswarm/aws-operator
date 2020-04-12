@@ -25,7 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
 )
 
-type machineDeploymentDrainerResourceSetConfig struct {
+type controlPlaneDrainerResourceSetConfig struct {
 	G8sClient versioned.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
@@ -34,7 +34,7 @@ type machineDeploymentDrainerResourceSetConfig struct {
 	ProjectName   string
 }
 
-func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResourceSetConfig) (*controller.ResourceSet, error) {
+func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var asgNameResource resource.Interface
@@ -42,8 +42,8 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 		c := asgname.Config{
 			Logger: config.Logger,
 
-			TagKey:       key.TagMachineDeployment,
-			TagValueFunc: key.MachineDeploymentID,
+			TagKey:       key.TagControlPlane,
+			TagValueFunc: key.ControlPlaneID,
 		}
 
 		asgNameResource, err = asgname.New(c)
@@ -71,7 +71,7 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 			Logger:    config.Logger,
 
 			CPAWSConfig:   config.HostAWSConfig,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
 		awsClientResource, err = awsclient.New(c)
@@ -86,8 +86,8 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
-			LabelMapFunc:  machineDeploymentDrainerLabelMapFunc,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			LabelMapFunc:  controlPlaneDrainerLabelMapFunc,
+			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)
@@ -102,8 +102,8 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
-			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,
-			LifeCycleHookName: key.LifeCycleHookNodePool,
+			LabelMapFunc:      controlPlaneDrainerLabelMapFunc,
+			LifeCycleHookName: key.LifeCycleHookControlPlane,
 		}
 
 		drainerFinalizerResource, err = drainerfinalizer.NewResource(c)
@@ -141,7 +141,7 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	}
 
 	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToMachineDeployment(obj)
+		cr, err := key.ToControlPlane(obj)
 		if err != nil {
 			return false
 		}
@@ -175,9 +175,9 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	return resourceSet, nil
 }
 
-func machineDeploymentDrainerLabelMapFunc(cr metav1.Object) map[string]string {
+func controlPlaneDrainerLabelMapFunc(cr metav1.Object) map[string]string {
 	return map[string]string{
-		label.Cluster:           key.ClusterID(cr),
-		label.MachineDeployment: key.MachineDeploymentID(cr),
+		label.Cluster:      key.ClusterID(cr),
+		label.ControlPlane: key.ControlPlaneID(cr),
 	}
 }
