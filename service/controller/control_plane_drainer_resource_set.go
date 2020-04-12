@@ -21,8 +21,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
-	"github.com/giantswarm/aws-operator/service/controller/resource/drainfinisher"
 )
 
 type controlPlaneDrainerResourceSetConfig struct {
@@ -96,9 +96,9 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 		}
 	}
 
-	var drainFinisherResource resource.Interface
+	var drainerFinalizerResource resource.Interface
 	{
-		c := drainfinisher.ResourceConfig{
+		c := drainerfinalizer.ResourceConfig{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 
@@ -106,7 +106,7 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 			LifeCycleHookName: key.LifeCycleHookControlPlane,
 		}
 
-		drainFinisherResource, err = drainfinisher.NewResource(c)
+		drainerFinalizerResource, err = drainerfinalizer.NewResource(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -117,7 +117,7 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 		asgNameResource,
 		asgStatusResource,
 		drainerInitializerResource,
-		drainFinisherResource,
+		drainerFinalizerResource,
 	}
 
 	{
