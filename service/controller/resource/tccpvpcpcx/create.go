@@ -15,7 +15,7 @@ import (
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := r.toClusterFunc(obj)
 	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 		return nil
@@ -29,7 +29,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		if cc.Status.TenantCluster.TCCP.VPC.ID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster vpc id not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster vpc id not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 			return nil

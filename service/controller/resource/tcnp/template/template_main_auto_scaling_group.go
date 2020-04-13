@@ -26,7 +26,7 @@ const TemplateMainAutoScalingGroup = `
       LifecycleHookSpecificationList:
         - DefaultResult: CONTINUE
           HeartbeatTimeout: 3600
-          LifecycleHookName: NodePool
+          LifecycleHookName: {{ .AutoScalingGroup.LifeCycleHookName }}
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
 
       # 10 seconds after a new node comes into service, the ASG checks the new

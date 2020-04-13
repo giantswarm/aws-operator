@@ -16,9 +16,8 @@ type MachineDeploymentDrainerConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	LabelSelector  MachineDeploymentDrainerConfigLabelSelector
-	Route53Enabled bool
+	HostAWSConfig aws.Config
+	LabelSelector MachineDeploymentDrainerConfigLabelSelector
 }
 
 type MachineDeploymentDrainerConfigLabelSelector struct {
@@ -45,7 +44,6 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha2.NewAWSMachineDeploymentCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
@@ -81,9 +79,8 @@ func newMachineDeploymentDrainerResourceSets(config MachineDeploymentDrainerConf
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
-			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    project.Name(),
-			Route53Enabled: config.Route53Enabled,
+			HostAWSConfig: config.HostAWSConfig,
+			ProjectName:   project.Name(),
 		}
 
 		resourceSet, err = newMachineDeploymentDrainerResourceSet(c)

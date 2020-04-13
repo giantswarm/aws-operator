@@ -12,25 +12,31 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
-type ControlPlaneConfig struct {
+type ControlPlaneDrainerConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	HostAWSConfig aws.Config
+	LabelSelector ControlPlaneDrainerConfigLabelSelector
 }
 
-type ControlPlane struct {
+type ControlPlaneDrainerConfigLabelSelector struct {
+	Enabled          bool
+	OverridenVersion string
+}
+
+type ControlPlaneDrainer struct {
 	*controller.Controller
 }
 
-func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
+func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrainer, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	var err error
 
-	resourceSets, err := newControlPlaneResourceSets(config)
+	resourceSets, err := newControlPlaneDrainerResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -43,8 +49,8 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 			ResourceSets: resourceSets,
 
 			// Name is used to compute finalizer names. This results in something
-			// like operatorkit.giantswarm.io/aws-operator-control-plane-controller.
-			Name: project.Name() + "-control-plane-controller",
+			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
+			Name: project.Name() + "-drainer-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSControlPlane)
 			},
@@ -56,27 +62,28 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 		}
 	}
 
-	d := &ControlPlane{
+	d := &ControlPlaneDrainer{
 		Controller: operatorkitController,
 	}
 
 	return d, nil
 }
 
-func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.ResourceSet, error) {
+func newControlPlaneDrainerResourceSets(config ControlPlaneDrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := controlPlaneResourceSetConfig{
+		c := controlPlaneDrainerResourceSetConfig{
 			G8sClient: config.K8sClient.G8sClient(),
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
 			HostAWSConfig: config.HostAWSConfig,
+			ProjectName:   project.Name(),
 		}
 
-		resourceSet, err = newControlPlaneResourceSet(c)
+		resourceSet, err = newControlPlaneDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

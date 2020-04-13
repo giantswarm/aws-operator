@@ -2,10 +2,8 @@ package tcnpencryption
 
 import (
 	"context"
-	"time"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,7 +27,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(md.Namespace).Get(key.ClusterID(&md), metav1.GetOptions{})
 		if errors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not yet availabile")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 
@@ -40,25 +38,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cl = *m
 	}
 
-	// For some obscure reasons the encryption key is not immediately available
-	// when creating it. On each cluster creation we saw the retry resource
-	// kicking in once because of a not found error. To prevent the error, instead
-	// we backoff silently upfront where we know we have to.
+	// The encryption key is created within the cluster controller. This here is
+	// the machine deployment controller. We need to wait until the encryption key
+	// got created. So in case we do not find it, we cancel the resource and try
+	// again during the next reconciliation loop.
 	{
-		var encryptionKey string
-
-		o := func() error {
-			encryptionKey, err = r.encrypter.EncryptionKey(ctx, cl)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
+		encryptionKey, err := r.encrypter.EncryptionKey(ctx, cl)
+		if r.encrypter.IsKeyNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
-		}
-		b := backoff.NewMaxRetries(3, 1*time.Second)
 
-		err := backoff.Retry(o, b)
-		if err != nil {
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
