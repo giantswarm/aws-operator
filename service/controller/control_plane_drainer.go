@@ -44,7 +44,6 @@ func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrai
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha2.NewAWSControlPlaneCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
