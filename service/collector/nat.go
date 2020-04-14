@@ -56,8 +56,7 @@ type NAT struct {
 }
 
 type natCache struct {
-	cache   *cache.StringCache
-	content natResponse
+	cache *cache.StringCache
 }
 
 type natResponse struct {
@@ -177,7 +176,10 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		v.cache.Set(accountID, natInfo)
+		err = v.cache.Set(accountID, natInfo)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	for vpcID, vpcInfo := range natInfo.vpcs {
