@@ -1,11 +1,11 @@
 package project
 
 var (
-	description        = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
+	description        = "The aws-operator manages Kubernetes clusters running on AWS."
 	gitSHA             = "n/a"
 	name        string = "aws-operator"
 	source      string = "https://github.com/giantswarm/aws-operator"
-	version            = "8.2.2-dev"
+	version            = "8.2.4-dev"
 )
 
 func Description() string {

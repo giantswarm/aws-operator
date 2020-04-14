@@ -1,49 +1,16 @@
-orbs:
-  architect: giantswarm/architect@0.4.3
-
 version: 2.1
-jobs:
-  build:
-    machine: true
-    steps:
-    - checkout
 
-    - run: |
-        wget -q $(curl -sS -H "Authorization: token $RELEASE_TOKEN" https://api.github.com/repos/giantswarm/architect/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./architect
-        ./architect version
-
-    - run: |
-        date +"%Y" > /tmp/year
-        date +"%m" > /tmp/month
-        date +"%d" > /tmp/day
-    - restore_cache:
-        keys:
-        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
-        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}
-        - go-cache-v1-{{ checksum "/tmp/year" }}
-
-    - run: ./architect build
-
-    - store_test_results:
-        path: /tmp/results
-
-    - save_cache:
-        key: go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
-        paths:
-        - /tmp/go/cache
-
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./aws-operator
+orbs:
+  architect: giantswarm/architect@0.8.8
 
 workflows:
   build:
     jobs:
-      - build:
+      - architect/go-build:
+          name: go-build
+          binary: aws-operator
+          resource_class: large
           filters:
-            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
 
@@ -53,37 +20,19 @@ workflows:
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           requires:
-            - build
+            - go-build
           filters:
-            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
 
       - architect/push-to-docker:
-          name: push-aws-operator-to-aliyun-pr
-          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
-          username_envar: "ALIYUN_USERNAME"
-          password_envar: "ALIYUN_PASSWORD"
-          # Push to Aliyun should execute for non-master branches only once manually approved.
-          requires:
-            - build
-          filters:
-            # Do not trigger the job on merge to master.
-            branches:
-              ignore: master
-
-      # Push to Aliyun should execute without manual approval on master.
-      - architect/push-to-docker:
-          name: push-aws-operator-to-aliyun-master
+          name: push-aws-operator-to-aliyun
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           requires:
-            - build
+            - go-build
           filters:
-            # Trigger the job on merge to master.
-            branches:
-              only: master
             # Trigger the job also on git tag.
             tags:
               only: /^v.*/
@@ -94,9 +43,9 @@ workflows:
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
+            - push-aws-operator-to-aliyun
             - push-aws-operator-to-quay
           filters:
-            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
 
@@ -107,9 +56,7 @@ workflows:
           requires:
             - push-aws-operator-to-control-plane-app-catalog
           filters:
-            # Do not trigger the job on commit.
             branches:
               ignore: /.*/
-            # Trigger the job also on git tag.
             tags:
               only: /^v.*/

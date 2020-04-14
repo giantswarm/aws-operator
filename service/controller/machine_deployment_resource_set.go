@@ -3,24 +3,32 @@ package controller
 import (
 	"context"
 	"fmt"
+	"net"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/operatorkit/resource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 
+	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
@@ -40,14 +48,54 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
+
+type machineDeploymentResourceSetConfig struct {
+	CertsSearcher      certs.Interface
+	G8sClient          versioned.Interface
+	K8sClient          kubernetes.Interface
+	Locker             locker.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
+
+	CalicoCIDR                 int
+	CalicoMTU                  int
+	CalicoSubnet               string
+	ClusterIPRange             string
+	DockerDaemonCIDR           string
+	GuestPrivateSubnetMaskBits int
+	GuestPublicSubnetMaskBits  int
+	GuestSubnetMaskBits        int
+	HostAWSConfig              aws.Config
+	IgnitionPath               string
+	ImagePullProgressDeadline  string
+	InstallationName           string
+	IPAMNetworkRange           net.IPNet
+	ClusterDomain              string
+	NetworkSetupDockerImage    string
+	PodInfraContainerImage     string
+	ProjectName                string
+	RegistryDomain             string
+	Route53Enabled             bool
+	RouteTables                string
+	SSHUserList                string
+	SSOPublicKey               string
+	VaultAddress               string
+}
 
 func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var encrypterObject encrypter.Interface
 	{
-		encrypterObject, err = newEncrypterObject(config)
+		c := &kms.EncrypterConfig{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		encrypterObject, err = kms.NewEncrypter(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -163,6 +211,33 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var asgNameResource resource.Interface
+	{
+		c := asgname.Config{
+			Logger: config.Logger,
+
+			TagKey:       key.TagMachineDeployment,
+			TagValueFunc: key.MachineDeploymentID,
+		}
+
+		asgNameResource, err = asgname.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var asgStatusResource resource.Interface
+	{
+		c := asgstatus.Config{
+			Logger: config.Logger,
+		}
+
+		asgStatusResource, err = asgstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
@@ -238,6 +313,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			G8sClient:          config.G8sClient,
 			PathFunc:           key.S3ObjectPathTCNP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
+			RegistryDomain:     config.RegistryDomain,
 		}
 
 		ops, err := s3object.New(c)
@@ -356,19 +432,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpASGStatusResource resource.Interface
-	{
-		c := asgstatus.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
-		}
-
-		tcnpASGStatusResource, err = asgstatus.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
@@ -436,7 +499,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tccpVPCPCXResource,
 		tccpSubnetsResource,
 		tccpAZsResource,
-		tcnpASGStatusResource,
+		asgNameResource,
+		asgStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
 		tcnpEncryptionResource,

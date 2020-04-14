@@ -23,8 +23,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		var clusters apiv1alpha2.ClusterList
 
 		var labelSelector client.MatchingLabels
-		labelSelector = make(map[string]string)
-		labelSelector[label.Cluster] = key.ClusterID(&cr)
+		{
+			labelSelector = make(map[string]string)
+			labelSelector[label.Cluster] = key.ClusterID(&cr)
+		}
 
 		err = r.ctrlClient.List(ctx, &clusters, labelSelector)
 		if err != nil {

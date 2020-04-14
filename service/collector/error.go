@@ -41,10 +41,6 @@ func IsNilUsage(err error) bool {
 	return microerror.Cause(err) == nilUsageError
 }
 
-var unsupportedPlanError = &microerror.Error{
-	Kind: "unsupportedPlanError",
-}
-
 // IsUnsupportedPlan asserts that an error is due to Trusted Advisor not being
 // available with the current support plan.
 func IsUnsupportedPlan(err error) bool {

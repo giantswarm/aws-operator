@@ -31,6 +31,9 @@ const (
 	// labelInstanceType will contain the instance type name
 	labelInstanceType = "instance_type"
 
+	// labelPrivateDNS will contain the private dns name
+	labelPrivateDNS = "private_dns"
+
 	// subsystemEC2 will become the second part of the metric name, right after namespace.
 	subsystemEC2 = "ec2"
 )
@@ -47,6 +50,7 @@ var (
 			labelOrganization,
 			labelAvailabilityZone,
 			labelInstanceType,
+			labelPrivateDNS,
 			labelInstanceState,
 			labelInstanceStatus,
 		},
@@ -95,7 +99,12 @@ func NewEC2Instances(config EC2InstancesConfig) (*EC2Instances, error) {
 
 // Collect is the main metrics collection function.
 func (e *EC2Instances) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := e.helper.GetAWSClients()
+	reconciledClusters, err := e.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := e.helper.GetAWSClients(reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -209,7 +218,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			continue
 		}
 
-		var az, cluster, instanceType, installation, organization, state, status string
+		var az, cluster, instanceType, installation, organization, privateDNS, state, status string
 		for _, tag := range instances[instanceID].Tags {
 			switch *tag.Key {
 			case tagCluster:
@@ -222,6 +231,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		}
 
 		instanceType = *instances[instanceID].InstanceType
+		privateDNS = *instances[instanceID].PrivateDnsName
 
 		up := 0
 		if statuses.InstanceState.Name != nil {
@@ -248,6 +258,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			organization,
 			az,
 			instanceType,
+			privateDNS,
 			state,
 			status,
 		)

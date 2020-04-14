@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net"
+	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
@@ -101,7 +102,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha2.NewAWSClusterCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
@@ -167,14 +167,14 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 
 			AccessLogsExpiration:  config.AccessLogsExpiration,
 			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: tccp.APIWhitelist{
-				Private: tccp.Whitelist{
+			APIWhitelist: tccp.ConfigAPIWhitelist{
+				Private: tccp.ConfigAPIWhitelistSecurityGroup{
 					Enabled:    config.APIWhitelist.Private.Enabled,
-					SubnetList: config.APIWhitelist.Private.SubnetList,
+					SubnetList: strings.Split(config.APIWhitelist.Private.SubnetList, ","),
 				},
-				Public: tccp.Whitelist{
+				Public: tccp.ConfigAPIWhitelistSecurityGroup{
 					Enabled:    config.APIWhitelist.Public.Enabled,
-					SubnetList: config.APIWhitelist.Public.SubnetList,
+					SubnetList: strings.Split(config.APIWhitelist.Public.SubnetList, ","),
 				},
 			},
 			CalicoCIDR:                 config.CalicoCIDR,

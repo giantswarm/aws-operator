@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -33,10 +32,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		// when aws operator starts it needs to find CP VPC information, so we have to
-		// cancel the resource in case the information is not yet available.
+		// When aws operator starts it needs to find CP VPC information, so we have to
+		// cancel the resource in case the information is not available yet.
 		if cc.Status.ControlPlane.VPC.ID == "" || cc.Status.ControlPlane.VPC.CIDR == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the control plane VPC info is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "control plane VPC info not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -45,7 +44,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// with it an ARN for it. As long as the peer role ARN is not present, we have
 		// to cancel the resource to prevent further TCCP resource actions.
 		if cc.Status.ControlPlane.PeerRole.ARN == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane peer role arn is not yet set up")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster's control plane peer role arn not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		// We need the encryption key for managing the IAM policies. Without the
+		// encryption key we cannot continue so we stop here and try again during
+		// the next reconciliation loop.
+		if cc.Status.TenantCluster.Encryption.Key == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -55,7 +63,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// process and stop here. We will then check on the next reconciliation loop
 		// and continue eventually.
 		if cc.Status.TenantCluster.TCCP.IsTransitioning {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is in transitioning state")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster's control plane cloud formation stack is in transitioning state")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -98,7 +106,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", o.Stacks[0].StackStatus)
+			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
@@ -451,8 +459,6 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 					PortInstance: key.KubernetesSecurePort,
 				},
 			},
-			APIElbScheme:             externalELBScheme,
-			APIInternalElbScheme:     internalELBScheme,
 			EtcdElbHealthCheckTarget: key.HealthCheckTarget(key.EtcdPort),
 			EtcdElbName:              key.ELBNameEtcd(&cr),
 			EtcdElbPortsToOpen: []template.ParamsMainLoadBalancersPortPair{
@@ -461,16 +467,12 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 					PortInstance: key.EtcdPort,
 				},
 			},
-			EtcdElbScheme:                    internalELBScheme,
-			ELBHealthCheckHealthyThreshold:   healthCheckHealthyThreshold,
-			ELBHealthCheckInterval:           healthCheckInterval,
-			ELBHealthCheckTimeout:            healthCheckTimeout,
-			ELBHealthCheckUnhealthyThreshold: healthCheckUnhealthyThreshold,
-			MasterInstanceResourceName:       key.MasterInstanceResourceName(cr, t),
-			PublicSubnets:                    publicSubnets,
-			PrivateSubnets:                   privateSubnets,
+			MasterInstanceResourceName: key.MasterInstanceResourceName(cr, t),
+			PublicSubnets:              publicSubnets,
+			PrivateSubnets:             privateSubnets,
 		}
 	}
+
 	return loadBalancers, nil
 }
 
@@ -636,38 +638,23 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 		return nil, microerror.Mask(err)
 	}
 
-	var cfg securityConfig
-	{
-		cfg = securityConfig{
-			APIWhitelist:                    r.apiWhiteList,
-			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
-			ControlPlaneVPCCidr:             cc.Status.ControlPlane.VPC.CIDR,
-			CustomObject:                    cr,
-		}
-	}
-
-	masterRules, err := getMasterRules(cfg, cfg.ControlPlaneVPCCidr)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	internalAPIRules, err := getKubernetesPrivateAPIRules(cfg, cfg.ControlPlaneVPCCidr)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	var securityGroups *template.ParamsMainSecurityGroups
 	{
 		securityGroups = &template.ParamsMainSecurityGroups{
-			APIInternalELBSecurityGroupName:  key.SecurityGroupName(&cfg.CustomObject, "internal-api"),
-			APIInternalELBSecurityGroupRules: internalAPIRules,
-			APIWhitelistEnabled:              cfg.APIWhitelist.Public.Enabled,
-			AWSCNISecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "aws-cni"),
-			PrivateAPIWhitelistEnabled:       cfg.APIWhitelist.Private.Enabled,
-			MasterSecurityGroupName:          key.SecurityGroupName(&cfg.CustomObject, "master"),
-			MasterSecurityGroupRules:         masterRules,
-			EtcdELBSecurityGroupName:         key.SecurityGroupName(&cfg.CustomObject, "etcd-elb"),
-			EtcdELBSecurityGroupRules:        getEtcdRules(cfg.CustomObject, cfg.ControlPlaneVPCCidr),
+			APIWhitelist: template.ParamsMainSecurityGroupsAPIWhitelist{
+				Private: template.ParamsMainSecurityGroupsAPIWhitelistSecurityGroup{
+					Enabled:    r.apiWhitelist.Private.Enabled,
+					SubnetList: r.apiWhitelist.Private.SubnetList,
+				},
+				Public: template.ParamsMainSecurityGroupsAPIWhitelistSecurityGroup{
+					Enabled:    r.apiWhitelist.Public.Enabled,
+					SubnetList: r.apiWhitelist.Public.SubnetList,
+				},
+			},
+			ClusterID:                       key.ClusterID(&cr),
+			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
+			ControlPlaneVPCCIDR:             cc.Status.ControlPlane.VPC.CIDR,
+			TenantClusterVPCCIDR:            key.StatusClusterNetworkCIDR(cr),
 		}
 	}
 
@@ -838,211 +825,4 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	}
 
 	return nil
-}
-
-// TODO: The rule management should be moved to templates
-// https://github.com/giantswarm/giantswarm/issues/7665
-
-func getEtcdRules(customObject infrastructurev1alpha2.AWSCluster, hostClusterCIDR string) []template.SecurityGroupRule {
-	return []template.SecurityGroupRule{
-		{
-			Description: "Allow all etcd traffic from the VPC to the etcd load balancer.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  defaultCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane to etcd port for backup and metrics.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-	}
-}
-
-func getHostClusterNATGatewayRules(cfg securityConfig) ([]template.SecurityGroupRule, error) {
-	var gatewayRules []template.SecurityGroupRule
-
-	for _, address := range cfg.ControlPlaneNATGatewayAddresses {
-		gatewayRule := template.SecurityGroupRule{
-			Description: "Allow traffic from gateways.",
-			Port:        key.KubernetesSecurePort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  fmt.Sprintf("%s/32", *address.PublicIp),
-		}
-
-		gatewayRules = append(gatewayRules, gatewayRule)
-	}
-
-	return gatewayRules, nil
-}
-
-func getKubernetesPrivateAPIRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
-	// When public API whitelisting is enabled, add separate security group rule per each subnet.
-	if cfg.APIWhitelist.Private.Enabled {
-		// Allow control-plane CIDR and tenant cluster CIDR.
-		rules := []template.SecurityGroupRule{
-			{
-				Description: "Allow traffic from control plane CIDR.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  hostClusterCIDR,
-			},
-			{
-				Description: "Allow traffic from tenant cluster CIDR.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  key.StatusClusterNetworkCIDR(cfg.CustomObject),
-			},
-		}
-
-		// Whitelist all configured subnets.
-		privateWhitelistSubnets := strings.Split(cfg.APIWhitelist.Private.SubnetList, ",")
-		for _, subnet := range privateWhitelistSubnets {
-			if subnet != "" {
-				subnetRule := template.SecurityGroupRule{
-					Description: "Custom Whitelist CIDR.",
-					Port:        key.KubernetesSecurePort,
-					Protocol:    tcpProtocol,
-					SourceCIDR:  subnet,
-				}
-				rules = append(rules, subnetRule)
-			}
-		}
-
-		return rules, nil
-	} else {
-		// When private API whitelisting is disabled, allow all private subnets traffic.
-		allowAllRule := []template.SecurityGroupRule{
-			{
-				Description: "Allow all traffic to the master instance from A class network.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  "10.0.0.0/8",
-			},
-			{
-				Description: "Allow all traffic to the master instance from B class network.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  "172.16.0.0/12",
-			},
-			{
-				Description: "Allow all traffic to the master instance from C class network.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  "192.168.0.0/16",
-			},
-		}
-
-		return allowAllRule, nil
-	}
-}
-
-func getKubernetesPublicAPIRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
-	// When API whitelisting is enabled, add separate security group rule per each subnet.
-	if cfg.APIWhitelist.Public.Enabled {
-		rules := []template.SecurityGroupRule{
-			{
-				Description: "Allow traffic from control plane CIDR.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  hostClusterCIDR,
-			},
-			{
-				Description: "Allow traffic from tenant cluster CIDR.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  key.StatusClusterNetworkCIDR(cfg.CustomObject),
-			},
-		}
-
-		// Whitelist all configured subnets.
-		publicWhitelistSubnets := strings.Split(cfg.APIWhitelist.Public.SubnetList, ",")
-		for _, subnet := range publicWhitelistSubnets {
-			if subnet != "" {
-				subnetRule := template.SecurityGroupRule{
-					Description: "Custom Whitelist CIDR.",
-					Port:        key.KubernetesSecurePort,
-					Protocol:    tcpProtocol,
-					SourceCIDR:  subnet,
-				}
-				rules = append(rules, subnetRule)
-			}
-		}
-
-		// Whitelist public EIPs of the host cluster NAT gateways.
-		hostClusterNATGatewayRules, err := getHostClusterNATGatewayRules(cfg)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		for _, gatewayRule := range hostClusterNATGatewayRules {
-			rules = append(rules, gatewayRule)
-		}
-
-		return rules, nil
-	} else {
-		// When API whitelisting is disabled, allow all traffic.
-		allowAllRule := []template.SecurityGroupRule{
-			{
-				Description: "Allow all traffic to the master instance.",
-				Port:        key.KubernetesSecurePort,
-				Protocol:    tcpProtocol,
-				SourceCIDR:  defaultCIDR,
-			},
-		}
-
-		return allowAllRule, nil
-	}
-}
-
-func getMasterRules(cfg securityConfig, hostClusterCIDR string) ([]template.SecurityGroupRule, error) {
-	// Allow traffic to the Kubernetes API server depending on the API
-	// whitelisting rules.
-	publicAPIRules, err := getKubernetesPublicAPIRules(cfg, hostClusterCIDR)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	// Other security group rules for the master.
-	otherRules := []template.SecurityGroupRule{
-		{
-			Description: "Allow traffic from control plane CIDR to 4194 for cadvisor scraping.",
-			Port:        cadvisorPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 2379 for etcd backup.",
-			Port:        etcdPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10250 for kubelet scraping.",
-			Port:        kubeletPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10300 for node-exporter scraping.",
-			Port:        nodeExporterPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.",
-			Port:        kubeStateMetricsPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-		{
-			Description: "Only allow ssh traffic from the control plane.",
-			Port:        sshPort,
-			Protocol:    tcpProtocol,
-			SourceCIDR:  hostClusterCIDR,
-		},
-	}
-
-	return append(publicAPIRules, otherRules...), nil
 }

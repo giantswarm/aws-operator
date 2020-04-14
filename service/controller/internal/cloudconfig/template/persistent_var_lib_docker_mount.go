@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const PersistentVarLibDockerMount = `
 [Unit]

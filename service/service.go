@@ -37,12 +37,13 @@ type Config struct {
 type Service struct {
 	Version *version.Service
 
-	bootOnce                    sync.Once
-	clusterController           *controller.Cluster
-	controlPlaneController      *controller.ControlPlane
-	drainerController           *controller.Drainer
-	machineDeploymentController *controller.MachineDeployment
-	operatorCollector           *collector.Set
+	bootOnce                           sync.Once
+	clusterController                  *controller.Cluster
+	controlPlaneController             *controller.ControlPlane
+	controlPlaneDrainerController      *controller.ControlPlaneDrainer
+	machineDeploymentController        *controller.MachineDeployment
+	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
+	operatorCollector                  *collector.Set
 }
 
 // New creates a new configured service object.
@@ -207,21 +208,20 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var drainerController *controller.Drainer
+	var controlPlaneDrainerController *controller.ControlPlaneDrainer
 	{
-		c := controller.DrainerConfig{
+		c := controller.ControlPlaneDrainerConfig{
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.DrainerConfigLabelSelector{
+			LabelSelector: controller.ControlPlaneDrainerConfigLabelSelector{
 				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
 				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
 			},
-			Route53Enabled: config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 		}
 
-		drainerController, err = controller.NewDrainer(c)
+		controlPlaneDrainerController, err = controller.NewControlPlaneDrainer(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -275,12 +275,30 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var machineDeploymentDrainerController *controller.MachineDeploymentDrainer
+	{
+		c := controller.MachineDeploymentDrainerConfig{
+			K8sClient: k8sClient,
+			Logger:    config.Logger,
+
+			HostAWSConfig: awsConfig,
+			LabelSelector: controller.MachineDeploymentDrainerConfigLabelSelector{
+				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
+				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
+			},
+		}
+
+		machineDeploymentDrainerController, err = controller.NewMachineDeploymentDrainer(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
-			G8sClient: k8sClient.G8sClient(),
-			K8sClient: k8sClient.K8sClient(),
-			Logger:    config.Logger,
+			Clients: k8sClient,
+			Logger:  config.Logger,
 
 			AWSConfig:             awsConfig,
 			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
@@ -313,12 +331,13 @@ func New(config Config) (*Service, error) {
 	s := &Service{
 		Version: versionService,
 
-		bootOnce:                    sync.Once{},
-		clusterController:           clusterController,
-		controlPlaneController:      controlPlaneController,
-		drainerController:           drainerController,
-		machineDeploymentController: machineDeploymentController,
-		operatorCollector:           operatorCollector,
+		bootOnce:                           sync.Once{},
+		clusterController:                  clusterController,
+		controlPlaneController:             controlPlaneController,
+		controlPlaneDrainerController:      controlPlaneDrainerController,
+		machineDeploymentController:        machineDeploymentController,
+		machineDeploymentDrainerController: machineDeploymentDrainerController,
+		operatorCollector:                  operatorCollector,
 	}
 
 	return s, nil
@@ -326,11 +345,12 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.operatorCollector.Boot(ctx)
+		go s.operatorCollector.Boot(ctx) // nolint:errcheck
 
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
-		go s.drainerController.Boot(ctx)
+		go s.controlPlaneDrainerController.Boot(ctx)
 		go s.machineDeploymentController.Boot(ctx)
+		go s.machineDeploymentDrainerController.Boot(ctx)
 	})
 }

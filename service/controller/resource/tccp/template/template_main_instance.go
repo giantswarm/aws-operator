@@ -26,9 +26,7 @@ const TemplateMainInstance = `
   {{ $v.Master.DockerVolume.ResourceName }}:
     Type: AWS::EC2::Volume
     Properties:
-{{ if eq $v.Master.EncrypterBackend "kms" }}
       Encrypted: true
-{{ end }}
       Size: 50
       VolumeType: gp2
       AvailabilityZone: {{ $v.Master.AZ }}
@@ -38,9 +36,7 @@ const TemplateMainInstance = `
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
-{{ if eq $v.Master.EncrypterBackend "kms" }}
       Encrypted: true
-{{ end }}
       Size: 100
       VolumeType: gp2
       AvailabilityZone: {{ $v.Master.AZ }}
@@ -50,9 +46,7 @@ const TemplateMainInstance = `
   LogVolume:
     Type: AWS::EC2::Volume
     Properties:
-{{ if eq $v.Master.EncrypterBackend "kms" }}
       Encrypted: true
-{{ end }}
       Size: 100
       VolumeType: gp2
       AvailabilityZone: {{ $v.Master.AZ }}

@@ -1,21 +1,21 @@
 package template
 
+import "github.com/aws/aws-sdk-go/service/ec2"
+
 type ParamsMainSecurityGroups struct {
-	APIInternalELBSecurityGroupName  string
-	APIInternalELBSecurityGroupRules []SecurityGroupRule
-	APIWhitelistEnabled              bool
-	AWSCNISecurityGroupName          string
-	PrivateAPIWhitelistEnabled       bool
-	MasterSecurityGroupName          string
-	MasterSecurityGroupRules         []SecurityGroupRule
-	EtcdELBSecurityGroupName         string
-	EtcdELBSecurityGroupRules        []SecurityGroupRule
+	APIWhitelist                    ParamsMainSecurityGroupsAPIWhitelist
+	ClusterID                       string
+	ControlPlaneNATGatewayAddresses []*ec2.Address
+	ControlPlaneVPCCIDR             string
+	TenantClusterVPCCIDR            string
 }
 
-type SecurityGroupRule struct {
-	Description         string
-	Port                int
-	Protocol            string
-	SourceCIDR          string
-	SourceSecurityGroup string
+type ParamsMainSecurityGroupsAPIWhitelist struct {
+	Private ParamsMainSecurityGroupsAPIWhitelistSecurityGroup
+	Public  ParamsMainSecurityGroupsAPIWhitelistSecurityGroup
+}
+
+type ParamsMainSecurityGroupsAPIWhitelistSecurityGroup struct {
+	Enabled    bool
+	SubnetList []string
 }

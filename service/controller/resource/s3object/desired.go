@@ -7,7 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/certs"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/randomkeys"
@@ -29,9 +31,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	releaseVersion := key.ReleaseVersion(cr)
+
 	var cluster infrastructurev1alpha2.AWSCluster
 	var clusterCerts certs.Cluster
 	var clusterKeys randomkeys.Cluster
+	var release *v1alpha1.Release
 	{
 		g := &errgroup.Group{}
 
@@ -65,15 +70,25 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			return nil
 		})
 
+		g.Go(func() error {
+			releaseCR, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(key.ReleaseName(releaseVersion), metav1.GetOptions{})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			release = releaseCR
+
+			return nil
+		})
+
 		err = g.Wait()
 		if certs.IsTimeout(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "certificate secrets are not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "certificate secrets are not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
 
 		} else if randomkeys.IsTimeout(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "random key secrets are not yet available")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "random key secrets are not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
@@ -83,7 +98,20 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, r.labelsFunc(cr))
+	var images k8scloudconfig.Images
+	{
+		v, err := k8scloudconfig.ExtractComponentVersions(release.Spec.Components)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		v.Kubectl = key.KubectlVersion
+		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
+		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
+		images = k8scloudconfig.BuildImages(r.registryDomain, v)
+	}
+
+	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, images, r.labelsFunc(cr))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
