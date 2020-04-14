@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/hprose/hprose-go"
 	"github.com/prometheus/client_golang/prometheus"
-	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -17,11 +17,10 @@ import (
 )
 
 const (
-	// awsNATlocker is used as temporal lock to decide if AWS NAT API request
-	// should be done or not.
-	awsNATlocker = "__awsNATlocker__"
-	labelVPC     = "vpc"
-	labelAZ      = "availability_zone"
+	// __NATCache__ is used as temporal cache key to save NAT response.
+	prefixNATcacheKey = "__NATCache__"
+	labelVPC          = "vpc"
+	labelAZ           = "availability_zone"
 )
 
 const (
@@ -49,11 +48,24 @@ type NATConfig struct {
 }
 
 type NAT struct {
-	awsAPIcache *cache.Float64Cache
-	helper      *helper
-	logger      micrologger.Logger
+	cache  *natCache
+	helper *helper
+	logger micrologger.Logger
 
 	installationName string
+}
+
+type natCache struct {
+	cache   *cache.StringCache
+	content natResponse
+}
+
+type natResponse struct {
+	vpcs map[string]natVPC
+}
+
+type natVPC struct {
+	zones map[string]float64
 }
 
 func NewNAT(config NATConfig) (*NAT, error) {
@@ -73,8 +85,8 @@ func NewNAT(config NATConfig) (*NAT, error) {
 		// pool). As clusters are not created nor changed so often, and the process
 		// can take around 20 minutes, 30 minutes for the cache expiration is a
 		// reasonable value.
-		awsAPIcache: cache.NewFloat64Cache(time.Minute * 5),
-		//awsAPIcache: cache.NewFloat64Cache(time.Minute * 30),
+		cache: newNATCache(time.Minute * 5),
+		//cache: newNATCache(time.Minute * 30),
 		helper: config.Helper,
 		logger: config.Logger,
 
@@ -84,30 +96,57 @@ func NewNAT(config NATConfig) (*NAT, error) {
 	return v, nil
 }
 
-func (v *NAT) Collect(ch chan<- prometheus.Metric) error {
-	awsClientsList, err := v.helper.GetAWSClients()
+func newNATCache(expiration time.Duration) *natCache {
+	cache := &natCache{
+		cache: cache.NewStringCache(expiration),
+	}
+
+	return cache
+}
+
+func (n *natCache) Get(accID string) (*natResponse, error) {
+	var c *natResponse
+
+	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
+	if ok {
+		err := hprose.Unserialize(raw, c, true)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	return c, nil
+}
+
+func (n *natCache) Set(accID string, content *natResponse) error {
+	contentSerialized, err := hprose.Serialize(content, true)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	var g errgroup.Group
+	n.cache.Set(prefixNATcacheKey+accID, contentSerialized)
+
+	return nil
+}
+
+func (v *NAT) Collect(ch chan<- prometheus.Metric) error {
+	reconciledClusters, err := v.helper.ListReconciledClusters()
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	awsClientsList, err := v.helper.GetAWSClients(reconciledClusters)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	for _, item := range awsClientsList {
 		awsClients := item
 
-		g.Go(func() error {
-			err := v.collectForAccount(ch, awsClients)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			return nil
-		})
-	}
-
-	err = g.Wait()
-	if err != nil {
-		return microerror.Mask(err)
+		err := v.collectForAccount(ch, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	return nil
@@ -119,17 +158,46 @@ func (v *NAT) Describe(ch chan<- *prometheus.Desc) error {
 }
 
 func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
-	fmt.Println("Collecting nat info")
-	if _, ok := v.awsAPIcache.Get(awsNATlocker); ok {
-		fmt.Printf("nat cache not empty %t", ok)
-		return nil
-	}
-	v.awsAPIcache.Set(awsNATlocker, 1)
-
 	accountID, err := v.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)
 	}
+
+	fmt.Println("Collecting nat info")
+	var natInfo *natResponse
+
+	natInfo, err = v.cache.Get(accountID)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	//Cache empty, getting from API
+	if natInfo == nil {
+		natInfo, err := getNatInfoFromAPI(accountID, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		v.cache.Set(accountID, natInfo)
+	}
+
+	for vpcID, vpcInfo := range natInfo.vpcs {
+		for azName, azValue := range vpcInfo.zones {
+			ch <- prometheus.MustNewConstMetric(
+				natDesc,
+				prometheus.GaugeValue,
+				azValue,
+				accountID,
+				vpcID,
+				azName,
+			)
+		}
+	}
+
+	return nil
+}
+
+func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natResponse, error) {
+	var res natResponse
 	fmt.Printf("nat cache empty, query AWS API for account %s\n", accountID)
 
 	iv := &ec2.DescribeVpcsInput{
@@ -144,10 +212,11 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 	rv, err := awsClients.EC2.DescribeVpcs(iv)
 	if err != nil {
-		return microerror.Mask(err)
+		return nil, microerror.Mask(err)
 	}
 
 	for _, vpc := range rv.Vpcs {
+
 		fmt.Printf("nat vpc %s \n", *vpc.VpcId)
 		in := &ec2.DescribeNatGatewaysInput{
 			Filter: []*ec2.Filter{
@@ -160,11 +229,13 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			},
 		}
 
-		var azs map[string]float64
-		azs = make(map[string]float64)
+		res.vpcs[*vpc.VpcId] = natVPC{
+			zones: make(map[string]float64),
+		}
+
 		rn, err := awsClients.EC2.DescribeNatGateways(in)
 		if err != nil {
-			return microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 		for _, nat := range rn.NatGateways {
 			fmt.Printf("nat subnet %s \n", *nat.SubnetId)
@@ -175,32 +246,19 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			}
 			rs, err := awsClients.EC2.DescribeSubnets(is)
 			if err != nil {
-				return microerror.Mask(err)
+				return nil, microerror.Mask(err)
 			}
 			for _, sub := range rs.Subnets {
 				zoneID := *sub.AvailabilityZoneId
-				if _, ok := azs[zoneID]; ok {
-					azs[zoneID] = azs[zoneID] + 1
+				if _, ok := res.vpcs[*vpc.VpcId].zones[zoneID]; ok {
+					res.vpcs[*vpc.VpcId].zones[zoneID] = res.vpcs[*vpc.VpcId].zones[zoneID] + 1
 				} else {
-					azs[zoneID] = 1
+					res.vpcs[*vpc.VpcId].zones[zoneID] = 1
 				}
 			}
 		}
 
-		fmt.Printf("nat zones %+v \n", azs)
-
-		for azName, azValue := range azs {
-			ch <- prometheus.MustNewConstMetric(
-				natDesc,
-				prometheus.GaugeValue,
-				azValue,
-				accountID,
-				*vpc.VpcId,
-				azName,
-			)
-		}
-
 	}
 
-	return nil
+	return &res, nil
 }

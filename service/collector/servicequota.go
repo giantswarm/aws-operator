@@ -11,8 +11,6 @@ import (
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/internal/cache"
-	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/micrologger"
 )
 
 const (

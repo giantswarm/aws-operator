@@ -37,3 +37,35 @@ func (c *Float64Cache) Get(k string) (float64, bool) {
 func (c *Float64Cache) Set(k string, v float64) {
 	c.underlying.Set(k, v, 0)
 }
+
+type StringCache struct {
+	underlying *gocache.Cache
+}
+
+func NewStringCache(expiration time.Duration) *StringCache {
+	c := &StringCache{
+		// Clean up period is set to half of the expiration, which means values are
+		// checked to be cleaned at least once before the expiration time.
+		underlying: gocache.New(expiration, expiration/2),
+	}
+
+	return c
+}
+
+func (c *StringCache) Get(k string) ([]byte, bool) {
+	v, exist := c.underlying.Get(k)
+	if v == nil {
+		return nil, exist
+	}
+
+	vn, ok := v.([]byte)
+	if !ok {
+		return nil, exist
+	}
+
+	return vn, exist
+}
+
+func (c *StringCache) Set(k string, v []byte) {
+	c.underlying.Set(k, v, 0)
+}
