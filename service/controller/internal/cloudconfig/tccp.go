@@ -103,6 +103,7 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = images
+		params.EnableAWSCNI = true
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)

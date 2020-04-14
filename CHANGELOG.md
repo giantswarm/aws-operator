@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Drop CRD management to not ensure CRDs in operators anymore.
+- Update to `k8scloudconfig@v6.0.3` including:
+    - Add flag to enable or disable AWS CNI in ignition, `EnableAWSCNI`. 
+    - Remove `component: kube-proxy` label from `kube-proxy`.
 
 ### Fixed
 
