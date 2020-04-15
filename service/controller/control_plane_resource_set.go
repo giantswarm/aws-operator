@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -260,6 +261,21 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
+	var tccpOutputsResource resource.Interface
+	{
+		c := tccpoutputs.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+			ToClusterFunc:  newControlPlaneToClusterFunc(config.G8sClient),
+		}
+
+		tccpOutputsResource, err = tccpoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
@@ -351,6 +367,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		tccpnOutputsResource,
 		snapshotIDResource,
 		tccpAZsResource,
+		tccpOutputsResource,
 		tccpSecurityGroupsResource,
 		tccpVPCIDResource,
 		tccpVPCPCXResource,
