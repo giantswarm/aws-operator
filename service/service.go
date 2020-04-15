@@ -219,6 +219,7 @@ func New(config Config) (*Service, error) {
 			InstallationName:          config.Viper.GetString(config.Flag.Service.Installation.Name),
 			NetworkSetupDockerImage:   config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:    config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
+			Route53Enabled:            config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
