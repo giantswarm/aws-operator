@@ -126,8 +126,8 @@ func ChinaControllerContext() controllercontext.Context {
 				Encryption: controllercontext.ContextStatusTenantClusterEncryption{},
 				DNS: controllercontext.ContextStatusTenantClusterDNS{
 					HostedZoneID:          "hosted-zone-id",
-					HostedZoneNameServers: "hosted-zone-internal-id",
-					InternalHostedZoneID:  "1.1.1.1,8.8.8.8",
+					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
+					InternalHostedZoneID:  "hosted-zone-internal-id",
 				},
 				MasterInstance:  controllercontext.ContextStatusTenantClusterMasterInstance{},
 				OperatorVersion: "6.3.0",
@@ -382,8 +382,8 @@ func DefaultControllerContext() controllercontext.Context {
 				Encryption: controllercontext.ContextStatusTenantClusterEncryption{},
 				DNS: controllercontext.ContextStatusTenantClusterDNS{
 					HostedZoneID:          "hosted-zone-id",
-					HostedZoneNameServers: "hosted-zone-internal-id",
-					InternalHostedZoneID:  "1.1.1.1,8.8.8.8",
+					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
+					InternalHostedZoneID:  "hosted-zone-internal-id",
 				},
 				MasterInstance:  controllercontext.ContextStatusTenantClusterMasterInstance{},
 				OperatorVersion: "6.3.0",
