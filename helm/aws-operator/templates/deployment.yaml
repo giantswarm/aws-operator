@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        releasetime: {{ $.Release.Time }}
+        releaseRevision: {{ $.Release.Revision | quote }}
       labels:
         {{- include "aws-operator.selectorLabels" . | nindent 8 }}
     spec:
