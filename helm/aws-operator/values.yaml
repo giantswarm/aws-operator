@@ -8,7 +8,7 @@ flag:
         version: ""
 image:
   name: "giantswarm/aws-operator"
-  tag: "alice"
+  tag: "[[ .Version ]]"
 Installation:
   V1:
     Registry:
@@ -19,5 +19,5 @@ pod:
   group:
     id: 1000
 project:
-  branch: "bob"
-  commit: "max"
+  branch: "[[ .Branch ]]"
+  commit: "[[ .SHA ]]"
