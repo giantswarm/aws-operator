@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switch from dep to Go modules.
+- Use release.Revision in Helm chart for Helm 3 support.
 
 ## [5.6.0] - 2020-01-29
 
