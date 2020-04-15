@@ -48,6 +48,25 @@ const TemplateMainIAMPolicies = `
             Action: "s3:GetObject"
             Resource: "arn:{{ .IAMPolicies.RegionARN }}:s3:::{{ .IAMPolicies.S3Bucket }}/*"
           - Effect: "Allow"
+            Action: "elasticloadbalancing:*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:DescribeAutoScalingGroups"
+              - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:DescribeTags"
+              - "autoscaling:DescribeLaunchConfigurations"
+              - "ec2:DescribeLaunchTemplateVersions"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:SetDesiredCapacity"
+              - "autoscaling:TerminateInstanceInAutoScalingGroup"
+            Resource: "*"
+            Condition:
+              StringEquals:
+                autoscaling:ResourceTag/giantswarm.io/cluster: "{{ .IAMPolicies.ClusterID }}"
+          - Effect: "Allow"
             Action:
               - "ecr:GetAuthorizationToken"
               - "ecr:BatchCheckLayerAvailability"
