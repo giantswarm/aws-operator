@@ -132,7 +132,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		_, awsCNISubnet, err := net.ParseCIDR(r.cidrBlockAWSCNI)
+		// IF cr.spec.aws_cni defined
+		// Else we take from r which is actually doming from draughtsman
+		podSubnet := r.cidrBlockAWSCNI
+
+		if cr.Spec.Provider.CNI.Subnet != "" && cr.Spec.Provider.CNI.CIDR != 0 {
+			podSubnet = fmt.Sprintf("%s/%d", cr.Spec.Provider.CNI.Subnet, cr.Spec.Provider.CNI.CIDR)
+		}
+
+		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
 		if err != nil {
 			return microerror.Mask(err)
 		}
