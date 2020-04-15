@@ -8,7 +8,7 @@ flag:
         version: ""
 image:
   name: "giantswarm/aws-operator"
-  tag: "[[ .Version ]]"
+  tag: "alice"
 Installation:
   V1:
     Registry:
@@ -19,8 +19,8 @@ pod:
   group:
     id: 1000
 project:
-  branch: "[[ .Branch ]]"
-  commit: "[[ .SHA ]]"
+  branch: "bob"
+  commit: "max"
 # Defaults for resource names and namespaces
 #
 # NOTE: All values under resource key need to be used with `tpl` to render them
