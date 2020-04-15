@@ -31,10 +31,6 @@ project:
 #
 resource:
   default:
-    name: '{{ include "aws-operator.resourceName" . }}'
     namespace: "giantswarm"
-  psp:
-    name: '{{ include "aws-operator.resourceName" . }}-psp'
   pullSecret:
-    name: '{{ include "aws-operator.resourceName" . }}-pull-secret'
     namespace: "giantswarm"
