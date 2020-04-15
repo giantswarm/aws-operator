@@ -222,8 +222,8 @@ Resources:
           - Effect: "Allow"
             Action: "route53:ChangeResourceRecordSets"
             Resource:
-              - "arn:aws:route53:::hostedzone/"
-              - "arn:aws:route53:::hostedzone/"
+              - "arn:aws:route53:::hostedzone/hosted-zone-id"
+              - "arn:aws:route53:::hostedzone/hosted-zone-internal-id"
           - Effect: "Allow"
             Action:
               - "route53:ListHostedZones"

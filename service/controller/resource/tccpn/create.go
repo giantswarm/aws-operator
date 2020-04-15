@@ -307,12 +307,14 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
-			ClusterID:        key.ClusterID(&cr),
-			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
-			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			S3Bucket:         key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-			Route53Enabled:   route53Enabled,
+			ClusterID:            key.ClusterID(&cr),
+			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
+			InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
+			KMSKeyARN:            cc.Status.TenantCluster.Encryption.Key,
+			RegionARN:            key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			S3Bucket:             key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
+			Route53Enabled:       route53Enabled,
 		}
 	}
 
