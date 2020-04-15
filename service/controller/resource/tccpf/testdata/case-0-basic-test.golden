@@ -8,7 +8,7 @@ Resources:
       Name: '8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       Type: 'NS'
       TTL: '300'
-      ResourceRecords: !Split [ ',', 'hosted-zone-internal-id' ]
+      ResourceRecords: !Split [ ',', '1.1.1.1,8.8.8.8' ]
   
   PrivateRoute0:
     Type: AWS::EC2::Route
