@@ -26,11 +26,15 @@ room for such suffix.
 {{- end -}}
 
 {{- define "resource.psp.name" -}}
-{{- {{ include "resource.default.name" .}}-psp -}}
+{{- include "resource.default.name" . -}}-psp
 {{- end -}}
 
 {{- define "resource.pullSecret.name" -}}
-{{- {{ include "resource.default.name" .}}-pull-secret -}}
+{{- include "resource.default.name" . -}}-pull-secret
+{{- end -}}
+
+{{- define "resource.default.namespace" -}}
+giantswarm
 {{- end -}}
 
 {{/*
