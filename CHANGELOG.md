@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add Control Plane drainer controller.
 - Add mixed instance support for worker ASGs.
 - Add Dependabot configuration.
+- Add VPC ID to AWSCluster CR status.
 
 ### Changed
 
