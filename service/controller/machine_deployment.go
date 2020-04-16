@@ -73,7 +73,6 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha2.NewAWSMachineDeploymentCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
