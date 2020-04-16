@@ -12,13 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add Control Plane drainer controller.
+- Add Dependabot configuration.
 - Add VPC ID to AWSCluster CR status.
+
+### Changed
+
+- Drop CRD management to not ensure CRDs in operators anymore.
 
 ### Fixed
 
 - Fix aws operator policy for latest node pools version.
 - Make encryption key lookup graceful during cluster creation.
-
 
 
 
