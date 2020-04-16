@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ tpl .Values.resource.default.name  . }}
-  namespace: {{ tpl .Values.resource.default.namespace  . }}
+  name: {{ include "resource.default.name" . }}
+  namespace: {{ include "resource.default.namespace" . }}
   labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      {{- include "aws-operator.selectorLabels" . | nindent 6 }}
+      {{- include "labels.selector" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
@@ -18,25 +18,25 @@ spec:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        {{- include "aws-operator.selectorLabels" . | nindent 8 }}
+        {{- include "labels.selector" . | nindent 8 }}
     spec:
       volumes:
       - name: {{ .Chart.Name }}-configmap
         configMap:
-          name: {{ tpl .Values.resource.default.name  . }}
+          name: {{ include "resource.default.name"  . }}
           items:
           - key: config.yaml
             path: config.yaml
       - name: {{ .Chart.Name }}-secret
         secret:
-          secretName: {{ tpl .Values.resource.default.name  . }}
+          secretName: {{ include "resource.default.name"  . }}
           items:
           - key: secret.yaml
             path: secret.yaml
       - name: certs
         hostPath:
           path: /etc/ssl/certs/ca-certificates.crt
-      serviceAccountName: {{ tpl .Values.resource.default.name  . }}
+      serviceAccountName: {{ include "resource.default.name"  . }}
       securityContext:
         runAsUser: {{ .Values.pod.user.id }}
         runAsGroup: {{ .Values.pod.group.id }}
@@ -80,4 +80,4 @@ spec:
             cpu: 250m
             memory: 250Mi
       imagePullSecrets:
-      - name: {{ tpl .Values.resource.pullSecret.name . }}
+      - name: {{ include "resource.pullSecret.name" . }}
