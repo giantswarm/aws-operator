@@ -52,7 +52,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
@@ -437,21 +436,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	var tccpOutputsResource resource.Interface
-	{
-		c := tccpoutputs.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-			ToClusterFunc:  key.ToCluster,
-		}
-
-		tccpOutputsResource, err = tccpoutputs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpSubnetsResource resource.Interface
 	{
 		c := tccpsubnets.Config{
@@ -658,7 +642,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		cpRouteTablesResource,
 		cpVPCResource,
 		tccpVPCIDResource,
-		tccpOutputsResource,
 		tccpSubnetsResource,
 		regionResource,
 		tenantClientsResource,
