@@ -6,7 +6,7 @@ var (
 	gitSHA               = "n/a"
 	name          string = "aws-operator"
 	source        string = "https://github.com/giantswarm/aws-operator"
-	version              = "n/a"
+	version              = "5.6.1-dev"
 )
 
 func BundleVersion() string {

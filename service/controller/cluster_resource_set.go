@@ -321,8 +321,10 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
 			CloudConfig:        cloudConfig,
+			G8sClient:          config.K8sClient.G8sClient(),
 			Logger:             config.Logger,
 			RandomKeysSearcher: config.RandomKeysSearcher,
+			RegistryDomain:     config.RegistryDomain,
 		}
 
 		ops, err := s3object.New(c)
@@ -368,6 +370,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 				Public:  config.APIWhitelist.Public,
 			},
 			EncrypterRoleManager: encrypterRoleManager,
+			G8sClient:            config.K8sClient.G8sClient(),
 			Logger:               config.Logger,
 
 			Detection:          detectionService,

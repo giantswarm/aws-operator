@@ -2,14 +2,17 @@ package tccp
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
@@ -295,7 +298,30 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	im, err := key.ImageID(cr)
+
+	var osVersion string
+	{
+		releaseVersion, ok := cr.Labels[label.ReleaseVersion]
+		if !ok {
+			return "", microerror.Maskf(executionFailedError, "release version label not found")
+		}
+		releaseName := fmt.Sprintf("v%s", releaseVersion)
+		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		for _, component := range release.Spec.Components {
+			if component.Name == "containerlinux" {
+				osVersion = component.Version
+				break
+			}
+		}
+		if osVersion == "" {
+			return "", microerror.Maskf(executionFailedError, "containerlinux component version not found on release")
+		}
+	}
+
+	im, err := key.ImageID(cr, osVersion)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

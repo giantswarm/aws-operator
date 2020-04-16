@@ -7,9 +7,8 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/certs"
 	ignition "github.com/giantswarm/k8scloudconfig/v6/ignition/v_2_2_0"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_5_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
@@ -49,7 +48,12 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
-		template, err := ccService.NewMasterTemplate(ctx, tc.CustomObject, certs.Cluster{}, tc.ClusterKeys)
+
+		data := IgnitionTemplateData{
+			CustomObject: tc.CustomObject,
+			ClusterKeys:  tc.ClusterKeys,
+		}
+		template, err := ccService.NewMasterTemplate(ctx, data)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -103,7 +107,10 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
-		template, err := ccService.NewWorkerTemplate(ctx, tc.CustomObject, certs.Cluster{})
+		data := IgnitionTemplateData{
+			CustomObject: tc.CustomObject,
+		}
+		template, err := ccService.NewWorkerTemplate(ctx, data)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

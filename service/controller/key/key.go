@@ -9,6 +9,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -20,7 +21,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_5_0_0"
+	CloudConfigVersion = "v_6_0_0"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -105,6 +106,12 @@ const (
 	KindWorker      = "worker"
 	KindEtcd        = "etcd-elb"
 	KindInternalAPI = "internal-api"
+)
+
+const (
+	kubectlVersion                           = "1.16.4"
+	kubernetesAPIHealthzVersion              = "0999549a4c334b646288d08bd2c781c6aae2e12f"
+	kubernetesSetupNetworkEnvironmentVersion = "68e90113331feca3b9ffe6a75a601b381ba8c1f7"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -213,6 +220,14 @@ func ClusterTags(customObject v1alpha1.AWSConfig, installationName string) map[s
 
 func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
+}
+
+func DefaultVersions() k8scloudconfig.Versions {
+	return k8scloudconfig.Versions{
+		Kubectl:                      kubectlVersion,
+		KubernetesAPIHealthz:         kubernetesAPIHealthzVersion,
+		KubernetesNetworkSetupDocker: kubernetesSetupNetworkEnvironmentVersion,
+	}
 }
 
 func DockerVolumeResourceName(customObject v1alpha1.AWSConfig) string {
@@ -727,59 +742,20 @@ func componentName(domainName string) (string, error) {
 	return splits[0], nil
 }
 
-// ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.AWSConfig) (string, error) {
-	region := Region(customObject)
-
-	/*
-		Container Linux AMIs for each active AWS region.
-
-		NOTE 1: AMIs should always be for HVM virtualisation and not PV.
-		NOTE 2: You also need to update the tests.
-
-		service/controller/key/key_test.go
-		service/controller/internal/adapter/adapter_test.go
-		service/controller/resource/cloudformation/main_stack_test.go
-
-		Current Release: CoreOS Container Linux stable 2191.5.0 (HVM)
-		AMI IDs copied from https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt.
-
-		Script to parse AMIs (Python 3):
-
-		import urllib.request
-		url='https://stable.release.core-os.net/amd64-usr/2191.5.0/coreos_production_ami_hvm.txt'
-		a=urllib.request.urlopen(url).read()
-		print(',\n'.join(['"'+'":"'.join(i.split('='))+'"' for i in a.decode('utf-8').strip().split('|')])+',')
-	*/
-	imageIDs := map[string]string{
-		"ap-northeast-1": "ami-06443443a3ad575e0",
-		"ap-northeast-2": "ami-05385569b790d035a",
-		"ap-south-1":     "ami-05d7bc2359eaaecf1",
-		"ap-southeast-1": "ami-0e69fd5ed05e58e4a",
-		"ap-southeast-2": "ami-0af85d64c1d5aeae6",
-		"ca-central-1":   "ami-00cbc28393f9da64c",
-		"cn-north-1":     "ami-001272d09c87c54fa",
-		"cn-northwest-1": "ami-0c08167b4fb0293c1",
-		"eu-central-1":   "ami-038cea5071a5ee580",
-		"eu-north-1":     "ami-01f28d71d1c924642",
-		"eu-west-1":      "ami-067301c1a68e593f5",
-		"eu-west-2":      "ami-0f5c4ede722171894",
-		"eu-west-3":      "ami-07bf54c1c2b7c368e",
-		"sa-east-1":      "ami-0d1ca6b44a76c404a",
-		"us-east-1":      "ami-06d2804068b372d32",
-		"us-east-2":      "ami-07ee0d30575e363c4",
-		"us-gov-east-1":  "ami-0751c20ce4cb557df",
-		"us-gov-west-1":  "ami-a9571fc8",
-		"us-west-1":      "ami-0d05a67ab67139420",
-		"us-west-2":      "ami-039eb9d6842534000",
+// ImageID returns the EC2 AMI for the configured region and given version.
+func ImageID(customObject v1alpha1.AWSConfig, osVersion string) (string, error) {
+	regionAMIs, ok := amiInfo[osVersion]
+	if !ok {
+		return "", microerror.Maskf(invalidConfigError, "no image id for version '%s'", osVersion)
 	}
 
-	imageID, ok := imageIDs[region]
+	region := Region(customObject)
+	regionAMI, ok := regionAMIs[region]
 	if !ok {
 		return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
 	}
 
-	return imageID, nil
+	return regionAMI, nil
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,

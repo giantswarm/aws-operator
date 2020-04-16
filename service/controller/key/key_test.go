@@ -1335,6 +1335,7 @@ func Test_ImageID(t *testing.T) {
 	testCases := []struct {
 		description     string
 		customObject    v1alpha1.AWSConfig
+		osVersion       string
 		errorMatcher    func(error) bool
 		expectedImageID string
 	}{
@@ -1347,6 +1348,7 @@ func Test_ImageID(t *testing.T) {
 					},
 				},
 			},
+			osVersion:       "2191.5.0",
 			errorMatcher:    nil,
 			expectedImageID: "ami-038cea5071a5ee580",
 		},
@@ -1361,6 +1363,7 @@ func Test_ImageID(t *testing.T) {
 			},
 			errorMatcher:    nil,
 			expectedImageID: "ami-067301c1a68e593f5",
+			osVersion:       "2191.5.0",
 		},
 		{
 			description: "invalid region",
@@ -1371,13 +1374,39 @@ func Test_ImageID(t *testing.T) {
 					},
 				},
 			},
+			osVersion:    "2191.5.0",
 			errorMatcher: IsInvalidConfig,
+		},
+		{
+			description: "invalid version",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "eu-west-1",
+					},
+				},
+			},
+			osVersion:    "invalid",
+			errorMatcher: IsInvalidConfig,
+		},
+		{
+			description: "different version",
+			customObject: v1alpha1.AWSConfig{
+				Spec: v1alpha1.AWSConfigSpec{
+					AWS: v1alpha1.AWSConfigSpecAWS{
+						Region: "cn-north-1",
+					},
+				},
+			},
+			errorMatcher:    nil,
+			expectedImageID: "ami-026f7fae59b401ac0",
+			osVersion:       "2345.3.0",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			imageID, err := ImageID(tc.customObject)
+			imageID, err := ImageID(tc.customObject, tc.osVersion)
 			if tc.errorMatcher != nil && err == nil {
 				t.Error("expected error didn't happen")
 			}
