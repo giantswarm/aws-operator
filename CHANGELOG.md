@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Drop CRD management to not ensure CRDs in operators anymore.
+- Move helm chart variables to helpers to reduce repetition in charts' values.yaml
 
 ### Fixed
 
