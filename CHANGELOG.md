@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add Control Plane drainer controller.
+- Add Dependabot configuration.
+
+### Changed
+
+- Drop CRD management to not ensure CRDs in operators anymore.
 
 ### Fixed
 
