@@ -12,14 +12,16 @@ import (
 )
 
 const (
+	HostedZoneID              = "HostedZoneID"
 	HostedZoneNameServersKey  = "HostedZoneNameServers"
+	InternalHostedZoneID      = "InternalHostedZoneID"
 	OperatorVersion           = "OperatorVersion"
 	VPCIDKey                  = "VPCID"
 	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -68,11 +70,30 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if r.route53Enabled {
-		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
-		if err != nil {
-			return microerror.Mask(err)
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.TenantCluster.DNS.HostedZoneID = v
 		}
-		cc.Status.TenantCluster.HostedZoneNameServers = v
+
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.TenantCluster.DNS.HostedZoneNameServers = v
+		}
+
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, InternalHostedZoneID)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.TenantCluster.DNS.InternalHostedZoneID = v
+		}
+
 	}
 
 	{
