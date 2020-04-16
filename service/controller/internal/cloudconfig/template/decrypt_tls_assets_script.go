@@ -1,4 +1,4 @@
-package cloudconfig
+package template
 
 const DecryptTLSAssetsScript = `#!/bin/bash -e
 kms_tls_assets_decrypt() {

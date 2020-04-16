@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add Control Plane drainer controller.
+- Add Dependabot configuration.
+
+### Changed
+
+- Drop CRD management to not ensure CRDs in operators anymore.
+
+### Fixed
+
+- Fix aws operator policy for latest node pools version.
+- Make encryption key lookup graceful during cluster creation.
+
 
 
 ## [8.2.3] 2020-04-06
@@ -24,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switch from dep to Go modules.
+- Use architect orb.
 - Fix subnet allocation for Availability Zones.
 - Switch to AWS CNI
 

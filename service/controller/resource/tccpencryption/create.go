@@ -21,6 +21,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// The tccpencryption resource is reconciled upon the AWSCluster CR which
+	// defines the TCCP Cloud Formation stack. With the provider specific Cluster
+	// CR we ensure the encryption key. Note that the TCNP stack for the Node
+	// Pools also needs the encryption key.
 	err = r.encrypter.EnsureCreatedEncryptionKey(ctx, cr)
 	if err != nil {
 		return microerror.Mask(err)

@@ -37,7 +37,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// bucket itself.
 	if key.IsDeleted(cr) {
 		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "no encryption key in controller context")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil

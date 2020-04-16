@@ -12,32 +12,31 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
-type DrainerConfig struct {
+type ControlPlaneDrainerConfig struct {
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	LabelSelector  DrainerConfigLabelSelector
-	Route53Enabled bool
+	HostAWSConfig aws.Config
+	LabelSelector ControlPlaneDrainerConfigLabelSelector
 }
 
-type DrainerConfigLabelSelector struct {
+type ControlPlaneDrainerConfigLabelSelector struct {
 	Enabled          bool
 	OverridenVersion string
 }
 
-type Drainer struct {
+type ControlPlaneDrainer struct {
 	*controller.Controller
 }
 
-func NewDrainer(config DrainerConfig) (*Drainer, error) {
+func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrainer, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
 	var err error
 
-	resourceSets, err := newDrainerResourceSets(config)
+	resourceSets, err := newControlPlaneDrainerResourceSets(config)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -45,7 +44,6 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          infrastructurev1alpha2.NewAWSMachineDeploymentCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,
@@ -54,7 +52,7 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
 			Name: project.Name() + "-drainer-controller",
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSMachineDeployment)
+				return new(infrastructurev1alpha2.AWSControlPlane)
 			},
 		}
 
@@ -64,29 +62,28 @@ func NewDrainer(config DrainerConfig) (*Drainer, error) {
 		}
 	}
 
-	d := &Drainer{
+	d := &ControlPlaneDrainer{
 		Controller: operatorkitController,
 	}
 
 	return d, nil
 }
 
-func newDrainerResourceSets(config DrainerConfig) ([]*controller.ResourceSet, error) {
+func newControlPlaneDrainerResourceSets(config ControlPlaneDrainerConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := drainerResourceSetConfig{
+		c := controlPlaneDrainerResourceSetConfig{
 			G8sClient: config.K8sClient.G8sClient(),
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
-			HostAWSConfig:  config.HostAWSConfig,
-			ProjectName:    project.Name(),
-			Route53Enabled: config.Route53Enabled,
+			HostAWSConfig: config.HostAWSConfig,
+			ProjectName:   project.Name(),
 		}
 
-		resourceSet, err = newDrainerResourceSet(c)
+		resourceSet, err = newControlPlaneDrainerResourceSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

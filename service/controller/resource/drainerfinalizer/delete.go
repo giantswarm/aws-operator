@@ -1,4 +1,4 @@
-package drainfinisher
+package drainerfinalizer
 
 import (
 	"context"
