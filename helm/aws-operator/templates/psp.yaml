@@ -3,7 +3,7 @@ kind: PodSecurityPolicy
 metadata:
   name: {{ include "resource.psp.name" . }}
   labels:
-    {{- include "labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 spec:
   privileged: false
   fsGroup:

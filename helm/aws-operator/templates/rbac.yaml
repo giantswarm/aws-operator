@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   name: {{ include "resource.default.name" . }}
   labels:
-    {{- include "labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 rules:
   - apiGroups:
       - release.giantswarm.io
@@ -140,7 +140,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ include "resource.default.name" . }}
   labels:
-    {{- include "labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
     name: {{ include "resource.default.name" . }}
@@ -155,7 +155,7 @@ kind: ClusterRole
 metadata:
   name: {{ include "resource.psp.name" . }}
   labels:
-    {{- include "labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 rules:
   - apiGroups:
       - extensions
@@ -171,7 +171,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ include "resource.psp.name" . }}
   labels:
-    {{- include "labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
     name: {{ include "resource.default.name" . }}
