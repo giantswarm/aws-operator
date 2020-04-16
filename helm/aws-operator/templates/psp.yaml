@@ -1,9 +1,9 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ tpl .Values.resource.psp.name . }}
+  name: {{ include "resource.psp.name" . }}
   labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+    {{- include "labels.common" . | nindent 4 }}
 spec:
   privileged: false
   fsGroup:

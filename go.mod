@@ -35,7 +35,7 @@ require (
 	github.com/google/go-cmp v0.4.0
 	github.com/prometheus/client_golang v1.5.1
 	github.com/spf13/afero v1.2.2
-	github.com/spf13/viper v1.6.2
+	github.com/spf13/viper v1.6.3
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	k8s.io/api v0.17.2
 	k8s.io/apiextensions-apiserver v0.17.2
