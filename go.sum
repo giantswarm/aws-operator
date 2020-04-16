@@ -220,10 +220,6 @@ github.com/giantswarm/apiextensions v0.2.0 h1:6gnfXFRL/eGqPbYhM7jUckwmulx7jh6qJp
 github.com/giantswarm/apiextensions v0.2.0/go.mod h1:iw66G0WDcrQl9mi2m/6mov2fWTD6ZiT2+FC62b2Mczw=
 github.com/giantswarm/apiextensions v0.2.6-0.20200416124925-41ae82fa7022 h1:BB5mG0zzG2gjeXGzEsjJWb6lH64GieeZbyfqSKItCS0=
 github.com/giantswarm/apiextensions v0.2.6-0.20200416124925-41ae82fa7022/go.mod h1:w2eArKPArbnZ0TQ8w8AgdhuytgNY/KpEpr2u158tJao=
-github.com/giantswarm/apiextensions v0.2.7-0.20200415152932-c8837f0cda98 h1:Hhi9IXRKZicQk2O0xgdGRiAkHX0x0l2RgT5ID6ywYYk=
-github.com/giantswarm/apiextensions v0.2.7-0.20200415152932-c8837f0cda98/go.mod h1:sdtmW67L+Y+jgF//ra4jbOI238SrPtfGHtckCRyw4Ak=
-github.com/giantswarm/apiextensions v0.2.7-0.20200416120821-adcfb7522702 h1:wRMS4+gCOFtiymN0SPq7oLCiaY/uQLkwe37pFAAsPq4=
-github.com/giantswarm/apiextensions v0.2.7-0.20200416120821-adcfb7522702/go.mod h1:sdtmW67L+Y+jgF//ra4jbOI238SrPtfGHtckCRyw4Ak=
 github.com/giantswarm/apprclient v0.2.0 h1:XLi/xt2BE316zCjgG9sJF25gKfIkIkdxPzgWmR8pACI=
 github.com/giantswarm/apprclient v0.2.0/go.mod h1:iAGOReCnEud0xxwhDS/lI50JSUN4zRCB3vlPRqH3IVc=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
