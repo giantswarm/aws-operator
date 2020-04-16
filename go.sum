@@ -135,6 +135,7 @@ github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkE
 github.com/coreos/bbolt v1.3.3 h1:n6AiVyVRKQFNb6mJlwESEvvLoDyiTzXX7ORAUlkeBdY=
 github.com/coreos/bbolt v1.3.3/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
+github.com/coreos/etcd v3.3.13+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.17+incompatible h1:f/Z3EoDSx1yjaIjLQGo1diYUlQYSBrrAQ5vP8NjwXwo=
 github.com/coreos/etcd v3.3.17+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
@@ -218,8 +219,13 @@ github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 h1:Mn26/9ZMNWSw9C9ER
 github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32/go.mod h1:GIjDIg/heH5DOkXY3YJ/wNhfHsQHoXGjl8G8amsYQ1I=
 github.com/giantswarm/apiextensions v0.2.0 h1:6gnfXFRL/eGqPbYhM7jUckwmulx7jh6qJpEe06riIKA=
 github.com/giantswarm/apiextensions v0.2.0/go.mod h1:iw66G0WDcrQl9mi2m/6mov2fWTD6ZiT2+FC62b2Mczw=
+<<<<<<< HEAD
 github.com/giantswarm/apiextensions v0.2.7-0.20200416135817-fbfb02004a72 h1:W49jX1vVzR95eNIcsYJpKBn/npe9NQhHsvVgq0EceXI=
 github.com/giantswarm/apiextensions v0.2.7-0.20200416135817-fbfb02004a72/go.mod h1:zv0VvUDPUuLOcSJA+DAGxisg3PP5y6EiLaGRieedqMQ=
+=======
+github.com/giantswarm/apiextensions v0.3.0 h1:Vr6UUMr9GxX00510tILX4gQi5KMbZL+rNBFQ68eYyKo=
+github.com/giantswarm/apiextensions v0.3.0/go.mod h1:zv0VvUDPUuLOcSJA+DAGxisg3PP5y6EiLaGRieedqMQ=
+>>>>>>> master
 github.com/giantswarm/apprclient v0.2.0 h1:XLi/xt2BE316zCjgG9sJF25gKfIkIkdxPzgWmR8pACI=
 github.com/giantswarm/apprclient v0.2.0/go.mod h1:iAGOReCnEud0xxwhDS/lI50JSUN4zRCB3vlPRqH3IVc=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
@@ -236,7 +242,6 @@ github.com/giantswarm/e2etemplates v0.2.0 h1:xwsa8hSirDF8nFdRJZJROPwjiL1vsuhWltz
 github.com/giantswarm/e2etemplates v0.2.0/go.mod h1:q7aE42HUEdxm6NtLJ/csoMBWoRoIfhdy0WC85aRjLi8=
 github.com/giantswarm/e2etests v0.1.0 h1:VgD3rCoMUytET96eDiySYeVYCVtBQUtP7bO+y/ORxfg=
 github.com/giantswarm/e2etests v0.1.0/go.mod h1:jfE2zMqSmGC5Infyh/DufFRDriS+CwVAVV+lFb/SLWg=
-github.com/giantswarm/errors v0.2.0 h1:l9bAe0IQBHLkZQVT+h79DTCJQ3tuDFrOfUySVlbKn10=
 github.com/giantswarm/errors v0.2.0/go.mod h1:Oj1LIWs9Uoj6JGtK5HxTb50iZuqe9f60LDI0nLXA5vU=
 github.com/giantswarm/errors v0.2.2 h1:O7shm0kFukHgzuX3iVZvxleu1RZXHFVEro/e8Ge3CgI=
 github.com/giantswarm/errors v0.2.2/go.mod h1:Oj1LIWs9Uoj6JGtK5HxTb50iZuqe9f60LDI0nLXA5vU=
@@ -304,7 +309,6 @@ github.com/go-openapi/analysis v0.19.2 h1:ophLETFestFZHk3ji7niPEL4d466QjW+0Tdg5V
 github.com/go-openapi/analysis v0.19.2/go.mod h1:3P1osvZa9jKjb8ed2TPng3f0i/UY9snX6gxi44djMjk=
 github.com/go-openapi/errors v0.17.0/go.mod h1:LcZQpmvG4wyF5j4IhA73wkLFQg+QJXOQHVjmcZxhka0=
 github.com/go-openapi/errors v0.18.0/go.mod h1:LcZQpmvG4wyF5j4IhA73wkLFQg+QJXOQHVjmcZxhka0=
-github.com/go-openapi/errors v0.19.2 h1:a2kIyV3w+OS3S97zxUndRVD46+FhGOUBDFY7nmu4CsY=
 github.com/go-openapi/errors v0.19.2/go.mod h1:qX0BLWsyaKfvhluLejVpVNwNRdXZhEbTA4kxxpKBC94=
 github.com/go-openapi/errors v0.19.4 h1:fSGwO1tSYHFu70NKaWJt5Qh0qoBRtCm/mXS1yhf+0W0=
 github.com/go-openapi/errors v0.19.4/go.mod h1:qX0BLWsyaKfvhluLejVpVNwNRdXZhEbTA4kxxpKBC94=
@@ -833,8 +837,9 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spf13/viper v1.0.2/go.mod h1:A8kyI5cUJhb8N+3pkfONlcEcZbueH6nhAm0Fq7SrnBM=
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/spf13/viper v1.4.0/go.mod h1:PTJ7Z/lr49W6bUbkmS1V3by4uWynFiR9p7+dSq/yZzE=
-github.com/spf13/viper v1.6.2 h1:7aKfF+e8/k68gda3LOjo5RxiUqddoFxVq4BKBPrxk5E=
 github.com/spf13/viper v1.6.2/go.mod h1:t3iDnF5Jlj76alVNuyFBk5oUMCvsrkbvZK0WQdfDi5k=
+github.com/spf13/viper v1.6.3 h1:pDDu1OyEDTKzpJwdq4TiuLyMsUgRa/BT5cn5O62NoHs=
+github.com/spf13/viper v1.6.3/go.mod h1:jUMtyi0/lB5yZH/FjyGAoH7IMNrIhlBf6pXZmbMDvzw=
 github.com/storageos/go-api v0.0.0-20180912212459-343b3eff91fc/go.mod h1:ZrLn+e0ZuF3Y65PNF6dIwbJPZqfmtCXxFm9ckv0agOY=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
 github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
