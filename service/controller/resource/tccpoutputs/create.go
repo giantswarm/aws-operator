@@ -73,7 +73,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
 			// migration code to dont throw error  when the old C dont yet have the new output value
-			// TODO
+			// TODO https://github.com/giantswarm/giantswarm/issues/10139
 			// after migration we can remove the check for IsOutputNotFound
 			if cloudformation.IsOutputNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane hostedZoneID output")
@@ -97,7 +97,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, InternalHostedZoneID)
 			// migration code to dont throw error  when the old C dont yet have the new output value
-			// TODO
+			// TODO https://github.com/giantswarm/giantswarm/issues/10139
 			// after migration we can remove the check for IsOutputNotFound
 			if cloudformation.IsOutputNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane internalHostedZoneID output")
