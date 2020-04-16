@@ -132,10 +132,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		// IF cr.spec.aws_cni defined
-		// Else we take from r which is actually doming from draughtsman
+		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 		podSubnet := r.cidrBlockAWSCNI
-
 		if cr.Spec.Provider.Pods.CIDRBlock != "" {
 			podSubnet = cr.Spec.Provider.Pods.CIDRBlock
 		}
