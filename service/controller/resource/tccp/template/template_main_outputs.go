@@ -3,6 +3,10 @@ package template
 const TemplateMainOutputs = `
 {{- define "outputs" -}}
   {{- if .Outputs.Route53Enabled -}}
+  HostedZoneID: 
+    Value: !Ref HostedZone
+  InternalHostedZoneID: 
+    Value: !Ref InternalHostedZone
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   {{ end -}}

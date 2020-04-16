@@ -33,15 +33,15 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	ASG                   ContextStatusTenantClusterASG
-	AWS                   ContextStatusTenantClusterAWS
-	Encryption            ContextStatusTenantClusterEncryption
-	HostedZoneNameServers string
-	MasterInstance        ContextStatusTenantClusterMasterInstance
-	TCCP                  ContextStatusTenantClusterTCCP
-	TCCPN                 ContextStatusTenantClusterTCCPN
-	TCNP                  ContextStatusTenantClusterTCNP
-	OperatorVersion       string
+	ASG             ContextStatusTenantClusterASG
+	AWS             ContextStatusTenantClusterAWS
+	DNS             ContextStatusTenantClusterDNS
+	Encryption      ContextStatusTenantClusterEncryption
+	MasterInstance  ContextStatusTenantClusterMasterInstance
+	TCCP            ContextStatusTenantClusterTCCP
+	TCCPN           ContextStatusTenantClusterTCCPN
+	TCNP            ContextStatusTenantClusterTCNP
+	OperatorVersion string
 }
 
 type ContextStatusTenantClusterASG struct {
@@ -54,6 +54,12 @@ type ContextStatusTenantClusterASG struct {
 type ContextStatusTenantClusterAWS struct {
 	AccountID string
 	Region    string
+}
+
+type ContextStatusTenantClusterDNS struct {
+	HostedZoneID          string
+	HostedZoneNameServers string
+	InternalHostedZoneID  string
 }
 
 type ContextStatusTenantClusterEncryption struct {

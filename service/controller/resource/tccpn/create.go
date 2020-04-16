@@ -64,6 +64,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if r.route53Enabled {
+			if cc.Status.TenantCluster.DNS.HostedZoneID == "" || cc.Status.TenantCluster.DNS.InternalHostedZoneID == "" {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "hosted zone id not available yet")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+				return nil
+			}
+		}
+
 		// When the TCCPN cloud formation stack is transitioning, it means it is
 		// updating in most cases. We do not want to interfere with the current
 		// process and stop here. We will then check on the next reconciliation loop
@@ -300,12 +309,14 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
-			ClusterID:        key.ClusterID(&cr),
-			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
-			RegionARN:        key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			S3Bucket:         key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-			Route53Enabled:   route53Enabled,
+			ClusterID:            key.ClusterID(&cr),
+			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
+			InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
+			KMSKeyARN:            cc.Status.TenantCluster.Encryption.Key,
+			RegionARN:            key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			S3Bucket:             key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
+			Route53Enabled:       route53Enabled,
 		}
 	}
 

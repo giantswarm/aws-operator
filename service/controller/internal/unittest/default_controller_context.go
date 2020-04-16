@@ -123,10 +123,14 @@ func ChinaControllerContext() controllercontext.Context {
 					AccountID: "tenant-account",
 					Region:    "cn-north-1",
 				},
-				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
-				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
-				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
-				OperatorVersion:       "6.3.0",
+				Encryption: controllercontext.ContextStatusTenantClusterEncryption{},
+				DNS: controllercontext.ContextStatusTenantClusterDNS{
+					HostedZoneID:          "hosted-zone-id",
+					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
+					InternalHostedZoneID:  "hosted-zone-internal-id",
+				},
+				MasterInstance:  controllercontext.ContextStatusTenantClusterMasterInstance{},
+				OperatorVersion: "6.3.0",
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
@@ -375,10 +379,14 @@ func DefaultControllerContext() controllercontext.Context {
 					AccountID: "tenant-account",
 					Region:    "eu-central-1",
 				},
-				Encryption:            controllercontext.ContextStatusTenantClusterEncryption{},
-				HostedZoneNameServers: "1.1.1.1,8.8.8.8",
-				MasterInstance:        controllercontext.ContextStatusTenantClusterMasterInstance{},
-				OperatorVersion:       "6.3.0",
+				Encryption: controllercontext.ContextStatusTenantClusterEncryption{},
+				DNS: controllercontext.ContextStatusTenantClusterDNS{
+					HostedZoneID:          "hosted-zone-id",
+					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
+					InternalHostedZoneID:  "hosted-zone-internal-id",
+				},
+				MasterInstance:  controllercontext.ContextStatusTenantClusterMasterInstance{},
+				OperatorVersion: "6.3.0",
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{

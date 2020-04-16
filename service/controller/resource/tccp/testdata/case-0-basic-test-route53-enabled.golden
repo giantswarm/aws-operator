@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
+  HostedZoneID: 
+    Value: !Ref HostedZone
+  InternalHostedZoneID: 
+    Value: !Ref InternalHostedZone
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
   OperatorVersion:

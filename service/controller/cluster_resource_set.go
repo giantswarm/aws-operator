@@ -443,6 +443,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
+			ToClusterFunc:  key.ToCluster,
 		}
 
 		tccpOutputsResource, err = tccpoutputs.New(c)
