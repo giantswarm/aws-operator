@@ -4,13 +4,13 @@ metadata:
   name: {{ include "resource.default.name" . }}
   namespace: {{ include "resource.default.namespace" . }}
   labels:
-    {{- include "aws-operator.labels" . | nindent 4 }}
+    {{- include "labels" . | nindent 4 }}
 spec:
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      {{- include "aws-operator.selectorLabels" . | nindent 6 }}
+      {{- include "selectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
@@ -18,7 +18,7 @@ spec:
       annotations:
         releasetime: {{ $.Release.Time }}
       labels:
-        {{- include "aws-operator.selectorLabels" . | nindent 8 }}
+        {{- include "selectorLabels" . | nindent 8 }}
     spec:
       volumes:
       - name: {{ .Chart.Name }}-configmap
