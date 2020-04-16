@@ -57,6 +57,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
@@ -547,6 +548,19 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var tccpVPCIDStatusResource resource.Interface
+	{
+		c := tccpvpcidstatus.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		tccpVPCIDStatusResource, err = tccpvpcidstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var natGatewayAddressesResource resource.Interface
 	{
 		c := natgatewayaddresses.Config{
@@ -721,6 +735,9 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		eniConfigCRsResource,
 		ensureCPCRsResource,
 		secretFinalizerResource,
+
+		// All these resources implement logic to update CR status information.
+		tccpVPCIDStatusResource,
 
 		// All these resources implement cleanup functionality only being executed
 		// on delete events.

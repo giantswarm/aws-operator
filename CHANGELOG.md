@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add Control Plane drainer controller.
 - Add Dependabot configuration.
+- Add VPC ID to AWSCluster CR status.
 
 ### Changed
 
@@ -41,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use architect orb.
 - Fix subnet allocation for Availability Zones.
 - Switch to AWS CNI
+
+
 
 ## [8.2.1] - 2020-03-20
 
