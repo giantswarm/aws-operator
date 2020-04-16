@@ -1,0 +1,9 @@
+version: 1
+update_configs:
+  - package_manager: "go:modules"
+    directory: "/"
+    update_schedule: "daily"
+    ignored_updates:
+      - match:
+          dependency_name: "k8s.io/*"
+          version_requirement: ">=0.17.0"
