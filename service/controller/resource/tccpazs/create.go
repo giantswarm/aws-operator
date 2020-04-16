@@ -136,8 +136,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// Else we take from r which is actually doming from draughtsman
 		podSubnet := r.cidrBlockAWSCNI
 
-		if cr.Spec.Provider.CNI.Subnet != "" && cr.Spec.Provider.CNI.CIDR != 0 {
-			podSubnet = fmt.Sprintf("%s/%d", cr.Spec.Provider.CNI.Subnet, cr.Spec.Provider.CNI.CIDR)
+		if cr.Spec.Provider.Pods.CIDRBlock != "" {
+			podSubnet = cr.Spec.Provider.Pods.CIDRBlock
 		}
 
 		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
