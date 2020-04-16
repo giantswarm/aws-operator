@@ -64,11 +64,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		if cc.Status.TenantCluster.DNS.HostedZoneID == "" || cc.Status.TenantCluster.DNS.InternalHostedZoneID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "hosted zone id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		if r.route53Enabled {
+			if cc.Status.TenantCluster.DNS.HostedZoneID == "" || cc.Status.TenantCluster.DNS.InternalHostedZoneID == "" {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "hosted zone id not available yet")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
-			return nil
+				return nil
+			}
 		}
 
 		// When the TCCPN cloud formation stack is transitioning, it means it is
