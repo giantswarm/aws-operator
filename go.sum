@@ -219,15 +219,14 @@ github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 h1:Mn26/9ZMNWSw9C9ER
 github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32/go.mod h1:GIjDIg/heH5DOkXY3YJ/wNhfHsQHoXGjl8G8amsYQ1I=
 github.com/giantswarm/apiextensions v0.2.0 h1:6gnfXFRL/eGqPbYhM7jUckwmulx7jh6qJpEe06riIKA=
 github.com/giantswarm/apiextensions v0.2.0/go.mod h1:iw66G0WDcrQl9mi2m/6mov2fWTD6ZiT2+FC62b2Mczw=
-github.com/giantswarm/apiextensions v0.2.1 h1:PbOu+iNHhjJI08eMmLel7iLOAGoC5sDBHxJHRrQIGoA=
-github.com/giantswarm/apiextensions v0.2.1/go.mod h1:sdtmW67L+Y+jgF//ra4jbOI238SrPtfGHtckCRyw4Ak=
+github.com/giantswarm/apiextensions v0.2.6-0.20200416081458-acf9cc91d3a2 h1:2z6ZB9fops2P9u2vZTOTXwnwi3fi/1VrH9NNcbCEiqI=
+github.com/giantswarm/apiextensions v0.2.6-0.20200416081458-acf9cc91d3a2/go.mod h1:w2eArKPArbnZ0TQ8w8AgdhuytgNY/KpEpr2u158tJao=
 github.com/giantswarm/apprclient v0.2.0 h1:XLi/xt2BE316zCjgG9sJF25gKfIkIkdxPzgWmR8pACI=
 github.com/giantswarm/apprclient v0.2.0/go.mod h1:iAGOReCnEud0xxwhDS/lI50JSUN4zRCB3vlPRqH3IVc=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/certs v0.2.0 h1:IWxNmheSV1hg2H5AZJast25IM01XOXRGA9wkUT7PLg8=
 github.com/giantswarm/certs v0.2.0/go.mod h1:Axozt4pVBuaLKDzH8TwMEDGil4y2c4/2XvUnsGNeYg8=
-github.com/giantswarm/cluster-operator v1.0.0 h1:ervey633B/Q1Vj3inr/pNFgImUmR9mLfP6DsSDqCJSM=
 github.com/giantswarm/e2e-harness v0.2.0 h1:M71fV6T3zIjpg63eAbP8d5eHxCLLT4Q6hskiWelw6jM=
 github.com/giantswarm/e2e-harness v0.2.0/go.mod h1:+2H1VF3hRA75LQHVYno0/GmWxA/f7YEc9Bey03jyGRY=
 github.com/giantswarm/e2eclients v0.2.0 h1:fk3/dU1tAt9NHgSZwz4C9Bm15E9lFuNfYYneLjkw5Sg=
@@ -368,6 +367,8 @@ github.com/go-toolsmith/typep v1.0.0/go.mod h1:JSQCQMUPdRlMZFswiq3TGpNp1GMktqkR2
 github.com/gobuffalo/envy v1.7.0/go.mod h1:n7DRkBerg/aorDM8kbduw5dN3oXGswK5liaSCx4T5NI=
 github.com/gobuffalo/envy v1.7.1 h1:OQl5ys5MBea7OGCdvPbBJWRgnhC/fGona6QKfvFeau8=
 github.com/gobuffalo/envy v1.7.1/go.mod h1:FurDp9+EDPE4aIUS3ZLyD+7/9fpx7YRt/ukY6jIHf0w=
+github.com/gobuffalo/here v0.6.0 h1:hYrd0a6gDmWxBM4TnrGw8mQg24iSVoIkHEk7FodQcBI=
+github.com/gobuffalo/here v0.6.0/go.mod h1:wAG085dHOYqUpf+Ap+WOdrPTp5IYcDAs/x7PLa8Y5fM=
 github.com/gobuffalo/logger v1.0.1 h1:ZEgyRGgAm4ZAhAO45YXMs5Fp+bzGLESFewzAVBMKuTg=
 github.com/gobuffalo/logger v1.0.1/go.mod h1:2zbswyIUa45I+c+FLXuWl9zSWEiVuthsk8ze5s8JvPs=
 github.com/gobuffalo/packd v0.3.0 h1:eMwymTkA1uXsqxS0Tpoop3Lc0u3kTfiMBE6nKtQU4g4=
@@ -591,6 +592,8 @@ github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.0.0-20190312143242-1de009706dbe/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63 h1:nTT4s92Dgz2HlrB2NaMgvlfqHH39OgMhA7z3PK7PGD4=
 github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
+github.com/markbates/pkger v0.15.1 h1:3MPelV53RnGSW07izx5xGxl4e/sdRD6zqseIk0rMASY=
+github.com/markbates/pkger v0.15.1/go.mod h1:0JoVlrol20BSywW79rN3kdFFsE5xYM+rSCQDXbLhiuI=
 github.com/marten-seemann/qtls v0.2.3/go.mod h1:xzjG7avBwGGbdZ8dTGxlBnLArsVKLvwmjgmPuiQEcYk=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
