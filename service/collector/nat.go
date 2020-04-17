@@ -172,31 +172,30 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	//Cache empty, getting from API
 	if natInfo == nil {
-		natInfo, err := getNatInfoFromAPI(accountID, awsClients)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		err = v.cache.Set(accountID, natInfo)
+		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
 	fmt.Printf("nat info %+v /n", natInfo)
-	if natInfo == nil || natInfo.vpcs == nil {
-		return nil
-	}
+	if natInfo != nil {
+		err = v.cache.Set(accountID, natInfo)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	for vpcID, vpcInfo := range natInfo.vpcs {
-		for azName, azValue := range vpcInfo.zones {
-			ch <- prometheus.MustNewConstMetric(
-				natDesc,
-				prometheus.GaugeValue,
-				azValue,
-				accountID,
-				vpcID,
-				azName,
-			)
+		for vpcID, vpcInfo := range natInfo.vpcs {
+			for azName, azValue := range vpcInfo.zones {
+				ch <- prometheus.MustNewConstMetric(
+					natDesc,
+					prometheus.GaugeValue,
+					azValue,
+					accountID,
+					vpcID,
+					azName,
+				)
+			}
 		}
 	}
 
