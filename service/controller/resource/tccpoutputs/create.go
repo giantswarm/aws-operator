@@ -72,10 +72,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if r.route53Enabled {
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
-			if err != nil {
-				return microerror.Mask(err)
+			// migration code to dont throw error  when the old C dont yet have the new output value
+			// TODO https://github.com/giantswarm/giantswarm/issues/10139
+			// after migration we can remove the check for IsOutputNotFound
+			if cloudformation.IsOutputNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane hostedZoneID output")
+			} else {
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				cc.Status.TenantCluster.DNS.HostedZoneID = v
 			}
-			cc.Status.TenantCluster.DNS.HostedZoneID = v
+
 		}
 
 		{
@@ -88,10 +96,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, InternalHostedZoneID)
-			if err != nil {
-				return microerror.Mask(err)
+			// migration code to dont throw error  when the old C dont yet have the new output value
+			// TODO https://github.com/giantswarm/giantswarm/issues/10139
+			// after migration we can remove the check for IsOutputNotFound
+			if cloudformation.IsOutputNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane internalHostedZoneID output")
+			} else {
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				cc.Status.TenantCluster.DNS.InternalHostedZoneID = v
 			}
-			cc.Status.TenantCluster.DNS.InternalHostedZoneID = v
 		}
 
 	}
