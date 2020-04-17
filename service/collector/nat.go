@@ -182,10 +182,6 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		}
 	}
 
-	if natInfo.vpcs == nil {
-		return nil
-	}
-
 	for vpcID, vpcInfo := range natInfo.vpcs {
 		for azName, azValue := range vpcInfo.zones {
 			ch <- prometheus.MustNewConstMetric(
@@ -204,6 +200,8 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natResponse, error) {
 	var res natResponse
+	res.vpcs = make(map[string]natVPC)
+
 	fmt.Printf("nat cache empty, query AWS API for account %s\n", accountID)
 
 	iv := &ec2.DescribeVpcsInput{
