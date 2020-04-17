@@ -183,7 +183,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	fmt.Printf("nat info %+v /n", natInfo)
-	if natInfo.vpcs == nil {
+	if natInfo == nil || natInfo.vpcs == nil {
 		return nil
 	}
 
