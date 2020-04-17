@@ -12,7 +12,7 @@ require (
 	github.com/giantswarm/certs v0.2.0
 	github.com/giantswarm/e2e-harness v0.2.0
 	github.com/giantswarm/e2eclients v0.2.0
-	github.com/giantswarm/e2esetup v0.1.0
+	github.com/giantswarm/e2esetup v0.2.0
 	github.com/giantswarm/e2etemplates v0.2.0
 	github.com/giantswarm/e2etests v0.1.0
 	github.com/giantswarm/errors v0.2.2
