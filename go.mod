@@ -17,7 +17,7 @@ require (
 	github.com/giantswarm/e2etests v0.1.0
 	github.com/giantswarm/errors v0.2.2
 	github.com/giantswarm/exporterkit v0.2.0
-	github.com/giantswarm/helmclient v0.2.0
+	github.com/giantswarm/helmclient v0.2.2
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient v0.2.0
 	github.com/giantswarm/k8scloudconfig/v6 v6.0.2
