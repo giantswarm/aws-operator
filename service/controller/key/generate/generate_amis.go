@@ -21,10 +21,8 @@ import (
 )
 
 const (
-	flatcarDomain     = "flatcar-linux.net"
-	flatcarMinimum    = "2345.3.1"
-	coreosDomain      = "core-os.net"
-	coreosMinimum     = "2135.4.0"
+	domain            = "flatcar-linux.net"
+	minimumVersion    = "2191.5.0"
 	channel           = "stable"
 	arch              = "amd64-usr"
 	generatedFilename = "amis.go"
@@ -104,45 +102,32 @@ func scrapeVersionAMIs(source io.Reader) (map[string]string, error) {
 }
 
 func main() {
-	vendors := map[string]string{
-		"coreos":  coreosDomain,
-		"flatcar": flatcarDomain,
+	var versions []string
+	{
+		url := fmt.Sprintf("https://%s.release.%s/%s/", channel, domain, arch)
+		fmt.Println("scraping", url)
+		response, err := http.Get(url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		versions, err = scrapeVersions(response.Body)
 	}
-	mergedAMIs := map[string]map[string]string{}
-	for vendor, domain := range vendors {
-		var versions []string
-		{
-			url := fmt.Sprintf("https://%s.release.%s/%s/", channel, domain, arch)
-			fmt.Println("scraping", url)
-			response, err := http.Get(url)
-			if err != nil {
-				log.Fatal(err)
-			}
-			versions, err = scrapeVersions(response.Body)
-		}
 
-		for _, version := range versions {
-			var minimumVersion string
-			switch vendor {
-			case "coreos":
-				minimumVersion = coreosMinimum
-			case "flatcar":
-				minimumVersion = flatcarMinimum
-			}
-			if minimumVersion != "" && semver.MustParse(version).LessThan(semver.MustParse(minimumVersion)) {
-				continue
-			}
-			url := fmt.Sprintf("https://%s.release.%s/%s/%s/%s_production_ami_all.json", channel, domain, arch, version, vendor)
-			fmt.Println("scraping", url)
-			response, err := http.Get(url)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if response.StatusCode == 403 {
-				continue
-			}
-			mergedAMIs[version], err = scrapeVersionAMIs(response.Body)
+	mergedAMIs := map[string]map[string]string{}
+	for _, version := range versions {
+		if semver.MustParse(version).LessThan(semver.MustParse(minimumVersion)) {
+			continue
 		}
+		url := fmt.Sprintf("https://%s.release.%s/%s/%s/flatcar_production_ami_all.json", channel, domain, arch, version)
+		fmt.Println("scraping", url)
+		response, err := http.Get(url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if response.StatusCode == 403 {
+			continue
+		}
+		mergedAMIs[version], err = scrapeVersionAMIs(response.Body)
 	}
 
 	result, err := json.MarshalIndent(mergedAMIs, "", "  ")

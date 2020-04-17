@@ -1350,7 +1350,7 @@ func Test_ImageID(t *testing.T) {
 			},
 			osVersion:       "2191.5.0",
 			errorMatcher:    nil,
-			expectedImageID: "ami-038cea5071a5ee580",
+			expectedImageID: "ami-0f607d2a5a0fd8041",
 		},
 		{
 			description: "different region",
@@ -1362,7 +1362,7 @@ func Test_ImageID(t *testing.T) {
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-067301c1a68e593f5",
+			expectedImageID: "ami-0c75aa1f3a9f34e91",
 			osVersion:       "2191.5.0",
 		},
 		{
@@ -1394,12 +1394,12 @@ func Test_ImageID(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "cn-north-1",
+						Region: "me-south-1",
 					},
 				},
 			},
 			errorMatcher:    nil,
-			expectedImageID: "ami-026f7fae59b401ac0",
+			expectedImageID: "ami-0a6518241a90f491f",
 			osVersion:       "2345.3.0",
 		},
 	}
@@ -1416,7 +1416,7 @@ func Test_ImageID(t *testing.T) {
 			}
 
 			if tc.expectedImageID != imageID {
-				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
+				t.Errorf("unexpected imageID, expected %q, got %q", tc.expectedImageID, imageID)
 			}
 		})
 	}
