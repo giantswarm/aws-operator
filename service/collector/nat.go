@@ -182,6 +182,11 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		}
 	}
 
+	fmt.Printf("nat info %+v /n", natInfo)
+	if natInfo.vpcs == nil {
+		return nil
+	}
+
 	for vpcID, vpcInfo := range natInfo.vpcs {
 		for azName, azValue := range vpcInfo.zones {
 			ch <- prometheus.MustNewConstMetric(
