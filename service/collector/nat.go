@@ -170,7 +170,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	//Cache empty, getting from API
-	if natInfo == nil {
+	if natInfo == nil || natInfo.vpcs == nil {
 		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
 		if err != nil {
 			return microerror.Mask(err)
