@@ -105,8 +105,6 @@ func newNATCache(expiration time.Duration) *natCache {
 
 func (n *natCache) Get(accID string) (*natResponse, error) {
 	var c natResponse
-	c.vpcs = make(map[string]natVPC)
-
 	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
 	if ok {
 		err := hprose.Unserialize(raw, c, true)
@@ -172,7 +170,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	//Cache empty, getting from API
-	if natInfo.vpcs == nil {
+	if natInfo == nil {
 		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
 		if err != nil {
 			return microerror.Mask(err)
