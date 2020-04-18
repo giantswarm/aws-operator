@@ -118,7 +118,7 @@ func (n *natCache) Get(accID string) (*natResponse, error) {
 	return &c, nil
 }
 
-func (n *natCache) Set(accID string, content *natResponse) error {
+func (n *natCache) Set(accID string, content natResponse) error {
 	contentSerialized, err := hprose.Serialize(content, true)
 	if err != nil {
 		return microerror.Mask(err)
@@ -172,7 +172,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	//Cache empty, getting from API
-	if natInfo == nil {
+	if natInfo.vpcs == nil {
 		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
 		if err != nil {
 			return microerror.Mask(err)
@@ -181,7 +181,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	fmt.Printf("nat info %+v /n", natInfo)
 	if natInfo != nil {
-		err = v.cache.Set(accountID, natInfo)
+		err = v.cache.Set(accountID, *natInfo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
