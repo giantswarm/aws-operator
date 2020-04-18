@@ -104,7 +104,8 @@ func newNATCache(expiration time.Duration) *natCache {
 }
 
 func (n *natCache) Get(accID string) (*natResponse, error) {
-	var c *natResponse
+	var c natResponse
+	c.vpcs = make(map[string]natVPC)
 
 	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
 	if ok {
@@ -114,7 +115,7 @@ func (n *natCache) Get(accID string) (*natResponse, error) {
 		}
 	}
 
-	return c, nil
+	return &c, nil
 }
 
 func (n *natCache) Set(accID string, content *natResponse) error {
