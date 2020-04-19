@@ -13,5 +13,7 @@ const TemplateMainENI = `
        Tags:
        - Key: Name
          Value: {{ .ENI.Name }}
+       - Key: node.k8s.amazonaws.com/no_manage
+         Value: "true"
 {{- end -}}
 `
