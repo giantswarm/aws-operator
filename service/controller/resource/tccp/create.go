@@ -763,11 +763,17 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 		routeTableNames = append(routeTableNames, rtName)
 	}
 
+	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
+	podSubnet := r.cidrBlockAWSCNI
+	if cr.Spec.Provider.Pods.CIDRBlock != "" {
+		podSubnet = cr.Spec.Provider.Pods.CIDRBlock
+	}
+
 	var vpc *template.ParamsMainVPC
 	{
 		vpc = &template.ParamsMainVPC{
 			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
-			CIDRBlockAWSCNI:  r.cidrBlockAWSCNI,
+			CIDRBlockAWSCNI:  podSubnet,
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,

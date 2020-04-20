@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [8.3.0] 2020-04-17
+
 ### Added
 
 - Add Control Plane drainer controller.
 - Add mixed instance support for worker ASGs.
 - Add Dependabot configuration.
 - Add VPC ID to AWSCluster CR status.
+- Read CIDR from CR if available.
 
 ### Changed
 
@@ -56,8 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.3.0...HEAD
 
+[8.3.0]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...v8.3.0
 [8.2.3]: https://github.com/giantswarm/aws-operator/compare/v8.2.2...v8.2.3
 [8.2.2]: https://github.com/giantswarm/aws-operator/compare/v8.2.1...v8.2.2
 
