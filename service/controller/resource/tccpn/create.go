@@ -323,42 +323,43 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 	return iamPolicies, nil
 }
 
-func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchConfiguration, error) {
+func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	launchConfiguration := &template.ParamsMainLaunchConfiguration{
-		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
-			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
+	launchTemplate := &template.ParamsMainLaunchTemplate{
+		BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
+			Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume{
 					Size: defaultVolumeSize,
 				},
 			},
-			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
+			Kubelet: template.ParamsMainLaunchTemplateBlockDeviceMappingKubelet{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume{
 					Size: defaultVolumeSize,
 				},
 			},
-			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume{
+			Logging: template.ParamsMainLaunchTemplateBlockDeviceMappingLogging{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume{
 					Size: defaultVolumeSize,
 				},
 			},
 		},
-		Instance: template.ParamsMainLaunchConfigurationInstance{
+		Instance: template.ParamsMainLaunchTemplateInstance{
 			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Monitoring: false,
 			Type:       key.ControlPlaneInstanceType(cr),
 		},
 		MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
+		SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
 			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr)),
 		},
+		ResourceName: key.ControlPlaneLaunchTemplateName(&cr, 0),
 	}
 
-	return launchConfiguration, nil
+	return launchTemplate, nil
 }
 
 func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
@@ -389,7 +390,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchConfiguration, err := newLaunchConfiguration(ctx, cr)
+		launchTemplate, err := newLaunchTemplate(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -399,12 +400,12 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		}
 
 		params = &template.ParamsMain{
-			AutoScalingGroup:    autoScalingGroup,
-			ENI:                 eni,
-			EtcdVolume:          etcdVolume,
-			IAMPolicies:         iamPolicies,
-			LaunchConfiguration: launchConfiguration,
-			Outputs:             outputs,
+			AutoScalingGroup: autoScalingGroup,
+			ENI:              eni,
+			EtcdVolume:       etcdVolume,
+			IAMPolicies:      iamPolicies,
+			LaunchTemplate:   launchTemplate,
+			Outputs:          outputs,
 		}
 	}
 
