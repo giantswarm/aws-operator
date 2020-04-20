@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource/crud"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -20,9 +21,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		return microerror.Mask(err)
 	}
 
-	for key, bucketObject := range updateBucketState {
+	for objectKey, bucketObject := range updateBucketState {
 		if bucketObject.Key != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", objectKey))
 
 			s3PutInput, err := toPutObjectInput(bucketObject)
 			if err != nil {
@@ -34,9 +35,16 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", key))
+			switch objectKey {
+			case key.BucketObjectName(key.KindMaster):
+				cc.Status.TenantCluster.MasterInstance.IgnitionHash = bucketObject.Hash
+			case key.BucketObjectName(key.KindWorker):
+				cc.Status.TenantCluster.WorkerInstance.IgnitionHash = bucketObject.Hash
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", objectKey))
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", key))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", objectKey))
 		}
 	}
 

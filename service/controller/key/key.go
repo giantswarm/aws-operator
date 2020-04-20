@@ -1,18 +1,14 @@
 package key
 
 import (
-	"crypto/md5"
 	"crypto/sha1"
 	"fmt"
-	"io"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 
@@ -135,27 +131,6 @@ func AWSCliContainerRegistry(customObject v1alpha1.AWSConfig) string {
 
 func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
-}
-
-// ReleaseComponentHash returns a value unique to the
-func ReleaseComponentHash(release releasev1alpha1.Release) (string, error) {
-	var componentNames []string
-	componentVersions := map[string]string{}
-	for _, component := range release.Spec.Components {
-		componentNames = append(componentNames, component.Name)
-		componentVersions[component.Name] = component.Version
-	}
-	sort.Strings(componentNames)
-
-	hasher := md5.New()
-	for _, name := range componentNames {
-		_, err := io.WriteString(hasher, fmt.Sprintf("|%s@%s|", name, componentVersions[name]))
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-	}
-	hash := fmt.Sprintf("%x", hasher.Sum(nil)) // []byte as base16
-	return hash, nil
 }
 
 // BucketObjectName computes the S3 object path to the actual cloud config (e.g. ignition/master).

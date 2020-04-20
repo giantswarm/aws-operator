@@ -2,6 +2,8 @@ package s3object
 
 import (
 	"context"
+	"crypto/sha512"
+	"encoding/hex"
 	"fmt"
 	"sync"
 
@@ -103,11 +105,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 			m.Lock()
 			k := key.BucketObjectName(key.KindMaster)
-			output[k] = BucketObjectState{
+			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}
+			output[k] = hashBucketObject(object)
 			m.Unlock()
 
 			return nil
@@ -121,11 +124,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 			m.Lock()
 			k := key.BucketObjectName(key.KindWorker)
-			output[k] = BucketObjectState{
+			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   b,
 				Key:    k,
 			}
+			output[k] = hashBucketObject(object)
 			m.Unlock()
 
 			return nil
@@ -138,4 +142,14 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	return output, nil
+}
+
+// hashBucketObject returns the given object with object.Hash set to the hash of object.Body.
+func hashBucketObject(object BucketObjectState) BucketObjectState {
+	rawSum := sha512.Sum512([]byte(object.Body))
+	sum := rawSum[:]
+	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
+	hex.Encode(encodedSum, sum)
+	object.Hash = string(encodedSum)
+	return object
 }

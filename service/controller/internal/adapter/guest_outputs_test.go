@@ -34,8 +34,8 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.Master.CloudConfig.Hash != tc.ExpectedMasterIgnitionHash {
-				t.Fatalf("expected %s got %s", tc.ExpectedMasterIgnitionHash, a.Master.CloudConfig.Hash)
+			if a.Master.Ignition.Hash != tc.ExpectedMasterIgnitionHash {
+				t.Fatalf("expected %s got %s", tc.ExpectedMasterIgnitionHash, a.Master.Ignition.Hash)
 			}
 		})
 	}
@@ -69,8 +69,8 @@ func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) 
 				t.Fatalf("expected %#v got %#v", nil, err)
 			}
 
-			if a.Worker.CloudConfig.Hash != tc.ExpectedWorkerIgnitionHash {
-				t.Fatalf("expected %s got %s", tc.ExpectedWorkerIgnitionHash, a.Worker.CloudConfig.Hash)
+			if a.Worker.Ignition.Hash != tc.ExpectedWorkerIgnitionHash {
+				t.Fatalf("expected %s got %s", tc.ExpectedWorkerIgnitionHash, a.Worker.Ignition.Hash)
 			}
 		})
 	}

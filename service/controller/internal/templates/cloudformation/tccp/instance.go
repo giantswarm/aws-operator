@@ -19,7 +19,7 @@ const Instance = `
       SecurityGroupIds:
       - !Ref MasterSecurityGroup
       SubnetId: !Ref {{ $v.Master.PrivateSubnet }}
-      UserData: {{ $v.Master.CloudConfig }}
+      UserData: {{ $v.Master.Ignition }}
       Tags:
       - Key: Name
         Value: {{ $v.Cluster.ID }}-master

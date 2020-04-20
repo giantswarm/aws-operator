@@ -141,7 +141,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 				t.Fatalf("unexpected error %v", err)
 			}
 
-			data, err := base64.StdEncoding.DecodeString(a.Master.CloudConfig)
+			data, err := base64.StdEncoding.DecodeString(a.Master.Ignition)
 			if err != nil {
 				t.Fatalf("unexpected error decoding a.Master.CloudConfig %v", err)
 			}

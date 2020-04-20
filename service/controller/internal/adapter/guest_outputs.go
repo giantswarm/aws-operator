@@ -14,14 +14,14 @@ type GuestOutputsAdapter struct {
 func (a *GuestOutputsAdapter) Adapt(config Config) error {
 	a.Route53Enabled = config.Route53Enabled
 	a.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
+	a.Master.Ignition.Hash = config.StackState.MasterIgnitionHash
 	a.Master.ImageID = config.StackState.MasterImageID
 	a.Master.Instance.ResourceName = config.StackState.MasterInstanceResourceName
 	a.Master.Instance.Type = config.StackState.MasterInstanceType
-	a.Master.CloudConfig.Hash = config.StackState.MasterIgnitionHash
 
 	a.Worker.ASG.Ref = key.WorkerASGRef
-	a.Worker.CloudConfig.Hash = config.StackState.WorkerIgnitionHash
 	a.Worker.DockerVolumeSizeGB = config.StackState.WorkerDockerVolumeSizeGB
+	a.Worker.Ignition.Hash = config.StackState.WorkerIgnitionHash
 	a.Worker.ImageID = config.StackState.WorkerImageID
 	a.Worker.InstanceType = config.StackState.WorkerInstanceType
 
@@ -31,9 +31,9 @@ func (a *GuestOutputsAdapter) Adapt(config Config) error {
 }
 
 type GuestOutputsAdapterMaster struct {
+	Ignition     GuestOutputsAdapterMasterIgnition
 	ImageID      string
 	Instance     GuestOutputsAdapterMasterInstance
-	CloudConfig  GuestOutputsAdapterMasterCloudConfig
 	DockerVolume GuestOutputsAdapterMasterDockerVolume
 }
 
@@ -42,7 +42,7 @@ type GuestOutputsAdapterMasterInstance struct {
 	Type         string
 }
 
-type GuestOutputsAdapterMasterCloudConfig struct {
+type GuestOutputsAdapterMasterIgnition struct {
 	Hash string
 }
 
@@ -52,8 +52,8 @@ type GuestOutputsAdapterMasterDockerVolume struct {
 
 type GuestOutputsAdapterWorker struct {
 	ASG                GuestOutputsAdapterWorkerASG
-	CloudConfig        GuestOutputsAdapterWorkerCloudConfig
 	DockerVolumeSizeGB string
+	Ignition           GuestOutputsAdapterWorkerIgnition
 	ImageID            string
 	InstanceType       string
 }
@@ -62,7 +62,7 @@ type GuestOutputsAdapterWorkerASG struct {
 	Ref string
 }
 
-type GuestOutputsAdapterWorkerCloudConfig struct {
+type GuestOutputsAdapterWorkerIgnition struct {
 	Hash string
 }
 
