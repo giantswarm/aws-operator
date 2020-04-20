@@ -70,7 +70,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.DockerVolumeResourceNameKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.DockerVolumeResourceNameKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -78,7 +78,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if r.route53Enabled {
-		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
+		v, err := cloudformation.GetOutputValue(outputs, HostedZoneNameServersKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -86,7 +86,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.MasterImageIDKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.MasterImageIDKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -94,7 +94,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.MasterInstanceResourceNameKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.MasterInstanceResourceNameKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -102,7 +102,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.MasterInstanceTypeKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.MasterInstanceTypeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -110,7 +110,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -118,7 +118,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.VersionBundleVersionKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.VersionBundleVersionKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -126,7 +126,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCIDKey)
+		v, err := cloudformation.GetOutputValue(outputs, VPCIDKey)
 		if cloudformation.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v24 to
 			// v25. The code can be cleaned up in v30 and the controller context value
@@ -147,7 +147,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
+		v, err := cloudformation.GetOutputValue(outputs, VPCPeeringConnectionIDKey)
 		if cloudformation.IsOutputNotFound(err) {
 			// TODO this exception is necessary for clusters upgrading from v23 to
 			// v24. The code can be cleaned up in v25 and the controller context value
@@ -168,7 +168,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -176,7 +176,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerDockerVolumeSizeKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.WorkerDockerVolumeSizeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -184,7 +184,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerImageIDKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.WorkerImageIDKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -192,7 +192,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, key.WorkerInstanceTypeKey)
+		v, err := cloudformation.GetOutputValue(outputs, key.WorkerInstanceTypeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}

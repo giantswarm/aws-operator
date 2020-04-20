@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
+	cloudformationinternal "github.com/giantswarm/aws-operator/service/controller/internal/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates"
@@ -80,6 +81,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane network cidr")
 	}
 
+	var outputs []cloudformationinternal.Output
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
@@ -108,11 +110,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 		}
 
+		outputs = cloudformationinternal.ToOutputs(o.Stacks[0].Outputs)
+
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
 	}
 
 	{
-		update, err := r.detection.ShouldUpdate(ctx, cr)
+		update, err := r.detection.ShouldUpdate(ctx, cr, outputs)
 		if err != nil {
 			return microerror.Mask(err)
 		}
