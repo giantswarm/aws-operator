@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add mixed instance support for worker ASGs.
+
 
 
 ## [8.3.0] 2020-04-17
