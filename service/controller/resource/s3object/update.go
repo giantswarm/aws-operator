@@ -37,9 +37,9 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 			switch objectKey {
 			case key.BucketObjectName(key.KindMaster):
-				cc.Status.TenantCluster.MasterInstance.IgnitionHash = bucketObject.Hash
+				cc.Spec.TenantCluster.MasterInstance.IgnitionHash = bucketObject.Hash
 			case key.BucketObjectName(key.KindWorker):
-				cc.Status.TenantCluster.WorkerInstance.IgnitionHash = bucketObject.Hash
+				cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = bucketObject.Hash
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", objectKey))

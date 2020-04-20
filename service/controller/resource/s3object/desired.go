@@ -4,18 +4,14 @@ import (
 	"context"
 	"crypto/sha512"
 	"encoding/hex"
-	"fmt"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	gscerts "github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -31,19 +27,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	var release *v1alpha1.Release
-	{
-		releaseVersion := customObject.Labels[label.ReleaseVersion]
-		releaseName := fmt.Sprintf("v%s", releaseVersion)
-		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var images k8scloudconfig.Images
 	{
-		versions, err := k8scloudconfig.ExtractComponentVersions(release.Spec.Components)
+		versions, err := k8scloudconfig.ExtractComponentVersions(cc.Spec.TenantCluster.Release.Spec.Components)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

@@ -30,8 +30,5 @@ const Outputs = `
     Value: {{ .Guest.Outputs.Worker.ImageID }}
   WorkerInstanceType:
     Value: {{ .Guest.Outputs.Worker.InstanceType }}
-  VersionBundleVersion:
-    Value:
-      Ref: VersionBundleVersionParameter
 {{end}}
 `

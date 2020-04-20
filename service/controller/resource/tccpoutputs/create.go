@@ -94,6 +94,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
+		v, err := cloudformation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.MasterInstance.IgnitionHash = v
+	}
+
+	{
 		v, err := cloudformation.GetOutputValue(outputs, key.MasterInstanceResourceNameKey)
 		if err != nil {
 			return microerror.Mask(err)
@@ -107,22 +115,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.MasterInstance.Type = v
-	}
-
-	{
-		v, err := cloudformation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.MasterInstance.IgnitionHash = v
-	}
-
-	{
-		v, err := cloudformation.GetOutputValue(outputs, key.VersionBundleVersionKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.VersionBundleVersion = v
 	}
 
 	{
@@ -168,19 +160,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudformation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.WorkerInstance.IgnitionHash = v
-	}
-
-	{
 		v, err := cloudformation.GetOutputValue(outputs, key.WorkerDockerVolumeSizeKey)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB = v
+	}
+
+	{
+		v, err := cloudformation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.WorkerInstance.IgnitionHash = v
 	}
 
 	{

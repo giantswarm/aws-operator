@@ -8,7 +8,6 @@ type GuestOutputsAdapter struct {
 	Master         GuestOutputsAdapterMaster
 	Worker         GuestOutputsAdapterWorker
 	Route53Enabled bool
-	VersionBundle  GuestOutputsAdapterVersionBundle
 }
 
 func (a *GuestOutputsAdapter) Adapt(config Config) error {
@@ -24,8 +23,6 @@ func (a *GuestOutputsAdapter) Adapt(config Config) error {
 	a.Worker.Ignition.Hash = config.StackState.WorkerIgnitionHash
 	a.Worker.ImageID = config.StackState.WorkerImageID
 	a.Worker.InstanceType = config.StackState.WorkerInstanceType
-
-	a.VersionBundle.Version = config.StackState.VersionBundleVersion
 
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 
@@ -28,6 +29,11 @@ const (
 	// CloudProviderTagOwnedValue is used to indicate an AWS resource is owned
 	// and managed by a cluster.
 	CloudProviderTagOwnedValue = "owned"
+
+	// ComponentOS is the name of the component specified in a Release CR which
+	// determines the version of the OS to be used for tenant cluster nodes and
+	// is ultimately transformed into an AMI based on TC region.
+	ComponentOS = "containerlinux"
 
 	// EnableTerminationProtection is used to protect the CF stacks from deletion.
 	EnableTerminationProtection = true
@@ -352,16 +358,6 @@ func MainHostPostStackName(customObject v1alpha1.AWSConfig) string {
 
 func MasterCount(customObject v1alpha1.AWSConfig) int {
 	return len(customObject.Spec.AWS.Masters)
-}
-
-func MasterImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Masters) > 0 {
-		imageID = customObject.Spec.AWS.Masters[0].ImageID
-	}
-
-	return imageID
 }
 
 func MasterInstanceResourceName(customObject v1alpha1.AWSConfig) string {
@@ -690,16 +686,6 @@ func WorkerDockerVolumeSizeGB(customObject v1alpha1.AWSConfig) string {
 	return strconv.Itoa(customObject.Spec.AWS.Workers[0].DockerVolumeSizeGB)
 }
 
-func WorkerImageID(customObject v1alpha1.AWSConfig) string {
-	var imageID string
-
-	if len(customObject.Spec.AWS.Workers) > 0 {
-		imageID = customObject.Spec.AWS.Workers[0].ImageID
-	}
-
-	return imageID
-}
-
 func WorkerInstanceType(customObject v1alpha1.AWSConfig) string {
 	var instanceType string
 
@@ -735,7 +721,12 @@ func componentName(domainName string) (string, error) {
 }
 
 // ImageID returns the EC2 AMI for the configured region and given version.
-func ImageID(customObject v1alpha1.AWSConfig, osVersion string) (string, error) {
+func ImageID(customObject v1alpha1.AWSConfig, release releasev1alpha1.Release) (string, error) {
+	osVersion, err := OSVersion(release)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	regionAMIs, ok := amiInfo[osVersion]
 	if !ok {
 		return "", microerror.Maskf(invalidConfigError, "no image id for version '%s'", osVersion)
@@ -763,4 +754,17 @@ func getResourcenameWithTimeHash(prefix string, customObject v1alpha1.AWSConfig)
 	upperClusterID := strings.ToUpper(clusterID)
 
 	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
+}
+
+func ComponentVersion(release releasev1alpha1.Release, componentName string) (string, error) {
+	for _, component := range release.Spec.Components {
+		if component.Name == componentName {
+			return component.Version, nil
+		}
+	}
+	return "", microerror.Maskf(notFoundError, "version for component %#v not found on release %#v", componentName, release.Name)
+}
+
+func OSVersion(release releasev1alpha1.Release) (string, error) {
+	return ComponentVersion(release, ComponentOS)
 }

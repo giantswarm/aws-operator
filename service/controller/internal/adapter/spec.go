@@ -77,8 +77,6 @@ type StackState struct {
 	WorkerInstanceType        string
 	WorkerMax                 int
 	WorkerMin                 int
-
-	VersionBundleVersion string
 }
 
 // SmallCloudconfigConfig represents the data structure required for executing

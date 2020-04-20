@@ -8,7 +8,6 @@ import (
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
@@ -34,23 +33,24 @@ func Test_DesiredState(t *testing.T) {
 		},
 	}
 
-	release := releasev1alpha1.NewReleaseCR()
-	release.ObjectMeta.Name = "v1.0.0"
-	release.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
-		{
-			Name:    "kubernetes",
-			Version: "1.15.4",
-		},
-		{
-			Name:    "calico",
-			Version: "3.9.1",
-		},
-		{
-			Name:    "etcd",
-			Version: "3.3.15",
+	release := releasev1alpha1.Release{
+		Spec: releasev1alpha1.ReleaseSpec{
+			Components: []releasev1alpha1.ReleaseSpecComponent{
+				{
+					Name:    "kubernetes",
+					Version: "1.15.4",
+				},
+				{
+					Name:    "calico",
+					Version: "3.9.1",
+				},
+				{
+					Name:    "etcd",
+					Version: "3.3.15",
+				},
+			},
 		},
 	}
-	clientset := fake.NewSimpleClientset(release)
 
 	masterKeyPattern := "ignition/master"
 	workerKeyPattern := "ignition/worker"
@@ -105,7 +105,6 @@ calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
-					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 					RegistryDomain:     "example.com",
@@ -121,6 +120,11 @@ calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 				Client: controllercontext.ContextClient{
 					TenantCluster: controllercontext.ContextClientTenantCluster{
 						AWS: awsClients,
+					},
+				},
+				Spec: controllercontext.ContextSpec{
+					TenantCluster: controllercontext.ContextSpecTenantCluster{
+						Release: release,
 					},
 				},
 				Status: controllercontext.ContextStatus{

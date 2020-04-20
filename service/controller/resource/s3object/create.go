@@ -36,9 +36,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 			switch objectKey {
 			case key.BucketObjectName(key.KindMaster):
-				cc.Status.TenantCluster.MasterInstance.IgnitionHash = bucketObject.Hash
+				cc.Spec.TenantCluster.MasterInstance.IgnitionHash = bucketObject.Hash
 			case key.BucketObjectName(key.KindWorker):
-				cc.Status.TenantCluster.WorkerInstance.IgnitionHash = bucketObject.Hash
+				cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = bucketObject.Hash
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", objectKey))

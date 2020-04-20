@@ -9,7 +9,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -67,12 +66,25 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (boo
 //     The worker node's instance type changes.
 //     The tenant cluster's version changes.
 //
-func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig, outputs []cloudformation.Output) (bool, error) {
+func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
 
+	imageID, err := key.ImageID(cr, cc.Spec.TenantCluster.Release)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	if cc.Status.TenantCluster.MasterInstance.IgnitionHash != cc.Spec.TenantCluster.MasterInstance.IgnitionHash {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(cr)))
+		return true, nil
+	}
+	if cc.Status.TenantCluster.MasterInstance.Image != imageID {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
+		return true, nil
+	}
 	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
 		return true, nil
@@ -81,57 +93,17 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig, out
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance docker volume size changes: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB is %q while key.WorkerDockerVolumeSizeGB(cr) is %q", cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB, key.WorkerDockerVolumeSizeGB(cr)))
 		return true, nil
 	}
-	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(cr) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(cr)))
-		return true, nil
-	}
-	if cc.Status.TenantCluster.VersionBundleVersion != key.VersionBundleVersion(cr) {
+	if cc.Status.TenantCluster.WorkerInstance.IgnitionHash != cc.Spec.TenantCluster.WorkerInstance.IgnitionHash {
 		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(cr)))
 		return true, nil
 	}
-
-	{
-		v, err := cloudformation.GetOutputValue(outputs, key.MasterImageIDKey)
-		if err != nil {
-			return false, microerror.Mask(err)
-		}
-		if cc.Status.TenantCluster.MasterInstance.Image != v {
-			d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-			return true, nil
-		}
+	if cc.Status.TenantCluster.WorkerInstance.Image != imageID {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
+		return true, nil
 	}
-
-	{
-		v, err := cloudformation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
-		if err != nil {
-			return false, microerror.Mask(err)
-		}
-		if cc.Status.TenantCluster.MasterInstance.IgnitionHash != v {
-			d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-			return true, nil
-		}
-	}
-
-	{
-		v, err := cloudformation.GetOutputValue(outputs, key.WorkerImageIDKey)
-		if err != nil {
-			return false, microerror.Mask(err)
-		}
-		if cc.Status.TenantCluster.WorkerInstance.Image != v {
-			d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-			return true, nil
-		}
-	}
-
-	{
-		v, err := cloudformation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
-		if err != nil {
-			return false, microerror.Mask(err)
-		}
-		if cc.Status.TenantCluster.WorkerInstance.IgnitionHash != v {
-			d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-			return true, nil
-		}
+	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
+		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(cr) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(cr)))
+		return true, nil
 	}
 
 	return false, nil
