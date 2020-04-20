@@ -12,6 +12,10 @@ import (
 )
 
 var (
+	// MachineDeploymentLaunchTemplateOverrides is a mapping for instance type
+	// overrides. We made these up and can adapt them to our needs. The meaning of
+	// the mapping is that e.g. when wanting m4.xlarge but these are unavailable
+	// we allow to chose m5.xlarge to fulfil the scaling requirements.
 	MachineDeploymentLaunchTemplateOverrides = map[string][]template.LaunchTemplateOverride{
 		"m4.xlarge": {
 			template.LaunchTemplateOverride{
