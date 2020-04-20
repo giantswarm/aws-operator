@@ -119,13 +119,6 @@ type ContextStatusTenantClusterTCNP struct {
 	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
 }
 
-type ContextStatusTenantClusterTCNPASG struct {
-	DesiredCapacity int
-	MaxSize         int
-	MinSize         int
-	Name            string
-}
-
 type ContextStatusTenantClusterTCNPInstances struct {
 	InstanceTypes         []string
 	NumberOfSpotInstances int
