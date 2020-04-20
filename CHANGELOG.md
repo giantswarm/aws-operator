@@ -9,10 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [8.3.0] 2020-04-17
+
 ### Added
 
 - Add Control Plane drainer controller.
 - Add Dependabot configuration.
+- Add VPC ID to AWSCluster CR status.
+- Read CIDR from CR if available.
 
 ### Changed
 
@@ -45,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix subnet allocation for Availability Zones.
 - Switch to AWS CNI
 
+
+
 ## [8.2.1] - 2020-03-20
 
 - Add PV limit per node. The limit is 20 PV per node.
@@ -55,8 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.3.0...HEAD
 
+[8.3.0]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...v8.3.0
 [8.2.3]: https://github.com/giantswarm/aws-operator/compare/v8.2.2...v8.2.3
 [8.2.2]: https://github.com/giantswarm/aws-operator/compare/v8.2.1...v8.2.2
 
