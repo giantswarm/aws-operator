@@ -31,6 +31,17 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
+          - Effect: Allow
+            Action: 
+             - "ec2:AuthorizeSecurityGroupIngress"
+             - "ec2:CreateSecurityGroup"
+             - "ec2:CreateTags"
+             - "ec2:DeleteTags"
+             - "ec2:DeleteSecurityGroup"
+             - "ec2:ModifyInstanceAttribute"
+             - "ec2:ModifyNetworkInterfaceAttribute"
+             - "ec2:RevokeSecurityGroupIngress"
+            Resource: "*"
           {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
