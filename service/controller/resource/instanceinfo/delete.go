@@ -1,4 +1,4 @@
-package instancestatus
+package instanceinfo
 
 import (
 	"context"

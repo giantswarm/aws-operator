@@ -1,4 +1,4 @@
-package instancestatus
+package instanceinfo
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Name = "instancestatus"
+	Name = "instanceinfo"
 )
 
 type Config struct {

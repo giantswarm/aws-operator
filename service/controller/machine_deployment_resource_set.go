@@ -33,7 +33,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/instancestatus"
+	"github.com/giantswarm/aws-operator/service/controller/resource/instanceinfo"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -448,14 +448,14 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpInstanceStatusResource resource.Interface
+	var tcnpInstanceInfoResource resource.Interface
 	{
-		c := instancestatus.Config{
+		c := instanceinfo.Config{
 			G8sClient: config.G8sClient,
 			Logger:    config.Logger,
 		}
 
-		tcnpInstanceStatusResource, err = instancestatus.New(c)
+		tcnpInstanceInfoResource, err = instanceinfo.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -532,8 +532,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		tcnpAZsResource,
 		tcnpOutputsResource,
 		tcnpEncryptionResource,
+		tcnpInstanceInfoResource,
 		tcnpSecurityGroupsResource,
-		tcnpInstanceStatusResource,
 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
@@ -541,6 +541,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		ipamResource,
 		tcnpResource,
 		tcnpfResource,
+
+		// All these resources implement logic to update CR status information.
 		tcnpStatusResource,
 	}
 
