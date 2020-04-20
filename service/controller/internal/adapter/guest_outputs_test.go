@@ -9,9 +9,9 @@ import (
 func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		Description                      string
-		Config                           Config
-		ExpectedMasterIgnitionHash       string
+		Description                string
+		Config                     Config
+		ExpectedMasterIgnitionHash string
 	}{
 		{
 			Description: "master CloudConfig version should match the hardcoded value",
@@ -44,9 +44,9 @@ func Test_CloudFormation_Adapter_Outputs_MasterCloudConfigVersion(t *testing.T) 
 func Test_CloudFormation_Adapter_Outputs_WorkerCloudConfigVersion(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
-		Description                      string
-		Config                           Config
-		ExpectedWorkerIgnitionHash       string
+		Description                string
+		Config                     Config
+		ExpectedWorkerIgnitionHash string
 	}{
 		{
 			Description: "worker CloudConfig version should match the hardcoded value",
