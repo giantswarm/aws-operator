@@ -33,7 +33,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/instanceinfo"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -47,6 +46,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpinstanceinfo"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
@@ -450,12 +450,11 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 
 	var tcnpInstanceInfoResource resource.Interface
 	{
-		c := instanceinfo.Config{
-			G8sClient: config.G8sClient,
-			Logger:    config.Logger,
+		c := tcnpinstanceinfo.Config{
+			Logger: config.Logger,
 		}
 
-		tcnpInstanceInfoResource, err = instanceinfo.New(c)
+		tcnpInstanceInfoResource, err = tcnpinstanceinfo.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

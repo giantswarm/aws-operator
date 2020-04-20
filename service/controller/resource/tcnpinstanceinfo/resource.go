@@ -1,4 +1,4 @@
-package instanceinfo
+package tcnpinstanceinfo
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -15,30 +14,24 @@ import (
 )
 
 const (
-	Name = "instanceinfo"
+	Name = "tcnpinstanceinfo"
 )
 
 type Config struct {
-	G8sClient versioned.Interface
-	Logger    micrologger.Logger
+	Logger micrologger.Logger
 }
 
 type Resource struct {
-	g8sClient versioned.Interface
-	logger    micrologger.Logger
+	logger micrologger.Logger
 }
 
 func New(config Config) (*Resource, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		g8sClient: config.G8sClient,
-		logger:    config.Logger,
+		logger: config.Logger,
 	}
 
 	return r, nil

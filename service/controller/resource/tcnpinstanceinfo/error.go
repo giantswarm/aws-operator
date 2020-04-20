@@ -1,4 +1,4 @@
-package instanceinfo
+package tcnpinstanceinfo
 
 import (
 	"strings"
