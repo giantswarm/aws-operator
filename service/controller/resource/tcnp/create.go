@@ -279,8 +279,6 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 
 		if cr.Spec.Provider.Worker.UseAlikeInstanceTypes && ok {
 			launchTemplateOverride = val
-		} else {
-			launchTemplateOverride = []template.LaunchTemplateOverride{}
 		}
 	}
 
