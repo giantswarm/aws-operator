@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use release.Revision in Helm chart for Helm 3 support.
+
 
 
 ## [8.3.0] 2020-04-17
