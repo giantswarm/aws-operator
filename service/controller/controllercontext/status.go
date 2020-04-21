@@ -41,7 +41,6 @@ type ContextStatusTenantCluster struct {
 	HostedZoneNameServers string
 	MasterInstance        ContextStatusTenantClusterMasterInstance
 	TCCP                  ContextStatusTenantClusterTCCP
-	VersionBundleVersion  string
 	WorkerInstance        ContextStatusTenantClusterWorkerInstance
 }
 

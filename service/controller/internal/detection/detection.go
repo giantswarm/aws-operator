@@ -77,33 +77,55 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bo
 		return false, microerror.Mask(err)
 	}
 
-	if cc.Status.TenantCluster.MasterInstance.IgnitionHash != cc.Spec.TenantCluster.MasterInstance.IgnitionHash {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(cr)))
-		return true, nil
+	changeCandidates := []struct {
+		name         string
+		desiredValue string
+		currentValue string
+	}{
+		{
+			name:         "master ignition hash",
+			desiredValue: cc.Spec.TenantCluster.MasterInstance.IgnitionHash,
+			currentValue: cc.Status.TenantCluster.MasterInstance.IgnitionHash,
+		},
+		{
+			name:         "master instance AMI",
+			desiredValue: imageID,
+			currentValue: cc.Status.TenantCluster.MasterInstance.Image,
+		},
+		{
+			name:         "master instance type",
+			desiredValue: key.WorkerInstanceType(cr),
+			currentValue: cc.Status.TenantCluster.MasterInstance.IgnitionHash,
+		},
+		{
+			name:         "worker instance docker volume size",
+			desiredValue: key.WorkerDockerVolumeSizeGB(cr),
+			currentValue: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB,
+		},
+		{
+			name:         "worker ignition hash",
+			desiredValue: cc.Spec.TenantCluster.WorkerInstance.IgnitionHash,
+			currentValue: cc.Status.TenantCluster.WorkerInstance.IgnitionHash,
+		},
+		{
+			name:         "worker instance AMI",
+			desiredValue: imageID,
+			currentValue: cc.Status.TenantCluster.WorkerInstance.Image,
+		},
+		{
+			name:         "worker instance type",
+			desiredValue: key.WorkerInstanceType(cr),
+			currentValue: cc.Status.TenantCluster.WorkerInstance.Type,
+		},
 	}
-	if cc.Status.TenantCluster.MasterInstance.Image != imageID {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-		return true, nil
-	}
-	if cc.Status.TenantCluster.MasterInstance.Type != key.MasterInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-		return true, nil
-	}
-	if cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB != key.WorkerDockerVolumeSizeGB(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance docker volume size changes: cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB is %q while key.WorkerDockerVolumeSizeGB(cr) is %q", cc.Status.TenantCluster.WorkerInstance.DockerVolumeSizeGB, key.WorkerDockerVolumeSizeGB(cr)))
-		return true, nil
-	}
-	if cc.Status.TenantCluster.WorkerInstance.IgnitionHash != cc.Spec.TenantCluster.WorkerInstance.IgnitionHash {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to version bundle version changes: cc.Status.TenantCluster.VersionBundleVersion is %q while key.VersionBundleVersion(cr) is %q", cc.Status.TenantCluster.VersionBundleVersion, key.VersionBundleVersion(cr)))
-		return true, nil
-	}
-	if cc.Status.TenantCluster.WorkerInstance.Image != imageID {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to master instance type changes: cc.Status.TenantCluster.MasterInstance.Type is %q while key.MasterInstanceType(cr) is %q", cc.Status.TenantCluster.MasterInstance.Type, key.MasterInstanceType(cr)))
-		return true, nil
-	}
-	if cc.Status.TenantCluster.WorkerInstance.Type != key.WorkerInstanceType(cr) {
-		d.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detected the tenant cluster should update due to worker instance type changes: cc.Status.TenantCluster.WorkerInstance.Type is %q while key.WorkerInstanceType(cr) is %q", cc.Status.TenantCluster.WorkerInstance.Type, key.WorkerInstanceType(cr)))
-		return true, nil
+
+	template := "detected the tenant cluster should update due to changes in %s: current value of is %q while desired value is %q"
+	for _, candidate := range changeCandidates {
+		if candidate.desiredValue != candidate.currentValue {
+			message := fmt.Sprintf(template, candidate.name, candidate.currentValue, candidate.desiredValue)
+			d.logger.LogCtx(ctx, "level", "debug", "message", message)
+			return true, nil
+		}
 	}
 
 	return false, nil
