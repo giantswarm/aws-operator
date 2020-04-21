@@ -13,7 +13,11 @@ const TemplateMainAutoScalingGroup = `
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 1
-      LaunchConfigurationName: !Ref ControlPlaneNodeLaunchConfiguration
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate.LatestVersionNumber
       LoadBalancerNames:
       - {{ .AutoScalingGroup.LoadBalancers.ApiInternalName }}
       - {{ .AutoScalingGroup.LoadBalancers.ApiName }}

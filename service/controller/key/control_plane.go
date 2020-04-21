@@ -66,6 +66,10 @@ func ControlPlaneENISubnetSize(ipNet net.IPNet) int {
 	return subnetSize
 }
 
+func ControlPlaneLaunchTemplateName(getter LabelsGetter, masterID int) string {
+	return fmt.Sprintf("%s-master%d-launch-template", ClusterID(getter), masterID)
+}
+
 func ControlPlaneVolumeNameEtcd(getter LabelsGetter, masterID int) string {
 	return fmt.Sprintf("%s-master%d-etcd", ClusterID(getter), masterID)
 }

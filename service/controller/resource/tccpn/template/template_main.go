@@ -11,6 +11,6 @@ Resources:
   {{ template "eni" . }}
   {{ template "etcd_volume" . }}
   {{ template "iam_policies" . }}
-  {{ template "launch_configuration" . }}
+  {{ template "launch_template" . }}
 {{ end }}
 `

@@ -17,7 +17,11 @@ Resources:
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 1
-      LaunchConfigurationName: !Ref ControlPlaneNodeLaunchConfiguration
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate.LatestVersionNumber
       LoadBalancerNames:
       - 8y5ck-api-internal
       - 8y5ck-api
@@ -226,77 +230,83 @@ Resources:
               - "route53:ListResourceRecordSets"
             Resource: "*"
 
-  ControlPlaneNodeLaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  ControlPlaneNodeLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      AssociatePublicIpAddress: false
-      BlockDeviceMappings:
-      - DeviceName: /dev/xvdc
-        Ebs:
-          DeleteOnTermination: true
-          Encrypted: true
-          VolumeSize: 100
-          VolumeType: gp2
-      - DeviceName: /dev/xvdg
-        Ebs:
-          DeleteOnTermination: true
-          Encrypted: true
-          VolumeSize: 100
-          VolumeType: gp2
-      - DeviceName: /dev/xvdf
-        Ebs:
-          DeleteOnTermination: true
-          Encrypted: true
-          VolumeSize: 100
-          VolumeType: gp2
-      IamInstanceProfile: !Ref ControlPlaneNodesInstanceProfile
-      ImageId: ami-038cea5071a5ee580
-      InstanceType: m5.xlarge
-      InstanceMonitoring: false
-      SecurityGroups:
-      -  master-security-group-id
-      UserData:
-        Fn::Base64: |
-          {
-            "ignition": {
-              "version": "2.2.0",
-              "config": {
-                "append": [
+      LaunchTemplateName: 8y5ck-master0-launch-template
+      LaunchTemplateData:
+        BlockDeviceMappings:
+        - DeviceName: /dev/xvdc
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdg
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        IamInstanceProfile:
+          Name: !Ref ControlPlaneNodesInstanceProfile
+        ImageId: ami-038cea5071a5ee580
+        InstanceType: m5.xlarge
+        Monitoring:
+          Enabled: false
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeviceIndex: 0
+            Groups:
+            - master-security-group-id
+        UserData:
+          Fn::Base64: |
+            {
+              "ignition": {
+                "version": "2.2.0",
+                "config": {
+                  "append": [
+                    {
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_0_0/cluster-8y5ck-tccpn"
+                    }
+                  ]
+                }
+              },
+              "storage": {
+                "filesystems": [
                   {
-                    "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_0_0/cluster-8y5ck-tccpn"
+                    "name": "docker",
+                    "mount": {
+                      "device": "/dev/xvdc",
+                      "wipeFilesystem": true,
+                      "label": "docker",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "kubelet",
+                    "mount": {
+                      "device": "/dev/xvdg",
+                      "wipeFilesystem": true,
+                      "label": "kubelet",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "log",
+                    "mount": {
+                      "device": "/dev/xvdf",
+                      "wipeFilesystem": true,
+                      "label": "log",
+                      "format": "xfs"
+                    }
                   }
                 ]
               }
-            },
-            "storage": {
-              "filesystems": [
-                {
-                  "name": "docker",
-                  "mount": {
-                    "device": "/dev/xvdc",
-                    "wipeFilesystem": true,
-                    "label": "docker",
-                    "format": "xfs"
-                  }
-                },
-                {
-                  "name": "kubelet",
-                  "mount": {
-                    "device": "/dev/xvdg",
-                    "wipeFilesystem": true,
-                    "label": "kubelet",
-                    "format": "xfs"
-                  }
-                },
-                {
-                  "name": "log",
-                  "mount": {
-                    "device": "/dev/xvdf",
-                    "wipeFilesystem": true,
-                    "label": "log",
-                    "format": "xfs"
-                  }
-                }
-              ]
             }
-          }

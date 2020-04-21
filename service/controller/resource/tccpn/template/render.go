@@ -13,7 +13,7 @@ func Render(v interface{}) (string, error) {
 		TemplateMainENI,
 		TemplateMainEtcdVolume,
 		TemplateMainIAMPolicies,
-		TemplateMainLaunchConfiguration,
+		TemplateMainLaunchTemplate,
 		TemplateMainOutputs,
 	}
 
