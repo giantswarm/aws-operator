@@ -84,8 +84,7 @@ func NewNAT(config NATConfig) (*NAT, error) {
 		// pool). As clusters are not created nor changed so often, and the process
 		// can take around 20 minutes, 30 minutes for the cache expiration is a
 		// reasonable value.
-		cache: newNATCache(time.Minute * 5),
-		//cache: newNATCache(time.Minute * 30),
+		cache:  newNATCache(time.Minute * 30),
 		helper: config.Helper,
 		logger: config.Logger,
 
@@ -176,7 +175,6 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		}
 	}
 
-	fmt.Printf("nat info %+v /n", natInfo)
 	if natInfo != nil {
 		err = v.cache.Set(accountID, *natInfo)
 		if err != nil {
