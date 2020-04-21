@@ -1,9 +1,14 @@
 package drainerfinalizer
 
 import (
-	"strings"
+	"regexp"
 
 	"github.com/giantswarm/microerror"
+)
+
+var (
+	// noActiveLifeCycleActionRegExp is a fuzzy regular expression to match Autoscaling errors
+	noActiveLifeCycleActionRegExp = regexp.MustCompile(`(?m)[nN][oO].*[lL][iI][fF][eE].*[cC][yY][cC][lL][eE].*[fF][oO][uU][nN][dD]`)
 )
 
 var invalidConfigError = &microerror.Error{
@@ -37,7 +42,7 @@ func IsNoActiveLifeCycleAction(err error) bool {
 		return false
 	}
 
-	if strings.Contains(c.Error(), "no active life cycle action found") {
+	if noActiveLifeCycleActionRegExp.MatchString(c.Error()) {
 		return true
 	}
 
