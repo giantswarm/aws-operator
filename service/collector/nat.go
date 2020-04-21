@@ -59,12 +59,12 @@ type natCache struct {
 	cache *cache.StringCache
 }
 
-type natResponse struct {
-	vpcs map[string]natVPC
+type natInfoResponse struct {
+	vpcs map[string]vpcInfo
 }
 
-type natVPC struct {
-	zones map[string]float64
+type vpcInfo struct {
+	natGatewaysByZone map[string]float64
 }
 
 func NewNAT(config NATConfig) (*NAT, error) {
@@ -103,8 +103,8 @@ func newNATCache(expiration time.Duration) *natCache {
 	return cache
 }
 
-func (n *natCache) Get(accID string) (*natResponse, error) {
-	var c natResponse
+func (n *natCache) Get(accID string) (*natInfoResponse, error) {
+	var c natInfoResponse
 	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
 	if ok {
 		err := hprose.Unserialize(raw, c, true)
@@ -116,7 +116,7 @@ func (n *natCache) Get(accID string) (*natResponse, error) {
 	return &c, nil
 }
 
-func (n *natCache) Set(accID string, content natResponse) error {
+func (n *natCache) Set(accID string, content natInfoResponse) error {
 	contentSerialized, err := hprose.Serialize(content, true)
 	if err != nil {
 		return microerror.Mask(err)
@@ -161,9 +161,8 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
-	fmt.Println("Collecting nat info")
-	var natInfo *natResponse
-
+	var natInfo *natInfoResponse
+	// Check if response is cached
 	natInfo, err = v.cache.Get(accountID)
 	if err != nil {
 		return microerror.Mask(err)
@@ -185,7 +184,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		}
 
 		for vpcID, vpcInfo := range natInfo.vpcs {
-			for azName, azValue := range vpcInfo.zones {
+			for azName, azValue := range vpcInfo.natGatewaysByZone {
 				ch <- prometheus.MustNewConstMetric(
 					natDesc,
 					prometheus.GaugeValue,
@@ -201,12 +200,13 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	return nil
 }
 
-func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natResponse, error) {
-	var res natResponse
-	res.vpcs = make(map[string]natVPC)
+// getNatInfoFromAPI collect from AWS API the number of NAT Gateways by Availability Zone for
+// each VPC of the installation
+func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfoResponse, error) {
+	var res natInfoResponse
+	res.vpcs = make(map[string]vpcInfo)
 
-	fmt.Printf("nat cache empty, query AWS API for account %s\n", accountID)
-
+	// 1. Get all VPCs of the installation
 	iv := &ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -222,9 +222,12 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natResp
 		return nil, microerror.Mask(err)
 	}
 
+	// 2. Get all NAT GWs for each VPC
 	for _, vpc := range rv.Vpcs {
+		res.vpcs[*vpc.VpcId] = vpcInfo{
+			natGatewaysByZone: make(map[string]float64),
+		}
 
-		fmt.Printf("nat vpc %s \n", *vpc.VpcId)
 		in := &ec2.DescribeNatGatewaysInput{
 			Filter: []*ec2.Filter{
 				{
@@ -235,17 +238,13 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natResp
 				},
 			},
 		}
-
-		res.vpcs[*vpc.VpcId] = natVPC{
-			zones: make(map[string]float64),
-		}
-
 		rn, err := awsClients.EC2.DescribeNatGateways(in)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
+		// 3. Get all the subnets for each NAT GW
 		for _, nat := range rn.NatGateways {
-			fmt.Printf("nat subnet %s \n", *nat.SubnetId)
 			is := &ec2.DescribeSubnetsInput{
 				SubnetIds: []*string{
 					nat.SubnetId,
@@ -255,12 +254,14 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natResp
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
+
+			// 4. Store the number of GWs by Availability Zone
 			for _, sub := range rs.Subnets {
 				zoneID := *sub.AvailabilityZoneId
-				if _, ok := res.vpcs[*vpc.VpcId].zones[zoneID]; ok {
-					res.vpcs[*vpc.VpcId].zones[zoneID] = res.vpcs[*vpc.VpcId].zones[zoneID] + 1
+				if _, ok := res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID]; ok {
+					res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] = res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] + 1
 				} else {
-					res.vpcs[*vpc.VpcId].zones[zoneID] = 1
+					res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] = 1
 				}
 			}
 		}
