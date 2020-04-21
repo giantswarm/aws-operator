@@ -27,7 +27,8 @@ const (
 	arch              = "amd64-usr"
 	generatedFilename = "amis.go"
 	generatedPackage  = "key"
-	generatedTemplate = `package {{ .Package }}
+	generatedTemplate = `// NOTE: This file is generated. Do not edit.
+package {{ .Package }}
 
 import "encoding/json"
 

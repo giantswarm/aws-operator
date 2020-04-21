@@ -1,3 +1,4 @@
+// NOTE: This file is generated. Do not edit.
 package key
 
 import "encoding/json"
