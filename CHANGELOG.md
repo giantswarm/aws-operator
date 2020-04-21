@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retrieve component versions from `releases`.
 - Update helm chart with modern labels, configuration, and templating.
 - Switch from dep to Go modules.
+- Use release.Revision in Helm chart for Helm 3 support.
 
 
 ## [5.6.0] - 2020-01-29
