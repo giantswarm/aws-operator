@@ -36,7 +36,7 @@ const TemplateMainLaunchTemplate = `
           - AssociatePublicIpAddress: false
             DeviceIndex: 0
             Groups:
-            - !Ref {{ .LaunchTemplate.MasterSecurityGroupID }}
+            - {{ .LaunchTemplate.MasterSecurityGroupID }}
         UserData:
           Fn::Base64: |
             {

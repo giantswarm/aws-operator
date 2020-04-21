@@ -233,7 +233,7 @@ Resources:
           - AssociatePublicIpAddress: false
             DeviceIndex: 0
             Groups:
-            - !Ref master-security-group-id
+            - master-security-group-id
         UserData:
           Fn::Base64: |
             {
