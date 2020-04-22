@@ -26,7 +26,7 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-docker:
-          name: push-aws-operator-to-aliyun
+          name: push-aws-operator-to-aliyun-master
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
@@ -38,13 +38,26 @@ workflows:
             tags:
               only: /^v.*/
 
+      - architect/push-to-docker:
+          name: push-aws-operator-to-aliyun-pr
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          requires:
+            - go-build
+          filters:
+            branches:
+              ignore: master
+            tags:
+              only: /^v.*/
+
       - architect/push-to-app-catalog:
           name: push-aws-operator-to-control-plane-app-catalog-master
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
-            - push-aws-operator-to-aliyun
+            - push-aws-operator-to-aliyun-master
             - push-aws-operator-to-quay
           filters:
             branches:
