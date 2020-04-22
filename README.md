@@ -40,12 +40,12 @@ go build github.com/giantswarm/aws-operator
 
 ## Architecture
 
+The operator uses our [operatorkit][1] framework.
+
 The operator provisions guest Kubernetes clusters running on AWS. It runs in a
 host Kubernetes cluster also running on AWS.
 
 [1]:https://github.com/giantswarm/operatorkit
-[2]:https://github.com/giantswarm/apiextensions
-[3]:https://github.com/giantswarm/versionbundle
 
 ### CloudFormation
 
