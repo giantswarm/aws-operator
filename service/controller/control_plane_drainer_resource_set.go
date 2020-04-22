@@ -177,7 +177,8 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 
 func controlPlaneDrainerLabelMapFunc(cr metav1.Object) map[string]string {
 	return map[string]string{
-		label.Cluster:      key.ClusterID(cr),
-		label.ControlPlane: key.ControlPlaneID(cr),
+		label.Cluster:         key.ClusterID(cr),
+		label.ControlPlane:    key.ControlPlaneID(cr),
+		label.OperatorVersion: key.OperatorVersion(cr),
 	}
 }
