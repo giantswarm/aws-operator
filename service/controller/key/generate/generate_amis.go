@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	domain            = "flatcar-linux.net"
+	primaryDomain     = "flatcar-linux.net"
+	chinaDomain       = "flatcar-prod-ami-import-cn-north-1.s3.cn-north-1.amazonaws.com.cn"
 	minimumVersion    = "2191.5.0"
 	channel           = "stable"
 	arch              = "amd64-usr"
@@ -82,20 +83,31 @@ func scrapeVersions(source io.Reader) ([]string, error) {
 	}
 }
 
-func scrapeVersionAMIs(source io.Reader) (map[string]string, error) {
+func scrapeVersionAMIs(source io.Reader, parent bool) (map[string]string, error) {
 	body, err := ioutil.ReadAll(source)
 	if err != nil {
 		return nil, err
 	}
 
-	amis := key.AMIInfoList{}
-	err = json.Unmarshal(body, &amis)
-	if err != nil {
-		return nil, err
+	var amis []key.AMIInfo
+	if parent {
+		var list key.AMIInfoListParent
+		err = json.Unmarshal(body, &list)
+		if err != nil {
+			return nil, err
+		}
+		amis = list.AWS.AMIs
+	} else {
+		var list key.AMIInfoList
+		err = json.Unmarshal(body, &list)
+		if err != nil {
+			return nil, err
+		}
+		amis = list.AMIs
 	}
 
 	result := map[string]string{}
-	for _, region := range amis.AMIs {
+	for _, region := range amis {
 		result[region.Name] = region.HVM
 	}
 
@@ -105,7 +117,7 @@ func scrapeVersionAMIs(source io.Reader) (map[string]string, error) {
 func main() {
 	var versions []string
 	{
-		url := fmt.Sprintf("https://%s.release.%s/%s/", channel, domain, arch)
+		url := fmt.Sprintf("https://%s.release.%s/%s/", channel, primaryDomain, arch)
 		fmt.Println("scraping", url)
 		response, err := http.Get(url)
 		if err != nil {
@@ -119,7 +131,7 @@ func main() {
 		if semver.MustParse(version).LessThan(semver.MustParse(minimumVersion)) {
 			continue
 		}
-		url := fmt.Sprintf("https://%s.release.%s/%s/%s/flatcar_production_ami_all.json", channel, domain, arch, version)
+		url := fmt.Sprintf("https://%s.release.%s/%s/%s/flatcar_production_ami_all.json", channel, primaryDomain, arch, version)
 		fmt.Println("scraping", url)
 		response, err := http.Get(url)
 		if err != nil {
@@ -128,7 +140,29 @@ func main() {
 		if response.StatusCode == 403 {
 			continue
 		}
-		mergedAMIs[version], err = scrapeVersionAMIs(response.Body)
+		mergedAMIs[version], err = scrapeVersionAMIs(response.Body, false)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	for version := range mergedAMIs {
+		url := fmt.Sprintf("https://%s/%s/%s/%s.json", chinaDomain, channel, arch, version)
+		fmt.Println("scraping", url)
+		response, err := http.Get(url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if response.StatusCode == 403 {
+			continue
+		}
+		chinaVersionAMIs, err := scrapeVersionAMIs(response.Body, true)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for region, image := range chinaVersionAMIs {
+			mergedAMIs[version][region] = image
+		}
 	}
 
 	result, err := json.MarshalIndent(mergedAMIs, "", "  ")
