@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"math"
 	"time"
 
 	gocache "github.com/patrickmn/go-cache"
@@ -21,17 +22,17 @@ func NewFloat64Cache(expiration time.Duration) *Float64Cache {
 }
 
 func (c *Float64Cache) Get(k string) (float64, bool) {
-	v, exist := c.underlying.Get(k)
+	v, exists := c.underlying.Get(k)
 	if v == nil {
-		return 0, exist
+		return 0, exists
 	}
 
 	vn, ok := v.(float64)
 	if !ok {
-		return 0, exist
+		return math.NaN(), exists
 	}
 
-	return vn, exist
+	return vn, exists
 }
 
 func (c *Float64Cache) Set(k string, v float64) {
@@ -53,17 +54,17 @@ func NewStringCache(expiration time.Duration) *StringCache {
 }
 
 func (c *StringCache) Get(k string) ([]byte, bool) {
-	v, exist := c.underlying.Get(k)
+	v, exists := c.underlying.Get(k)
 	if v == nil {
-		return nil, exist
+		return nil, exists
 	}
 
 	vn, ok := v.([]byte)
 	if !ok {
-		return nil, exist
+		return nil, exists
 	}
 
-	return vn, exist
+	return vn, exists
 }
 
 func (c *StringCache) Set(k string, v []byte) {

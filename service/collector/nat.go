@@ -104,7 +104,7 @@ func newNATCache(expiration time.Duration) *natCache {
 
 func (n *natCache) Get(accID string) (*natInfoResponse, error) {
 	var c natInfoResponse
-	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
+	raw, ok := n.cache.Get(getCacheKey(accID))
 	if ok {
 		err := json.Unmarshal(raw, &c)
 		if err != nil {
@@ -121,9 +121,13 @@ func (n *natCache) Set(accID string, content natInfoResponse) error {
 		return microerror.Mask(err)
 	}
 
-	n.cache.Set(prefixNATcacheKey+accID, contentSerialized)
+	n.cache.Set(getCacheKey(accID), contentSerialized)
 
 	return nil
+}
+
+func getCacheKey(accID string) string {
+	return prefixNATcacheKey + accID
 }
 
 func (v *NAT) Collect(ch chan<- prometheus.Metric) error {
@@ -222,7 +226,8 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfo
 
 	// 2. Get all NAT GWs for each VPC
 	for _, vpc := range rv.Vpcs {
-		res.Vpcs[*vpc.VpcId] = vpcInfo{
+		vpcID := *vpc.VpcId
+		res.Vpcs[vpcID] = vpcInfo{
 			NatGatewaysByZone: make(map[string]float64),
 		}
 
@@ -255,7 +260,6 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfo
 
 			// 4. Store the number of GWs by Availability Zone
 			for _, sub := range rs.Subnets {
-				vpcID := *vpc.VpcId
 				zoneID := *sub.AvailabilityZoneId
 				if _, exists := res.Vpcs[vpcID].NatGatewaysByZone[zoneID]; exists {
 					res.Vpcs[vpcID].NatGatewaysByZone[zoneID] = res.Vpcs[vpcID].NatGatewaysByZone[zoneID] + 1
