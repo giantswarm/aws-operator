@@ -256,7 +256,7 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfo
 			// 4. Store the number of GWs by Availability Zone
 			for _, sub := range rs.Subnets {
 				zoneID := *sub.AvailabilityZoneId
-				if _, ok := res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID]; ok {
+				if _, exists := res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID]; exists {
 					res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] = res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] + 1
 				} else {
 					res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] = 1
