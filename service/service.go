@@ -94,9 +94,31 @@ func New(config Config) (*Service, error) {
 			Logger:     config.Logger,
 			RestConfig: restConfig,
 		}
+
 		k8sClient, err = k8sclient.NewClients(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
+		}
+	}
+
+	// TODO remove migration
+	{
+		ctx := context.Background()
+
+		var list infrastructurev1alpha2.AWSMachineDeploymentList
+		err := k8sClient.CtrlClient().List(ctx, &list)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, md := range list.Items {
+			md.Spec.Provider.InstanceDistribution.OnDemandBaseCapacity = 0
+			md.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity = 100
+
+			err := k8sClient.CtrlClient().Status().Update(ctx, &md)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 		}
 	}
 
