@@ -105,6 +105,7 @@ func newNATCache(expiration time.Duration) *natCache {
 func (n *natCache) Get(accID string) (*natInfoResponse, error) {
 	var c natInfoResponse
 	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
+	fmt.Printf("Get cache nat content %+v for key %s \n", raw, prefixNATcacheKey+accID)
 	if ok {
 		err := hprose.Unserialize(raw, c, true)
 		if err != nil {
@@ -121,6 +122,7 @@ func (n *natCache) Set(accID string, content natInfoResponse) error {
 		return microerror.Mask(err)
 	}
 
+	fmt.Printf("Save in cache nat content %+v for key %s \n", contentSerialized, prefixNATcacheKey+accID)
 	n.cache.Set(prefixNATcacheKey+accID, contentSerialized)
 
 	return nil
@@ -169,20 +171,20 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	//Cache empty, getting from API
 	if natInfo == nil || natInfo.vpcs == nil {
-		fmt.Println("Cache empty querying to AWS for nat info")
+		fmt.Printf("Cache empty for account %s querying to AWS for nat info \n", accountID)
 		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		fmt.Printf("Save in cache nat info %+v /n", natInfo)
+		fmt.Printf("Save in cache nat info %+v \n", natInfo)
 		err = v.cache.Set(accountID, *natInfo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
-	fmt.Printf("exposing nat info %+v /n", natInfo)
+	fmt.Printf("exposing nat info %+v \n", natInfo)
 	if natInfo != nil {
 		for vpcID, vpcInfo := range natInfo.vpcs {
 			for azName, azValue := range vpcInfo.natGatewaysByZone {
