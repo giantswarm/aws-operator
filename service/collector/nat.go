@@ -169,18 +169,21 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	//Cache empty, getting from API
 	if natInfo == nil || natInfo.vpcs == nil {
+		fmt.Println("Cache empty querying to AWS for nat info")
 		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		fmt.Printf("Save in cache nat info %+v /n", natInfo)
+		err = v.cache.Set(accountID, *natInfo)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
+	fmt.Printf("exposing nat info %+v /n", natInfo)
 	if natInfo != nil {
-		err = v.cache.Set(accountID, *natInfo)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
 		for vpcID, vpcInfo := range natInfo.vpcs {
 			for azName, azValue := range vpcInfo.natGatewaysByZone {
 				ch <- prometheus.MustNewConstMetric(
@@ -255,11 +258,12 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfo
 
 			// 4. Store the number of GWs by Availability Zone
 			for _, sub := range rs.Subnets {
+				vpcID := *vpc.VpcId
 				zoneID := *sub.AvailabilityZoneId
-				if _, exists := res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID]; exists {
-					res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] = res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] + 1
+				if _, exists := res.vpcs[vpcID].natGatewaysByZone[zoneID]; exists {
+					res.vpcs[vpcID].natGatewaysByZone[zoneID] = res.vpcs[vpcID].natGatewaysByZone[zoneID] + 1
 				} else {
-					res.vpcs[*vpc.VpcId].natGatewaysByZone[zoneID] = 1
+					res.vpcs[vpcID].natGatewaysByZone[zoneID] = 1
 				}
 			}
 		}
