@@ -1,12 +1,163 @@
 package key
 
 import (
+	"fmt"
 	"strconv"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+)
+
+var (
+	// MachineDeploymentLaunchTemplateOverrides is a mapping for instance type
+	// overrides. We made these up and can adapt them to our needs. The meaning of
+	// the mapping is that e.g. when wanting m4.xlarge but these are unavailable
+	// we allow to chose m5.xlarge to fulfil the scaling requirements.
+	MachineDeploymentLaunchTemplateOverrides = map[string][]template.LaunchTemplateOverride{
+		"m4.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m4.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m4.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m5.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m5.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m5.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r4.8xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.8xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.8xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.2xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.2xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.2xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.4xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.4xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"r5.8xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "r5.8xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "r4.8xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+	}
 )
 
 func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.AWSMachineDeployment) []string {
@@ -21,6 +172,10 @@ func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeploymen
 	return cr.Spec.Provider.Worker.InstanceType
 }
 
+func MachineDeploymentLaunchTemplateName(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return fmt.Sprintf("%s-%s-LaunchTemplate", ClusterID(&cr), MachineDeploymentID(&cr))
+}
+
 func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return strconv.Itoa(cr.Spec.NodePool.Machine.KubeletVolumeSizeGB)
 }
@@ -33,8 +188,29 @@ func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment)
 	return cr.Spec.NodePool.Scaling.Min
 }
 
+// MachineDeploymentSpotInstancePools ensures that the number of spot instance pools
+// we submit to AWS is within AWS limits of more than 0 and less than 21 pools.
+func MachineDeploymentSpotInstancePools(overrides []template.LaunchTemplateOverride) int {
+	pools := len(overrides)
+	if pools < 1 {
+		return 1
+	}
+	if pools > 20 {
+		return 20
+	}
+	return pools
+}
+
 func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return cr.Annotations[annotation.MachineDeploymentSubnet]
+}
+
+func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+	return cr.Spec.Provider.InstanceDistribution.OnDemandBaseCapacity
+}
+
+func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+	return cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
 }
 
 func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {

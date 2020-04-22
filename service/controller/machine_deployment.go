@@ -131,8 +131,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 	{
 		c := machineDeploymentResourceSetConfig{
 			CertsSearcher:      certsSearcher,
-			G8sClient:          config.K8sClient.G8sClient(),
-			K8sClient:          config.K8sClient.K8sClient(),
+			K8sClient:          config.K8sClient,
 			Locker:             config.Locker,
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,

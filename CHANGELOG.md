@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add mixed instance support for worker ASGs.
+
 ### Changed
 
 - Improve cleanup of `DrainerConfig` CRs after node draining.

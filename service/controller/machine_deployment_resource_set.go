@@ -9,6 +9,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -17,7 +18,6 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -46,15 +46,16 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpinstanceinfo"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type machineDeploymentResourceSetConfig struct {
 	CertsSearcher      certs.Interface
-	G8sClient          versioned.Interface
-	K8sClient          kubernetes.Interface
+	K8sClient          k8sclient.Interface
 	Locker             locker.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
@@ -104,7 +105,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var machineDeploymentChecker *ipam.MachineDeploymentChecker
 	{
 		c := ipam.MachineDeploymentCheckerConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -117,7 +118,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
 			NetworkRange: config.IPAMNetworkRange,
@@ -173,7 +174,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var machineDeploymentPersister *ipam.MachineDeploymentPersister
 	{
 		c := ipam.MachineDeploymentPersisterConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -198,9 +199,9 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
-			K8sClient:     config.K8sClient,
+			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -255,9 +256,9 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.G8sClient,
+			G8sClient:     config.K8sClient.G8sClient(),
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 
 			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
@@ -271,10 +272,10 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var encryptionSearcherResource resource.Interface
 	{
 		c := encryptionsearcher.Config{
-			G8sClient:     config.G8sClient,
+			G8sClient:     config.K8sClient.G8sClient(),
 			Encrypter:     encrypterObject,
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		encryptionSearcherResource, err = encryptionsearcher.New(c)
@@ -311,7 +312,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 			CloudConfig:        tcnpCloudConfig,
 			LabelsFunc:         key.KubeletLabelsTCNP,
 			Logger:             config.Logger,
-			G8sClient:          config.G8sClient,
+			G8sClient:          config.K8sClient.G8sClient(),
 			PathFunc:           key.S3ObjectPathTCNP,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 			RegistryDomain:     config.RegistryDomain,
@@ -331,7 +332,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tcnpAZsResource resource.Interface
 	{
 		c := tcnpazs.Config{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
 
@@ -345,7 +346,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpnatgateways.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpNATGatewaysResource, err = tccpnatgateways.New(c)
@@ -358,7 +359,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := region.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		regionResource, err = region.New(c)
@@ -371,7 +372,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpvpcpcx.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
@@ -384,7 +385,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpsecuritygroups.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
@@ -420,8 +421,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
-			G8sClient: config.G8sClient,
 			Detection: tcnpChangeDetection,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -447,6 +448,31 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
+	var tcnpInstanceInfoResource resource.Interface
+	{
+		c := tcnpinstanceinfo.Config{
+			Logger: config.Logger,
+		}
+
+		tcnpInstanceInfoResource, err = tcnpinstanceinfo.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tcnpStatusResource resource.Interface
+	{
+		c := tcnpstatus.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		tcnpStatusResource, err = tcnpstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -465,7 +491,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpVPCIDResource, err = tccpvpcid.New(c)
@@ -505,6 +531,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		asgStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
+		tcnpInstanceInfoResource,
 		tcnpSecurityGroupsResource,
 
 		// All these resources implement certain business logic and operate based on
@@ -513,6 +540,9 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		ipamResource,
 		tcnpResource,
 		tcnpfResource,
+
+		// All these resources implement logic to update CR status information.
+		tcnpStatusResource,
 	}
 
 	{
