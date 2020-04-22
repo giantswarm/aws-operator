@@ -14,7 +14,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@0.8.8
+  architect: giantswarm/architect@0.8.12
 
 workflows:
   build:
@@ -65,7 +65,7 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-app-catalog:
-          name: push-to-control-plane-app-catalog-master
+          name: push-to-app-catalog-master
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
@@ -79,7 +79,7 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-app-catalog:
-          name: push-to-control-plane-app-catalog-pr
+          name: push-to-app-catalog-pr
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
@@ -94,7 +94,7 @@ workflows:
           app_name: "aws-operator"
           app_collection_repo: "aws-app-collection"
           requires:
-            - push-to-control-plane-app-catalog-master
+            - push-to-app-catalog-master
           filters:
             branches:
               ignore: /.*/
