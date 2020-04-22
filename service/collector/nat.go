@@ -104,8 +104,8 @@ func newNATCache(expiration time.Duration) *natCache {
 
 func (n *natCache) Get(accID string) (*natInfoResponse, error) {
 	var c natInfoResponse
-	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
-	if ok {
+	raw, exists := n.cache.Get(prefixNATcacheKey + accID)
+	if exists {
 		err := json.Unmarshal(raw, &c)
 		if err != nil {
 			return nil, microerror.Mask(err)
