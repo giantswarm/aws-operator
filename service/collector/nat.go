@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/hprose/hprose-go"
 	"github.com/prometheus/client_golang/prometheus"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
@@ -60,11 +60,11 @@ type natCache struct {
 }
 
 type natInfoResponse struct {
-	vpcs map[string]vpcInfo
+	Vpcs map[string]vpcInfo
 }
 
 type vpcInfo struct {
-	natGatewaysByZone map[string]float64
+	NatGatewaysByZone map[string]float64
 }
 
 func NewNAT(config NATConfig) (*NAT, error) {
@@ -107,7 +107,7 @@ func (n *natCache) Get(accID string) (*natInfoResponse, error) {
 	raw, ok := n.cache.Get(prefixNATcacheKey + accID)
 	fmt.Printf("Get cache nat content %+v for key %s \n", raw, prefixNATcacheKey+accID)
 	if ok {
-		err := hprose.Unserialize(raw, c, true)
+		err := json.Unmarshal(raw, &c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -117,7 +117,7 @@ func (n *natCache) Get(accID string) (*natInfoResponse, error) {
 }
 
 func (n *natCache) Set(accID string, content natInfoResponse) error {
-	contentSerialized, err := hprose.Serialize(content, true)
+	contentSerialized, err := json.Marshal(content)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -170,7 +170,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 	}
 
 	//Cache empty, getting from API
-	if natInfo == nil || natInfo.vpcs == nil {
+	if natInfo == nil || natInfo.Vpcs == nil {
 		fmt.Printf("Cache empty for account %s querying to AWS for nat info \n", accountID)
 		natInfo, err = getNatInfoFromAPI(accountID, awsClients)
 		if err != nil {
@@ -186,8 +186,8 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	fmt.Printf("exposing nat info %+v \n", natInfo)
 	if natInfo != nil {
-		for vpcID, vpcInfo := range natInfo.vpcs {
-			for azName, azValue := range vpcInfo.natGatewaysByZone {
+		for vpcID, vpcInfo := range natInfo.Vpcs {
+			for azName, azValue := range vpcInfo.NatGatewaysByZone {
 				ch <- prometheus.MustNewConstMetric(
 					natDesc,
 					prometheus.GaugeValue,
@@ -207,7 +207,7 @@ func (v *NAT) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 // each VPC of the installation
 func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfoResponse, error) {
 	var res natInfoResponse
-	res.vpcs = make(map[string]vpcInfo)
+	res.Vpcs = make(map[string]vpcInfo)
 
 	// 1. Get all VPCs of the installation
 	iv := &ec2.DescribeVpcsInput{
@@ -227,8 +227,8 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfo
 
 	// 2. Get all NAT GWs for each VPC
 	for _, vpc := range rv.Vpcs {
-		res.vpcs[*vpc.VpcId] = vpcInfo{
-			natGatewaysByZone: make(map[string]float64),
+		res.Vpcs[*vpc.VpcId] = vpcInfo{
+			NatGatewaysByZone: make(map[string]float64),
 		}
 
 		in := &ec2.DescribeNatGatewaysInput{
@@ -262,10 +262,10 @@ func getNatInfoFromAPI(accountID string, awsClients clientaws.Clients) (*natInfo
 			for _, sub := range rs.Subnets {
 				vpcID := *vpc.VpcId
 				zoneID := *sub.AvailabilityZoneId
-				if _, exists := res.vpcs[vpcID].natGatewaysByZone[zoneID]; exists {
-					res.vpcs[vpcID].natGatewaysByZone[zoneID] = res.vpcs[vpcID].natGatewaysByZone[zoneID] + 1
+				if _, exists := res.Vpcs[vpcID].NatGatewaysByZone[zoneID]; exists {
+					res.Vpcs[vpcID].NatGatewaysByZone[zoneID] = res.Vpcs[vpcID].NatGatewaysByZone[zoneID] + 1
 				} else {
-					res.vpcs[vpcID].natGatewaysByZone[zoneID] = 1
+					res.Vpcs[vpcID].NatGatewaysByZone[zoneID] = 1
 				}
 			}
 		}
