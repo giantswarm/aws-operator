@@ -12,15 +12,16 @@ import (
 )
 
 const (
+	HostedZoneID              = "HostedZoneID"
 	HostedZoneNameServersKey  = "HostedZoneNameServers"
-	MasterInstanceTypeKey     = "MasterInstanceType"
+	InternalHostedZoneID      = "InternalHostedZoneID"
 	OperatorVersion           = "OperatorVersion"
 	VPCIDKey                  = "VPCID"
 	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := r.toClusterFunc(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -69,19 +70,45 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if r.route53Enabled {
-		v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		cc.Status.TenantCluster.HostedZoneNameServers = v
-	}
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
+			// migration code to dont throw error  when the old C dont yet have the new output value
+			// TODO https://github.com/giantswarm/giantswarm/issues/10139
+			// after migration we can remove the check for IsOutputNotFound
+			if cloudformation.IsOutputNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane hostedZoneID output")
+			} else {
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				cc.Status.TenantCluster.DNS.HostedZoneID = v
+			}
 
-	{
-		v, err := cloudFormation.GetOutputValue(outputs, MasterInstanceTypeKey)
-		if err != nil {
-			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.MasterInstance.Type = v
+
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneNameServersKey)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.TenantCluster.DNS.HostedZoneNameServers = v
+		}
+
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, InternalHostedZoneID)
+			// migration code to dont throw error  when the old C dont yet have the new output value
+			// TODO https://github.com/giantswarm/giantswarm/issues/10139
+			// after migration we can remove the check for IsOutputNotFound
+			if cloudformation.IsOutputNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane internalHostedZoneID output")
+			} else {
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				cc.Status.TenantCluster.DNS.InternalHostedZoneID = v
+			}
+		}
+
 	}
 
 	{
