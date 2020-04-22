@@ -39,7 +39,7 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-app-catalog:
-          name: push-aws-operator-to-control-plane-app-catalog
+          name: push-aws-operator-to-control-plane-app-catalog-master
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
@@ -53,7 +53,7 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-app-catalog:
-          name: push-aws-operator-to-control-plane-app-catalog
+          name: push-aws-operator-to-control-plane-app-catalog-pr
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
@@ -68,7 +68,7 @@ workflows:
           app_name: "aws-operator"
           app_collection_repo: "aws-app-collection"
           requires:
-            - push-aws-operator-to-control-plane-app-catalog
+            - push-aws-operator-to-control-plane-app-catalog-master
           filters:
             branches:
               ignore: /.*/
