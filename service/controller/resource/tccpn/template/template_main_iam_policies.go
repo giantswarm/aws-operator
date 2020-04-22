@@ -2,34 +2,33 @@ package template
 
 const TemplateMainIAMPolicies = `
 {{- define "iam_policies" -}}
-{{- $v := .IAMPolicies -}}
-  MasterRole:
-    Type: "AWS::IAM::Role"
+  ControlPlaneNodesRole:
+    Type: AWS::IAM::Role
     Properties:
-      RoleName: {{ $v.MasterRoleName }}
+      RoleName: gs-cluster-{{ .IAMPolicies.ClusterID }}-role-tccpn
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           Effect: "Allow"
           Principal:
-            Service: {{ $v.EC2ServiceDomain }}
+            Service: {{ .IAMPolicies.EC2ServiceDomain }}
           Action: "sts:AssumeRole"
-  MasterRolePolicy:
+  ControlPlaneNodesRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{ $v.MasterPolicyName }}
+      PolicyName: gs-cluster-{{ .IAMPolicies.ClusterID }}-policy-tccpn
       Roles:
-        - Ref: "MasterRole"
+        - Ref: ControlPlaneNodesRole
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: "Allow"
             Action: "ec2:*"
-            Resource: "*"
-          {{- if $v.KMSKeyARN }}
+            Resource: "*"          
+          {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
-            Resource: "{{ $v.KMSKeyARN }}"
+            Resource: "{{ .IAMPolicies.KMSKeyARN }}"
           {{- end }}
           - Effect: "Allow"
             Action:
@@ -38,10 +37,10 @@ const TemplateMainIAMPolicies = `
             Resource: "*"
           - Effect: "Allow"
             Action: "s3:ListBucket"
-            Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}"
+            Resource: "arn:{{ .IAMPolicies.RegionARN }}:s3:::{{ .IAMPolicies.S3Bucket }}"
           - Effect: "Allow"
             Action: "s3:GetObject"
-            Resource: "arn:{{ $v.RegionARN }}:s3:::{{ $v.S3Bucket }}/*"
+            Resource: "arn:{{ .IAMPolicies.RegionARN }}:s3:::{{ .IAMPolicies.S3Bucket }}/*"
           - Effect: "Allow"
             Action: "elasticloadbalancing:*"
             Resource: "*"
@@ -60,7 +59,7 @@ const TemplateMainIAMPolicies = `
             Resource: "*"
             Condition:
               StringEquals:
-                autoscaling:ResourceTag/giantswarm.io/cluster: "{{ $v.ClusterID }}"
+                autoscaling:ResourceTag/giantswarm.io/cluster: "{{ .IAMPolicies.ClusterID }}"
           - Effect: "Allow"
             Action:
               - "ecr:GetAuthorizationToken"
@@ -91,23 +90,28 @@ const TemplateMainIAMPolicies = `
             Action:
               - ec2:CreateTags
             Resource:
-              - arn:{{ $v.RegionARN }}:ec2:*:*:network-interface/*
-
+              - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:network-interface/*
+  ControlPlaneNodesInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: gs-cluster-{{ .IAMPolicies.ClusterID }}-profile-tccpn
+      Roles:
+        - Ref: ControlPlaneNodesRole
   IAMManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: {{ $v.ClusterID }}-IAMManager-Role
+      RoleName: {{ .IAMPolicies.ClusterID }}-IAMManager-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           Effect: "Allow"
           Principal:
-            AWS: !GetAtt MasterRole.Arn
+            AWS: !GetAtt ControlPlaneNodesRole.Arn
           Action: "sts:AssumeRole"
   IAMManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{ $v.ClusterID }}-IAMManager-Policy
+      PolicyName: {{ .IAMPolicies.ClusterID }}-IAMManager-Policy
       Roles:
         - Ref: "IAMManagerRole"
       PolicyDocument:
@@ -116,11 +120,11 @@ const TemplateMainIAMPolicies = `
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
-{{- if $v.Route53Enabled}}
+{{- if .IAMPolicies.Route53Enabled}}
   Route53ManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: {{ $v.ClusterID }}-Route53Manager-Role
+      RoleName: {{ .IAMPolicies.ClusterID }}-Route53Manager-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -131,7 +135,7 @@ const TemplateMainIAMPolicies = `
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{ $v.ClusterID }}-Route53Manager-Policy
+      PolicyName: {{ .IAMPolicies.ClusterID }}-Route53Manager-Policy
       Roles:
         - Ref: "Route53ManagerRole"
       PolicyDocument:
@@ -140,19 +144,13 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "route53:ChangeResourceRecordSets"
             Resource:
-              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'HostedZone' ] ]
-              - !Join [ "/", [ 'arn:aws:route53:::hostedzone', !Ref 'InternalHostedZone' ] ]
+              - "arn:aws:route53:::hostedzone/{{ .IAMPolicies.HostedZoneID }}"
+              - "arn:aws:route53:::hostedzone/{{ .IAMPolicies.InternalHostedZoneID }}"
           - Effect: "Allow"
             Action:
               - "route53:ListHostedZones"
               - "route53:ListResourceRecordSets"
             Resource: "*"
 {{ end }}
-  MasterInstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
-    Properties:
-      InstanceProfileName: {{ $v.MasterProfileName }}
-      Roles:
-        - Ref: "MasterRole"
 {{- end -}}
 `

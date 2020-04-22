@@ -33,14 +33,15 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	ASG                   ContextStatusTenantClusterASG
-	AWS                   ContextStatusTenantClusterAWS
-	Encryption            ContextStatusTenantClusterEncryption
-	HostedZoneNameServers string
-	MasterInstance        ContextStatusTenantClusterMasterInstance
-	TCCP                  ContextStatusTenantClusterTCCP
-	TCNP                  ContextStatusTenantClusterTCNP
-	OperatorVersion       string
+	ASG             ContextStatusTenantClusterASG
+	AWS             ContextStatusTenantClusterAWS
+	DNS             ContextStatusTenantClusterDNS
+	Encryption      ContextStatusTenantClusterEncryption
+	MasterInstance  ContextStatusTenantClusterMasterInstance
+	TCCP            ContextStatusTenantClusterTCCP
+	TCCPN           ContextStatusTenantClusterTCCPN
+	TCNP            ContextStatusTenantClusterTCNP
+	OperatorVersion string
 }
 
 type ContextStatusTenantClusterASG struct {
@@ -55,12 +56,19 @@ type ContextStatusTenantClusterAWS struct {
 	Region    string
 }
 
+type ContextStatusTenantClusterDNS struct {
+	HostedZoneID          string
+	HostedZoneNameServers string
+	InternalHostedZoneID  string
+}
+
 type ContextStatusTenantClusterEncryption struct {
 	Key string
 }
 
 type ContextStatusTenantClusterMasterInstance struct {
-	Type string
+	EtcdVolumeSnapshotID string
+	Type                 string
 }
 
 type ContextStatusTenantClusterTCCP struct {
@@ -111,6 +119,12 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
 type ContextStatusTenantClusterTCCPVPC struct {
 	ID                  string
 	PeeringConnectionID string
+}
+
+type ContextStatusTenantClusterTCCPN struct {
+	EtcdVolumeSnapshotID string
+	IsTransitioning      bool
+	InstanceType         string
 }
 
 type ContextStatusTenantClusterTCNP struct {

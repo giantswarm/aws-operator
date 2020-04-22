@@ -7,7 +7,6 @@ Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   {{ template "outputs" . }}
 Resources:
-  {{ template "iam_policies" . }}
   {{ template "instance" . }}
   {{ template "internet_gateway" . }}
   {{ template "load_balancers" . }}

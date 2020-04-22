@@ -16,7 +16,6 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
@@ -43,35 +42,21 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		errorMatcher   func(error) bool
 	}{
 		{
-			name:           "case 0: basic test without encryption key, route53 enabled",
+			name:           "case 0: basic test, route53 enabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
 			errorMatcher:   nil,
 			route53Enabled: true,
 		},
 		{
-			name:           "case 1: basic test with encryption key, route53 enabled",
-			cr:             unittest.DefaultCluster(),
-			ctx:            updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
-			errorMatcher:   nil,
-			route53Enabled: true,
-		},
-		{
-			name:           "case 2: basic test without encryption key, route53 disabled",
+			name:           "case 1: basic test, route53 disabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
 			errorMatcher:   nil,
 			route53Enabled: false,
 		},
 		{
-			name:           "case 3: basic test with encryption key, route53 disabled",
-			cr:             unittest.DefaultCluster(),
-			ctx:            updateEncryptionKey(unittest.DefaultContext(), "8y5ck"),
-			errorMatcher:   nil,
-			route53Enabled: false,
-		},
-		{
-			name: "case 4: basic test with api whitelist enabled",
+			name: "case 2: basic test with api whitelist enabled",
 			cr:   unittest.DefaultCluster(),
 			ctx:  unittest.DefaultContext(),
 			apiWhitelist: ConfigAPIWhitelistSecurityGroup{
@@ -162,14 +147,4 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			}
 		})
 	}
-}
-
-func updateEncryptionKey(ctx context.Context, encryptionKey string) context.Context {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	cc.Status.TenantCluster.Encryption.Key = encryptionKey
-	return ctx
 }
