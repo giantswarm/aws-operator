@@ -115,7 +115,7 @@ func New(config Config) (*Service, error) {
 			md.Spec.Provider.InstanceDistribution.OnDemandBaseCapacity = 0
 			md.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity = 100
 
-			err := k8sClient.CtrlClient().Status().Update(ctx, &md)
+			err := k8sClient.CtrlClient().Update(ctx, &md)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
