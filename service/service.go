@@ -221,6 +221,32 @@ func New(config Config) (*Service, error) {
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
+			APIWhitelist: controller.ClusterConfigAPIWhitelist{
+				Private: controller.ClusterConfigAPIWhitelistConfig{
+					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
+					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
+				},
+				Public: controller.ClusterConfigAPIWhitelistConfig{
+					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
+					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
+			},
+			CalicoCIDR:                config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
+			CalicoMTU:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
+			CalicoSubnet:              config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
+			ClusterDomain:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
+			ClusterIPRange:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
+			DockerDaemonCIDR:          config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
+			IgnitionPath:              config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
+			ImagePullProgressDeadline: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
+			InstallationName:          config.Viper.GetString(config.Flag.Service.Installation.Name),
+			NetworkSetupDockerImage:   config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			PodInfraContainerImage:    config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
+			Route53Enabled:            config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
+			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
+			VaultAddress:              config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+
 			HostAWSConfig: awsConfig,
 		}
 

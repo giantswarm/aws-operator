@@ -179,5 +179,6 @@ func machineDeploymentDrainerLabelMapFunc(cr metav1.Object) map[string]string {
 	return map[string]string{
 		label.Cluster:           key.ClusterID(cr),
 		label.MachineDeployment: key.MachineDeploymentID(cr),
+		label.OperatorVersion:   key.OperatorVersion(cr),
 	}
 }

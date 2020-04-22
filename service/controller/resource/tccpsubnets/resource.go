@@ -2,6 +2,7 @@ package tccpsubnets
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -9,6 +10,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -59,6 +61,12 @@ func (r *Resource) addSubnetsToContext(ctx context.Context) error {
 					Name: aws.String("vpc-id"),
 					Values: []*string{
 						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+					},
+				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCCP),
 					},
 				},
 			},
