@@ -67,6 +67,12 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 						aws.String(key.SecurityGroupName(&cr, "master")),
 					},
 				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCCP),
+					},
+				},
 			},
 		}
 
@@ -78,7 +84,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		groups = o.SecurityGroups
 
 		if len(groups) > 3 {
-			return microerror.Maskf(executionFailedError, "expected two security groups, got %d", len(groups))
+			return microerror.Maskf(executionFailedError, "expected three security groups, got %d", len(groups))
 		}
 
 		if len(groups) < 3 {

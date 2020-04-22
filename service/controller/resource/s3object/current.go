@@ -35,13 +35,16 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// anything here anymore. The current implementation relies on the bucket
 	// deletion of the s3bucket resource, which deletes all S3 objects and the
 	// bucket itself.
-	if key.IsDeleted(cr) {
-		if cc.Status.TenantCluster.Encryption.Key == "" {
+	if cc.Status.TenantCluster.Encryption.Key == "" {
+		if key.IsDeleted(cr) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available anymore")
+		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
-			return nil, nil
 		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
 	}
 
 	var body []byte
