@@ -33,7 +33,6 @@ require (
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v0.2.0
 	github.com/google/go-cmp v0.4.0
-	github.com/hprose/hprose-go v0.0.0-20161031134501-83de97da5004 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.5.1
 	github.com/spf13/afero v1.2.2
