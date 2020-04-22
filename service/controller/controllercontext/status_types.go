@@ -128,8 +128,14 @@ type ContextStatusTenantClusterTCCPN struct {
 }
 
 type ContextStatusTenantClusterTCNP struct {
+	Instances        ContextStatusTenantClusterTCNPInstances
 	SecurityGroupIDs []string
 	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
+}
+
+type ContextStatusTenantClusterTCNPInstances struct {
+	InstanceTypes         []string
+	NumberOfSpotInstances int
 }
 
 type ContextStatusTenantClusterTCNPWorkerInstance struct {

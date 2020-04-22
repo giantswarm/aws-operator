@@ -273,18 +273,32 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 
 	minDesiredNodes := minDesiredWorkers(key.MachineDeploymentScalingMin(cr), key.MachineDeploymentScalingMax(cr), cc.Status.TenantCluster.ASG.DesiredCapacity)
 
+	var launchTemplateOverride []template.LaunchTemplateOverride
+	{
+		val, ok := key.MachineDeploymentLaunchTemplateOverrides[key.MachineDeploymentInstanceType(cr)]
+
+		if cr.Spec.Provider.Worker.UseAlikeInstanceTypes && ok {
+			launchTemplateOverride = val
+		}
+	}
+
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.MachineDeploymentAvailabilityZones(cr),
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
-		DesiredCapacity:       minDesiredNodes,
-		LifeCycleHookName:     key.LifeCycleHookNodePool,
-		MaxBatchSize:          workerCountRatio(minDesiredNodes, 0.3),
-		MaxSize:               key.MachineDeploymentScalingMax(cr),
-		MinInstancesInService: workerCountRatio(minDesiredNodes, 0.7),
-		MinSize:               key.MachineDeploymentScalingMin(cr),
-		Subnets:               subnets,
+		DesiredCapacity:                     minDesiredNodes,
+		MaxBatchSize:                        workerCountRatio(minDesiredNodes, 0.3),
+		MaxSize:                             key.MachineDeploymentScalingMax(cr),
+		MinInstancesInService:               workerCountRatio(minDesiredNodes, 0.7),
+		MinSize:                             key.MachineDeploymentScalingMin(cr),
+		Subnets:                             subnets,
+		OnDemandPercentageAboveBaseCapacity: key.MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr),
+		OnDemandBaseCapacity:                key.MachineDeploymentOnDemandBaseCapacity(cr),
+		SpotInstancePools:                   key.MachineDeploymentSpotInstancePools(launchTemplateOverride),
+		SpotAllocationStrategy:              "lowest-price",
+		LaunchTemplateOverrides:             launchTemplateOverride,
+		LifeCycleHookName:                   key.LifeCycleHookNodePool,
 	}
 
 	return autoScalingGroup, nil
@@ -315,41 +329,42 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	return iamPolicies, nil
 }
 
-func newLaunchConfiguration(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLaunchConfiguration, error) {
+func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	launchConfiguration := &template.ParamsMainLaunchConfiguration{
-		BlockDeviceMapping: template.ParamsMainLaunchConfigurationBlockDeviceMapping{
-			Docker: template.ParamsMainLaunchConfigurationBlockDeviceMappingDocker{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingDockerVolume{
+	launchTemplate := &template.ParamsMainLaunchTemplate{
+		BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
+			Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume{
 					Size: key.MachineDeploymentDockerVolumeSizeGB(cr),
 				},
 			},
-			Kubelet: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubelet{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingKubeletVolume{
+			Kubelet: template.ParamsMainLaunchTemplateBlockDeviceMappingKubelet{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume{
 					Size: key.MachineDeploymentKubeletVolumeSizeGB(cr),
 				},
 			},
-			Logging: template.ParamsMainLaunchConfigurationBlockDeviceMappingLogging{
-				Volume: template.ParamsMainLaunchConfigurationBlockDeviceMappingLoggingVolume{
+			Logging: template.ParamsMainLaunchTemplateBlockDeviceMappingLogging{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume{
 					Size: 100,
 				},
 			},
 		},
-		Instance: template.ParamsMainLaunchConfigurationInstance{
+		Instance: template.ParamsMainLaunchTemplateInstance{
 			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
 			Monitoring: true,
 			Type:       key.MachineDeploymentInstanceType(cr),
 		},
-		SmallCloudConfig: template.ParamsMainLaunchConfigurationSmallCloudConfig{
+		Name: key.MachineDeploymentLaunchTemplateName(cr),
+		SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
 			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCNP(&cr)),
 		},
 	}
 
-	return launchConfiguration, nil
+	return launchTemplate, nil
 }
 
 func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
@@ -487,7 +502,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchConfiguration, err := newLaunchConfiguration(ctx, cr)
+		launchTemplate, err := newLaunchTemplate(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -513,14 +528,14 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		}
 
 		params = &template.ParamsMain{
-			AutoScalingGroup:    autoScalingGroup,
-			IAMPolicies:         iamPolicies,
-			LaunchConfiguration: launchConfiguration,
-			Outputs:             outputs,
-			RouteTables:         routeTables,
-			SecurityGroups:      securityGroups,
-			Subnets:             subnets,
-			VPC:                 vpc,
+			AutoScalingGroup: autoScalingGroup,
+			IAMPolicies:      iamPolicies,
+			LaunchTemplate:   launchTemplate,
+			Outputs:          outputs,
+			RouteTables:      routeTables,
+			SecurityGroups:   securityGroups,
+			Subnets:          subnets,
+			VPC:              vpc,
 		}
 	}
 

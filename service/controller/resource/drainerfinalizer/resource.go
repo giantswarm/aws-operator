@@ -128,7 +128,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var asgName string
 	{
 		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker auto scaling group name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -172,13 +172,8 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		if len(drainedDrainerConfigs) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find drained drainer configs for tenant cluster")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-		if len(timeoutDrainerConfigs) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find timeout drainer configs for tenant cluster")
+		if len(drainedDrainerConfigs) == 0 && len(timeoutDrainerConfigs) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainer config for tenant cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
