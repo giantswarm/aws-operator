@@ -1,9 +1,16 @@
 package drainerfinalizer
 
 import (
-	"strings"
+	"regexp"
 
 	"github.com/giantswarm/microerror"
+)
+
+var (
+	// noActiveLifeCycleActionRegExp is a fuzzy regular expression to match
+	// Autoscaling errors which we have to string match due to the lack of proper
+	// error types in the AWS SDK.
+	noActiveLifeCycleActionRegExp = regexp.MustCompile(`(?im)no.*life.*cycle.*found`)
 )
 
 var invalidConfigError = &microerror.Error{
@@ -37,7 +44,7 @@ func IsNoActiveLifeCycleAction(err error) bool {
 		return false
 	}
 
-	if strings.Contains(c.Error(), "no active life cycle action found") {
+	if noActiveLifeCycleActionRegExp.MatchString(c.Error()) {
 		return true
 	}
 
