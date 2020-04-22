@@ -128,7 +128,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var asgName string
 	{
 		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "worker auto scaling group name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -137,6 +137,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
+	var timeoutDrainerConfigs []corev1alpha1.DrainerConfig
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding drained drainer configs for tenant cluster")
 
@@ -167,17 +168,18 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 			if dc.Status.HasTimeoutCondition() {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has timeout condition", dc.GetName()))
-				drainedDrainerConfigs = append(drainedDrainerConfigs, dc)
+				timeoutDrainerConfigs = append(timeoutDrainerConfigs, dc)
 			}
 		}
 
-		if len(drainedDrainerConfigs) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find drained drainer configs for tenant cluster")
+		if len(drainedDrainerConfigs) == 0 && len(timeoutDrainerConfigs) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainer config for tenant cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d drained drainer configs for tenant cluster", len(drainedDrainerConfigs)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d timeout drainer configs for tenant cluster", len(timeoutDrainerConfigs)))
 	}
 
 	{
@@ -198,6 +200,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
+			err = r.deleteDrainerConfig(ctx, dc)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		// Timeout drainer configs should simply be deleted without draining since
+		// the time window for draining did expire at this point.
+		for _, dc := range timeoutDrainerConfigs {
 			err = r.deleteDrainerConfig(ctx, dc)
 			if err != nil {
 				return microerror.Mask(err)

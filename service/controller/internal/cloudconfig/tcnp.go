@@ -180,7 +180,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
-	data := e.templateData()
+	data := e.templateDataTCNP()
 
 	for _, m := range filesMeta {
 		c, err := k8scloudconfig.RenderFileAssetContent(m.AssetContent, data)

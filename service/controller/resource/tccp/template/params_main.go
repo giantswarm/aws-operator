@@ -1,7 +1,6 @@
 package template
 
 type ParamsMain struct {
-	IAMPolicies     *ParamsMainIAMPolicies
 	InternetGateway *ParamsMainInternetGateway
 	Instance        *ParamsMainInstance
 	LoadBalancers   *ParamsMainLoadBalancers

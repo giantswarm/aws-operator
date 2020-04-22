@@ -9,6 +9,8 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/pkg/project"
 )
 
 const (
@@ -27,6 +29,10 @@ const (
 	EtcdPort             = 2379
 	EtcdPrefix           = "giantswarm.io"
 	KubernetesSecurePort = 443
+)
+
+const (
+	HAMasterSnapshotIDValue = "ha-master-migration"
 )
 
 const (
@@ -53,6 +59,7 @@ const (
 	TagOrganization            = "giantswarm.io/organization"
 	TagRouteTableType          = "giantswarm.io/route-table-type"
 	TagStack                   = "giantswarm.io/stack"
+	TagSnapshot                = "giantswarm.io/snapshot"
 	TagSubnetType              = "giantswarm.io/subnet-type"
 )
 
@@ -60,6 +67,7 @@ const (
 	StackTCCP  = "tccp"
 	StackTCCPF = "tccpf"
 	StackTCCPI = "tccpi"
+	StackTCCPN = "tccpn"
 	StackTCNP  = "tcnp"
 	StackTCNPF = "tcnpf"
 )
@@ -105,12 +113,35 @@ func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Spec.Provider.CredentialSecret.Namespace
 }
 
-func DockerVolumeResourceName(cr infrastructurev1alpha2.AWSCluster, t time.Time) string {
-	return getResourcenameWithTimeHash("DockerVolume", cr, t)
-}
-
 func IsChinaRegion(awsRegion string) bool {
 	return strings.HasPrefix(awsRegion, "cn-")
+}
+
+func IsNewCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
+	// If  condition list is empty then this is a new cluster.
+	if len(cluster.Status.Cluster.Conditions) == 0 {
+		return true
+	}
+	// If versions list is empty then this is a new cluster.
+	if len(cluster.Status.Cluster.Versions) == 0 {
+		return true
+	}
+	// Check if there is transition state Updated or Updating,
+	// this indicates cluster is not new but updated from other version.
+	if cluster.Status.Cluster.HasUpdatedCondition() || cluster.Status.Cluster.HasUpdatingCondition() {
+		return false
+	}
+
+	// Check if there is transition state from other version,
+	// this indicates cluster is not new but updated from other version.
+	for _, version := range cluster.Status.Cluster.Versions {
+		if version.Version != project.Version() {
+			return false
+		}
+	}
+
+	// No update event is registered in the versions or conditions lists in cr status so this is new cluster.
+	return true
 }
 
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {

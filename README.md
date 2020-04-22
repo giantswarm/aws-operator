@@ -148,7 +148,6 @@ aws-operator is under the Apache 2.0 license. See the [LICENSE](LICENSE) file
 for details.
 
 
-
 ## Credit
 - https://golang.org
 - https://github.com/giantswarm/microkit

@@ -2,18 +2,14 @@ package template
 
 const TemplateMainOutputs = `
 {{- define "outputs" -}}
-  DockerVolumeResourceName:
-    Value: {{ .Outputs.Master.DockerVolume.ResourceName }}
-  {{- if .Outputs.Route53Enabled }}
+  {{- if .Outputs.Route53Enabled -}}
+  HostedZoneID: 
+    Value: !Ref HostedZone
+  InternalHostedZoneID: 
+    Value: !Ref InternalHostedZone
   HostedZoneNameServers:
     Value: !Join [ ',', !GetAtt 'HostedZone.NameServers' ]
-  {{- end }}
-  MasterImageID:
-    Value: {{ .Outputs.Master.ImageID }}
-  MasterInstanceResourceName:
-    Value: {{ .Outputs.Master.Instance.ResourceName }}
-  MasterInstanceType:
-    Value: {{ .Outputs.Master.Instance.Type }}
+  {{ end -}}
   OperatorVersion:
     Value: {{ .Outputs.OperatorVersion }}
   VPCID:
