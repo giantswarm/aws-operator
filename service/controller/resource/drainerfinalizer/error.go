@@ -10,7 +10,7 @@ var (
 	// noActiveLifeCycleActionRegExp is a fuzzy regular expression to match
 	// Autoscaling errors which we have to string match due to the lack of proper
 	// error types in the AWS SDK.
-	noActiveLifeCycleActionRegExp = regexp.MustCompile(`(?m)[nN][oO].*[lL][iI][fF][eE].*[cC][yY][cC][lL][eE].*[fF][oO][uU][nN][dD]`)
+	noActiveLifeCycleActionRegExp = regexp.MustCompile(`(?im)no.*life.*cycle.*found`)
 )
 
 var invalidConfigError = &microerror.Error{
