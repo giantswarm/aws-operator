@@ -43,7 +43,6 @@ workflows:
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
-            - push-aws-operator-to-aliyun
             - push-aws-operator-to-quay
           filters:
             tags:
