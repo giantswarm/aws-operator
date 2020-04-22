@@ -74,6 +74,7 @@ func Test_scrapeVersionAMIs(t *testing.T) {
 	testCases := []struct {
 		name     string
 		body     string
+		parent   bool
 		expected map[string]string
 	}{
 		{
@@ -86,8 +87,27 @@ func Test_scrapeVersionAMIs(t *testing.T) {
     }
   ]
 }`,
+			parent: false,
 			expected: map[string]string{
 				"ap-northeast-1": "ami-02e7b007b87514a38",
+			},
+		},
+		{
+			name: "case 1: flatcar style",
+			body: `{
+  "aws": {
+    "amis": [
+      {
+        "name": "cn-northwest-1",
+        "hvm": "ami-004e81bc53b1e6ffa"
+      }
+    ]
+  }
+}
+`,
+			parent: true,
+			expected: map[string]string{
+				"cn-northwest-1": "ami-004e81bc53b1e6ffa",
 			},
 		},
 	}
@@ -95,7 +115,7 @@ func Test_scrapeVersionAMIs(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			reader := strings.NewReader(tc.body)
-			amis, err := scrapeVersionAMIs(reader)
+			amis, err := scrapeVersionAMIs(reader, tc.parent)
 			if err != nil {
 				t.Fatal(err)
 			}
