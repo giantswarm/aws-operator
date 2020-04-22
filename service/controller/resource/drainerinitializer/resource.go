@@ -127,11 +127,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	asgName := cc.Status.TenantCluster.ASG.Name
-	if asgName == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "worker ASG name is not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-		return nil
+	var asgName string
+	{
+		if cc.Status.TenantCluster.ASG.Name == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		asgName = cc.Status.TenantCluster.ASG.Name
 	}
 
 	var instances []*autoscaling.Instance
