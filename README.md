@@ -40,10 +40,6 @@ go build github.com/giantswarm/aws-operator
 
 ## Architecture
 
-The operator uses our [operatorkit][1] framework. It manages an `awsconfig`
-CRD using a generated client stored in our [apiextensions][2] repo. Releases
-are versioned using [version bundles][3].
-
 The operator provisions guest Kubernetes clusters running on AWS. It runs in a
 host Kubernetes cluster also running on AWS.
 

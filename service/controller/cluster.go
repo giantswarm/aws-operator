@@ -99,7 +99,6 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	var clusterController *controller.Controller
 	{
 		c := controller.Config{
-			CRD:          v1alpha1.NewAWSConfigCRD(),
 			K8sClient:    config.K8sClient,
 			Logger:       config.Logger,
 			ResourceSets: resourceSets,

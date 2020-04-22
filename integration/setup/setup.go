@@ -238,6 +238,17 @@ func installResources(ctx context.Context, config Config) error {
 		}
 	}
 
+	// Install AWSConfig CRD since it is no longer installed by the operator.
+	// If the CRD doesn't exist it fails.
+	{
+		b := backoff.NewMaxRetries(5, 2*time.Second)
+
+		err := config.CPCRDClient.EnsureCreated(ctx, providerv1alpha1.NewAWSConfigCRD(), b)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	// Install AWSCluster CRD for IPAM resource. It checks clusters objects
 	// for allocated ranges. If the CRD doesn't exist it fails.
 	{
