@@ -33,6 +33,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -44,7 +45,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpazs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpencryption"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpinstanceinfo"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
@@ -269,15 +269,16 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	var tcnpEncryptionResource resource.Interface
+	var encryptionSearcherResource resource.Interface
 	{
-		c := tcnpencryption.Config{
-			G8sClient: config.K8sClient.G8sClient(),
-			Encrypter: encrypterObject,
-			Logger:    config.Logger,
+		c := encryptionsearcher.Config{
+			G8sClient:     config.K8sClient.G8sClient(),
+			Encrypter:     encrypterObject,
+			Logger:        config.Logger,
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
-		tcnpEncryptionResource, err = tcnpencryption.New(c)
+		encryptionSearcherResource, err = encryptionsearcher.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -516,6 +517,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
+		encryptionSearcherResource,
 		regionResource,
 		cpRouteTablesResource,
 		cpVPCResource,
@@ -529,7 +531,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		asgStatusResource,
 		tcnpAZsResource,
 		tcnpOutputsResource,
-		tcnpEncryptionResource,
 		tcnpInstanceInfoResource,
 		tcnpSecurityGroupsResource,
 

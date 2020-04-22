@@ -125,7 +125,7 @@ func newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSClust
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                 key.ClusterBaseDomain(cr),
 			ClusterID:                  key.ClusterID(&cr),
-			GuestHostedZoneNameServers: cc.Status.TenantCluster.HostedZoneNameServers,
+			GuestHostedZoneNameServers: cc.Status.TenantCluster.DNS.HostedZoneNameServers,
 			Route53Enabled:             route53Enabled,
 		}
 	}
