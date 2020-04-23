@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/service/servicequotas"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -8,6 +10,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/service/internal/cache"
 )
 
 const (
@@ -41,8 +44,9 @@ type ServiceQuotaConfig struct {
 }
 
 type ServiceQuota struct {
-	helper *helper
-	logger micrologger.Logger
+	awsAPIcache *cache.Float64Cache
+	helper      *helper
+	logger      micrologger.Logger
 
 	installationName string
 }
@@ -60,8 +64,12 @@ func NewServiceQuota(config ServiceQuotaConfig) (*ServiceQuota, error) {
 	}
 
 	v := &ServiceQuota{
-		helper: config.Helper,
-		logger: config.Logger,
+		// Default quotas are changed by request to AWS support and they are
+		// considered quite static information, then 12 hours for the cache
+		// expiration is a reasonable value.
+		awsAPIcache: cache.NewFloat64Cache(time.Minute * 720),
+		helper:      config.Helper,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 	}
@@ -114,9 +122,17 @@ func (v *ServiceQuota) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		return microerror.Mask(err)
 	}
 
-	natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
-	if err != nil {
-		return microerror.Mask(err)
+	// natQuotaValue reflects the value of number of NAT Gateways that can be
+	// created by the operator in a specific VPC for each availability zone.
+	var natQuotaValue float64
+	if val, ok := v.awsAPIcache.Get(NATQuotaCode); ok {
+		natQuotaValue = val
+	} else {
+		natQuotaValue, err := getDefaultVPCQuotaFor(NATQuotaCode, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		v.awsAPIcache.Set(NATQuotaCode, natQuotaValue)
 	}
 
 	ch <- prometheus.MustNewConstMetric(
@@ -135,6 +151,7 @@ func getDefaultVPCQuotaFor(quotaCode string, awsClients clientaws.Clients) (floa
 		QuotaCode:   &NATQuotaCode,
 		ServiceCode: &VPCServiceCode,
 	}
+	//Get the default NAT quota for the specific account
 	od, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(id)
 	if err != nil {
 		return 0, microerror.Mask(err)
@@ -144,9 +161,10 @@ func getDefaultVPCQuotaFor(quotaCode string, awsClients clientaws.Clients) (floa
 	il := &servicequotas.ListServiceQuotasInput{
 		ServiceCode: &VPCServiceCode,
 	}
+	//Get the NAT quota in case it has been modified by AWS support request
 	ol, err := awsClients.ServiceQuotas.ListServiceQuotas(il)
 	if err != nil {
-		return 0, microerror.Mask(err)
+		return natQuotaValue, microerror.Mask(err)
 	}
 	for _, sq := range ol.Quotas {
 		if *sq.QuotaCode == NATQuotaCode {
