@@ -62,7 +62,7 @@ workflows:
             branches:
               ignore: master
             tags:
-              only: /^v.*/
+              ignore: /^v.*/
 
       - architect/push-to-app-catalog:
           name: push-to-app-catalog-master
