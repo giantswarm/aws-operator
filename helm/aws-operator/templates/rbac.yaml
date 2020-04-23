@@ -5,12 +5,17 @@ metadata:
   labels:
     {{- include "labels.common" . | nindent 4 }}
 rules:
+  # The aws-operator needs read access to our Release CRs in order to fetch and
+  # further propagate certain version information.
   - apiGroups:
       - release.giantswarm.io
     resources:
       - releases
     verbs:
       - get
+
+  # The aws-operator needs read and write access to all AWS specific
+  # infrastructure CRs we manage for Tenant Clusters.
   - apiGroups:
       - infrastructure.giantswarm.io
     resources:
@@ -24,81 +29,20 @@ rules:
       - g8scontrolplanes/status
     verbs:
       - "*"
-  - apiGroups:
-      - cluster.k8s.io
-    resources:
-      - clusters
-      - clusters/status
-    verbs:
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - cluster.x-k8s.io
-    resources:
-      - clusters
-      - clusters/status
-      - machinedeployments
-      - machinedeployments/status
-    verbs:
-      - "*"
-  - apiGroups:
-      - cluster.k8s.io
-    resources:
-      - machinedeployments
-      - machinedeployments/status
-    verbs:
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - apiextensions.k8s.io
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - "*"
-  - apiGroups:
-      - extensions
-    resources:
-      - thirdpartyresources
-    verbs:
-      - "*"
-  - apiGroups:
-      - provider.giantswarm.io
-    resources:
-      - awsconfigs
-      - awsconfigs/status
-    verbs:
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - provider.giantswarm.io
-    resources:
-      - awsconfigs/status
-    verbs:
-      - create
-      - patch
-      - update
-  - apiGroups:
-      - core.giantswarm.io
-    resources:
-      - nodeconfigs
-    verbs:
-      - "*"
+
+  # The aws-operator needs read and write access to the DrainerConfig CRs in
+  # order to initialize and finalize node draining. DrainerConfig CRs are
+  # created, listed and deleted once draining is done or timed out.
   - apiGroups:
       - core.giantswarm.io
     resources:
       - drainerconfigs
     verbs:
       - "*"
+
+  # The aws-operator uses a distributed locking mechanism called kubelock. It
+  # operates based on namespaces in order to achieve a distributed locking
+  # mechanism. The locking is used for IPAM subnet allocation.
   - apiGroups:
       - ""
     resources:
@@ -106,6 +50,10 @@ rules:
     verbs:
       - get
       - update
+
+  # The aws-operator manages endpoints and services for Prometheus monitoring.
+  # So it needs read and write access for these services in order to manage them
+  # according to a Tenant Cluster's life cycle.
   - apiGroups:
       - ""
     resources:
@@ -113,14 +61,21 @@ rules:
       - services
     verbs:
       - "*"
+
+  # The aws-operator needs read access to secrets so that it can read
+  # certificates which we inject into Cloud Config files. These Cloud Configs
+  # get encrypted and uploaded to S3 in order to boot EC2 instances for the
+  # Kubernetes nodes of a Tenant Cluster.
   - apiGroups:
       - ""
     resources:
       - secrets
     verbs:
       - get
-      - update
       - watch
+
+  # The aws-operator needs read access for its own configmap since all
+  # non-sensitive settings are propagated into the pod's process that way.
   - apiGroups:
       - ""
     resources:
@@ -129,6 +84,7 @@ rules:
       - {{ include "resource.default.name"  . }}
     verbs:
       - get
+
   - nonResourceURLs:
       - "/"
       - "/healthz"
