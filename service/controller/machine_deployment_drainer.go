@@ -41,6 +41,7 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 		return nil, microerror.Mask(err)
 	}
 
+	// +operatorkit:validation:controller=MachineDeploymentDrainer
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
