@@ -23,6 +23,21 @@ rules:
     verbs:
       - get
 
+  # The aws-operator needs read and write access to the CAPI Cluster CR in order
+  # to set the API endpoint in its status.
+  - apiGroups:
+      - cluster.x-k8s.io
+    resources:
+      - clusters
+    verbs:
+      - list
+  - apiGroups:
+      - cluster.x-k8s.io
+    resources:
+      - clusters/status
+    verbs:
+      - update
+
   # The aws-operator needs read and write access to all AWS specific
   # infrastructure CRs we manage for Tenant Clusters.
   - apiGroups:
