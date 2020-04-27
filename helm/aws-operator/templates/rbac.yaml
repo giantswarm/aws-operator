@@ -89,13 +89,16 @@ rules:
   # The aws-operator needs read access to secrets so that it can read
   # certificates which we inject into Cloud Config files. These Cloud Configs
   # get encrypted and uploaded to S3 in order to boot EC2 instances for the
-  # Kubernetes nodes of a Tenant Cluster.
+  # Kubernetes nodes of a Tenant Cluster. The update capability is necessary for
+  # the operator to add and remove finalizers from certain secrets associated
+  # with certificates.
   - apiGroups:
       - ""
     resources:
       - secrets
     verbs:
       - get
+      - update
       - watch
 
   # The aws-operator needs read access for its own configmap since all
