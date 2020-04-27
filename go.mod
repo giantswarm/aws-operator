@@ -3,7 +3,7 @@ module github.com/giantswarm/aws-operator
 go 1.13
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.6.0
+	github.com/aws/amazon-vpc-cni-k8s v1.6.1
 	github.com/aws/aws-sdk-go v1.29.32
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions v0.3.0
