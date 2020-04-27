@@ -5,6 +5,15 @@ metadata:
   labels:
     {{- include "labels.common" . | nindent 4 }}
 rules:
+  # The aws-operator needs read access to the legacy AWSConfig CRs in order to
+  # do proper IPAM subnet allocation.
+  - apiGroups:
+      - provider.giantswarm.io
+    resources:
+      - awsconfigs
+    verbs:
+      - list
+
   # The aws-operator needs read access to our Release CRs in order to fetch and
   # further propagate certain version information.
   - apiGroups:
