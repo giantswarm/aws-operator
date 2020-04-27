@@ -19,7 +19,6 @@ import (
 	"github.com/giantswarm/tenantcluster"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
@@ -727,19 +726,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
-	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToCluster(obj)
-		if err != nil {
-			return false
-		}
-
-		if key.OperatorVersion(&cr) == project.Version() {
-			return true
-		}
-
-		return false
-	}
-
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
 		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
@@ -747,7 +733,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var resourceSet *controller.ResourceSet
 	{
 		c := controller.ResourceSetConfig{
-			Handles:   handlesFunc,
 			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,

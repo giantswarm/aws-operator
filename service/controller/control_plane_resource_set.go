@@ -18,7 +18,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
@@ -401,19 +400,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 	}
 
-	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToControlPlane(obj)
-		if err != nil {
-			return false
-		}
-
-		if key.OperatorVersion(&cr) == project.Version() {
-			return true
-		}
-
-		return false
-	}
-
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
 		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
@@ -421,7 +407,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var resourceSet *controller.ResourceSet
 	{
 		c := controller.ResourceSetConfig{
-			Handles:   handlesFunc,
 			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,

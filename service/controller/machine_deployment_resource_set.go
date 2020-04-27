@@ -20,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
@@ -565,19 +564,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 	}
 
-	handlesFunc := func(obj interface{}) bool {
-		cr, err := key.ToMachineDeployment(obj)
-		if err != nil {
-			return false
-		}
-
-		if key.OperatorVersion(&cr) == project.Version() {
-			return true
-		}
-
-		return false
-	}
-
 	initCtxFunc := func(ctx context.Context, obj interface{}) (context.Context, error) {
 		return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
 	}
@@ -585,7 +571,6 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var resourceSet *controller.ResourceSet
 	{
 		c := controller.ResourceSetConfig{
-			Handles:   handlesFunc,
 			InitCtx:   initCtxFunc,
 			Logger:    config.Logger,
 			Resources: resources,
