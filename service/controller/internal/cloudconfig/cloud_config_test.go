@@ -53,7 +53,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			CustomObject: tc.CustomObject,
 			ClusterKeys:  tc.ClusterKeys,
 		}
-		template, err := ccService.NewMasterTemplate(ctx, data)
+		template, _, err := ccService.NewMasterTemplate(ctx, data)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -110,7 +110,7 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 		data := IgnitionTemplateData{
 			CustomObject: tc.CustomObject,
 		}
-		template, err := ccService.NewWorkerTemplate(ctx, data)
+		template, _, err := ccService.NewWorkerTemplate(ctx, data)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

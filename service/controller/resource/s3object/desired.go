@@ -2,8 +2,6 @@ package s3object
 
 import (
 	"context"
-	"crypto/sha512"
-	"encoding/hex"
 	"sync"
 
 	gscerts "github.com/giantswarm/certs"
@@ -84,40 +82,40 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Images:       images,
 		}
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewMasterTemplate(ctx, data)
+			ignition, hash, err := r.cloudConfig.NewMasterTemplate(ctx, data)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			m.Lock()
+			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = hash
 			k := key.BucketObjectName(key.KindMaster)
 			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
-				Body:   b,
+				Body:   ignition,
 				Key:    k,
 			}
 			output[k] = object
-			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = hashBucketObject(object)
 			m.Unlock()
 
 			return nil
 		})
 
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
+			ignition, hash, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			m.Lock()
+			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = hash
 			k := key.BucketObjectName(key.KindWorker)
 			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
-				Body:   b,
+				Body:   ignition,
 				Key:    k,
 			}
 			output[k] = object
-			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = hashBucketObject(object)
 			m.Unlock()
 
 			return nil
@@ -130,13 +128,4 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	return output, nil
-}
-
-// hashBucketObject returns the given object with object.Hash set to the hash of object.Body.
-func hashBucketObject(object BucketObjectState) string {
-	rawSum := sha512.Sum512([]byte(object.Body))
-	sum := rawSum[:]
-	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
-	hex.Encode(encodedSum, sum)
-	return string(encodedSum)
 }

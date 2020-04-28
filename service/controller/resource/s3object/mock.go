@@ -72,30 +72,30 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
+func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, string, error) {
 	template, err := gotemplate.New("master").Parse(c.template)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 	var builder strings.Builder
 	err = template.Execute(&builder, data)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
-	return builder.String(), nil
+	return builder.String(), "hash", nil
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
+func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, string, error) {
 	template, err := gotemplate.New("master").Parse(c.template)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 	var builder strings.Builder
 	err = template.Execute(&builder, data)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
-	return builder.String(), nil
+	return builder.String(), "hash", nil
 }
 
 type KMSClientMock struct {
