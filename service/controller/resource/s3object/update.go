@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/operatorkit/resource/crud"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -33,13 +32,6 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(&s3PutInput)
 			if err != nil {
 				return microerror.Mask(err)
-			}
-
-			switch objectKey {
-			case key.BucketObjectName(key.KindMaster):
-				cc.Spec.TenantCluster.MasterInstance.IgnitionHash = bucketObject.Hash
-			case key.BucketObjectName(key.KindWorker):
-				cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = bucketObject.Hash
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", objectKey))

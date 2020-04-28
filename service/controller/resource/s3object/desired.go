@@ -96,7 +96,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Body:   b,
 				Key:    k,
 			}
-			output[k] = hashBucketObject(object)
+			output[k] = object
+			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = hashBucketObject(object)
 			m.Unlock()
 
 			return nil
@@ -115,7 +116,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Body:   b,
 				Key:    k,
 			}
-			output[k] = hashBucketObject(object)
+			output[k] = object
+			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = hashBucketObject(object)
 			m.Unlock()
 
 			return nil
@@ -131,11 +133,10 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 }
 
 // hashBucketObject returns the given object with object.Hash set to the hash of object.Body.
-func hashBucketObject(object BucketObjectState) BucketObjectState {
+func hashBucketObject(object BucketObjectState) string {
 	rawSum := sha512.Sum512([]byte(object.Body))
 	sum := rawSum[:]
 	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
 	hex.Encode(encodedSum, sum)
-	object.Hash = string(encodedSum)
-	return object
+	return string(encodedSum)
 }

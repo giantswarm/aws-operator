@@ -307,13 +307,13 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				Name: key.MainGuestStackName(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
-				MasterIgnitionHash:         cc.Status.TenantCluster.MasterInstance.IgnitionHash,
+				MasterIgnitionHash:         cc.Spec.TenantCluster.MasterInstance.IgnitionHash,
 				MasterImageID:              imageID,
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         key.MasterInstanceType(cr),
 				MasterInstanceMonitoring:   r.instanceMonitoring,
 
-				WorkerIgnitionHash:       cc.Status.TenantCluster.WorkerInstance.IgnitionHash,
+				WorkerIgnitionHash:       cc.Spec.TenantCluster.WorkerInstance.IgnitionHash,
 				WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
 				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
