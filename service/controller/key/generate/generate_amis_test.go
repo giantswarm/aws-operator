@@ -13,24 +13,6 @@ func Test_scrapeVersions(t *testing.T) {
 		expected []string
 	}{
 		{
-			name: "case 1: coreos style",
-			body: `<html>
-    <head>
-	<title>stable.release.core-os.net/amd64-usr/</title>
-	<meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
-    </head>
-    <body>
-    <h1>stable.release.core-os.net/amd64-usr/</h1>
-	[dir] <a href="2345.3.0/">2345.3.0</a> <br/>
-    
-	[dir] <a href="current/">current</a> <br/>
-    
-    
-    </body>
-</html>`,
-			expected: []string{"2345.3.0"},
-		},
-		{
 			name: "case 1: flatcar style",
 			body: `<html>
 	<body>
@@ -94,21 +76,6 @@ func Test_scrapeVersionAMIs(t *testing.T) {
 		body     string
 		expected map[string]string
 	}{
-		{
-			name: "case 1: coreos style",
-			body: `{
-	"amis": [
-		{
-			"name": "ap-northeast-1",
-			"pv": "ami-07b83b324896e0c5a",
-			"hvm": "ami-02e7b007b87514a38"
-		}
-	]
-}`,
-			expected: map[string]string{
-				"ap-northeast-1": "ami-02e7b007b87514a38",
-			},
-		},
 		{
 			name: "case 1: flatcar style",
 			body: `{
