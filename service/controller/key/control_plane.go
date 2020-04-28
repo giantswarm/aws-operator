@@ -70,6 +70,10 @@ func ControlPlaneLaunchTemplateName(getter LabelsGetter, masterID int) string {
 	return fmt.Sprintf("%s-master%d-launch-template", ClusterID(getter), masterID)
 }
 
+func ControlPlaneMasterIgnitionPath(path string, masterID int) string {
+	return fmt.Sprintf("%s%d", path, masterID)
+}
+
 func ControlPlaneVolumeNameEtcd(getter LabelsGetter, masterID int) string {
 	return fmt.Sprintf("%s-master%d-etcd", ClusterID(getter), masterID)
 }

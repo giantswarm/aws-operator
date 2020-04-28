@@ -107,3 +107,16 @@ func toS3Object(v interface{}) (*s3.PutObjectInput, error) {
 
 	return t, nil
 }
+
+func toS3ObjectArray(v interface{}) ([]*s3.PutObjectInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	t, ok := v.([]*s3.PutObjectInput)
+	if !ok {
+		return []*s3.PutObjectInput{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", []*s3.PutObjectInput{{}}, v)
+	}
+
+	return t, nil
+}

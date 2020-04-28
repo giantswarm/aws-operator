@@ -111,17 +111,52 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		images = k8scloudconfig.BuildImages(r.registryDomain, v)
 	}
 
-	body, err := r.cloudConfig.Render(ctx, cluster, clusterCerts, clusterKeys, images, r.labelsFunc(cr))
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var s3Objects []*s3.PutObjectInput
+
+	cp, isControlPlaneCR := obj.(*infrastructurev1alpha2.AWSControlPlane)
+	if isControlPlaneCR {
+		// tccpn render
+
+		// Fetch the replicas number.
+		g8scp, err := r.g8sClient.InfrastructureV1alpha2().G8sControlPlanes(cp.Namespace).Get(cp.Name, metav1.GetOptions{})
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		// get replicas num
+		numReplicas := g8scp.Spec.Replicas
+
+		for i := 0; i < numReplicas; i++ {
+			body, err := r.cloudConfig.RenderTCCPN(ctx, cluster, clusterCerts, clusterKeys, images, i, r.labelsFunc(cr))
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			s3Object :=
+				&s3.PutObjectInput{
+					Key:           aws.String(key.ControlPlaneMasterIgnitionPath(r.pathFunc(cr), i)),
+					Body:          strings.NewReader(string(body)),
+					Bucket:        aws.String(key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)),
+					ContentLength: aws.Int64(int64(len(body))),
+				}
+			s3Objects = append(s3Objects, s3Object)
+		}
+	} else {
+		// tcnp render
+		body, err := r.cloudConfig.RenderTCNP(ctx, cluster, clusterCerts, clusterKeys, images, r.labelsFunc(cr))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		s3Object :=
+			&s3.PutObjectInput{
+				Key:           aws.String(r.pathFunc(cr)),
+				Body:          strings.NewReader(string(body)),
+				Bucket:        aws.String(key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)),
+				ContentLength: aws.Int64(int64(len(body))),
+			}
+		s3Objects = append(s3Objects, s3Object)
+
 	}
 
-	s3Object := &s3.PutObjectInput{
-		Key:           aws.String(r.pathFunc(cr)),
-		Body:          strings.NewReader(string(body)),
-		Bucket:        aws.String(key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)),
-		ContentLength: aws.Int64(int64(len(body))),
-	}
-
-	return s3Object, nil
+	return s3Objects, nil
 }

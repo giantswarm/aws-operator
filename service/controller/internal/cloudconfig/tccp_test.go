@@ -90,7 +90,7 @@ func Test_Controller_CloudConfig_TCCP_Template_Render(t *testing.T) {
 				}
 			}
 
-			templateBody, err := tccp.Render(tc.ctx, tc.cr, tc.certs, tc.keys, tc.images, tc.labels)
+			templateBody, err := tccp.RenderTCNP(tc.ctx, tc.cr, tc.certs, tc.keys, tc.images, tc.labels)
 			if err != nil {
 				t.Fatal(err)
 			}

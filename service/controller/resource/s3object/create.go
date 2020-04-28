@@ -20,20 +20,22 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	s3Object, err := toS3Object(createChange)
+	s3Objects, err := toS3ObjectArray(createChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if s3Object != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", *s3Object.Key))
+	if len(s3Objects) != 0 {
+		for i := 0; i < len(s3Objects); i++ {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", s3Objects[i].Key))
 
-		_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
-		if err != nil {
-			return microerror.Mask(err)
+			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Objects[i])
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", s3Objects[i].Key))
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", *s3Object.Key))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object %#q", r.pathFunc(cr)))
 	}
@@ -42,18 +44,18 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentS3Object, err := toS3Object(currentState)
+	currentS3Objects, err := toS3ObjectArray(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredS3Object, err := toS3Object(desiredState)
+	desiredS3Objects, err := toS3ObjectArray(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var createState *s3.PutObjectInput
-	if currentS3Object == nil {
-		createState = desiredS3Object
+	var createState []*s3.PutObjectInput
+	if len(currentS3Objects) == 0 {
+		createState = desiredS3Objects
 	}
 
 	return createState, nil

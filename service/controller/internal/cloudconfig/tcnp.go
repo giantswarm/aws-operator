@@ -37,7 +37,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+func (t *TCNP) RenderTCNP(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -102,6 +102,10 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 	}
 
 	return templateBody, nil
+}
+
+func (t *TCNP) RenderTCCPN(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+	return nil, nil
 }
 
 type WorkerExtension struct {

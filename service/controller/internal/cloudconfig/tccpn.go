@@ -46,7 +46,7 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	return t, nil
 }
 
-func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+func (t *TCCPN) RenderTCCPN(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, masterID int, images k8scloudconfig.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -95,8 +95,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
-
-	masterID := 0 // for now we have only 1 master, TODO get this value via render function as argument
 
 	var masterSubnet net.IPNet
 	{
@@ -168,6 +166,10 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	}
 
 	return templateBody, nil
+}
+
+func (t *TCCPN) RenderTCNP(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+	return nil, nil
 }
 
 type HAMasterExtension struct {

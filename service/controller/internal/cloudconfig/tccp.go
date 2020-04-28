@@ -37,7 +37,7 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	return t, nil
 }
 
-func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+func (t *TCCP) RenderTCNP(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -130,6 +130,10 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 	}
 
 	return templateBody, nil
+}
+
+func (t *TCCP) RenderTCCPN(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+	return nil, nil
 }
 
 type MasterExtension struct {

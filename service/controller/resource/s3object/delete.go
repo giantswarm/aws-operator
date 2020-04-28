@@ -14,7 +14,7 @@ import (
 // deleted Node Pool. Another very rare but noteworthy side effect might be that
 // Node Pool IDs generate twice during the lifetime of a Tenant Cluster cause
 // existing Cloud Config objects to be overwritten with newer versions,
-// potentially causing confusion and inconsisencies upon inspection. Chances are
+// potentially causing confusion and inconsistencies upon inspection. Chances are
 // you win the lotto before this bullshit ever happens, but one should
 // understand current design decisions.
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
