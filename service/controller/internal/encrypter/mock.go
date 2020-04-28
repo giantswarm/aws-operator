@@ -16,6 +16,10 @@ func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (str
 	return plaintext, nil
 }
 
+func (e *EncrypterMock) Decrypt(ctx context.Context, key, ciphertext string) (string, error) {
+	return ciphertext, nil
+}
+
 func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {
 	return "", nil
 }

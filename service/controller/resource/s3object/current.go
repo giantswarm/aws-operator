@@ -72,15 +72,9 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		for _, object := range objects {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the content of the S3 object %#q", *object.Key))
 
-			body, err := r.getBucketObjectBody(ctx, bucketName, *object.Key)
+			currentBucketState[*object.Key], err = r.getBucketObject(ctx, bucketName, *object.Key)
 			if err != nil {
 				return nil, microerror.Mask(err)
-			}
-
-			currentBucketState[*object.Key] = BucketObjectState{
-				Body:   body,
-				Bucket: bucketName,
-				Key:    *object.Key,
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the content of the S3 object %#q", *object.Key))
@@ -92,10 +86,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	return currentBucketState, nil
 }
 
-func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, keyName string) (string, error) {
+func (r *Resource) getBucketObject(ctx context.Context, bucketName string, keyName string) (BucketObjectState, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return BucketObjectState{}, microerror.Mask(err)
 	}
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
@@ -104,17 +98,29 @@ func (r *Resource) getBucketObjectBody(ctx context.Context, bucketName string, k
 	result, err := cc.Client.TenantCluster.AWS.S3.GetObject(input)
 	if IsObjectNotFound(err) || IsBucketNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q", keyName))
-		return "", nil
+		return BucketObjectState{}, nil
 	} else if err != nil {
-		return "", microerror.Mask(err)
+		return BucketObjectState{}, microerror.Mask(err)
 	}
 
 	var body string
 	{
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(result.Body)
+		_, err = buf.ReadFrom(result.Body)
+		if err != nil {
+			return BucketObjectState{}, microerror.Mask(err)
+		}
 		body = buf.String()
 	}
 
-	return body, nil
+	hash, err := r.cloudConfig.DecryptedHash(ctx, []byte(body))
+
+	object := BucketObjectState{
+		Bucket: bucketName,
+		Body:   body,
+		Hash:   hash,
+		Key:    keyName,
+	}
+
+	return object, nil
 }

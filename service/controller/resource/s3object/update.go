@@ -82,7 +82,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		currentObject := currentS3Object[key]
-		if currentObject.Body != "" && bucketObject.Body != currentObject.Body {
+		if currentObject.Body != "" && bucketObject.Hash != currentObject.Hash {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be updated", key))
 			updateState[key] = bucketObject
 		} else {

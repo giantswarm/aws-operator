@@ -89,10 +89,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTempla
 
 		switch encryption {
 		case "unencrypted":
-			unencryptedHash, err = hashIgnition([]byte(newCloudConfig.String()))
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
+			unencryptedHash = hashIgnition([]byte(newCloudConfig.String()))
 		case "encrypted":
 			renderedIgnition = newCloudConfig.String()
 		}

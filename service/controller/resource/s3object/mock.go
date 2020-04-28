@@ -72,6 +72,10 @@ type CloudConfigMock struct {
 	template string
 }
 
+func (c *CloudConfigMock) DecryptedHash(ctx context.Context, data []byte) (string, error) {
+	return "decrypted", nil
+}
+
 func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, string, error) {
 	template, err := gotemplate.New("master").Parse(c.template)
 	if err != nil {
