@@ -29,86 +29,66 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		return "", "", microerror.Mask(err)
 	}
 
-	var renderedIgnition string
-	var unencryptedHash string
-	// We want the rendered ignition used by nodes to contain encrypted content such as the encryption key itself and
-	// certificates. While calculating the desired state, the ignition will always appear to have changed because of
-	// salt in the encryption process. By generating the ignition twice, once with encryption and once without, we can
-	// return the encrypted form and calculate a hash from the unencrypted form which should only change when the
-	// plaintext of the ignition content changes.
-	for _, encryption := range []string{"encrypted", "unencrypted"} {
-		var encrypter iencrypter.Interface
-		if encryption == "encrypted" {
-			encrypter = c.encrypter
-		} else {
-			encrypter = &iencrypter.EncrypterMock{}
+	var params k8scloudconfig.Params
+	{
+		be := baseExtension{
+			customObject:  data.CustomObject,
+			encrypter:     &iencrypter.EncrypterMock{},
+			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
 
-		var params k8scloudconfig.Params
-		{
-			be := baseExtension{
-				customObject:  data.CustomObject,
-				encrypter:     encrypter,
-				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-			}
+		params = k8scloudconfig.DefaultParams()
 
-			params = k8scloudconfig.DefaultParams()
+		params.Cluster = data.CustomObject.Spec.Cluster
+		params.DisableEncryptionAtREST = true
+		// Ingress controller service remains in k8scloudconfig and will be
+		// removed in a later migration.
+		params.DisableIngressControllerService = false
+		params.EtcdPort = data.CustomObject.Spec.Cluster.Etcd.Port
+		params.Extension = &MasterExtension{
+			baseExtension: be,
+			ctlCtx:        cc,
 
-			params.Cluster = data.CustomObject.Spec.Cluster
-			params.DisableEncryptionAtREST = true
-			// Ingress controller service remains in k8scloudconfig and will be
-			// removed in a later migration.
-			params.DisableIngressControllerService = false
-			params.EtcdPort = data.CustomObject.Spec.Cluster.Etcd.Port
-			params.Extension = &MasterExtension{
-				baseExtension: be,
-				ctlCtx:        cc,
-
-				ClusterCerts:     data.ClusterCerts,
-				RandomKeyTmplSet: randomKeyTmplSet,
-			}
-			params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
-			params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
-			params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-			params.Images = data.Images
-			params.SSOPublicKey = c.SSOPublicKey
-			params.EnableAWSCNI = false
-
-			ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
-			params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
+			ClusterCerts:     data.ClusterCerts,
+			RandomKeyTmplSet: randomKeyTmplSet,
 		}
+		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
+		params.Images = data.Images
+		params.SSOPublicKey = c.SSOPublicKey
+		params.EnableAWSCNI = false
 
-		var newCloudConfig *k8scloudconfig.CloudConfig
-		{
-			cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
-			cloudConfigConfig.Params = params
-			cloudConfigConfig.Template = k8scloudconfig.MasterTemplate
-
-			newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
-
-			err = newCloudConfig.ExecuteTemplate()
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
-		}
-
-		switch encryption {
-		case "unencrypted":
-			unencryptedHash, err = hashIgnition([]byte(newCloudConfig.String()))
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
-		case "encrypted":
-			renderedIgnition = newCloudConfig.String()
+		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
+		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
+		if err != nil {
+			return "", "", microerror.Mask(err)
 		}
 	}
 
+	var newCloudConfig *k8scloudconfig.CloudConfig
+	{
+		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
+		cloudConfigConfig.Params = params
+		cloudConfigConfig.Template = k8scloudconfig.MasterTemplate
+
+		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
+		if err != nil {
+			return "", "", microerror.Mask(err)
+		}
+
+		err = newCloudConfig.ExecuteTemplate()
+		if err != nil {
+			return "", "", microerror.Mask(err)
+		}
+	}
+
+	unencryptedHash, err := hashIgnition([]byte(newCloudConfig.String()))
+	if err != nil {
+		return "", "", microerror.Mask(err)
+	}
+	renderedIgnition := newCloudConfig.String()
+	
 	return renderedIgnition, unencryptedHash, nil
 }
 
@@ -415,208 +395,4 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{}
 
 	return newSections
-}
-
-func (e *MasterExtension) _DangerousUnencrypted() ([]k8scloudconfig.FileAsset, error) {
-	// TODO Pass context to k8scloudconfig rendering functions.
-	//
-	//     https://github.com/giantswarm/giantswarm/issues/4329
-	//
-	var storageClass string
-	_, ok := e.encrypter.(*vault.Encrypter)
-	if ok {
-		storageClass = cloudconfig.InstanceStorageClassContent
-	} else {
-		storageClass = cloudconfig.InstanceStorageClassEncryptedContent
-	}
-	ctx := context.TODO()
-
-	filesMeta := []k8scloudconfig.FileMetadata{
-		{
-			AssetContent: cloudconfig.DecryptTLSAssetsScript,
-			Path:         "/opt/bin/decrypt-tls-assets",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-		{
-			AssetContent: cloudconfig.DecryptKeysAssetsScript,
-			Path:         "/opt/bin/decrypt-keys-assets",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-
-		{
-			AssetContent: e.RandomKeyTmplSet.APIServerEncryptionKey,
-			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.WaitDockerConf,
-			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-		{
-			AssetContent: cloudconfig.VaultAWSAuthorizerScript,
-			Path:         "/opt/bin/vault-aws-authorizer",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
-		// on KVM because of dependencies on hardware LB configuration.
-		{
-			AssetContent: cloudconfig.IngressControllerConfigMap,
-			Path:         "/srv/ingress-controller-cm.yml",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		// NVME disks udev rules and script.
-		// Workaround for https://github.com/coreos/bugs/issues/2399
-		{
-			AssetContent: cloudconfig.NVMEUdevRule,
-			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.NVMEUdevScript,
-			Path:         "/opt/ebs-nvme-mapping",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0766,
-		},
-		{
-			AssetContent: storageClass,
-			Path:         "/srv/default-storage-class.yaml",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-	}
-
-	certsMeta := []k8scloudconfig.FileMetadata{}
-	{
-		certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
-
-		for _, f := range certFiles {
-			// TODO We should just pass ctx to Files.
-			//
-			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
-			//
-			ctx = controllercontext.NewContext(ctx, *e.ctlCtx)
-
-			data, err := e.encrypt(ctx, f.Data)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			meta := k8scloudconfig.FileMetadata{
-				AssetContent: string(data),
-				Path:         f.AbsolutePath + ".enc",
-				Owner: k8scloudconfig.Owner{
-					Group: k8scloudconfig.Group{
-						Name: FileOwnerGroupName,
-					},
-					User: k8scloudconfig.User{
-						Name: FileOwnerUserName,
-					},
-				},
-				Permissions: 0700,
-			}
-
-			certsMeta = append(certsMeta, meta)
-		}
-	}
-
-	var fileAssets []k8scloudconfig.FileAsset
-
-	data := e.templateData()
-
-	for _, fm := range filesMeta {
-		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		asset := k8scloudconfig.FileAsset{
-			Metadata: fm,
-			Content:  c,
-		}
-
-		fileAssets = append(fileAssets, asset)
-	}
-
-	for _, cm := range certsMeta {
-		c := base64.StdEncoding.EncodeToString([]byte(cm.AssetContent))
-		asset := k8scloudconfig.FileAsset{
-			Metadata: cm,
-			Content:  c,
-		}
-
-		fileAssets = append(fileAssets, asset)
-	}
-
-	return fileAssets, nil
 }
