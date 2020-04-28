@@ -9,7 +9,3 @@ type AMIInfo struct {
 type AMIInfoList struct {
 	AMIs []AMIInfo `json:"amis"`
 }
-
-type AMIInfoListParent struct {
-	AWS AMIInfoList `json:"aws"`
-}

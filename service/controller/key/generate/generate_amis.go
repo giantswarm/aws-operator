@@ -83,31 +83,20 @@ func scrapeVersions(source io.Reader) ([]string, error) {
 	}
 }
 
-func scrapeVersionAMIs(source io.Reader, parent bool) (map[string]string, error) {
+func scrapeVersionAMIs(source io.Reader) (map[string]string, error) {
 	body, err := ioutil.ReadAll(source)
 	if err != nil {
 		return nil, err
 	}
 
-	var amis []key.AMIInfo
-	if parent {
-		var list key.AMIInfoListParent
-		err = json.Unmarshal(body, &list)
-		if err != nil {
-			return nil, err
-		}
-		amis = list.AWS.AMIs
-	} else {
-		var list key.AMIInfoList
-		err = json.Unmarshal(body, &list)
-		if err != nil {
-			return nil, err
-		}
-		amis = list.AMIs
+	var list key.AMIInfoList
+	err = json.Unmarshal(body, &list)
+	if err != nil {
+		return nil, err
 	}
 
 	result := map[string]string{}
-	for _, region := range amis {
+	for _, region := range list.AMIs {
 		result[region.Name] = region.HVM
 	}
 
@@ -140,7 +129,7 @@ func main() {
 		if response.StatusCode == 403 {
 			continue
 		}
-		mergedAMIs[version], err = scrapeVersionAMIs(response.Body, false)
+		mergedAMIs[version], err = scrapeVersionAMIs(response.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -156,7 +145,7 @@ func main() {
 		if response.StatusCode == 403 {
 			continue
 		}
-		chinaVersionAMIs, err := scrapeVersionAMIs(response.Body, true)
+		chinaVersionAMIs, err := scrapeVersionAMIs(response.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
