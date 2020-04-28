@@ -2,31 +2,32 @@ package cloudconfig
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"github.com/giantswarm/randomkeys"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"golang.org/x/sync/errgroup"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type TCCPNConfig struct {
-	Config    Config
-	G8sClient versioned.Interface
+	Config Config
 }
 
 type TCCPN struct {
-	config    Config
-	g8sClient versioned.Interface
+	config Config
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
@@ -34,35 +35,171 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T cannot by nil", config.G8sClient)
-	}
 
 	t := &TCCPN{
-		config:    config.Config,
-		g8sClient: config.G8sClient,
+		config: config.Config,
 	}
 
 	return t, nil
 }
 
-func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	// We need to determine if we want to generate certificates for a Tenant
+	// Cluster with a HA Master setup.
+	var haMasterEnabled bool
+	{
+		haMasterEnabled, err = t.config.HAMaster.Enabled(ctx, key.ClusterID(cr))
+		if hamaster.IsNotFound(err) {
+			// TODO return package error
+		} else if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var paths []string
+	if haMasterEnabled {
+		paths = append(paths, key.S3ObjectPathTCCPN(cr, 1))
+		paths = append(paths, key.S3ObjectPathTCCPN(cr, 2))
+		paths = append(paths, key.S3ObjectPathTCCPN(cr, 3))
+	} else {
+		paths = append(paths, key.S3ObjectPathTCCPN(cr, 0))
+	}
+
+	return paths, nil
+}
+
+//			CertsSearcher:      config.CertsSearcher,
+//			LabelsFunc:         key.KubeletLabelsTCCPN,
+//			G8sClient:          config.G8sClient,
+//			PathFunc:           key.S3ObjectPathTCCPN,
+//			RandomKeysSearcher: config.RandomKeysSearcher,
+//			RegistryDomain:     config.RegistryDomain,
+func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
+	cr, err := key.ToControlPlane(obj)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	listOptions := metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s", key.TagCluster, key.ClusterID(&cr)),
+
+	// We need to determine if we want to generate certificates for a Tenant
+	// Cluster with a HA Master setup.
+	var haMasterEnabled bool
+	{
+		haMasterEnabled, err = t.config.HAMaster.Enabled(ctx, key.ClusterID(&cr))
+		if hamaster.IsNotFound(err) {
+			// TODO return package error
+		} else if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	cps, err := t.g8sClient.InfrastructureV1alpha2().AWSControlPlanes(cr.Namespace).List(listOptions)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+		err := t.config.K8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			// TODO return package error
+		}
+
+		cl = list.Items[0]
 	}
-	if len(cps.Items) != 1 {
-		return nil, microerror.Maskf(executionFailedError, "expected 1 control plane cr but found %d", len(cps.Items))
+
+	releaseVersion := key.ReleaseVersion(cr)
+
+	var cluster infrastructurev1alpha2.AWSCluster
+	var clusterCerts certs.Cluster
+	var clusterKeys randomkeys.Cluster
+	var release *v1alpha1.Release
+	{
+		g := &errgroup.Group{}
+
+		g.Go(func() error {
+			m, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(cr.GetNamespace()).Get(key.ClusterID(cr), metav1.GetOptions{})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cluster = *m
+
+			return nil
+		})
+
+		g.Go(func() error {
+			certs, err := r.certsSearcher.SearchCluster(key.ClusterID(cr))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			clusterCerts = certs
+
+			return nil
+		})
+
+		g.Go(func() error {
+			keys, err := r.randomKeysSearcher.SearchCluster(key.ClusterID(cr))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			clusterKeys = keys
+
+			return nil
+		})
+
+		g.Go(func() error {
+			releaseCR, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(key.ReleaseName(releaseVersion), metav1.GetOptions{})
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			release = releaseCR
+
+			return nil
+		})
+
+		err = g.Wait()
+		if certs.IsTimeout(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "certificate secrets are not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+			return nil, nil
+
+		} else if randomkeys.IsTimeout(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "random key secrets are not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+			return nil, nil
+
+		} else if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
-	cp := cps.Items[0]
+
+	var images k8scloudconfig.Images
+	{
+		v, err := k8scloudconfig.ExtractComponentVersions(release.Spec.Components)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		v.Kubectl = key.KubectlVersion
+		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
+		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
+		images = k8scloudconfig.BuildImages(r.registryDomain, v)
+	}
 
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
 	if err != nil {
@@ -102,6 +239,8 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	{
 		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
 		for _, az := range zones {
+			// TODO is it that a Single Master setup guarantees a single AZ and that a
+			// HA Masters setup guarantees 3 AZs?
 			if az.Name == key.ControlPlaneAvailabilityZones(cp)[masterID] {
 				masterSubnet = az.Subnet.Private.CIDR
 				break
@@ -120,7 +259,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.EtcdPort = key.EtcdPort
-		params.Extension = &HAMasterExtension{
+		params.Extension = &TCCPNExtension{
 			baseExtension: baseExtension{
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
@@ -168,326 +307,4 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	}
 
 	return templateBody, nil
-}
-
-type HAMasterExtension struct {
-	baseExtension
-	// TODO Pass context to k8scloudconfig rendering fucntions
-	//
-	//	See https://github.com/giantswarm/giantswarm/issues/4329.
-	//
-	cc               *controllercontext.Context
-	clusterCerts     certs.Cluster
-	randomKeyTmplSet RandomKeyTmplSet
-}
-
-func (e *HAMasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	ctx := context.TODO()
-
-	storageClass := cloudconfig.InstanceStorageClassEncryptedContent
-
-	filesMeta := []k8scloudconfig.FileMetadata{
-		{
-			AssetContent: cloudconfig.DecryptTLSAssetsScript,
-			Path:         "/opt/bin/decrypt-tls-assets",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-		{
-			AssetContent: cloudconfig.DecryptKeysAssetsScript,
-			Path:         "/opt/bin/decrypt-keys-assets",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-
-		{
-			AssetContent: e.randomKeyTmplSet.APIServerEncryptionKey,
-			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.WaitDockerConf,
-			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
-		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
-		// on KVM because of dependencies on hardware LB configuration.
-		{
-			AssetContent: cloudconfig.IngressControllerConfigMap,
-			Path:         "/srv/ingress-controller-cm.yml",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		// NVME disks udev rules and script.
-		// Workaround for https://github.com/coreos/bugs/issues/2399
-		{
-			AssetContent: cloudconfig.NVMEUdevRule,
-			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.NVMEUdevScript,
-			Path:         "/opt/ebs-nvme-mapping",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0766,
-		},
-		{
-			AssetContent: storageClass,
-			Path:         "/srv/default-storage-class.yaml",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.Etcd3ExtraConfig,
-			Path:         "/etc/systemd/system/etcd3.d/10-require-attach-dep.conf",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.SystemdNetworkdEth1Network,
-			Path:         "/etc/systemd/network/10-eth1.network",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.AwsCNIManifest,
-			Path:         "/srv/aws-cni.yaml",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-	}
-
-	certsMeta := []k8scloudconfig.FileMetadata{}
-	{
-		certFiles := certs.NewFilesClusterMaster(e.clusterCerts)
-
-		for _, f := range certFiles {
-			// TODO We should just pass ctx to Files.
-			//
-			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
-			//
-			ctx = controllercontext.NewContext(ctx, *e.cc)
-
-			data, err := e.encrypt(ctx, f.Data)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			meta := k8scloudconfig.FileMetadata{
-				AssetContent: string(data),
-				Path:         f.AbsolutePath + ".enc",
-				Owner: k8scloudconfig.Owner{
-					Group: k8scloudconfig.Group{
-						Name: FileOwnerGroupName,
-					},
-					User: k8scloudconfig.User{
-						Name: FileOwnerUserName,
-					},
-				},
-				Permissions: 0700,
-			}
-
-			certsMeta = append(certsMeta, meta)
-		}
-	}
-
-	var fileAssets []k8scloudconfig.FileAsset
-
-	data := e.templateDataTCCPN()
-
-	for _, fm := range filesMeta {
-		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		asset := k8scloudconfig.FileAsset{
-			Metadata: fm,
-			Content:  c,
-		}
-
-		fileAssets = append(fileAssets, asset)
-	}
-
-	for _, cm := range certsMeta {
-		c := base64.StdEncoding.EncodeToString([]byte(cm.AssetContent))
-		asset := k8scloudconfig.FileAsset{
-			Metadata: cm,
-			Content:  c,
-		}
-
-		fileAssets = append(fileAssets, asset)
-	}
-
-	return fileAssets, nil
-}
-
-func (e *HAMasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
-	unitsMeta := []k8scloudconfig.UnitMetadata{
-		// Create symlinks for nvme disks.
-		// This service should be started only on first boot.
-		{
-			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
-			Name:         "ebs-nvme-udev-trigger.service",
-			Enabled:      true,
-		},
-		// Set bigger timeouts for NVME driver.
-		// Workaround for https://github.com/coreos/bugs/issues/2484
-		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
-		{
-			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
-			Name:         "nvme-set-timeouts.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.DecryptTLSAssetsService,
-			Name:         "decrypt-tls-assets.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.DecryptKeysAssetsService,
-			Name:         "decrypt-keys-assets.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.SetHostname,
-			Name:         "set-hostname.service",
-			Enabled:      true,
-		},
-		{
-			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
-			Name:         "var-lib-docker.mount",
-			Enabled:      true,
-		},
-		// Attach etcd3 dependencies (EBS and ENI).
-		{
-			AssetContent: cloudconfig.Etcd3AttachDepService,
-			Name:         "etcd3-attach-dependencies.service",
-			Enabled:      true,
-		},
-		// Automount etcd EBS volume.
-		{
-			AssetContent: cloudconfig.AutomountEtcdVolume,
-			Name:         "var-lib-etcd.automount",
-			Enabled:      true,
-		},
-		// Mount etcd EBS volume.
-		{
-			AssetContent: cloudconfig.MountEtcdVolumeAsgMasters,
-			Name:         "var-lib-etcd.mount",
-			Enabled:      false,
-		},
-		// Mount log EBS volume.
-		{
-			AssetContent: cloudconfig.EphemeralVarLogMount,
-			Name:         "var-log.mount",
-			Enabled:      true,
-		},
-	}
-
-	var newUnits []k8scloudconfig.UnitAsset
-
-	data := e.templateDataTCCPN()
-
-	for _, fm := range unitsMeta {
-		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		unitAsset := k8scloudconfig.UnitAsset{
-			Metadata: fm,
-			Content:  c,
-		}
-
-		newUnits = append(newUnits, unitAsset)
-	}
-
-	return newUnits, nil
-}
-
-func (e *HAMasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
-	newSections := []k8scloudconfig.VerbatimSection{}
-
-	return newSections
 }

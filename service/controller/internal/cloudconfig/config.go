@@ -1,15 +1,26 @@
 package cloudconfig
 
 import (
+	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type Config struct {
-	Encrypter encrypter.Interface
-	Logger    micrologger.Logger
+	CertsSearcher      certs.Interface
+	Encrypter          encrypter.Interface
+	HAMaster           hamaster.Interface
+	K8sClient          k8sclient.Interface
+	LabelsFunc         func(key.LabelsGetter) string
+	Logger             micrologger.Logger
+	PathFunc           func(key.LabelsGetter) string
+	RandomKeysSearcher randomkeys.Interface
 
 	APIExtraArgs              []string
 	CalicoCIDR                int
@@ -29,6 +40,7 @@ type Config struct {
 }
 
 func (c Config) Validate() error {
+	// TODO validate input
 	if c.Encrypter == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", c)
 	}

@@ -211,14 +211,8 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
-			CertsSearcher:      config.CertsSearcher,
-			CloudConfig:        tccpnCloudConfig,
-			LabelsFunc:         key.KubeletLabelsTCCPN,
-			Logger:             config.Logger,
-			G8sClient:          config.G8sClient,
-			PathFunc:           key.S3ObjectPathTCCPN,
-			RandomKeysSearcher: config.RandomKeysSearcher,
-			RegistryDomain:     config.RegistryDomain,
+			CloudConfig: tccpnCloudConfig,
+			Logger:      config.Logger,
 		}
 
 		ops, err := s3object.New(c)

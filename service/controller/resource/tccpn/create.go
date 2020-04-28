@@ -354,7 +354,7 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		},
 		MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 		SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
-			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr)),
+			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, TODO)),
 		},
 		ResourceName: key.ControlPlaneLaunchTemplateName(&cr, 0),
 	}

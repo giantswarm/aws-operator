@@ -2,13 +2,21 @@ package cloudconfig
 
 import (
 	"context"
-
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
-	"github.com/giantswarm/randomkeys"
 )
 
 type Interface interface {
-	Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error)
+	// NewPaths returns a list of S3 Object paths aligned with the templates
+	// returned by NewTemplates.
+	NewPaths(ctx context.Context, obj interface{}) ([]string, error)
+	// NewTemplates implements any functionality necessary to generate a list of
+	// Cloud Config templates. The interface defintion is most generic in order to
+	// serve all possible cases. The returned template is a list of Clooud Config
+	// templates ready to upload to S3. Usually the amount of templates generated
+	// should be 1. There may be special cases though e.g. HA Masters, where an
+	// implementation may detect an HA Masters setting and thus needs to generate
+	// multiple Cloud Configs based on e.g. some desired replicas configuration.
+	// Just like NewPaths, the implementation of NewTemplates must align with the
+	// returned items so that users of the interface are guaranteed to always work
+	// with a key-value pair of path and template.
+	NewTemplates(ctx context.Context, obj interface{}) ([]string, error)
 }

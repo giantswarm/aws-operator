@@ -13,7 +13,8 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type TCNPConfig struct {
@@ -37,7 +38,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	return t, nil
 }
 
-func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
+func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts []certs.File, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -112,7 +113,7 @@ type WorkerExtension struct {
 	// See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
 	cc           *controllercontext.Context
-	clusterCerts certs.Cluster
+	clusterCerts []certs.File
 }
 
 func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -120,7 +121,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: cloudconfig.DecryptTLSAssetsScript,
+			AssetContent: template.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -133,7 +134,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0700,
 		},
 		{
-			AssetContent: cloudconfig.WaitDockerConf,
+			AssetContent: template.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -149,9 +150,7 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
-		certFiles := certs.NewFilesClusterWorker(e.clusterCerts)
-
-		for _, f := range certFiles {
+		for _, f := range e.clusterCerts {
 			ctx = controllercontext.NewContext(ctx, *e.cc)
 
 			data, err := e.encrypt(ctx, f.Data)
@@ -179,7 +178,11 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
-	data := e.templateDataTCNP()
+	data := TemplateData{
+		AWSRegion:      key.Region(e.cluster),
+		IsChinaRegion:  key.IsChinaRegion(key.Region(e.cluster)),
+		RegistryDomain: e.registryDomain,
+	}
 
 	for _, m := range filesMeta {
 		c, err := k8scloudconfig.RenderFileAssetContent(m.AssetContent, data)
@@ -211,12 +214,12 @@ func (e *WorkerExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		{
-			AssetContent: cloudconfig.DecryptTLSAssetsService,
+			AssetContent: template.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.PersistentVarLibDockerMount,
+			AssetContent: template.PersistentVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
@@ -224,22 +227,22 @@ func (e *WorkerExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		// Workaround for https://github.com/coreos/bugs/issues/2484
 		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
 		{
-			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			AssetContent: template.NVMESetTimeoutsUnit,
 			Name:         "nvme-set-timeouts.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.SetHostname,
+			AssetContent: template.SetHostname,
 			Name:         "set-hostname.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.EphemeralVarLogMount,
+			AssetContent: template.EphemeralVarLogMount,
 			Name:         "var-log.mount",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.EphemeralVarLibKubeletMount,
+			AssetContent: template.EphemeralVarLibKubeletMount,
 			Name:         "var-lib-kubelet.mount",
 			Enabled:      true,
 		},

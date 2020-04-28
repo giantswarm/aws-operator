@@ -34,7 +34,7 @@ func Test_Controller_CloudConfig_TCNP_Template_Render(t *testing.T) {
 		name   string
 		ctx    context.Context
 		cr     infrastructurev1alpha2.AWSCluster
-		certs  certs.Cluster
+		certs  []certs.File
 		images k8scloudconfig.Images
 		keys   randomkeys.Cluster
 		labels string

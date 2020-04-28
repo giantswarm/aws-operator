@@ -210,12 +210,14 @@ func S3ObjectPathTCCP(getter LabelsGetter) string {
 }
 
 // S3ObjectPathTCCPN computes the S3 object path to the cloud config uploaded
-// for the TCCPN stack.
+// for the TCCPN stack. Note that the path is suffixed with the master ID, since
+// Tenant Clusters may be Single Master or HA Masters, where the suffix -0
+// indicates a Single Master configuration.
 //
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn-2
 //
-func S3ObjectPathTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCPN(getter))
+func S3ObjectPathTCCPN(cr LabelsGetter, id int) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s-%d", OperatorVersion(cr), CloudConfigVersion, StackNameTCCPN(cr), id)
 }
 
 // S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for
