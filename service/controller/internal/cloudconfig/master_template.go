@@ -88,7 +88,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		return "", "", microerror.Mask(err)
 	}
 	renderedIgnition := newCloudConfig.String()
-	
+
 	return renderedIgnition, unencryptedHash, nil
 }
 
