@@ -51,7 +51,7 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]Output, s
 			return nil, "", microerror.Maskf(tooManyStacksError, "expected 1 stack, got %d", len(o.Stacks))
 		}
 
-		stackOutputs = toOutputs(o.Stacks[0].Outputs)
+		stackOutputs = ToOutputs(o.Stacks[0].Outputs)
 		stackStatus = *o.Stacks[0].StackStatus
 	}
 
@@ -83,7 +83,7 @@ func (c *CloudFormation) DescribeOutputsAndStatus(stackName string) ([]Output, s
 	return stackOutputs, stackStatus, nil
 }
 
-func (c *CloudFormation) GetOutputValue(outputs []Output, key string) (string, error) {
+func GetOutputValue(outputs []Output, key string) (string, error) {
 	for _, o := range outputs {
 		if o.OutputKey == key {
 			return o.OutputValue, nil
@@ -93,7 +93,7 @@ func (c *CloudFormation) GetOutputValue(outputs []Output, key string) (string, e
 	return "", microerror.Maskf(outputNotFoundError, "stack output value for key '%s'", key)
 }
 
-func toOutputs(outputs []*cloudformation.Output) []Output {
+func ToOutputs(outputs []*cloudformation.Output) []Output {
 	var newOutputs []Output
 
 	for _, o := range outputs {

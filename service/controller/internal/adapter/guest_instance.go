@@ -26,7 +26,7 @@ type GuestInstanceAdapterImage struct {
 
 type GuestInstanceAdapterMaster struct {
 	AZ               string
-	CloudConfig      string
+	Ignition         string
 	EncrypterBackend string
 	DockerVolume     GuestInstanceAdapterMasterDockerVolume
 	EtcdVolume       GuestInstanceAdapterMasterEtcdVolume
@@ -84,7 +84,6 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		i.Master.CloudConfig = base64.StdEncoding.EncodeToString([]byte(rendered))
 
 		i.Master.EncrypterBackend = config.EncrypterBackend
 
@@ -93,6 +92,8 @@ func (i *GuestInstanceAdapter) Adapt(config Config) error {
 		i.Master.DockerVolume.ResourceName = config.StackState.DockerVolumeResourceName
 
 		i.Master.EtcdVolume.Name = key.EtcdVolumeName(config.CustomObject)
+
+		i.Master.Ignition = base64.StdEncoding.EncodeToString([]byte(rendered))
 
 		i.Master.LogVolume.Name = key.LogVolumeName(config.CustomObject)
 

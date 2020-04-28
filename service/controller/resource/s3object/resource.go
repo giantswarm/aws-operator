@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -23,7 +22,6 @@ const (
 type Config struct {
 	CertsSearcher      certs.Interface
 	CloudConfig        cloudconfig.Interface
-	G8sClient          versioned.Interface
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 	RegistryDomain     string
@@ -33,7 +31,6 @@ type Config struct {
 type Resource struct {
 	certsSearcher      certs.Interface
 	cloudConfig        cloudconfig.Interface
-	g8sClient          versioned.Interface
 	logger             micrologger.Logger
 	randomKeysSearcher randomkeys.Interface
 	registryDomain     string
@@ -46,9 +43,6 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.CloudConfig == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
-	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -63,7 +57,6 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		certsSearcher:      config.CertsSearcher,
 		cloudConfig:        config.CloudConfig,
-		g8sClient:          config.G8sClient,
 		logger:             config.Logger,
 		randomKeysSearcher: config.RandomKeysSearcher,
 		registryDomain:     config.RegistryDomain,

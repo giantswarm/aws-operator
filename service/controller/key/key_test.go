@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -475,42 +476,6 @@ func Test_KubernetesAPISecurePort(t *testing.T) {
 	}
 }
 
-func Test_MasterImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Masters: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if MasterImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected master image ID %s but was %s", tc.expectedImageID, MasterImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_MasterInstanceName(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -888,46 +853,6 @@ func Test_WorkerDockerVolumeSizeGB(t *testing.T) {
 	}
 }
 
-func Test_WorkerImageID(t *testing.T) {
-	t.Parallel()
-	tests := []struct {
-		customObject    v1alpha1.AWSConfig
-		expectedImageID string
-	}{
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{
-							{
-								ImageID:      "ami-d60ad6b9",
-								InstanceType: "m3.medium",
-							},
-						},
-					},
-				},
-			},
-			expectedImageID: "ami-d60ad6b9",
-		},
-		{
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Workers: []v1alpha1.AWSConfigSpecAWSNode{},
-					},
-				},
-			},
-			expectedImageID: "",
-		},
-	}
-
-	for _, tc := range tests {
-		if WorkerImageID(tc.customObject) != tc.expectedImageID {
-			t.Fatalf("Expected worker image ID %s but was %s", tc.expectedImageID, WorkerImageID(tc.customObject))
-		}
-	}
-}
-
 func Test_WorkerInstanceType(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -1190,17 +1115,10 @@ func Test_VersionBundleVersion(t *testing.T) {
 
 func Test_BucketObjectName(t *testing.T) {
 	t.Parallel()
-	customObject := v1alpha1.AWSConfig{
-		Spec: v1alpha1.AWSConfigSpec{
-			VersionBundle: v1alpha1.AWSConfigSpecVersionBundle{
-				Version: "0.1.0",
-			},
-		},
-	}
 	role := "worker"
 
-	e := fmt.Sprintf("version/0.1.0/cloudconfig/%s/worker", CloudConfigVersion)
-	a := BucketObjectName(customObject, role)
+	e := fmt.Sprintf("ignition/worker")
+	a := BucketObjectName(role)
 	if e != a {
 		t.Fatalf("expected %s got %s", e, a)
 	}
@@ -1406,7 +1324,17 @@ func Test_ImageID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			imageID, err := ImageID(tc.customObject, tc.osVersion)
+			release := releasev1alpha1.Release{
+				Spec: releasev1alpha1.ReleaseSpec{
+					Components: []releasev1alpha1.ReleaseSpecComponent{
+						{
+							Name:    ComponentOS,
+							Version: tc.osVersion,
+						},
+					},
+				},
+			}
+			imageID, err := ImageID(tc.customObject, release)
 			if tc.errorMatcher != nil && err == nil {
 				t.Error("expected error didn't happen")
 			}

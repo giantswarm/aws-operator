@@ -25,10 +25,6 @@ const (
 
 const (
 	namedIAMCapability = "CAPABILITY_NAMED_IAM"
-
-	// versionBundleVersionParameterKey is the key name of the Cloud Formation
-	// parameter that sets the version bundle version.
-	versionBundleVersionParameterKey = "VersionBundleVersionParameter"
 )
 
 // Config represents the configuration used to create a new cloudformation
