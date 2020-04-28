@@ -11,9 +11,11 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
 	"github.com/giantswarm/randomkeys"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
@@ -111,6 +113,9 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSCluster)
 			},
+			Selector: labels.SelectorFromSet(map[string]string{
+				label.OperatorVersion: project.Version(),
+			}),
 		}
 
 		operatorkitController, err = controller.New(c)
