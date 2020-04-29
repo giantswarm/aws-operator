@@ -2,8 +2,6 @@ package s3object
 
 import (
 	"context"
-	"crypto/sha512"
-	"encoding/hex"
 	"sync"
 
 	gscerts "github.com/giantswarm/certs"
@@ -84,12 +82,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Images:       images,
 		}
 		g.Go(func() error {
-			ignition, err := r.cloudConfig.NewMasterTemplate(ctx, data)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			decrypted, err := r.cloudConfig.DecryptTemplate(ctx, ignition)
+			ignition, hash, err := r.cloudConfig.NewMasterTemplate(ctx, data)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -100,7 +93,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   ignition,
 				Key:    k,
-				Hash:   hashIgnition(decrypted),
+				Hash:   hash,
 			}
 			output[k] = object
 			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = object.Hash
@@ -110,12 +103,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		})
 
 		g.Go(func() error {
-			ignition, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			decrypted, err := r.cloudConfig.DecryptTemplate(ctx, ignition)
+			ignition, hash, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -126,7 +114,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   ignition,
 				Key:    k,
-				Hash:   hashIgnition(decrypted),
+				Hash:   hash,
 			}
 			output[k] = object
 			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = object.Hash
@@ -142,13 +130,4 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	return output, nil
-}
-
-// hashIgnition returns a hash value representing the given ignition.
-func hashIgnition(encoded string) string {
-	rawSum := sha512.Sum512([]byte(encoded))
-	sum := rawSum[:]
-	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
-	hex.Encode(encodedSum, sum)
-	return string(encodedSum)
 }

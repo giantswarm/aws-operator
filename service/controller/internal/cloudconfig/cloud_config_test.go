@@ -53,7 +53,7 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			CustomObject: tc.CustomObject,
 			ClusterKeys:  tc.ClusterKeys,
 		}
-		template, err := ccService.NewMasterTemplate(ctx, data)
+		template, _, err := ccService.NewMasterTemplate(ctx, data)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
@@ -76,17 +76,6 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 				t.Fatalf("want ignition to contain %q", expectedString)
 			}
 		}
-
-		templateDecrypted, err := ccService.DecryptTemplate(ctx, template)
-		expectedStringsDecrypted := []string{
-			"a2luZDogRW5jcnlwdGlvbkNvbmZpZwphcGlWZXJzaW9uOiB2MQpyZXNvdXJjZXM6CiAgLSByZXNvdXJjZXM6CiAgICAtIHNlY3JldHMKICAgIHByb3ZpZGVyczoKICAgIC0gYWVzY2JjOgogICAgICAgIGtleXM6CiAgICAgICAgLSBuYW1lOiBrZXkxCiAgICAgICAgICBzZWNyZXQ6IGZla2hmaXdvaXFob2lmaHdxZWZvaXF3ZWZvaWtxaHdlZgogICAgLSBpZGVudGl0eToge30=",
-		}
-		for _, expectedString := range expectedStringsDecrypted {
-			if !strings.Contains(templateDecrypted, expectedString) {
-				t.Fatalf("want ignition to contain %q", expectedString)
-			}
-		}
-
 	}
 }
 
@@ -121,7 +110,7 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 		data := IgnitionTemplateData{
 			CustomObject: tc.CustomObject,
 		}
-		template, err := ccService.NewWorkerTemplate(ctx, data)
+		template, _, err := ccService.NewWorkerTemplate(ctx, data)
 		if err != nil {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}

@@ -15,25 +15,33 @@ import (
 
 // NewMasterTemplate generates a new master cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTemplateData) (string, error) {
+func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTemplateData) (string, string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, data.ClusterKeys)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 
+	var replacements map[string]string
 	var params k8scloudconfig.Params
 	{
-		be := baseExtension{
+		base := baseExtension{
 			customObject:  data.CustomObject,
 			encrypter:     c.encrypter,
 			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
+		}
+		extension := MasterExtension{
+			baseExtension: base,
+			ctlCtx:        cc,
+
+			ClusterCerts:     data.ClusterCerts,
+			RandomKeyTmplSet: randomKeyTmplSet,
 		}
 
 		params = k8scloudconfig.DefaultParams()
@@ -44,13 +52,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
 		params.EtcdPort = data.CustomObject.Spec.Cluster.Etcd.Port
-		params.Extension = &MasterExtension{
-			baseExtension: be,
-			ctlCtx:        cc,
-
-			ClusterCerts:     data.ClusterCerts,
-			RandomKeyTmplSet: randomKeyTmplSet,
-		}
+		params.Extension = &extension
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
@@ -61,7 +63,12 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return "", "", microerror.Mask(err)
+		}
+
+		replacements, err = extension.encryptedReplacements()
+		if err != nil {
+			return "", "", microerror.Mask(err)
 		}
 	}
 
@@ -73,16 +80,22 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 
 		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
 		if err != nil {
-			return "", microerror.Mask(err)
+			return "", "", microerror.Mask(err)
 		}
 
 		err = newCloudConfig.ExecuteTemplate()
 		if err != nil {
-			return "", microerror.Mask(err)
+			return "", "", microerror.Mask(err)
 		}
 	}
 
-	return newCloudConfig.String(), nil
+	rendered := newCloudConfig.String()
+	hash, err := hashIgnition(rendered, replacements)
+	if err != nil {
+		return "", "", microerror.Mask(err)
+	}
+
+	return rendered, hash, nil
 }
 
 // RandomKeyTmplSet holds a collection of rendered templates for random key
@@ -388,4 +401,14 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 	newSections := []k8scloudconfig.VerbatimSection{}
 
 	return newSections
+}
+
+func (e *MasterExtension) encryptedReplacements() (map[string]string, error) {
+	replacements := map[string]string{}
+	replacements["/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc"] = e.RandomKeyTmplSet.APIServerEncryptionKey
+	certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
+	for _, f := range certFiles {
+		replacements[f.AbsolutePath] = string(f.Data)
+	}
+	return replacements, nil
 }
