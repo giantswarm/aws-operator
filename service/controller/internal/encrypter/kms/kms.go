@@ -247,6 +247,25 @@ func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string,
 	return string(encryptOutput.CiphertextBlob), nil
 }
 
+func (e *Encrypter) Decrypt(ctx context.Context, key, ciphertext string) (string, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	decryptInput := &kms.DecryptInput{
+		KeyId:          aws.String(key),
+		CiphertextBlob: []byte(ciphertext),
+	}
+
+	decryptOutput, err := cc.Client.TenantCluster.AWS.KMS.Decrypt(decryptInput)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return string(decryptOutput.Plaintext), nil
+}
+
 func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }

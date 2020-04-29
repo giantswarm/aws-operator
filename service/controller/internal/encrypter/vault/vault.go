@@ -386,7 +386,7 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err)
 }
 
-func (e *Encrypter) Decrypt(key, ciphertext string) (string, error) {
+func (e *Encrypter) Decrypt(ctx context.Context, key, ciphertext string) (string, error) {
 	err := e.ensureToken()
 	if err != nil {
 		return "", microerror.Mask(err)

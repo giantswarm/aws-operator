@@ -12,8 +12,15 @@ const (
 )
 
 type Interface interface {
+	Decrypter
 	Encrypter
 	Resource
+}
+
+type Decrypter interface {
+	EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error)
+	Decrypt(ctx context.Context, key, ciphertext string) (string, error)
+	IsKeyNotFound(error) bool
 }
 
 type Encrypter interface {

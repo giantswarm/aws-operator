@@ -95,7 +95,7 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bo
 		{
 			name:         "master instance type",
 			desiredValue: key.WorkerInstanceType(cr),
-			currentValue: cc.Status.TenantCluster.MasterInstance.IgnitionHash,
+			currentValue: cc.Status.TenantCluster.MasterInstance.Type,
 		},
 		{
 			name:         "worker instance docker volume size",

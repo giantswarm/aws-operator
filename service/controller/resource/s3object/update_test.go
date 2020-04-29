@@ -82,6 +82,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
+					Hash:   "1",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
@@ -89,6 +90,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
+					Hash:   "2",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
@@ -96,6 +98,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
+					Hash:   "2",
 				},
 			},
 		},
@@ -107,11 +110,13 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					Body:   "master-body",
 					Bucket: "mybucket",
 					Key:    "master",
+					Hash:   "1",
 				},
 				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
+					Hash:   "1",
 				},
 			},
 			desiredState: map[string]BucketObjectState{
@@ -119,11 +124,13 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
+					Hash:   "2",
 				},
 				"worker": {
 					Body:   "worker-body",
 					Bucket: "mybucket",
 					Key:    "worker",
+					Hash:   "1",
 				},
 			},
 			expectedState: map[string]BucketObjectState{
@@ -131,6 +138,7 @@ func Test_Resource_S3Object_newUpdate(t *testing.T) {
 					Body:   "master-new-body",
 					Bucket: "mybucket",
 					Key:    "master",
+					Hash:   "2",
 				},
 				"worker": {},
 			},

@@ -84,7 +84,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			Images:       images,
 		}
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewMasterTemplate(ctx, data)
+			ignition, err := r.cloudConfig.NewMasterTemplate(ctx, data)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			decrypted, err := r.cloudConfig.DecryptTemplate(ctx, ignition)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -93,17 +98,24 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			k := key.BucketObjectName(key.KindMaster)
 			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
-				Body:   b,
+				Body:   ignition,
 				Key:    k,
+				Hash:   hashIgnition(decrypted),
 			}
-			output[k] = hashBucketObject(object)
+			output[k] = object
+			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = object.Hash
 			m.Unlock()
 
 			return nil
 		})
 
 		g.Go(func() error {
-			b, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
+			ignition, err := r.cloudConfig.NewWorkerTemplate(ctx, data)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			decrypted, err := r.cloudConfig.DecryptTemplate(ctx, ignition)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -112,10 +124,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			k := key.BucketObjectName(key.KindWorker)
 			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
-				Body:   b,
+				Body:   ignition,
 				Key:    k,
+				Hash:   hashIgnition(decrypted),
 			}
-			output[k] = hashBucketObject(object)
+			output[k] = object
+			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = object.Hash
 			m.Unlock()
 
 			return nil
@@ -130,12 +144,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return output, nil
 }
 
-// hashBucketObject returns the given object with object.Hash set to the hash of object.Body.
-func hashBucketObject(object BucketObjectState) BucketObjectState {
-	rawSum := sha512.Sum512([]byte(object.Body))
+// hashIgnition returns a hash value representing the given ignition.
+func hashIgnition(encoded string) string {
+	rawSum := sha512.Sum512([]byte(encoded))
 	sum := rawSum[:]
 	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
 	hex.Encode(encodedSum, sum)
-	object.Hash = string(encodedSum)
-	return object
+	return string(encodedSum)
 }
