@@ -285,7 +285,7 @@ func (e *WorkerExtension) encryptedReplacements() (map[string]string, error) {
 	replacements := map[string]string{}
 	certFiles := certs.NewFilesClusterWorker(e.ClusterCerts)
 	for _, f := range certFiles {
-		replacements[f.AbsolutePath] = string(f.Data)
+		replacements[f.AbsolutePath+".enc"] = string(f.Data)
 	}
 	return replacements, nil
 }
