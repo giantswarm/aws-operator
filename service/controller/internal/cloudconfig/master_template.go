@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
@@ -90,6 +91,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 	}
 
 	rendered := newCloudConfig.String()
+	c.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("rendered master template %s replacements %#v", base64.StdEncoding.EncodeToString([]byte(rendered)), replacements))
 	hash, err := hashIgnition(rendered, replacements)
 	if err != nil {
 		return "", "", microerror.Mask(err)
