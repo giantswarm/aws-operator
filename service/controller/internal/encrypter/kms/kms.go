@@ -255,12 +255,15 @@ func (e *Encrypter) Decrypt(ctx context.Context, key, ciphertext string) (string
 		return "", microerror.Mask(err)
 	}
 
-	encoded := base64.StdEncoding.EncodeToString([]byte(ciphertext))
-	e.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("decrypting: %s", encoded))
+	decoded, err := base64.StdEncoding.DecodeString(ciphertext)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	e.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("decrypting: %s", decoded))
 
 	decryptInput := &kms.DecryptInput{
 		KeyId:          aws.String(key),
-		CiphertextBlob: []byte(ciphertext),
+		CiphertextBlob: decoded,
 	}
 
 	decryptOutput, err := cc.Client.TenantCluster.AWS.KMS.Decrypt(decryptInput)
@@ -268,8 +271,7 @@ func (e *Encrypter) Decrypt(ctx context.Context, key, ciphertext string) (string
 		return "", microerror.Mask(err)
 	}
 
-	encoded = base64.StdEncoding.EncodeToString(decryptOutput.Plaintext)
-	e.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("decrypted: %s", encoded))
+	e.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("decrypted: %s", decryptOutput.Plaintext))
 
 	return string(decryptOutput.Plaintext), nil
 }
