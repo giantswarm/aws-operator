@@ -112,7 +112,7 @@ func (r *Resource) getBucketObject(ctx context.Context, bucketName string, keyNa
 		}
 		body = buf.String()
 	}
-	
+
 	object := BucketObjectState{
 		Bucket: bucketName,
 		Body:   body,
