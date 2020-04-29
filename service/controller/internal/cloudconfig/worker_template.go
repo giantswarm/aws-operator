@@ -79,7 +79,7 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTempla
 	}
 
 	rendered := newCloudConfig.String()
-	hash, err := hashIgnition(rendered, replacements)
+	hash, err := hashIgnition(rendered, replacements, c.logger)
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
