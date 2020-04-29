@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	ignition "github.com/giantswarm/k8scloudconfig/v6/ignition/v_2_2_0"
@@ -26,11 +27,14 @@ func (c *CloudConfig) DecryptTemplate(ctx context.Context, data string) (string,
 	encryptionKey := cc.Status.TenantCluster.Encryption.Key
 	for i, file := range decrypted.Storage.Files {
 		if strings.HasSuffix(file.Path, ".enc") {
-			content := strings.TrimPrefix(file.Contents.Source, "data:text/plain;charset=utf-8;base64,")
-			decrypted.Storage.Files[i].Contents.Source, err = c.encrypter.Decrypt(ctx, encryptionKey, content)
+			content := file.Contents.Source
+			ciphertext := strings.TrimPrefix(content, "data:text/plain;charset=utf-8;base64,")
+			plaintext, err := c.encrypter.Decrypt(ctx, encryptionKey, ciphertext)
 			if err != nil {
 				return "", microerror.Mask(err)
 			}
+			content = fmt.Sprintf("data:text/plain;charset=utf-8;base64,%s", plaintext)
+			decrypted.Storage.Files[i].Contents.Source = content
 		}
 	}
 

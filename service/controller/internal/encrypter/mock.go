@@ -3,7 +3,6 @@ package encrypter
 import (
 	"context"
 	"encoding/base64"
-	"strings"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -21,7 +20,7 @@ func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (str
 }
 
 func (e *EncrypterMock) Decrypt(ctx context.Context, key, ciphertext string) (string, error) {
-	plaintext, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(ciphertext, "data:text/plain;charset=utf-8;base64,"))
+	plaintext, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
