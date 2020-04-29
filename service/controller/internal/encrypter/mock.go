@@ -2,7 +2,8 @@ package encrypter
 
 import (
 	"context"
-	"encoding/base64"
+	"fmt"
+	"strings"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
@@ -15,16 +16,16 @@ type EncrypterMock struct {
 }
 
 func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
-	ciphertext := base64.StdEncoding.EncodeToString([]byte(plaintext))
+	ciphertext := fmt.Sprintf("<encrypted>--%s", plaintext)
 	return ciphertext, nil
 }
 
 func (e *EncrypterMock) Decrypt(ctx context.Context, key, ciphertext string) (string, error) {
-	plaintext, err := base64.StdEncoding.DecodeString(ciphertext)
-	if err != nil {
-		return "", microerror.Mask(err)
+	if !strings.HasPrefix(ciphertext, "<encrypted>--") {
+		return "", microerror.Mask(fmt.Errorf("InvalidCiphertextException"))
 	}
-	return string(plaintext), nil
+	plaintext := strings.TrimPrefix(ciphertext, "<encrypted>--")
+	return plaintext, nil
 }
 
 func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {

@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -28,12 +29,17 @@ func (c *CloudConfig) DecryptTemplate(ctx context.Context, data string) (string,
 	for i, file := range decrypted.Storage.Files {
 		if strings.HasSuffix(file.Path, ".enc") {
 			content := file.Contents.Source
-			ciphertext := strings.TrimPrefix(content, "data:text/plain;charset=utf-8;base64,")
-			plaintext, err := c.encrypter.Decrypt(ctx, encryptionKey, ciphertext)
+			ciphertextEncoded := strings.TrimPrefix(content, "data:text/plain;charset=utf-8;base64,")
+			ciphertext, err := base64.StdEncoding.DecodeString(ciphertextEncoded)
 			if err != nil {
 				return "", microerror.Mask(err)
 			}
-			content = fmt.Sprintf("data:text/plain;charset=utf-8;base64,%s", plaintext)
+			plaintext, err := c.encrypter.Decrypt(ctx, encryptionKey, string(ciphertext))
+			if err != nil {
+				return "", microerror.Mask(err)
+			}
+			encoded := base64.StdEncoding.EncodeToString([]byte(plaintext))
+			content = fmt.Sprintf("data:text/plain;charset=utf-8;base64,%s", encoded)
 			decrypted.Storage.Files[i].Contents.Source = content
 		}
 	}
