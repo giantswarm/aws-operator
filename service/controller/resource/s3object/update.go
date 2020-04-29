@@ -2,44 +2,12 @@ package s3object
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/resource/crud"
-
-	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	updateBucketState, err := toBucketObjectState(updateChange)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	for objectKey, bucketObject := range updateBucketState {
-		if bucketObject.Key != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", objectKey))
-
-			s3PutInput, err := toPutObjectInput(bucketObject)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(&s3PutInput)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", objectKey))
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", objectKey))
-		}
-	}
-
 	return nil
 }
 
@@ -49,47 +17,8 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 		return nil, microerror.Mask(err)
 	}
 
-	update, err := r.newUpdateChange(ctx, obj, currentState, desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
 	patch := crud.NewPatch()
 	patch.SetCreateChange(create)
-	patch.SetUpdateChange(update)
 
 	return patch, nil
-}
-
-func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentS3Object, err := toBucketObjectState(currentState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	desiredS3Object, err := toBucketObjectState(desiredState)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the s3 objects should be updated")
-
-	updateState := map[string]BucketObjectState{}
-
-	for objectKey, bucketObject := range desiredS3Object {
-		if _, ok := currentS3Object[objectKey]; !ok {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be updated", objectKey))
-			updateState[objectKey] = BucketObjectState{}
-		}
-
-		currentObject := currentS3Object[objectKey]
-		if currentObject.Body != "" && currentObject.Hash != bucketObject.Hash {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be updated", objectKey))
-			updateState[objectKey] = bucketObject
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should not be updated", objectKey))
-			updateState[objectKey] = BucketObjectState{}
-		}
-	}
-
-	return updateState, nil
 }

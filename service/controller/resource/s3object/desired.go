@@ -93,7 +93,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   ignition,
 				Key:    k,
-				Hash:   hash,
 			}
 			output[k] = object
 			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = hash
@@ -114,7 +113,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   ignition,
 				Key:    k,
-				Hash:   hash,
 			}
 			output[k] = object
 			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = hash
