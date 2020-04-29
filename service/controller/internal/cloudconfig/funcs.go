@@ -4,7 +4,6 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 
 	ignition "github.com/giantswarm/k8scloudconfig/v6/ignition/v_2_2_0"
 	"github.com/giantswarm/microerror"
@@ -26,7 +25,6 @@ func hashIgnition(encoded string, replacements map[string]string) (string, error
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	fmt.Println("ZZZ", reencoded)
 	rawSum := sha512.Sum512(reencoded)
 	sum := rawSum[:]
 	encodedSum := make([]byte, hex.EncodedLen(len(sum)))

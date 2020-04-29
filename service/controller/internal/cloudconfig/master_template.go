@@ -24,7 +24,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		return "", "", microerror.Mask(err)
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, data.ClusterKeys)
+	randomKeyTmplSet, randomKeyTmplUnenc, err := renderRandomKeyTmplSet(ctx, c.encrypter, cc.Status.TenantCluster.Encryption.Key, data.ClusterKeys)
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
@@ -71,6 +71,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		if err != nil {
 			return "", "", microerror.Mask(err)
 		}
+		replacements["/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc"] = randomKeyTmplUnenc
 	}
 
 	var newCloudConfig *k8scloudconfig.CloudConfig
@@ -407,7 +408,6 @@ func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
 
 func (e *MasterExtension) encryptedReplacements() (map[string]string, error) {
 	replacements := map[string]string{}
-	replacements["/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc"] = e.RandomKeyTmplSet.APIServerEncryptionKey
 	certFiles := certs.NewFilesClusterMaster(e.ClusterCerts)
 	for _, f := range certFiles {
 		replacements[f.AbsolutePath] = string(f.Data)
