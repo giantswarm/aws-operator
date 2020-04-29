@@ -7,24 +7,36 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 
-	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interface{}, error) {
 	paths, err := r.cloudConfig.NewPaths(ctx, obj)
-	if hamaster.IsNotFound(err) {
+	if cloudconfig.IsTODO(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing desired state", "reason", "control plane CR not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
 	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	templates, err := r.cloudConfig.NewTemplates(ctx, obj)
-	if hamaster.IsNotFound(err) {
+	if cloudconfig.IsTODO(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing desired state", "reason", "control plane CR not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
+	} else if cloudconfig.IsTODO(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "certificate secrets are not available yet")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
 	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}

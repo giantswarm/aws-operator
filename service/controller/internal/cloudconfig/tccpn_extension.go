@@ -17,20 +17,19 @@ import (
 )
 
 type TCCPNExtension struct {
-	cluster        infrastructurev1alpha2.AWSCluster
-	encrypter      encrypter.Interface
-	encryptionKey  string
-	masterSubnet   net.IPNet
-	masterID       int
-	registryDomain string
-
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
-	//	See https://github.com/giantswarm/giantswarm/issues/4329.
+	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
 	cc               *controllercontext.Context
+	cluster          infrastructurev1alpha2.AWSCluster
 	clusterCerts     []certs.File
+	encrypter        encrypter.Interface
+	encryptionKey    string
+	masterSubnet     net.IPNet
+	masterID         int
 	randomKeyTmplSet RandomKeyTmplSet
+	registryDomain   string
 }
 
 func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -194,11 +193,11 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		for _, f := range e.clusterCerts {
 			var encrypted string
 			{
-				e, err := t.config.Encrypter.Encrypt(ctx, e.encryptionKey, string(f.Data))
+				e, err := e.encrypter.Encrypt(ctx, e.encryptionKey, string(f.Data))
 				if err != nil {
 					return nil, microerror.Mask(err)
 				}
-				encrypted = []byte(e)
+				encrypted = e
 			}
 
 			meta := k8scloudconfig.FileMetadata{

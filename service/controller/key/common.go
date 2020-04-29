@@ -84,15 +84,6 @@ func ImageID(region string) string {
 	return imageIDs()[region]
 }
 
-func KubeletLabelsTCCP(getter LabelsGetter) string {
-	var labels string
-
-	labels = ensureLabel(labels, label.Provider, "aws")
-	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
-
-	return labels
-}
-
 func KubeletLabelsTCCPN(getter LabelsGetter) string {
 	var labels string
 
