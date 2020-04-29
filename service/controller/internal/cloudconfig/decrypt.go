@@ -26,7 +26,8 @@ func (c *CloudConfig) DecryptTemplate(ctx context.Context, data string) (string,
 	encryptionKey := cc.Status.TenantCluster.Encryption.Key
 	for i, file := range decrypted.Storage.Files {
 		if strings.HasSuffix(file.Path, ".enc") {
-			decrypted.Storage.Files[i].Contents.Source, err = c.encrypter.Decrypt(ctx, encryptionKey, file.Contents.Source)
+			content := strings.TrimPrefix(file.Contents.Source, "data:text/plain;charset=utf-8;base64,")
+			decrypted.Storage.Files[i].Contents.Source, err = c.encrypter.Decrypt(ctx, encryptionKey, content)
 			if err != nil {
 				return "", microerror.Mask(err)
 			}
