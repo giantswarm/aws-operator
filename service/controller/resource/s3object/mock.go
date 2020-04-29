@@ -73,7 +73,7 @@ type CloudConfigMock struct {
 }
 
 func (c *CloudConfigMock) DecryptTemplate(ctx context.Context, data string) (string, error) {
-	return "decrypted", nil
+	return "", nil
 }
 
 func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {

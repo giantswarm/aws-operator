@@ -69,13 +69,24 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			"/etc/kubernetes/ssl/etcd/client-crt.pem.enc",
 			"/etc/kubernetes/ssl/etcd/client-key.pem.enc",
 			"decrypt-tls-assets.service",
-			"a2luZDogRW5jcnlwdGlvbkNvbmZpZwphcGlWZXJzaW9uOiB2MQpyZXNvdXJjZXM6CiAgLSByZXNvdXJjZXM6CiAgICAtIHNlY3JldHMKICAgIHByb3ZpZGVyczoKICAgIC0gYWVzY2JjOgogICAgICAgIGtleXM6CiAgICAgICAgLSBuYW1lOiBrZXkxCiAgICAgICAgICBzZWNyZXQ6IGZla2hmaXdvaXFob2lmaHdxZWZvaXF3ZWZvaWtxaHdlZgogICAgLSBpZGVudGl0eToge30=",
+			"YTJsdVpEb2dSVzVqY25sd2RHbHZia052Ym1acFp3cGhjR2xXWlhKemFXOXVPaUIyTVFweVpYTnZkWEpqWlhNNkNpQWdMU0J5WlhOdmRYSmpaWE02Q2lBZ0lDQXRJSE5sWTNKbGRITUtJQ0FnSUhCeWIzWnBaR1Z5Y3pvS0lDQWdJQzBnWVdWelkySmpPZ29nSUNBZ0lDQWdJR3RsZVhNNkNpQWdJQ0FnSUNBZ0xTQnVZVzFsT2lCclpYa3hDaUFnSUNBZ0lDQWdJQ0J6WldOeVpYUTZJR1psYTJobWFYZHZhWEZvYjJsbWFIZHhaV1p2YVhGM1pXWnZhV3R4YUhkbFpnb2dJQ0FnTFNCcFpHVnVkR2wwZVRvZ2UzMD0=",
 		}
 		for _, expectedString := range expectedStrings {
 			if !strings.Contains(template, expectedString) {
 				t.Fatalf("want ignition to contain %q", expectedString)
 			}
 		}
+
+		templateDecrypted, err := ccService.DecryptTemplate(ctx, template)
+		expectedStringsDecrypted := []string{
+			"a2luZDogRW5jcnlwdGlvbkNvbmZpZwphcGlWZXJzaW9uOiB2MQpyZXNvdXJjZXM6CiAgLSByZXNvdXJjZXM6CiAgICAtIHNlY3JldHMKICAgIHByb3ZpZGVyczoKICAgIC0gYWVzY2JjOgogICAgICAgIGtleXM6CiAgICAgICAgLSBuYW1lOiBrZXkxCiAgICAgICAgICBzZWNyZXQ6IGZla2hmaXdvaXFob2lmaHdxZWZvaXF3ZWZvaWtxaHdlZgogICAgLSBpZGVudGl0eToge30=",
+		}
+		for _, expectedString := range expectedStringsDecrypted {
+			if !strings.Contains(templateDecrypted, expectedString) {
+				t.Fatalf("want ignition to contain %q", expectedString)
+			}
+		}
+
 	}
 }
 
