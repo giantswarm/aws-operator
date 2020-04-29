@@ -2,8 +2,6 @@ package kms
 
 import (
 	"context"
-	"encoding/base64"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -255,9 +253,6 @@ func (e *Encrypter) Decrypt(ctx context.Context, key, ciphertext string) (string
 		return "", microerror.Mask(err)
 	}
 
-	encoded := base64.StdEncoding.EncodeToString([]byte(ciphertext))
-	e.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("decrypting: %s", encoded))
-
 	decryptInput := &kms.DecryptInput{
 		KeyId:          aws.String(key),
 		CiphertextBlob: []byte(ciphertext),
@@ -267,9 +262,6 @@ func (e *Encrypter) Decrypt(ctx context.Context, key, ciphertext string) (string
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-
-	encoded = base64.StdEncoding.EncodeToString(decryptOutput.Plaintext)
-	e.logger.LogCtx(ctx, "level", "info", "message", fmt.Sprintf("decrypted: %s", encoded))
 
 	return string(decryptOutput.Plaintext), nil
 }
