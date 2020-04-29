@@ -2,8 +2,6 @@ package cloudconfig
 
 import (
 	"context"
-	"crypto/sha512"
-	"encoding/hex"
 	"encoding/json"
 	"strings"
 
@@ -13,23 +11,14 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 
-// hashIgnition returns a hash value representing the given ignition.
-func hashIgnition(encoded []byte) string {
-	rawSum := sha512.Sum512(encoded)
-	sum := rawSum[:]
-	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
-	hex.Encode(encodedSum, sum)
-	return string(encodedSum)
-}
-
-func (c *CloudConfig) DecryptedHash(ctx context.Context, data []byte) (string, error) {
+func (c *CloudConfig) DecryptTemplate(ctx context.Context, data string) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
 	var decrypted ignition.Config
-	err = json.Unmarshal(data, &decrypted)
+	err = json.Unmarshal([]byte(data), &decrypted)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -49,5 +38,5 @@ func (c *CloudConfig) DecryptedHash(ctx context.Context, data []byte) (string, e
 		return "", microerror.Mask(err)
 	}
 
-	return hashIgnition(decryptedData), nil
+	return string(decryptedData), nil
 }

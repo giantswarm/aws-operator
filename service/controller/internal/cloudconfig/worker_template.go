@@ -9,93 +9,69 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	iencrypter "github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
 )
 
 // NewWorkerTemplate generates a new worker cloud config template and returns it
 // as a string.
-func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTemplateData) (string, string, error) {
+func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTemplateData) (string, error) {
 	var err error
 
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return "", "", microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 
-	var renderedIgnition string
-	var unencryptedHash string
-	// We want the rendered ignition used by nodes to contain encrypted content such as the encryption key itself and
-	// certificates. While calculating the desired state, the ignition will always appear to have changed because of
-	// salt in the encryption process. By generating the ignition twice, once with encryption and once without, we can
-	// return the encrypted form and calculate a hash from the unencrypted form which should only change when the
-	// plaintext of the ignition content changes.
-	for _, encryption := range []string{"encrypted", "unencrypted"} {
-		var encrypter iencrypter.Interface
-		if encryption == "encrypted" {
-			encrypter = c.encrypter
-		} else {
-			encrypter = &iencrypter.EncrypterMock{}
+	var params k8scloudconfig.Params
+	{
+		be := baseExtension{
+			customObject:  data.CustomObject,
+			encrypter:     c.encrypter,
+			encryptionKey: cc.Status.TenantCluster.Encryption.Key,
 		}
 
-		var params k8scloudconfig.Params
-		{
-			be := baseExtension{
-				customObject:  data.CustomObject,
-				encrypter:     encrypter,
-				encryptionKey: cc.Status.TenantCluster.Encryption.Key,
-			}
+		// Default registry, kubernetes, etcd images etcd.
+		// Required for proper rending of the templates.
+		params = k8scloudconfig.DefaultParams()
 
-			// Default registry, kubernetes, etcd images etcd.
-			// Required for proper rending of the templates.
-			params = k8scloudconfig.DefaultParams()
+		params.Cluster = data.CustomObject.Spec.Cluster
+		params.Extension = &WorkerExtension{
+			baseExtension: be,
+			ctlCtx:        cc,
 
-			params.Cluster = data.CustomObject.Spec.Cluster
-			params.Extension = &WorkerExtension{
-				baseExtension: be,
-				ctlCtx:        cc,
-
-				ClusterCerts: data.ClusterCerts,
-			}
-			params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
-			params.ImagePullProgressDeadline = c.imagePullProgressDeadline
-			params.Images = data.Images
-			params.SSOPublicKey = c.SSOPublicKey
-			params.EnableAWSCNI = false
-
-			ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
-			params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
+			ClusterCerts: data.ClusterCerts,
 		}
+		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
+		params.Images = data.Images
+		params.SSOPublicKey = c.SSOPublicKey
+		params.EnableAWSCNI = false
 
-		var newCloudConfig *k8scloudconfig.CloudConfig
-		{
-			cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
-			cloudConfigConfig.Params = params
-			cloudConfigConfig.Template = k8scloudconfig.WorkerTemplate
-
-			newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
-
-			err = newCloudConfig.ExecuteTemplate()
-			if err != nil {
-				return "", "", microerror.Mask(err)
-			}
-		}
-
-		switch encryption {
-		case "unencrypted":
-			unencryptedHash = hashIgnition([]byte(newCloudConfig.String()))
-		case "encrypted":
-			renderedIgnition = newCloudConfig.String()
+		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
+		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
+		if err != nil {
+			return "", microerror.Mask(err)
 		}
 	}
 
-	return renderedIgnition, unencryptedHash, nil
+	var newCloudConfig *k8scloudconfig.CloudConfig
+	{
+		cloudConfigConfig := k8scloudconfig.DefaultCloudConfigConfig()
+		cloudConfigConfig.Params = params
+		cloudConfigConfig.Template = k8scloudconfig.WorkerTemplate
+
+		newCloudConfig, err = k8scloudconfig.NewCloudConfig(cloudConfigConfig)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		err = newCloudConfig.ExecuteTemplate()
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
+
+	return newCloudConfig.String(), nil
 }
 
 type WorkerExtension struct {
