@@ -139,9 +139,9 @@ func BucketName(customObject v1alpha1.AWSConfig, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(customObject))
 }
 
-// BucketObjectName computes the S3 object path to the actual cloud config (e.g. ignition/master).
-func BucketObjectName(role string) string {
-	return fmt.Sprintf("ignition/%s", role)
+// BucketObjectName computes the S3 object path to the actual cloud config (e.g. ignition/<hash>).
+func BucketObjectName(hash string) string {
+	return fmt.Sprintf("ignition/%s", hash)
 }
 
 func CredentialName(customObject v1alpha1.AWSConfig) string {
@@ -534,16 +534,12 @@ func SecurityGroupName(customObject v1alpha1.AWSConfig, groupName string) string
 	return fmt.Sprintf("%s-%s", ClusterID(customObject), groupName)
 }
 
-func SmallCloudConfigPath(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(role))
+func SmallCloudConfigPath(customObject v1alpha1.AWSConfig, accountID string, hash string) string {
+	return fmt.Sprintf("%s/%s", BucketName(customObject, accountID), BucketObjectName(hash))
 }
 
-func SmallCloudConfigS3HTTPURL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return fmt.Sprintf("https://%s/%s", S3ServiceDomain(customObject), SmallCloudConfigPath(customObject, accountID, role))
-}
-
-func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, role string) string {
-	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(customObject, accountID, role))
+func SmallCloudConfigS3URL(customObject v1alpha1.AWSConfig, accountID string, hash string) string {
+	return fmt.Sprintf("s3://%s", SmallCloudConfigPath(customObject, accountID, hash))
 }
 
 func SpecAvailabilityZones(customObject v1alpha1.AWSConfig) int {

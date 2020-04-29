@@ -88,7 +88,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			}
 
 			m.Lock()
-			k := key.BucketObjectName(key.KindMaster)
+			k := key.BucketObjectName(hash)
 			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   ignition,
@@ -96,7 +96,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Hash:   hash,
 			}
 			output[k] = object
-			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = object.Hash
+			cc.Spec.TenantCluster.MasterInstance.IgnitionHash = hash
 			m.Unlock()
 
 			return nil
@@ -109,7 +109,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			}
 
 			m.Lock()
-			k := key.BucketObjectName(key.KindWorker)
+			k := key.BucketObjectName(hash)
 			object := BucketObjectState{
 				Bucket: key.BucketName(customObject, cc.Status.TenantCluster.AWSAccountID),
 				Body:   ignition,
@@ -117,7 +117,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 				Hash:   hash,
 			}
 			output[k] = object
-			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = object.Hash
+			cc.Spec.TenantCluster.WorkerInstance.IgnitionHash = hash
 			m.Unlock()
 
 			return nil

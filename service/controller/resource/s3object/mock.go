@@ -82,7 +82,7 @@ func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfi
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
-	return builder.String(), "hash", nil
+	return builder.String(), builder.String(), nil
 }
 
 func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, string, error) {
@@ -95,7 +95,7 @@ func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfi
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}
-	return builder.String(), "hash", nil
+	return builder.String(), builder.String(), nil
 }
 
 type KMSClientMock struct {

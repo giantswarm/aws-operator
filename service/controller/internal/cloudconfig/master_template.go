@@ -91,7 +91,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 	}
 
 	rendered := newCloudConfig.String()
-	hash, err := hashIgnition(rendered, replacements, c.logger)
+	hash, err := hashIgnition(rendered, replacements)
 	if err != nil {
 		return "", "", microerror.Mask(err)
 	}

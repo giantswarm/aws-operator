@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -113,13 +114,7 @@ func (r *Resource) getBucketObject(ctx context.Context, bucketName string, keyNa
 		body = buf.String()
 	}
 
-	var hash string
-	switch keyName {
-	case key.BucketObjectName(key.KindMaster):
-		hash = cc.Status.TenantCluster.MasterInstance.IgnitionHash
-	case key.BucketObjectName(key.KindWorker):
-		hash = cc.Status.TenantCluster.WorkerInstance.IgnitionHash
-	}
+	hash := strings.TrimPrefix(keyName, "ignition/")
 
 	object := BucketObjectState{
 		Bucket: bucketName,
