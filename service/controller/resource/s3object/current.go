@@ -113,12 +113,15 @@ func (r *Resource) getBucketObject(ctx context.Context, bucketName string, keyNa
 		body = buf.String()
 	}
 
-	hash, err := r.cloudConfig.DecryptTemplate(ctx, body)
+	decrypted, err := r.cloudConfig.DecryptTemplate(ctx, body)
+	if err != nil {
+		return BucketObjectState{}, microerror.Mask(err)
+	}
 
 	object := BucketObjectState{
 		Bucket: bucketName,
 		Body:   body,
-		Hash:   hash,
+		Hash:   hashIgnition(decrypted),
 		Key:    keyName,
 	}
 

@@ -2,7 +2,6 @@ package s3object
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 
 	"github.com/giantswarm/microerror"
@@ -83,30 +82,6 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		currentObject := currentS3Object[key]
-		if currentObject.Body != "" {
-			currentEncoded := base64.StdEncoding.EncodeToString([]byte(currentObject.Body))
-			currentHash := hashIgnition(currentObject.Body)
-			currentDecrypted, err := r.cloudConfig.DecryptTemplate(ctx, currentObject.Body)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			currentDecryptedHash := hashIgnition(currentDecrypted)
-			currentDecryptedEncoded := base64.StdEncoding.EncodeToString([]byte(currentDecrypted))
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q current %#q hash %#q current decrypted %#q hash %#q", key, currentEncoded, currentHash, currentDecryptedEncoded, currentDecryptedHash))
-		}
-
-		if bucketObject.Body != "" {
-			desiredEncoded := base64.StdEncoding.EncodeToString([]byte(bucketObject.Body))
-			desiredHash := hashIgnition(bucketObject.Body)
-			desiredDecrypted, err := r.cloudConfig.DecryptTemplate(ctx, bucketObject.Body)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			desiredDecryptedHash := hashIgnition(desiredDecrypted)
-			desiredDecryptedEncoded := base64.StdEncoding.EncodeToString([]byte(desiredDecrypted))
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q desired %#q hash %#q desired decrypted %#q hash %#q", key, desiredEncoded, desiredHash, desiredDecryptedEncoded, desiredDecryptedHash))
-		}
-
 		if currentObject.Body != "" && bucketObject.Hash != currentObject.Hash {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("S3 object %#q should be updated", key))
 			updateState[key] = bucketObject
