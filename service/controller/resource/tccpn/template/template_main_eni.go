@@ -6,7 +6,7 @@ const TemplateMainENI = `
   {{ $e.ResourceName }}:
     Type: AWS::EC2::NetworkInterface
     Properties:
-       Description: A Network interface used for etcd{{ $i }}.
+       Description: A Network interface used for etcd.
        GroupSet:
        - {{ $e.SecurityGroupID }}
        SubnetId: {{ $e.SubnetID }}
