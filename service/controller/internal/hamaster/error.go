@@ -19,3 +19,13 @@ var notFoundError = &microerror.Error{
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
+
+var tooManyCRsError = &microerror.Error{
+	Kind: "tooManyCRsError",
+	Desc: "There is only a single G8sControlPlane CR allowed with the current implementation.",
+}
+
+// IsTooManyCRsError asserts tooManyCRsError.
+func IsTooManyCRsError(err error) bool {
+	return microerror.Cause(err) == tooManyCRsError
+}

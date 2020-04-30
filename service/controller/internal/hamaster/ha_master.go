@@ -49,6 +49,9 @@ func (h *HAMaster) Enabled(ctx context.Context, cluster string) (bool, error) {
 	if len(list.Items) == 0 {
 		return false, microerror.Mask(notFoundError)
 	}
+	if len(list.Items) > 1 {
+		return false, microerror.Mask(tooManyCRsError)
+	}
 
 	if key.G8sControlPlaneReplicas(list.Items[0]) == 1 {
 		return false, nil

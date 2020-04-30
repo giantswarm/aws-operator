@@ -13,6 +13,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 )
@@ -95,7 +96,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack")
 			err = r.createStack(ctx, cr)
-			if err != nil {
+			if hamaster.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "not creating cloud formation stack", "reason", "control plane CR not available yet")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				return nil
+
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 
@@ -131,7 +137,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		if update {
 			err = r.updateStack(ctx, cr)
-			if err != nil {
+			if hamaster.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "control plane CR not available yet")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				return nil
+
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 		}
@@ -150,7 +161,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
+		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -204,7 +215,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
+		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -239,7 +250,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, haMasterEnabled bool) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -259,7 +270,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSContr
 	return autoScalingGroup, nil
 }
 
-func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainENI, error) {
+func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainENI, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -285,7 +296,7 @@ func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*te
 	return eni, nil
 }
 
-func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
+func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, haMasterEnabled bool) (*template.ParamsMainEtcdVolume, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -300,7 +311,7 @@ func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlan
 	return etcdVolume, nil
 }
 
-func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, route53Enabled bool) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -316,53 +327,69 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 			KMSKeyARN:            cc.Status.TenantCluster.Encryption.Key,
 			RegionARN:            key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:             key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-			Route53Enabled:       route53Enabled,
+			Route53Enabled:       r.route53Enabled,
 		}
 	}
 
 	return iamPolicies, nil
 }
 
-func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
+func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, haMasterEnabled bool) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
+	var ids []int
+	if haMasterEnabled {
+		ids = []int{1, 2, 3}
+	} else {
+		ids = []int{0}
+	}
+
+	var launchTemplates []template.ParamsMainLaunchTemplateItem
+	for _, id := range ids {
+		item := template.ParamsMainLaunchTemplateItem{
+			BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
+				Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
+					Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume{
+						Size: defaultVolumeSize,
+					},
+				},
+				Kubelet: template.ParamsMainLaunchTemplateBlockDeviceMappingKubelet{
+					Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume{
+						Size: defaultVolumeSize,
+					},
+				},
+				Logging: template.ParamsMainLaunchTemplateBlockDeviceMappingLogging{
+					Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume{
+						Size: defaultVolumeSize,
+					},
+				},
+			},
+			Instance: template.ParamsMainLaunchTemplateInstance{
+				Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
+				Monitoring: false,
+				Type:       key.ControlPlaneInstanceType(cr),
+			},
+			MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
+			SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
+				S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, id)),
+			},
+			ResourceName: key.ControlPlaneLaunchTemplateName(&cr, 0),
+		}
+
+		launchTemplates = append(launchTemplates, item)
+	}
+
 	launchTemplate := &template.ParamsMainLaunchTemplate{
-		BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
-			Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
-				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume{
-					Size: defaultVolumeSize,
-				},
-			},
-			Kubelet: template.ParamsMainLaunchTemplateBlockDeviceMappingKubelet{
-				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume{
-					Size: defaultVolumeSize,
-				},
-			},
-			Logging: template.ParamsMainLaunchTemplateBlockDeviceMappingLogging{
-				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume{
-					Size: defaultVolumeSize,
-				},
-			},
-		},
-		Instance: template.ParamsMainLaunchTemplateInstance{
-			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
-			Monitoring: false,
-			Type:       key.ControlPlaneInstanceType(cr),
-		},
-		MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-		SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
-			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, TODO)),
-		},
-		ResourceName: key.ControlPlaneLaunchTemplateName(&cr, 0),
+		List: launchTemplates,
 	}
 
 	return launchTemplate, nil
 }
 
-func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
 	outputs := &template.ParamsMainOutputs{
 		InstanceType:    key.ControlPlaneInstanceType(cr),
 		OperatorVersion: key.OperatorVersion(&cr),
@@ -371,30 +398,42 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMain, error) {
+	var err error
+
+	// We need to determine if we want to generate certificates for a Tenant
+	// Cluster with a HA Master setup.
+	var haMasterEnabled bool
+	{
+		haMasterEnabled, err = r.haMaster.Enabled(ctx, key.ClusterID(&cr))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var params *template.ParamsMain
 	{
-		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
+		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr, haMasterEnabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		eni, err := newENI(ctx, cr)
+		eni, err := r.newENI(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		etcdVolume, err := newEtcdVolume(ctx, cr)
+		etcdVolume, err := r.newEtcdVolume(ctx, cr, haMasterEnabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		iamPolicies, err := newIAMPolicies(ctx, cr, route53Enabled)
+		iamPolicies, err := r.newIAMPolicies(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchTemplate, err := newLaunchTemplate(ctx, cr)
+		launchTemplate, err := r.newLaunchTemplate(ctx, cr, haMasterEnabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		outputs, err := newOutputs(ctx, cr)
+		outputs, err := r.newOutputs(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

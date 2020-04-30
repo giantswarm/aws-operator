@@ -2,41 +2,42 @@ package template
 
 const TemplateMainLaunchTemplate = `
 {{- define "launch_template" -}}
+  {{- range .LaunchTemplate.List }}
   ControlPlaneNodeLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: {{ .LaunchTemplate.ResourceName }}
+      LaunchTemplateName: {{ .ResourceName }}
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdc
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Docker.Volume.Size }}
+            VolumeSize: {{ .BlockDeviceMapping.Docker.Volume.Size }}
             VolumeType: gp2
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Kubelet.Volume.Size }}
+            VolumeSize: {{ .BlockDeviceMapping.Kubelet.Volume.Size }}
             VolumeType: gp2
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Logging.Volume.Size }}
+            VolumeSize: {{ .BlockDeviceMapping.Logging.Volume.Size }}
             VolumeType: gp2
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
-        ImageId: {{ .LaunchTemplate.Instance.Image }}
-        InstanceType: {{ .LaunchTemplate.Instance.Type }}
+        ImageId: {{ .Instance.Image }}
+        InstanceType: {{ .Instance.Type }}
         Monitoring:
-          Enabled: {{ .LaunchTemplate.Instance.Monitoring }}
+          Enabled: {{ .Instance.Monitoring }}
         NetworkInterfaces:
           - AssociatePublicIpAddress: false
             DeviceIndex: 0
             Groups:
-            - {{ .LaunchTemplate.MasterSecurityGroupID }}
+            - {{ .MasterSecurityGroupID }}
         UserData:
           Fn::Base64: |
             {
@@ -45,7 +46,7 @@ const TemplateMainLaunchTemplate = `
                 "config": {
                   "append": [
                     {
-                      "source": "{{ .LaunchTemplate.SmallCloudConfig.S3URL }}"
+                      "source": "{{ .SmallCloudConfig.S3URL }}"
                     }
                   ]
                 }
@@ -82,5 +83,6 @@ const TemplateMainLaunchTemplate = `
                 ]
               }
             }
+  {{- end }}
 {{- end -}}
 `

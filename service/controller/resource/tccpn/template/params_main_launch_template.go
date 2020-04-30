@@ -1,6 +1,10 @@
 package template
 
 type ParamsMainLaunchTemplate struct {
+	List []ParamsMainLaunchTemplateItem
+}
+
+type ParamsMainLaunchTemplateItem struct {
 	BlockDeviceMapping    ParamsMainLaunchTemplateBlockDeviceMapping
 	Instance              ParamsMainLaunchTemplateInstance
 	SmallCloudConfig      ParamsMainLaunchTemplateSmallCloudConfig

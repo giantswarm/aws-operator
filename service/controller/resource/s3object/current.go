@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -37,9 +37,9 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// bucket itself.
 	if cc.Status.TenantCluster.Encryption.Key == "" {
 		if key.IsDeleted(cr) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available anymore")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "encryption key not available anymore")
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "encryption key not available yet")
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -48,9 +48,12 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	paths, err := r.cloudConfig.NewPaths(ctx, obj)
-	if hamaster.IsNotFound(err) {
+	if cloudconfig.IsNotFound(err) {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "control plane CR not available yet")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
 	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -66,7 +69,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		o, err := cc.Client.TenantCluster.AWS.S3.GetObject(i)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 bucket %#q", bn))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", fmt.Sprintf("did not find S3 bucket %#q", bn))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
@@ -79,7 +82,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		body, err = ioutil.ReadAll(o.Body)
+		body, err := ioutil.ReadAll(o.Body)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

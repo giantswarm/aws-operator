@@ -191,15 +191,6 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 	return fmt.Sprintf("arn:%s:iam::%s:role/gs-cluster-%s-role-*", partition, accountID, clusterID)
 }
 
-// S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded
-// for the TCCP stack.
-//
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
-//
-func S3ObjectPathTCCP(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
-}
-
 // S3ObjectPathTCCPN computes the S3 object path to the cloud config uploaded
 // for the TCCPN stack. Note that the path is suffixed with the master ID, since
 // Tenant Clusters may be Single Master or HA Masters, where the suffix -0

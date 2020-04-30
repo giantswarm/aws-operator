@@ -7,9 +7,7 @@ import (
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/certs"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
@@ -56,7 +54,7 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 	{
 		haMasterEnabled, err = t.config.HAMaster.Enabled(ctx, key.ClusterID(cr))
 		if hamaster.IsNotFound(err) {
-			// TODO return package error
+			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -86,7 +84,7 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 	{
 		haMasterEnabled, err = t.config.HAMaster.Enabled(ctx, key.ClusterID(&cr))
 		if hamaster.IsNotFound(err) {
-			// TODO return package error
+			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -122,74 +120,41 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 	return templates, nil
 }
 
-//			CertsSearcher:      config.CertsSearcher,
-//			LabelsFunc:         key.KubeletLabelsTCCPN,
-//			G8sClient:          config.G8sClient,
-//			PathFunc:           key.S3ObjectPathTCCPN,
-//			RandomKeysSearcher: config.RandomKeysSearcher,
-//			RegistryDomain:     config.RegistryDomain,
 func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, id int) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	im, err := t.config.Images.ForRelease(ctx, cr)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	var cl infrastructurev1alpha2.AWSCluster
-	var re *v1alpha1.Release
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+		err := t.config.K8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		cl = list.Items[0]
+	}
 
 	var certFiles []certs.File
 	var randKeys randomkeys.Cluster
 	{
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
-
-		g.Go(func() error {
-			var list infrastructurev1alpha2.AWSClusterList
-			err := t.config.K8sClient.CtrlClient().List(
-				ctx,
-				&list,
-				client.InNamespace(cr.Namespace),
-				client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
-			)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			if len(list.Items) != 1 {
-				// TODO return package error
-			}
-
-			cl = list.Items[0]
-
-			return nil
-		})
-
-		g.Go(func() error {
-			rel, err := t.config.K8sClient.G8sClient().ReleaseV1alpha1().Releases().Get(key.ReleaseName(key.ReleaseVersion(&cr)), metav1.GetOptions{})
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			release = rel
-
-			var list releasev1alpha1.ReleaseList
-			err := t.config.K8sClient.CtrlClient().List(
-				ctx,
-				&list,
-				client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
-			)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			if len(list.Items) != 1 {
-				// TODO return package error
-			}
-
-			cl = list.Items[0]
-
-			return nil
-		})
-
 
 		g.Go(func() error {
 			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.APICert)
@@ -217,7 +182,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 			case 3:
 				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.Etcd3Cert)
 			default:
-				// TODO return package error
+				return microerror.Maskf(executionFailedError, "invalid master id %d", id)
 			}
 
 			if err != nil {
@@ -267,30 +232,17 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 
 		err := g.Wait()
 		if certs.IsTimeout(err) {
-			// TODO return package error
+			return "", microerror.Maskf(timeoutError, "waited too long for certificates")
 		} else if randomkeys.IsTimeout(err) {
-			// TODO return package error
+			return "", microerror.Maskf(timeoutError, "waited too long for random keys")
 		} else if err != nil {
 			return "", microerror.Mask(err)
 		}
 	}
 
-	var images k8scloudconfig.Images
-	{
-		v, err := k8scloudconfig.ExtractComponentVersions(release.Spec.Components)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-
-		v.Kubectl = key.KubectlVersion
-		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
-		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
-		images = k8scloudconfig.BuildImages(t.config.RegistryDomain, v)
-	}
-
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, randKeys)
 	if err != nil {
-			return "", microerror.Mask(err)
+		return "", microerror.Mask(err)
 	}
 
 	var apiExtraArgs []string
@@ -320,13 +272,18 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
-
+	// Here we try to find the subnet of the master node which is associated to a
+	// specific availability zone. It is not possible right now to run 3 masters
+	// in 1 or 2 availability zones. The system is limited to the following two
+	// scenarios.
+	//
+	//     * 1 master, 1 availability zone
+	//     * 3 master, 3 availability zone
+	//
 	var masterSubnet net.IPNet
 	{
 		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
 		for _, az := range zones {
-			// TODO is it that a Single Master setup guarantees a single AZ and that a
-			// HA Masters setup guarantees 3 AZs?
 			if az.Name == key.ControlPlaneAvailabilityZones(cr)[id] {
 				masterSubnet = az.Subnet.Private.CIDR
 				break
@@ -347,21 +304,21 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &TCCPNExtension{
 			cc:               cc,
-				cluster:        cl,
+			cluster:          cl,
 			clusterCerts:     certFiles,
-				encrypter:      t.config.Encrypter,
-				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
-				masterSubnet:   masterSubnet,
-				masterID:       id,
+			encrypter:        t.config.Encrypter,
+			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
+			masterSubnet:     masterSubnet,
+			masterID:         id,
 			randomKeyTmplSet: randomKeyTmplSet,
-				registryDomain: t.config.RegistryDomain,
+			registryDomain:   t.config.RegistryDomain,
 		}
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
-		params.Images = images
+		params.Images = im
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)

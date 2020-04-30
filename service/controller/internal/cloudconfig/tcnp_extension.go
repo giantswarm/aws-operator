@@ -12,6 +12,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -21,9 +22,12 @@ type TCNPExtension struct {
 	//
 	// See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
-	cc           *controllercontext.Context
-	cluster      infrastructurev1alpha2.AWSCluster
-	clusterCerts []certs.File
+	cc             *controllercontext.Context
+	cluster        infrastructurev1alpha2.AWSCluster
+	clusterCerts   []certs.File
+	encrypter      encrypter.Interface
+	encryptionKey  string
+	registryDomain string
 }
 
 func (e *TCNPExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -63,13 +67,17 @@ func (e *TCNPExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		for _, f := range e.clusterCerts {
 			ctx = controllercontext.NewContext(ctx, *e.cc)
 
-			data, err := e.encrypt(ctx, f.Data)
-			if err != nil {
-				return nil, microerror.Mask(err)
+			var encrypted string
+			{
+				e, err := e.encrypter.Encrypt(ctx, e.encryptionKey, string(f.Data))
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+				encrypted = e
 			}
 
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: string(data),
+				AssetContent: encrypted,
 				Path:         f.AbsolutePath + ".enc",
 				Owner: k8scloudconfig.Owner{
 					Group: k8scloudconfig.Group{

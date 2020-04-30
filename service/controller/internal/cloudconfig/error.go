@@ -6,11 +6,6 @@ var executionFailedError = &microerror.Error{
 	Kind: "executionFailedError",
 }
 
-// IsInvalidConfig asserts invalidConfigError.
-func IsExecutionFailed(err error) bool {
-	return microerror.Cause(err) == executionFailedError
-}
-
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
@@ -27,4 +22,13 @@ var notFoundError = &microerror.Error{
 // IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
+}
+
+var timeoutError = &microerror.Error{
+	Kind: "timeoutError",
+}
+
+// IsTimeout asserts timeoutError.
+func IsTimeout(err error) bool {
+	return microerror.Cause(err) == timeoutError
 }

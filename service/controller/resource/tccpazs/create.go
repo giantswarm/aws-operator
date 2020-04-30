@@ -11,8 +11,9 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -27,13 +28,8 @@ import (
 const MaxAZs = 4
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := r.toClusterFunc(obj)
-	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-		return nil
-	} else if err != nil {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
@@ -41,37 +37,85 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(v1.NamespaceDefault),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+		if len(list.Items) > 1 {
+			return microerror.Mask(tooManyCRsError)
+		}
+
+		cl = list.Items[0]
+	}
+
+	var cp infrastructurev1alpha2.AWSControlPlane
+	{
+		var list infrastructurev1alpha2.AWSControlPlaneList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(v1.NamespaceDefault),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "control plane cr not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+		if len(list.Items) > 1 {
+			return microerror.Mask(tooManyCRsError)
+		}
+
+		cp = list.Items[0]
+	}
+
+	var mds []infrastructurev1alpha2.AWSMachineDeployment
+	{
+		var list infrastructurev1alpha2.AWSMachineDeploymentList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(v1.NamespaceDefault),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		for _, md := range list.Items {
+			mds = append(mds, md)
+		}
+	}
+
 	// We need to cancel the resource early in case the ipam resource did not yet
 	// allocate a subnet for the tenant cluster.
-	if key.StatusClusterNetworkCIDR(cr) == "" {
+	if key.StatusClusterNetworkCIDR(cl) == "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect private and public subnets for availability zones")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster subnet not yet allocated")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
 		return nil
-	}
-
-	var machineDeployments []infrastructurev1alpha2.AWSMachineDeployment
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding MachineDeployments for tenant cluster")
-
-		l := metav1.AddLabelToSelector(
-			&metav1.LabelSelector{},
-			label.Cluster,
-			key.ClusterID(&cr),
-		)
-		o := metav1.ListOptions{
-			LabelSelector: labels.Set(l.MatchLabels).String(),
-		}
-
-		list, err := r.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(o)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		machineDeployments = list.Items
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d MachineDeployments for tenant cluster", len(machineDeployments)))
 	}
 
 	// As a first step we initialize the mappings for all the relevant
@@ -81,24 +125,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// below.
 	azMapping := map[string]mapping{}
 	{
-		azMapping[key.MasterAvailabilityZone(cr)] = mapping{
-			RequiredByCR: true,
+		for _, az := range key.ControlPlaneAvailabilityZones(cp) {
+			azMapping[az] = mapping{}
 		}
 
-		for _, md := range machineDeployments {
+		for _, md := range mds {
 			for _, az := range key.MachineDeploymentAvailabilityZones(md) {
-				azMapping[az] = mapping{
-					RequiredByCR: true,
-				}
+				azMapping[az] = mapping{}
 			}
 		}
 
 		for _, az := range azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets) {
 			_, exists := azMapping[az]
 			if !exists {
-				azMapping[az] = mapping{
-					RequiredByCR: false,
-				}
+				azMapping[az] = mapping{}
 			}
 		}
 	}
@@ -120,10 +160,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				"level", "debug",
 				"message", "computed controller context status",
 				"availability-zone", az.Name,
-				"subnet-id", az.Subnet.Public.CIDR,
-				"public-subnet", az.Subnet.Public.CIDR,
-				"private-subnet", az.Subnet.Private.CIDR,
-				"aws-cni-subnet", az.Subnet.AWSCNI.CIDR,
+				"aws-cni-subnet-cidr", az.Subnet.AWSCNI.CIDR.String(),
+				"aws-cni-subnet-id", az.Subnet.AWSCNI.ID,
+				"private-subnet-cidr", az.Subnet.Private.CIDR.String(),
+				"private-subnet-id", az.Subnet.Private.ID,
+				"public-subnet-cidr", az.Subnet.Public.CIDR.String(),
+				"public-subnet-id", az.Subnet.Public.ID,
 			)
 		}
 
@@ -134,8 +176,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 		podSubnet := r.cidrBlockAWSCNI
-		if cr.Spec.Provider.Pods.CIDRBlock != "" {
-			podSubnet = cr.Spec.Provider.Pods.CIDRBlock
+		if cl.Spec.Provider.Pods.CIDRBlock != "" {
+			podSubnet = cl.Spec.Provider.Pods.CIDRBlock
 		}
 
 		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
@@ -144,7 +186,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		// Parse TCCP network CIDR.
-		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
+		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cl))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -161,10 +203,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				"level", "debug",
 				"message", "computed controller context spec",
 				"availability-zone", az.Name,
-				"subnet-id", az.Subnet.Public.CIDR,
-				"public-subnet", az.Subnet.Public.CIDR,
-				"private-subnet", az.Subnet.Private.CIDR,
-				"aws-cni-subnet", az.Subnet.AWSCNI.CIDR,
+				"aws-cni-subnet-cidr", az.Subnet.AWSCNI.CIDR.String(),
+				"aws-cni-subnet-id", az.Subnet.AWSCNI.ID,
+				"private-subnet-cidr", az.Subnet.Private.CIDR.String(),
+				"private-subnet-id", az.Subnet.Private.ID,
+				"public-subnet-cidr", az.Subnet.Public.CIDR.String(),
+				"public-subnet-id", az.Subnet.Public.ID,
 			)
 		}
 

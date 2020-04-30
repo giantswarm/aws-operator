@@ -3,10 +3,15 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/randomkeys"
+	"golang.org/x/sync/errgroup"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -36,7 +41,12 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 }
 
 func (t *TCNP) NewPaths(ctx context.Context, obj interface{}) ([]string, error) {
-	return nil, nil
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return []string{key.S3ObjectPathTCNP(cr)}, nil
 }
 
 func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
@@ -45,6 +55,10 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		return nil, microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	im, err := t.config.Images.ForRelease(ctx, obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -63,10 +77,49 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		}
 
 		if len(list.Items) != 1 {
-			// TODO return package error
+			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
 		}
 
 		cl = list.Items[0]
+	}
+
+	var certFiles []certs.File
+	{
+		g := &errgroup.Group{}
+		m := sync.Mutex{}
+
+		g.Go(func() error {
+			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.ServiceAccountCert)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			m.Lock()
+			certFiles = append(certFiles, certs.NewFilesServiceAccount(tls)...)
+			m.Unlock()
+
+			return nil
+		})
+
+		g.Go(func() error {
+			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.WorkerCert)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			m.Lock()
+			certFiles = append(certFiles, certs.NewFilesWorker(tls)...)
+			m.Unlock()
+
+			return nil
+		})
+
+		err := g.Wait()
+		if certs.IsTimeout(err) {
+			return nil, microerror.Maskf(timeoutError, "waited too long for certificates")
+		} else if randomkeys.IsTimeout(err) {
+			return nil, microerror.Maskf(timeoutError, "waited too long for random keys")
+		} else if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var kubeletExtraArgs []string
@@ -89,13 +142,13 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),
 			cc:             cc,
 			cluster:        cl,
-			clusterCerts:   clusterCerts,
+			clusterCerts:   certFiles,
 			encrypter:      t.config.Encrypter,
 			encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
 			registryDomain: t.config.RegistryDomain,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
-		params.Images = images
+		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
@@ -105,7 +158,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		}
 	}
 
-	var templateBody []byte
+	var templateBody string
 	{
 		c := k8scloudconfig.CloudConfigConfig{
 			Params:   params,
@@ -122,8 +175,8 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			return nil, microerror.Mask(err)
 		}
 
-		templateBody = []byte(cloudConfig.String())
+		templateBody = cloudConfig.String()
 	}
 
-	return templateBody, nil
+	return []string{templateBody}, nil
 }
