@@ -30,43 +30,51 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 //
 func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 
-	apiWhitelist := APIWhitelist{
-		Public: Whitelist{
-			Enabled:    false,
-			SubnetList: "",
-		},
-		Private: Whitelist{
-			Enabled:    false,
-			SubnetList: "",
-		},
-	}
-
 	testCases := []struct {
 		name           string
 		ctx            context.Context
 		cr             infrastructurev1alpha2.AWSControlPlane
-		apiWhitelist   APIWhitelist
 		route53Enabled bool
+		baseDomain     string
+		masterCount    int
 	}{
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			ctx:            unittest.DefaultContextControlPlane(),
 			cr:             unittest.DefaultControlPlane(),
-			apiWhitelist:   apiWhitelist,
 			route53Enabled: true,
+			masterCount:    1,
+			baseDomain:     "example.com",
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			ctx:            unittest.DefaultContextControlPlane(),
 			cr:             unittest.DefaultControlPlane(),
-			apiWhitelist:   apiWhitelist,
 			route53Enabled: false,
+			masterCount:    1,
+			baseDomain:     "example.com",
+		},
+		{
+			name:           "case 2: basic test with encrypter backend KMS, route53 enabled, 3 masters",
+			ctx:            unittest.DefaultContextControlPlane(),
+			cr:             unittest.DefaultControlPlane(),
+			route53Enabled: true,
+			masterCount:    3,
+			baseDomain:     "example.com",
+		},
+		{
+			name:           "case 3: basic test with encrypter backend KMS, route53 disabled, 3 masters",
+			ctx:            unittest.DefaultContextControlPlane(),
+			cr:             unittest.DefaultControlPlane(),
+			route53Enabled: false,
+			masterCount:    3,
+			baseDomain:     "example.com",
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, tc.apiWhitelist, tc.route53Enabled)
+			params, err := newTemplateParams(tc.ctx, tc.cr, tc.route53Enabled, tc.masterCount, tc.baseDomain)
 			if err != nil {
 				t.Fatal(err)
 			}

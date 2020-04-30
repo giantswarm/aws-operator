@@ -4,6 +4,7 @@ type ParamsMainAutoScalingGroup struct {
 	AvailabilityZone string
 	ClusterID        string
 	LoadBalancers    ParamsMainAutoScalingGroupLoadBalancers
+	ResourceNames    []string
 	SubnetID         string
 }
 

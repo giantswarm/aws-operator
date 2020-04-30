@@ -214,8 +214,8 @@ func S3ObjectPathTCCP(getter LabelsGetter) string {
 //
 //     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn
 //
-func S3ObjectPathTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCPN(getter))
+func S3ObjectPathTCCPN(getter LabelsGetter, masterID int) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s%d", OperatorVersion(getter), CloudConfigVersion, StackNameTCCPN(getter), masterID)
 }
 
 // S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for

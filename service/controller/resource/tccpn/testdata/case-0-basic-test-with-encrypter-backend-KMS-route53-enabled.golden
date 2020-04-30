@@ -6,22 +6,23 @@ Outputs:
   OperatorVersion:
     Value: 7.3.0
 Resources:
+  
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: EtcdVolume
     Properties:
       VPCZoneIdentifier:
-        - subnet-id-eu-central-1b
+        - subnet-id-eu-central-1a
       AvailabilityZones:
-        - eu-central-1b
+        - eu-central-1a
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 1
       MixedInstancesPolicy:
         LaunchTemplate:
           LaunchTemplateSpecification:
-            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate
-            Version: !GetAtt ControlPlaneNodeLaunchTemplate.LatestVersionNumber
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate0
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate0.LatestVersionNumber
       LoadBalancerNames:
       - 8y5ck-api-internal
       - 8y5ck-api
@@ -62,23 +63,25 @@ Resources:
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
+  
   MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
-       Description: A Network interface used for etcd.
+       Description: A Network interface used for etcd0.
        GroupSet:
        - master-security-group-id
-       SubnetId: subnet-id-eu-central-1b
-       PrivateIpAddress: 10.100.3.68
+       SubnetId: subnet-id-eu-central-1a
+       PrivateIpAddress: 10.100.3.4
        Tags:
        - Key: Name
          Value: 8y5ck-master0-eni
        - Key: node.k8s.amazonaws.com/no_manage
          Value: "true"
+  
   EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
-      AvailabilityZone: eu-central-1b
+      AvailabilityZone: eu-central-1a
       Encrypted: true
       Size: 100
       SnapshotId: snap-1234567890abcdef0
@@ -230,7 +233,8 @@ Resources:
               - "route53:ListResourceRecordSets"
             Resource: "*"
 
-  ControlPlaneNodeLaunchTemplate:
+  
+  ControlPlaneNodeLaunchTemplate0:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateName: 8y5ck-master0-launch-template
@@ -273,7 +277,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_0_0/cluster-8y5ck-tccpn"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_0_0/cluster-8y5ck-tccpn0"
                     }
                   ]
                 }
@@ -310,3 +314,12 @@ Resources:
                 ]
               }
             }
+  
+  ControlPlaneRecordSet0:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      ResourceRecords:
+      - !Get  MasterEni.PrimaryPrivateIpAddress
+      Name: 'etcd1.8y5ck.k8s.example.com.'
+      HostedZoneId: $v.HostedZoneID
+      Type: A

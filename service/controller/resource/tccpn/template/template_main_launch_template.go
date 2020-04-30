@@ -2,41 +2,43 @@ package template
 
 const TemplateMainLaunchTemplate = `
 {{- define "launch_template" -}}
-  ControlPlaneNodeLaunchTemplate:
+{{- $t := .LaunchTemplate -}}
+{{- range $i, $cc := $t.SmallCloudConfigs }}
+  ControlPlaneNodeLaunchTemplate{{ $i }}:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: {{ .LaunchTemplate.ResourceName }}
+      LaunchTemplateName: {{ $t.ResourceName }}
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdc
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Docker.Volume.Size }}
+            VolumeSize: {{ $t.BlockDeviceMapping.Docker.Volume.Size }}
             VolumeType: gp2
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Kubelet.Volume.Size }}
+            VolumeSize: {{ $t.BlockDeviceMapping.Kubelet.Volume.Size }}
             VolumeType: gp2
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Logging.Volume.Size }}
+            VolumeSize: {{ $t.BlockDeviceMapping.Logging.Volume.Size }}
             VolumeType: gp2
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
-        ImageId: {{ .LaunchTemplate.Instance.Image }}
-        InstanceType: {{ .LaunchTemplate.Instance.Type }}
+        ImageId: {{ $t.Instance.Image }}
+        InstanceType: {{ $t.Instance.Type }}
         Monitoring:
-          Enabled: {{ .LaunchTemplate.Instance.Monitoring }}
+          Enabled: {{ $t.Instance.Monitoring }}
         NetworkInterfaces:
           - AssociatePublicIpAddress: false
             DeviceIndex: 0
             Groups:
-            - {{ .LaunchTemplate.MasterSecurityGroupID }}
+            - {{ $t.MasterSecurityGroupID }}
         UserData:
           Fn::Base64: |
             {
@@ -45,7 +47,7 @@ const TemplateMainLaunchTemplate = `
                 "config": {
                   "append": [
                     {
-                      "source": "{{ .LaunchTemplate.SmallCloudConfig.S3URL }}"
+                      "source": "{{ $cc.S3URL }}"
                     }
                   ]
                 }
@@ -82,5 +84,6 @@ const TemplateMainLaunchTemplate = `
                 ]
               }
             }
+{{- end -}}
 {{- end -}}
 `

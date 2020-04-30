@@ -3,7 +3,7 @@ package template
 type ParamsMainLaunchTemplate struct {
 	BlockDeviceMapping    ParamsMainLaunchTemplateBlockDeviceMapping
 	Instance              ParamsMainLaunchTemplateInstance
-	SmallCloudConfig      ParamsMainLaunchTemplateSmallCloudConfig
+	SmallCloudConfigs     []ParamsMainLaunchTemplateSmallCloudConfig
 	MasterSecurityGroupID string
 	ResourceName          string
 }

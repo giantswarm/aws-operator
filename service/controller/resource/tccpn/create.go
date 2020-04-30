@@ -3,6 +3,7 @@ package tccpn
 import (
 	"context"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -146,11 +147,18 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
+	clusterCr, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(cr.Annotations[key.TagCluster], metav1.GetOptions{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	masterCount := 1
+
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
+		params, err := newTemplateParams(ctx, cr, r.route53Enabled, masterCount, key.ClusterBaseDomain(*clusterCr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -199,12 +207,18 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	if err != nil {
 		return microerror.Mask(err)
 	}
+	clusterCr, err := r.g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(cr.Annotations[key.TagCluster], metav1.GetOptions{})
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	masterCount := 0
 
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
+		params, err := newTemplateParams(ctx, cr, r.route53Enabled, masterCount, key.ClusterBaseDomain(*clusterCr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -239,10 +253,17 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
+func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, masterCount int) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	var resourceNames []string
+	{
+		for i := 0; i < masterCount; i++ {
+			resourceNames = append(resourceNames, key.ControlPlaneASGResourceName(i))
+		}
 	}
 
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
@@ -253,13 +274,14 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSContr
 			ApiName:         key.ELBNameAPI(&cr),
 			EtcdName:        key.ELBNameEtcd(&cr),
 		},
-		SubnetID: idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
+		ResourceNames: resourceNames,
+		SubnetID:      idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
 
 	return autoScalingGroup, nil
 }
 
-func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainENI, error) {
+func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, masterCount int) (*template.ParamsMainENI, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -269,32 +291,57 @@ func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*te
 	{
 		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
 		for _, az := range zones {
-			if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
-				continue
-			}
 			masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
 		}
 	}
 
-	eni := &template.ParamsMainENI{
-		IpAddress:       key.ControlPlaneENIIpAddress(masterSubnets[0]),
-		Name:            key.ControlPlaneENIName(&cr, 0),
-		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
+	cpSecuritygroupID := idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master"))
+
+	var enis []template.ParamsMainENISpec
+	{
+		for i := 0; i < masterCount; i++ {
+			e := template.ParamsMainENISpec{
+				IpAddress:       key.ControlPlaneENIIpAddress(masterSubnets[i]),
+				Name:            key.ControlPlaneENIName(&cr, i),
+				SecurityGroupID: cpSecuritygroupID,
+				SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[i]))),
+				ResourceName:    key.ControlPlaneENIResourceName(i),
+			}
+			enis = append(enis, e)
+		}
 	}
+	eni := &template.ParamsMainENI{
+		ENIs: enis,
+	}
+
 	return eni, nil
 }
 
-func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
+func newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, masterCount int) (*template.ParamsMainEtcdVolume, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	var volumes []template.ParamsMainEtcdVolumeEtcdVolumeSpec
+	{
+		snapshotID := cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID
+		for i := 0; i < masterCount; i++ {
+			if i != 0 {
+				// this is weird hack but snapshotID does not make sense for all volumes, since it would not work
+				snapshotID = ""
+			}
 
+			v := template.ParamsMainEtcdVolumeEtcdVolumeSpec{
+				AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[i],
+				Name:             key.ControlPlaneVolumeNameEtcd(&cr, i),
+				SnapshotID:       snapshotID,
+				ResourceName:     key.ControlPlaneVolumeResourceName(i),
+			}
+			volumes = append(volumes, v)
+		}
+	}
 	etcdVolume := &template.ParamsMainEtcdVolume{
-		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
-		Name:             key.ControlPlaneVolumeNameEtcd(&cr, 0),
-		SnapshotID:       cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID,
+		Volumes: volumes,
 	}
 
 	return etcdVolume, nil
@@ -323,10 +370,20 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 	return iamPolicies, nil
 }
 
-func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
+func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, masterCount int) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	var smallCloudConfigs []template.ParamsMainLaunchTemplateSmallCloudConfig
+	{
+		for i := 0; i < masterCount; i++ {
+			scc := template.ParamsMainLaunchTemplateSmallCloudConfig{
+				S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, i)),
+			}
+			smallCloudConfigs = append(smallCloudConfigs, scc)
+		}
 	}
 
 	launchTemplate := &template.ParamsMainLaunchTemplate{
@@ -353,13 +410,43 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			Type:       key.ControlPlaneInstanceType(cr),
 		},
 		MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-		SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
-			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr)),
-		},
-		ResourceName: key.ControlPlaneLaunchTemplateName(&cr, 0),
+		SmallCloudConfigs:     smallCloudConfigs,
+		ResourceName:          key.ControlPlaneLaunchTemplateName(&cr, 0),
 	}
 
 	return launchTemplate, nil
+}
+
+func newRecordSets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, route53Enabled bool, masterCount int, baseDomain string) (*template.ParamsMainRecordSets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var recordSets *template.ParamsMainRecordSets
+	{
+		var records []template.ParamsMainRecordSetsRecords
+		{
+			for i := 0; i < masterCount; i++ {
+				record := template.ParamsMainRecordSetsRecords{
+					Value:           key.ControlPlaneRecordSetsRecordValue(i),
+					ResourceName:    key.ControlPlaneRecordSetsResourceName(i),
+					ENIResourceName: key.ControlPlaneENIResourceName(i),
+				}
+				records = append(records, record)
+			}
+		}
+
+		recordSets = &template.ParamsMainRecordSets{
+			ClusterID:      key.ClusterID(&cr),
+			HostedZoneID:   cc.Status.TenantCluster.DNS.HostedZoneID,
+			BaseDomain:     baseDomain,
+			Records:        records,
+			Route53Enabled: route53Enabled,
+		}
+	}
+
+	return recordSets, nil
 }
 
 func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
@@ -371,18 +458,18 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, route53Enabled bool, masterCount int, baseDomain string) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
+		autoScalingGroup, err := newAutoScalingGroup(ctx, cr, masterCount)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		eni, err := newENI(ctx, cr)
+		eni, err := newENI(ctx, cr, masterCount)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		etcdVolume, err := newEtcdVolume(ctx, cr)
+		etcdVolume, err := newEtcdVolume(ctx, cr, masterCount)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -390,7 +477,11 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchTemplate, err := newLaunchTemplate(ctx, cr)
+		launchTemplate, err := newLaunchTemplate(ctx, cr, masterCount)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		recordSets, err := newRecordSets(ctx, cr, route53Enabled, masterCount, baseDomain)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -405,6 +496,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			EtcdVolume:       etcdVolume,
 			IAMPolicies:      iamPolicies,
 			LaunchTemplate:   launchTemplate,
+			RecordSets:       recordSets,
 			Outputs:          outputs,
 		}
 	}

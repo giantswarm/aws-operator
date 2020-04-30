@@ -8,5 +8,6 @@ type ParamsMain struct {
 	EtcdVolume       *ParamsMainEtcdVolume
 	IAMPolicies      *ParamsMainIAMPolicies
 	LaunchTemplate   *ParamsMainLaunchTemplate
+	RecordSets       *ParamsMainRecordSets
 	Outputs          *ParamsMainOutputs
 }

@@ -10,6 +10,13 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+func ControlPlaneASGResourceName(masterID int) string {
+	if masterID == 0 {
+		return "ControlPlaneNodeAutoScalingGroup"
+	}
+	return fmt.Sprintf("ControlPlaneNodeAutoScalingGroup%d", masterID)
+}
+
 func ControlPlaneAvailabilityZones(cr infrastructurev1alpha2.AWSControlPlane) []string {
 	return cr.Spec.AvailabilityZones
 }
@@ -37,6 +44,10 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	return *c, nil
 }
 
+func ControlPlaneBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Cluster.DNS.Domain
+}
+
 func ControlPlaneENIIpAddress(ipNet net.IPNet) string {
 	// VPC subnet has reserved first 4 IPs so we need to use the fifth one (counting from zero it is index 4)
 	// https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
@@ -60,6 +71,13 @@ func ControlPlaneENIName(getter LabelsGetter, masterID int) string {
 	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), masterID)
 }
 
+func ControlPlaneENIResourceName(masterID int) string {
+	if masterID == 0 {
+		return "MasterEni"
+	}
+	return fmt.Sprintf("MasterEni%d", masterID)
+}
+
 func ControlPlaneENISubnetSize(ipNet net.IPNet) int {
 	subnetSize, _ := ipNet.Mask.Size()
 
@@ -70,8 +88,23 @@ func ControlPlaneLaunchTemplateName(getter LabelsGetter, masterID int) string {
 	return fmt.Sprintf("%s-master%d-launch-template", ClusterID(getter), masterID)
 }
 
+func ControlPlaneRecordSetsRecordValue(masterID int) string {
+	return fmt.Sprintf("etcd%d", masterID+1)
+}
+
+func ControlPlaneRecordSetsResourceName(masterID int) string {
+	return fmt.Sprintf("ControlPlaneRecordSet%d", masterID)
+}
+
 func ControlPlaneVolumeNameEtcd(getter LabelsGetter, masterID int) string {
 	return fmt.Sprintf("%s-master%d-etcd", ClusterID(getter), masterID)
+}
+
+func ControlPlaneVolumeResourceName(masterID int) string {
+	if masterID == 0 {
+		return "EtcdVolume"
+	}
+	return fmt.Sprintf("EtcdVolume%d", masterID)
 }
 
 func dupIP(ip net.IP) net.IP {
