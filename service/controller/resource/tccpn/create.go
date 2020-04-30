@@ -3,7 +3,6 @@ package tccpn
 import (
 	"context"
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
