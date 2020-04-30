@@ -61,10 +61,13 @@ func (d *Detection) ShouldScale(ctx context.Context, cr v1alpha1.AWSConfig) (boo
 // ShouldUpdate determines whether the reconciled tenant cluster should be
 // updated. A tenant cluster is only allowed to update in the following cases.
 //
-//     The master node's instance type changes.
-//     The worker node's docker volume size changes.
-//     The worker node's instance type changes.
-//     The tenant cluster's version changes.
+//   The master ignition hash changes.
+//   The master instance AMI changes.
+//   The master instance type changes.
+//   The worker instance docker volume size changes.
+//   The worker ignition hash changes.
+//   The worker instance AMI changes.
+//   The worker instance type changes.
 //
 func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
@@ -94,7 +97,7 @@ func (d *Detection) ShouldUpdate(ctx context.Context, cr v1alpha1.AWSConfig) (bo
 		},
 		{
 			name:         "master instance type",
-			desiredValue: key.WorkerInstanceType(cr),
+			desiredValue: key.MasterInstanceType(cr),
 			currentValue: cc.Status.TenantCluster.MasterInstance.Type,
 		},
 		{
