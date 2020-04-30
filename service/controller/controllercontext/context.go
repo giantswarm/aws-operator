@@ -14,9 +14,11 @@ type Context struct {
 	// Client holds the client implementations used for several tenant cluster
 	// specific actions.
 	Client ContextClient
-	// Status holds the data used to communicate between controller's
-	// resources. It can be edited in place as Context is stored as
-	// a pointer within context.Context.
+	// Spec holds the desired state of resource during reconciliations. It can be edited
+	// in place as Context is stored as a pointer within context.Context.
+	Spec ContextSpec
+	// Status holds the current state of resources during reconciliation. It
+	// can be edited in place as Context is stored as a pointer within context.Context.
 	Status ContextStatus
 }
 

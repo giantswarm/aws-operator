@@ -2,13 +2,12 @@ package s3object
 
 import (
 	"context"
+	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
@@ -34,29 +33,24 @@ func Test_DesiredState(t *testing.T) {
 		},
 	}
 
-	release := releasev1alpha1.NewReleaseCR()
-	release.ObjectMeta.Name = "v1.0.0"
-	release.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
-		{
-			Name:    "kubernetes",
-			Version: "1.15.4",
-		},
-		{
-			Name:    "calico",
-			Version: "3.9.1",
-		},
-		{
-			Name:    "etcd",
-			Version: "3.3.15",
+	release := releasev1alpha1.Release{
+		Spec: releasev1alpha1.ReleaseSpec{
+			Components: []releasev1alpha1.ReleaseSpecComponent{
+				{
+					Name:    "kubernetes",
+					Version: "1.15.4",
+				},
+				{
+					Name:    "calico",
+					Version: "3.9.1",
+				},
+				{
+					Name:    "etcd",
+					Version: "3.3.15",
+				},
+			},
 		},
 	}
-	clientset := fake.NewSimpleClientset(release)
-
-	masterKeyPattern := "cloudconfig/v[\\d_]+/master"
-	workerKeyPattern := "cloudconfig/v[\\d_]+/worker"
-
-	masterKeyRegexp := regexp.MustCompile(masterKeyPattern)
-	workerKeyRegexp := regexp.MustCompile(workerKeyPattern)
 
 	testCases := []struct {
 		obj            *providerv1alpha1.AWSConfig
@@ -106,7 +100,6 @@ calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
-					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 					RegistryDomain:     "example.com",
@@ -122,6 +115,17 @@ calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 				Client: controllercontext.ContextClient{
 					TenantCluster: controllercontext.ContextClientTenantCluster{
 						AWS: awsClients,
+					},
+				},
+				Spec: controllercontext.ContextSpec{
+					TenantCluster: controllercontext.ContextSpecTenantCluster{
+						Release: release,
+						MasterInstance: controllercontext.ContextSpecTenantClusterInstance{
+							IgnitionHash: "masterhash",
+						},
+						WorkerInstance: controllercontext.ContextSpecTenantClusterInstance{
+							IgnitionHash: "workerhash",
+						},
 					},
 				},
 				Status: controllercontext.ContextStatus{
@@ -143,8 +147,8 @@ calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 				t.Fatalf("expected '%T', got '%T'", desiredState, result)
 			}
 
-			if len(desiredState) != 2 {
-				t.Fatalf("expected 2 objects, got %d", len(desiredState))
+			if len(desiredState) != 1 {
+				t.Fatalf("expected 1 object, got %d", len(desiredState))
 			}
 
 			for key, bucketObjectState := range desiredState {
@@ -156,16 +160,10 @@ calico-kube-controllers: example.com/giantswarm/kube-controllers:v3.9.1
 					t.Fatalf("expected body %q, got %q", tc.expectedBody, bucketObjectState.Body)
 				}
 
-				if strings.HasSuffix(key, "master") {
-					if !masterKeyRegexp.MatchString(key) {
-						t.Fatalf("expected key %q, to match pattern %q", key, masterKeyPattern)
-					}
-				} else if strings.HasSuffix(key, "worker") {
-					if !workerKeyRegexp.MatchString(key) {
-						t.Fatalf("expected key %q, to match pattern %q", key, workerKeyPattern)
-					}
-				} else {
-					t.Fatalf("unexpected key %q", key)
+				keyPattern := fmt.Sprintf("ignition/%s", bucketObjectState.Body)
+				keyRegexp := regexp.MustCompile(keyPattern)
+				if !keyRegexp.MatchString(key) {
+					t.Fatalf("expected key %q, to match pattern %q", key, keyPattern)
 				}
 			}
 		})

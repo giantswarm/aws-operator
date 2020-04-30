@@ -2,6 +2,7 @@ package encrypter
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 )
@@ -13,7 +14,8 @@ type EncrypterMock struct {
 }
 
 func (e *EncrypterMock) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
-	return plaintext, nil
+	ciphertext := fmt.Sprintf("<encrypted>--%s", plaintext)
+	return ciphertext, nil
 }
 
 func (e *EncrypterMock) EncryptionKey(ctx context.Context, customObject v1alpha1.AWSConfig) (string, error) {

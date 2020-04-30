@@ -6,10 +6,6 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
   {{template "outputs" .}}
-Parameters:
-  VersionBundleVersionParameter:
-    Type: String
-    Description: Sets the VersionBundleVersion used to generate the template.
 Resources:
   {{template "vpc" .}}
   {{template "iam_policies" .}}

@@ -2,17 +2,14 @@ package tccp
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/microerror"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
@@ -181,15 +178,9 @@ func (r *Resource) createStack(ctx context.Context, cr v1alpha1.AWSConfig) error
 				aws.String(namedIAMCapability),
 			},
 			EnableTerminationProtection: aws.Bool(key.EnableTerminationProtection),
-			Parameters: []*cloudformation.Parameter{
-				{
-					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.VersionBundleVersion(cr)),
-				},
-			},
-			StackName:    aws.String(key.MainGuestStackName(cr)),
-			Tags:         r.getCloudFormationTags(cr),
-			TemplateBody: aws.String(templateBody),
+			StackName:                   aws.String(key.MainGuestStackName(cr)),
+			Tags:                        r.getCloudFormationTags(cr),
+			TemplateBody:                aws.String(templateBody),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
@@ -267,12 +258,6 @@ func (r *Resource) ensureStack(ctx context.Context, cr v1alpha1.AWSConfig, templ
 				// roles.
 				aws.String(namedIAMCapability),
 			},
-			Parameters: []*cloudformation.Parameter{
-				{
-					ParameterKey:   aws.String(versionBundleVersionParameterKey),
-					ParameterValue: aws.String(key.VersionBundleVersion(cr)),
-				},
-			},
 			StackName:    aws.String(key.MainGuestStackName(cr)),
 			TemplateBody: aws.String(templateBody),
 		}
@@ -299,29 +284,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 		return "", microerror.Mask(err)
 	}
 
-	var osVersion string
-	{
-		releaseVersion, ok := cr.Labels[label.ReleaseVersion]
-		if !ok {
-			return "", microerror.Maskf(executionFailedError, "release version label not found")
-		}
-		releaseName := fmt.Sprintf("v%s", releaseVersion)
-		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-		for _, component := range release.Spec.Components {
-			if component.Name == "containerlinux" {
-				osVersion = component.Version
-				break
-			}
-		}
-		if osVersion == "" {
-			return "", microerror.Maskf(executionFailedError, "containerlinux component version not found on release")
-		}
-	}
-
-	im, err := key.ImageID(cr, osVersion)
+	imageID, err := key.ImageID(cr, cc.Spec.TenantCluster.Release)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -344,25 +307,23 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 				Name: key.MainGuestStackName(cr),
 
 				DockerVolumeResourceName:   tp.DockerVolumeResourceName,
-				MasterImageID:              im,
+				MasterIgnitionHash:         cc.Spec.TenantCluster.MasterInstance.IgnitionHash,
+				MasterImageID:              imageID,
 				MasterInstanceResourceName: tp.MasterInstanceResourceName,
 				MasterInstanceType:         key.MasterInstanceType(cr),
-				MasterCloudConfigVersion:   key.CloudConfigVersion,
 				MasterInstanceMonitoring:   r.instanceMonitoring,
 
-				WorkerCloudConfigVersion: key.CloudConfigVersion,
+				WorkerIgnitionHash:       cc.Spec.TenantCluster.WorkerInstance.IgnitionHash,
 				WorkerDesired:            cc.Status.TenantCluster.TCCP.ASG.DesiredCapacity,
 				WorkerDockerVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
 				// TODO: https://github.com/giantswarm/giantswarm/issues/4105#issuecomment-421772917
 				// TODO: for now we use same value as for DockerVolumeSizeFromNode, when we have kubelet size in spec we should use that.
 				WorkerKubeletVolumeSizeGB: key.WorkerDockerVolumeSizeGB(cr),
-				WorkerImageID:             im,
+				WorkerImageID:             imageID,
 				WorkerInstanceMonitoring:  r.instanceMonitoring,
 				WorkerInstanceType:        key.WorkerInstanceType(cr),
 				WorkerMax:                 cc.Status.TenantCluster.TCCP.ASG.MaxSize,
 				WorkerMin:                 cc.Status.TenantCluster.TCCP.ASG.MinSize,
-
-				VersionBundleVersion: key.VersionBundleVersion(cr),
 			},
 			TenantClusterAccountID: cc.Status.TenantCluster.AWSAccountID,
 		}

@@ -44,6 +44,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/namespace"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
+	"github.com/giantswarm/aws-operator/service/controller/resource/release"
 	"github.com/giantswarm/aws-operator/service/controller/resource/routetable"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -294,6 +295,19 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		}
 	}
 
+	var releaseResource resource.Interface
+	{
+		c := release.Config{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+		}
+
+		releaseResource, err = release.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var s3BucketResource resource.Interface
 	{
 		c := s3bucket.Config{
@@ -321,7 +335,6 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := s3object.Config{
 			CertsSearcher:      config.CertsSearcher,
 			CloudConfig:        cloudConfig,
-			G8sClient:          config.K8sClient.G8sClient(),
 			Logger:             config.Logger,
 			RandomKeysSearcher: config.RandomKeysSearcher,
 			RegistryDomain:     config.RegistryDomain,
@@ -627,6 +640,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		ipamResource,
 		bridgeZoneResource,
 		encryptionResource,
+		releaseResource,
 		s3BucketResource,
 		s3ObjectResource,
 		loadBalancerResource,

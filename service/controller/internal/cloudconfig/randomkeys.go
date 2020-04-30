@@ -12,12 +12,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
 )
 
-func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, key string, clusterKeys randomkeys.Cluster) (RandomKeyTmplSet, error) {
+func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, key string, clusterKeys randomkeys.Cluster) (RandomKeyTmplSet, string, error) {
+	var unencrypted string
 	var randomKeyTmplSet RandomKeyTmplSet
 	{
 		tmpl, err := template.New("encryption-config").Parse(cloudconfig.EncryptionConfig)
 		if err != nil {
-			return RandomKeyTmplSet{}, microerror.Mask(err)
+			return RandomKeyTmplSet{}, "", microerror.Mask(err)
 		}
 		buf := new(bytes.Buffer)
 		err = tmpl.Execute(buf, struct {
@@ -26,16 +27,17 @@ func renderRandomKeyTmplSet(ctx context.Context, encrypter encrypter.Interface, 
 			EncryptionKey: string(clusterKeys.APIServerEncryptionKey),
 		})
 		if err != nil {
-			return RandomKeyTmplSet{}, microerror.Mask(err)
+			return RandomKeyTmplSet{}, "", microerror.Mask(err)
 		}
 
-		enc, err := encrypter.Encrypt(ctx, key, buf.String())
+		unencrypted = buf.String()
+		enc, err := encrypter.Encrypt(ctx, key, unencrypted)
 		if err != nil {
-			return RandomKeyTmplSet{}, microerror.Mask(err)
+			return RandomKeyTmplSet{}, "", microerror.Mask(err)
 		}
 
 		randomKeyTmplSet.APIServerEncryptionKey = enc
 	}
 
-	return randomKeyTmplSet, nil
+	return randomKeyTmplSet, unencrypted, nil
 }

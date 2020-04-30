@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	providerv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/certs/certstest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys/randomkeystest"
@@ -37,7 +35,7 @@ func Test_CurrentState(t *testing.T) {
 		{
 			description:    "basic match",
 			obj:            clusterTpo,
-			expectedKey:    "cloudconfig/myversion/worker",
+			expectedKey:    "ignition/abcdefg",
 			expectedBucket: "myaccountid-g8s-test-cluster",
 			expectedBody:   "mybody",
 		},
@@ -58,16 +56,12 @@ func Test_CurrentState(t *testing.T) {
 			}
 
 			cloudconfig := &CloudConfigMock{}
-			release := &releasev1alpha1.Release{}
-			clientset := fake.NewSimpleClientset(release)
-
 			var err error
 			var newResource *Resource
 			{
 				c := Config{
 					CertsSearcher:      certstest.NewSearcher(certstest.Config{}),
 					CloudConfig:        cloudconfig,
-					G8sClient:          clientset,
 					Logger:             microloggertest.New(),
 					RandomKeysSearcher: randomkeystest.NewSearcher(),
 					RegistryDomain:     "example.com",
