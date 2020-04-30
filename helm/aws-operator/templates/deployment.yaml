@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        releasetime: {{ $.Release.Time }}
+        releaseRevision: {{ .Release.Revision | quote }}
       labels:
         {{- include "labels.selector" . | nindent 8 }}
     spec:

@@ -3,4 +3,4 @@ name: aws-operator
 description: The aws-operator manages Kubernetes clusters running on AWS.
 home: https://github.com/giantswarm/aws-operator
 version: [[ .Version ]]
-appVersion: [[ .AppVersion ]]
+appVersion: 8.3.0-1
