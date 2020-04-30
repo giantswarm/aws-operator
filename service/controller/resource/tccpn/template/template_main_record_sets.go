@@ -11,7 +11,7 @@ const TemplateMainRecordSets = `
       ResourceRecords:
       - !Get  {{ $r.ENIResourceName}}.PrimaryPrivateIpAddress
       Name: '{{ $r.Value }}.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
-      HostedZoneId: $v.HostedZoneID
+      HostedZoneId: {{ $v.HostedZoneID }}
       Type: A
 {{- end -}}
 {{- end -}}

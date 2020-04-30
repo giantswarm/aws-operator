@@ -179,7 +179,7 @@ Resources:
   MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
-       Description: A Network interface used for etcd0.
+       Description: A Network interface used for etcd.
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1a
@@ -192,7 +192,7 @@ Resources:
   MasterEni1:
     Type: AWS::EC2::NetworkInterface
     Properties:
-       Description: A Network interface used for etcd1.
+       Description: A Network interface used for etcd.
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1b
@@ -205,7 +205,7 @@ Resources:
   MasterEni2:
     Type: AWS::EC2::NetworkInterface
     Properties:
-       Description: A Network interface used for etcd2.
+       Description: A Network interface used for etcd.
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1c
@@ -639,7 +639,7 @@ Resources:
       ResourceRecords:
       - !Get  MasterEni.PrimaryPrivateIpAddress
       Name: 'etcd1.8y5ck.k8s.example.com.'
-      HostedZoneId: $v.HostedZoneID
+      HostedZoneId: hosted-zone-id
       Type: A
   ControlPlaneRecordSet1:
     Type: AWS::Route53::RecordSet
@@ -647,7 +647,7 @@ Resources:
       ResourceRecords:
       - !Get  MasterEni1.PrimaryPrivateIpAddress
       Name: 'etcd2.8y5ck.k8s.example.com.'
-      HostedZoneId: $v.HostedZoneID
+      HostedZoneId: hosted-zone-id
       Type: A
   ControlPlaneRecordSet2:
     Type: AWS::Route53::RecordSet
@@ -655,5 +655,5 @@ Resources:
       ResourceRecords:
       - !Get  MasterEni2.PrimaryPrivateIpAddress
       Name: 'etcd3.8y5ck.k8s.example.com.'
-      HostedZoneId: $v.HostedZoneID
+      HostedZoneId: hosted-zone-id
       Type: A

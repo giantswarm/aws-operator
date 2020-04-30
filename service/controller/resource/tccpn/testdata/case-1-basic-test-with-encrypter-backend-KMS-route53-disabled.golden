@@ -67,7 +67,7 @@ Resources:
   MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
-       Description: A Network interface used for etcd0.
+       Description: A Network interface used for etcd.
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1a
