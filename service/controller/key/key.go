@@ -10,7 +10,7 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"

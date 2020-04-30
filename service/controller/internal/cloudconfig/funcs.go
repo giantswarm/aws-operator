@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	ignition "github.com/giantswarm/k8scloudconfig/v6/ignition/v_2_2_0"
+	"github.com/giantswarm/k8scloudconfig/v6/pkg/ignition"
 	"github.com/giantswarm/microerror"
 )
 
