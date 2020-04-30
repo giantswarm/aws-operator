@@ -1115,10 +1115,10 @@ func Test_VersionBundleVersion(t *testing.T) {
 
 func Test_BucketObjectName(t *testing.T) {
 	t.Parallel()
-	role := "worker"
 
-	e := fmt.Sprintf("ignition/worker")
-	a := BucketObjectName(role)
+	hash := "abcdefg"
+	e := fmt.Sprintf("ignition/%s", hash)
+	a := BucketObjectName(hash)
 	if e != a {
 		t.Fatalf("expected %s got %s", e, a)
 	}

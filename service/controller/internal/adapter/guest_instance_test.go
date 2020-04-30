@@ -92,7 +92,7 @@ func Test_Adapter_Instance_SmallCloudConfig(t *testing.T) {
 	}{
 		{
 			Description:  "case 0 S3 URL",
-			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/ignition/master"),
+			ExpectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/ignition/foo"),
 			Region:       "eu-central-1",
 		},
 	}

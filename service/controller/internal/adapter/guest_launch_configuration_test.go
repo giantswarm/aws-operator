@@ -146,7 +146,7 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	}{
 		{
 			description:  "contains S3 URL",
-			expectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/ignition/worker"),
+			expectedLine: fmt.Sprintf("s3://000000000000-g8s-test-cluster/ignition/hash"),
 		},
 	}
 
@@ -173,6 +173,9 @@ func Test_AdapterLaunchConfiguration_SmallCloudConfig(t *testing.T) {
 	cfg := Config{
 		CustomObject:           customObject,
 		TenantClusterAccountID: "000000000000",
+		StackState: StackState{
+			WorkerIgnitionHash: "hash",
+		},
 	}
 	err := a.Guest.LaunchConfiguration.Adapt(cfg)
 

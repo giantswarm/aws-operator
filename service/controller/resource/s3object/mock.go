@@ -60,7 +60,7 @@ func (s *S3ClientMock) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2O
 	output := &s3.ListObjectsV2Output{
 		Contents: []*s3.Object{
 			{
-				Key: aws.String("cloudconfig/myversion/worker"),
+				Key: aws.String("ignition/abcdefg"),
 			},
 		},
 	}
@@ -72,34 +72,30 @@ type CloudConfigMock struct {
 	template string
 }
 
-func (c *CloudConfigMock) DecryptTemplate(ctx context.Context, data string) (string, error) {
-	return "", nil
-}
-
-func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
+func (c *CloudConfigMock) NewMasterTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, string, error) {
 	template, err := gotemplate.New("master").Parse(c.template)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 	var builder strings.Builder
 	err = template.Execute(&builder, data)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
-	return builder.String(), nil
+	return builder.String(), builder.String(), nil
 }
 
-func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, error) {
+func (c *CloudConfigMock) NewWorkerTemplate(ctx context.Context, data cloudconfig.IgnitionTemplateData) (string, string, error) {
 	template, err := gotemplate.New("master").Parse(c.template)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 	var builder strings.Builder
 	err = template.Execute(&builder, data)
 	if err != nil {
-		return "", microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
-	return builder.String(), nil
+	return builder.String(), builder.String(), nil
 }
 
 type KMSClientMock struct {

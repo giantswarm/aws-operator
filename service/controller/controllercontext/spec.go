@@ -18,7 +18,3 @@ type ContextSpecTenantCluster struct {
 type ContextSpecTenantClusterInstance struct {
 	IgnitionHash string
 }
-
-type ContextSpecTenantClusterWorkerInstance struct {
-	IgnitionHash string
-}
