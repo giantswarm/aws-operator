@@ -95,10 +95,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cloudformation.GetOutputValue(outputs, key.MasterIgnitionHashKey)
-		if err != nil {
+		if cloudformation.IsOutputNotFound(err) {
+			cc.Status.TenantCluster.MasterInstance.IgnitionHash = ""
+		} else if err != nil {
 			return microerror.Mask(err)
+		} else {
+			cc.Status.TenantCluster.MasterInstance.IgnitionHash = v
 		}
-		cc.Status.TenantCluster.MasterInstance.IgnitionHash = v
 	}
 
 	{
@@ -169,10 +172,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		v, err := cloudformation.GetOutputValue(outputs, key.WorkerIgnitionHashKey)
-		if err != nil {
+		if cloudformation.IsOutputNotFound(err) {
+			cc.Status.TenantCluster.WorkerInstance.IgnitionHash = ""
+		} else if err != nil {
 			return microerror.Mask(err)
+		} else {
+			cc.Status.TenantCluster.WorkerInstance.IgnitionHash = v
 		}
-		cc.Status.TenantCluster.WorkerInstance.IgnitionHash = v
 	}
 
 	{
