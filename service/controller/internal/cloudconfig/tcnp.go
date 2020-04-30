@@ -72,6 +72,7 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		}
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.Images = images
+		params.EnableAWSCNI = true
 		params.SSOPublicKey = t.config.SSOPublicKey
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
