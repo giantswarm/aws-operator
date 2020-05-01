@@ -20,7 +20,7 @@ func (f *fakeK8sClient) CRDClient() k8scrdclient.Interface {
 }
 
 func (f *fakeK8sClient) CtrlClient() client.Client {
-	return nil
+	return f.ctrlClient
 }
 
 func (f *fakeK8sClient) DynClient() dynamic.Interface {

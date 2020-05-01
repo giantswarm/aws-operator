@@ -136,10 +136,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		for _, az := range azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets) {
-			_, exists := azMapping[az]
-			if !exists {
-				azMapping[az] = mapping{}
-			}
+			azMapping[az] = mapping{}
 		}
 	}
 

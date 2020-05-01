@@ -293,6 +293,7 @@ func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSCont
 		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
 	}
+
 	return eni, nil
 }
 
