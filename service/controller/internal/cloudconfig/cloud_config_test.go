@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/k8scloudconfig/v6/ignition"
+	"github.com/giantswarm/k8scloudconfig/v6/pkg/ignition"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
