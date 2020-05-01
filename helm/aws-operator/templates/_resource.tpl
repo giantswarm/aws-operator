@@ -15,6 +15,10 @@ room for such suffix.
 {{- include "resource.default.name" . -}}-psp
 {{- end -}}
 
+{{- define "resource.networkPolicy.name" -}}
+{{- include "resource.default.name" . -}}-network-policy
+{{- end -}}
+
 {{- define "resource.pullSecret.name" -}}
 {{- include "resource.default.name" . -}}-pull-secret
 {{- end -}}
