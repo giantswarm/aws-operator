@@ -26,8 +26,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	}
 
 	var images k8scloudconfig.Images
+	var versions k8scloudconfig.Versions
 	{
-		versions, err := k8scloudconfig.ExtractComponentVersions(cc.Spec.TenantCluster.Release.Spec.Components)
+		versions, err = k8scloudconfig.ExtractComponentVersions(cc.Spec.TenantCluster.Release.Spec.Components)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -79,6 +80,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			ClusterCerts: clusterCerts,
 			ClusterKeys:  clusterKeys,
 			Images:       images,
+			Versions:     versions,
 		}
 		g.Go(func() error {
 			ignition, hash, err := r.cloudConfig.NewMasterTemplate(ctx, data)
