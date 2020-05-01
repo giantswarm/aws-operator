@@ -139,6 +139,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = images
+		params.EnableAWSCNI = true
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
