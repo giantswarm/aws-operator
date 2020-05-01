@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.0] - 2020-04-30
+
 ### Added
 
 - Support for Flatcar Linux.
@@ -45,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update to Kubernetes 1.15.5.
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.6.0...legacy
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.7.0...legacy
+[5.7.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.6.0
 [5.6.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.6.0
 [5.5.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.0
