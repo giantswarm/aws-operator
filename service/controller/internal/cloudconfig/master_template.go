@@ -53,8 +53,8 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		params.DisableIngressControllerService = false
 		params.EtcdPort = data.CustomObject.Spec.Cluster.Etcd.Port
 		params.Extension = &extension
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = c.k8sAPIExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.Kubernetes.Apiserver.CommandExtraArgs = c.k8sAPIExtraArgs
+		params.Kubernetes.Kubelet.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
 		params.Images = data.Images
 		params.SSOPublicKey = c.SSOPublicKey

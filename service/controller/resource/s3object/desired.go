@@ -33,7 +33,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 
 		defaultVersions := key.DefaultVersions()
-		versions.Kubectl = defaultVersions.Kubectl
 		versions.KubernetesAPIHealthz = defaultVersions.KubernetesAPIHealthz
 		versions.KubernetesNetworkSetupDocker = defaultVersions.KubernetesNetworkSetupDocker
 		images = k8scloudconfig.BuildImages(r.registryDomain, versions)

@@ -222,7 +222,6 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 
 func DefaultVersions() k8scloudconfig.Versions {
 	return k8scloudconfig.Versions{
-		Kubectl:                      kubectlVersion,
 		KubernetesAPIHealthz:         kubernetesAPIHealthzVersion,
 		KubernetesNetworkSetupDocker: kubernetesSetupNetworkEnvironmentVersion,
 	}
