@@ -51,9 +51,14 @@ spec:
           readOnly: true
         - name: certs
           mountPath: /etc/ssl/certs/ca-certificates.crt
+        {{- if .Values.ports.ingress }}
         ports:
-        - name: http
-          containerPort: 8000
+        {{- range .Values.ports.ingress }}
+        - name: {{ .name }}
+          containerPort: {{ .port }}
+          protocol: {{ .protocol }}
+        {{- end }}
+        {{- end }}
         args:
         - daemon
         - --config.dirs=/var/run/{{ .Chart.Name }}/configmap/
