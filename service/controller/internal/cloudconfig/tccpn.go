@@ -301,6 +301,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 		// Ingress Controller service is not created via ignition.
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
+		params.EnableAWSCNI = true
 		params.EtcdPort = key.EtcdPort
 		params.Extension = &TCCPNExtension{
 			cc:               cc,
