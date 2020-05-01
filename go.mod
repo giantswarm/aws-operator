@@ -7,7 +7,7 @@ require (
 	github.com/Sirupsen/logrus v0.0.0-00010101000000-000000000000 // indirect
 	github.com/aws/aws-sdk-go v1.29.20
 	github.com/chai2010/gettext-go v0.0.0-20191225085308-6b9f4b1008e1 // indirect
-	github.com/giantswarm/apiextensions v0.2.0
+	github.com/giantswarm/apiextensions v0.3.4
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs v0.2.0
@@ -20,7 +20,7 @@ require (
 	github.com/giantswarm/helmclient v0.2.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient v0.2.0
-	github.com/giantswarm/k8scloudconfig/v6 v6.0.4-0.20200430181524-d7111039cf3f
+	github.com/giantswarm/k8scloudconfig/v6 v6.0.4-0.20200501124044-f2b5b4bd53ee
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
@@ -28,7 +28,7 @@ require (
 	github.com/giantswarm/micrologger v0.3.1
 	github.com/giantswarm/operatorkit v0.2.0
 	github.com/giantswarm/randomkeys v0.2.0
-	github.com/giantswarm/statusresource v0.2.0
+	github.com/giantswarm/statusresource v0.3.0
 	github.com/giantswarm/tenantcluster v0.2.0
 	github.com/giantswarm/versionbundle v0.2.0
 	github.com/go-openapi/spec v0.19.5 // indirect
@@ -40,9 +40,9 @@ require (
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.2
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.0
 	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876 // indirect
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200103143344-a1369afcdac7 // indirect
 	google.golang.org/genproto v0.0.0-20191230161307-f3c370f40bfb // indirect
