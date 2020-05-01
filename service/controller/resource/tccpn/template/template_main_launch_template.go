@@ -3,10 +3,10 @@ package template
 const TemplateMainLaunchTemplate = `
 {{- define "launch_template" -}}
   {{- range .LaunchTemplate.List }}
-  ControlPlaneNodeLaunchTemplate:
+  {{ .Resource }}:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: {{ .ResourceName }}
+      LaunchTemplateName: {{ .Name }}
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdc

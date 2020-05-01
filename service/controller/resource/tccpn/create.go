@@ -10,8 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -96,8 +98,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack")
 			err = r.createStack(ctx, cr)
-			if hamaster.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "not creating cloud formation stack", "reason", "control plane CR not available yet")
+			if IsNotFound(err) || hamaster.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "CR not available yet")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				return nil
+
+			} else if IsTooManyCRsError(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "too many CRs found")
 				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 				return nil
 
@@ -137,8 +144,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		if update {
 			err = r.updateStack(ctx, cr)
-			if hamaster.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "control plane CR not available yet")
+			if IsNotFound(err) || hamaster.IsNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "CR not available yet")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				return nil
+
+			} else if IsTooManyCRsError(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "too many CRs found")
 				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 				return nil
 
@@ -250,21 +262,40 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, haMasterEnabled bool) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
-		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
-		ClusterID:        key.ClusterID(&cr),
-		LoadBalancers: template.ParamsMainAutoScalingGroupLoadBalancers{
-			ApiInternalName: key.InternalELBNameAPI(&cr),
-			ApiName:         key.ELBNameAPI(&cr),
-			EtcdName:        key.ELBNameEtcd(&cr),
-		},
-		SubnetID: idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings.
+	{
+		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	autoScalingGroup := &template.ParamsMainAutoScalingGroup{}
+	for !r.haMaster.Reconciled() {
+		item := template.ParamsMainAutoScalingGroupItem{
+			AvailabilityZone: r.haMaster.AZ(),
+			ClusterID:        key.ClusterID(&cr),
+			LaunchTemplate: template.ParamsMainAutoScalingGroupItemLaunchTemplate{
+				Resource: key.ControlPlaneLaunchTemplateResourceName(&cr, r.haMaster.ID()),
+			},
+			LoadBalancers: template.ParamsMainAutoScalingGroupItemLoadBalancers{
+				ApiInternalName: key.InternalELBNameAPI(&cr),
+				ApiName:         key.ELBNameAPI(&cr),
+				EtcdName:        key.ELBNameEtcd(&cr),
+			},
+			Resource: key.ControlPlaneASGResourceName(&cr, r.haMaster.ID()),
+			SubnetID: idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(r.haMaster.AZ()))),
+		}
+
+		autoScalingGroup.List = append(autoScalingGroup.List, item)
+		r.haMaster.Next()
 	}
 
 	return autoScalingGroup, nil
@@ -276,40 +307,69 @@ func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSCont
 		return nil, microerror.Mask(err)
 	}
 
-	var masterSubnets []net.IPNet
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings.
 	{
-		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-		for _, az := range zones {
-			if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
-				continue
-			}
-			masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
+		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
 	}
 
-	eni := &template.ParamsMainENI{
-		IpAddress:       key.ControlPlaneENIIpAddress(masterSubnets[0]),
-		Name:            key.ControlPlaneENIName(&cr, 0),
-		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),
+	enis := &template.ParamsMainENI{}
+	for !r.haMaster.Reconciled() {
+		var masterSubnet net.IPNet
+		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+			if az.Name == r.haMaster.AZ() {
+				masterSubnet = az.Subnet.Private.CIDR
+				break
+			}
+		}
+
+		item := template.ParamsMainENIItem{
+			IpAddress:       key.ControlPlaneENIIpAddress(masterSubnet),
+			Name:            key.ControlPlaneENIName(&cr, r.haMaster.ID()),
+			Resource:        key.ControlPlaneENIResourceName(r.haMaster.ID()),
+			SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
+			SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(r.haMaster.AZ()))),
+		}
+
+		enis.List = append(enis.List, item)
+		r.haMaster.Next()
 	}
 
-	return eni, nil
+	return enis, nil
 }
 
-func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, haMasterEnabled bool) (*template.ParamsMainEtcdVolume, error) {
+func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	etcdVolume := &template.ParamsMainEtcdVolume{
-		AvailabilityZone: key.ControlPlaneAvailabilityZones(cr)[0],
-		Name:             key.ControlPlaneVolumeNameEtcd(&cr, 0),
-		SnapshotID:       cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID,
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings.
+	{
+		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	return etcdVolume, nil
+	etcdVolumes := &template.ParamsMainEtcdVolume{}
+	for !r.haMaster.Reconciled() {
+		item := template.ParamsMainEtcdVolumeItem{
+			AvailabilityZone: r.haMaster.AZ(),
+			Name:             key.ControlPlaneVolumeName(&cr, r.haMaster.ID()),
+			Resource:         key.ControlPlaneVolumeResourceName(r.haMaster.ID()),
+			SnapshotID:       key.ControlPlaneVolumeSnapshotID(cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID, r.haMaster.ID()),
+		}
+
+		etcdVolumes.List = append(etcdVolumes.List, item)
+		r.haMaster.Next()
+	}
+
+	return etcdVolumes, nil
 }
 
 func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
@@ -335,56 +395,56 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 	return iamPolicies, nil
 }
 
-func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, haMasterEnabled bool) (*template.ParamsMainLaunchTemplate, error) {
+func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var ids []int
-	if haMasterEnabled {
-		ids = []int{1, 2, 3}
-	} else {
-		ids = []int{0}
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings.
+	{
+		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	var launchTemplates []template.ParamsMainLaunchTemplateItem
-	for _, id := range ids {
+	launchTemplate := &template.ParamsMainLaunchTemplate{}
+	for !r.haMaster.Reconciled() {
 		item := template.ParamsMainLaunchTemplateItem{
-			BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
-				Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
-					Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume{
+			BlockDeviceMapping: template.ParamsMainLaunchTemplateItemBlockDeviceMapping{
+				Docker: template.ParamsMainLaunchTemplateItemBlockDeviceMappingDocker{
+					Volume: template.ParamsMainLaunchTemplateItemBlockDeviceMappingDockerVolume{
 						Size: defaultVolumeSize,
 					},
 				},
-				Kubelet: template.ParamsMainLaunchTemplateBlockDeviceMappingKubelet{
-					Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume{
+				Kubelet: template.ParamsMainLaunchTemplateItemBlockDeviceMappingKubelet{
+					Volume: template.ParamsMainLaunchTemplateItemBlockDeviceMappingKubeletVolume{
 						Size: defaultVolumeSize,
 					},
 				},
-				Logging: template.ParamsMainLaunchTemplateBlockDeviceMappingLogging{
-					Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume{
+				Logging: template.ParamsMainLaunchTemplateItemBlockDeviceMappingLogging{
+					Volume: template.ParamsMainLaunchTemplateItemBlockDeviceMappingLoggingVolume{
 						Size: defaultVolumeSize,
 					},
 				},
 			},
-			Instance: template.ParamsMainLaunchTemplateInstance{
+			Instance: template.ParamsMainLaunchTemplateItemInstance{
 				Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
 				Monitoring: false,
 				Type:       key.ControlPlaneInstanceType(cr),
 			},
 			MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-			SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
-				S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, id)),
+			Name:                  key.ControlPlaneLaunchTemplateName(&cr, r.haMaster.ID()),
+			Resource:              key.ControlPlaneLaunchTemplateResourceName(&cr, r.haMaster.ID()),
+			SmallCloudConfig: template.ParamsMainLaunchTemplateItemSmallCloudConfig{
+				S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, r.haMaster.ID())),
 			},
-			ResourceName: key.ControlPlaneLaunchTemplateName(&cr, 0),
 		}
 
-		launchTemplates = append(launchTemplates, item)
-	}
-
-	launchTemplate := &template.ParamsMainLaunchTemplate{
-		List: launchTemplates,
+		launchTemplate.List = append(launchTemplate.List, item)
+		r.haMaster.Next()
 	}
 
 	return launchTemplate, nil
@@ -399,22 +459,76 @@ func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWS
 	return outputs, nil
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMain, error) {
-	var err error
+func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainRecordSets, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
-	// We need to determine if we want to generate certificates for a Tenant
-	// Cluster with a HA Master setup.
-	var haMasterEnabled bool
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings.
 	{
-		haMasterEnabled, err = r.haMaster.Enabled(ctx, key.ClusterID(&cr))
+		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
+	// We need to fetch the cluster CR for once because it holds the base domain
+	// which we need to get the record sets right.
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			return nil, microerror.Mask(notFoundError)
+		}
+		if len(list.Items) > 1 {
+			return nil, microerror.Mask(tooManyCRsError)
+		}
+
+		cl = list.Items[0]
+	}
+
+	var records []template.ParamsMainRecordSetsRecord
+	for !r.haMaster.Reconciled() {
+		item := template.ParamsMainRecordSetsRecord{
+			ENI: template.ParamsMainRecordSetsRecordENI{
+				Resource: key.ControlPlaneENIResourceName(r.haMaster.ID()),
+			},
+			Resource: key.ControlPlaneRecordSetsResourceName(r.haMaster.ID()),
+			Value:    key.ControlPlaneRecordSetsRecordValue(r.haMaster.ID()),
+		}
+
+		records = append(records, item)
+		r.haMaster.Next()
+	}
+
+	recordSets := &template.ParamsMainRecordSets{
+		ClusterID:      key.ClusterID(&cr),
+		HostedZoneID:   cc.Status.TenantCluster.DNS.HostedZoneID,
+		BaseDomain:     key.ClusterBaseDomain(cl),
+		Records:        records,
+		Route53Enabled: r.route53Enabled,
+	}
+
+	return recordSets, nil
+}
+
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr, haMasterEnabled)
+		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -422,7 +536,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		etcdVolume, err := r.newEtcdVolume(ctx, cr, haMasterEnabled)
+		etcdVolume, err := r.newEtcdVolume(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -430,11 +544,15 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchTemplate, err := r.newLaunchTemplate(ctx, cr, haMasterEnabled)
+		launchTemplate, err := r.newLaunchTemplate(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 		outputs, err := r.newOutputs(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		recordSets, err := r.newRecordSets(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -446,6 +564,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 			IAMPolicies:      iamPolicies,
 			LaunchTemplate:   launchTemplate,
 			Outputs:          outputs,
+			RecordSets:       recordSets,
 		}
 	}
 

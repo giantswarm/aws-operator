@@ -14,12 +14,118 @@ func ControlPlaneAvailabilityZones(cr infrastructurev1alpha2.AWSControlPlane) []
 	return cr.Spec.AvailabilityZones
 }
 
+func ControlPlaneASGResourceName(getter LabelsGetter, id int) string {
+	if id == 0 {
+		return "ControlPlaneNodeAutoScalingGroup"
+	}
+
+	return fmt.Sprintf("ControlPlaneNodeAutoScalingGroup%d", id)
+}
+
+func ControlPlaneENIIpAddress(ip net.IPNet) string {
+	// VPC subnet has reserved the first 4 IPs so we need to use the fifth one,
+	// meaning to start counting from zero, which is then index 4.
+	//
+	//     https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
+	//
+	eni := copyIP(ip.IP)
+	eni.To4()
+	eni[3] += 4
+
+	return eni.String()
+}
+
+func ControlPlaneENIGateway(ip net.IPNet) string {
+	// VPC subnet has reserved the first 4 IPs so we need to use the fifth one,
+	// meaning to start counting from zero, which is then index 4.
+	//
+	//     https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
+	//
+	gw := copyIP(ip.IP)
+	gw.To4()
+	gw[3] += 1
+
+	return gw.String()
+}
+
+func ControlPlaneENIName(getter LabelsGetter, id int) string {
+	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), id)
+}
+
+func ControlPlaneENIResourceName(id int) string {
+	if id == 0 {
+		return "MasterEni"
+	}
+
+	return fmt.Sprintf("MasterEni%d", id)
+}
+
+func ControlPlaneENISubnetSize(ip net.IPNet) int {
+	subnetSize, _ := ip.Mask.Size()
+
+	return subnetSize
+}
+
 func ControlPlaneID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ControlPlane]
 }
 
 func ControlPlaneInstanceType(cr infrastructurev1alpha2.AWSControlPlane) string {
 	return cr.Spec.InstanceType
+}
+
+func ControlPlaneLaunchTemplateName(getter LabelsGetter, id int) string {
+	return fmt.Sprintf("%s-master%d-launch-template", ClusterID(getter), id)
+}
+
+func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string {
+	if id == 0 {
+		return "ControlPlaneNodeLaunchTemplate"
+	}
+
+	return fmt.Sprintf("ControlPlaneNodeLaunchTemplate%d", id)
+}
+
+func ControlPlaneRecordSetsRecordValue(id int) string {
+	if id == 0 {
+		return "etcd"
+	}
+
+	return fmt.Sprintf("etcd%d", id)
+}
+
+func ControlPlaneRecordSetsResourceName(id int) string {
+	if id == 0 {
+		return "ControlPlaneRecordSet"
+	}
+
+	return fmt.Sprintf("ControlPlaneRecordSet%d", id)
+}
+
+func ControlPlaneVolumeName(getter LabelsGetter, id int) string {
+	return fmt.Sprintf("%s-master%d-etcd", ClusterID(getter), id)
+}
+
+func ControlPlaneVolumeResourceName(id int) string {
+	if id == 0 {
+		return "EtcdVolume"
+	}
+
+	return fmt.Sprintf("EtcdVolume%d", id)
+}
+
+func ControlPlaneVolumeSnapshotID(snapshot string, master int) string {
+	if master == 0 || master == 1 {
+		// Master ID 0 does only exist in single master setups. Master ID 1 does
+		// only exist in HA Masters setups. In either setup it does only work to
+		// provide a Snapshot ID for one of the running masters, of which other
+		// masters replicate in a HA Masters setup. For backward compatability we
+		// maintain the Snapshot ID of Tenant Clusters upgrading to this version so
+		// that there is an automated migration path.
+		return snapshot
+	}
+
+	return ""
 }
 
 func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, error) {
@@ -37,44 +143,7 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	return *c, nil
 }
 
-func ControlPlaneENIIpAddress(ipNet net.IPNet) string {
-	// VPC subnet has reserved first 4 IPs so we need to use the fifth one (counting from zero it is index 4)
-	// https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	eniAddressIP := dupIP(ipNet.IP)
-	eniAddressIP.To4()
-	eniAddressIP[3] += 4
-
-	return eniAddressIP.String()
-}
-
-func ControlPlaneENIGateway(ipNet net.IPNet) string {
-	// https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	gatewayAddressIP := dupIP(ipNet.IP)
-	gatewayAddressIP.To4()
-	gatewayAddressIP[3] += 1
-
-	return gatewayAddressIP.String()
-}
-
-func ControlPlaneENIName(getter LabelsGetter, masterID int) string {
-	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), masterID)
-}
-
-func ControlPlaneENISubnetSize(ipNet net.IPNet) int {
-	subnetSize, _ := ipNet.Mask.Size()
-
-	return subnetSize
-}
-
-func ControlPlaneLaunchTemplateName(getter LabelsGetter, masterID int) string {
-	return fmt.Sprintf("%s-master%d-launch-template", ClusterID(getter), masterID)
-}
-
-func ControlPlaneVolumeNameEtcd(getter LabelsGetter, masterID int) string {
-	return fmt.Sprintf("%s-master%d-etcd", ClusterID(getter), masterID)
-}
-
-func dupIP(ip net.IP) net.IP {
+func copyIP(ip net.IP) net.IP {
 	dup := make(net.IP, len(ip))
 	copy(dup, ip)
 	return dup

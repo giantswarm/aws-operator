@@ -48,11 +48,12 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 		return nil, microerror.Mask(err)
 	}
 
-	// We need to determine if we want to generate certificates for a Tenant
-	// Cluster with a HA Master setup.
-	var haMasterEnabled bool
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings. Here the list of master IDs
+	// decides if we want to generate certificates for a Tenant Cluster whether a
+	// HA Master setup.
 	{
-		haMasterEnabled, err = t.config.HAMaster.Enabled(ctx, key.ClusterID(cr))
+		err = t.config.HAMaster.Init(ctx, key.ClusterID(cr))
 		if hamaster.IsNotFound(err) {
 			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
@@ -61,28 +62,31 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 	}
 
 	var paths []string
-	if haMasterEnabled {
-		paths = append(paths, key.S3ObjectPathTCCPN(cr, 1))
-		paths = append(paths, key.S3ObjectPathTCCPN(cr, 2))
-		paths = append(paths, key.S3ObjectPathTCCPN(cr, 3))
-	} else {
-		paths = append(paths, key.S3ObjectPathTCCPN(cr, 0))
+	for !t.config.HAMaster.Reconciled() {
+		path, err := t.newPath(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		paths = append(paths, path)
+		t.config.HAMaster.Next()
 	}
 
 	return paths, nil
 }
 
 func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
-	cr, err := key.ToControlPlane(obj)
+	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	// We need to determine if we want to generate certificates for a Tenant
-	// Cluster with a HA Master setup.
-	var haMasterEnabled bool
+	// We need to initialize the HA Master state machine. This gives us straight
+	// forward access to master ID/AZ mappings. Here the list of master IDs
+	// decides if we want to generate certificates for a Tenant Cluster whether a
+	// HA Master setup.
 	{
-		haMasterEnabled, err = t.config.HAMaster.Enabled(ctx, key.ClusterID(&cr))
+		err = t.config.HAMaster.Init(ctx, key.ClusterID(cr))
 		if hamaster.IsNotFound(err) {
 			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
@@ -91,36 +95,33 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 	}
 
 	var templates []string
-	if haMasterEnabled {
-		t1, err := t.newTemplate(ctx, cr, 1)
+	for !t.config.HAMaster.Reconciled() {
+		template, err := t.newTemplate(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		templates = append(templates, t1)
 
-		t2, err := t.newTemplate(ctx, cr, 2)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		templates = append(templates, t2)
-
-		t3, err := t.newTemplate(ctx, cr, 3)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		templates = append(templates, t3)
-	} else {
-		t0, err := t.newTemplate(ctx, cr, 0)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		templates = append(templates, t0)
+		templates = append(templates, template)
+		t.config.HAMaster.Next()
 	}
 
 	return templates, nil
 }
 
-func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, id int) (string, error) {
+func (t *TCCPN) newPath(ctx context.Context, obj interface{}) (string, error) {
+	cr, err := key.ToControlPlane(obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return key.S3ObjectPathTCCPN(&cr, t.config.HAMaster.ID()), nil
+}
+
+func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error) {
+	cr, err := key.ToControlPlane(obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -172,7 +173,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 			var err error
 			var tls certs.TLS
 
-			switch id {
+			switch t.config.HAMaster.ID() {
 			case 0:
 				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.EtcdCert)
 			case 1:
@@ -182,7 +183,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 			case 3:
 				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.Etcd3Cert)
 			default:
-				return microerror.Maskf(executionFailedError, "invalid master id %d", id)
+				return microerror.Maskf(executionFailedError, "invalid master id %d", t.config.HAMaster.ID())
 			}
 
 			if err != nil {
@@ -272,22 +273,11 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
-	// Here we try to find the subnet of the master node which is associated to a
-	// specific availability zone. It is not possible right now to run 3 masters
-	// in 1 or 2 availability zones. The system is limited to the following two
-	// scenarios.
-	//
-	//     * 1 master, 1 availability zone
-	//     * 3 master, 3 availability zone
-	//
 	var masterSubnet net.IPNet
-	{
-		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-		for _, az := range zones {
-			if az.Name == key.ControlPlaneAvailabilityZones(cr)[id] {
-				masterSubnet = az.Subnet.Private.CIDR
-				break
-			}
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		if az.Name == t.config.HAMaster.AZ() {
+			masterSubnet = az.Subnet.Private.CIDR
+			break
 		}
 	}
 
@@ -310,7 +300,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSCo
 			encrypter:        t.config.Encrypter,
 			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
 			masterSubnet:     masterSubnet,
-			masterID:         id,
+			masterID:         t.config.HAMaster.ID(),
 			randomKeyTmplSet: randomKeyTmplSet,
 			registryDomain:   t.config.RegistryDomain,
 		}

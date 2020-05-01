@@ -12,5 +12,6 @@ Resources:
   {{ template "etcd_volume" . }}
   {{ template "iam_policies" . }}
   {{ template "launch_template" . }}
+  {{ template "record_sets" . }}
 {{ end }}
 `

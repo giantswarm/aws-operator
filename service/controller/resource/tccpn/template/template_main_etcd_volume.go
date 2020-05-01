@@ -2,16 +2,20 @@ package template
 
 const TemplateMainEtcdVolume = `
 {{- define "etcd_volume" -}}
-  EtcdVolume:
+  {{- range .EtcdVolume.List }}
+  {{ .Resource }}:
     Type: AWS::EC2::Volume
     Properties:
-      AvailabilityZone: {{ .EtcdVolume.AvailabilityZone }}
+      AvailabilityZone: {{ .AvailabilityZone }}
       Encrypted: true
       Size: 100
-      SnapshotId: {{ .EtcdVolume.SnapshotID }}
+      {{- if ne .SnapshotID "" }}
+      SnapshotId: {{ .SnapshotID }}
+      {{- end }}
       Tags:
       - Key: Name
-        Value: {{ .EtcdVolume.Name }}
+        Value: {{ .Name }}
       VolumeType: gp2
+  {{- end }}
 {{- end -}}
 `

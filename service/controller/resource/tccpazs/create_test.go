@@ -9,12 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
@@ -210,25 +207,12 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 
 			ctx := unittest.DefaultContext()
 
-			var k8sClient k8sclient.Interface
-			{
-				scheme := runtime.NewScheme()
-				err := infrastructurev1alpha2.AddToScheme(scheme)
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				k8sClient = &fakeK8sClient{
-					ctrlClient: fake.NewFakeClientWithScheme(scheme),
-				}
-			}
-
 			var r *Resource
 			{
 				var err error
 
 				c := Config{
-					K8sClient: k8sClient,
+					K8sClient: unittest.FakeK8sClient(),
 					Logger:    microloggertest.New(),
 
 					CIDRBlockAWSCNI: "172.17.0.0/16",
@@ -243,18 +227,18 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			// Prepare all the necessary runtime objects using the abstract controller
 			// client.
 			{
-				err = k8sClient.CtrlClient().Create(ctx, &tc.cluster)
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				err = k8sClient.CtrlClient().Create(ctx, &tc.controlPlane)
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.controlPlane)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				for _, md := range tc.machineDeployments {
-					err := k8sClient.CtrlClient().Create(ctx, &md)
+					err := r.k8sClient.CtrlClient().Create(ctx, &md)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -759,10 +743,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 		var err error
 
 		c := Config{
-			K8sClient: &fakeK8sClient{
-				ctrlClient: fake.NewFakeClient(),
-			},
-			Logger: microloggertest.New(),
+			K8sClient: unittest.FakeK8sClient(),
+			Logger:    microloggertest.New(),
 
 			CIDRBlockAWSCNI: "dummy",
 		}

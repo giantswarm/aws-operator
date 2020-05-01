@@ -82,7 +82,7 @@ const (
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("api.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -90,7 +90,7 @@ func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
 }
 
 func ClusterEtcdEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("etcd.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterEtcdEndpointWithPort(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -98,7 +98,7 @@ func ClusterEtcdEndpointWithPort(cluster infrastructurev1alpha2.AWSCluster) stri
 }
 
 func ClusterKubeletEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("worker.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("worker.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterNamespace(cluster infrastructurev1alpha2.AWSCluster) string {

@@ -11,8 +11,10 @@ import (
 
 	"github.com/ghodss/yaml"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 )
@@ -29,44 +31,61 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 //  go test ./service/controller/resource/tccpn -run Test_Controller_Resource_TCCPN_Template_Render -update
 //
 func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
-
-	apiWhitelist := APIWhitelist{
-		Public: Whitelist{
-			Enabled:    false,
-			SubnetList: "",
-		},
-		Private: Whitelist{
-			Enabled:    false,
-			SubnetList: "",
-		},
-	}
-
 	testCases := []struct {
 		name           string
 		ctx            context.Context
 		cr             infrastructurev1alpha2.AWSControlPlane
-		apiWhitelist   APIWhitelist
 		route53Enabled bool
 	}{
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			ctx:            unittest.DefaultContextControlPlane(),
 			cr:             unittest.DefaultControlPlane(),
-			apiWhitelist:   apiWhitelist,
 			route53Enabled: true,
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			ctx:            unittest.DefaultContextControlPlane(),
 			cr:             unittest.DefaultControlPlane(),
-			apiWhitelist:   apiWhitelist,
 			route53Enabled: false,
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, tc.apiWhitelist, tc.route53Enabled)
+			var err error
+
+			var d *changedetection.TCCPN
+			{
+				c := changedetection.TCCPNConfig{
+					Logger: microloggertest.New(),
+				}
+
+				d, err = changedetection.NewTCCPN(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			var r *Resource
+			{
+				c := Config{
+					K8sClient: unittest.FakeK8sClient(),
+					Detection: d,
+					HAMaster:  TODO,
+					Logger:    microloggertest.New(),
+
+					InstallationName: "dummy",
+					Route53Enabled:   tc.route53Enabled,
+				}
+
+				r, err = New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			params, err := r.newTemplateParams(tc.ctx, tc.cr)
 			if err != nil {
 				t.Fatal(err)
 			}

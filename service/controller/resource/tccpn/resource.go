@@ -1,11 +1,12 @@
 package tccpn
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
 )
 
 const (
@@ -14,9 +15,9 @@ const (
 )
 
 type Config struct {
-	G8sClient versioned.Interface
+	K8sClient k8sclient.Interface
 	Detection *changedetection.TCCPN
-	HAMaster           hamaster.Interface
+	HAMaster  hamaster.Interface
 	Logger    micrologger.Logger
 
 	InstallationName string
@@ -27,9 +28,9 @@ type Config struct {
 // Control Plane Node. We manage a dedicated Cloud Formation stack for each node
 // pool.
 type Resource struct {
-	g8sClient versioned.Interface
+	k8sClient k8sclient.Interface
 	detection *changedetection.TCCPN
-	haMaster           hamaster.Interface
+	haMaster  hamaster.Interface
 	logger    micrologger.Logger
 
 	installationName string
@@ -37,8 +38,8 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
@@ -54,9 +55,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		g8sClient: config.G8sClient,
+		k8sClient: config.K8sClient,
 		detection: config.Detection,
-		haMaster: config.HAMaster,
+		haMaster:  config.HAMaster,
 		logger:    config.Logger,
 
 		installationName: config.InstallationName,
