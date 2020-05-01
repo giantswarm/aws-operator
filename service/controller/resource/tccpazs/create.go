@@ -11,7 +11,6 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -44,7 +43,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
 			&list,
-			client.InNamespace(v1.NamespaceDefault),
+			client.InNamespace(cr.GetNamespace()),
 			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 		)
 		if err != nil {
@@ -70,7 +69,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
 			&list,
-			client.InNamespace(v1.NamespaceDefault),
+			client.InNamespace(cr.GetNamespace()),
 			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 		)
 		if err != nil {
@@ -96,7 +95,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
 			&list,
-			client.InNamespace(v1.NamespaceDefault),
+			client.InNamespace(cr.GetNamespace()),
 			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 		)
 		if err != nil {

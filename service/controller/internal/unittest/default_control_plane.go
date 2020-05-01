@@ -27,7 +27,7 @@ func DefaultControlPlane() infrastructurev1alpha2.AWSControlPlane {
 			},
 		},
 		Spec: infrastructurev1alpha2.AWSControlPlaneSpec{
-			AvailabilityZones: []string{"eu-central-1b"},
+			AvailabilityZones: []string{"eu-central-1a"},
 			InstanceType:      "m5.xlarge",
 		},
 	}
