@@ -13,8 +13,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {

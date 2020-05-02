@@ -20,9 +20,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
@@ -57,6 +54,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 

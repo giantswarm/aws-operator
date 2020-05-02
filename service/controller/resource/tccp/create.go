@@ -14,9 +14,9 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
+	"github.com/giantswarm/aws-operator/service/internal/ebs"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

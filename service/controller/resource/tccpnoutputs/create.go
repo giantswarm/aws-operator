@@ -7,8 +7,8 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudformation"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudformation"
 )
 
 const (
