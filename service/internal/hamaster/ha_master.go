@@ -140,10 +140,10 @@ func (h *HAMaster) Init(ctx context.Context, obj interface{}) error {
 	{
 		h.ids = []int{}
 
-		if g8s.Spec.Replicas == 1 {
+		if key.G8sControlPlaneReplicas(g8s) == 1 {
 			h.ids = append(h.ids, 0)
 		}
-		if g8s.Spec.Replicas == 3 {
+		if key.G8sControlPlaneReplicas(g8s) == 3 {
 			h.ids = append(h.ids, 1)
 			h.ids = append(h.ids, 2)
 			h.ids = append(h.ids, 3)
