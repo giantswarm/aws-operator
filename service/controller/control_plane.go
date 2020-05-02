@@ -14,7 +14,6 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 )
@@ -27,7 +26,6 @@ type ControlPlaneConfig struct {
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
-	APIWhitelist              tccpn.APIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string

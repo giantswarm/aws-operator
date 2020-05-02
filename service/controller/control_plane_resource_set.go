@@ -51,7 +51,6 @@ type controlPlaneResourceSetConfig struct {
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
-	APIWhitelist              tccpn.APIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string
