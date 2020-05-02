@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
@@ -40,13 +41,13 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			ctx:            unittest.DefaultContextControlPlane(),
-			cr:             unittest.DefaultControlPlane(),
+			cr:             unittest.DefaultAWSControlPlane(),
 			route53Enabled: true,
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			ctx:            unittest.DefaultContextControlPlane(),
-			cr:             unittest.DefaultControlPlane(),
+			cr:             unittest.DefaultAWSControlPlane(),
 			route53Enabled: false,
 		},
 	}
@@ -54,6 +55,9 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var err error
+
+			ctx := unittest.DefaultContext()
+			k := unittest.FakeK8sClient()
 
 			var d *changedetection.TCCPN
 			{
@@ -67,12 +71,44 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
+			var h hamaster.Interface
+			{
+				c := hamaster.Config{
+					K8sClient: k,
+				}
+
+				h, err = hamaster.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			{
+				aws := unittest.DefaultAWSControlPlane()
+				err = k.CtrlClient().Create(ctx, &aws)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				g8s := unittest.DefaultG8sControlPlane()
+				err = k.CtrlClient().Create(ctx, &g8s)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				cl := unittest.DefaultCluster()
+				err = h.Init(ctx, &cl)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var r *Resource
 			{
 				c := Config{
-					K8sClient: unittest.FakeK8sClient(),
+					K8sClient: k,
 					Detection: d,
-					HAMaster:  TODO,
+					HAMaster:  h,
 					Logger:    microloggertest.New(),
 
 					InstallationName: "dummy",
@@ -114,7 +150,6 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			if !bytes.Equal([]byte(templateBody), goldenFile) {
 				t.Fatalf("\n\n%s\n", cmp.Diff(string(goldenFile), templateBody))
 			}
-
 		})
 	}
 }

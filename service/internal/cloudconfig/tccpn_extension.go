@@ -227,7 +227,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
 		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
-		MasterEtcdVolumeName: key.ControlPlaneVolumeNameEtcd(&e.cluster, e.masterID),
+		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
 		RegistryDomain:       e.registryDomain,
 	}
 
@@ -330,7 +330,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
 		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
-		MasterEtcdVolumeName: key.ControlPlaneVolumeNameEtcd(&e.cluster, e.masterID),
+		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
 		RegistryDomain:       e.registryDomain,
 	}
 

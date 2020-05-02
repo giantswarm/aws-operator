@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
-	"github.com/giantswarm/aws-operator/service/controller/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
 type Config struct {

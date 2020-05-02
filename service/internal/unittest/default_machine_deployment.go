@@ -2,7 +2,7 @@ package unittest
 
 import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -10,15 +10,16 @@ import (
 
 func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 	cr := infrastructurev1alpha2.AWSMachineDeployment{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.MachineDeploymentSubnet: "10.100.8.0/24",
 			},
 			Labels: map[string]string{
-				label.Cluster:           "8y5ck",
+				label.Cluster:           DefaultClusterID,
 				label.MachineDeployment: "al9qy",
 				label.OperatorVersion:   "7.3.0",
 			},
+			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSMachineDeploymentSpec{
 			NodePool: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePool{

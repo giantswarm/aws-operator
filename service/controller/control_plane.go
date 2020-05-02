@@ -14,13 +14,20 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
 type ControlPlaneConfig struct {
-	K8sClient k8sclient.Interface
-	Logger    micrologger.Logger
+	CertsSearcher      certs.Interface
+	HAMaster           hamaster.Interface
+	Images             images.Interface
+	K8sClient          k8sclient.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 
-	APIWhitelist              ClusterConfigAPIWhitelist
+	APIWhitelist              tccpn.APIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string
@@ -90,40 +97,15 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	var certsSearcher *certs.Searcher
-	{
-		c := certs.Config{
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
-		}
-
-		certsSearcher, err = certs.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var randomKeysSearcher randomkeys.Interface
-	{
-		c := randomkeys.Config{
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
-		}
-
-		randomKeysSearcher, err = randomkeys.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSet *controller.ResourceSet
 	{
 		c := controlPlaneResourceSetConfig{
-			G8sClient:          config.K8sClient.G8sClient(),
-			K8sClient:          config.K8sClient.K8sClient(),
+			CertsSearcher:      config.CertsSearcher,
+			HAMaster:           config.HAMaster,
+			Images:             config.Images,
+			K8sClient:          config.K8sClient,
 			Logger:             config.Logger,
-			CertsSearcher:      certsSearcher,
-			RandomKeysSearcher: randomKeysSearcher,
+			RandomKeysSearcher: config.RandomKeysSearcher,
 
 			CalicoCIDR:                config.CalicoCIDR,
 			CalicoMTU:                 config.CalicoMTU,

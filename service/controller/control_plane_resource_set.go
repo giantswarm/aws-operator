@@ -7,6 +7,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -15,7 +16,6 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -39,13 +39,16 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
 type controlPlaneResourceSetConfig struct {
-	G8sClient          versioned.Interface
-	K8sClient          kubernetes.Interface
-	Logger             micrologger.Logger
 	CertsSearcher      certs.Interface
+	HAMaster           hamaster.Interface
+	Images             images.Interface
+	K8sClient          k8sclient.Interface
+	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
 	APIWhitelist              tccpn.APIWhitelist
@@ -55,10 +58,10 @@ type controlPlaneResourceSetConfig struct {
 	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
+	HostAWSConfig             aws.Config
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	InstallationName          string
-	HostAWSConfig             aws.Config
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
@@ -68,27 +71,15 @@ type controlPlaneResourceSetConfig struct {
 	VaultAddress              string
 }
 
-func (c controlPlaneResourceSetConfig) GetInstallationName() string {
-	return c.InstallationName
-}
-
-func (c controlPlaneResourceSetConfig) GetLogger() micrologger.Logger {
-	return c.Logger
-}
-
-func (c controlPlaneResourceSetConfig) GetVaultAddress() string {
-	return c.VaultAddress
-}
-
 func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controller.ResourceSet, error) {
 	var err error
 
 	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
-			K8sClient:     config.K8sClient,
+			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -129,8 +120,13 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := cloudconfig.TCCPNConfig{
 			Config: cloudconfig.Config{
-				Encrypter: encrypterObject,
-				Logger:    config.Logger,
+				CertsSearcher:      config.CertsSearcher,
+				Encrypter:          encrypterObject,
+				HAMaster:           config.HAMaster,
+				Images:             config.Images,
+				K8sClient:          config.K8sClient,
+				Logger:             config.Logger,
+				RandomKeysSearcher: config.RandomKeysSearcher,
 
 				CalicoCIDR:                config.CalicoCIDR,
 				CalicoMTU:                 config.CalicoMTU,
@@ -146,7 +142,6 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
-			G8sClient: config.G8sClient,
 		}
 
 		tccpnCloudConfig, err = cloudconfig.NewTCCPN(c)
@@ -171,7 +166,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := region.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		regionResource, err = region.New(c)
@@ -184,7 +179,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := tccpvpcpcx.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
@@ -196,10 +191,10 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var encryptionSearcherResource resource.Interface
 	{
 		c := encryptionsearcher.Config{
-			G8sClient:     config.G8sClient,
+			G8sClient:     config.K8sClient.G8sClient(),
 			Encrypter:     encrypterObject,
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		encryptionSearcherResource, err = encryptionsearcher.New(c)
@@ -241,9 +236,8 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.G8sClient,
-			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
@@ -260,7 +254,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
-			ToClusterFunc:  newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc:  newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpOutputsResource, err = tccpoutputs.New(c)
@@ -273,7 +267,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := tccpsecuritygroups.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
@@ -297,10 +291,9 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
-			G8sClient: config.G8sClient,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
-			APIWhitelist:     config.APIWhitelist,
 			Detection:        tccpnChangeDetection,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
@@ -342,7 +335,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.G8sClient),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tccpVPCIDResource, err = tccpvpcid.New(c)

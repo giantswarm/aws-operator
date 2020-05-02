@@ -15,9 +15,9 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 const (
@@ -271,7 +271,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings.
 	{
-		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		err = r.haMaster.Init(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -310,7 +310,7 @@ func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSCont
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings.
 	{
-		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		err = r.haMaster.Init(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -350,7 +350,7 @@ func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings.
 	{
-		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		err = r.haMaster.Init(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -404,7 +404,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings.
 	{
-		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		err = r.haMaster.Init(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -468,7 +468,7 @@ func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings.
 	{
-		err = r.haMaster.Init(ctx, key.ClusterID(&cr))
+		err = r.haMaster.Init(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

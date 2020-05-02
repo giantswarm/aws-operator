@@ -16,19 +16,24 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type MachineDeploymentConfig struct {
-	K8sClient k8sclient.Interface
-	Locker    locker.Interface
-	Logger    micrologger.Logger
+	CertsSearcher      certs.Interface
+	HAMaster           hamaster.Interface
+	Images             images.Interface
+	K8sClient          k8sclient.Interface
+	Locker             locker.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
 	ClusterIPRange             string
-	DeleteLoggingBucket        bool
 	DockerDaemonCIDR           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -39,9 +44,7 @@ type MachineDeploymentConfig struct {
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	ClusterDomain              string
-	LabelSelector              MachineDeploymentConfigLabelSelector
 	NetworkSetupDockerImage    string
-	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
 	RegistryDomain             string
 	Route53Enabled             bool
@@ -49,11 +52,6 @@ type MachineDeploymentConfig struct {
 	SSHUserList                string
 	SSOPublicKey               string
 	VaultAddress               string
-}
-
-type MachineDeploymentConfigLabelSelector struct {
-	Enabled          bool
-	OverridenVersion string
 }
 
 type MachineDeployment struct {
@@ -106,40 +104,16 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*controller.ResourceSet, error) {
 	var err error
 
-	var certsSearcher *certs.Searcher
-	{
-		c := certs.Config{
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
-		}
-
-		certsSearcher, err = certs.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var randomKeysSearcher randomkeys.Interface
-	{
-		c := randomkeys.Config{
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
-		}
-
-		randomKeysSearcher, err = randomkeys.NewSearcher(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var resourceSet *controller.ResourceSet
 	{
 		c := machineDeploymentResourceSetConfig{
-			CertsSearcher:      certsSearcher,
+			CertsSearcher:      config.CertsSearcher,
+			HAMaster:           config.HAMaster,
+			Images:             config.Images,
 			K8sClient:          config.K8sClient,
 			Locker:             config.Locker,
 			Logger:             config.Logger,
-			RandomKeysSearcher: randomKeysSearcher,
+			RandomKeysSearcher: config.RandomKeysSearcher,
 
 			CalicoCIDR:                 config.CalicoCIDR,
 			CalicoMTU:                  config.CalicoMTU,
@@ -157,7 +131,6 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 			IPAMNetworkRange:           config.IPAMNetworkRange,
 			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
 			PodInfraContainerImage:     config.PodInfraContainerImage,
-			ProjectName:                project.Name(),
 			RegistryDomain:             config.RegistryDomain,
 			Route53Enabled:             config.Route53Enabled,
 			RouteTables:                config.RouteTables,

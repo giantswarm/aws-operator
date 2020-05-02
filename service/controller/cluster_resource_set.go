@@ -242,9 +242,8 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}

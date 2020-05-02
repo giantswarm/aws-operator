@@ -9,13 +9,18 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+const (
+	DefaultClusterID = "8y5ck"
+)
+
 func ChinaCluster() infrastructurev1alpha2.AWSCluster {
 	cr := infrastructurev1alpha2.AWSCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				label.Cluster:         "8y5ck",
+				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",
 			},
+			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSClusterSpec{
 			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{
@@ -52,9 +57,10 @@ func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 	cr := infrastructurev1alpha2.AWSCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				label.Cluster:         "8y5ck",
+				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",
 			},
+			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSClusterSpec{
 			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{

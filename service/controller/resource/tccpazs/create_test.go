@@ -31,7 +31,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:               "case 0: keep control plane, 0 node pools",
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			controlPlane:       unittest.DefaultControlPlane(),
+			controlPlane:       unittest.DefaultAWSControlPlane(),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				{
@@ -64,7 +64,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:         "case 1: control plane and 1 node pool on same AZ",
 			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			controlPlane: unittest.DefaultControlPlane(),
+			controlPlane: unittest.DefaultAWSControlPlane(),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
 			},
@@ -103,7 +103,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:         "case 2: create control plane and 1 node pool on different AZ",
 			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			controlPlane: unittest.DefaultControlPlane(),
+			controlPlane: unittest.DefaultAWSControlPlane(),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1b"}),
 			},
@@ -143,7 +143,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		{
 			name:               "case 3: keep control plane and delete 1 node pool from different AZ",
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
-			controlPlane:       unittest.DefaultControlPlane(),
+			controlPlane:       unittest.DefaultAWSControlPlane(),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				{
@@ -209,8 +209,6 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 
 			var r *Resource
 			{
-				var err error
-
 				c := Config{
 					K8sClient: unittest.FakeK8sClient(),
 					Logger:    microloggertest.New(),
@@ -270,13 +268,11 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			}
 
 			diff := cmp.Diff(tc.expectedAZs, cc.Spec.TenantCluster.TCCP.AvailabilityZones)
-
 			if diff != "" {
 				t.Fatalf("\n\n%s\n", diff)
 			}
 		})
 	}
-
 }
 
 func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {

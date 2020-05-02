@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 const (
