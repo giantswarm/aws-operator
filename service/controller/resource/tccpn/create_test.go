@@ -42,14 +42,14 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			ctx:            unittest.DefaultContextControlPlane(),
-			azs:            []string{"eu-central-1a"},
+			azs:            []string{"eu-central-1b"},
 			replicas:       1,
 			route53Enabled: true,
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			ctx:            unittest.DefaultContextControlPlane(),
-			azs:            []string{"eu-central-1a"},
+			azs:            []string{"eu-central-1b"},
 			replicas:       1,
 			route53Enabled: false,
 		},
