@@ -102,9 +102,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		for _, md := range list.Items {
-			mds = append(mds, md)
-		}
+		mds = append(mds, list.Items...)
 	}
 
 	// We need to cancel the resource early in case the ipam resource did not yet

@@ -47,7 +47,6 @@ type ClusterConfig struct {
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	ClusterDomain              string
-	LabelSelector              ClusterConfigLabelSelector
 	NetworkSetupDockerImage    string
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string

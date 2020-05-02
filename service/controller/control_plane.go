@@ -99,32 +99,7 @@ func newControlPlaneResourceSets(config ControlPlaneConfig) ([]*controller.Resou
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := controlPlaneResourceSetConfig{
-			CertsSearcher:      config.CertsSearcher,
-			HAMaster:           config.HAMaster,
-			Images:             config.Images,
-			K8sClient:          config.K8sClient,
-			Logger:             config.Logger,
-			RandomKeysSearcher: config.RandomKeysSearcher,
-
-			CalicoCIDR:                config.CalicoCIDR,
-			CalicoMTU:                 config.CalicoMTU,
-			CalicoSubnet:              config.CalicoSubnet,
-			ClusterDomain:             config.ClusterDomain,
-			ClusterIPRange:            config.ClusterIPRange,
-			DockerDaemonCIDR:          config.DockerDaemonCIDR,
-			IgnitionPath:              config.IgnitionPath,
-			ImagePullProgressDeadline: config.ImagePullProgressDeadline,
-			InstallationName:          config.InstallationName,
-			HostAWSConfig:             config.HostAWSConfig,
-			NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
-			PodInfraContainerImage:    config.PodInfraContainerImage,
-			RegistryDomain:            config.RegistryDomain,
-			Route53Enabled:            config.Route53Enabled,
-			SSHUserList:               config.SSHUserList,
-			SSOPublicKey:              config.SSOPublicKey,
-			VaultAddress:              config.VaultAddress,
-		}
+		c := controlPlaneResourceSetConfig(config)
 
 		resourceSet, err = newControlPlaneResourceSet(c)
 		if err != nil {

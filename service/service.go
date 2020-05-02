@@ -223,11 +223,7 @@ func New(config Config) (*Service, error) {
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.ClusterConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
-			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			OIDC: controller.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
@@ -292,10 +288,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.ControlPlaneDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		controlPlaneDrainerController, err = controller.NewControlPlaneDrainer(c)
@@ -352,10 +344,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.MachineDeploymentDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		machineDeploymentDrainerController, err = controller.NewMachineDeploymentDrainer(c)

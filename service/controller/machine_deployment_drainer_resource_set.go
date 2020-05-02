@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -25,12 +24,10 @@ import (
 )
 
 type machineDeploymentDrainerResourceSetConfig struct {
-	G8sClient versioned.Interface
-	K8sClient kubernetes.Interface
+	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	HostAWSConfig aws.Config
-	ProjectName   string
 }
 
 func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResourceSetConfig) (*controller.ResourceSet, error) {
@@ -66,11 +63,11 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
-			K8sClient: config.K8sClient,
+			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 
 			CPAWSConfig:   config.HostAWSConfig,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		awsClientResource, err = awsclient.New(c)
@@ -82,11 +79,11 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	var drainerInitializerResource resource.Interface
 	{
 		c := drainerinitializer.ResourceConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
 			LabelMapFunc:  machineDeploymentDrainerLabelMapFunc,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.G8sClient),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)
@@ -98,7 +95,7 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 	var drainerFinalizerResource resource.Interface
 	{
 		c := drainerfinalizer.ResourceConfig{
-			G8sClient: config.G8sClient,
+			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
 			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,

@@ -106,38 +106,7 @@ func newMachineDeploymentResourceSets(config MachineDeploymentConfig) ([]*contro
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := machineDeploymentResourceSetConfig{
-			CertsSearcher:      config.CertsSearcher,
-			HAMaster:           config.HAMaster,
-			Images:             config.Images,
-			K8sClient:          config.K8sClient,
-			Locker:             config.Locker,
-			Logger:             config.Logger,
-			RandomKeysSearcher: config.RandomKeysSearcher,
-
-			CalicoCIDR:                 config.CalicoCIDR,
-			CalicoMTU:                  config.CalicoMTU,
-			CalicoSubnet:               config.CalicoSubnet,
-			ClusterDomain:              config.ClusterDomain,
-			ClusterIPRange:             config.ClusterIPRange,
-			DockerDaemonCIDR:           config.DockerDaemonCIDR,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			HostAWSConfig:              config.HostAWSConfig,
-			IgnitionPath:               config.IgnitionPath,
-			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			RegistryDomain:             config.RegistryDomain,
-			Route53Enabled:             config.Route53Enabled,
-			RouteTables:                config.RouteTables,
-			SSHUserList:                config.SSHUserList,
-			SSOPublicKey:               config.SSOPublicKey,
-			VaultAddress:               config.VaultAddress,
-		}
+		c := machineDeploymentResourceSetConfig(config)
 
 		resourceSet, err = newMachineDeploymentResourceSet(c)
 		if err != nil {
