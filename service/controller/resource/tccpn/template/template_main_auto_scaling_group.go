@@ -2,7 +2,7 @@ package template
 
 const TemplateMainAutoScalingGroup = `
 {{- define "auto_scaling_group" -}}
-  {{- range .AutoScalingGroup.List }}
+{{ range .AutoScalingGroup.List }}
   {{ .Resource }}:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: EtcdVolume
@@ -59,6 +59,6 @@ const TemplateMainAutoScalingGroup = `
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
-  {{- end -}}
+{{- end -}}
 {{- end -}}
 `

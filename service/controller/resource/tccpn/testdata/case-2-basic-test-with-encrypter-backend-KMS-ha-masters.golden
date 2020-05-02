@@ -6,7 +6,6 @@ Outputs:
   OperatorVersion:
     Value: 7.3.0
 Resources:
-  
   ControlPlaneNodeAutoScalingGroup1:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: EtcdVolume
@@ -175,7 +174,6 @@ Resources:
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
-  
   MasterEni1:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -215,7 +213,6 @@ Resources:
          Value: 8y5ck-master3-eni
        - Key: node.k8s.amazonaws.com/no_manage
          Value: "true"
-  
   EtcdVolume1:
     Type: AWS::EC2::Volume
     Properties:
@@ -390,7 +387,6 @@ Resources:
               - "route53:ListHostedZones"
               - "route53:ListResourceRecordSets"
             Resource: "*"
-  
   ControlPlaneNodeLaunchTemplate1:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -631,7 +627,6 @@ Resources:
                 ]
               }
             }
-  
   ControlPlaneRecordSet1:
     Type: AWS::Route53::RecordSet
     Properties:

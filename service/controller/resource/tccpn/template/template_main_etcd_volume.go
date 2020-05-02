@@ -2,7 +2,7 @@ package template
 
 const TemplateMainEtcdVolume = `
 {{- define "etcd_volume" -}}
-  {{- range .EtcdVolume.List }}
+{{ range .EtcdVolume.List }}
   {{ .Resource }}:
     Type: AWS::EC2::Volume
     Properties:
@@ -16,6 +16,6 @@ const TemplateMainEtcdVolume = `
       - Key: Name
         Value: {{ .Name }}
       VolumeType: gp2
-  {{- end -}}
+{{- end -}}
 {{- end -}}
 `

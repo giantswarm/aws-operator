@@ -2,7 +2,7 @@ package template
 
 const TemplateMainLaunchTemplate = `
 {{- define "launch_template" -}}
-  {{- range .LaunchTemplate.List }}
+{{ range .LaunchTemplate.List }}
   {{ .Resource }}:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -83,6 +83,6 @@ const TemplateMainLaunchTemplate = `
                 ]
               }
             }
-  {{- end -}}
+{{- end -}}
 {{- end -}}
 `
