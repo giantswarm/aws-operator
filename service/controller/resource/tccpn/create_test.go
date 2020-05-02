@@ -35,20 +35,30 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name           string
 		ctx            context.Context
-		cr             infrastructurev1alpha2.AWSControlPlane
+		azs            []string
+		replicas       int
 		route53Enabled bool
 	}{
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			ctx:            unittest.DefaultContextControlPlane(),
-			cr:             unittest.DefaultAWSControlPlane(),
+			azs:            []string{"eu-central-1a"},
+			replicas:       1,
 			route53Enabled: true,
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			ctx:            unittest.DefaultContextControlPlane(),
-			cr:             unittest.DefaultAWSControlPlane(),
+			azs:            []string{"eu-central-1a"},
+			replicas:       1,
 			route53Enabled: false,
+		},
+		{
+			name:           "case 2: basic test with encrypter backend KMS, ha masters",
+			ctx:            unittest.DefaultContextControlPlane(),
+			azs:            []string{"eu-central-1a", "eu-central-1b", "eu-central-1c"},
+			replicas:       3,
+			route53Enabled: true,
 		},
 	}
 
@@ -83,21 +93,24 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
+			var aws infrastructurev1alpha2.AWSControlPlane
 			{
-				aws := unittest.DefaultAWSControlPlane()
+				cl := unittest.DefaultCluster()
+				err = k.CtrlClient().Create(ctx, &cl)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				aws = unittest.DefaultAWSControlPlane()
+				aws.Spec.AvailabilityZones = tc.azs
 				err = k.CtrlClient().Create(ctx, &aws)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				g8s := unittest.DefaultG8sControlPlane()
+				g8s.Spec.Replicas = tc.replicas
 				err = k.CtrlClient().Create(ctx, &g8s)
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				cl := unittest.DefaultCluster()
-				err = h.Init(ctx, &cl)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -121,7 +134,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
-			params, err := r.newTemplateParams(tc.ctx, tc.cr)
+			params, err := r.newTemplateParams(tc.ctx, aws)
 			if err != nil {
 				t.Fatal(err)
 			}

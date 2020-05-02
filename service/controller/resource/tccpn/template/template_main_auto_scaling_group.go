@@ -59,6 +59,6 @@ const TemplateMainAutoScalingGroup = `
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
-  {{- end }}
+  {{- end -}}
 {{- end -}}
 `

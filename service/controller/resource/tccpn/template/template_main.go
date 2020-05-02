@@ -13,5 +13,5 @@ Resources:
   {{ template "iam_policies" . }}
   {{ template "launch_template" . }}
   {{ template "record_sets" . }}
-{{ end }}
+{{- end -}}
 `

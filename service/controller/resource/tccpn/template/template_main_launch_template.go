@@ -83,6 +83,6 @@ const TemplateMainLaunchTemplate = `
                 ]
               }
             }
-  {{- end }}
+  {{- end -}}
 {{- end -}}
 `

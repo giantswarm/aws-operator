@@ -24,7 +24,7 @@ const TemplateMainIAMPolicies = `
         Statement:
           - Effect: "Allow"
             Action: "ec2:*"
-            Resource: "*"          
+            Resource: "*"
           {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
@@ -120,7 +120,7 @@ const TemplateMainIAMPolicies = `
           Effect: "Allow"
           Action: "sts:AssumeRole"
           Resource: "*"
-{{- if .IAMPolicies.Route53Enabled}}
+{{- if .IAMPolicies.Route53Enabled }}
   Route53ManagerRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -151,6 +151,6 @@ const TemplateMainIAMPolicies = `
               - "route53:ListHostedZones"
               - "route53:ListResourceRecordSets"
             Resource: "*"
-{{ end }}
+{{- end -}}
 {{- end -}}
 `

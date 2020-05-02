@@ -2,7 +2,7 @@ package template
 
 const TemplateMainRecordSets = `
 {{- define "record_sets" -}}
-{{- $v := .RecordSets }}
+{{- $v := .RecordSets -}}
 {{- if $v.Route53Enabled -}}
 {{- range $r := $v.Records }}
   {{ $r.Resource}}:

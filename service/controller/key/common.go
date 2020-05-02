@@ -196,7 +196,7 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 // Tenant Clusters may be Single Master or HA Masters, where the suffix -0
 // indicates a Single Master configuration.
 //
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn-2
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn-a2wax-2
 //
 func S3ObjectPathTCCPN(cr LabelsGetter, id int) string {
 	return fmt.Sprintf("version/%s/cloudconfig/%s/%s-%d", OperatorVersion(cr), CloudConfigVersion, StackNameTCCPN(cr), id)
@@ -259,7 +259,7 @@ func StackNameTCCPI(getter LabelsGetter) string {
 }
 
 func StackNameTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tccpn", ClusterID(getter))
+	return fmt.Sprintf("cluster-%s-tccpn-%s", ClusterID(getter), ControlPlaneID(getter))
 }
 
 func StackNameTCNP(getter LabelsGetter) string {

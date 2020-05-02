@@ -16,6 +16,6 @@ const TemplateMainEtcdVolume = `
       - Key: Name
         Value: {{ .Name }}
       VolumeType: gp2
-  {{- end }}
+  {{- end -}}
 {{- end -}}
 `

@@ -35,6 +35,7 @@ func New(config Config) (*HAMaster, error) {
 
 		azs: []string{},
 		ids: []int{},
+		ptr: 0,
 	}
 
 	return h, nil
@@ -110,6 +111,13 @@ func (h *HAMaster) Init(ctx context.Context, obj interface{}) error {
 		aws = list.Items[0]
 	}
 
+	// When the state machine is initialized we need to reset all internal
+	// information, including the pointer. This ensures we start fresh all over
+	// again.
+	{
+		h.ptr = 0
+	}
+
 	// We need a deterministic list of availability zones which we can cycle
 	// through for the required amount of masters. Eventually it happens that
 	// there is only 1 availability zone in a HA Masters setup. Therefore the
@@ -119,6 +127,8 @@ func (h *HAMaster) Init(ctx context.Context, obj interface{}) error {
 	// Masters setup will never make use of the repeated availability zones, which
 	// is just a side effect of the current implementation.
 	{
+		h.azs = []string{}
+
 		h.azs = append(h.azs, aws.Spec.AvailabilityZones...)
 		h.azs = append(h.azs, aws.Spec.AvailabilityZones...)
 		h.azs = append(h.azs, aws.Spec.AvailabilityZones...)
@@ -128,11 +138,15 @@ func (h *HAMaster) Init(ctx context.Context, obj interface{}) error {
 	// the list of master IDs depending on the given replicas, which must be
 	// either 1 or 3.
 	{
+		h.ids = []int{}
+
 		if g8s.Spec.Replicas == 1 {
-			h.ids = []int{0}
+			h.ids = append(h.ids, 0)
 		}
 		if g8s.Spec.Replicas == 3 {
-			h.ids = []int{1, 2, 3}
+			h.ids = append(h.ids, 1)
+			h.ids = append(h.ids, 2)
+			h.ids = append(h.ids, 3)
 		}
 	}
 

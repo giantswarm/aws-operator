@@ -23,17 +23,24 @@ func DefaultAWSControlPlane() infrastructurev1alpha2.AWSControlPlane {
 			Name: "a2wax",
 			Labels: map[string]string{
 				label.Cluster:         DefaultClusterID,
+				label.ControlPlane:    "a2wax",
 				label.OperatorVersion: "7.3.0",
 			},
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSControlPlaneSpec{
-			AvailabilityZones: []string{"eu-central-1a"},
+			AvailabilityZones: []string{"eu-central-1b"},
 			InstanceType:      "m5.xlarge",
 		},
 	}
 
 	return cr
+}
+
+func DefaultAWSControlPlaneWithAZs(azs ...string) infrastructurev1alpha2.AWSControlPlane {
+	cp := DefaultAWSControlPlane()
+	cp.Spec.AvailabilityZones = azs
+	return cp
 }
 
 func DefaultG8sControlPlane() infrastructurev1alpha2.G8sControlPlane {
@@ -42,6 +49,7 @@ func DefaultG8sControlPlane() infrastructurev1alpha2.G8sControlPlane {
 			Name: "a2wax",
 			Labels: map[string]string{
 				label.Cluster:         DefaultClusterID,
+				label.ControlPlane:    "a2wax",
 				label.OperatorVersion: "7.3.0",
 			},
 			Namespace: metav1.NamespaceDefault,
