@@ -9,7 +9,7 @@ const TemplateMainRecordSets = `
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !Get {{ $r.ENI.Resource }}.PrimaryPrivateIpAddress
+      - !GetAtt {{ $r.ENI.Resource }}.PrimaryPrivateIpAddress
       Name: '{{ $r.Value }}.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: {{ $v.HostedZoneID }}
       Type: A
