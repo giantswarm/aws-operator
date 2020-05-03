@@ -2,6 +2,7 @@ package s3object
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -53,6 +54,26 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
+	for _, p := range paths {
+		fmt.Printf("\n")
+		fmt.Printf("path\n")
+		fmt.Printf("\n")
+		fmt.Printf("%#v\n", p)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+	}
+
+	for _, t := range templates {
+		fmt.Printf("\n")
+		fmt.Printf("template\n")
+		fmt.Printf("\n")
+		fmt.Printf("%#v\n", t)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+	}
+
 	var num int
 	{
 		if len(paths) != len(templates) {
@@ -60,6 +81,14 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 
 		num = len(paths)
+
+		fmt.Printf("\n")
+		fmt.Printf("num\n")
+		fmt.Printf("\n")
+		fmt.Printf("%#v\n", num)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
 	}
 
 	var s3Objects []*s3.PutObjectInput

@@ -68,6 +68,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
+	if len(currentS3Objects) == 0 {
+		// In case there is no current state we need to create first and cannot
+		// update.
+		return nil, nil
+	}
+
 	// We do a poor man's comparison here to figure out if we have to deal with a
 	// change between current and desired state. The first and most straight
 	// forward thing to do at this point is to simply check how many S3 Objects we

@@ -12,7 +12,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
-	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -43,17 +42,14 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 }
 
 func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error) {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+	var err error
 
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings. Here the list of master IDs
 	// decides if we want to generate certificates for a Tenant Cluster whether a
 	// HA Master setup.
 	{
-		err = t.config.HAMaster.Init(ctx, key.ClusterID(cr))
+		err = t.config.HAMaster.Init(ctx, obj)
 		if hamaster.IsNotFound(err) {
 			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
@@ -63,7 +59,7 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 
 	var paths []string
 	for !t.config.HAMaster.Reconciled() {
-		path, err := t.newPath(ctx, cr)
+		path, err := t.newPath(ctx, obj)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -76,17 +72,14 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 }
 
 func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+	var err error
 
 	// We need to initialize the HA Master state machine. This gives us straight
 	// forward access to master ID/AZ mappings. Here the list of master IDs
 	// decides if we want to generate certificates for a Tenant Cluster whether a
 	// HA Master setup.
 	{
-		err = t.config.HAMaster.Init(ctx, key.ClusterID(cr))
+		err = t.config.HAMaster.Init(ctx, obj)
 		if hamaster.IsNotFound(err) {
 			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
@@ -96,7 +89,7 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 
 	var templates []string
 	for !t.config.HAMaster.Reconciled() {
-		template, err := t.newTemplate(ctx, cr)
+		template, err := t.newTemplate(ctx, obj)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
