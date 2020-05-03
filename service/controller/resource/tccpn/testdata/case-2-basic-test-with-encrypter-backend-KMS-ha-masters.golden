@@ -631,7 +631,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !Get MasterEni1.PrimaryPrivateIpAddress
+      - !GetAtt MasterEni1.PrimaryPrivateIpAddress
       Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
@@ -639,7 +639,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !Get MasterEni2.PrimaryPrivateIpAddress
+      - !GetAtt MasterEni2.PrimaryPrivateIpAddress
       Name: 'etcd2.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
@@ -647,7 +647,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !Get MasterEni3.PrimaryPrivateIpAddress
+      - !GetAtt MasterEni3.PrimaryPrivateIpAddress
       Name: 'etcd3.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A

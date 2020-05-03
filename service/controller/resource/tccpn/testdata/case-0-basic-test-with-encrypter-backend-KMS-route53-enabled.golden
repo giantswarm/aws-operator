@@ -313,7 +313,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !Get MasterEni.PrimaryPrivateIpAddress
+      - !GetAtt MasterEni.PrimaryPrivateIpAddress
       Name: 'etcd.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
