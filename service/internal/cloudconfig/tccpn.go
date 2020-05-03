@@ -119,7 +119,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
-	im, err := t.config.Images.ForRelease(ctx, cr)
+	im, err := t.config.Images.ForRelease(ctx, obj)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
