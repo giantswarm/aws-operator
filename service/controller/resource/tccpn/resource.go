@@ -15,9 +15,9 @@ const (
 )
 
 type Config struct {
-	K8sClient k8sclient.Interface
 	Detection *changedetection.TCCPN
 	HAMaster  hamaster.Interface
+	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	InstallationName string
@@ -28,9 +28,9 @@ type Config struct {
 // Control Plane Node. We manage a dedicated Cloud Formation stack for each node
 // pool.
 type Resource struct {
-	k8sClient k8sclient.Interface
 	detection *changedetection.TCCPN
 	haMaster  hamaster.Interface
+	k8sClient k8sclient.Interface
 	logger    micrologger.Logger
 
 	installationName string
@@ -38,18 +38,19 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
 	}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}

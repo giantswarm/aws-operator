@@ -290,10 +290,11 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
+			Detection: tccpnChangeDetection,
+			HAMaster:  config.HAMaster,
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
-			Detection:        tccpnChangeDetection,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
 		}
