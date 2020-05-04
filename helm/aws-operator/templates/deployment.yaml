@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        releasetime: {{ $.Release.Time }}
+        releaseRevision: {{ .Release.Revision | quote }}
       labels:
         app: {{ .Values.project.name }}
         version: {{ .Values.project.version }}
