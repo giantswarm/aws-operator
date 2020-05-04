@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-        releasetime: {{ $.Release.Time }}
+        releaseRevision: {{ .Release.Revision | quote }}
       labels:
         app: {{ tpl .Values.resource.default.name  . }}
     spec:
