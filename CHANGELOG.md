@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add common labels to our managed components.
 - Disable profiling for Controller Manager and Scheduler.
+- Add network policy.
+- Move containerPort values from deployment to `values.yaml`.
 
 ## [8.4.0] 2020-04-23
 
