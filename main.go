@@ -131,8 +131,6 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image, "", "Full docker image of networksetup.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.SSH.UserList, "", "Comma separated list of ssh users and their public key in format `username:publickey`, being installed in the guest cluster nodes.")
 
-	daemonCommand.PersistentFlags().Bool(f.Service.Feature.LabelSelector.Enabled, false, "When it is set to `true` controller uses aws-operator.giantswarm.io/version label to filter watched AWSConfig CRs.")
-
 	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
 
@@ -158,8 +156,6 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 
 	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
-
-	daemonCommand.PersistentFlags().String(f.Service.Test.LabelSelector.Version, "", "Overrides version value used with aws-operator.giantswarm.io/version label selector. Should be used only for testing.")
 
 	err = newCommand.CobraCommand().Execute()
 	if err != nil {

@@ -184,14 +184,6 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane nodes cloud formation stack")
-
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("%s\n", templateBody)
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
 	}
 
 	{
