@@ -2,6 +2,8 @@ package controllercontext
 
 import (
 	"net"
+
+	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 )
 
 type ContextSpec struct {
@@ -9,8 +11,9 @@ type ContextSpec struct {
 }
 
 type ContextSpecTenantCluster struct {
-	TCCP ContextSpecTenantClusterTCCP
-	TCNP ContextSpecTenantClusterTCNP
+	Release v1alpha1.Release
+	TCCP    ContextSpecTenantClusterTCCP
+	TCNP    ContextSpecTenantClusterTCNP
 }
 
 type ContextSpecTenantClusterTCCP struct {
