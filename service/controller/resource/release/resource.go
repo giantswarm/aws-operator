@@ -29,12 +29,16 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
+	if config.G8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		logger: config.Logger,
+		g8sClient: config.G8sClient,
+		logger:    config.Logger,
 	}
 
 	return r, nil
