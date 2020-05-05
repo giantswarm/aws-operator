@@ -51,7 +51,7 @@ func (r *Resource) addReleaseToContext(ctx context.Context, cr metav1.Object) er
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	
+
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the tenant cluster release label")
 
