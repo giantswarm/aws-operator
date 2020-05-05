@@ -11,6 +11,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -133,22 +134,25 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	release := v1alpha1.Release{
-		Spec: v1alpha1.ReleaseSpec{
-			Components: []v1alpha1.ReleaseSpecComponent{
-				{
-					Name:    "containerlinux",
-					Version: "2345.3.1",
-				},
-			},
-		},
+	var release *v1alpha1.Release
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the machine deployment release label")
+
+		releaseVersion := key.ReleaseVersion(&cr)
+		releaseName := key.ReleaseName(releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the machine deployment release label")
 	}
 
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, release)
+		params, err := newTemplateParams(ctx, cr, *release)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -198,22 +202,25 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	release := v1alpha1.Release{
-		Spec: v1alpha1.ReleaseSpec{
-			Components: []v1alpha1.ReleaseSpecComponent{
-				{
-					Name:    "containerlinux",
-					Version: "2345.3.1",
-				},
-			},
-		},
+	var release *v1alpha1.Release
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the machine deployment release label")
+
+		releaseVersion := key.ReleaseVersion(&cr)
+		releaseName := key.ReleaseName(releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the machine deployment release label")
 	}
 
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, release)
+		params, err := newTemplateParams(ctx, cr, *release)
 		if err != nil {
 			return microerror.Mask(err)
 		}

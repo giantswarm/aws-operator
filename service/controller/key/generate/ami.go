@@ -14,7 +14,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Masterminds/semver"
+	"github.com/Masterminds/semver/v3"
 	"golang.org/x/net/html"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
