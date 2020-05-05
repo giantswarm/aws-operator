@@ -11,7 +11,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
@@ -46,6 +46,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		name           string
 		ctx            context.Context
 		cr             infrastructurev1alpha2.AWSControlPlane
+		r              releasev1alpha1.Release
 		apiWhitelist   APIWhitelist
 		route53Enabled bool
 	}{
@@ -53,6 +54,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			ctx:            unittest.DefaultContextControlPlane(),
 			cr:             unittest.DefaultControlPlane(),
+			r:              unittest.DefaultRelease(),
 			apiWhitelist:   apiWhitelist,
 			route53Enabled: true,
 		},
@@ -60,6 +62,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			ctx:            unittest.DefaultContextControlPlane(),
 			cr:             unittest.DefaultControlPlane(),
+			r:              unittest.DefaultRelease(),
 			apiWhitelist:   apiWhitelist,
 			route53Enabled: false,
 		},
@@ -67,16 +70,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, v1alpha1.Release{
-				Spec: v1alpha1.ReleaseSpec{
-					Components: []v1alpha1.ReleaseSpecComponent{
-						{
-							Name:    "containerlinux",
-							Version: "2345.3.1",
-						},
-					},
-				},
-			}, tc.apiWhitelist, tc.route53Enabled)
+			params, err := newTemplateParams(tc.ctx, tc.cr, tc.r, tc.apiWhitelist, tc.route53Enabled)
 			if err != nil {
 				t.Fatal(err)
 			}

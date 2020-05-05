@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -148,7 +148,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	var release *v1alpha1.Release
+	var release *releasev1alpha1.Release
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the control plane release label")
 
@@ -216,7 +216,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	var release *v1alpha1.Release
+	var release *releasev1alpha1.Release
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the control plane release label")
 
@@ -353,7 +353,7 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 	return iamPolicies, nil
 }
 
-func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, release v1alpha1.Release) (*template.ParamsMainLaunchTemplate, error) {
+func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, release releasev1alpha1.Release) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -406,7 +406,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, release v1alpha1.Release, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, release releasev1alpha1.Release, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
