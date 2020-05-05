@@ -317,3 +317,4 @@ Resources:
       Name: 'etcd.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
+      TTL: 60

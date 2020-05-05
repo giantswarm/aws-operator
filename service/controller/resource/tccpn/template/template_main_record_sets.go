@@ -13,6 +13,7 @@ const TemplateMainRecordSets = `
       Name: '{{ $r.Value }}.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: {{ $v.HostedZoneID }}
       Type: A
+      TTL: 60
 {{- end -}}
 {{- end -}}
 {{- end -}}

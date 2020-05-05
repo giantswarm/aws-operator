@@ -635,6 +635,7 @@ Resources:
       Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
+      TTL: 60
   ControlPlaneRecordSet2:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -643,6 +644,7 @@ Resources:
       Name: 'etcd2.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
+      TTL: 60
   ControlPlaneRecordSet3:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -651,3 +653,4 @@ Resources:
       Name: 'etcd3.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A
+      TTL: 60
