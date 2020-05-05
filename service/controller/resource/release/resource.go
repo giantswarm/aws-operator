@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -44,7 +44,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addReleaseToContext(ctx context.Context, cr v1alpha2.AWSCluster) error {
+func (r *Resource) addReleaseToContext(ctx context.Context, cr *v1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -55,7 +55,7 @@ func (r *Resource) addReleaseToContext(ctx context.Context, cr v1alpha2.AWSClust
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the tenant cluster release label")
 
-		releaseVersion := cr.Labels[label.Release]
+		releaseVersion := key.ReleaseVersion(cr)
 		releaseName := fmt.Sprintf("v%s", releaseVersion)
 		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
 		if err != nil {
