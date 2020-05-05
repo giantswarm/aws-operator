@@ -81,6 +81,13 @@ const (
 	RefWorkerASG = "workerAutoScalingGroup"
 )
 
+const (
+	// ComponentOS is the name of the component specified in a Release CR which
+	// determines the version of the OS to be used for tenant cluster nodes and
+	// is ultimately transformed into an AMI based on TC region.
+	ComponentOS = "containerlinux"
+)
+
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }

@@ -4,7 +4,7 @@ Outputs:
   DockerVolumeSizeGB:
     Value: 100
   InstanceImage:
-    Value: ami-038cea5071a5ee580
+    Value: ami-0a9a5d2b65cce04eb
   InstanceType:
     Value: m5.2xlarge
   OperatorVersion:
@@ -182,7 +182,7 @@ Resources:
             VolumeType: gp2
         IamInstanceProfile:
           Name: !Ref NodePoolInstanceProfile
-        ImageId: ami-038cea5071a5ee580
+        ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.2xlarge
         Monitoring:
           Enabled: true

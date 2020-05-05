@@ -3,6 +3,7 @@ module github.com/giantswarm/aws-operator
 go 1.13
 
 require (
+	github.com/Masterminds/semver v1.5.0
 	github.com/aws/amazon-vpc-cni-k8s v1.6.0
 	github.com/aws/aws-sdk-go v1.29.32
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -37,6 +38,7 @@ require (
 	github.com/prometheus/client_golang v1.5.1
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/viper v1.6.3
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	k8s.io/api v0.17.2
 	k8s.io/apiextensions-apiserver v0.17.2
