@@ -1,4 +1,4 @@
-package accountid
+package release
 
 import (
 	"github.com/giantswarm/microerror"

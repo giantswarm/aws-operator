@@ -29,6 +29,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/resource/release"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
@@ -120,6 +121,19 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		}
 
 		encrypterObject, err = kms.NewEncrypter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var releaseResource resource.Interface
+	{
+		c := release.Config{
+			G8sClient: config.G8sClient,
+			Logger: config.Logger,
+		}
+
+		releaseResource, err = release.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -363,6 +377,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 		awsClientResource,
 		accountIDResource,
 		encryptionSearcherResource,
+		releaseResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
 		tccpAZsResource,
