@@ -130,7 +130,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 	{
 		c := release.Config{
 			G8sClient: config.G8sClient,
-			Logger: config.Logger,
+			Logger:    config.Logger,
 		}
 
 		releaseResource, err = release.New(c)
