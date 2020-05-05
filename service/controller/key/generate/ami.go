@@ -108,11 +108,15 @@ func main() {
 	{
 		url := fmt.Sprintf("https://%s.release.%s/%s/", channel, primaryDomain, arch)
 		fmt.Println("scraping", url)
-		response, err := http.Get(url)
+		response, err := http.Get(url) //nolint:gosec
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		versions, err = scrapeVersions(response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	mergedAMIs := map[string]map[string]string{}
@@ -122,12 +126,12 @@ func main() {
 		}
 		url := fmt.Sprintf("https://%s.release.%s/%s/%s/flatcar_production_ami_all.json", channel, primaryDomain, arch, version)
 		fmt.Println("scraping", url)
-		response, err := http.Get(url)
+		response, err := http.Get(url) //nolint:gosec
 		if err != nil {
 			log.Fatal(err)
 		}
 		if response.StatusCode == 403 {
-			continue
+			continue // not found, keep going
 		}
 		mergedAMIs[version], err = scrapeVersionAMIs(response.Body)
 		if err != nil {
@@ -138,7 +142,7 @@ func main() {
 	for version := range mergedAMIs {
 		url := fmt.Sprintf("https://%s/%s/%s/%s.json", chinaDomain, channel, arch, version)
 		fmt.Println("scraping", url)
-		response, err := http.Get(url)
+		response, err := http.Get(url) //nolint:gosec
 		if err != nil {
 			log.Fatal(err)
 		}

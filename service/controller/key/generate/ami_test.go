@@ -86,7 +86,7 @@ func Test_scrapeVersionAMIs(t *testing.T) {
   ]
 }`,
 			expected: map[string]string{
-				"ap-northeast-1": "ami-02e7b007b87514a38",
+				"ap-east-1": "ami-0e28e38ecce552688",
 			},
 		},
 	}
@@ -102,7 +102,7 @@ func Test_scrapeVersionAMIs(t *testing.T) {
 				t.Fatalf("version count %d doesn't match expected %d", len(amis), len(tc.expected))
 			}
 			for i := range amis {
-				if amis[i] != amis[i] {
+				if amis[i] != tc.expected[i] {
 					t.Fatalf("ami at key %s, %s, doesn't match expected %s", i, amis[i], tc.expected[i])
 				}
 			}
