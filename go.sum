@@ -274,6 +274,8 @@ github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8Zp
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
 github.com/giantswarm/operatorkit v0.2.0 h1:OY5NCS4L4MPpZgtzvPlpUXlLK9d7VxHOzDy05MavK3c=
 github.com/giantswarm/operatorkit v0.2.0/go.mod h1:i/yHa01y+d67ZzZBOck56CcZLkbRIx89ZqAoK46+Bjs=
+github.com/giantswarm/operatorkit v0.2.1-0.20200505185222-72ffc7493f98 h1:5dZl8M8c/fgiP3Ow7ln+DPEvMDvxy5xwiWCMbl2DRW8=
+github.com/giantswarm/operatorkit v0.2.1-0.20200505185222-72ffc7493f98/go.mod h1:i/yHa01y+d67ZzZBOck56CcZLkbRIx89ZqAoK46+Bjs=
 github.com/giantswarm/randomkeys v0.2.0 h1:e03tqr+OemoyF42BrlQpdeHZ/xvqJd4ALW5IM2X26Ek=
 github.com/giantswarm/randomkeys v0.2.0/go.mod h1:24kbDDO8XgP+nx7SKaX/z5I/qhj4X4n+hiSynpD/9Kk=
 github.com/giantswarm/tenantcluster v0.2.0 h1:NDra7kcxt22w4HwxuVgBGjgG5BHjZ5bxtlYk2YmXaEk=
