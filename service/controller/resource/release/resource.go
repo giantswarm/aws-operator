@@ -2,9 +2,7 @@ package release
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -48,7 +46,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addReleaseToContext(ctx context.Context, cr *v1alpha2.AWSCluster) error {
+func (r *Resource) addReleaseToContext(ctx context.Context, cr metav1.Object) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -60,7 +58,7 @@ func (r *Resource) addReleaseToContext(ctx context.Context, cr *v1alpha2.AWSClus
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the tenant cluster release label")
 
 		releaseVersion := key.ReleaseVersion(cr)
-		releaseName := fmt.Sprintf("v%s", releaseVersion)
+		releaseName := key.ReleaseName(releaseVersion)
 		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
 		if err != nil {
 			return microerror.Mask(err)

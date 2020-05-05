@@ -35,6 +35,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/resource/release"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnatgateways"
@@ -190,6 +191,19 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		}
 
 		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var releaseResource resource.Interface
+	{
+		c := release.Config{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+		}
+
+		releaseResource, err = release.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -516,6 +530,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
+		releaseResource,
 		encryptionSearcherResource,
 		regionResource,
 		cpRouteTablesResource,
