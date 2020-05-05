@@ -2,11 +2,14 @@ package hamaster
 
 import (
 	"context"
+	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/operatorkit/controller/context/cachekeycontext"
 	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -20,9 +23,8 @@ type Config struct {
 type HAMaster struct {
 	k8sClient k8sclient.Interface
 
-	azs []string
-	ids []int
-	ptr int
+	awsCache map[string]infrastructurev1alpha2.AWSControlPlane
+	g8sCache map[string]infrastructurev1alpha2.G8sControlPlane
 }
 
 func New(config Config) (*HAMaster, error) {
@@ -33,26 +35,28 @@ func New(config Config) (*HAMaster, error) {
 	h := &HAMaster{
 		k8sClient: config.K8sClient,
 
-		azs: []string{},
-		ids: []int{},
-		ptr: 0,
+		awsCache: map[string]infrastructurev1alpha2.AWSControlPlane{},
+		g8sCache: map[string]infrastructurev1alpha2.G8sControlPlane{},
 	}
 
 	return h, nil
 }
 
-func (h *HAMaster) AZ() string {
-	return h.azs[h.ptr]
-}
+func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, error) {
+	var err error
+	var ok bool
 
-func (h *HAMaster) ID() int {
-	return h.ids[h.ptr]
-}
-
-func (h *HAMaster) Init(ctx context.Context, obj interface{}) error {
 	cr, err := meta.Accessor(obj)
 	if err != nil {
-		return microerror.Mask(err)
+		return nil, microerror.Mask(err)
+	}
+
+	var cacheKey string
+	{
+		ck, ok := cachekeycontext.FromContext(ctx)
+		if ok {
+			cacheKey = fmt.Sprintf("%s/%s", ck, key.ClusterID(cr))
+		}
 	}
 
 	// We need the G8sControlPlane CR because it holds the replica count. This
@@ -60,111 +64,137 @@ func (h *HAMaster) Init(ctx context.Context, obj interface{}) error {
 	// the Master IDs. The system's implementation requires there only to be 1 or
 	// 3 masters.
 	var g8s infrastructurev1alpha2.G8sControlPlane
-	{
-		var list infrastructurev1alpha2.G8sControlPlaneList
-
-		err := h.k8sClient.CtrlClient().List(
-			ctx,
-			&list,
-			client.InNamespace(cr.GetNamespace()),
-			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
-		)
+	if cacheKey == "" {
+		g8s, err = h.getG8s(ctx, cr)
 		if err != nil {
-			return microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
+	} else {
+		g8s, ok = h.g8sCache[cacheKey]
+		if !ok {
+			g8s, err = h.getG8s(ctx, cr)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 
-		if len(list.Items) == 0 {
-			return microerror.Mask(notFoundError)
-		}
-		if len(list.Items) > 1 {
-			return microerror.Mask(tooManyCRsError)
-		}
+			if len(h.g8sCache) == 1 {
+				h.g8sCache = map[string]infrastructurev1alpha2.G8sControlPlane{}
+			}
 
-		g8s = list.Items[0]
+			h.g8sCache[cacheKey] = g8s
+		}
 	}
 
 	// We need the AWSControlPlane CR because it holds the availability zones. The
-	// state machine allows to cycle through them in a deterministic way. The
 	// system's implementation requires there only to be 1, 2 or 3 availability
 	// zones.
 	var aws infrastructurev1alpha2.AWSControlPlane
-	{
-		var list infrastructurev1alpha2.AWSControlPlaneList
-
-		err := h.k8sClient.CtrlClient().List(
-			ctx,
-			&list,
-			client.InNamespace(cr.GetNamespace()),
-			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
-		)
+	if cacheKey == "" {
+		aws, err = h.getAWS(ctx, cr)
 		if err != nil {
-			return microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
+	} else {
+		aws, ok = h.awsCache[cacheKey]
+		if !ok {
+			aws, err = h.getAWS(ctx, cr)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
 
-		if len(list.Items) == 0 {
-			return microerror.Mask(notFoundError)
-		}
-		if len(list.Items) > 1 {
-			return microerror.Mask(tooManyCRsError)
-		}
+			if len(h.awsCache) == 1 {
+				h.awsCache = map[string]infrastructurev1alpha2.AWSControlPlane{}
+			}
 
-		aws = list.Items[0]
+			h.awsCache[cacheKey] = aws
+		}
 	}
 
-	// When the state machine is initialized we need to reset all internal
-	// information, including the pointer. This ensures we start fresh all over
-	// again.
-	{
-		h.ptr = 0
-	}
-
-	// We need a deterministic list of availability zones which we can cycle
+	// We need a deterministic list of availability zones which we can loop over
 	// through for the required amount of masters. Eventually it happens that
 	// there is only 1 availability zone in a HA Masters setup. Therefore the
-	// internal state holds the given availability zones repeatedly 3 times so
-	// that it can always guarantee an availability zone for each master in any of
-	// the allowed permutations. Note that given 3 availability zones in a HA
-	// Masters setup will never make use of the repeated availability zones, which
-	// is just a side effect of the current implementation.
+	// computed mapping holds the given availability zones repeatedly 3 times so
+	// that there is always a guaranteed availability zone for each master in any
+	// of the allowed permutations. Note that given 3 availability zones in a HA
+	// Masters setup we will never make use of the repeated availability zones,
+	// which is just a side effect of the current implementation.
+	var azs []string
 	{
-		h.azs = []string{}
-
-		h.azs = append(h.azs, aws.Spec.AvailabilityZones...)
-		h.azs = append(h.azs, aws.Spec.AvailabilityZones...)
-		h.azs = append(h.azs, aws.Spec.AvailabilityZones...)
+		azs = append(azs, aws.Spec.AvailabilityZones...)
+		azs = append(azs, aws.Spec.AvailabilityZones...)
+		azs = append(azs, aws.Spec.AvailabilityZones...)
 	}
 
 	// The master IDs are only allowed to be either 0, 1, 2 or 3, so we hard code
 	// the list of master IDs depending on the given replicas, which must be
 	// either 1 or 3.
+	var ids []int
 	{
-		h.ids = []int{}
-
 		if key.G8sControlPlaneReplicas(g8s) == 1 {
-			h.ids = append(h.ids, 0)
+			ids = append(ids, 0)
 		}
 		if key.G8sControlPlaneReplicas(g8s) == 3 {
-			h.ids = append(h.ids, 1)
-			h.ids = append(h.ids, 2)
-			h.ids = append(h.ids, 3)
+			ids = append(ids, 1)
+			ids = append(ids, 2)
+			ids = append(ids, 3)
 		}
 	}
 
-	return nil
+	var mappings []Mapping
+	for i, _ := range ids {
+		m := Mapping{
+			AZ: azs[i],
+			ID: ids[i],
+		}
+
+		mappings = append(mappings, m)
+	}
+
+	return mappings, nil
 }
 
-func (h *HAMaster) Next() {
-	if h.ptr == len(h.ids) {
-		h.ptr = 0
-	} else {
-		h.ptr++
+func (h *HAMaster) getAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {
+	var list infrastructurev1alpha2.AWSControlPlaneList
+
+	err := h.k8sClient.CtrlClient().List(
+		ctx,
+		&list,
+		client.InNamespace(cr.GetNamespace()),
+		client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+	)
+	if err != nil {
+		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(err)
 	}
+
+	if len(list.Items) == 0 {
+		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(notFoundError)
+	}
+	if len(list.Items) > 1 {
+		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(tooManyCRsError)
+	}
+
+	return list.Items[0], nil
 }
 
-func (h *HAMaster) Reconciled() bool {
-	if h.ptr == len(h.ids) {
-		return true
-	} else {
-		return false
+func (h *HAMaster) getG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.G8sControlPlane, error) {
+	var list infrastructurev1alpha2.G8sControlPlaneList
+
+	err := h.k8sClient.CtrlClient().List(
+		ctx,
+		&list,
+		client.InNamespace(cr.GetNamespace()),
+		client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+	)
+	if err != nil {
+		return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(err)
 	}
+
+	if len(list.Items) == 0 {
+		return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(notFoundError)
+	}
+	if len(list.Items) > 1 {
+		return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(tooManyCRsError)
+	}
+
+	return list.Items[0], nil
 }

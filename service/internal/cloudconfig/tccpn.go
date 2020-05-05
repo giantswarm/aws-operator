@@ -44,12 +44,9 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error) {
 	var err error
 
-	// We need to initialize the HA Master state machine. This gives us straight
-	// forward access to master ID/AZ mappings. Here the list of master IDs
-	// decides if we want to generate certificates for a Tenant Cluster whether a
-	// HA Master setup.
+	var mappings []hamaster.Mapping
 	{
-		err = t.config.HAMaster.Init(ctx, obj)
+		mappings, err = t.config.HAMaster.Mapping(ctx, obj)
 		if hamaster.IsNotFound(err) {
 			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
@@ -58,14 +55,13 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 	}
 
 	var paths []string
-	for !t.config.HAMaster.Reconciled() {
-		path, err := t.newPath(ctx, obj)
+	for _, m := range mappings {
+		path, err := t.newPath(ctx, obj, m)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		paths = append(paths, path)
-		t.config.HAMaster.Next()
 	}
 
 	return paths, nil
@@ -74,12 +70,9 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
 	var err error
 
-	// We need to initialize the HA Master state machine. This gives us straight
-	// forward access to master ID/AZ mappings. Here the list of master IDs
-	// decides if we want to generate certificates for a Tenant Cluster whether a
-	// HA Master setup.
+	var mappings []hamaster.Mapping
 	{
-		err = t.config.HAMaster.Init(ctx, obj)
+		mappings, err = t.config.HAMaster.Mapping(ctx, obj)
 		if hamaster.IsNotFound(err) {
 			return nil, microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
@@ -88,29 +81,28 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 	}
 
 	var templates []string
-	for !t.config.HAMaster.Reconciled() {
-		template, err := t.newTemplate(ctx, obj)
+	for _, mapping := range mappings {
+		template, err := t.newTemplate(ctx, obj, mapping)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		templates = append(templates, template)
-		t.config.HAMaster.Next()
 	}
 
 	return templates, nil
 }
 
-func (t *TCCPN) newPath(ctx context.Context, obj interface{}) (string, error) {
+func (t *TCCPN) newPath(ctx context.Context, obj interface{}, mapping hamaster.Mapping) (string, error) {
 	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	return key.S3ObjectPathTCCPN(&cr, t.config.HAMaster.ID()), nil
+	return key.S3ObjectPathTCCPN(&cr, mapping.ID), nil
 }
 
-func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error) {
+func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping) (string, error) {
 	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -166,7 +158,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error
 			var err error
 			var tls certs.TLS
 
-			switch t.config.HAMaster.ID() {
+			switch mapping.ID {
 			case 0:
 				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.EtcdCert)
 			case 1:
@@ -176,7 +168,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error
 			case 3:
 				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.Etcd3Cert)
 			default:
-				return microerror.Maskf(executionFailedError, "invalid master id %d", t.config.HAMaster.ID())
+				return microerror.Maskf(executionFailedError, "invalid master id %d", mapping.ID)
 			}
 
 			if err != nil {
@@ -268,7 +260,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error
 
 	var masterSubnet net.IPNet
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name == t.config.HAMaster.AZ() {
+		if az.Name == mapping.AZ {
 			masterSubnet = az.Subnet.Private.CIDR
 			break
 		}
@@ -293,7 +285,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}) (string, error
 			encrypter:        t.config.Encrypter,
 			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
 			masterSubnet:     masterSubnet,
-			masterID:         t.config.HAMaster.ID(),
+			masterID:         mapping.ID,
 			randomKeyTmplSet: randomKeyTmplSet,
 			registryDomain:   t.config.RegistryDomain,
 		}
