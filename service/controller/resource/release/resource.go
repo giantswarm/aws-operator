@@ -51,9 +51,7 @@ func (r *Resource) addReleaseToContext(ctx context.Context, cr metav1.Object) er
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	// Here we take the STS client scoped to the control plane AWS account to
-	// lookup its ID. The ID is then set to the controller context.
+	
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the tenant cluster release label")
 
