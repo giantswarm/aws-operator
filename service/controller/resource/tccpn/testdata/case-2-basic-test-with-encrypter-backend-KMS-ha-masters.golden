@@ -6,7 +6,7 @@ Outputs:
   OperatorVersion:
     Value: 7.3.0
 Resources:
-  ControlPlaneNodeAutoScalingGroup1:
+  ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: EtcdVolume
     Properties:
@@ -20,8 +20,8 @@ Resources:
       MixedInstancesPolicy:
         LaunchTemplate:
           LaunchTemplateSpecification:
-            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate1
-            Version: !GetAtt ControlPlaneNodeLaunchTemplate1.LatestVersionNumber
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate.LatestVersionNumber
       LoadBalancerNames:
       - 8y5ck-api-internal
       - 8y5ck-api
@@ -174,7 +174,7 @@ Resources:
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
-  MasterEni1:
+  MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
        Description: A Network interface used for etcd.
@@ -213,7 +213,7 @@ Resources:
          Value: 8y5ck-master3-eni
        - Key: node.k8s.amazonaws.com/no_manage
          Value: "true"
-  EtcdVolume1:
+  EtcdVolume:
     Type: AWS::EC2::Volume
     Properties:
       AvailabilityZone: eu-central-1a
@@ -387,7 +387,7 @@ Resources:
               - "route53:ListHostedZones"
               - "route53:ListResourceRecordSets"
             Resource: "*"
-  ControlPlaneNodeLaunchTemplate1:
+  ControlPlaneNodeLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateName: 8y5ck-master1-launch-template
@@ -627,11 +627,11 @@ Resources:
                 ]
               }
             }
-  ControlPlaneRecordSet1:
+  ControlPlaneRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !GetAtt MasterEni1.PrimaryPrivateIpAddress
+      - !GetAtt MasterEni.PrimaryPrivateIpAddress
       Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-id
       Type: A

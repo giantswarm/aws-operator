@@ -15,7 +15,7 @@ func ControlPlaneAvailabilityZones(cr infrastructurev1alpha2.AWSControlPlane) []
 }
 
 func ControlPlaneASGResourceName(getter LabelsGetter, id int) string {
-	if id == 0 {
+	if id == 0 || id == 1 {
 		return "ControlPlaneNodeAutoScalingGroup"
 	}
 
@@ -53,7 +53,7 @@ func ControlPlaneENIName(getter LabelsGetter, id int) string {
 }
 
 func ControlPlaneENIResourceName(id int) string {
-	if id == 0 {
+	if id == 0 || id == 1 {
 		return "MasterEni"
 	}
 
@@ -79,7 +79,7 @@ func ControlPlaneLaunchTemplateName(getter LabelsGetter, id int) string {
 }
 
 func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string {
-	if id == 0 {
+	if id == 0 || id == 1 {
 		return "ControlPlaneNodeLaunchTemplate"
 	}
 
@@ -87,15 +87,11 @@ func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string 
 }
 
 func ControlPlaneRecordSetsRecordValue(id int) string {
-	if id == 0 {
-		return "etcd"
-	}
-
 	return fmt.Sprintf("etcd%d", id)
 }
 
 func ControlPlaneRecordSetsResourceName(id int) string {
-	if id == 0 {
+	if id == 0 || id == 1 {
 		return "ControlPlaneRecordSet"
 	}
 
@@ -107,7 +103,7 @@ func ControlPlaneVolumeName(getter LabelsGetter, id int) string {
 }
 
 func ControlPlaneVolumeResourceName(id int) string {
-	if id == 0 {
+	if id == 0 || id == 1 {
 		return "EtcdVolume"
 	}
 
