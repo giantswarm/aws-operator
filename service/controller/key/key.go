@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/k8scloudconfig/v_4_9_1"
+	"github.com/giantswarm/k8scloudconfig/v_4_9_2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -20,7 +20,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use.
 	// It is used in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_4_9_1"
+	CloudConfigVersion = "v_4_9_2"
 
 	// CloudProviderTagName is used to add Cloud Provider tags to AWS resources.
 	CloudProviderTagName = "kubernetes.io/cluster/%s"
@@ -220,8 +220,8 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 	return customObject.Spec.Cluster.Customer.ID
 }
 
-func DefaultVersions() v_4_9_1.Versions {
-	return v_4_9_1.Versions{
+func DefaultVersions() v_4_9_2.Versions {
+	return v_4_9_2.Versions{
 		Kubectl:              kubectlVersion,
 		KubernetesAPIHealthz: kubernetesAPIHealthzVersion,
 	}
