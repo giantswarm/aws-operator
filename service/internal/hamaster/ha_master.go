@@ -141,7 +141,7 @@ func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, err
 	}
 
 	var mappings []Mapping
-	for i, _ := range ids {
+	for i := range ids {
 		m := Mapping{
 			AZ: azs[i],
 			ID: ids[i],
