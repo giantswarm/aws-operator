@@ -33,10 +33,8 @@ require (
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v0.2.0
 	github.com/google/go-cmp v0.4.0
-	github.com/gophercloud/gophercloud v0.3.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.5.1
-	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/viper v1.6.3
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
