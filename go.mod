@@ -6,7 +6,7 @@ require (
 	github.com/aws/amazon-vpc-cni-k8s v1.6.0
 	github.com/aws/aws-sdk-go v1.29.32
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions v0.3.0
+	github.com/giantswarm/apiextensions v0.3.4
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs v0.2.0
@@ -20,7 +20,7 @@ require (
 	github.com/giantswarm/helmclient v0.2.2
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient v0.2.0
-	github.com/giantswarm/k8scloudconfig/v6 v6.0.3
+	github.com/giantswarm/k8scloudconfig/v6 v6.0.4-0.20200506154346-c3c2317dfc33
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
@@ -33,8 +33,10 @@ require (
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v0.2.0
 	github.com/google/go-cmp v0.4.0
+	github.com/gophercloud/gophercloud v0.3.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.5.1
+	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/viper v1.6.3
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
