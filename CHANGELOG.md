@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.2] - 2020-05-06
+
+### Fixed
+
+- Update error package for the double-quote issue.
+
 ## [5.5.1] - 2020-03-30
 
 ### Added
