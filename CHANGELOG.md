@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Correct conntrack configuration structure for kube-proxy.
+
 ## [5.5.2] - 2020-05-06
 
 ### Fixed
@@ -42,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update to Kubernetes 1.15.5.
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.5.1...legacy-1-15
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.5.2...legacy-1-15
+[5.5.1]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.2
 [5.5.1]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.1
 [5.5.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.5.0
