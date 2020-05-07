@@ -3,13 +3,16 @@ package images
 import (
 	"context"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/k8sclient"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -43,7 +46,57 @@ func New(c Config) (*Images, error) {
 	return i, nil
 }
 
-func (i *Images) ForRelease(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error) {
+func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+
+		err := i.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			return "", microerror.Mask(err)
+		}
+		if len(list.Items) > 1 {
+			return "", microerror.Mask(err)
+		}
+
+		cl = list.Items[0]
+	}
+
+	var re v1alpha1.Release
+	{
+		err := i.k8sClient.CtrlClient().Get(
+			ctx,
+			types.NamespacedName{Name: key.ReleaseName(key.ReleaseVersion(cr))},
+			&re,
+		)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
+
+	ami, err := key.AMI(key.Region(cl), re)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return ami, nil
+}
+
+func (i *Images) CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error) {
 	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return k8scloudconfig.Images{}, microerror.Mask(err)

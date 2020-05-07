@@ -18,6 +18,11 @@ pod:
     id: 1000
   group:
     id: 1000
+ports:
+  ingress:
+    - name: "http"
+      port: 8000
+      protocol: "TCP"
 project:
   branch: "[[ .Branch ]]"
   commit: "[[ .SHA ]]"

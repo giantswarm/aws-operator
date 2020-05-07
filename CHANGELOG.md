@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add common labels to our managed components.
+- Disable profiling for Controller Manager and Scheduler.
+- Add network policy.
+- Move containerPort values from deployment to `values.yaml`.
+
+### Changed
+
+- Replace CoreOS with Flatcar.
 
 
 
@@ -25,7 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve cleanup of `DrainerConfig` CRs after node draining.
 - Use release.Revision in Helm chart for Helm 3 support.
-- Disable profiling for Controller Manager and Scheduler.
 
 ## [8.3.0] 2020-04-17
 

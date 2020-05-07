@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -93,6 +94,20 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
+			var i images.Interface
+			{
+				c := images.Config{
+					K8sClient: k,
+
+					RegistryDomain: "dummy",
+				}
+
+				i, err = images.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var aws infrastructurev1alpha2.AWSControlPlane
 			{
 				cl := unittest.DefaultCluster()
@@ -114,6 +129,12 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+
+				re := unittest.DefaultRelease()
+				err = k.CtrlClient().Create(ctx, &re)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
 			var r *Resource
@@ -122,6 +143,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 					K8sClient: k,
 					Detection: d,
 					HAMaster:  h,
+					Images:    i,
 					Logger:    microloggertest.New(),
 
 					InstallationName: "dummy",

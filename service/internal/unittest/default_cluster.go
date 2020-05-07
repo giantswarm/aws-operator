@@ -19,6 +19,7 @@ func ChinaCluster() infrastructurev1alpha2.AWSCluster {
 			Labels: map[string]string{
 				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",
+				label.Release:         "100.0.0",
 			},
 			Namespace: metav1.NamespaceDefault,
 		},
@@ -59,6 +60,7 @@ func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 			Labels: map[string]string{
 				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",
+				label.Release:         "100.0.0",
 			},
 			Namespace: metav1.NamespaceDefault,
 		},

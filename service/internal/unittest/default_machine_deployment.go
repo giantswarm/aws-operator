@@ -18,6 +18,7 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 				label.Cluster:           DefaultClusterID,
 				label.MachineDeployment: "al9qy",
 				label.OperatorVersion:   "7.3.0",
+				label.Release:           "100.0.0",
 			},
 			Namespace: metav1.NamespaceDefault,
 		},

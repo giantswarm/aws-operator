@@ -403,6 +403,14 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 		}
 	}
 
+	var ami string
+	{
+		ami, err = r.images.AMI(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	launchTemplate := &template.ParamsMainLaunchTemplate{}
 	for _, m := range mappings {
 		item := template.ParamsMainLaunchTemplateItem{
@@ -424,7 +432,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 				},
 			},
 			Instance: template.ParamsMainLaunchTemplateItemInstance{
-				Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
+				Image:      ami,
 				Monitoring: false,
 				Type:       key.ControlPlaneInstanceType(cr),
 			},

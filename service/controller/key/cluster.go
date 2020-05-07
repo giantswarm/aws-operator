@@ -16,7 +16,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_6_0_0"
+	CloudConfigVersion = "v_6_1_0"
 	CloudProvider      = "aws"
 )
 
@@ -79,6 +79,13 @@ const (
 
 const (
 	RefWorkerASG = "workerAutoScalingGroup"
+)
+
+const (
+	// ComponentOS is the name of the component specified in a Release CR which
+	// determines the version of the OS to be used for tenant cluster nodes and
+	// is ultimately transformed into an AMI based on TC region.
+	ComponentOS = "containerlinux"
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
