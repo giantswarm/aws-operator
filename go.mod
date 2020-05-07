@@ -6,7 +6,7 @@ require (
 	github.com/aws/amazon-vpc-cni-k8s v1.6.0
 	github.com/aws/aws-sdk-go v1.29.32
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions v0.3.6-0.20200506131354-bf3a68b4fc07
+	github.com/giantswarm/apiextensions v0.3.7-0.20200507150949-c557d5ccbe67
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs v0.2.0
