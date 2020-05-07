@@ -365,7 +365,7 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		return nil, microerror.Mask(err)
 	}
 
-	image, err := key.ImageID(cc.Status.TenantCluster.AWS.Region, release)
+	image, err := key.AMI(cc.Status.TenantCluster.AWS.Region, release)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -408,7 +408,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeploym
 		return nil, microerror.Mask(err)
 	}
 
-	image, err := key.ImageID(cc.Status.TenantCluster.AWS.Region, release)
+	image, err := key.AMI(cc.Status.TenantCluster.AWS.Region, release)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

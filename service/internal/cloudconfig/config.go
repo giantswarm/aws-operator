@@ -1,15 +1,25 @@
 package cloudconfig
 
 import (
+	"github.com/giantswarm/certs/v2/pkg/certs"
+	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/randomkeys"
 
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
 type Config struct {
-	Encrypter encrypter.Interface
-	Logger    micrologger.Logger
+	CertsSearcher      certs.Interface
+	Encrypter          encrypter.Interface
+	HAMaster           hamaster.Interface
+	Images             images.Interface
+	K8sClient          k8sclient.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 
 	APIExtraArgs              []string
 	CalicoCIDR                int
@@ -29,11 +39,26 @@ type Config struct {
 }
 
 func (c Config) Validate() error {
+	if c.CertsSearcher == nil {
+		return microerror.Maskf(invalidConfigError, "%T.CertsSearcher must not be empty", c)
+	}
 	if c.Encrypter == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", c)
 	}
+	if c.HAMaster == nil {
+		return microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", c)
+	}
+	if c.Images == nil {
+		return microerror.Maskf(invalidConfigError, "%T.Images must not be empty", c)
+	}
+	if c.K8sClient == nil {
+		return microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", c)
+	}
 	if c.Logger == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", c)
+	}
+	if c.RandomKeysSearcher == nil {
+		return microerror.Maskf(invalidConfigError, "%T.RandomKeysSearcher must not be empty", c)
 	}
 
 	if c.CalicoCIDR == 0 {

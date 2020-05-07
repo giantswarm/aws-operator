@@ -19,7 +19,6 @@ type ControlPlaneDrainerConfig struct {
 	Logger    micrologger.Logger
 
 	HostAWSConfig aws.Config
-	LabelSelector ControlPlaneDrainerConfigLabelSelector
 }
 
 type ControlPlaneDrainerConfigLabelSelector struct {
@@ -79,14 +78,7 @@ func newControlPlaneDrainerResourceSets(config ControlPlaneDrainerConfig) ([]*co
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := controlPlaneDrainerResourceSetConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
-
-			HostAWSConfig: config.HostAWSConfig,
-			ProjectName:   project.Name(),
-		}
+		c := controlPlaneDrainerResourceSetConfig(config)
 
 		resourceSet, err = newControlPlaneDrainerResourceSet(c)
 		if err != nil {

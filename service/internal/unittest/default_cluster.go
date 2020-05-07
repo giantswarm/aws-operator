@@ -4,18 +4,24 @@ import (
 	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+const (
+	DefaultClusterID = "8y5ck"
+)
+
 func ChinaCluster() infrastructurev1alpha2.AWSCluster {
 	cr := infrastructurev1alpha2.AWSCluster{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				label.Cluster:         "8y5ck",
+				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",
+				label.Release:         "100.0.0",
 			},
+			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSClusterSpec{
 			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{
@@ -50,11 +56,13 @@ func ChinaCluster() infrastructurev1alpha2.AWSCluster {
 
 func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 	cr := infrastructurev1alpha2.AWSCluster{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				label.Cluster:         "8y5ck",
+				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",
+				label.Release:         "100.0.0",
 			},
+			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSClusterSpec{
 			Cluster: infrastructurev1alpha2.AWSClusterSpecCluster{

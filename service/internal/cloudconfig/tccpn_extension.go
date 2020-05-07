@@ -3,153 +3,43 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
+	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 )
 
-type TCCPConfig struct {
-	Config Config
-}
-
-type TCCP struct {
-	config Config
-}
-
-func NewTCCP(config TCCPConfig) (*TCCP, error) {
-	err := config.Config.Validate()
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	t := &TCCP{
-		config: config.Config,
-	}
-
-	return t, nil
-}
-
-func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, clusterCerts certs.Cluster, clusterKeys randomkeys.Cluster, images k8scloudconfig.Images, labels string) ([]byte, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-
-	var apiExtraArgs []string
-	{
-		if key.OIDCClientID(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cr)))
-		}
-		if key.OIDCIssuerURL(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(cr)))
-		}
-		if key.OIDCUsernameClaim(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(cr)))
-		}
-		if key.OIDCGroupsClaim(cr) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(cr)))
-		}
-
-		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
-	}
-
-	var kubeletExtraArgs []string
-	{
-		if t.config.PodInfraContainerImage != "" {
-			kubeletExtraArgs = append(kubeletExtraArgs, fmt.Sprintf("--pod-infra-container-image=%s", t.config.PodInfraContainerImage))
-		}
-
-		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
-	}
-
-	var params k8scloudconfig.Params
-	{
-		params = k8scloudconfig.DefaultParams()
-
-		params.Cluster = cmaClusterToG8sConfig(t.config, cr, labels).Cluster
-		params.DisableEncryptionAtREST = true
-		// Ingress Controller service is not created via ignition.
-		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
-		params.DisableIngressControllerService = true
-		params.EtcdPort = key.EtcdPort
-		params.Extension = &MasterExtension{
-			baseExtension: baseExtension{
-				cluster:        cr,
-				encrypter:      t.config.Encrypter,
-				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
-				registryDomain: t.config.RegistryDomain,
-			},
-			cc:               cc,
-			clusterCerts:     clusterCerts,
-			randomKeyTmplSet: randomKeyTmplSet,
-		}
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
-		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
-		params.SSOPublicKey = t.config.SSOPublicKey
-		params.Images = images
-		params.EnableAWSCNI = true
-
-		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
-		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var templateBody []byte
-	{
-		c := k8scloudconfig.CloudConfigConfig{
-			Params:   params,
-			Template: k8scloudconfig.MasterTemplate,
-		}
-
-		cloudConfig, err := k8scloudconfig.NewCloudConfig(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		err = cloudConfig.ExecuteTemplate()
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		templateBody = []byte(cloudConfig.String())
-	}
-
-	return templateBody, nil
-}
-
-type MasterExtension struct {
-	baseExtension
+type TCCPNExtension struct {
 	// TODO Pass context to k8scloudconfig rendering fucntions
 	//
-	//	See https://github.com/giantswarm/giantswarm/issues/4329.
+	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
 	cc               *controllercontext.Context
-	clusterCerts     certs.Cluster
+	cluster          infrastructurev1alpha2.AWSCluster
+	clusterCerts     []certs.File
+	encrypter        encrypter.Interface
+	encryptionKey    string
+	masterSubnet     net.IPNet
+	masterID         int
 	randomKeyTmplSet RandomKeyTmplSet
+	registryDomain   string
 }
 
-func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
-	ctx := context.TODO()
+func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
+	ctx := controllercontext.NewContext(context.Background(), *e.cc)
+
+	storageClass := template.InstanceStorageClassEncryptedContent
 
 	filesMeta := []k8scloudconfig.FileMetadata{
 		{
-			AssetContent: cloudconfig.DecryptTLSAssetsScript,
+			AssetContent: template.DecryptTLSAssetsScript,
 			Path:         "/opt/bin/decrypt-tls-assets",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -162,7 +52,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: FilePermission,
 		},
 		{
-			AssetContent: cloudconfig.DecryptKeysAssetsScript,
+			AssetContent: template.DecryptKeysAssetsScript,
 			Path:         "/opt/bin/decrypt-keys-assets",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -189,7 +79,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0644,
 		},
 		{
-			AssetContent: cloudconfig.WaitDockerConf,
+			AssetContent: template.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -204,7 +94,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		// Add use-proxy-protocol to ingress-controller ConfigMap, this doesn't work
 		// on KVM because of dependencies on hardware LB configuration.
 		{
-			AssetContent: cloudconfig.IngressControllerConfigMap,
+			AssetContent: template.IngressControllerConfigMap,
 			Path:         "/srv/ingress-controller-cm.yml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -219,7 +109,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		// NVME disks udev rules and script.
 		// Workaround for https://github.com/coreos/bugs/issues/2399
 		{
-			AssetContent: cloudconfig.NVMEUdevRule,
+			AssetContent: template.NVMEUdevRule,
 			Path:         "/etc/udev/rules.d/10-ebs-nvme-mapping.rules",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -232,7 +122,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0644,
 		},
 		{
-			AssetContent: cloudconfig.NVMEUdevScript,
+			AssetContent: template.NVMEUdevScript,
 			Path:         "/opt/ebs-nvme-mapping",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -245,7 +135,7 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0766,
 		},
 		{
-			AssetContent: cloudconfig.InstanceStorageClassEncryptedContent,
+			AssetContent: storageClass,
 			Path:         "/srv/default-storage-class.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -258,7 +148,33 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0644,
 		},
 		{
-			AssetContent: cloudconfig.AwsCNIManifest,
+			AssetContent: template.Etcd3ExtraConfig,
+			Path:         "/etc/systemd/system/etcd3.d/10-require-attach-dep.conf",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			AssetContent: template.SystemdNetworkdEth1Network,
+			Path:         "/etc/systemd/network/10-eth1.network",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			AssetContent: template.AwsCNIManifest,
 			Path:         "/srv/aws-cni.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -274,22 +190,18 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
-		certFiles := certs.NewFilesClusterMaster(e.clusterCerts)
-
-		for _, f := range certFiles {
-			// TODO We should just pass ctx to Files.
-			//
-			// 	See https://github.com/giantswarm/giantswarm/issues/4329.
-			//
-			ctx = controllercontext.NewContext(ctx, *e.cc)
-
-			data, err := e.encrypt(ctx, f.Data)
-			if err != nil {
-				return nil, microerror.Mask(err)
+		for _, f := range e.clusterCerts {
+			var encrypted string
+			{
+				e, err := e.encrypter.Encrypt(ctx, e.encryptionKey, string(f.Data))
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+				encrypted = e
 			}
 
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: string(data),
+				AssetContent: encrypted,
 				Path:         f.AbsolutePath + ".enc",
 				Owner: k8scloudconfig.Owner{
 					Group: k8scloudconfig.Group{
@@ -308,7 +220,16 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	var fileAssets []k8scloudconfig.FileAsset
 
-	data := e.templateDataTCCP()
+	data := TemplateData{
+		AWSRegion:            key.Region(e.cluster),
+		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
+		MasterENIAddress:     key.ControlPlaneENIIpAddress(e.masterSubnet),
+		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
+		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
+		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
+		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
+		RegistryDomain:       e.registryDomain,
+	}
 
 	for _, fm := range filesMeta {
 		c, err := k8scloudconfig.RenderFileAssetContent(fm.AssetContent, data)
@@ -337,12 +258,12 @@ func (e *MasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	return fileAssets, nil
 }
 
-func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
+func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	unitsMeta := []k8scloudconfig.UnitMetadata{
 		// Create symlinks for nvme disks.
 		// This service should be started only on first boot.
 		{
-			AssetContent: cloudconfig.NVMEUdevTriggerUnit,
+			AssetContent: template.NVMEUdevTriggerUnit,
 			Name:         "ebs-nvme-udev-trigger.service",
 			Enabled:      true,
 		},
@@ -350,39 +271,51 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		// Workaround for https://github.com/coreos/bugs/issues/2484
 		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255
 		{
-			AssetContent: cloudconfig.NVMESetTimeoutsUnit,
+			AssetContent: template.NVMESetTimeoutsUnit,
 			Name:         "nvme-set-timeouts.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.DecryptTLSAssetsService,
+			AssetContent: template.DecryptTLSAssetsService,
 			Name:         "decrypt-tls-assets.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.DecryptKeysAssetsService,
+			AssetContent: template.DecryptKeysAssetsService,
 			Name:         "decrypt-keys-assets.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.SetHostname,
+			AssetContent: template.SetHostname,
 			Name:         "set-hostname.service",
 			Enabled:      true,
 		},
 		{
-			AssetContent: cloudconfig.EphemeralVarLibDockerMount,
+			AssetContent: template.EphemeralVarLibDockerMount,
 			Name:         "var-lib-docker.mount",
+			Enabled:      true,
+		},
+		// Attach etcd3 dependencies (EBS and ENI).
+		{
+			AssetContent: template.Etcd3AttachDepService,
+			Name:         "etcd3-attach-dependencies.service",
+			Enabled:      true,
+		},
+		// Automount etcd EBS volume.
+		{
+			AssetContent: template.AutomountEtcdVolume,
+			Name:         "var-lib-etcd.automount",
 			Enabled:      true,
 		},
 		// Mount etcd EBS volume.
 		{
-			AssetContent: cloudconfig.MountEtcdVolume,
+			AssetContent: template.MountEtcdVolumeAsgMasters,
 			Name:         "var-lib-etcd.mount",
-			Enabled:      true,
+			Enabled:      false,
 		},
 		// Mount log EBS volume.
 		{
-			AssetContent: cloudconfig.EphemeralVarLogMount,
+			AssetContent: template.EphemeralVarLogMount,
 			Name:         "var-log.mount",
 			Enabled:      true,
 		},
@@ -390,7 +323,16 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 
 	var newUnits []k8scloudconfig.UnitAsset
 
-	data := e.templateDataTCCP()
+	data := TemplateData{
+		AWSRegion:            key.Region(e.cluster),
+		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
+		MasterENIAddress:     key.ControlPlaneENIIpAddress(e.masterSubnet),
+		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
+		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
+		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
+		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
+		RegistryDomain:       e.registryDomain,
+	}
 
 	for _, fm := range unitsMeta {
 		c, err := k8scloudconfig.RenderAssetContent(fm.AssetContent, data)
@@ -409,8 +351,6 @@ func (e *MasterExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	return newUnits, nil
 }
 
-func (e *MasterExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
-	newSections := []k8scloudconfig.VerbatimSection{}
-
-	return newSections
+func (e *TCCPNExtension) VerbatimSections() []k8scloudconfig.VerbatimSection {
+	return nil
 }

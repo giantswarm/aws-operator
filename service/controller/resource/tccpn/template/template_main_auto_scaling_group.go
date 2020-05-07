@@ -2,26 +2,27 @@ package template
 
 const TemplateMainAutoScalingGroup = `
 {{- define "auto_scaling_group" -}}
-  ControlPlaneNodeAutoScalingGroup:
+{{ range .AutoScalingGroup.List }}
+  {{ .Resource }}:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: EtcdVolume
     Properties:
       VPCZoneIdentifier:
-        - {{ .AutoScalingGroup.SubnetID }}
+        - {{ .SubnetID }}
       AvailabilityZones:
-        - {{ .AutoScalingGroup.AvailabilityZone }}
+        - {{ .AvailabilityZone }}
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 1
       MixedInstancesPolicy:
         LaunchTemplate:
           LaunchTemplateSpecification:
-            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate
-            Version: !GetAtt ControlPlaneNodeLaunchTemplate.LatestVersionNumber
+            LaunchTemplateId: !Ref {{ .LaunchTemplate.Resource }}
+            Version: !GetAtt {{ .LaunchTemplate.Resource }}.LatestVersionNumber
       LoadBalancerNames:
-      - {{ .AutoScalingGroup.LoadBalancers.ApiInternalName }}
-      - {{ .AutoScalingGroup.LoadBalancers.ApiName }}
-      - {{ .AutoScalingGroup.LoadBalancers.EtcdName }}
+      - {{ .LoadBalancers.ApiInternalName }}
+      - {{ .LoadBalancers.ApiName }}
+      - {{ .LoadBalancers.EtcdName }}
 
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
@@ -43,7 +44,7 @@ const TemplateMainAutoScalingGroup = `
 
       Tags:
         - Key: Name
-          Value: {{ .AutoScalingGroup.ClusterID }}-master
+          Value: {{ .ClusterID }}-master
           PropagateAtLaunch: true
     UpdatePolicy:
       AutoScalingRollingUpdate:
@@ -58,5 +59,6 @@ const TemplateMainAutoScalingGroup = `
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
+{{- end -}}
 {{- end -}}
 `

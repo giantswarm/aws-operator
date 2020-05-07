@@ -8,7 +8,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -21,10 +21,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
@@ -49,11 +45,19 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type machineDeploymentResourceSetConfig struct {
 	CertsSearcher      certs.Interface
+	HAMaster           hamaster.Interface
+	Images             images.Interface
 	K8sClient          k8sclient.Interface
 	Locker             locker.Interface
 	Logger             micrologger.Logger
@@ -75,7 +79,6 @@ type machineDeploymentResourceSetConfig struct {
 	ClusterDomain              string
 	NetworkSetupDockerImage    string
 	PodInfraContainerImage     string
-	ProjectName                string
 	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
@@ -145,17 +148,22 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := cloudconfig.TCNPConfig{
 			Config: cloudconfig.Config{
-				Encrypter: encrypterObject,
-				Logger:    config.Logger,
+				CertsSearcher:      config.CertsSearcher,
+				Encrypter:          encrypterObject,
+				HAMaster:           config.HAMaster,
+				Images:             config.Images,
+				K8sClient:          config.K8sClient,
+				Logger:             config.Logger,
+				RandomKeysSearcher: config.RandomKeysSearcher,
 
 				CalicoCIDR:                config.CalicoCIDR,
 				CalicoMTU:                 config.CalicoMTU,
 				CalicoSubnet:              config.CalicoSubnet,
+				ClusterDomain:             config.ClusterDomain,
 				ClusterIPRange:            config.ClusterIPRange,
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
-				ClusterDomain:             config.ClusterDomain,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
@@ -255,9 +263,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
@@ -307,14 +314,8 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
-			CertsSearcher:      config.CertsSearcher,
-			CloudConfig:        tcnpCloudConfig,
-			LabelsFunc:         key.KubeletLabelsTCNP,
-			Logger:             config.Logger,
-			G8sClient:          config.K8sClient.G8sClient(),
-			PathFunc:           key.S3ObjectPathTCNP,
-			RandomKeysSearcher: config.RandomKeysSearcher,
-			RegistryDomain:     config.RegistryDomain,
+			CloudConfig: tcnpCloudConfig,
+			Logger:      config.Logger,
 		}
 
 		ops, err := s3object.New(c)

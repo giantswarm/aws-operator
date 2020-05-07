@@ -19,7 +19,6 @@ type MachineDeploymentDrainerConfig struct {
 	Logger    micrologger.Logger
 
 	HostAWSConfig aws.Config
-	LabelSelector MachineDeploymentDrainerConfigLabelSelector
 }
 
 type MachineDeploymentDrainerConfigLabelSelector struct {
@@ -79,14 +78,7 @@ func newMachineDeploymentDrainerResourceSets(config MachineDeploymentDrainerConf
 
 	var resourceSet *controller.ResourceSet
 	{
-		c := machineDeploymentDrainerResourceSetConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			K8sClient: config.K8sClient.K8sClient(),
-			Logger:    config.Logger,
-
-			HostAWSConfig: config.HostAWSConfig,
-			ProjectName:   project.Name(),
-		}
+		c := machineDeploymentDrainerResourceSetConfig(config)
 
 		resourceSet, err = newMachineDeploymentDrainerResourceSet(c)
 		if err != nil {

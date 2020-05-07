@@ -9,7 +9,7 @@ require (
 	github.com/giantswarm/apiextensions v0.3.6
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
-	github.com/giantswarm/certs v0.2.0
+	github.com/giantswarm/certs/v2 v2.0.0
 	github.com/giantswarm/e2e-harness v0.2.0
 	github.com/giantswarm/e2eclients v0.2.0
 	github.com/giantswarm/e2esetup v0.1.0
@@ -26,9 +26,9 @@ require (
 	github.com/giantswarm/microerror v0.2.0
 	github.com/giantswarm/microkit v0.2.1
 	github.com/giantswarm/micrologger v0.3.1
-	github.com/giantswarm/operatorkit v0.2.0
+	github.com/giantswarm/operatorkit v0.2.1
 	github.com/giantswarm/randomkeys v0.2.0
-	github.com/giantswarm/tenantcluster v0.2.0
+	github.com/giantswarm/tenantcluster/v2 v2.0.0
 	github.com/giantswarm/to v0.2.0
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v0.2.0

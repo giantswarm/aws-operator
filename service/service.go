@@ -8,11 +8,14 @@ import (
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/randomkeys"
 	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
@@ -23,6 +26,8 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -90,6 +95,7 @@ func New(config Config) (*Service, error) {
 			SchemeBuilder: k8sclient.SchemeBuilder{
 				apiv1alpha2.AddToScheme,
 				infrastructurev1alpha2.AddToScheme,
+				releasev1alpha1.AddToScheme,
 			},
 			Logger:     config.Logger,
 			RestConfig: restConfig,
@@ -107,6 +113,45 @@ func New(config Config) (*Service, error) {
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
+		}
+	}
+
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: k8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ha hamaster.Interface
+	{
+		c := hamaster.Config{
+			K8sClient: k8sClient,
+		}
+
+		ha, err = hamaster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var im images.Interface
+	{
+		c := images.Config{
+			K8sClient: k8sClient,
+
+			RegistryDomain: config.Viper.GetString(config.Flag.Service.RegistryDomain),
+		}
+
+		im, err = images.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -130,6 +175,19 @@ func New(config Config) (*Service, error) {
 			return nil, microerror.Mask(err)
 		}
 		ipamNetworkRange = *ipnet
+	}
+
+	var randomKeysSearcher randomkeys.Interface
+	{
+		c := randomkeys.Config{
+			K8sClient: k8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		randomKeysSearcher, err = randomkeys.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var clusterController *controller.Cluster
@@ -167,11 +225,7 @@ func New(config Config) (*Service, error) {
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.ClusterConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
-			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			OIDC: controller.ClusterConfigOIDC{
 				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
 				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
@@ -196,18 +250,13 @@ func New(config Config) (*Service, error) {
 	var controlPlaneController *controller.ControlPlane
 	{
 		c := controller.ControlPlaneConfig{
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
+			CertsSearcher:      certsSearcher,
+			HAMaster:           ha,
+			Images:             im,
+			K8sClient:          k8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
 
-			APIWhitelist: controller.ClusterConfigAPIWhitelist{
-				Private: controller.ClusterConfigAPIWhitelistConfig{
-					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
-					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
-				},
-				Public: controller.ClusterConfigAPIWhitelistConfig{
-					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
-					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
-			},
 			CalicoCIDR:                config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:              config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
@@ -241,10 +290,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.ControlPlaneDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		controlPlaneDrainerController, err = controller.NewControlPlaneDrainer(c)
@@ -256,16 +301,19 @@ func New(config Config) (*Service, error) {
 	var machineDeploymentController *controller.MachineDeployment
 	{
 		c := controller.MachineDeploymentConfig{
-			K8sClient: k8sClient,
-			Locker:    kubeLockLocker,
-			Logger:    config.Logger,
+			CertsSearcher:      certsSearcher,
+			HAMaster:           ha,
+			Images:             im,
+			K8sClient:          k8sClient,
+			Locker:             kubeLockLocker,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
 
 			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
 			ClusterDomain:              config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
-			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
@@ -275,24 +323,14 @@ func New(config Config) (*Service, error) {
 			ImagePullProgressDeadline:  config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.MachineDeploymentConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
-			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
-			OIDC: controller.ClusterConfigOIDC{
-				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
-				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
-				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
-				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
-			},
-			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
-			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
-			SSHUserList:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
-			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
+			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
+			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
+			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
+			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		machineDeploymentController, err = controller.NewMachineDeployment(c)
@@ -308,10 +346,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.MachineDeploymentDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		machineDeploymentDrainerController, err = controller.NewMachineDeploymentDrainer(c)
