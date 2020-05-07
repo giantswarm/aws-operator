@@ -57,7 +57,7 @@ version directory, and  then changes are introduced.
 - Add eviction hard setting for image file system in kubelet.
 - Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
 
-## [v4.10.0] - 2020-05-06
+## [v4.9.2] - 2020-05-06
 
 ### Changed
 
@@ -529,54 +529,55 @@ chart-operator).
 
 ## [v0.1.0]
 
-[v6.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_6_0_0
-[v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_2_0
-[v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_1_0
-[v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_5_0_0
-[v4.9.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_1
-[v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_9_0
-[v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_1
-[v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_8_0
-[v4.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_7_0
-[v4.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_6_0
-[v4.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_1
-[v4.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_5_0
-[v4.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_4_0
-[v4.3.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_3_0
-[v4.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_2_0
-[v4.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_1_0
-[v4.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_4_0_0
-[v3.7.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_4
-[v3.7.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_3
-[v3.6.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_4
-[v3.6.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_3
-[v3.5.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_2
-[v3.7.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_2
-[v3.7.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_1
-[v3.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_7_0
-[v3.6.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_2
-[v3.6.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_1
-[v3.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_6_0
-[v3.5.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_3
-[v3.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_5_0
-[v3.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_4_0
-[v3.3.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_4
-[v3.3.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_3
-[v3.3.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_2
-[v3.3.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_1
-[v3.3.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_3_0
-[v3.2.6]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_2_6
-[v3.2.5]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_2_5
-[v3.2.4]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_2_4
-[v3.2.3]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_2_3
-[v3.2.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_2_2
-[v3.2.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_2_1
-[v3.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_1_1
-[v3.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_1_0
-[v3.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_3_0_0
-[v2.0.2]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_2_0_2
-[v2.0.1]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_2_0_1
-[v2.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v2
-[v1.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v1_1
-[v1.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v1
-[v0.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/master/v_0_1_0
+[v6.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_6_0_0
+[v5.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_5_2_0
+[v5.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_5_1_0
+[v5.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_5_0_0
+[v4.9.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_9_2
+[v4.9.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_9_1
+[v4.9.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_9_0
+[v4.8.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_8_1
+[v4.8.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_8_0
+[v4.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_7_0
+[v4.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_6_0
+[v4.5.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_5_1
+[v4.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_5_0
+[v4.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_4_0
+[v4.3.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_3_0
+[v4.2.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_2_0
+[v4.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_1_0
+[v4.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_4_0_0
+[v3.7.4]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_7_4
+[v3.7.3]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_7_3
+[v3.6.4]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_6_4
+[v3.6.3]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_6_3
+[v3.5.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_5_2
+[v3.7.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_7_2
+[v3.7.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_7_1
+[v3.7.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_7_0
+[v3.6.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_6_2
+[v3.6.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_6_1
+[v3.6.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_6_0
+[v3.5.3]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_5_3
+[v3.5.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_5_0
+[v3.4.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_4_0
+[v3.3.4]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_3_4
+[v3.3.3]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_3_3
+[v3.3.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_3_2
+[v3.3.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_3_1
+[v3.3.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_3_0
+[v3.2.6]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_2_6
+[v3.2.5]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_2_5
+[v3.2.4]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_2_4
+[v3.2.3]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_2_3
+[v3.2.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_2_2
+[v3.2.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_2_1
+[v3.1.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_1_1
+[v3.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_1_0
+[v3.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_3_0_0
+[v2.0.2]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_2_0_2
+[v2.0.1]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_2_0_1
+[v2.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v2
+[v1.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v1_1
+[v1.0.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v1
+[v0.1.0]: https://github.com/giantswarm/k8scloudconfig/commits/legacy/v_0_1_0
