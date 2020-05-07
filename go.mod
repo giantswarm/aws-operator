@@ -26,7 +26,7 @@ require (
 	github.com/giantswarm/microerror v0.2.0
 	github.com/giantswarm/microkit v0.2.1
 	github.com/giantswarm/micrologger v0.3.1
-	github.com/giantswarm/operatorkit v0.2.0
+	github.com/giantswarm/operatorkit v0.2.1
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster v0.2.0
 	github.com/giantswarm/to v0.2.0
