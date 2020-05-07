@@ -9,7 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -146,11 +148,25 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
+	var release *releasev1alpha1.Release
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the control plane release label")
+
+		releaseVersion := key.ReleaseVersion(&cr)
+		releaseName := key.ReleaseName(releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the control plane release label")
+	}
+
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
+		params, err := newTemplateParams(ctx, cr, *release, r.apiWhitelist, r.route53Enabled)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -200,11 +216,25 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
+	var release *releasev1alpha1.Release
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the control plane release label")
+
+		releaseVersion := key.ReleaseVersion(&cr)
+		releaseName := key.ReleaseName(releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the control plane release label")
+	}
+
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, r.apiWhitelist, r.route53Enabled)
+		params, err := newTemplateParams(ctx, cr, *release, r.apiWhitelist, r.route53Enabled)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -323,8 +353,13 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPla
 	return iamPolicies, nil
 }
 
-func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
+func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, release releasev1alpha1.Release) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	image, err := key.ImageID(cc.Status.TenantCluster.AWS.Region, release)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -348,7 +383,7 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 			},
 		},
 		Instance: template.ParamsMainLaunchTemplateInstance{
-			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
+			Image:      image,
 			Monitoring: false,
 			Type:       key.ControlPlaneInstanceType(cr),
 		},
@@ -371,7 +406,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) 
 	return outputs, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, release releasev1alpha1.Release, apiWhiteList APIWhitelist, route53Enabled bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
@@ -390,7 +425,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControl
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchTemplate, err := newLaunchTemplate(ctx, cr)
+		launchTemplate, err := newLaunchTemplate(ctx, cr, release)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
