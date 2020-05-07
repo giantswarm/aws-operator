@@ -2,7 +2,7 @@ package controller
 
 import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"

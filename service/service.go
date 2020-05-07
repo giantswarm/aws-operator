@@ -9,7 +9,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/k8sclient/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"

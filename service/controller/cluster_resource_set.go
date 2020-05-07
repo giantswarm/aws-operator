@@ -6,7 +6,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -16,7 +16,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys"
-	"github.com/giantswarm/tenantcluster"
+	"github.com/giantswarm/tenantcluster/v2/pkg/tenantcluster"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
