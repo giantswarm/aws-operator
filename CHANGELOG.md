@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Correct conntrack configuration structure for kube-proxy.
+
 ## [5.7.0] - 2020-04-30
 
 ### Added
