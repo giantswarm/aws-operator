@@ -41,6 +41,7 @@ func newMachineDeploymentDrainerResourceSet(config machineDeploymentDrainerResou
 		c := asgname.Config{
 			Logger: config.Logger,
 
+			Stack:        key.StackTCNP,
 			TagKey:       key.TagMachineDeployment,
 			TagValueFunc: key.MachineDeploymentID,
 		}
