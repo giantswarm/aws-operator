@@ -33,16 +33,15 @@ type ContextStatusControlPlaneVPC struct {
 }
 
 type ContextStatusTenantCluster struct {
-	ASG             ContextStatusTenantClusterASG
-	AWS             ContextStatusTenantClusterAWS
-	DNS             ContextStatusTenantClusterDNS
-	Encryption      ContextStatusTenantClusterEncryption
-	MasterInstance  ContextStatusTenantClusterMasterInstance
-	S3Object        ContextStatusTenantClusterS3Object
-	TCCP            ContextStatusTenantClusterTCCP
-	TCCPN           ContextStatusTenantClusterTCCPN
-	TCNP            ContextStatusTenantClusterTCNP
-	OperatorVersion string
+	ASG            ContextStatusTenantClusterASG
+	AWS            ContextStatusTenantClusterAWS
+	DNS            ContextStatusTenantClusterDNS
+	Encryption     ContextStatusTenantClusterEncryption
+	MasterInstance ContextStatusTenantClusterMasterInstance
+	S3Object       ContextStatusTenantClusterS3Object
+	TCCP           ContextStatusTenantClusterTCCP
+	TCCPN          ContextStatusTenantClusterTCCPN
+	TCNP           ContextStatusTenantClusterTCNP
 }
 
 type ContextStatusTenantClusterASG struct {
@@ -80,6 +79,7 @@ type ContextStatusTenantClusterTCCP struct {
 	AvailabilityZones []ContextStatusTenantClusterTCCPAvailabilityZone
 	IsTransitioning   bool
 	NATGateways       []*ec2.NatGateway
+	OperatorVersion   string
 	RouteTables       []*ec2.RouteTable
 	SecurityGroups    []*ec2.SecurityGroup
 	Subnets           []*ec2.Subnet
@@ -130,10 +130,12 @@ type ContextStatusTenantClusterTCCPN struct {
 	EtcdVolumeSnapshotID string
 	IsTransitioning      bool
 	InstanceType         string
+	OperatorVersion      string
 }
 
 type ContextStatusTenantClusterTCNP struct {
 	Instances        ContextStatusTenantClusterTCNPInstances
+	OperatorVersion  string
 	SecurityGroupIDs []string
 	WorkerInstance   ContextStatusTenantClusterTCNPWorkerInstance
 }

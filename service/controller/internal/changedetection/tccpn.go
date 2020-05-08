@@ -46,7 +46,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	}
 
 	masterInstanceEqual := cc.Status.TenantCluster.TCCPN.InstanceType == key.ControlPlaneInstanceType(cr)
-	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
+	operatorVersionEqual := cc.Status.TenantCluster.TCCPN.OperatorVersion == key.OperatorVersion(&cr)
 
 	if !masterInstanceEqual {
 		t.logger.LogCtx(
@@ -61,7 +61,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCCPN stack should update",
-			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
+			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.TCCPN.OperatorVersion, key.OperatorVersion(&cr)),
 		)
 		return true, nil
 	}

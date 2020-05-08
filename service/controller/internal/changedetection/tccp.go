@@ -46,7 +46,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	}
 
 	azsEqual := availabilityZonesEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones)
-	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
+	operatorVersionEqual := cc.Status.TenantCluster.TCCP.OperatorVersion == key.OperatorVersion(&cr)
 
 	if !azsEqual {
 		t.logger.LogCtx(ctx,
@@ -60,7 +60,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCCP stack should update",
-			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
+			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.TCCP.OperatorVersion, key.OperatorVersion(&cr)),
 		)
 		return true, nil
 	}

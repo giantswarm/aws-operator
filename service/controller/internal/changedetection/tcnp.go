@@ -86,7 +86,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(cr)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
-	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
+	operatorVersionEqual := cc.Status.TenantCluster.TCNP.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
 
 	if !dockerVolumeEqual {
@@ -109,7 +109,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCNP stack should update",
-			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
+			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.TCNP.OperatorVersion, key.OperatorVersion(&cr)),
 		)
 		return true, nil
 	}

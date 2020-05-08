@@ -129,8 +129,7 @@ func ChinaControllerContext() controllercontext.Context {
 					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 					InternalHostedZoneID:  "hosted-zone-internal-id",
 				},
-				MasterInstance:  controllercontext.ContextStatusTenantClusterMasterInstance{},
-				OperatorVersion: "6.3.0",
+				MasterInstance: controllercontext.ContextStatusTenantClusterMasterInstance{},
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
@@ -189,6 +188,7 @@ func ChinaControllerContext() controllercontext.Context {
 						},
 					},
 					IsTransitioning: false,
+					OperatorVersion: "6.3.0",
 					SecurityGroups: []*ec2.SecurityGroup{
 						{
 							GroupId: aws.String("ingress-security-group-id"),
@@ -385,8 +385,7 @@ func DefaultControllerContext() controllercontext.Context {
 					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
 					InternalHostedZoneID:  "hosted-zone-internal-id",
 				},
-				MasterInstance:  controllercontext.ContextStatusTenantClusterMasterInstance{},
-				OperatorVersion: "6.3.0",
+				MasterInstance: controllercontext.ContextStatusTenantClusterMasterInstance{},
 				TCCP: controllercontext.ContextStatusTenantClusterTCCP{
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
@@ -445,6 +444,7 @@ func DefaultControllerContext() controllercontext.Context {
 						},
 					},
 					IsTransitioning: false,
+					OperatorVersion: "6.3.0",
 					SecurityGroups: []*ec2.SecurityGroup{
 						{
 							GroupId: aws.String("ingress-security-group-id"),
@@ -516,6 +516,12 @@ func DefaultControllerContext() controllercontext.Context {
 						ID:                  "vpc-id",
 						PeeringConnectionID: "peering-connection-id",
 					},
+				},
+				TCCPN: controllercontext.ContextStatusTenantClusterTCCPN{
+					OperatorVersion: "6.3.0",
+				},
+				TCNP: controllercontext.ContextStatusTenantClusterTCNP{
+					OperatorVersion: "6.3.0",
 				},
 			},
 		},

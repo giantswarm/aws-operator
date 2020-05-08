@@ -116,7 +116,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		cc.Status.TenantCluster.OperatorVersion = v
+		cc.Status.TenantCluster.TCCP.OperatorVersion = v
 	}
 
 	{
