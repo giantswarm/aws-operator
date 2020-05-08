@@ -38,6 +38,7 @@ type ContextStatusTenantCluster struct {
 	DNS             ContextStatusTenantClusterDNS
 	Encryption      ContextStatusTenantClusterEncryption
 	MasterInstance  ContextStatusTenantClusterMasterInstance
+	S3Object        ContextStatusTenantClusterS3Object
 	TCCP            ContextStatusTenantClusterTCCP
 	TCCPN           ContextStatusTenantClusterTCCPN
 	TCNP            ContextStatusTenantClusterTCNP
@@ -69,6 +70,10 @@ type ContextStatusTenantClusterEncryption struct {
 type ContextStatusTenantClusterMasterInstance struct {
 	EtcdVolumeSnapshotID string
 	Type                 string
+}
+
+type ContextStatusTenantClusterS3Object struct {
+	Uploaded bool
 }
 
 type ContextStatusTenantClusterTCCP struct {
