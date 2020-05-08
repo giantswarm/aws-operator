@@ -140,25 +140,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	var release *releasev1alpha1.Release
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the machine deployment release label")
-
-		releaseVersion := key.ReleaseVersion(&cr)
-		releaseName := key.ReleaseName(releaseVersion)
-		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the machine deployment release label")
-	}
-
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, *release)
+		params, err := newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -208,25 +194,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
-	var release *releasev1alpha1.Release
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the machine deployment release label")
-
-		releaseVersion := key.ReleaseVersion(&cr)
-		releaseName := key.ReleaseName(releaseVersion)
-		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the machine deployment release label")
-	}
-
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr, *release)
+		params, err := newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -256,6 +228,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
+
 	return nil
 }
 
