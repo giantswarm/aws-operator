@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 type Config struct {
 	G8sClient versioned.Interface
 	Detection *changedetection.TCNP
+	Images    images.Interface
 	Logger    micrologger.Logger
 
 	InstallationName string
@@ -26,6 +28,7 @@ type Config struct {
 type Resource struct {
 	g8sClient versioned.Interface
 	detection *changedetection.TCNP
+	images    images.Interface
 	logger    micrologger.Logger
 
 	installationName string
@@ -38,6 +41,9 @@ func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
+	if config.Images == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Images must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -49,6 +55,7 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		g8sClient: config.G8sClient,
 		detection: config.Detection,
+		images:    config.Images,
 		logger:    config.Logger,
 
 		installationName: config.InstallationName,
