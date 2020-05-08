@@ -99,5 +99,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		s3Objects = append(s3Objects, s3Object)
 	}
 
+	// We want to prevent Cloud Formation stacks from being created without the
+	// Cloud Config being uploaded to S3. The TCCPN and TCNP handlers check this
+	// value and cancel in case the S3 Object is not yet uploaded.
+	cc.Status.TenantCluster.S3Object.Uploaded = true
+
 	return s3Objects, nil
 }

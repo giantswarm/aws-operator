@@ -36,6 +36,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
+		if !cc.Status.TenantCluster.S3Object.Uploaded {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "s3 object not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
 		if cc.Status.TenantCluster.Encryption.Key == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
