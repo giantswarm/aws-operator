@@ -10,7 +10,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
 	"github.com/google/go-cmp/cmp"
