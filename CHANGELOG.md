@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
 ### Added
 
 - Add common labels to our managed components.
@@ -21,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replace CoreOS with Flatcar.
 
+### Fixed
+
+- Fix cluster creation by preventing S3 Object upload race condition.
+
+
+
 ## [8.4.0] 2020-04-23
 
 ### Added
@@ -31,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve cleanup of `DrainerConfig` CRs after node draining.
 - Use release.Revision in Helm chart for Helm 3 support.
+
+
 
 ## [8.3.0] 2020-04-17
 
