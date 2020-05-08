@@ -60,7 +60,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var s3Objects []*s3.PutObjectInput
 	for _, p := range paths {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding S3 object %#q/%#q", bn, p))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
 
 		i := &s3.GetObjectInput{
 			Bucket: aws.String(bn),
@@ -75,7 +75,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, nil
 
 		} else if IsObjectNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q/%#q", bn, p))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
 			return nil, nil
 
 		} else if err != nil {
@@ -87,7 +87,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q/%#q", bn, p))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
 
 		s3Object := &s3.PutObjectInput{
 			Key:           aws.String(p),
