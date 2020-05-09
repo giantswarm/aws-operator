@@ -134,6 +134,12 @@ func (r *Resource) searchMasterInstanceID(ctx context.Context, cr infrastructure
 					},
 				},
 				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCCP),
+					},
+				},
+				{
 					Name: aws.String("instance-state-name"),
 					Values: []*string{
 						aws.String(ec2.InstanceStateNamePending),
