@@ -2,7 +2,6 @@ package tccpn
 
 import (
 	"bytes"
-	"context"
 	"flag"
 	"io/ioutil"
 	"path/filepath"
@@ -35,28 +34,24 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name           string
-		ctx            context.Context
 		azs            []string
 		replicas       int
 		route53Enabled bool
 	}{
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
-			ctx:            unittest.DefaultContextControlPlane(),
 			azs:            []string{"eu-central-1b"},
 			replicas:       1,
 			route53Enabled: true,
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
-			ctx:            unittest.DefaultContextControlPlane(),
 			azs:            []string{"eu-central-1b"},
 			replicas:       1,
 			route53Enabled: false,
 		},
 		{
 			name:           "case 2: basic test with encrypter backend KMS, ha masters",
-			ctx:            unittest.DefaultContextControlPlane(),
 			azs:            []string{"eu-central-1a", "eu-central-1b", "eu-central-1c"},
 			replicas:       3,
 			route53Enabled: true,
@@ -67,7 +62,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var err error
 
-			ctx := unittest.DefaultContext()
+			ctx := unittest.DefaultContextControlPlane()
 			k := unittest.FakeK8sClient()
 
 			var d *changedetection.TCCPN
@@ -156,7 +151,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
-			params, err := r.newTemplateParams(tc.ctx, aws)
+			params, err := r.newTemplateParams(ctx, aws)
 			if err != nil {
 				t.Fatal(err)
 			}

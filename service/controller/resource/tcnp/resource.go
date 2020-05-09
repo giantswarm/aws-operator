@@ -1,7 +1,6 @@
 package tcnp
 
 import (
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -15,7 +14,6 @@ const (
 )
 
 type Config struct {
-	G8sClient versioned.Interface
 	Detection *changedetection.TCNP
 	Images    images.Interface
 	Logger    micrologger.Logger
@@ -26,7 +24,6 @@ type Config struct {
 // Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
-	g8sClient versioned.Interface
 	detection *changedetection.TCNP
 	images    images.Interface
 	logger    micrologger.Logger
@@ -35,9 +32,6 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
-	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -53,7 +47,6 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		g8sClient: config.G8sClient,
 		detection: config.Detection,
 		images:    config.Images,
 		logger:    config.Logger,

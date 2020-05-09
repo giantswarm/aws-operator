@@ -9,9 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -144,7 +142,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr)
+		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -198,7 +196,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr)
+		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -269,7 +267,7 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	return minWorkers
 }
 
-func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -313,7 +311,7 @@ func newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachi
 	return autoScalingGroup, nil
 }
 
-func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -338,15 +336,18 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	return iamPolicies, nil
 }
 
-func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, release releasev1alpha1.Release) (*template.ParamsMainLaunchTemplate, error) {
+func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	image, err := key.AMI(cc.Status.TenantCluster.AWS.Region, release)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var ami string
+	{
+		ami, err = r.images.AMI(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	launchTemplate := &template.ParamsMainLaunchTemplate{
@@ -368,7 +369,7 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			},
 		},
 		Instance: template.ParamsMainLaunchTemplateInstance{
-			Image:      image,
+			Image:      ami,
 			Monitoring: true,
 			Type:       key.MachineDeploymentInstanceType(cr),
 		},
@@ -381,21 +382,21 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	return launchTemplate, nil
 }
 
-func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, release releasev1alpha1.Release) (*template.ParamsMainOutputs, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
+func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
+	var err error
 
-	image, err := key.AMI(cc.Status.TenantCluster.AWS.Region, release)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var ami string
+	{
+		ami, err = r.images.AMI(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	outputs := &template.ParamsMainOutputs{
 		DockerVolumeSizeGB: key.MachineDeploymentDockerVolumeSizeGB(cr),
 		Instance: template.ParamsMainOutputsInstance{
-			Image: image,
+			Image: ami,
 			Type:  key.MachineDeploymentInstanceType(cr),
 		},
 		OperatorVersion: key.OperatorVersion(&cr),
@@ -404,7 +405,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeploym
 	return outputs, nil
 }
 
-func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainRouteTables, error) {
+func (r *Resource) newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainRouteTables, error) {
 	var routeTables template.ParamsMainRouteTables
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -435,7 +436,7 @@ func newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	return &routeTables, nil
 }
 
-func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainSecurityGroups, error) {
+func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -478,7 +479,7 @@ func newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	return securityGroups, nil
 }
 
-func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainSubnets, error) {
 	var subnets template.ParamsMainSubnets
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -510,38 +511,38 @@ func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeploym
 	return &subnets, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, release releasev1alpha1.Release) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
+		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		iamPolicies, err := newIAMPolicies(ctx, cr)
+		iamPolicies, err := r.newIAMPolicies(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchTemplate, err := newLaunchTemplate(ctx, cr, release)
+		launchTemplate, err := r.newLaunchTemplate(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		outputs, err := newOutputs(ctx, cr, release)
+		outputs, err := r.newOutputs(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		routeTables, err := newRouteTables(ctx, cr)
+		routeTables, err := r.newRouteTables(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		securityGroups, err := newSecurityGroups(ctx, cr)
+		securityGroups, err := r.newSecurityGroups(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		subnets, err := newSubnets(ctx, cr)
+		subnets, err := r.newSubnets(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		vpc, err := newVPC(ctx, cr)
+		vpc, err := r.newVPC(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -561,7 +562,7 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	return params, nil
 }
 
-func newVPC(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainVPC, error) {
+func (r *Resource) newVPC(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainVPC, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
