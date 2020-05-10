@@ -422,7 +422,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 	{
 		c := tcnp.Config{
 			Detection: tcnpChangeDetection,
-			G8sClient: config.K8sClient.G8sClient(),
+			Images:    config.Images,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
