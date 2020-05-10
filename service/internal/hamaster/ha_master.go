@@ -2,18 +2,17 @@ package hamaster
 
 import (
 	"context"
-	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/k8sclient"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/cachekeycontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster/internal/cache"
 )
 
 type Config struct {
@@ -23,8 +22,8 @@ type Config struct {
 type HAMaster struct {
 	k8sClient k8sclient.Interface
 
-	awsCache map[string]infrastructurev1alpha2.AWSControlPlane
-	g8sCache map[string]infrastructurev1alpha2.G8sControlPlane
+	awsCache *cache.AWS
+	g8sCache *cache.G8s
 }
 
 func New(config Config) (*HAMaster, error) {
@@ -35,79 +34,34 @@ func New(config Config) (*HAMaster, error) {
 	h := &HAMaster{
 		k8sClient: config.K8sClient,
 
-		awsCache: map[string]infrastructurev1alpha2.AWSControlPlane{},
-		g8sCache: map[string]infrastructurev1alpha2.G8sControlPlane{},
+		awsCache: cache.NewAWS(),
+		g8sCache: cache.NewG8s(),
 	}
 
 	return h, nil
 }
 
 func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, error) {
-	var err error
-	var ok bool
-
 	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var cacheKey string
-	{
-		ck, ok := cachekeycontext.FromContext(ctx)
-		if ok {
-			cacheKey = fmt.Sprintf("%s/%s", ck, key.ClusterID(cr))
-		}
+	// We need the AWSControlPlane CR because it holds the availability zones. The
+	// system's implementation requires there only to be 1, 2 or 3 availability
+	// zones.
+	aws, err := h.cachedAWS(ctx, cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	// We need the G8sControlPlane CR because it holds the replica count. This
 	// tells us how many masters the current setup defines and ultimately dictates
 	// the Master IDs. The system's implementation requires there only to be 1 or
 	// 3 masters.
-	var g8s infrastructurev1alpha2.G8sControlPlane
-	if cacheKey == "" {
-		g8s, err = h.getG8s(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	} else {
-		g8s, ok = h.g8sCache[cacheKey]
-		if !ok {
-			g8s, err = h.getG8s(ctx, cr)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			if len(h.g8sCache) == 1 {
-				h.g8sCache = map[string]infrastructurev1alpha2.G8sControlPlane{}
-			}
-
-			h.g8sCache[cacheKey] = g8s
-		}
-	}
-
-	// We need the AWSControlPlane CR because it holds the availability zones. The
-	// system's implementation requires there only to be 1, 2 or 3 availability
-	// zones.
-	var aws infrastructurev1alpha2.AWSControlPlane
-	if cacheKey == "" {
-		aws, err = h.getAWS(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	} else {
-		aws, ok = h.awsCache[cacheKey]
-		if !ok {
-			aws, err = h.getAWS(ctx, cr)
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-
-			if len(h.awsCache) == 1 {
-				h.awsCache = map[string]infrastructurev1alpha2.AWSControlPlane{}
-			}
-
-			h.awsCache[cacheKey] = aws
-		}
+	g8s, err := h.cachedG8s(ctx, cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	// We need a deterministic list of availability zones which we can loop over
@@ -153,7 +107,65 @@ func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, err
 	return mappings, nil
 }
 
-func (h *HAMaster) getAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {
+func (h *HAMaster) cachedAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {
+	var err error
+	var ok bool
+
+	var cluster infrastructurev1alpha2.AWSControlPlane
+	{
+		ck := h.awsCache.Key(ctx, cr)
+
+		if ck == "" {
+			cluster, err = h.lookupAWS(ctx, cr)
+			if err != nil {
+				return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(err)
+			}
+		} else {
+			cluster, ok = h.awsCache.Get(ctx, ck)
+			if !ok {
+				cluster, err = h.lookupAWS(ctx, cr)
+				if err != nil {
+					return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(err)
+				}
+
+				h.awsCache.Set(ctx, ck, cluster)
+			}
+		}
+	}
+
+	return cluster, nil
+}
+
+func (h *HAMaster) cachedG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.G8sControlPlane, error) {
+	var err error
+	var ok bool
+
+	var cluster infrastructurev1alpha2.G8sControlPlane
+	{
+		ck := h.g8sCache.Key(ctx, cr)
+
+		if ck == "" {
+			cluster, err = h.lookupG8s(ctx, cr)
+			if err != nil {
+				return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(err)
+			}
+		} else {
+			cluster, ok = h.g8sCache.Get(ctx, ck)
+			if !ok {
+				cluster, err = h.lookupG8s(ctx, cr)
+				if err != nil {
+					return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(err)
+				}
+
+				h.g8sCache.Set(ctx, ck, cluster)
+			}
+		}
+	}
+
+	return cluster, nil
+}
+
+func (h *HAMaster) lookupAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {
 	var list infrastructurev1alpha2.AWSControlPlaneList
 
 	err := h.k8sClient.CtrlClient().List(
@@ -176,7 +188,7 @@ func (h *HAMaster) getAWS(ctx context.Context, cr metav1.Object) (infrastructure
 	return list.Items[0], nil
 }
 
-func (h *HAMaster) getG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.G8sControlPlane, error) {
+func (h *HAMaster) lookupG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.G8sControlPlane, error) {
 	var list infrastructurev1alpha2.G8sControlPlaneList
 
 	err := h.k8sClient.CtrlClient().List(
