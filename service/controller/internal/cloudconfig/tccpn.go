@@ -7,13 +7,13 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 

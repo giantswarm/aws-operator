@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
