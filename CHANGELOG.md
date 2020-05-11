@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disable profiling for Controller Manager and Scheduler.
 - Add network policy.
 - Move containerPort values from deployment to `values.yaml`.
+- Enable per-cluster configuration of kube-proxy's `conntrackMaxPerCore` parameter.
 
 ### Changed
 

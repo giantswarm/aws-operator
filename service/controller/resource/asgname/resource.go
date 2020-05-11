@@ -22,6 +22,7 @@ const (
 type Config struct {
 	Logger micrologger.Logger
 
+	Stack        string
 	TagKey       string
 	TagValueFunc func(cr key.LabelsGetter) string
 }
@@ -29,6 +30,7 @@ type Config struct {
 type Resource struct {
 	logger micrologger.Logger
 
+	stack        string
 	tagKey       string
 	tagValueFunc func(cr key.LabelsGetter) string
 }
@@ -38,6 +40,9 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.Stack == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Stack must not be empty", config)
+	}
 	if config.TagKey == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.TagKey must not be empty", config)
 	}
@@ -48,6 +53,7 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		logger: config.Logger,
 
+		stack:        config.Stack,
 		tagKey:       config.TagKey,
 		tagValueFunc: config.TagValueFunc,
 	}
@@ -83,7 +89,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				{
 					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
 					Values: []*string{
-						aws.String(key.StackTCNP),
+						aws.String(r.stack),
 					},
 				},
 				{
