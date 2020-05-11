@@ -41,6 +41,7 @@ func newControlPlaneDrainerResourceSet(config controlPlaneDrainerResourceSetConf
 		c := asgname.Config{
 			Logger: config.Logger,
 
+			Stack:        key.StackTCCPN,
 			TagKey:       key.TagControlPlane,
 			TagValueFunc: key.ControlPlaneID,
 		}
