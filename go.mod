@@ -29,7 +29,7 @@ require (
 	github.com/giantswarm/operatorkit v0.2.0
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster v0.2.0
-	github.com/giantswarm/to v0.2.0
+	github.com/giantswarm/to v0.3.0
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v0.2.0
 	github.com/google/go-cmp v0.4.0
