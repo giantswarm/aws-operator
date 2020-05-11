@@ -281,6 +281,8 @@ github.com/giantswarm/tenantcluster v0.2.0 h1:NDra7kcxt22w4HwxuVgBGjgG5BHjZ5bxtl
 github.com/giantswarm/tenantcluster v0.2.0/go.mod h1:YMYyVokto7LbAhl3eezMbpKJtzJ9axqNrvM5VbYWLgs=
 github.com/giantswarm/to v0.2.0 h1:qZj0DUnjUcI/7ajwIVtT6mwmSYQm8g0qBvAPCoS1ZF8=
 github.com/giantswarm/to v0.2.0/go.mod h1:RTRtw+Dyk6YqoiNBOGLO981BqhibtVwogdaFIMO1y/A=
+github.com/giantswarm/to v0.3.0 h1:cEzMYkWLGI3cI8x3a0L3nPCQYJTb/cAaqcIPvxnDmpQ=
+github.com/giantswarm/to v0.3.0/go.mod h1:RTRtw+Dyk6YqoiNBOGLO981BqhibtVwogdaFIMO1y/A=
 github.com/giantswarm/valuemodifier v0.2.0 h1:TaGV03L2LAEhvm7VhaRa4khs/u/JhsQEiZA4e2na8AU=
 github.com/giantswarm/valuemodifier v0.2.0/go.mod h1:GYMylCMZIu9XrSXD8LE5U0bn1KA1z7U533jTRlN7CEM=
 github.com/giantswarm/versionbundle v0.2.0 h1:6EP3+9uO/9z1xu7g4pHNUyENxE+Ix1bc5aFpUMPz5Yg=
