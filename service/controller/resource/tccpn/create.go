@@ -3,8 +3,6 @@ package tccpn
 import (
 	"context"
 	"fmt"
-	"net"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -265,19 +263,7 @@ func newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*te
 		return nil, microerror.Mask(err)
 	}
 
-	var masterSubnets []net.IPNet
-	{
-		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-		for _, az := range zones {
-			if az.Name != key.ControlPlaneAvailabilityZones(cr)[0] {
-				continue
-			}
-			masterSubnets = append(masterSubnets, az.Subnet.Private.CIDR)
-		}
-	}
-
 	eni := &template.ParamsMainENI{
-		IpAddress:       key.ControlPlaneENIIpAddress(masterSubnets[0]),
 		Name:            key.ControlPlaneENIName(&cr, 0),
 		SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 		SubnetID:        idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(key.ControlPlaneAvailabilityZones(cr)[0]))),

@@ -4,18 +4,16 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/v_6_0_0"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -51,18 +49,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	listOptions := metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s", key.TagCluster, key.ClusterID(&cr)),
-	}
-
-	cps, err := t.g8sClient.InfrastructureV1alpha2().AWSControlPlanes(cr.Namespace).List(listOptions)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	if len(cps.Items) != 1 {
-		return nil, microerror.Maskf(executionFailedError, "expected 1 control plane cr but found %d", len(cps.Items))
-	}
-	cp := cps.Items[0]
 
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
 	if err != nil {
@@ -98,17 +84,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 
 	masterID := 0 // for now we have only 1 master, TODO get this value via render function as argument
 
-	var masterSubnet net.IPNet
-	{
-		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-		for _, az := range zones {
-			if az.Name == key.ControlPlaneAvailabilityZones(cp)[masterID] {
-				masterSubnet = az.Subnet.Private.CIDR
-				break
-			}
-		}
-	}
-
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -125,7 +100,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
-				masterSubnet:   masterSubnet,
 				masterID:       masterID,
 				registryDomain: t.config.RegistryDomain,
 			},
@@ -300,19 +274,6 @@ func (e *HAMasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			AssetContent: cloudconfig.Etcd3ExtraConfig,
 			Path:         "/etc/systemd/system/etcd3.d/10-require-attach-dep.conf",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
-			AssetContent: cloudconfig.SystemdNetworkdEth1Network,
-			Path:         "/etc/systemd/network/10-eth1.network",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
