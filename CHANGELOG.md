@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Replace CoreOS with Flatcar.
-- Update version of architect-orb used for builds to 0.8.14.
 
 ### Fixed
 
