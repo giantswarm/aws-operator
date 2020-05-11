@@ -8,7 +8,7 @@ After=network.target
 
 [Service]
 # image is from https://github.com/giantswarm/aws-attach-etcd-dep
-Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:ba6078639682ef65afc58fadfc1fb78962d4ef08"
+Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:b5d570e051a53c427dd86e7901cfb10b76b2e1b1"
 Environment="NAME=%p.service"
 Type=oneshot
 RemainAfterExit=yes
