@@ -51,7 +51,7 @@ const TemplateMainAutoScalingGroup = `
 
         # Minimum amount of nodes that must always be running during a rolling
         # update.
-        MinInstancesInService: 1
+        MinInstancesInService: 0
 
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1

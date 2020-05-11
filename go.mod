@@ -6,7 +6,7 @@ require (
 	github.com/aws/amazon-vpc-cni-k8s v1.6.0
 	github.com/aws/aws-sdk-go v1.29.32
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions v0.3.6
+	github.com/giantswarm/apiextensions v0.3.8
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs/v2 v2.0.0
@@ -29,7 +29,7 @@ require (
 	github.com/giantswarm/operatorkit v0.2.1
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster/v2 v2.0.0
-	github.com/giantswarm/to v0.2.0
+	github.com/giantswarm/to v0.3.0
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v0.2.0
 	github.com/google/go-cmp v0.4.0

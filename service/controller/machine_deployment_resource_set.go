@@ -224,6 +224,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 		c := asgname.Config{
 			Logger: config.Logger,
 
+			Stack:        key.StackTCNP,
 			TagKey:       key.TagMachineDeployment,
 			TagValueFunc: key.MachineDeploymentID,
 		}
