@@ -8,16 +8,16 @@ After=network.target
 
 [Service]
 # image is from https://github.com/giantswarm/aws-attach-etcd-dep
-Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:b5d570e051a53c427dd86e7901cfb10b76b2e1b1"
+Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:40c13721400c3e824b908e081c12666fd81cb0b9"
 Environment="NAME=%p.service"
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/bash -c "docker run --rm -i \
       -v /dev:/dev \
+      -v /etc/systemd/network:/etc/systemd/network
       --privileged \
       --name ${NAME} \
       ${IMAGE} \
-      --eni-configure-routing=true \
       --eni-device-index=1 \
       --eni-tag-key=Name \
       --eni-tag-value={{ .MasterENIName }} \
@@ -26,6 +26,8 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-device-label=etcd \
       --volume-tag-key=Name \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
+#ExecStartPost=/usr/bin/systemctl daemon-reload
+#ExecStartPost=/usr/bin/systemctl restart systemd-networkd
 [Install]
 WantedBy=multi-user.target
 `
