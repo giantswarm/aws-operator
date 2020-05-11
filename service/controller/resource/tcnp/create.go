@@ -9,7 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -36,6 +38,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		if cc.Status.TenantCluster.Encryption.Key == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
+		if !cc.Status.TenantCluster.S3Object.Uploaded {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "s3 object not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -132,11 +140,25 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
+	var release *releasev1alpha1.Release
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the machine deployment release label")
+
+		releaseVersion := key.ReleaseVersion(&cr)
+		releaseName := key.ReleaseName(releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the machine deployment release label")
+	}
+
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr)
+		params, err := newTemplateParams(ctx, cr, *release)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -186,11 +208,25 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		return microerror.Mask(err)
 	}
 
+	var release *releasev1alpha1.Release
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the release corresponding to the machine deployment release label")
+
+		releaseVersion := key.ReleaseVersion(&cr)
+		releaseName := key.ReleaseName(releaseVersion)
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found the release corresponding to the machine deployment release label")
+	}
+
 	var templateBody string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
 
-		params, err := newTemplateParams(ctx, cr)
+		params, err := newTemplateParams(ctx, cr, *release)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -329,8 +365,13 @@ func newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	return iamPolicies, nil
 }
 
-func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLaunchTemplate, error) {
+func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, release releasev1alpha1.Release) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	image, err := key.ImageID(cc.Status.TenantCluster.AWS.Region, release)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -354,7 +395,7 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 			},
 		},
 		Instance: template.ParamsMainLaunchTemplateInstance{
-			Image:      key.ImageID(cc.Status.TenantCluster.AWS.Region),
+			Image:      image,
 			Monitoring: true,
 			Type:       key.MachineDeploymentInstanceType(cr),
 		},
@@ -367,8 +408,13 @@ func newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 	return launchTemplate, nil
 }
 
-func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
+func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, release releasev1alpha1.Release) (*template.ParamsMainOutputs, error) {
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	image, err := key.ImageID(cc.Status.TenantCluster.AWS.Region, release)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -376,7 +422,7 @@ func newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeploym
 	outputs := &template.ParamsMainOutputs{
 		DockerVolumeSizeGB: key.MachineDeploymentDockerVolumeSizeGB(cr),
 		Instance: template.ParamsMainOutputsInstance{
-			Image: key.ImageID(cc.Status.TenantCluster.AWS.Region),
+			Image: image,
 			Type:  key.MachineDeploymentInstanceType(cr),
 		},
 		OperatorVersion: key.OperatorVersion(&cr),
@@ -491,7 +537,7 @@ func newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeploym
 	return &subnets, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, release releasev1alpha1.Release) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := newAutoScalingGroup(ctx, cr)
@@ -502,11 +548,11 @@ func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachine
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		launchTemplate, err := newLaunchTemplate(ctx, cr)
+		launchTemplate, err := newLaunchTemplate(ctx, cr, release)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		outputs, err := newOutputs(ctx, cr)
+		outputs, err := newOutputs(ctx, cr, release)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

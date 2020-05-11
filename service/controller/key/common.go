@@ -6,6 +6,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
@@ -80,8 +83,24 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
 
-func ImageID(region string) string {
-	return imageIDs()[region]
+// ImageID returns the EC2 AMI for the configured region and given version.
+func ImageID(region string, release releasev1alpha1.Release) (string, error) {
+	osVersion, err := OSVersion(release)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	regionAMIs, ok := amiInfo[osVersion]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for version '%s'", osVersion)
+	}
+
+	regionAMI, ok := regionAMIs[region]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for region '%s'", region)
+	}
+
+	return regionAMI, nil
 }
 
 func KubeletLabelsTCCP(getter LabelsGetter) string {
@@ -290,38 +309,19 @@ func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
 }
 
-// imageIDs returns our Container Linux AMIs for each active AWS region. Note
-// that AMIs should always be for HVM virtualisation, not PV. Current Release is
-// CoreOS Container Linux stable 2135.4.0. AMI IDs are copied from the following
-// resource.
-//
-//     https://stable.release.core-os.net/amd64-usr/2135.4.0/coreos_production_ami_hvm.txt.
-//
-func imageIDs() map[string]string {
-	return map[string]string{
-		"ap-northeast-1": "ami-06443443a3ad575e0",
-		"ap-northeast-2": "ami-05385569b790d035a",
-		"ap-south-1":     "ami-05d7bc2359eaaecf1",
-		"ap-southeast-1": "ami-0e69fd5ed05e58e4a",
-		"ap-southeast-2": "ami-0af85d64c1d5aeae6",
-		"ca-central-1":   "ami-00cbc28393f9da64c",
-		"cn-north-1":     "ami-001272d09c87c54fa",
-		"cn-northwest-1": "ami-0c08167b4fb0293c1",
-		"eu-central-1":   "ami-038cea5071a5ee580",
-		"eu-north-1":     "ami-01f28d71d1c924642",
-		"eu-west-1":      "ami-067301c1a68e593f5",
-		"eu-west-2":      "ami-0f5c4ede722171894",
-		"eu-west-3":      "ami-07bf54c1c2b7c368e",
-		"sa-east-1":      "ami-0d1ca6b44a76c404a",
-		"us-east-1":      "ami-06d2804068b372d32",
-		"us-east-2":      "ami-07ee0d30575e363c4",
-		"us-gov-east-1":  "ami-0751c20ce4cb557df",
-		"us-gov-west-1":  "ami-a9571fc8",
-		"us-west-1":      "ami-0d05a67ab67139420",
-		"us-west-2":      "ami-039eb9d6842534000",
-	}
-}
-
 func isChinaRegion(region string) bool {
 	return strings.HasPrefix(region, "cn-")
+}
+
+func ComponentVersion(release releasev1alpha1.Release, componentName string) (string, error) {
+	for _, component := range release.Spec.Components {
+		if component.Name == componentName {
+			return component.Version, nil
+		}
+	}
+	return "", microerror.Maskf(notFoundError, "version for component %#v not found on release %#v", componentName, release.Name)
+}
+
+func OSVersion(release releasev1alpha1.Release) (string, error) {
+	return ComponentVersion(release, ComponentOS)
 }

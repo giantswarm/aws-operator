@@ -79,6 +79,11 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q/%#q", b, k))
 	}
 
+	// We want to prevent Cloud Formation stacks from being created without the
+	// Cloud Config being uploaded to S3. The TCCPN and TCNP handlers check this
+	// value and cancel in case the S3 Object is not yet uploaded.
+	cc.Status.TenantCluster.S3Object.Uploaded = true
+
 	s3Object := &s3.PutObjectInput{
 		Key:           aws.String(k),
 		Body:          strings.NewReader(string(body)),

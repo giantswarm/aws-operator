@@ -224,7 +224,7 @@ Resources:
             VolumeType: gp2
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
-        ImageId: ami-038cea5071a5ee580
+        ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
         Monitoring:
           Enabled: false
@@ -241,7 +241,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_0_0/cluster-8y5ck-tccpn"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn"
                     }
                   ]
                 }

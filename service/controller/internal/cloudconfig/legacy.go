@@ -35,7 +35,7 @@ func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l str
 				},
 				CloudProvider: key.CloudProvider,
 				DNS: g8sv1alpha1.ClusterKubernetesDNS{
-					IP: dnsIPFromRange(c.ClusterIPRange),
+					IP: dnsIPFromRange(c.ClusterIPRange).String(),
 				},
 				Domain: c.ClusterDomain,
 				Kubelet: g8sv1alpha1.ClusterKubernetesKubelet{
