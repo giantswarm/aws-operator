@@ -26,8 +26,8 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-device-label=etcd \
       --volume-tag-key=Name \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
-#ExecStartPost=/usr/bin/systemctl daemon-reload
-#ExecStartPost=/usr/bin/systemctl restart systemd-networkd
+ExecStartPost=/usr/bin/systemctl daemon-reload
+ExecStartPost=/usr/bin/systemctl restart systemd-networkd
 
 [Install]
 WantedBy=multi-user.target
