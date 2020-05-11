@@ -14,7 +14,7 @@ Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/bash -c "docker run --rm -i \
       -v /dev:/dev \
-      -v /etc/systemd/network:/etc/systemd/network
+      -v /etc/systemd/network:/etc/systemd/network \
       --privileged \
       --name ${NAME} \
       ${IMAGE} \
@@ -28,6 +28,7 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
 #ExecStartPost=/usr/bin/systemctl daemon-reload
 #ExecStartPost=/usr/bin/systemctl restart systemd-networkd
+
 [Install]
 WantedBy=multi-user.target
 `
