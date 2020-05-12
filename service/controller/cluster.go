@@ -52,6 +52,7 @@ type ClusterConfig struct {
 	OIDC                       ClusterConfigOIDC
 	PodInfraContainerImage     string
 	RegistryDomain             string
+	CNI                        ClusterConfigCNI
 	Route53Enabled             bool
 	RouteTables                string
 	SSHUserList                string
@@ -83,6 +84,11 @@ type ClusterConfigAPIWhitelist struct {
 type ClusterConfigAPIWhitelistConfig struct {
 	Enabled    bool
 	SubnetList string
+}
+
+// ClusterConfigCNI represents the configuration of the CNI
+type ClusterConfigCNI struct {
+	ExternalSNAT bool
 }
 
 type Cluster struct {

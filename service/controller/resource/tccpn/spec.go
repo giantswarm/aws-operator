@@ -12,3 +12,8 @@ type Whitelist struct {
 	Enabled    bool
 	SubnetList string
 }
+
+// Defines CNI options
+type CNI struct {
+	ExternalSNAT bool
+}

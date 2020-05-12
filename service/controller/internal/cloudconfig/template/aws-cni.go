@@ -141,7 +141,7 @@ spec:
             ## Deviation from original manifest - 5
             ## disable SNAT as we setup NATGW in the route tables
             - name: AWS_VPC_K8S_CNI_EXTERNALSNAT
-              value: "true"
+              value: "{{.ExternalSNAT}}"
             ## Deviation from original manifest - 6
             ## Explicit interface naming
             - name: AWS_VPC_K8S_CNI_VETHPREFIX

@@ -109,6 +109,12 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		}
 	}
 
+	// Allow the actual externalSNAT to be set by the CR
+	externalSNAT := t.config.ExternalSNAT
+	if key.ExternalSNAT(cr) != externalSNAT {
+		externalSNAT = key.ExternalSNAT(cr)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -125,6 +131,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				externalSNAT:   externalSNAT,
 				masterSubnet:   masterSubnet,
 				masterID:       masterID,
 				registryDomain: t.config.RegistryDomain,

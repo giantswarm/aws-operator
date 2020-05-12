@@ -120,6 +120,7 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.IncludeTags, true, "Should resource tags be included (especially for restricted regions, like S3 buckets in China regions).")
 	daemonCommand.PersistentFlags().Int(f.Service.AWS.S3AccessLogsExpiration, 365, "S3 access logs expiration policy.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.TrustedAdvisor.Enabled, "", "Whether trusted advisor metrics collection is enabled.")
+	daemonCommand.PersistentFlags().Bool(f.Service.AWS.CNI.ExternalSNAT, false, "Whether External SNAT for the AWS CNI is enabled.")
 
 	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.CIDR, 0, "Calico CIDR of guest clusters.")
 	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.MTU, 0, "Calico MTU of guest clusters.")

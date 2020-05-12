@@ -75,6 +75,12 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	// Allow the actual externalSNAT to be set by the CR
+	externalSNAT := t.config.ExternalSNAT
+	if key.ExternalSNAT(cr) != externalSNAT {
+		externalSNAT = key.ExternalSNAT(cr)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -90,6 +96,7 @@ func (t *TCCP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				externalSNAT:   externalSNAT,
 				registryDomain: t.config.RegistryDomain,
 			},
 			cc:               cc,
