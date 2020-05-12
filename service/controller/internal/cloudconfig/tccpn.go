@@ -297,6 +297,19 @@ func (e *HAMasterExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0644,
 		},
+		{
+			AssetContent: cloudconfig.SystemdNetworkdEth1Network,
+			Path:         "/etc/systemd/network/00-eth1-no-dhcp.network",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
 	}
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
