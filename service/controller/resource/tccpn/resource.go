@@ -21,7 +21,6 @@ type Config struct {
 	APIWhitelist     APIWhitelist
 	InstallationName string
 	Route53Enabled   bool
-	CNI              CNI
 }
 
 // Resource implements the TCCPN resource, which stands for Tenant Cluster Control
@@ -34,7 +33,6 @@ type Resource struct {
 	apiWhitelist     APIWhitelist
 	installationName string
 	route53Enabled   bool
-	cni              CNI
 }
 
 func New(config Config) (*Resource, error) {
@@ -63,7 +61,6 @@ func New(config Config) (*Resource, error) {
 		logger:    config.Logger,
 
 		apiWhitelist:     config.APIWhitelist,
-		cni:              config.CNI,
 		installationName: config.InstallationName,
 		route53Enabled:   config.Route53Enabled,
 	}

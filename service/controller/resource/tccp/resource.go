@@ -37,7 +37,6 @@ type Config struct {
 	APIWhitelist       ConfigAPIWhitelist
 	CIDRBlockAWSCNI    string
 	Detection          *changedetection.TCCP
-	ExternalSNAT       bool
 	InstallationName   string
 	InstanceMonitoring bool
 	PublicRouteTables  string
