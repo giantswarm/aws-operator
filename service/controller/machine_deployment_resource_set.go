@@ -64,6 +64,7 @@ type machineDeploymentResourceSetConfig struct {
 	CalicoSubnet               string
 	ClusterIPRange             string
 	DockerDaemonCIDR           string
+	ExternalSNAT               bool
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
@@ -153,6 +154,7 @@ func newMachineDeploymentResourceSet(config machineDeploymentResourceSetConfig) 
 				CalicoSubnet:              config.CalicoSubnet,
 				ClusterIPRange:            config.ClusterIPRange,
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				ExternalSNAT:              config.ExternalSNAT,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 				ClusterDomain:             config.ClusterDomain,

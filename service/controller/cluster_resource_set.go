@@ -76,7 +76,6 @@ type clusterResourceSetConfig struct {
 	CalicoSubnet               string
 	ClusterIPRange             string
 	DockerDaemonCIDR           string
-	ExternalSNAT               bool
 	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int

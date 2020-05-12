@@ -30,6 +30,7 @@ type MachineDeploymentConfig struct {
 	ClusterIPRange             string
 	DeleteLoggingBucket        bool
 	DockerDaemonCIDR           string
+	ExternalSNAT               bool
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int

@@ -217,6 +217,7 @@ func New(config Config) (*Service, error) {
 			ClusterDomain:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DockerDaemonCIDR:          config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
+			ExternalSNAT:              config.Viper.GetBool(config.Flag.Service.AWS.CNI.ExternalSNAT),
 			IgnitionPath:              config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
 			ImagePullProgressDeadline: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
 			InstallationName:          config.Viper.GetString(config.Flag.Service.Installation.Name),

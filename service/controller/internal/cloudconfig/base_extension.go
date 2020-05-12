@@ -40,17 +40,10 @@ func (e *baseExtension) templateDataTCCPN() TemplateData {
 }
 
 func (e *baseExtension) templateDataTCCP() TemplateData {
-	// Allow the actual externalSNAT to be set by the CR
-	externalSNAT := e.externalSNAT
-	if key.ExternalSNAT(e.cluster) != externalSNAT {
-		externalSNAT = key.ExternalSNAT(e.cluster)
-	}
-
 	awsRegion := key.Region(e.cluster)
 
 	data := TemplateData{
 		AWSRegion:      awsRegion,
-		ExternalSNAT:   externalSNAT,
 		IsChinaRegion:  key.IsChinaRegion(awsRegion),
 		RegistryDomain: e.registryDomain,
 	}
@@ -63,6 +56,7 @@ func (e *baseExtension) templateDataTCNP() TemplateData {
 
 	data := TemplateData{
 		AWSRegion:      awsRegion,
+		ExternalSNAT:   e.externalSNAT,
 		IsChinaRegion:  key.IsChinaRegion(awsRegion),
 		RegistryDomain: e.registryDomain,
 	}

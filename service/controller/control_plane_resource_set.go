@@ -55,6 +55,7 @@ type controlPlaneResourceSetConfig struct {
 	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
+	ExternalSNAT              bool
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	InstallationName          string
@@ -138,6 +139,7 @@ func newControlPlaneResourceSet(config controlPlaneResourceSetConfig) (*controll
 				ClusterDomain:             config.ClusterDomain,
 				ClusterIPRange:            config.ClusterIPRange,
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				ExternalSNAT:              config.ExternalSNAT,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,

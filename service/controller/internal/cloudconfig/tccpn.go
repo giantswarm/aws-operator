@@ -109,10 +109,12 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 		}
 	}
 
-	// Allow the actual externalSNAT to be set by the CR
-	externalSNAT := t.config.ExternalSNAT
-	if key.ExternalSNAT(cr) != externalSNAT {
-		externalSNAT = key.ExternalSNAT(cr)
+	// Allow the actual externalSNAT to be set by the CR.
+	var externalSNAT bool
+	if key.ExternalSNAT(cr) == nil {
+		externalSNAT = t.config.ExternalSNAT
+	} else {
+		externalSNAT = *key.ExternalSNAT(cr)
 	}
 
 	var params k8scloudconfig.Params

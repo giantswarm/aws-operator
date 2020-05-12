@@ -14,6 +14,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type TCNPConfig struct {
@@ -52,6 +53,14 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	// Allow the actual externalSNAT to be set by the CR.
+	var externalSNAT bool
+	if key.ExternalSNAT(cr) == nil {
+		externalSNAT = t.config.ExternalSNAT
+	} else {
+		externalSNAT = *key.ExternalSNAT(cr)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		// Default registry, kubernetes, etcd images etcd.
@@ -65,6 +74,7 @@ func (t *TCNP) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster,
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				externalSNAT:   externalSNAT,
 				registryDomain: t.config.RegistryDomain,
 			},
 			cc:           cc,
