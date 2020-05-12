@@ -9,16 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+### Fixed
+
+- Fix RBAC rules for Control Plane CR migration.
+
+
+
+## [8.5.0] 2020-05-11
+
 ### Added
 
 - Add common labels to our managed components.
 - Disable profiling for Controller Manager and Scheduler.
 - Add network policy.
 - Move containerPort values from deployment to `values.yaml`.
+- Enable per-cluster configuration of kube-proxy's `conntrackMaxPerCore` parameter.
 
 ### Changed
 
 - Replace CoreOS with Flatcar.
+
+### Fixed
+
+- Fix cluster creation by preventing S3 Object upload race condition.
+
+
 
 ## [8.4.0] 2020-04-23
 
@@ -30,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve cleanup of `DrainerConfig` CRs after node draining.
 - Use release.Revision in Helm chart for Helm 3 support.
+
+
 
 ## [8.3.0] 2020-04-17
 
@@ -80,8 +99,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.4.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...HEAD
 
+[8.5.0]: https://github.com/giantswarm/aws-operator/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/giantswarm/aws-operator/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...v8.3.0
 [8.2.3]: https://github.com/giantswarm/aws-operator/compare/v8.2.2...v8.2.3

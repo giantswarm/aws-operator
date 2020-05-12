@@ -24,12 +24,15 @@ rules:
       - get
 
   # The aws-operator needs read and write access to the CAPI Cluster CR in order
-  # to set the API endpoint in its status.
+  # to set the API endpoint in its status. Note that the get permission is used
+  # within the ensurecpcrs handler, which is for migration purposes and can be
+  # removed at some point.
   - apiGroups:
       - cluster.x-k8s.io
     resources:
       - clusters
     verbs:
+      - get
       - list
   - apiGroups:
       - cluster.x-k8s.io

@@ -42,6 +42,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if !cc.Status.TenantCluster.S3Object.Uploaded {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "s3 object not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
 		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")

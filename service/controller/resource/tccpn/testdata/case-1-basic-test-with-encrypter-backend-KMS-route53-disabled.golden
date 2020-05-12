@@ -54,7 +54,7 @@ Resources:
 
         # Minimum amount of nodes that must always be running during a rolling
         # update.
-        MinInstancesInService: 1
+        MinInstancesInService: 0
 
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
@@ -242,7 +242,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_0_0/cluster-8y5ck-tccpn"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn"
                     }
                   ]
                 }

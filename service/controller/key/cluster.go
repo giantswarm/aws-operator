@@ -16,7 +16,7 @@ import (
 const (
 	// CloudConfigVersion defines the version of k8scloudconfig in use. It is used
 	// in the main stack output and S3 object paths.
-	CloudConfigVersion = "v_6_0_0"
+	CloudConfigVersion = "v_6_1_0"
 	CloudProvider      = "aws"
 )
 

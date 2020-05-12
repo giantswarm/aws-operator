@@ -46,6 +46,9 @@ func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l str
 					Docker: g8sv1alpha1.ClusterKubernetesNetworkSetupDocker{
 						Image: c.NetworkSetupDockerImage,
 					},
+					KubeProxy: g8sv1alpha1.ClusterKubernetesNetworkSetupKubeProxy{
+						ConntrackMaxPerCore: cr.Spec.Cluster.KubeProxy.ConntrackMaxPerCore,
+					},
 				},
 				SSH: g8sv1alpha1.ClusterKubernetesSSH{
 					UserList: stringToUserList(c.SSHUserList),
