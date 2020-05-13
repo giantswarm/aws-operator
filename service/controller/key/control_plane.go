@@ -37,7 +37,7 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 }
 
 func ControlPlaneENIName(getter LabelsGetter, masterID int) string {
-	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), masterID)
+	return fmt.Sprintf("%s-master%d-etcd-eni", ClusterID(getter), masterID)
 }
 
 func ControlPlaneLaunchTemplateName(getter LabelsGetter, masterID int) string {

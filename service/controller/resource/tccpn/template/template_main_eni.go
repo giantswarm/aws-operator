@@ -2,7 +2,7 @@ package template
 
 const TemplateMainENI = `
 {{- define "eni" -}}
-  MasterEni1:
+  MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
        Description: A Network interface used for etcd.
