@@ -510,11 +510,11 @@ func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.
 	}
 
 	recordSets := &template.ParamsMainRecordSets{
-		ClusterID:      key.ClusterID(&cr),
-		HostedZoneID:   cc.Status.TenantCluster.DNS.HostedZoneID,
-		BaseDomain:     key.ClusterBaseDomain(cl),
-		Records:        records,
-		Route53Enabled: r.route53Enabled,
+		ClusterID:            key.ClusterID(&cr),
+		InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
+		BaseDomain:           key.ClusterBaseDomain(cl),
+		Records:              records,
+		Route53Enabled:       r.route53Enabled,
 	}
 
 	return recordSets, nil
