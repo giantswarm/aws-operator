@@ -10,7 +10,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
     - EtcdVolume
-    - MasterEni
+    - MasterEni1
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
