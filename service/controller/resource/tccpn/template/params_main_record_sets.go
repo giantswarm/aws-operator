@@ -1,11 +1,11 @@
 package template
 
 type ParamsMainRecordSets struct {
-	BaseDomain     string
-	ClusterID      string
-	HostedZoneID   string
-	Records        []ParamsMainRecordSetsRecord
-	Route53Enabled bool
+	BaseDomain           string
+	ClusterID            string
+	InternalHostedZoneID string
+	Records              []ParamsMainRecordSetsRecord
+	Route53Enabled       bool
 }
 
 type ParamsMainRecordSetsRecord struct {

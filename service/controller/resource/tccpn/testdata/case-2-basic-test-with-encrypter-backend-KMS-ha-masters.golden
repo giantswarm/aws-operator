@@ -633,7 +633,7 @@ Resources:
       ResourceRecords:
       - !GetAtt MasterEni.PrimaryPrivateIpAddress
       Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: hosted-zone-id
+      HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60
   ControlPlaneRecordSet2:
@@ -642,7 +642,7 @@ Resources:
       ResourceRecords:
       - !GetAtt MasterEni2.PrimaryPrivateIpAddress
       Name: 'etcd2.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: hosted-zone-id
+      HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60
   ControlPlaneRecordSet3:
@@ -651,6 +651,6 @@ Resources:
       ResourceRecords:
       - !GetAtt MasterEni3.PrimaryPrivateIpAddress
       Name: 'etcd3.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: hosted-zone-id
+      HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60
