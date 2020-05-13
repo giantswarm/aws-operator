@@ -73,7 +73,7 @@ Resources:
        SubnetId: subnet-id-eu-central-1b
        Tags:
        - Key: Name
-         Value: 8y5ck-master0-etcd-eni
+         Value: 8y5ck-master0-eni
        - Key: node.k8s.amazonaws.com/no_manage
          Value: "true"
   EtcdVolume:

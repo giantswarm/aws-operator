@@ -3,7 +3,6 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -258,14 +257,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
-	var masterSubnet net.IPNet
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name == mapping.AZ {
-			masterSubnet = az.Subnet.Private.CIDR
-			break
-		}
-	}
-
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -284,7 +275,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			clusterCerts:     certFiles,
 			encrypter:        t.config.Encrypter,
 			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
-			masterSubnet:     masterSubnet,
 			masterID:         mapping.ID,
 			randomKeyTmplSet: randomKeyTmplSet,
 			registryDomain:   t.config.RegistryDomain,
