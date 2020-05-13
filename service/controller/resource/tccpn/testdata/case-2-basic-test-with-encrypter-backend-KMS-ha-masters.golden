@@ -8,7 +8,9 @@ Outputs:
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1a
@@ -64,7 +66,9 @@ Resources:
         PauseTime: PT15M
   ControlPlaneNodeAutoScalingGroup2:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -120,7 +124,9 @@ Resources:
         PauseTime: PT15M
   ControlPlaneNodeAutoScalingGroup3:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1c
@@ -181,7 +187,6 @@ Resources:
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1a
-       PrivateIpAddress: 10.100.3.4
        Tags:
        - Key: Name
          Value: 8y5ck-master1-eni
@@ -194,7 +199,6 @@ Resources:
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1b
-       PrivateIpAddress: 10.100.3.68
        Tags:
        - Key: Name
          Value: 8y5ck-master2-eni
@@ -207,7 +211,6 @@ Resources:
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1c
-       PrivateIpAddress: 10.100.3.132
        Tags:
        - Key: Name
          Value: 8y5ck-master3-eni
@@ -633,7 +636,7 @@ Resources:
       ResourceRecords:
       - !GetAtt MasterEni.PrimaryPrivateIpAddress
       Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: hosted-zone-id
+      HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60
   ControlPlaneRecordSet2:
@@ -642,7 +645,7 @@ Resources:
       ResourceRecords:
       - !GetAtt MasterEni2.PrimaryPrivateIpAddress
       Name: 'etcd2.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: hosted-zone-id
+      HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60
   ControlPlaneRecordSet3:
@@ -651,6 +654,6 @@ Resources:
       ResourceRecords:
       - !GetAtt MasterEni3.PrimaryPrivateIpAddress
       Name: 'etcd3.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
-      HostedZoneId: hosted-zone-id
+      HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60

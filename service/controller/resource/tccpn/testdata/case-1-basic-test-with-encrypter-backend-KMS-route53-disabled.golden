@@ -8,7 +8,9 @@ Outputs:
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -69,7 +71,6 @@ Resources:
        GroupSet:
        - master-security-group-id
        SubnetId: subnet-id-eu-central-1b
-       PrivateIpAddress: 10.100.3.68
        Tags:
        - Key: Name
          Value: 8y5ck-master0-eni

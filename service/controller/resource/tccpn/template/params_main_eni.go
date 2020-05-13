@@ -5,7 +5,6 @@ type ParamsMainENI struct {
 }
 
 type ParamsMainENIItem struct {
-	IpAddress       string
 	Name            string
 	Resource        string
 	SecurityGroupID string

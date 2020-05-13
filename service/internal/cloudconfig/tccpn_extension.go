@@ -3,8 +3,6 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
-	"net"
-
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
@@ -26,7 +24,6 @@ type TCCPNExtension struct {
 	clusterCerts     []certs.File
 	encrypter        encrypter.Interface
 	encryptionKey    string
-	masterSubnet     net.IPNet
 	masterID         int
 	randomKeyTmplSet RandomKeyTmplSet
 	registryDomain   string
@@ -162,7 +159,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 		{
 			AssetContent: template.SystemdNetworkdEth1Network,
-			Path:         "/etc/systemd/network/10-eth1.network",
+			Path:         "/etc/systemd/network/00-eth1-no-dhcp.network",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
@@ -223,9 +220,6 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	data := TemplateData{
 		AWSRegion:            key.Region(e.cluster),
 		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
-		MasterENIAddress:     key.ControlPlaneENIIpAddress(e.masterSubnet),
-		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
-		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
 		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
 		RegistryDomain:       e.registryDomain,
@@ -326,9 +320,6 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	data := TemplateData{
 		AWSRegion:            key.Region(e.cluster),
 		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
-		MasterENIAddress:     key.ControlPlaneENIIpAddress(e.masterSubnet),
-		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
-		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
 		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
 		RegistryDomain:       e.registryDomain,

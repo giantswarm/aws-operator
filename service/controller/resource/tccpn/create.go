@@ -3,7 +3,6 @@ package tccpn
 import (
 	"context"
 	"fmt"
-	"net"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -321,16 +320,7 @@ func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSCont
 
 	enis := &template.ParamsMainENI{}
 	for _, m := range mappings {
-		var masterSubnet net.IPNet
-		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-			if az.Name == m.AZ {
-				masterSubnet = az.Subnet.Private.CIDR
-				break
-			}
-		}
-
 		item := template.ParamsMainENIItem{
-			IpAddress:       key.ControlPlaneENIIpAddress(masterSubnet),
 			Name:            key.ControlPlaneENIName(&cr, m.ID),
 			Resource:        key.ControlPlaneENIResourceName(m.ID),
 			SecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
@@ -338,6 +328,7 @@ func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSCont
 		}
 
 		enis.List = append(enis.List, item)
+
 	}
 
 	return enis, nil
@@ -519,11 +510,11 @@ func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.
 	}
 
 	recordSets := &template.ParamsMainRecordSets{
-		ClusterID:      key.ClusterID(&cr),
-		HostedZoneID:   cc.Status.TenantCluster.DNS.HostedZoneID,
-		BaseDomain:     key.ClusterBaseDomain(cl),
-		Records:        records,
-		Route53Enabled: r.route53Enabled,
+		ClusterID:            key.ClusterID(&cr),
+		InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
+		BaseDomain:           key.ClusterBaseDomain(cl),
+		Records:              records,
+		Route53Enabled:       r.route53Enabled,
 	}
 
 	return recordSets, nil
