@@ -2,9 +2,11 @@ package template
 
 const TemplateMainAutoScalingGroup = `
 {{- define "auto_scaling_group" -}}
-  ControlPlaneNodeAutoScalingGroup:
+  ControlPlaneNodeAutoScalingGroup1:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - {{ .AutoScalingGroup.SubnetID }}

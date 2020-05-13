@@ -6,9 +6,11 @@ Outputs:
   OperatorVersion:
     Value: 7.3.0
 Resources:
-  ControlPlaneNodeAutoScalingGroup:
+  ControlPlaneNodeAutoScalingGroup1:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -62,7 +64,7 @@ Resources:
         # After creating a new instance, pause the rolling update on the ASG for
         # 15 minutes.
         PauseTime: PT15M
-  MasterEni:
+  MasterEni1:
     Type: AWS::EC2::NetworkInterface
     Properties:
        Description: A Network interface used for etcd.
