@@ -6,8 +6,8 @@ const TemplateMainAutoScalingGroup = `
   {{ .Resource }}:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
-    - EtcdVolume
-    - MasterEni
+    - {{ .Eni.Resource }}
+    - {{ .EtcdVolume.Resource }}
     Properties:
       VPCZoneIdentifier:
         - {{ .SubnetID }}

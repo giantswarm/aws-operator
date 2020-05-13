@@ -7,12 +7,20 @@ type ParamsMainAutoScalingGroup struct {
 type ParamsMainAutoScalingGroupItem struct {
 	AvailabilityZone string
 	ClusterID        string
+	Eni              ParamsMainAutoScalingGroupItemEni
+	EtcdVolume       ParamsMainAutoScalingGroupItemEtcdVolume
 	LaunchTemplate   ParamsMainAutoScalingGroupItemLaunchTemplate
 	LoadBalancers    ParamsMainAutoScalingGroupItemLoadBalancers
 	Resource         string
 	SubnetID         string
 }
 
+type ParamsMainAutoScalingGroupItemEni struct {
+	Resource string
+}
+type ParamsMainAutoScalingGroupItemEtcdVolume struct {
+	Resource string
+}
 type ParamsMainAutoScalingGroupItemLaunchTemplate struct {
 	Resource string
 }
