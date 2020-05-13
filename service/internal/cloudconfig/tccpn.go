@@ -70,6 +70,7 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
 	var err error
 
+	var multiMasterEnabled bool = false
 	var mappings []hamaster.Mapping
 	{
 		mappings, err = t.config.HAMaster.Mapping(ctx, obj)
@@ -78,11 +79,15 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
+		if len(mappings) == 3 {
+			multiMasterEnabled = true
+		}
 	}
 
 	var templates []string
 	for _, mapping := range mappings {
-		template, err := t.newTemplate(ctx, obj, mapping)
+		template, err := t.newTemplate(ctx, obj, mapping, multiMasterEnabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -102,7 +107,7 @@ func (t *TCCPN) newPath(ctx context.Context, obj interface{}, mapping hamaster.M
 	return key.S3ObjectPathTCCPN(&cr, mapping.ID), nil
 }
 
-func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping) (string, error) {
+func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping, multiMasterEnabled bool) (string, error) {
 	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -292,6 +297,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
+		params.MultiMasters = k8scloudconfig.MultiMasters{
+			Enabled:  multiMasterEnabled,
+			MasterID: mapping.ID,
+		}
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = im

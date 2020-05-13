@@ -632,10 +632,6 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 
 	var privateSubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
