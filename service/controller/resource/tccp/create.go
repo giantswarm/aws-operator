@@ -319,11 +319,16 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 }
 
 func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var instance *template.ParamsMainInstance
 	{
 		instance = &template.ParamsMainInstance{
 			Master: template.ParamsMainInstanceMaster{
-				AZ: key.MasterAvailabilityZone(cr),
+				AZ: cc.Spec.TenantCluster.TCCP.AvailabilityZones[0].Name,
 				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
 					Name: key.VolumeNameEtcd(cr),
 				},
