@@ -160,7 +160,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 		{
 			AssetContent: template.SystemdNetworkdEth1Network,
-			Path:         "/etc/systemd/network/00-eth1-no-dhcp.network",
+			Path:         "/etc/systemd/network/10-eth1.network",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
