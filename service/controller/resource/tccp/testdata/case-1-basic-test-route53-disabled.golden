@@ -87,7 +87,11 @@ Resources:
       SecurityGroups:
         - !Ref APIInternalELBSecurityGroup
       Subnets:
+        - !Ref PrivateSubnetEuCentral1a
+      
         - !Ref PrivateSubnetEuCentral1b
+      
+        - !Ref PrivateSubnetEuCentral1c
       
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -144,7 +148,11 @@ Resources:
       SecurityGroups:
         - !Ref EtcdELBSecurityGroup
       Subnets:
+        - !Ref PrivateSubnetEuCentral1a
+      
         - !Ref PrivateSubnetEuCentral1b
+      
+        - !Ref PrivateSubnetEuCentral1c
       
   
   NATGatewayEuCentral1a:
@@ -204,6 +212,13 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
+  NATRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGatewayEuCentral1a
   AWSCNINATRouteEuCentral1a:
     Type: AWS::EC2::Route
     Properties:
@@ -225,6 +240,13 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1b
+  NATRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGatewayEuCentral1c
   AWSCNINATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
@@ -300,6 +322,24 @@ Resources:
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
         Value: public
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  VPCPeeringRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: VPCPeeringConnection
   PrivateRouteTableEuCentral1b:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -315,6 +355,24 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1b
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: VPCPeeringConnection
+  PrivateRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  VPCPeeringRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId:
         Ref: VPCPeeringConnection
@@ -693,7 +751,9 @@ Resources:
         - !Ref PublicRouteTableEuCentral1a
         - !Ref PublicRouteTableEuCentral1b
         - !Ref PublicRouteTableEuCentral1c
+        - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
+        - !Ref PrivateRouteTableEuCentral1c
       ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"

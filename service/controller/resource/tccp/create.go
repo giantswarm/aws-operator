@@ -379,10 +379,6 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 
 	var privateSubnets []string
 	for _, az := range clusterAZs {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		privateSubnets = append(privateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
@@ -435,16 +431,14 @@ func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructur
 
 	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name == key.MasterAvailabilityZone(cr) {
-			{
-				nr := template.ParamsMainNATGatewayNATRoute{
-					NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
-					NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
-					RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-				}
-
-				natRoutes = append(natRoutes, nr)
+		{
+			nr := template.ParamsMainNATGatewayNATRoute{
+				NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+				NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 			}
+
+			natRoutes = append(natRoutes, nr)
 		}
 
 		{
@@ -529,10 +523,6 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 
 	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		rtName := template.ParamsMainRouteTablesRouteTableName{
 			AvailabilityZone:    az.Name,
 			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
@@ -673,10 +663,6 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 		routeTableNames = append(routeTableNames, rtName)
 	}
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		rtName := template.ParamsMainVPCRouteTableName{
 			ResourceName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 		}
