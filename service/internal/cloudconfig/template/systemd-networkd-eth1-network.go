@@ -6,4 +6,5 @@ const SystemdNetworkdEth1Network = `
 Name=eth1
 [Network]
 DHCP=no
+Address=127.0.0.1/32
 `
