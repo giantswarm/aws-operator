@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ tpl .Values.resource.default.name  . }}
@@ -8,12 +8,15 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ tpl .Values.resource.default.name  . }}
   strategy:
     type: RollingUpdate
   template:
     metadata:
       annotations:
-        releasetime: {{ $.Release.Time }}
+        releaseRevision: {{ .Release.Revision | quote }}
       labels:
         app: {{ tpl .Values.resource.default.name  . }}
     spec:
