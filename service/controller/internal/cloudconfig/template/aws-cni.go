@@ -142,7 +142,7 @@ spec:
             ## disable SNAT as we setup NATGW in the route tables
             - name: AWS_VPC_K8S_CNI_EXTERNALSNAT
               value: "{{.ExternalSNAT}}"
-            {{- if .ExternalSNAT }}
+            {{- if eq .ExternalSNAT false }}
             ## If we left this enabled, cross subnet communication doesn't work. Only affects EcternalSnat to false
             - name: AWS_VPC_K8S_CNI_RANDOMIZESNAT
               value: "none"
