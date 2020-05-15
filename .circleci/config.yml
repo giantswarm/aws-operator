@@ -98,7 +98,7 @@ workflows:
               only: /^v.*/
 
       # Ensure that for every commit (branch other than master)
-      # there is an app verison in the test catalog.
+      # there is an app version in the test catalog.
       # Note: Making this app usable in china needs manual approval
       # of the 'hold-push-to-aliyun-pr' job.
       - architect/push-to-app-catalog:
