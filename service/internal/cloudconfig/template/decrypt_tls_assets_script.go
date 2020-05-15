@@ -33,7 +33,9 @@ docker run --net=host -v /etc/kubernetes/ssl:/etc/kubernetes/ssl \
 
 main() {
   kms_tls_assets_decrypt
-  chown -R etcd:etcd /etc/kubernetes/ssl/etcd
+  if [ -d "/etc/kubernetes/ssl/etcd" ]; then 
+    chown -R etcd:etcd /etc/kubernetes/ssl/etcd
+  fi
 }
 
 main
