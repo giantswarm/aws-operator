@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Removed static ip FOR ENI to avoid collision with internal API LB.
 
 
 ### Fixed
 
 - Fix RBAC rules for Control Plane CR migration.
-
 
 
 ## [8.5.0] 2020-05-11

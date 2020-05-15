@@ -4,7 +4,9 @@ const TemplateMainAutoScalingGroup = `
 {{- define "auto_scaling_group" -}}
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: EtcdVolume
+    DependsOn: 
+    - EtcdVolume
+    - MasterEni
     Properties:
       VPCZoneIdentifier:
         - {{ .AutoScalingGroup.SubnetID }}

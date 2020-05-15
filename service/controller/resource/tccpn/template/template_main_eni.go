@@ -9,7 +9,6 @@ const TemplateMainENI = `
        GroupSet:
        - {{ .ENI.SecurityGroupID }}
        SubnetId: {{ .ENI.SubnetID }}
-       PrivateIpAddress: {{ .ENI.IpAddress }}
        Tags:
        - Key: Name
          Value: {{ .ENI.Name }}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
@@ -12,7 +11,6 @@ import (
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	cloudconfig "github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig/template"
@@ -51,18 +49,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	listOptions := metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s", key.TagCluster, key.ClusterID(&cr)),
-	}
-
-	cps, err := t.g8sClient.InfrastructureV1alpha2().AWSControlPlanes(cr.Namespace).List(listOptions)
-	if err != nil {
-		return nil, microerror.Mask(err)
-	}
-	if len(cps.Items) != 1 {
-		return nil, microerror.Maskf(executionFailedError, "expected 1 control plane cr but found %d", len(cps.Items))
-	}
-	cp := cps.Items[0]
 
 	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, clusterKeys)
 	if err != nil {
@@ -98,17 +84,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 
 	masterID := 0 // for now we have only 1 master, TODO get this value via render function as argument
 
-	var masterSubnet net.IPNet
-	{
-		zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
-		for _, az := range zones {
-			if az.Name == key.ControlPlaneAvailabilityZones(cp)[masterID] {
-				masterSubnet = az.Subnet.Private.CIDR
-				break
-			}
-		}
-	}
-
 	// Allow the actual externalSNAT to be set by the CR.
 	var externalSNAT bool
 	if key.ExternalSNAT(cr) == nil {
@@ -134,7 +109,6 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
 				externalSNAT:   externalSNAT,
-				masterSubnet:   masterSubnet,
 				masterID:       masterID,
 				registryDomain: t.config.RegistryDomain,
 			},

@@ -2,7 +2,6 @@ package cloudconfig
 
 import (
 	"context"
-	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
@@ -16,7 +15,6 @@ type baseExtension struct {
 	encrypter      encrypter.Interface
 	encryptionKey  string
 	externalSNAT   bool
-	masterSubnet   net.IPNet
 	masterID       int
 	registryDomain string
 }
@@ -28,9 +26,6 @@ func (e *baseExtension) templateDataTCCPN() TemplateData {
 		AWSRegion:            awsRegion,
 		ExternalSNAT:         e.externalSNAT,
 		IsChinaRegion:        key.IsChinaRegion(awsRegion),
-		MasterENIAddress:     key.ControlPlaneENIIpAddress(e.masterSubnet),
-		MasterENIGateway:     key.ControlPlaneENIGateway(e.masterSubnet),
-		MasterENISubnetSize:  key.ControlPlaneENISubnetSize(e.masterSubnet),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
 		MasterEtcdVolumeName: key.ControlPlaneVolumeNameEtcd(&e.cluster, e.masterID),
 		RegistryDomain:       e.registryDomain,
