@@ -315,7 +315,7 @@ Resources:
     Properties:
       ResourceRecords:
       - !GetAtt MasterEni.PrimaryPrivateIpAddress
-      Name: 'etcd0.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       HostedZoneId: hosted-zone-internal-id
       Type: A
       TTL: 60
