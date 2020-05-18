@@ -154,7 +154,7 @@ spec:
               value: eni
           resources:
             requests:
-              cpu: 10m
+              cpu: 30m
           securityContext:
             privileged: true
           volumeMounts:
