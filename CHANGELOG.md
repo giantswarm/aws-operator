@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Removed static ip FOR ENI to avoid collision with internal API LB.
-
+- Check Service Quota endpoint availability for the current AWS region
 
 ### Fixed
 
