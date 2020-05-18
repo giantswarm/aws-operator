@@ -14,11 +14,7 @@ const endpointNotAvailableMatch = "no such host"
 func IsEndpointNotAvailable(err error) bool {
 	c := microerror.Cause(err)
 
-	if strings.Contains(c.Error(), endpointNotAvailableMatch) {
-		return true
-	}
-
-	return false
+	return strings.Contains(c.Error(), endpointNotAvailableMatch)
 }
 
 var invalidConfigError = &microerror.Error{
