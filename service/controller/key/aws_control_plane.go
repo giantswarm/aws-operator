@@ -2,8 +2,6 @@ package key
 
 import (
 	"fmt"
-	"net"
-
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
@@ -37,6 +35,7 @@ func ControlPlaneENIResourceName(id int) string {
 func ControlPlaneEtcdNodeName(id int) string {
 	return fmt.Sprintf("etcd%d", id)
 }
+
 func ControlPlaneID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ControlPlane]
 }
@@ -108,10 +107,4 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	c := p.DeepCopy()
 
 	return *c, nil
-}
-
-func copyIP(ip net.IP) net.IP {
-	dup := make(net.IP, len(ip))
-	copy(dup, ip)
-	return dup
 }
