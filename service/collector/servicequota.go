@@ -153,7 +153,10 @@ func getDefaultVPCQuotaFor(quotaCode string, awsClients clientaws.Clients) (floa
 	}
 	//Get the default NAT quota for the specific account
 	od, err := awsClients.ServiceQuotas.GetAWSDefaultServiceQuota(id)
-	if err != nil {
+	if IsEndpointNotAvailable(err) {
+		// Some regions does not support ServiceQuota API.
+		return 0, nil
+	} else if err != nil {
 		return 0, microerror.Mask(err)
 	}
 	natQuotaValue := *od.Quota.Value
