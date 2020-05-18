@@ -22,32 +22,6 @@ func ControlPlaneASGResourceName(getter LabelsGetter, id int) string {
 	return fmt.Sprintf("ControlPlaneNodeAutoScalingGroup%d", id)
 }
 
-func ControlPlaneENIIpAddress(ip net.IPNet) string {
-	// VPC subnet has reserved the first 4 IPs so we need to use the fifth one,
-	// meaning to start counting from zero, which is then index 4.
-	//
-	//     https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	//
-	eni := copyIP(ip.IP)
-	eni.To4()
-	eni[3] += 4
-
-	return eni.String()
-}
-
-func ControlPlaneENIGateway(ip net.IPNet) string {
-	// VPC subnet has reserved the first 4 IPs so we need to use the fifth one,
-	// meaning to start counting from zero, which is then index 4.
-	//
-	//     https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	//
-	gw := copyIP(ip.IP)
-	gw.To4()
-	gw[3] += 1
-
-	return gw.String()
-}
-
 func ControlPlaneENIName(getter LabelsGetter, id int) string {
 	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), id)
 }
@@ -60,12 +34,9 @@ func ControlPlaneENIResourceName(id int) string {
 	return fmt.Sprintf("MasterEni%d", id)
 }
 
-func ControlPlaneENISubnetSize(ip net.IPNet) int {
-	subnetSize, _ := ip.Mask.Size()
-
-	return subnetSize
+func ControlPlaneEtcdNodeName(id int) string {
+	return fmt.Sprintf("etcd%d", id)
 }
-
 func ControlPlaneID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ControlPlane]
 }

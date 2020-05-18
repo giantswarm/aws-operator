@@ -274,7 +274,11 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.EnableAWSCNI = true
-		params.EtcdPort = key.EtcdPort
+		params.Etcd = k8scloudconfig.Etcd{
+			ClientPort:       key.EtcdPort,
+			HighAvailability: multiMasterEnabled,
+			NodeName:         key.ControlPlaneEtcdNodeName(mapping.ID),
+		}
 		params.Extension = &TCCPNExtension{
 			cc:               cc,
 			cluster:          cl,
@@ -288,10 +292,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
 		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
-		params.MultiMasters = k8scloudconfig.MultiMasters{
-			Enabled:  multiMasterEnabled,
-			MasterID: mapping.ID,
-		}
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = im
