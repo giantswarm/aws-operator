@@ -61,6 +61,9 @@ func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string 
 }
 
 func ControlPlaneRecordSetsRecordValue(id int) string {
+	if id == 0 {
+		return "etcd1"
+	}
 	return fmt.Sprintf("etcd%d", id)
 }
 
