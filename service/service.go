@@ -154,30 +154,17 @@ func New(config Config) (*Service, error) {
 				},
 			},
 			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
-			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
-			ClusterDomain:              config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
-			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
-			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
-			GuestAvailabilityZones:     config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
 			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
 			HostAWSConfig:              awsConfig,
-			IgnitionPath:               config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
-			ImagePullProgressDeadline:  config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
-			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
-			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
-			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		clusterController, err = controller.NewCluster(c)
@@ -216,7 +203,6 @@ func New(config Config) (*Service, error) {
 			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:              config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 
 			HostAWSConfig: awsConfig,
 		}
@@ -234,10 +220,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.ControlPlaneDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		controlPlaneDrainerController, err = controller.NewControlPlaneDrainer(c)
@@ -258,7 +240,6 @@ func New(config Config) (*Service, error) {
 			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
 			ClusterDomain:              config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
-			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
@@ -271,11 +252,9 @@ func New(config Config) (*Service, error) {
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
-			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:               config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 		}
 
 		machineDeploymentController, err = controller.NewMachineDeployment(c)

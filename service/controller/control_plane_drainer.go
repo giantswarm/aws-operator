@@ -32,12 +32,6 @@ type ControlPlaneDrainerConfig struct {
 	Logger    micrologger.Logger
 
 	HostAWSConfig aws.Config
-	LabelSelector ControlPlaneDrainerConfigLabelSelector
-}
-
-type ControlPlaneDrainerConfigLabelSelector struct {
-	Enabled          bool
-	OverridenVersion string
 }
 
 type ControlPlaneDrainer struct {

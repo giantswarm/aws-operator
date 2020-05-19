@@ -65,7 +65,6 @@ type MachineDeploymentConfig struct {
 	CalicoMTU                  int
 	CalicoSubnet               string
 	ClusterIPRange             string
-	DeleteLoggingBucket        bool
 	DockerDaemonCIDR           string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -79,11 +78,9 @@ type MachineDeploymentConfig struct {
 	NetworkSetupDockerImage    string
 	PodInfraContainerImage     string
 	RegistryDomain             string
-	Route53Enabled             bool
 	RouteTables                string
 	SSHUserList                string
 	SSOPublicKey               string
-	VaultAddress               string
 }
 
 type MachineDeployment struct {

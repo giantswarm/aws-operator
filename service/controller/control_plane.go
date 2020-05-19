@@ -66,7 +66,6 @@ type ControlPlaneConfig struct {
 	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
-	VaultAddress              string
 }
 
 type ControlPlane struct {

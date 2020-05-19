@@ -73,31 +73,17 @@ type ClusterConfig struct {
 	AdvancedMonitoringEC2      bool
 	APIWhitelist               tccp.ConfigAPIWhitelist
 	CalicoCIDR                 int
-	CalicoMTU                  int
 	CalicoSubnet               string
-	ClusterIPRange             string
 	DeleteLoggingBucket        bool
-	DockerDaemonCIDR           string
-	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
-	GuestUpdateEnabled         bool
 	HostAWSConfig              aws.Config
-	IgnitionPath               string
-	ImagePullProgressDeadline  string
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	ClusterDomain              string
-	NetworkSetupDockerImage    string
-	PodInfraContainerImage     string
-	RegistryDomain             string
 	Route53Enabled             bool
 	RouteTables                string
-	SSHUserList                string
-	SSOPublicKey               string
-	VaultAddress               string
 }
 
 type Cluster struct {
