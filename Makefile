@@ -25,7 +25,7 @@ build-darwin: clean $(SOURCES)
 .PHONY: install
 ## install: install the application
 install: $(SOURCES)
-	go install .
+	go install $(BUILD_FLAGS) .
 
 .PHONY: run
 ## run: runs go run main.go
