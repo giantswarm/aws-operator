@@ -7,14 +7,12 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-const endpointNotAvailableMatch = "no such host"
-
 // IsEndpointNotAvailable asserts that an error is due to service
 // not available in the current region.
 func IsEndpointNotAvailable(err error) bool {
 	c := microerror.Cause(err)
 
-	return strings.Contains(c.Error(), endpointNotAvailableMatch)
+	return strings.Contains(c.Error(), "no such host")
 }
 
 var invalidConfigError = &microerror.Error{
