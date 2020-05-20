@@ -131,8 +131,8 @@ func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1
 		}
 
 		for _, i := range o.Reservations[0].Instances {
-			for _, instanceState := range o2.InstanceStates {
-				if i.InstanceId == i.InstanceId && instanceState.State == aws.String(key.ELBInstanceStateInService) {
+			for _, iState := range o2.InstanceStates {
+				if i.InstanceId == iState.InstanceId && *iState.State == key.ELBInstanceStateInService {
 					instances = append(instances, i)
 				}
 			}
