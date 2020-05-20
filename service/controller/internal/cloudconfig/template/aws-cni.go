@@ -144,7 +144,7 @@ spec:
               value: "{{.ExternalSNAT}}"
             {{- if eq .ExternalSNAT false }}
             ## Deviation from original manifest - 7
-            ## If we left this enabled, cross subnet communication doesn't work. Only affects EcternalSnat to false
+            ## If we left this enabled, cross subnet communication doesn't work. Only affects ExternalSNAT=false.
             - name: AWS_VPC_K8S_CNI_RANDOMIZESNAT
               value: "none"
             {{- end }}
