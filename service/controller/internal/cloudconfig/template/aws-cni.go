@@ -201,7 +201,113 @@ spec:
     plural: eniconfigs
     singular: eniconfig
     kind: ENIConfig
-
-
-
+---
+## AWS CNI restarter, to be removed when AWS CNI is able to detect new Additional CIDRs https://github.com/giantswarm/giantswarm/issues/11077
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aws-cni-restarter
+  namespace: kube-system
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aws-cni-restarter
+  namespace: kube-system
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "create", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list", "delete"]
+- apiGroups: ["policy"]
+  resources: ["podsecuritypolicies"]
+  resourceNames: ["aws-cni-restarter"]
+  verbs: ["use", "get", "create"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aws-cni-restarter-binding
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: aws-cni-restarter
+  namespace: kube-system
+roleRef:
+  kind: Role
+  name: aws-cni-restarter
+  apiGroup: ""
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+    name: aws-cni-restarter
+    namespace: kube-system
+spec:
+  fsGroup:
+    rule: RunAsAny
+  hostNetwork: true
+  privileged: false
+  runAsUser:
+    rule: MustRunAsNonRoot
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - secret
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: aws-cni-restarter
+  name: aws-cni-restarter
+  namespace: kube-system
+spec:
+  egress:
+  - {}
+  podSelector:
+    matchLabels:
+      app: aws-cni-restarter
+  policyTypes:
+  - Egress
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: aws-cni-restarter
+  namespace: kube-system
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 10
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: aws-cni-restarter
+        spec:
+          serviceAccountName: aws-cni-restarter
+          hostNetwork: true
+          containers:
+            - name: aws-cni-restarter
+              image: {{.RegistryDomain}}/giantswarm/aws-cni-restarter:v1.0.0
+          restartPolicy: OnFailure
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: role
+                      operator: In
+                      values:
+                      - master
+          tolerations:
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
 `
