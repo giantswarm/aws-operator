@@ -34,13 +34,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	if len(cc.Spec.TenantCluster.TCCP.AvailabilityZones) == 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "tccp availability zones is not ready yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-		return nil
-	}
-
 	// We need to configure our security group ID to all the ENIConfig CRs.
 	// Therefore we look it up from the controller context, where it is already
 	// available.
