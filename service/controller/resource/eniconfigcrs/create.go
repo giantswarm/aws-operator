@@ -65,7 +65,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				Subnet: az.Subnet.AWSCNI.ID,
 			},
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", "prepared one ENI config")
 
 		eniConfigs = append(eniConfigs, ec)
 	}
