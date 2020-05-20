@@ -3,6 +3,7 @@ package endpoints
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/elb"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -87,7 +88,7 @@ func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1
 
 	var instances []*ec2.Instance
 	{
-		i := &ec2.DescribeInstancesInput{
+		instancesInput := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
 					Name: aws.String("tag:Name"),
@@ -110,7 +111,7 @@ func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1
 			},
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(instancesInput)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -119,7 +120,23 @@ func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1
 			return nil, microerror.Maskf(notFoundError, "master instance")
 		}
 
-		instances = o.Reservations[0].Instances
+		// check for health of the instance
+		instanceHealthInput := &elb.DescribeInstanceHealthInput{
+			LoadBalancerName: aws.String(key.ELBNameAPI(&cr)),
+		}
+
+		o2, err := cc.Client.TenantCluster.AWS.ELB.DescribeInstanceHealth(instanceHealthInput)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, i := range o.Reservations[0].Instances {
+			for _, instanceState := range o2.InstanceStates {
+				if i.InstanceId == i.InstanceId && instanceState.State == aws.String(key.ELBInstanceStateInService) {
+					instances = append(instances, i)
+				}
+			}
+		}
 	}
 
 	return instances, nil

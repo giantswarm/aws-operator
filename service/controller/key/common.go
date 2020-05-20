@@ -12,6 +12,10 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+const (
+	ELBInstanceStateInService = "InService"
+)
+
 // AMI returns the EC2 AMI for the configured region and given version.
 func AMI(region string, release releasev1alpha1.Release) (string, error) {
 	osVersion, err := OSVersion(release)
