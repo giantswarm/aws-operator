@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1"
 	"github.com/giantswarm/errors/tenant"
-	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/tenantcluster"
 	"k8s.io/client-go/rest"
