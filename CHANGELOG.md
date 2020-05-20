@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add common labels to aws-operator pod.
+
 ### Changed
 
 - CI: Add optional pushing of WIP work to Aliyun registry.
