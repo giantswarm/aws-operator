@@ -282,7 +282,7 @@ func StackNameTCCPI(getter LabelsGetter) string {
 }
 
 func StackNameTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tccpn-%s", ClusterID(getter), ControlPlaneID(getter))
+	return fmt.Sprintf("cluster-%s-tccpn", ClusterID(getter))
 }
 
 func StackNameTCNP(getter LabelsGetter) string {
