@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/microkit/command"
 	microserver "github.com/giantswarm/microkit/server"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 
 	"github.com/giantswarm/aws-operator/flag"
@@ -87,12 +86,11 @@ func mainE(ctx context.Context) error {
 			Logger:        logger,
 			ServerFactory: serverFactory,
 
-			Description:    project.Description(),
-			GitCommit:      project.GitSHA(),
-			Name:           project.Name(),
-			Source:         project.Source(),
-			Version:        project.Version(),
-			VersionBundles: []versionbundle.Bundle{project.NewVersionBundle()},
+			Description: project.Description(),
+			GitCommit:   project.GitSHA(),
+			Name:        project.Name(),
+			Source:      project.Source(),
+			Version:     project.Version(),
 		}
 
 		newCommand, err = command.New(c)
