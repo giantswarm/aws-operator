@@ -5,6 +5,7 @@ const Etcd3AttachDepService = `
 Description=Attach etcd dependencies
 Requires=network.target
 After=network.target
+Before=k8s-kubelet.service
 
 [Service]
 # image is from https://github.com/giantswarm/aws-attach-etcd-dep
