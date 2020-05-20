@@ -25,7 +25,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	var instances []*ec2.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instance")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instances")
 
 		instances, err = r.searchMasterInstances(ctx, cr)
 		if IsNotFound(err) {
@@ -47,7 +47,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found master instance")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d healthy master instances", len(instances)))
 	}
 
 	var addresses []corev1.EndpointAddress
