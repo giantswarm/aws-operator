@@ -34,6 +34,9 @@ func ControlPlaneENIResourceName(id int) string {
 }
 
 func ControlPlaneEtcdNodeName(id int) string {
+	if id == 0 {
+		return "etcd"
+	}
 	return fmt.Sprintf("etcd%d", id)
 }
 
