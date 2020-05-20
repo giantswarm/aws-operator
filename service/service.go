@@ -5,15 +5,15 @@ package service
 import (
 	"context"
 	"net"
+	"strings"
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/k8sclient"
-	"github.com/giantswarm/k8sclient/k8srestconfig"
+	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v3/pkg/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/versionbundle"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
@@ -23,6 +23,8 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -141,50 +143,28 @@ func New(config Config) (*Service, error) {
 
 			AccessLogsExpiration:  config.Viper.GetInt(config.Flag.Service.AWS.S3AccessLogsExpiration),
 			AdvancedMonitoringEC2: config.Viper.GetBool(config.Flag.Service.AWS.AdvancedMonitoringEC2),
-			APIWhitelist: controller.ClusterConfigAPIWhitelist{
-				Private: controller.ClusterConfigAPIWhitelistConfig{
+			APIWhitelist: tccp.ConfigAPIWhitelist{
+				Private: tccp.ConfigAPIWhitelistSecurityGroup{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
-					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
+					SubnetList: strings.Split(config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList), ","),
 				},
-				Public: controller.ClusterConfigAPIWhitelistConfig{
+				Public: tccp.ConfigAPIWhitelistSecurityGroup{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
-					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
+					SubnetList: strings.Split(config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList), ","),
+				},
 			},
 			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
-			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
-			ClusterDomain:              config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
-			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
-			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
-			GuestAvailabilityZones:     config.Viper.GetStringSlice(config.Flag.Service.AWS.AvailabilityZones),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
 			GuestSubnetMaskBits:        config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.SubnetMaskBits),
 			HostAWSConfig:              awsConfig,
-			IgnitionPath:               config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
-			ImagePullProgressDeadline:  config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.ClusterConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
-			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
-			OIDC: controller.ClusterConfigOIDC{
-				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
-				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
-				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
-				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
-			},
-			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
-			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
-			SSHUserList:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
-			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
+			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 		}
 
 		clusterController, err = controller.NewCluster(c)
@@ -199,12 +179,12 @@ func New(config Config) (*Service, error) {
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
-			APIWhitelist: controller.ClusterConfigAPIWhitelist{
-				Private: controller.ClusterConfigAPIWhitelistConfig{
+			APIWhitelist: tccpn.APIWhitelist{
+				Private: tccpn.Whitelist{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
 				},
-				Public: controller.ClusterConfigAPIWhitelistConfig{
+				Public: tccpn.Whitelist{
 					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
 					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
 			},
@@ -223,7 +203,6 @@ func New(config Config) (*Service, error) {
 			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:              config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
 
 			HostAWSConfig: awsConfig,
 		}
@@ -241,10 +220,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.ControlPlaneDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		controlPlaneDrainerController, err = controller.NewControlPlaneDrainer(c)
@@ -265,7 +240,6 @@ func New(config Config) (*Service, error) {
 			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
 			ClusterDomain:              config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
-			DeleteLoggingBucket:        config.Viper.GetBool(config.Flag.Service.AWS.LoggingBucket.Delete),
 			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
@@ -275,24 +249,12 @@ func New(config Config) (*Service, error) {
 			ImagePullProgressDeadline:  config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
-			LabelSelector: controller.MachineDeploymentConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
-			NetworkSetupDockerImage: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
-			OIDC: controller.ClusterConfigOIDC{
-				ClientID:      config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID),
-				IssuerURL:     config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL),
-				UsernameClaim: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim),
-				GroupsClaim:   config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim),
-			},
-			PodInfraContainerImage: config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:         config.Viper.GetString(config.Flag.Service.RegistryDomain),
-			Route53Enabled:         config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			RouteTables:            config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
-			SSHUserList:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
-			SSOPublicKey:           config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
-			VaultAddress:           config.Viper.GetString(config.Flag.Service.AWS.VaultAddress),
+			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
+			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
+			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
+			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
+			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 		}
 
 		machineDeploymentController, err = controller.NewMachineDeployment(c)
@@ -308,10 +270,6 @@ func New(config Config) (*Service, error) {
 			Logger:    config.Logger,
 
 			HostAWSConfig: awsConfig,
-			LabelSelector: controller.MachineDeploymentDrainerConfigLabelSelector{
-				Enabled:          config.Viper.GetBool(config.Flag.Service.Feature.LabelSelector.Enabled),
-				OverridenVersion: config.Viper.GetString(config.Flag.Service.Test.LabelSelector.Version),
-			},
 		}
 
 		machineDeploymentDrainerController, err = controller.NewMachineDeploymentDrainer(c)
@@ -340,12 +298,11 @@ func New(config Config) (*Service, error) {
 	var versionService *version.Service
 	{
 		c := version.Config{
-			Description:    project.Description(),
-			GitCommit:      project.GitSHA(),
-			Name:           project.Name(),
-			Source:         project.Source(),
-			Version:        project.Version(),
-			VersionBundles: []versionbundle.Bundle{project.NewVersionBundle()},
+			Description: project.Description(),
+			GitCommit:   project.GitSHA(),
+			Name:        project.Name(),
+			Source:      project.Source(),
+			Version:     project.Version(),
 		}
 
 		versionService, err = version.New(c)
