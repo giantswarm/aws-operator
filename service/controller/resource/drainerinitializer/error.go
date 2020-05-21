@@ -1,8 +1,9 @@
 package drainerinitializer
 
 import (
-	"github.com/giantswarm/microerror"
 	"regexp"
+
+	"github.com/giantswarm/microerror"
 )
 
 var (
