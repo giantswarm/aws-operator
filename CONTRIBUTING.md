@@ -15,6 +15,7 @@ aws-operator is Apache 2.0 licensed and accepts contributions via GitHub pull re
 ## Reporting Bugs and Creating Issues
 
 Reporting bugs is one of the best ways to contribute. If you find bugs or documentation mistakes in the aws-operator project, please let us know by [opening an issue](https://github.com/giantswarm/aws-operator/issues/new). We treat bugs and mistakes very seriously and believe no issue is too small. Before creating a bug report, please check there that one does not already exist.
+For security issues, please see [the security policy](SECURITY.md).
 
 To make your bug report accurate and easy to understand, please try to create bug reports that are:
 
