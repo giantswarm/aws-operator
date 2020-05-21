@@ -14,10 +14,10 @@ require (
 	github.com/giantswarm/e2eclients v0.2.0
 	github.com/giantswarm/e2esetup v0.1.0
 	github.com/giantswarm/e2etemplates v0.2.0
-	github.com/giantswarm/e2etests v0.1.0
+	github.com/giantswarm/e2etests v0.3.1
 	github.com/giantswarm/errors v0.2.3
 	github.com/giantswarm/exporterkit v0.2.0
-	github.com/giantswarm/helmclient v0.2.2
+	github.com/giantswarm/helmclient v1.0.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v3 v3.1.0
 	github.com/giantswarm/k8scloudconfig/v6 v6.1.1
