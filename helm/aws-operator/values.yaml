@@ -1,11 +1,3 @@
-flag:
-  service:
-    feature:
-      labelselector:
-        enabled: false
-    test:
-      labelselector:
-        version: ""
 image:
   name: "giantswarm/aws-operator"
   tag: "[[ .Version ]]"

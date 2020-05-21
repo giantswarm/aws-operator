@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - CI: Add optional pushing of WIP work to Aliyun registry.
-- Removed static ip FOR ENI to avoid collision with internal API LB.
+- Remove static ip FOR ENI to avoid collision with internal API LB.
+- Remove `--service.feature*` and `--service.test*` flags.
 
 ### Fixed
 
