@@ -29,6 +29,8 @@ data:
         trustedAdvisor:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
         vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
+        cni:
+          externalSNAT: '{{ .Values.Installation.V1.Provider.AWS.CNI.ExternalSNAT }}'
       cluster:
         calico:
           cidr: '{{ .Values.Installation.V1.Guest.Calico.CIDR }}'
@@ -46,9 +48,6 @@ data:
               image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
           ssh:
             userList: '{{ .Values.Installation.V1.Guest.SSH.UserList }}'
-      feature:
-        labelselector:
-          enabled: '{{ .Values.flag.service.feature.labelselector.enabled }}'
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
@@ -87,6 +86,3 @@ data:
         {{- end }}
       kubernetes:
         incluster: true
-      test:
-        labelselector:
-          version: '{{ .Values.flag.service.test.labelselector.version }}'

@@ -84,6 +84,14 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 
 	masterID := 0 // for now we have only 1 master, TODO get this value via render function as argument
 
+	// Allow the actual externalSNAT to be set by the CR.
+	var externalSNAT bool
+	if key.ExternalSNAT(cr) == nil {
+		externalSNAT = t.config.ExternalSNAT
+	} else {
+		externalSNAT = *key.ExternalSNAT(cr)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.DefaultParams()
@@ -100,6 +108,7 @@ func (t *TCCPN) Render(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 				cluster:        cr,
 				encrypter:      t.config.Encrypter,
 				encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+				externalSNAT:   externalSNAT,
 				masterID:       masterID,
 				registryDomain: t.config.RegistryDomain,
 			},

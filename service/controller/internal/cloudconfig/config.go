@@ -17,6 +17,7 @@ type Config struct {
 	CalicoSubnet              string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
+	ExternalSNAT              bool
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	KubeletExtraArgs          []string

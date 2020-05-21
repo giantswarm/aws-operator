@@ -14,6 +14,7 @@ type baseExtension struct {
 	cluster        infrastructurev1alpha2.AWSCluster
 	encrypter      encrypter.Interface
 	encryptionKey  string
+	externalSNAT   bool
 	masterID       int
 	registryDomain string
 }
@@ -23,6 +24,7 @@ func (e *baseExtension) templateDataTCCPN() TemplateData {
 
 	data := TemplateData{
 		AWSRegion:            awsRegion,
+		ExternalSNAT:         e.externalSNAT,
 		IsChinaRegion:        key.IsChinaRegion(awsRegion),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
 		MasterEtcdVolumeName: key.ControlPlaneVolumeNameEtcd(&e.cluster, e.masterID),
@@ -49,6 +51,7 @@ func (e *baseExtension) templateDataTCNP() TemplateData {
 
 	data := TemplateData{
 		AWSRegion:      awsRegion,
+		ExternalSNAT:   e.externalSNAT,
 		IsChinaRegion:  key.IsChinaRegion(awsRegion),
 		RegistryDomain: e.registryDomain,
 	}

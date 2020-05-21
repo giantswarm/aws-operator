@@ -118,6 +118,7 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().Bool(f.Service.AWS.IncludeTags, true, "Should resource tags be included (especially for restricted regions, like S3 buckets in China regions).")
 	daemonCommand.PersistentFlags().Int(f.Service.AWS.S3AccessLogsExpiration, 365, "S3 access logs expiration policy.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.TrustedAdvisor.Enabled, "", "Whether trusted advisor metrics collection is enabled.")
+	daemonCommand.PersistentFlags().Bool(f.Service.AWS.CNI.ExternalSNAT, false, "Whether External SNAT for the AWS CNI is enabled.")
 
 	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.CIDR, 0, "Calico CIDR of guest clusters.")
 	daemonCommand.PersistentFlags().Int(f.Service.Cluster.Calico.MTU, 0, "Calico MTU of guest clusters.")
@@ -128,8 +129,6 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline, "1m", "If no progress is made before this deadline image pulling is cancelled.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image, "", "Full docker image of networksetup.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.SSH.UserList, "", "Comma separated list of ssh users and their public key in format `username:publickey`, being installed in the guest cluster nodes.")
-
-	daemonCommand.PersistentFlags().Bool(f.Service.Feature.LabelSelector.Enabled, false, "When it is set to `true` controller uses aws-operator.giantswarm.io/version label to filter watched AWSConfig CRs.")
 
 	daemonCommand.PersistentFlags().String(f.Service.Guest.Ignition.Path, "/opt/ignition", "Default path for the ignition base directory.")
 	daemonCommand.PersistentFlags().String(f.Service.Guest.SSH.SSOPublicKey, "", "Public key for trusted SSO CA.")
@@ -156,8 +155,6 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 
 	daemonCommand.PersistentFlags().String(f.Service.RegistryDomain, "quay.io", "Image registry.")
-
-	daemonCommand.PersistentFlags().String(f.Service.Test.LabelSelector.Version, "", "Overrides version value used with aws-operator.giantswarm.io/version label selector. Should be used only for testing.")
 
 	err = newCommand.CobraCommand().Execute()
 	if err != nil {
