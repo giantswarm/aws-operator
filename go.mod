@@ -12,12 +12,12 @@ require (
 	github.com/giantswarm/certs v0.2.0
 	github.com/giantswarm/e2e-harness v0.2.0
 	github.com/giantswarm/e2eclients v0.2.0
-	github.com/giantswarm/e2esetup v0.1.0
+	github.com/giantswarm/e2esetup v0.3.0
 	github.com/giantswarm/e2etemplates v0.2.0
 	github.com/giantswarm/e2etests v0.1.0
 	github.com/giantswarm/errors v0.2.3
 	github.com/giantswarm/exporterkit v0.2.0
-	github.com/giantswarm/helmclient v0.2.2
+	github.com/giantswarm/helmclient v1.0.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v3 v3.1.0
 	github.com/giantswarm/k8scloudconfig/v6 v6.1.1
@@ -30,7 +30,6 @@ require (
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster v0.2.0
 	github.com/giantswarm/to v0.3.0
-	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/google/go-cmp v0.4.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.5.1
