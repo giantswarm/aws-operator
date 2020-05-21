@@ -27,6 +27,7 @@ type TCNPExtension struct {
 	clusterCerts   []certs.File
 	encrypter      encrypter.Interface
 	encryptionKey  string
+	externalSNAT   bool
 	registryDomain string
 }
 
@@ -98,6 +99,7 @@ func (e *TCNPExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	data := TemplateData{
 		AWSRegion:      key.Region(e.cluster),
+		ExternalSNAT:   e.externalSNAT,
 		IsChinaRegion:  key.IsChinaRegion(key.Region(e.cluster)),
 		RegistryDomain: e.registryDomain,
 	}

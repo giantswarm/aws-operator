@@ -3,7 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
-	
+
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
@@ -25,6 +25,7 @@ type TCCPNExtension struct {
 	clusterCerts     []certs.File
 	encrypter        encrypter.Interface
 	encryptionKey    string
+	externalSNAT     bool
 	masterID         int
 	randomKeyTmplSet RandomKeyTmplSet
 	registryDomain   string
@@ -220,6 +221,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	data := TemplateData{
 		AWSRegion:            key.Region(e.cluster),
+		ExternalSNAT:         e.externalSNAT,
 		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
 		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
@@ -320,6 +322,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 
 	data := TemplateData{
 		AWSRegion:            key.Region(e.cluster),
+		ExternalSNAT:         e.externalSNAT,
 		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
 		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),

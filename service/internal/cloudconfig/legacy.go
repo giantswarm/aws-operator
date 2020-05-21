@@ -35,7 +35,7 @@ func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l str
 				},
 				CloudProvider: key.CloudProvider,
 				DNS: g8sv1alpha1.ClusterKubernetesDNS{
-					IP: dnsIPFromRange(c.ClusterIPRange).String(),
+					IP: dnsIPFromRange(c.ClusterIPRange),
 				},
 				Domain: c.ClusterDomain,
 				Kubelet: g8sv1alpha1.ClusterKubernetesKubelet{
@@ -65,10 +65,10 @@ func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l str
 // internally. It must be some specific IP, so we chose the last IP octet to be
 // 10. The only reason to do this is to have some static value we apply
 // everywhere.
-func dnsIPFromRange(s string) net.IP {
+func dnsIPFromRange(s string) string {
 	ip := ipFromString(s)
 	ip[3] = 10
-	return ip
+	return ip.String()
 }
 
 func ipFromString(cidr string) net.IP {

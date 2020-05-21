@@ -2,7 +2,7 @@ package cloudconfig
 
 import (
 	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys"
@@ -27,6 +27,7 @@ type Config struct {
 	CalicoSubnet              string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
+	ExternalSNAT              bool
 	IgnitionPath              string
 	ImagePullProgressDeadline string
 	KubeletExtraArgs          []string

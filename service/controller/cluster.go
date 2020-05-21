@@ -1,23 +1,66 @@
 package controller
 
 import (
+	"context"
+	"fmt"
 	"net"
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient"
+	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/operatorkit/resource"
+	"github.com/giantswarm/operatorkit/resource/crud"
+	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
+	"github.com/giantswarm/tenantcluster/v2/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
+	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
+	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
+	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
+	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
+	"github.com/giantswarm/aws-operator/service/controller/resource/region"
+	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
+	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
+	"github.com/giantswarm/aws-operator/service/controller/resource/service"
+	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpi"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpoutputs"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -28,60 +71,19 @@ type ClusterConfig struct {
 
 	AccessLogsExpiration       int
 	AdvancedMonitoringEC2      bool
-	APIWhitelist               ClusterConfigAPIWhitelist
+	APIWhitelist               tccp.ConfigAPIWhitelist
 	CalicoCIDR                 int
-	CalicoMTU                  int
 	CalicoSubnet               string
-	ClusterIPRange             string
 	DeleteLoggingBucket        bool
-	DockerDaemonCIDR           string
-	GuestAvailabilityZones     []string
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
 	GuestSubnetMaskBits        int
-	GuestUpdateEnabled         bool
 	HostAWSConfig              aws.Config
-	IgnitionPath               string
-	ImagePullProgressDeadline  string
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	ClusterDomain              string
-	NetworkSetupDockerImage    string
-	OIDC                       ClusterConfigOIDC
-	PodInfraContainerImage     string
-	RegistryDomain             string
-	Route53Enabled             bool
 	RouteTables                string
-	SSHUserList                string
-	SSOPublicKey               string
-	VaultAddress               string
-}
-
-type ClusterConfigLabelSelector struct {
-	Enabled          bool
-	OverridenVersion string
-}
-
-// ClusterConfigOIDC represents the configuration of the OIDC authorization
-// provider.
-type ClusterConfigOIDC struct {
-	ClientID      string
-	IssuerURL     string
-	UsernameClaim string
-	GroupsClaim   string
-}
-
-// ClusterConfigAPIWhitelist defines guest cluster k8s API whitelisting types.
-type ClusterConfigAPIWhitelist struct {
-	Private ClusterConfigAPIWhitelistConfig
-	Public  ClusterConfigAPIWhitelistConfig
-}
-
-// ClusterConfigAPIWhitelistConfig defines guest cluster k8s API whitelisting.
-type ClusterConfigAPIWhitelistConfig struct {
-	Enabled    bool
-	SubnetList string
+	Route53Enabled             bool
 }
 
 type Cluster struct {
@@ -95,23 +97,30 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 
-	resourceSets, err := newClusterResourceSets(config)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var resources []resource.Interface
+	{
+		resources, err = newClusterResources(config)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var operatorkitController *controller.Controller
 	{
 		c := controller.Config{
-			K8sClient:    config.K8sClient,
-			Logger:       config.Logger,
-			ResourceSets: resourceSets,
-			// Name is used to compute finalizer names. This results in something
-			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
-			Name: project.Name() + "-cluster-controller",
+			InitCtx: func(ctx context.Context, obj interface{}) (context.Context, error) {
+				return controllercontext.NewContext(ctx, controllercontext.Context{}), nil
+			},
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSCluster)
 			},
+			Resources: resources,
+
+			// Name is used to compute finalizer names. This results in something
+			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
+			Name: project.Name() + "-cluster-controller",
 			Selector: labels.SelectorFromSet(map[string]string{
 				label.OperatorVersion: project.Version(),
 			}),
@@ -130,7 +139,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 	return c, nil
 }
 
-func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, error) {
+func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var err error
 
 	var certsSearcher *certs.Searcher
@@ -146,76 +155,645 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 		}
 	}
 
-	var randomKeysSearcher randomkeys.Interface
+	var encrypterObject encrypter.Interface
 	{
-		c := randomkeys.Config{
+		c := &kms.EncrypterConfig{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		encrypterObject, err = kms.NewEncrypter(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpChangeDetection *changedetection.TCCP
+	{
+		c := changedetection.TCCPConfig{
+			Logger: config.Logger,
+		}
+
+		tccpChangeDetection, err = changedetection.NewTCCP(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantCluster tenantcluster.Interface
+	{
+		c := tenantcluster.Config{
+			CertsSearcher: certsSearcher,
+			Logger:        config.Logger,
+
+			// TODO use a dedicated aws-operator key-pair.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/9327
+			//
+			CertID: certs.ClusterOperatorAPICert,
+		}
+
+		tenantCluster, err = tenantcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterChecker *ipam.ClusterChecker
+	{
+		c := ipam.ClusterCheckerConfig{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+		}
+
+		clusterChecker, err = ipam.NewClusterChecker(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var subnetCollector *ipam.SubnetCollector
+	{
+		c := ipam.SubnetCollectorConfig{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+
+			NetworkRange: config.IPAMNetworkRange,
+		}
+
+		subnetCollector, err = ipam.NewSubnetCollector(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var clusterPersister *ipam.ClusterPersister
+	{
+		c := ipam.ClusterPersisterConfig{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+		}
+
+		clusterPersister, err = ipam.NewClusterPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var accountIDResource resource.Interface
+	{
+		c := accountid.Config{
+			Logger: config.Logger,
+		}
+
+		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var apiEndpointResource resource.Interface
+	{
+		c := apiendpoint.Config{
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
+		}
+
+		apiEndpointResource, err = apiendpoint.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var awsClientResource resource.Interface
+	{
+		c := awsclient.Config{
+			K8sClient:     config.K8sClient.K8sClient(),
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+
+			CPAWSConfig: config.HostAWSConfig,
+		}
+
+		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var snapshotIDResource resource.Interface
+	{
+		c := snapshotid.Config{
+			Logger: config.Logger,
+		}
+
+		snapshotIDResource, err = snapshotid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpAZsResource resource.Interface
+	{
+		c := tccpazs.Config{
+			G8sClient:     config.K8sClient.G8sClient(),
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+
+			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
+		}
+
+		tccpAZsResource, err = tccpazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var encryptionEnsurerResource resource.Interface
+	{
+		c := encryptionensurer.Config{
+			Encrypter: encrypterObject,
+			Logger:    config.Logger,
+		}
+
+		encryptionEnsurerResource, err = encryptionensurer.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSecurityGroupsResource resource.Interface
+	{
+		c := tccpsecuritygroups.Config{
+			ToClusterFunc: key.ToCluster,
+			Logger:        config.Logger,
+		}
+
+		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ipamResource resource.Interface
+	{
+		c := ipam.Config{
+			Checker:   clusterChecker,
+			Collector: subnetCollector,
+			Locker:    config.Locker,
+			Logger:    config.Logger,
+			Persister: clusterPersister,
+
+			AllocatedSubnetMaskBits: config.GuestSubnetMaskBits,
+			NetworkRange:            config.IPAMNetworkRange,
+			PrivateSubnetMaskBits:   config.GuestPrivateSubnetMaskBits,
+			PublicSubnetMaskBits:    config.GuestPublicSubnetMaskBits,
+		}
+
+		ipamResource, err = ipam.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var bridgeZoneResource resource.Interface
+	{
+		c := bridgezone.Config{
+			HostAWSConfig: config.HostAWSConfig,
+			K8sClient:     config.K8sClient.K8sClient(),
+			Logger:        config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		bridgeZoneResource, err = bridgezone.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var s3BucketResource resource.Interface
+	{
+		c := s3bucket.Config{
+			Logger: config.Logger,
+
+			AccessLogsExpiration: config.AccessLogsExpiration,
+			DeleteLoggingBucket:  config.DeleteLoggingBucket,
+			IncludeTags:          config.IncludeTags,
+			InstallationName:     config.InstallationName,
+		}
+
+		ops, err := s3bucket.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		s3BucketResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupEBSVolumesResource resource.Interface
+	{
+		c := cleanupebsvolumes.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupEBSVolumesResource, err = cleanupebsvolumes.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupLoadBalancersResource resource.Interface
+	{
+		c := cleanuploadbalancers.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupLoadBalancersResource, err = cleanuploadbalancers.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupMachineDeploymentsResource resource.Interface
+	{
+		c := cleanupmachinedeployments.Config{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+		}
+
+		cleanupMachineDeploymentsResource, err = cleanupmachinedeployments.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupRecordSets resource.Interface
+	{
+		c := cleanuprecordsets.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		cleanupRecordSets, err = cleanuprecordsets.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupSecurityGroups resource.Interface
+	{
+		c := cleanupsecuritygroups.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupSecurityGroups, err = cleanupsecuritygroups.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var regionResource resource.Interface
+	{
+		c := region.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+		}
+
+		regionResource, err = region.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpResource resource.Interface
+	{
+		c := tccp.Config{
+			G8sClient: config.K8sClient.G8sClient(),
+			Logger:    config.Logger,
+
+			APIWhitelist:       config.APIWhitelist,
+			CIDRBlockAWSCNI:    fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
+			Detection:          tccpChangeDetection,
+			InstallationName:   config.InstallationName,
+			InstanceMonitoring: config.AdvancedMonitoringEC2,
+			PublicRouteTables:  config.RouteTables,
+			Route53Enabled:     config.Route53Enabled,
+		}
+
+		tccpResource, err = tccp.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpOutputsResource resource.Interface
+	{
+		c := tccpoutputs.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+			ToClusterFunc:  key.ToCluster,
+		}
+
+		tccpOutputsResource, err = tccpoutputs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpSubnetsResource resource.Interface
+	{
+		c := tccpsubnets.Config{
+			Logger: config.Logger,
+		}
+
+		tccpSubnetsResource, err = tccpsubnets.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpfResource resource.Interface
+	{
+		c := tccpf.Config{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+			Route53Enabled:   config.Route53Enabled,
+		}
+
+		tccpfResource, err = tccpf.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpiResource resource.Interface
+	{
+		c := tccpi.Config{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		tccpiResource, err = tccpi.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpVPCIDResource resource.Interface
+	{
+		c := tccpvpcid.Config{
+			Logger:        config.Logger,
+			ToClusterFunc: key.ToCluster,
+		}
+
+		tccpVPCIDResource, err = tccpvpcid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tccpVPCIDStatusResource resource.Interface
+	{
+		c := tccpvpcidstatus.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		tccpVPCIDStatusResource, err = tccpvpcidstatus.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var natGatewayAddressesResource resource.Interface
+	{
+		c := natgatewayaddresses.Config{
+			Logger: config.Logger,
+
+			Installation: config.InstallationName,
+		}
+
+		natGatewayAddressesResource, err = natgatewayaddresses.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var peerRoleARNResource resource.Interface
+	{
+		c := peerrolearn.Config{
+			Logger: config.Logger,
+		}
+
+		peerRoleARNResource, err = peerrolearn.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cpRouteTablesResource resource.Interface
+	{
+		c := cproutetables.Config{
+			Logger: config.Logger,
+
+			Names: strings.Split(config.RouteTables, ","),
+		}
+
+		cpRouteTablesResource, err = cproutetables.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var secretFinalizerResource resource.Interface
+	{
+		c := secretfinalizer.Config{
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}
 
-		randomKeysSearcher, err = randomkeys.NewSearcher(c)
+		secretFinalizerResource, err = secretfinalizer.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	var resourceSet *controller.ResourceSet
+	var serviceResource resource.Interface
 	{
-		c := clusterResourceSetConfig{
-			CertsSearcher:      certsSearcher,
-			HostAWSConfig:      config.HostAWSConfig,
-			K8sClient:          config.K8sClient,
-			Locker:             config.Locker,
-			Logger:             config.Logger,
-			RandomKeysSearcher: randomKeysSearcher,
-
-			AccessLogsExpiration:  config.AccessLogsExpiration,
-			AdvancedMonitoringEC2: config.AdvancedMonitoringEC2,
-			APIWhitelist: tccp.ConfigAPIWhitelist{
-				Private: tccp.ConfigAPIWhitelistSecurityGroup{
-					Enabled:    config.APIWhitelist.Private.Enabled,
-					SubnetList: strings.Split(config.APIWhitelist.Private.SubnetList, ","),
-				},
-				Public: tccp.ConfigAPIWhitelistSecurityGroup{
-					Enabled:    config.APIWhitelist.Public.Enabled,
-					SubnetList: strings.Split(config.APIWhitelist.Public.SubnetList, ","),
-				},
-			},
-			CalicoCIDR:                 config.CalicoCIDR,
-			CalicoMTU:                  config.CalicoMTU,
-			CalicoSubnet:               config.CalicoSubnet,
-			ClusterDomain:              config.ClusterDomain,
-			ClusterIPRange:             config.ClusterIPRange,
-			DeleteLoggingBucket:        config.DeleteLoggingBucket,
-			DockerDaemonCIDR:           config.DockerDaemonCIDR,
-			GuestAvailabilityZones:     config.GuestAvailabilityZones,
-			GuestPrivateSubnetMaskBits: config.GuestPrivateSubnetMaskBits,
-			GuestPublicSubnetMaskBits:  config.GuestPublicSubnetMaskBits,
-			GuestSubnetMaskBits:        config.GuestSubnetMaskBits,
-			IgnitionPath:               config.IgnitionPath,
-			ImagePullProgressDeadline:  config.ImagePullProgressDeadline,
-			IncludeTags:                config.IncludeTags,
-			InstallationName:           config.InstallationName,
-			IPAMNetworkRange:           config.IPAMNetworkRange,
-			NetworkSetupDockerImage:    config.NetworkSetupDockerImage,
-			PodInfraContainerImage:     config.PodInfraContainerImage,
-			RegistryDomain:             config.RegistryDomain,
-			Route53Enabled:             config.Route53Enabled,
-			RouteTables:                config.RouteTables,
-			SSHUserList:                config.SSHUserList,
-			SSOPublicKey:               config.SSOPublicKey,
-			VaultAddress:               config.VaultAddress,
+		c := service.Config{
+			K8sClient: config.K8sClient.K8sClient(),
+			Logger:    config.Logger,
 		}
 
-		resourceSet, err = newClusterResourceSet(c)
+		ops, err := service.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		serviceResource, err = toCRUDResource(config.Logger, ops)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
-	resourceSets := []*controller.ResourceSet{
-		resourceSet,
+	var endpointsResource resource.Interface
+	{
+		c := endpoints.Config{
+			K8sClient: config.K8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		ops, err := endpoints.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		endpointsResource, err = toCRUDResource(config.Logger, ops)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
-	return resourceSets, nil
+	var eniConfigCRsResource resource.Interface
+	{
+		c := eniconfigcrs.Config{
+			Logger: config.Logger,
+		}
+
+		eniConfigCRsResource, err = eniconfigcrs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ensureCPCRsResource resource.Interface
+	{
+		c := ensurecpcrs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		ensureCPCRsResource, err = ensurecpcrs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cpVPCResource resource.Interface
+	{
+		c := cpvpc.Config{
+			Logger: config.Logger,
+
+			InstallationName: config.InstallationName,
+		}
+
+		cpVPCResource, err = cpvpc.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: tenantCluster,
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	resources := []resource.Interface{
+		// All these resources only fetch information from remote APIs and put them
+		// into the controller context.
+		awsClientResource,
+		snapshotIDResource,
+		accountIDResource,
+		natGatewayAddressesResource,
+		peerRoleARNResource,
+		cpRouteTablesResource,
+		cpVPCResource,
+		tccpVPCIDResource,
+		tccpOutputsResource,
+		tccpSubnetsResource,
+		regionResource,
+		tenantClientsResource,
+
+		// All these resources implement certain business logic and operate based on
+		// the information given in the controller context.
+		encryptionEnsurerResource,
+		apiEndpointResource,
+		ipamResource,
+		bridgeZoneResource,
+		tccpSecurityGroupsResource,
+		s3BucketResource,
+		tccpAZsResource,
+		tccpiResource,
+		tccpResource,
+		tccpfResource,
+		serviceResource,
+		endpointsResource,
+		eniConfigCRsResource,
+		ensureCPCRsResource,
+		secretFinalizerResource,
+
+		// All these resources implement logic to update CR status information.
+		tccpVPCIDStatusResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupEBSVolumesResource,
+		cleanupLoadBalancersResource,
+		cleanupMachineDeploymentsResource,
+		cleanupRecordSets,
+		cleanupSecurityGroups,
+	}
+
+	{
+		c := retryresource.WrapConfig{
+			Logger: config.Logger,
+		}
+
+		resources, err = retryresource.Wrap(resources, c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	{
+		c := metricsresource.WrapConfig{}
+
+		resources, err = metricsresource.Wrap(resources, c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	return resources, nil
+}
+
+func toCRUDResource(logger micrologger.Logger, ops crud.Interface) (*crud.Resource, error) {
+	c := crud.ResourceConfig{
+		CRUD:   ops,
+		Logger: logger,
+	}
+
+	r, err := crud.NewResource(c)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	return r, nil
 }

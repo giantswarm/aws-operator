@@ -150,6 +150,7 @@ images have been published on AWS, this mapping can be updating using
 See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting patches, the
 contribution workflow as well as reporting bugs.
 
+For security issues, please see [the security policy](SECURITY.md).
 
 
 ## License

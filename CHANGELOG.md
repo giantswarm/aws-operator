@@ -6,18 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-
 ## [Unreleased]
+
+
+
+### Added
+
+- Add common labels to `aws-operator` pod.
+
+
+
+## [8.6.0] 2020-05-21
+
+### Added
+
+- Enable ExternalSNAT to be configurable.
 
 ### Changed
 
 - CI: Add optional pushing of WIP work to Aliyun registry.
-- Removed static ip FOR ENI to avoid collision with internal API LB.
-
+- Remove static ip FOR ENI to avoid collision with internal API LB.
+- Remove `--service.feature*` and `--service.test*` flags.
 
 ### Fixed
 
+- Check Service Quota endpoint availability for the current AWS region
 - Fix RBAC rules for Control Plane CR migration.
+
 
 
 ## [8.5.0] 2020-05-11
@@ -102,8 +117,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...HEAD
 
+[8.6.0]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/giantswarm/aws-operator/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/giantswarm/aws-operator/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...v8.3.0
