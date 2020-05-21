@@ -328,6 +328,13 @@ func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev
 	{
 		instance = &template.ParamsMainInstance{
 			Master: template.ParamsMainInstanceMaster{
+				/*
+					This is part of migration code we introduced with the new tccpn stack.
+					We need this to create empty ETCD volume in the first AZ  to do a snapshot
+					and then create volume from that snapshot in the tccpn stack.
+
+					We can take a look at how we could remove it before creating stable rlease for HA masters.
+				*/
 				AZ: cc.Spec.TenantCluster.TCCP.AvailabilityZones[0].Name,
 				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
 					Name: key.VolumeNameEtcd(cr),
