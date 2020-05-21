@@ -117,6 +117,10 @@ func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Spec.Provider.CredentialSecret.Namespace
 }
 
+func ExternalSNAT(cluster infrastructurev1alpha2.AWSCluster) *bool {
+	return cluster.Spec.Provider.Pods.ExternalSNAT
+}
+
 func IsChinaRegion(awsRegion string) bool {
 	return strings.HasPrefix(awsRegion, "cn-")
 }

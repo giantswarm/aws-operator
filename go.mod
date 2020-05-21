@@ -1,12 +1,12 @@
 module github.com/giantswarm/aws-operator
 
-go 1.13
+go 1.14
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.6.0
-	github.com/aws/aws-sdk-go v1.31.0
+	github.com/aws/aws-sdk-go v1.31.2
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions v0.3.10
+	github.com/giantswarm/apiextensions v0.4.0
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs/v2 v2.0.0
@@ -14,24 +14,23 @@ require (
 	github.com/giantswarm/e2eclients v0.2.0
 	github.com/giantswarm/e2esetup v0.1.0
 	github.com/giantswarm/e2etemplates v0.2.0
-	github.com/giantswarm/e2etests v0.1.0
+	github.com/giantswarm/e2etests v0.3.1
 	github.com/giantswarm/errors v0.2.3
 	github.com/giantswarm/exporterkit v0.2.0
-	github.com/giantswarm/helmclient v0.2.2
+	github.com/giantswarm/helmclient v1.0.0
 	github.com/giantswarm/ipam v0.2.0
-	github.com/giantswarm/k8sclient v0.2.0
+	github.com/giantswarm/k8sclient/v3 v3.1.0
 	github.com/giantswarm/k8scloudconfig/v6 v6.2.0
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
 	github.com/giantswarm/microkit v0.2.1
 	github.com/giantswarm/micrologger v0.3.1
-	github.com/giantswarm/operatorkit v0.2.1
+	github.com/giantswarm/operatorkit v1.0.0
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster/v2 v2.0.0
 	github.com/giantswarm/to v0.3.0
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
-	github.com/giantswarm/versionbundle v0.2.0
 	github.com/google/go-cmp v0.4.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.5.1
