@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add common labels to `aws-operator` pod.
 
+### Fixed
+
+- Fix collector panic.
+
 
 
 ## [8.6.0] 2020-05-21
