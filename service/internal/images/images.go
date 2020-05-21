@@ -125,7 +125,6 @@ func (i *Images) Versions(ctx context.Context, obj interface{}) (k8scloudconfig.
 
 		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
 		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
-
 	}
 
 	return v, nil

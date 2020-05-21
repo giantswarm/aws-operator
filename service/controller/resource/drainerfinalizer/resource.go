@@ -209,7 +209,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		// Timeout drainer configs should simply be deleted without draining since
 		// the time window for draining did expire at this point.
 		for _, dc := range timeoutDrainerConfigs {
-
 			err = r.deleteDrainerConfig(ctx, dc)
 			if err != nil {
 				return microerror.Mask(err)

@@ -140,8 +140,9 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
-			LabelMapFunc:  controlPlaneDrainerLabelMapFunc,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			LabelMapFunc:      controlPlaneDrainerLabelMapFunc,
+			ToClusterFunc:     newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			LifeCycleHookName: key.LifeCycleHookControlPlane,
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)
