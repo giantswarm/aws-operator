@@ -94,11 +94,8 @@ Resources:
         - !Ref APIInternalELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1a
-      
         - !Ref PrivateSubnetEuCentral1b
-      
         - !Ref PrivateSubnetEuCentral1c
-      
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
@@ -125,11 +122,8 @@ Resources:
         - !Ref MasterSecurityGroup
       Subnets:
         - !Ref PublicSubnetEuCentral1a
-      
         - !Ref PublicSubnetEuCentral1b
-      
         - !Ref PublicSubnetEuCentral1c
-      
 
   EtcdLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -155,11 +149,8 @@ Resources:
         - !Ref EtcdELBSecurityGroup
       Subnets:
         - !Ref PrivateSubnetEuCentral1a
-      
         - !Ref PrivateSubnetEuCentral1b
-      
         - !Ref PrivateSubnetEuCentral1c
-      
   
   NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway

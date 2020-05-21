@@ -130,8 +130,6 @@ func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d instances and %d elb instnace states", len(o.Reservations), len(o2.InstanceStates)))
-
 		for _, r := range o.Reservations {
 			for _, i := range r.Instances {
 				for _, iState := range o2.InstanceStates {
