@@ -10,9 +10,11 @@ import (
 // IsEndpointNotAvailable asserts that an error is due to service
 // not available in the current region.
 func IsEndpointNotAvailable(err error) bool {
-	c := microerror.Cause(err)
+	if err == nil {
+		return false
+	}
 
-	return strings.Contains(c.Error(), "no such host")
+	return strings.Contains(microerror.Cause(err).Error(), "no such host")
 }
 
 var invalidConfigError = &microerror.Error{
