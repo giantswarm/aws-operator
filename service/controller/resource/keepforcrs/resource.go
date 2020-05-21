@@ -25,7 +25,7 @@ type Config struct {
 
 // Resource receives the runtime object of the underlying controller it is wired
 // into and keeps finalizers for that very controller in case the configured
-// runtime objects do still exist. This is to initialize deletion for the
+// runtime objects do still exist. This is to have a reliable deletion for the
 // following CRs.
 //
 //     watch         |    delete
