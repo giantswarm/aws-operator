@@ -65,18 +65,6 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			ctx := unittest.DefaultContextControlPlane()
 			k := unittest.FakeK8sClient()
 
-			var d *changedetection.TCCPN
-			{
-				c := changedetection.TCCPNConfig{
-					Logger: microloggertest.New(),
-				}
-
-				d, err = changedetection.NewTCCPN(c)
-				if err != nil {
-					t.Fatal(err)
-				}
-			}
-
 			var h hamaster.Interface
 			{
 				c := hamaster.Config{
@@ -84,6 +72,19 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 
 				h, err = hamaster.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			var d *changedetection.TCCPN
+			{
+				c := changedetection.TCCPNConfig{
+					HAMaster: h,
+					Logger:   microloggertest.New(),
+				}
+
+				d, err = changedetection.NewTCCPN(c)
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -72,11 +72,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if r.route53Enabled {
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
-			// migration code to dont throw error  when the old C dont yet have the new output value
-			// TODO https://github.com/giantswarm/giantswarm/issues/10139
-			// after migration we can remove the check for IsOutputNotFound
+			// TODO migration code to dont throw error when the old TC does not yet
+			// have the new output value. Once the aws-operator graduated to v9.0.0 we
+			// can remove the check for IsOutputNotFound.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/10139
+			//
 			if cloudformation.IsOutputNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane hostedZoneID output")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane hostedZoneID output")
 			} else {
 				if err != nil {
 					return microerror.Mask(err)
@@ -96,11 +99,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, InternalHostedZoneID)
-			// migration code to dont throw error  when the old C dont yet have the new output value
-			// TODO https://github.com/giantswarm/giantswarm/issues/10139
-			// after migration we can remove the check for IsOutputNotFound
+			// TODO migration code to dont throw error when the old TC does not yet
+			// have the new output value. Once the aws-operator graduated to v9.0.0 we
+			// can remove the check for IsOutputNotFound.
+			//
+			//     https://github.com/giantswarm/giantswarm/issues/10139
+			//
 			if cloudformation.IsOutputNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane internalHostedZoneID output")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane internalHostedZoneID output")
 			} else {
 				if err != nil {
 					return microerror.Mask(err)
