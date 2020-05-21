@@ -289,8 +289,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			randomKeyTmplSet: randomKeyTmplSet,
 			registryDomain:   t.config.RegistryDomain,
 		}
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
+		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
+		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
