@@ -18,7 +18,7 @@ spec:
       annotations:
         releaseRevision: {{ .Release.Revision | quote }}
       labels:
-        {{- include "labels.selector" . | nindent 8 }}
+        {{- include "labels.common" . | nindent 8 }}
     spec:
       volumes:
       - name: {{ include "name" . }}-configmap

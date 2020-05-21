@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+### Added
+
+- Add common labels to `aws-operator` pod.
+
+
+
 ## [8.6.0] 2020-05-21
 
 ### Added
