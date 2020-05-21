@@ -102,7 +102,6 @@ spec:
         - operator: Exists
       containers:
         - image: {{.RegistryDomain}}/giantswarm/amazon-k8s-cni:v1.6.0
-          imagePullPolicy: Always
           ports:
             - containerPort: 61678
               name: metrics
