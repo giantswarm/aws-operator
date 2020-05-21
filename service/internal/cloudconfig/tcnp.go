@@ -157,7 +157,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			externalSNAT:   externalSNAT,
 			registryDomain: t.config.RegistryDomain,
 		}
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
+		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
 

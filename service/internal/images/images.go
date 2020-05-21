@@ -96,7 +96,6 @@ func (i *Images) CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images
 			return k8scloudconfig.Images{}, microerror.Mask(err)
 		}
 
-		v.Kubectl = key.KubectlVersion
 		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
 		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
 

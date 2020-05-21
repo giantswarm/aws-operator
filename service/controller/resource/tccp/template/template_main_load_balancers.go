@@ -30,7 +30,7 @@ const TemplateMainLoadBalancers = `
       Subnets:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
-      {{end}}
+      {{- end }}
   ApiLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
@@ -58,7 +58,7 @@ const TemplateMainLoadBalancers = `
       Subnets:
       {{- range $s := $v.PublicSubnets }}
         - !Ref {{ $s }}
-      {{end}}
+      {{- end }}
 
   EtcdLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
@@ -85,6 +85,6 @@ const TemplateMainLoadBalancers = `
       Subnets:
       {{- range $s := $v.PrivateSubnets }}
         - !Ref {{ $s }}
-      {{end}}
+      {{- end }}
 {{- end -}}
 `

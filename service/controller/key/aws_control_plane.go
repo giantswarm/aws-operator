@@ -2,7 +2,6 @@ package key
 
 import (
 	"fmt"
-	"net"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
@@ -22,32 +21,6 @@ func ControlPlaneASGResourceName(getter LabelsGetter, id int) string {
 	return fmt.Sprintf("ControlPlaneNodeAutoScalingGroup%d", id)
 }
 
-func ControlPlaneENIIpAddress(ip net.IPNet) string {
-	// VPC subnet has reserved the first 4 IPs so we need to use the fifth one,
-	// meaning to start counting from zero, which is then index 4.
-	//
-	//     https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	//
-	eni := copyIP(ip.IP)
-	eni.To4()
-	eni[3] += 4
-
-	return eni.String()
-}
-
-func ControlPlaneENIGateway(ip net.IPNet) string {
-	// VPC subnet has reserved the first 4 IPs so we need to use the fifth one,
-	// meaning to start counting from zero, which is then index 4.
-	//
-	//     https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html
-	//
-	gw := copyIP(ip.IP)
-	gw.To4()
-	gw[3] += 1
-
-	return gw.String()
-}
-
 func ControlPlaneENIName(getter LabelsGetter, id int) string {
 	return fmt.Sprintf("%s-master%d-eni", ClusterID(getter), id)
 }
@@ -60,10 +33,11 @@ func ControlPlaneENIResourceName(id int) string {
 	return fmt.Sprintf("MasterEni%d", id)
 }
 
-func ControlPlaneENISubnetSize(ip net.IPNet) int {
-	subnetSize, _ := ip.Mask.Size()
-
-	return subnetSize
+func ControlPlaneEtcdNodeName(id int) string {
+	if id == 0 {
+		return "etcd"
+	}
+	return fmt.Sprintf("etcd%d", id)
 }
 
 func ControlPlaneID(getter LabelsGetter) string {
@@ -137,10 +111,4 @@ func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, erro
 	c := p.DeepCopy()
 
 	return *c, nil
-}
-
-func copyIP(ip net.IP) net.IP {
-	dup := make(net.IP, len(ip))
-	copy(dup, ip)
-	return dup
 }

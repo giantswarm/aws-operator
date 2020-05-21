@@ -286,6 +286,12 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		item := template.ParamsMainAutoScalingGroupItem{
 			AvailabilityZone: m.AZ,
 			ClusterID:        key.ClusterID(&cr),
+			Eni: template.ParamsMainAutoScalingGroupItemEni{
+				Resource: key.ControlPlaneENIResourceName(m.ID),
+			},
+			EtcdVolume: template.ParamsMainAutoScalingGroupItemEtcdVolume{
+				Resource: key.ControlPlaneVolumeResourceName(m.ID),
+			},
 			LaunchTemplate: template.ParamsMainAutoScalingGroupItemLaunchTemplate{
 				Resource: key.ControlPlaneLaunchTemplateResourceName(&cr, m.ID),
 			},

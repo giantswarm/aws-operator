@@ -9,7 +9,6 @@ func DefaultImages() k8scloudconfig.Images {
 		CalicoNode:                   "1.0.0",
 		Etcd:                         "1.0.0",
 		Hyperkube:                    "1.0.0",
-		Kubectl:                      "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd",
 		KubernetesAPIHealthz:         "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd",
 		KubernetesNetworkSetupDocker: "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd",
 	}

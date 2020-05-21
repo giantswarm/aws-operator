@@ -9,8 +9,8 @@ Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
-    - EtcdVolume
     - MasterEni
+    - EtcdVolume
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1a
@@ -67,8 +67,8 @@ Resources:
   ControlPlaneNodeAutoScalingGroup2:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
-    - EtcdVolume
-    - MasterEni
+    - MasterEni2
+    - EtcdVolume2
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -125,8 +125,8 @@ Resources:
   ControlPlaneNodeAutoScalingGroup3:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
-    - EtcdVolume
-    - MasterEni
+    - MasterEni3
+    - EtcdVolume3
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1c
@@ -433,7 +433,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-a2wax-1"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-1"
                     }
                   ]
                 }
@@ -513,7 +513,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-a2wax-2"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-2"
                     }
                   ]
                 }
@@ -593,7 +593,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-a2wax-3"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-3"
                     }
                   ]
                 }

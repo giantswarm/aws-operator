@@ -69,6 +69,7 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
 	var err error
 
+	var multiMasterEnabled bool = false
 	var mappings []hamaster.Mapping
 	{
 		mappings, err = t.config.HAMaster.Mapping(ctx, obj)
@@ -77,11 +78,15 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
+		if len(mappings) == 3 {
+			multiMasterEnabled = true
+		}
 	}
 
 	var templates []string
 	for _, mapping := range mappings {
-		template, err := t.newTemplate(ctx, obj, mapping)
+		template, err := t.newTemplate(ctx, obj, mapping, multiMasterEnabled)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -101,7 +106,7 @@ func (t *TCCPN) newPath(ctx context.Context, obj interface{}, mapping hamaster.M
 	return key.S3ObjectPathTCCPN(&cr, mapping.ID), nil
 }
 
-func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping) (string, error) {
+func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping, multiMasterEnabled bool) (string, error) {
 	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -270,13 +275,18 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params = k8scloudconfig.DefaultParams()
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr))
+		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.EnableAWSCNI = true
-		params.EtcdPort = key.EtcdPort
+		params.Etcd = k8scloudconfig.Etcd{
+			ClientPort:       key.EtcdPort,
+			HighAvailability: multiMasterEnabled,
+			NodeName:         key.ControlPlaneEtcdNodeName(mapping.ID),
+		}
 		params.Extension = &TCCPNExtension{
 			cc:               cc,
 			cluster:          cl,
@@ -288,8 +298,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			randomKeyTmplSet: randomKeyTmplSet,
 			registryDomain:   t.config.RegistryDomain,
 		}
-		params.Hyperkube.Apiserver.Pod.CommandExtraArgs = apiExtraArgs
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = kubeletExtraArgs
+		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
+		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey

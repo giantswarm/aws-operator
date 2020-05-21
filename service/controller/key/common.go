@@ -12,6 +12,10 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
+const (
+	ELBInstanceStateInService = "InService"
+)
+
 // AMI returns the EC2 AMI for the configured region and given version.
 func AMI(region string, release releasev1alpha1.Release) (string, error) {
 	osVersion, err := OSVersion(release)
@@ -278,7 +282,7 @@ func StackNameTCCPI(getter LabelsGetter) string {
 }
 
 func StackNameTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tccpn-%s", ClusterID(getter), ControlPlaneID(getter))
+	return fmt.Sprintf("cluster-%s-tccpn", ClusterID(getter))
 }
 
 func StackNameTCNP(getter LabelsGetter) string {
