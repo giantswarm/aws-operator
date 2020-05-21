@@ -131,6 +131,14 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	// Allow the actual externalSNAT to be set by the CR.
+	var externalSNAT bool
+	if key.ExternalSNAT(cl) == nil {
+		externalSNAT = t.config.ExternalSNAT
+	} else {
+		externalSNAT = *key.ExternalSNAT(cl)
+	}
+
 	var params k8scloudconfig.Params
 	{
 		// Default registry, kubernetes, etcd images etcd.
@@ -146,6 +154,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			clusterCerts:   certFiles,
 			encrypter:      t.config.Encrypter,
 			encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+			externalSNAT:   externalSNAT,
 			registryDomain: t.config.RegistryDomain,
 		}
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs

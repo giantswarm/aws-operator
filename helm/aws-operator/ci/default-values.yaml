@@ -36,6 +36,8 @@ Installation:
         S3AccessLogsExpiration: 0
         TrustedAdvisor:
           Enabled: false
+        CNI:
+          ExternalSNAT: false
       Kind: ""
     Registry:
       Domain: ""
