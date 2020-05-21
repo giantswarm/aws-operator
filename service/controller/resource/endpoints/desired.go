@@ -47,7 +47,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d healthy master instances", len(instances)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d master instances", len(instances)))
 	}
 
 	var addresses []corev1.EndpointAddress

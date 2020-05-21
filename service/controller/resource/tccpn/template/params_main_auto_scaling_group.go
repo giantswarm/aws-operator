@@ -18,9 +18,11 @@ type ParamsMainAutoScalingGroupItem struct {
 type ParamsMainAutoScalingGroupItemEni struct {
 	Resource string
 }
+
 type ParamsMainAutoScalingGroupItemEtcdVolume struct {
 	Resource string
 }
+
 type ParamsMainAutoScalingGroupItemLaunchTemplate struct {
 	Resource string
 }
