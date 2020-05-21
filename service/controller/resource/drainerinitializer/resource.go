@@ -140,7 +140,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var instances []*autoscaling.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state in ASG names %s", autoscaling.LifecycleStateTerminatingWait, asgName))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
@@ -157,6 +157,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		for _, g := range o.AutoScalingGroups {
 			for _, i := range g.Instances {
 				c++
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("checking instance %s with state %s", *i.InstanceId, *i.LifecycleState))
 
 				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
 					instances = append(instances, i)
