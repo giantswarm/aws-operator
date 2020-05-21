@@ -3,6 +3,8 @@ Description: Tenant Cluster Control Plane Nodes Cloud Formation Stack.
 Outputs:
   InstanceType:
     Value: m5.xlarge
+  MasterReplicas:
+    Value: 3
   OperatorVersion:
     Value: 7.3.0
 Resources:

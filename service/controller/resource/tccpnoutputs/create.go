@@ -3,6 +3,7 @@ package tccpnoutputs
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/giantswarm/microerror"
 
@@ -14,6 +15,7 @@ import (
 const (
 	InstanceTypeKey    = "InstanceType"
 	OperatorVersionKey = "OperatorVersion"
+	MasterReplicasKey  = "MasterReplicas"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -79,6 +81,32 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.OperatorVersion = v
+	}
+
+	{
+		v, err := cloudFormation.GetOutputValue(outputs, MasterReplicasKey)
+		if cloudformation.IsOutputNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes MasterReplicas output")
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+
+		// TODO this is migration code and can be removed when the aws-operator got
+		// graduated to v9.0.0, because then we can be sure all Tenant Clusters have
+		// the proper HA Masters setup including the new stack outputs.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/10139
+		//
+		if v == "" {
+			v = "0"
+		}
+
+		i, err := strconv.Atoi(v)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		cc.Status.TenantCluster.TCCPN.MasterReplicas = i
 	}
 
 	return nil

@@ -14,8 +14,14 @@ type Mapping struct {
 }
 
 type Interface interface {
+	// Enabled returns true in case HA Masters is enabled. Right now this means to
+	// have 3 replicas configured for the master setup.
+	Enabled(ctx context.Context, obj interface{}) (bool, error)
 	// Mapping fetches the AWSCluster and AWSControlPlane CRs using the cluster ID
 	// label obj must provide as meta object. See the godoc of Mapping for more
 	// information on the returned list of mapped information.
 	Mapping(ctx context.Context, obj interface{}) ([]Mapping, error)
+	// Replicas fetches the G8sControlPlane CR and returns the number of replicas
+	// configured for the master setup.
+	Replicas(ctx context.Context, obj interface{}) (int, error)
 }

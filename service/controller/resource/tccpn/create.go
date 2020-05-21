@@ -454,8 +454,22 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 }
 
 func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
+	var err error
+
+	// The reconcliation acts upon the AWSControlPlane CR, but the replicas are
+	// defined in the G8sControlPlane CR. Therefore we use the HA Masters service
+	// implementation to fetch the actual replicas count of the master setup.
+	var rep int
+	{
+		rep, err = r.haMaster.Replicas(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	outputs := &template.ParamsMainOutputs{
 		InstanceType:    key.ControlPlaneInstanceType(cr),
+		MasterReplicas:  rep,
 		OperatorVersion: key.OperatorVersion(&cr),
 	}
 

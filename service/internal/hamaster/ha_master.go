@@ -41,6 +41,19 @@ func New(config Config) (*HAMaster, error) {
 	return h, nil
 }
 
+func (h *HAMaster) Enabled(ctx context.Context, obj interface{}) (bool, error) {
+	rep, err := h.Replicas(ctx, obj)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	if rep == 3 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, error) {
 	cr, err := meta.Accessor(obj)
 	if err != nil {
@@ -105,6 +118,22 @@ func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, err
 	}
 
 	return mappings, nil
+}
+
+func (h *HAMaster) Replicas(ctx context.Context, obj interface{}) (int, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	// We need the G8sControlPlane CR because it holds the replica count. This
+	// tells us how many masters the current setup defines.
+	g8s, err := h.cachedG8s(ctx, cr)
+	if err != nil {
+		return 0, microerror.Mask(err)
+	}
+
+	return key.G8sControlPlaneReplicas(g8s), nil
 }
 
 func (h *HAMaster) cachedAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {

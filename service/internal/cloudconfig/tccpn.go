@@ -69,7 +69,6 @@ func (t *TCCPN) NewPaths(ctx context.Context, obj interface{}) ([]string, error)
 func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, error) {
 	var err error
 
-	var multiMasterEnabled bool = false
 	var mappings []hamaster.Mapping
 	{
 		mappings, err = t.config.HAMaster.Mapping(ctx, obj)
@@ -78,15 +77,11 @@ func (t *TCCPN) NewTemplates(ctx context.Context, obj interface{}) ([]string, er
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
-
-		if len(mappings) == 3 {
-			multiMasterEnabled = true
-		}
 	}
 
 	var templates []string
 	for _, mapping := range mappings {
-		template, err := t.newTemplate(ctx, obj, mapping, multiMasterEnabled)
+		template, err := t.newTemplate(ctx, obj, mapping)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -106,7 +101,7 @@ func (t *TCCPN) newPath(ctx context.Context, obj interface{}, mapping hamaster.M
 	return key.S3ObjectPathTCCPN(&cr, mapping.ID), nil
 }
 
-func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping, multiMasterEnabled bool) (string, error) {
+func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamaster.Mapping) (string, error) {
 	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -268,6 +263,16 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		externalSNAT = t.config.ExternalSNAT
 	} else {
 		externalSNAT = *key.ExternalSNAT(cl)
+	}
+
+	var multiMasterEnabled bool
+	{
+		multiMasterEnabled, err = t.config.HAMaster.Enabled(ctx, obj)
+		if hamaster.IsNotFound(err) {
+			return "", microerror.Maskf(notFoundError, "control plane CR")
+		} else if err != nil {
+			return "", microerror.Mask(err)
+		}
 	}
 
 	var params k8scloudconfig.Params
