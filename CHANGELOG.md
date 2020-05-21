@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [8.6.1] 2020-05-21
+
 ### Added
 
 - Add common labels to `aws-operator` pod.
@@ -121,8 +123,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...HEAD
 
+[8.6.1]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...v8.6.1
 [8.6.0]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/giantswarm/aws-operator/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/giantswarm/aws-operator/compare/v8.3.0...v8.4.0
