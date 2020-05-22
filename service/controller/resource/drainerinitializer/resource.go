@@ -133,15 +133,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var asgNames []string
+	var asgName string
 	{
-		if len(cc.Status.TenantCluster.ASGNames.List) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group names is not available yet")
+		if cc.Status.TenantCluster.ASG.Name == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgNames = cc.Status.TenantCluster.ASGNames.List
+		asgName = cc.Status.TenantCluster.ASG.Name
 	}
 
 	var instances []*autoscaling.Instance
@@ -149,7 +149,9 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state in ASG ", autoscaling.LifecycleStateTerminatingWait))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
-			AutoScalingGroupNames: aws.StringSlice(asgNames),
+			AutoScalingGroupNames: []*string{
+				aws.String(asgName),
+			},
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(i)
@@ -217,7 +219,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 				// Terminated instance that still have lifecycle action in the AWS API.
 				// Lets finish lifecycle hook to get rid of the instance in next loop.
-				err = r.completeLifeCycleHook(ctx, *instance.InstanceId, XXX)
+				err = r.completeLifeCycleHook(ctx, *instance.InstanceId, asgName)
 				if err != nil {
 					return microerror.Mask(err)
 				}

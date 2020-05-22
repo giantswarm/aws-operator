@@ -125,15 +125,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var asgNames []string
+	var asgName string
 	{
-		if len(cc.Status.TenantCluster.ASGNames.List) == 0 {
+		if cc.Status.TenantCluster.ASG.Name == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgNames = cc.Status.TenantCluster.ASGNames.List
+		asgName = cc.Status.TenantCluster.ASG.Name
 	}
 
 	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
