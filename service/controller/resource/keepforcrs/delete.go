@@ -52,7 +52,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if len(list.Items) != 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found object of type %T for tenant cluster %#q", r.newObjFunc(), key.ClusterID(cr)))
 		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)
 	}
