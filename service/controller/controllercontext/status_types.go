@@ -34,6 +34,7 @@ type ContextStatusControlPlaneVPC struct {
 
 type ContextStatusTenantCluster struct {
 	ASG             ContextStatusTenantClusterASG
+	ASGNames        ContextStatusTenantClusterASGNames
 	AWS             ContextStatusTenantClusterAWS
 	DNS             ContextStatusTenantClusterDNS
 	Encryption      ContextStatusTenantClusterEncryption
@@ -50,6 +51,10 @@ type ContextStatusTenantClusterASG struct {
 	MaxSize         int
 	MinSize         int
 	Name            string
+}
+
+type ContextStatusTenantClusterASGNames struct {
+	List []string
 }
 
 type ContextStatusTenantClusterAWS struct {

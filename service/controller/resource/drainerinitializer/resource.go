@@ -133,25 +133,23 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var asgName string
+	var asgNames []string
 	{
-		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+		if len(cc.Status.TenantCluster.ASGNames.List) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group names is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		asgName = cc.Status.TenantCluster.ASG.Name
+		asgNames = cc.Status.TenantCluster.ASGNames.List
 	}
 
 	var instances []*autoscaling.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state in ASG names %s", autoscaling.LifecycleStateTerminatingWait, asgName))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state in ASG ", autoscaling.LifecycleStateTerminatingWait))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
-			AutoScalingGroupNames: []*string{
-				aws.String(asgName),
-			},
+			AutoScalingGroupNames: aws.StringSlice(asgNames),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(i)
@@ -219,7 +217,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 				// Terminated instance that still have lifecycle action in the AWS API.
 				// Lets finish lifecycle hook to get rid of the instance in next loop.
-				err = r.completeLifeCycleHook(ctx, *instance.InstanceId, asgName)
+				err = r.completeLifeCycleHook(ctx, *instance.InstanceId, XXX)
 				if err != nil {
 					return microerror.Mask(err)
 				}
@@ -298,7 +296,7 @@ func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgNam
 	} else if err != nil {
 		return microerror.Mask(err)
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifen cycle hook action for tenant cluster node %#q", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))

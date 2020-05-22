@@ -64,7 +64,8 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSMachineDeployment)
 			},
-			Resources: resources,
+			Resources:    resources,
+			ResyncPeriod: key.DrainerResyncPeriod,
 
 			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.

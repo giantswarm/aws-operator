@@ -132,6 +132,28 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		cc.Status.TenantCluster.ASG.Name = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, "aws:autoscaling:groupName")
 
+		var asgNames []string
+		{
+			for _, r := range o.Reservations {
+				for _, i := range r.Instances {
+					found := false
+					instanceAsgName := awstags.ValueForKey(i.Tags, "aws:autoscaling:groupName")
+					for _, n := range asgNames {
+						if instanceAsgName == n {
+							found = true
+							break
+						}
+					}
+					// add each ASG only once
+					if !found {
+						asgNames = append(asgNames, instanceAsgName)
+					}
+				}
+			}
+		}
+
+		cc.Status.TenantCluster.ASGNames.List = asgNames
+
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found auto scaling group name %#q", cc.Status.TenantCluster.ASG.Name))
 	}
 
