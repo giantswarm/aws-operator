@@ -44,6 +44,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
+	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
@@ -277,6 +278,40 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		awsClientResource, err = awsclient.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var keepForAWSControlPlaneCRsResource resource.Interface
+	{
+		c := keepforcrs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+
+			NewObjFunc: func() runtime.Object {
+				return &infrastructurev1alpha2.AWSControlPlane{}
+			},
+		}
+
+		keepForAWSControlPlaneCRsResource, err = keepforcrs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var keepForAWSMachineDeploymentCRsResource resource.Interface
+	{
+		c := keepforcrs.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+
+			NewObjFunc: func() runtime.Object {
+				return &infrastructurev1alpha2.AWSMachineDeployment{}
+			},
+		}
+
+		keepForAWSMachineDeploymentCRsResource, err = keepforcrs.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -759,6 +794,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupMachineDeploymentsResource,
 		cleanupRecordSets,
 		cleanupSecurityGroups,
+		keepForAWSControlPlaneCRsResource,
+		keepForAWSMachineDeploymentCRsResource,
 	}
 
 	{
