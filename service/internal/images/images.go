@@ -79,25 +79,12 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 }
 
 func (i *Images) CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error) {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return k8scloudconfig.Images{}, microerror.Mask(err)
-	}
-
-	re, err := i.cachedRelease(ctx, cr)
-	if err != nil {
-		return k8scloudconfig.Images{}, microerror.Mask(err)
-	}
-
 	var im k8scloudconfig.Images
 	{
-		v, err := k8scloudconfig.ExtractComponentVersions(re.Spec.Components)
+		v, err := i.Versions(ctx, obj)
 		if err != nil {
 			return k8scloudconfig.Images{}, microerror.Mask(err)
 		}
-
-		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
-		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
 
 		im = k8scloudconfig.BuildImages(i.registryDomain, v)
 	}

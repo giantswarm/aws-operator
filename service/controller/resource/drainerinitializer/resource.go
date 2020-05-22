@@ -165,7 +165,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				c++
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("checking instance %s with state %s.", *i.InstanceId, *i.LifecycleState))
 
-				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 					instances = append(instances, i)
 				}
 			}
