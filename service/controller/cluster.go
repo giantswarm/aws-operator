@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"net"
 	"strings"
 
@@ -67,6 +68,7 @@ import (
 
 type ClusterConfig struct {
 	K8sClient k8sclient.Interface
+	HAMaster  hamaster.Interface
 	Locker    locker.Interface
 	Logger    micrologger.Logger
 
@@ -509,6 +511,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := tccp.Config{
 			G8sClient: config.K8sClient.G8sClient(),
+			HAMaster:  config.HAMaster,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,

@@ -3,6 +3,7 @@ package tccp
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"sort"
 	"time"
 
@@ -319,9 +320,13 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 }
 
 func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	var err error
+	var haMapping []hamaster.Mapping
+	{
+		haMapping, err = r.haMaster.Mapping(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var instance *template.ParamsMainInstance
@@ -333,9 +338,9 @@ func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev
 					We need this to create empty ETCD volume in the first AZ  to do a snapshot
 					and then create volume from that snapshot in the tccpn stack.
 
-					We can take a look at how we could remove it before creating stable rlease for HA masters.
+					We can take a look at how we could remove it before creating stable release for HA masters.
 				*/
-				AZ: cc.Spec.TenantCluster.TCCP.AvailabilityZones[0].Name,
+				AZ: haMapping[0].AZ,
 				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
 					Name: key.VolumeNameEtcd(cr),
 				},
