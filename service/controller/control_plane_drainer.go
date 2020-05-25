@@ -21,7 +21,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
-	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
@@ -106,18 +105,6 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 		}
 	}
 
-	var asgStatusResource resource.Interface
-	{
-		c := asgstatus.Config{
-			Logger: config.Logger,
-		}
-
-		asgStatusResource, err = asgstatus.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var awsClientResource resource.Interface
 	{
 		c := awsclient.Config{
@@ -169,7 +156,6 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 	resources := []resource.Interface{
 		awsClientResource,
 		asgNameResource,
-		asgStatusResource,
 		drainerInitializerResource,
 		drainerFinalizerResource,
 	}
