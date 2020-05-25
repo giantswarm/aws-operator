@@ -195,6 +195,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.ClusterConfig{
 			K8sClient: k8sClient,
+			HAMaster:  ha,
 			Locker:    kubeLockLocker,
 			Logger:    config.Logger,
 

@@ -18,6 +18,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -73,6 +74,8 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 	var err error
 
+	k := unittest.FakeK8sClient()
+
 	var d *changedetection.TCCP
 	{
 		c := changedetection.TCCPConfig{
@@ -85,6 +88,18 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		}
 	}
 
+	var h hamaster.Interface
+	{
+		c := hamaster.Config{
+			K8sClient: k,
+		}
+
+		h, err = hamaster.New(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var r *Resource
@@ -92,6 +107,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 				c := Config{
 					G8sClient: fake.NewSimpleClientset(),
+					HAMaster:  h,
 					Detection: d,
 					Logger:    microloggertest.New(),
 
