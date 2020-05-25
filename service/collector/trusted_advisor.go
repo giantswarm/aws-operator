@@ -74,11 +74,14 @@ var (
 type TrustedAdvisorConfig struct {
 	Helper *helper
 	Logger micrologger.Logger
+	// Region to accept data for (the installation's region).
+	Region string
 }
 
 type TrustedAdvisor struct {
 	helper *helper
 	logger micrologger.Logger
+	region string
 }
 
 func NewTrustedAdvisor(config TrustedAdvisorConfig) (*TrustedAdvisor, error) {
@@ -88,10 +91,14 @@ func NewTrustedAdvisor(config TrustedAdvisorConfig) (*TrustedAdvisor, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.Region == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Region must not be empty", config)
+	}
 
 	t := &TrustedAdvisor{
 		helper: config.Helper,
 		logger: config.Logger,
+		region: config.Region,
 	}
 
 	return t, nil
@@ -175,6 +182,12 @@ func (t *TrustedAdvisor) collectForAccount(ch chan<- prometheus.Metric, awsClien
 				// One Trusted Advisor check returns the nil string for current usage.
 				// Skip it.
 				if len(resource.Metadata) == 6 && resource.Metadata[4] == nil {
+					continue
+				}
+
+				// Skip if the region is not "-" (for global metrics)
+				// and not the installation region.
+				if *resource.Region != "-" && *resource.Region != t.region {
 					continue
 				}
 

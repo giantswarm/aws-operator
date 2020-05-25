@@ -140,6 +140,7 @@ func NewSet(config SetConfig) (*Set, error) {
 		c := TrustedAdvisorConfig{
 			Helper: h,
 			Logger: config.Logger,
+			Region: config.AWSConfig.Region,
 		}
 
 		trustedAdvisorCollector, err = NewTrustedAdvisor(c)
