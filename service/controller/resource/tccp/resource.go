@@ -3,7 +3,6 @@ package tccp
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -15,6 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 const (

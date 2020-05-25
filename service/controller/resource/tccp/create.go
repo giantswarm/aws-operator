@@ -3,7 +3,6 @@ package tccp
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"sort"
 	"time"
 
@@ -18,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 	"github.com/giantswarm/aws-operator/service/internal/ebs"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

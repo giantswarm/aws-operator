@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"flag"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -19,6 +18,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
