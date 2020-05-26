@@ -1,7 +1,8 @@
 package template
 
 type ParamsMainAutoScalingGroup struct {
-	List []ParamsMainAutoScalingGroupItem
+	List      []ParamsMainAutoScalingGroupItem
+	HAMasters bool
 }
 
 type ParamsMainAutoScalingGroupItem struct {

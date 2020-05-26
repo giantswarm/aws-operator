@@ -62,6 +62,10 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	v, err := t.config.Images.Versions(ctx, obj)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
 	var cl infrastructurev1alpha2.AWSCluster
 	{
@@ -160,6 +164,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
+		params.Versions = v
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)

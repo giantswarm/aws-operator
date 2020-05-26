@@ -16,4 +16,8 @@ type Interface interface {
 	// images for the given object's release version. Paramter obj must be a
 	// metav1.Object and contain the Giant Swarm specific release version label.
 	CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error)
+	// Versions looks up necessary information to compute the relevant Cloud Config
+	// images versions for the given object's release version. Paramter obj must be a
+	// metav1.Object and contain the Giant Swarm specific release version label.
+	Versions(ctx context.Context, obj interface{}) (k8scloudconfig.Versions, error)
 }

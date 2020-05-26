@@ -280,8 +280,17 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			return nil, microerror.Mask(err)
 		}
 	}
+	var haMastersEnabled bool
+	{
+		haMastersEnabled, err = r.haMaster.Enabled(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
 
-	autoScalingGroup := &template.ParamsMainAutoScalingGroup{}
+	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
+		HAMasters: haMastersEnabled,
+	}
 	for _, m := range mappings {
 		item := template.ParamsMainAutoScalingGroupItem{
 			AvailabilityZone: m.AZ,

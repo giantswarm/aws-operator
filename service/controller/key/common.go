@@ -3,6 +3,7 @@ package key
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -14,6 +15,8 @@ import (
 
 const (
 	ELBInstanceStateInService = "InService"
+
+	DrainerResyncPeriod = time.Minute * 2
 )
 
 // AMI returns the EC2 AMI for the configured region and given version.
@@ -112,6 +115,7 @@ func KubeletLabelsTCCPN(getter LabelsGetter) string {
 
 	labels = ensureLabel(labels, label.Provider, "aws")
 	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
+	labels = ensureLabel(labels, label.ControlPlane, ControlPlaneID(getter))
 
 	return labels
 }
