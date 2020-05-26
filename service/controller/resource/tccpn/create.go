@@ -280,7 +280,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			return nil, microerror.Mask(err)
 		}
 	}
-	var haMastersEnabled bool = false
+	var haMastersEnabled bool
 	{
 		haMastersEnabled, err = r.haMaster.Enabled(ctx, &cr)
 		if err != nil {
