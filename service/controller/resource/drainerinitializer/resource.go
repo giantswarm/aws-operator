@@ -163,7 +163,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		for _, g := range o.AutoScalingGroups {
 			for _, i := range g.Instances {
 				c++
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("checking instance %s with state %s.", *i.InstanceId, *i.LifecycleState))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("checking instance %#q with state %#q", *i.InstanceId, *i.LifecycleState))
 
 				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 					instances = append(instances, i)
