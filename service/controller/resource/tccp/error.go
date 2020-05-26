@@ -187,3 +187,13 @@ var tooManyResultsError = &microerror.Error{
 func IsTooManyResults(err error) bool {
 	return microerror.Cause(err) == tooManyResultsError
 }
+
+var tooManyCRsError = &microerror.Error{
+	Kind: "tooManyCRsError",
+	Desc: "There is only a single AWSCluster CR allowed with the current implementation.",
+}
+
+// IsTooManyCRsError asserts tooManyCRsError.
+func IsTooManyCRsError(err error) bool {
+	return microerror.Cause(err) == tooManyCRsError
+}

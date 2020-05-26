@@ -38,6 +38,8 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 		name           string
 		cr             infrastructurev1alpha2.AWSCluster
 		ctx            context.Context
+		cpAzs          []string
+		cpReplicas     int
 		apiWhitelist   ConfigAPIWhitelistSecurityGroup
 		route53Enabled bool
 		errorMatcher   func(error) bool
@@ -46,6 +48,8 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:           "case 0: basic test, route53 enabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
+			cpAzs:          []string{"eu-central-1a"},
+			cpReplicas:     1,
 			errorMatcher:   nil,
 			route53Enabled: true,
 		},
@@ -53,13 +57,17 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:           "case 1: basic test, route53 disabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
+			cpAzs:          []string{"eu-central-1a"},
+			cpReplicas:     1,
 			errorMatcher:   nil,
 			route53Enabled: false,
 		},
 		{
-			name: "case 2: basic test with api whitelist enabled",
-			cr:   unittest.DefaultCluster(),
-			ctx:  unittest.DefaultContext(),
+			name:       "case 2: basic test with api whitelist enabled",
+			cr:         unittest.DefaultCluster(),
+			ctx:        unittest.DefaultContext(),
+			cpAzs:      []string{"eu-central-1a"},
+			cpReplicas: 1,
 			apiWhitelist: ConfigAPIWhitelistSecurityGroup{
 				Enabled: true,
 				SubnetList: []string{
@@ -74,40 +82,70 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 	var err error
 
-	k := unittest.FakeK8sClient()
-
-	var d *changedetection.TCCP
-	{
-		c := changedetection.TCCPConfig{
-			Logger: microloggertest.New(),
-		}
-
-		d, err = changedetection.NewTCCP(c)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	var h hamaster.Interface
-	{
-		c := hamaster.Config{
-			K8sClient: k,
-		}
-
-		h, err = hamaster.New(c)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var r *Resource
 			{
+				ctx := unittest.DefaultContextControlPlane()
+				k := unittest.FakeK8sClient()
+
+				var d *changedetection.TCCP
+				{
+					c := changedetection.TCCPConfig{
+						Logger: microloggertest.New(),
+					}
+
+					d, err = changedetection.NewTCCP(c)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+
+				var h hamaster.Interface
+				{
+					c := hamaster.Config{
+						K8sClient: k,
+					}
+
+					h, err = hamaster.New(c)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+
+				var aws infrastructurev1alpha2.AWSControlPlane
+				{
+					cl := unittest.DefaultCluster()
+					err = k.CtrlClient().Create(ctx, &cl)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					aws = unittest.DefaultAWSControlPlane()
+					aws.Spec.AvailabilityZones = tc.cpAzs
+					err = k.CtrlClient().Create(ctx, &aws)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					g8s := unittest.DefaultG8sControlPlane()
+					g8s.Spec.Replicas = tc.cpReplicas
+					err = k.CtrlClient().Create(ctx, &g8s)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					re := unittest.DefaultRelease()
+					err = k.CtrlClient().Create(ctx, &re)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
 
 				c := Config{
 					G8sClient: fake.NewSimpleClientset(),
 					HAMaster:  h,
+					K8sClient: k,
 					Detection: d,
 					Logger:    microloggertest.New(),
 

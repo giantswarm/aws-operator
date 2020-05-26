@@ -512,6 +512,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := tccp.Config{
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
