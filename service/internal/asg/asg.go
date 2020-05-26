@@ -106,12 +106,13 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 		}
 	}
 
-	// The user asks for the next drainable ASG. There is 1 ASG only, for instance
-	// for Node Pools and Single Master setups. There are 3 ASGs in HA Masters
-	// setups. So in case there are multiple ASGs we want to be careful and only
-	// drain instances of one of them in case in each of the other ASGs we have at
-	// least one healthy instance. This aims to ensure that an HA Masters setup is
-	// most reliable.
+	// The user asks for the next drainable ASG. There is 1 ASG only, for
+	// instance for Node Pools and Single Master setups. There are 3 ASGs in HA
+	// Masters setups. In case there are multiple ASGs we want to be careful and
+	// only drain instances of one of the ASGs at a time. Further, we only want
+	// to drain the next ASG, in case each of the other ASGs contains at least
+	// one healthy instance being InService. This aims to ensure that an HA
+	// Masters setup is most reliable.
 	if len(asgs) > 1 {
 		var c int
 
