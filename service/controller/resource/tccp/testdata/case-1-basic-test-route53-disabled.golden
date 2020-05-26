@@ -14,7 +14,7 @@ Resources:
       Encrypted: true
       Size: 100
       VolumeType: gp2
-      AvailabilityZone: eu-central-1a
+      AvailabilityZone: eu-central-1b
       Tags:
       - Key: Name
         Value: 8y5ck-etcd

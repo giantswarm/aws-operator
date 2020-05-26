@@ -57,7 +57,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:           "case 1: basic test, route53 disabled",
 			cr:             unittest.DefaultCluster(),
 			ctx:            unittest.DefaultContext(),
-			cpAzs:          []string{"eu-central-1a"},
+			cpAzs:          []string{"eu-central-1b"},
 			cpReplicas:     1,
 			errorMatcher:   nil,
 			route53Enabled: false,
@@ -66,7 +66,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			name:       "case 2: basic test with api whitelist enabled",
 			cr:         unittest.DefaultCluster(),
 			ctx:        unittest.DefaultContext(),
-			cpAzs:      []string{"eu-central-1a"},
+			cpAzs:      []string{"eu-central-1c"},
 			cpReplicas: 1,
 			apiWhitelist: ConfigAPIWhitelistSecurityGroup{
 				Enabled: true,
