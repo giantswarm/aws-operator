@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -35,7 +34,6 @@ const (
 type Config struct {
 	G8sClient versioned.Interface
 	HAMaster  hamaster.Interface
-	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	APIWhitelist       ConfigAPIWhitelist
@@ -51,7 +49,6 @@ type Config struct {
 type Resource struct {
 	g8sClient versioned.Interface
 	haMaster  hamaster.Interface
-	k8sClient k8sclient.Interface
 	logger    micrologger.Logger
 
 	apiWhitelist       ConfigAPIWhitelist
@@ -74,9 +71,6 @@ func New(config Config) (*Resource, error) {
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
 	}
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -94,7 +88,6 @@ func New(config Config) (*Resource, error) {
 	r := &Resource{
 		g8sClient: config.G8sClient,
 		haMaster:  config.HAMaster,
-		k8sClient: config.K8sClient,
 		detection: config.Detection,
 		logger:    config.Logger,
 

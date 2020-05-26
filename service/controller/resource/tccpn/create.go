@@ -282,8 +282,9 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	}
 	var haMastersEnabled bool = false
 	{
-		if len(mappings) == 3 {
-			haMastersEnabled = true
+		haMastersEnabled, err = r.haMaster.Enabled(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
 	}
 

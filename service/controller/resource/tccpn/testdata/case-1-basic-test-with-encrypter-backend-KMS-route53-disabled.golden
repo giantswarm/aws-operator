@@ -30,7 +30,10 @@ Resources:
       - 8y5ck-api-internal
       - 8y5ck-api
       - 8y5ck-etcd
-     
+
+      # We define lifecycle hook only in case of HA masters. In case of 1 masters
+      # the draining would not work as the API is down when we try to roll the instance.
+      
       # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
       HealthCheckGracePeriod: 60

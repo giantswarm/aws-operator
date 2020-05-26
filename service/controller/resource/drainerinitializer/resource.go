@@ -31,8 +31,8 @@ type ResourceConfig struct {
 	Logger    micrologger.Logger
 
 	LabelMapFunc      func(cr metav1.Object) map[string]string
-	ToClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 	LifeCycleHookName string
+	ToClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
@@ -40,8 +40,8 @@ type Resource struct {
 	logger    micrologger.Logger
 
 	labelMapFunc      func(cr metav1.Object) map[string]string
-	toClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 	lifeCycleHookName string
+	toClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
@@ -146,7 +146,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var instances []*autoscaling.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state in ASG ", autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
@@ -223,7 +223,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				if err != nil {
 					return microerror.Mask(err)
 				}
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook for terminate ec2 instance %#q", *instance.InstanceId))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook for terminated ec2 instance %#q", *instance.InstanceId))
 				continue
 			}
 

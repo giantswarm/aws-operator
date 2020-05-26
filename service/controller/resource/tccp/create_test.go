@@ -145,7 +145,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				c := Config{
 					G8sClient: fake.NewSimpleClientset(),
 					HAMaster:  h,
-					K8sClient: k,
 					Detection: d,
 					Logger:    microloggertest.New(),
 

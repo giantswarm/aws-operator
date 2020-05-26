@@ -11,10 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
@@ -324,33 +322,9 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
 	var err error
 	// We need to fetch the ControlPlane CR for once because it needs to be passed to hamaster interface to get the mapopings.
-	var cp infrastructurev1alpha2.AWSControlPlane
-	{
-		var list infrastructurev1alpha2.AWSControlPlaneList
-
-		err := r.k8sClient.CtrlClient().List(
-			ctx,
-			&list,
-			client.InNamespace(cr.GetNamespace()),
-			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
-		)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		if len(list.Items) == 0 {
-			return nil, microerror.Mask(notFoundError)
-		}
-		if len(list.Items) > 1 {
-			return nil, microerror.Mask(tooManyCRsError)
-		}
-
-		cp = list.Items[0]
-	}
-
 	var haMapping []hamaster.Mapping
 	{
-		haMapping, err = r.haMaster.Mapping(ctx, &cp)
+		haMapping, err = r.haMaster.Mapping(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

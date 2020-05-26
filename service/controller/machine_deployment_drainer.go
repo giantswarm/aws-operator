@@ -129,8 +129,8 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 			Logger:    config.Logger,
 
 			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,
-			ToClusterFunc:     newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 			LifeCycleHookName: key.LifeCycleHookNodePool,
+			ToClusterFunc:     newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)
