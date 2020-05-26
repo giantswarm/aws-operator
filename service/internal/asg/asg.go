@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/to"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -29,6 +30,7 @@ type Config struct {
 type ASG struct {
 	k8sClient k8sclient.Interface
 
+	asgsCache      *cache.ASGs
 	instancesCache *cache.Instances
 
 	stack        string
@@ -54,6 +56,7 @@ func New(config Config) (*ASG, error) {
 	a := &ASG{
 		k8sClient: config.K8sClient,
 
+		asgsCache:      cache.NewASGs(),
 		instancesCache: cache.NewInstances(),
 
 		stack:        config.Stack,
@@ -62,20 +65,6 @@ func New(config Config) (*ASG, error) {
 	}
 
 	return a, nil
-}
-
-func (a *ASG) Any(ctx context.Context, obj interface{}) (string, error) {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	instances, err := a.cachedInstances(ctx, cr)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return asgNameFromInstance(instances[0]), nil
 }
 
 func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
@@ -107,7 +96,56 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	return asgs[0].Name, nil
+	var name string
+	{
+		for _, a := range asgs {
+			for _, i := range a.Instances {
+				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+					return a.Name, nil
+				}
+			}
+		}
+	}
+
+	// TODO
+	//
+	//     * fetch lifecycle hooks
+	//     * map with names
+	// 		 * consider instance age of last rolled instance to have a configurable
+	// 		   cooldown period
+	//     * return first with lifecycle hook
+	//
+
+	return "", microerror.Mask(notFoundError)
+}
+
+func (a *ASG) cachedASGs(ctx context.Context, cr metav1.Object) ([]*autoscaling.Group, error) {
+	var err error
+	var ok bool
+
+	var asgs []*autoscaling.Group
+	{
+		ck := a.asgsCache.Key(ctx, cr)
+
+		if ck == "" {
+			asgs, err = a.lookupASGs(ctx, cr)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		} else {
+			asgs, ok = a.asgsCache.Get(ctx, ck)
+			if !ok {
+				asgs, err = a.lookupASGs(ctx, cr)
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+
+				a.asgsCache.Set(ctx, ck, asgs)
+			}
+		}
+	}
+
+	return asgs, nil
 }
 
 func (a *ASG) cachedInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Instance, error) {
@@ -139,51 +177,27 @@ func (a *ASG) cachedInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 	return instances, nil
 }
 
-func (a *ASG) cachedASGs(ctx context.Context, names []string) ([]*autoscaling.Group, error) {
+func (a *ASG) lookupASGs(ctx context.Context, names []string) ([]*autoscaling.Group, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
-	//
-	// TODO
-	//
-
-	/*
-		var instances []*autoscaling.Instance
-		{
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
-
-			i := &autoscaling.DescribeAutoScalingGroupsInput{
-				AutoScalingGroupNames: []*string{
-					aws.String(asgName),
-				},
-			}
-
-			o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(i)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			var c int
-			for _, g := range o.AutoScalingGroups {
-				for _, i := range g.Instances {
-					c++
-
-					if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
-						instances = append(instances, i)
-					}
-				}
-			}
+	var asgs []*autoscaling.Group
+	{
+		i := &autoscaling.DescribeAutoScalingGroupsInput{
+			AutoScalingGroupNames: toPtrList(names),
 		}
-	*/
 
-	// TODO
-	//
-	//     * fetch lifecycle hooks
-	//     * map with names
-	// 		 * consider instance age of last rolled instance to have a configurable
-	// 		   cooldown period
-	//     * return first with lifecycle hook
-	//
+		o, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 
-	return nil, nil
+		asgs = o.AutoScalingGroups
+	}
+
+	return asgs, nil
 }
 
 func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Instance, error) {
@@ -245,4 +259,14 @@ func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 
 func asgNameFromInstance(i *ec2.Instance) string {
 	return awstags.ValueForKey(i.Tags, "aws:autoscaling:groupName")
+}
+
+func toPtrList(l []string) []*string {
+	var p []*string
+
+	for _, s := range l {
+		p = append(p, to.StringP(s))
+	}
+
+	return p
 }

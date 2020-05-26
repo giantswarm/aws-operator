@@ -2,11 +2,10 @@ package asg
 
 import "context"
 
+// Interface describes how implementations should behave when providing
+// information about ASGs. Note that when caching enabled the returned results
+// stay consistently the same throughout a reconciliation loop.
 type Interface interface {
-	// Any returns the first ASG name found. When using this method the returned
-	// ASG name will be the only one available. E.g. when using an implementation
-	// configured for Node Pools.
-	Any(ctx context.Context, obj interface{}) (string, error)
 	// Drainable returns any drainable ASG name found. When using this method the
 	// returned ASG name will be the first one found having an active lifecycle
 	// hook configured. E.g. when using an implementation configured for HA
