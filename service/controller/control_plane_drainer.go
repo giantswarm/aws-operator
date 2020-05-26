@@ -63,7 +63,8 @@ func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrai
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSControlPlane)
 			},
-			Resources: resources,
+			Resources:    resources,
+			ResyncPeriod: key.DrainerResyncPeriod,
 
 			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
@@ -127,8 +128,9 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
-			LabelMapFunc:  controlPlaneDrainerLabelMapFunc,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			LabelMapFunc:      controlPlaneDrainerLabelMapFunc,
+			LifeCycleHookName: key.LifeCycleHookControlPlane,
+			ToClusterFunc:     newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)

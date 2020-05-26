@@ -3,6 +3,7 @@ package key
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -14,6 +15,8 @@ import (
 
 const (
 	ELBInstanceStateInService = "InService"
+
+	DrainerResyncPeriod = time.Minute * 2
 )
 
 // AMI returns the EC2 AMI for the configured region and given version.

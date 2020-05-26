@@ -79,30 +79,42 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 }
 
 func (i *Images) CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error) {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return k8scloudconfig.Images{}, microerror.Mask(err)
-	}
-
-	re, err := i.cachedRelease(ctx, cr)
-	if err != nil {
-		return k8scloudconfig.Images{}, microerror.Mask(err)
-	}
-
 	var im k8scloudconfig.Images
 	{
-		v, err := k8scloudconfig.ExtractComponentVersions(re.Spec.Components)
+		v, err := i.Versions(ctx, obj)
 		if err != nil {
 			return k8scloudconfig.Images{}, microerror.Mask(err)
 		}
-
-		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
-		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
 
 		im = k8scloudconfig.BuildImages(i.registryDomain, v)
 	}
 
 	return im, nil
+}
+
+func (i *Images) Versions(ctx context.Context, obj interface{}) (k8scloudconfig.Versions, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return k8scloudconfig.Versions{}, microerror.Mask(err)
+	}
+
+	re, err := i.cachedRelease(ctx, cr)
+	if err != nil {
+		return k8scloudconfig.Versions{}, microerror.Mask(err)
+	}
+
+	var v k8scloudconfig.Versions
+	{
+		v, err = k8scloudconfig.ExtractComponentVersions(re.Spec.Components)
+		if err != nil {
+			return k8scloudconfig.Versions{}, microerror.Mask(err)
+		}
+
+		v.KubernetesAPIHealthz = key.KubernetesAPIHealthzVersion
+		v.KubernetesNetworkSetupDocker = key.K8sSetupNetworkEnvironment
+	}
+
+	return v, nil
 }
 
 func (i *Images) cachedCluster(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSCluster, error) {

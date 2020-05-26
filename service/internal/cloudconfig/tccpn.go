@@ -114,6 +114,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	v, err := t.config.Images.Versions(ctx, obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	var cl infrastructurev1alpha2.AWSCluster
 	{
@@ -309,6 +313,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.RegistryDomain = t.config.RegistryDomain
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = im
+		params.Versions = v
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
