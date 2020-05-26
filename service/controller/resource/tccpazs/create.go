@@ -137,7 +137,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("CP azs %#v, md azs %#v, azs from subnets %#v", key.ControlPlaneAvailabilityZones(cp), key.MachineDeploymentAvailabilityZones(mds[0]), azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets)))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("CP azs %#v, azs from subnets %#v", key.ControlPlaneAvailabilityZones(cp), azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets)))
+	if len(mds) > 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("mds azs %#v", key.MachineDeploymentAvailabilityZones(mds[0])))
+	}
 
 	// Map subnet information to their corresponding availability zones based on
 	// the AWS API results.
