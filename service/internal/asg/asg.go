@@ -125,7 +125,7 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 			}
 		}
 
-		if c < len(asgs) {
+		if c < len(asgs)-1 {
 			return "", microerror.Mask(notFoundError)
 		}
 	}
