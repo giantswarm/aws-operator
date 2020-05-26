@@ -27,9 +27,9 @@ const TemplateMainAutoScalingGroup = `
       - {{ .LoadBalancers.ApiName }}
       - {{ .LoadBalancers.EtcdName }}
 
+      {{- if $HAMasters }}
       # We define lifecycle hook only in case of HA masters. In case of 1 masters
       # the draining would not work as the API is down when we try to roll the instance.
-      {{ if $HAMasters }}      
       # We define a lifecycle hook as part of the ASG in order to drain nodes
       # properly on Node Pool deletion. Earlier we defined a separate lifecycle
       # hook referencing the ASG name. In this setting when deleting a Node Pool
@@ -40,7 +40,7 @@ const TemplateMainAutoScalingGroup = `
           HeartbeatTimeout: 3600
           LifecycleHookName: ControlPlane
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
-      {{ end }}
+      {{- end }}
       # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
       HealthCheckGracePeriod: 60
