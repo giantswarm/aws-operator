@@ -73,53 +73,78 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
+	// In order to fetch all the relevant ASGs we have to fetch all relevant
+	// instances. The Autoscaling API does not provide tag filters but only
+	// filtering by ASG names. Therefore we get the ASG names from the instances,
+	// because the EC2 API has tag filter support.
 	instances, err := a.cachedInstances(ctx, cr)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
 
-	var names []string
+	// Having the EC2 instances we can parse the ASG names from the instance tags
+	// and fetch the ASGs in order to get the lifecycle hook information we are
+	// interested it.
+	var asgs []*autoscaling.Group
 	{
-		m := map[string]struct{}{}
+		var names []string
+		{
+			m := map[string]struct{}{}
 
-		for _, i := range instances {
-			m[asgNameFromInstance(i)] = struct{}{}
+			for _, i := range instances {
+				m[asgNameFromInstance(i)] = struct{}{}
+			}
+
+			for k := range m {
+				names = append(names, k)
+			}
 		}
 
-		for k := range m {
-			names = append(names, k)
+		asgs, err = a.cachedASGs(ctx, cr, names)
+		if err != nil {
+			return "", microerror.Mask(err)
 		}
 	}
 
-	asgs, err := a.cachedASGs(ctx, names)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
+	// The user asks for the next drainable ASG. There is 1 ASG only, for instance
+	// for Node Pools and Single Master setups. There are 3 ASGs in HA Masters
+	// setups. So in case there are multiple ASGs we want to be careful and only
+	// drain instances of one of them in case in each of the other ASGs we have at
+	// least one healthy instance. This aims to ensure that an HA Masters setup is
+	// most reliable.
+	if len(asgs) > 1 {
+		var c int
 
-	var name string
-	{
 		for _, a := range asgs {
 			for _, i := range a.Instances {
-				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
-					return a.Name, nil
+				if *i.LifecycleState == autoscaling.LifecycleStateInService {
+					c++
+					break
 				}
+			}
+		}
+
+		if c < len(asgs) {
+			return "", microerror.Mask(notFoundError)
+		}
+	}
+
+	// At this point we return the first drainable ASG, which we identify based on
+	// the Terminating:Wait condition of its instances. This should be generic
+	// enough to cover all of our cases for Node Pools and Control Planes having 1
+	// to N EC2 instances configured.
+	for _, a := range asgs {
+		for _, i := range a.Instances {
+			if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+				return *a.AutoScalingGroupName, nil
 			}
 		}
 	}
 
-	// TODO
-	//
-	//     * fetch lifecycle hooks
-	//     * map with names
-	// 		 * consider instance age of last rolled instance to have a configurable
-	// 		   cooldown period
-	//     * return first with lifecycle hook
-	//
-
 	return "", microerror.Mask(notFoundError)
 }
 
-func (a *ASG) cachedASGs(ctx context.Context, cr metav1.Object) ([]*autoscaling.Group, error) {
+func (a *ASG) cachedASGs(ctx context.Context, cr metav1.Object, names []string) ([]*autoscaling.Group, error) {
 	var err error
 	var ok bool
 
@@ -128,14 +153,14 @@ func (a *ASG) cachedASGs(ctx context.Context, cr metav1.Object) ([]*autoscaling.
 		ck := a.asgsCache.Key(ctx, cr)
 
 		if ck == "" {
-			asgs, err = a.lookupASGs(ctx, cr)
+			asgs, err = a.lookupASGs(ctx, names)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 		} else {
 			asgs, ok = a.asgsCache.Get(ctx, ck)
 			if !ok {
-				asgs, err = a.lookupASGs(ctx, cr)
+				asgs, err = a.lookupASGs(ctx, names)
 				if err != nil {
 					return nil, microerror.Mask(err)
 				}
