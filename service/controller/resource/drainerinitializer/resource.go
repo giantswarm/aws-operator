@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
 const (
@@ -27,6 +28,7 @@ const (
 )
 
 type ResourceConfig struct {
+	ASG       asg.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -35,6 +37,7 @@ type ResourceConfig struct {
 }
 
 type Resource struct {
+	asg       asg.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
@@ -43,6 +46,9 @@ type Resource struct {
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
+	if config.ASG == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -58,6 +64,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	}
 
 	r := &Resource{
+		asg:       config.ASG,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
@@ -129,13 +136,16 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		if cc.Status.TenantCluster.ASG.Name == "" {
+		drainable, err := r.asg.Drainable(ctx, &cr)
+		if asg.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+		} else if err != nil {
+			return microerror.Mask(err)
 		}
 
-		asgName = cc.Status.TenantCluster.ASG.Name
+		asgName = drainable
 	}
 
 	var instances []*autoscaling.Instance
