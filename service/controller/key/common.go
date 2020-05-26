@@ -117,6 +117,7 @@ func KubeletLabelsTCCPN(getter LabelsGetter) string {
 
 	labels = ensureLabel(labels, label.Provider, "aws")
 	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
+	labels = ensureLabel(labels, label.ControlPlane, ControlPlaneID(getter))
 
 	return labels
 }
