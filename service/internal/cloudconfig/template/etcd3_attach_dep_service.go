@@ -4,10 +4,13 @@ const Etcd3AttachDepService = `
 [Unit]
 Description=Attach etcd dependencies
 Requires=network.target
+StartLimitIntervalSec=0
 After=network.target
 Before=k8s-kubelet.service
 
 [Service]
+Restart=always
+RestartSec=10
 # image is from https://github.com/giantswarm/aws-attach-etcd-dep
 Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:5b8b44729b52b05a87b4d032f293d64f0f64a42e"
 Environment="NAME=%p.service"
