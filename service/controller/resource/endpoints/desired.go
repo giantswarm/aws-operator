@@ -142,5 +142,9 @@ func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1
 		}
 	}
 
+	if len(instances) == 0 {
+		return nil, microerror.Maskf(notFoundError, "no healthy master instances found")
+	}
+
 	return instances, nil
 }
