@@ -62,9 +62,8 @@ const TemplateMainAutoScalingGroup = `
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
-        PauseTime: PT15M
+        # We dont have to pause the roll of the master ASG as we run only 1 instance.
+        PauseTime: PT0S
 {{- end -}}
 {{- end -}}
 `
