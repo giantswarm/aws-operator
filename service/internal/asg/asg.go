@@ -106,43 +106,15 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 		}
 	}
 
-	// The user asks for the next drainable ASG. There is 1 ASG only, for
-	// instance for Node Pools and Single Master setups. There are 3 ASGs in HA
-	// Masters setups. In case there are multiple ASGs we want to be careful and
-	// only drain instances of one of the ASGs at a time. Further, we only want
-	// to drain the next ASG, in case each of the other ASGs contains at least
-	// one healthy instance being InService. This aims to ensure that an HA
-	// Masters setup is most reliable.
-	if len(asgs) > 1 {
-		var c int
-
-		for _, a := range asgs {
-			for _, i := range a.Instances {
-				if *i.LifecycleState == autoscaling.LifecycleStateInService {
-					c++
-					break
-				}
-			}
-		}
-
-		if c < len(asgs)-1 {
-			return "", microerror.Mask(notFoundError)
+	var name string
+	{
+		name, err = drainable(ctx, asgs)
+		if err != nil {
+			return "", microerror.Mask(err)
 		}
 	}
 
-	// At this point we return the first drainable ASG, which we identify based on
-	// the Terminating:Wait condition of its instances. This should be generic
-	// enough to cover all of our cases for Node Pools and Control Planes having 1
-	// to N EC2 instances configured.
-	for _, a := range asgs {
-		for _, i := range a.Instances {
-			if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
-				return *a.AutoScalingGroupName, nil
-			}
-		}
-	}
-
-	return "", microerror.Mask(notFoundError)
+	return name, nil
 }
 
 func (a *ASG) cachedASGs(ctx context.Context, cr metav1.Object, names []string) ([]*autoscaling.Group, error) {
@@ -283,6 +255,46 @@ func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 
 func asgNameFromInstance(i *ec2.Instance) string {
 	return awstags.ValueForKey(i.Tags, "aws:autoscaling:groupName")
+}
+
+func drainable(ctx context.Context, asgs []*autoscaling.Group) (string, error) {
+	// The user asks for the next drainable ASG. There is 1 ASG only, for
+	// instance for Node Pools and Single Master setups. There are 3 ASGs in HA
+	// Masters setups. In case there are multiple ASGs we want to be careful and
+	// only drain instances of one of the ASGs at a time. Further, we only want
+	// to drain the next ASG, in case each of the other ASGs contains at least
+	// one healthy instance being InService. This aims to ensure that an HA
+	// Masters setup is most reliable.
+	if len(asgs) > 1 {
+		var c int
+
+		for _, a := range asgs {
+			for _, i := range a.Instances {
+				if *i.LifecycleState == autoscaling.LifecycleStateInService {
+					c++
+					break
+				}
+			}
+		}
+
+		if c < len(asgs)-1 {
+			return "", microerror.Mask(notFoundError)
+		}
+	}
+
+	// At this point we return the first drainable ASG, which we identify based on
+	// the Terminating:Wait condition of its instances. This should be generic
+	// enough to cover all of our cases for Node Pools and Control Planes having 1
+	// to N EC2 instances configured.
+	for _, a := range asgs {
+		for _, i := range a.Instances {
+			if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
+				return *a.AutoScalingGroupName, nil
+			}
+		}
+	}
+
+	return "", microerror.Mask(notFoundError)
 }
 
 func toPtrList(l []string) []*string {
