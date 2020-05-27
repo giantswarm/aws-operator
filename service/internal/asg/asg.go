@@ -136,7 +136,7 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 	// to N EC2 instances configured.
 	for _, a := range asgs {
 		for _, i := range a.Instances {
-			if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+			if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 				return *a.AutoScalingGroupName, nil
 			}
 		}
@@ -271,9 +271,7 @@ func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 
 	var instances []*ec2.Instance
 	for _, r := range o.Reservations {
-		for _, i := range r.Instances {
-			instances = append(instances, i)
-		}
+		instances = append(instances, r.Instances...)
 	}
 
 	if len(instances) == 0 {
