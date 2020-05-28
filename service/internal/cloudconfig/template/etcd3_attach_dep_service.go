@@ -9,7 +9,7 @@ Before=k8s-kubelet.service
 
 [Service]
 # image is from https://github.com/giantswarm/aws-attach-etcd-dep
-Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:5b8b44729b52b05a87b4d032f293d64f0f64a42e"
+Environment="IMAGE={{ .RegistryDomain }}/giantswarm/aws-attach-etcd-dep:705a7d871bc98cf567243ae1fbcc7fb4ad6c2236"
 Environment="NAME=%p.service"
 Type=oneshot
 RemainAfterExit=yes

@@ -63,9 +63,8 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
-        PauseTime: PT15M
+        # We dont have to pause the roll of the master ASG as we run only 1 instance.
+        PauseTime: PT0S
   ControlPlaneNodeAutoScalingGroup2:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
@@ -121,9 +120,8 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
-        PauseTime: PT15M
+        # We dont have to pause the roll of the master ASG as we run only 1 instance.
+        PauseTime: PT0S
   ControlPlaneNodeAutoScalingGroup3:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
@@ -179,9 +177,8 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
-        PauseTime: PT15M
+        # We dont have to pause the roll of the master ASG as we run only 1 instance.
+        PauseTime: PT0S
   MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
