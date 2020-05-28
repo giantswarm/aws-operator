@@ -130,7 +130,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		drainable, err := r.asg.Drainable(ctx, &cr)
+		drainable, err := r.asg.Drainable(ctx, cr)
 		if asg.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
