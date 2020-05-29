@@ -100,9 +100,9 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 			}
 		}
 
-		fmt.Sprintf("found %d asgs", len(names))
+		fmt.Printf("found %d asgs", len(names))
 		for _, n := range names {
-			fmt.Sprintf("%s", n)
+			fmt.Printf("%s", n)
 		}
 
 		asgs, err = a.cachedASGs(ctx, cr, names)
@@ -255,9 +255,9 @@ func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 		return nil, microerror.Mask(notFoundError)
 	}
 
-	fmt.Sprintf("found %d instances", len(instances))
+	fmt.Printf("found %d instances", len(instances))
 	for _, i := range instances {
-		fmt.Sprintf("%s", *i.InstanceId)
+		fmt.Printf("%s", *i.InstanceId)
 	}
 
 	return instances, nil
