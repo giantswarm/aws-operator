@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -16,7 +16,7 @@ import (
 	"github.com/giantswarm/operatorkit/resource/crud"
 	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/tenantcluster"
+	"github.com/giantswarm/tenantcluster/v2/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -24,9 +24,6 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
@@ -62,11 +59,16 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
 type ClusterConfig struct {
 	K8sClient k8sclient.Interface
+	HAMaster  hamaster.Interface
 	Locker    locker.Interface
 	Logger    micrologger.Logger
 
@@ -83,8 +85,8 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	Route53Enabled             bool
 	RouteTables                string
+	Route53Enabled             bool
 }
 
 type Cluster struct {
@@ -332,9 +334,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Logger:        config.Logger,
-			ToClusterFunc: key.ToCluster,
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
@@ -510,6 +511,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := tccp.Config{
 			G8sClient: config.K8sClient.G8sClient(),
+			HAMaster:  config.HAMaster,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,

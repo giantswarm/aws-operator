@@ -282,8 +282,8 @@ github.com/giantswarm/apprclient v0.2.0 h1:XLi/xt2BE316zCjgG9sJF25gKfIkIkdxPzgWm
 github.com/giantswarm/apprclient v0.2.0/go.mod h1:iAGOReCnEud0xxwhDS/lI50JSUN4zRCB3vlPRqH3IVc=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
-github.com/giantswarm/certs v0.2.0 h1:IWxNmheSV1hg2H5AZJast25IM01XOXRGA9wkUT7PLg8=
-github.com/giantswarm/certs v0.2.0/go.mod h1:Axozt4pVBuaLKDzH8TwMEDGil4y2c4/2XvUnsGNeYg8=
+github.com/giantswarm/certs/v2 v2.0.0 h1:8OJoIKphN7TXSOgZKNHiMOsckn5Rt0HH4lpHLLfl6+8=
+github.com/giantswarm/certs/v2 v2.0.0/go.mod h1:23/sZZKqWxrmADOvGeIbQQ8mtVZrFOBnklxvTl3K9xY=
 github.com/giantswarm/e2e-harness v0.2.0 h1:M71fV6T3zIjpg63eAbP8d5eHxCLLT4Q6hskiWelw6jM=
 github.com/giantswarm/e2e-harness v0.2.0/go.mod h1:+2H1VF3hRA75LQHVYno0/GmWxA/f7YEc9Bey03jyGRY=
 github.com/giantswarm/e2eclients v0.2.0 h1:fk3/dU1tAt9NHgSZwz4C9Bm15E9lFuNfYYneLjkw5Sg=
@@ -309,8 +309,8 @@ github.com/giantswarm/k8sclient v0.2.0 h1:Az+Knfs2UJrNFoqfOsfkudg+rt3fn5EM1aKrnL
 github.com/giantswarm/k8sclient v0.2.0/go.mod h1:tUgUynwKgMnjnN2PldGmxJW6+8eZn2p7tT+tEhXDwOg=
 github.com/giantswarm/k8sclient/v3 v3.1.0 h1:5Zk9P0hBR3afkdFHkSne3ZwNqbvrp3KRWAyjUQ1oVm0=
 github.com/giantswarm/k8sclient/v3 v3.1.0/go.mod h1:kDOgbAQ3V8YqroN4T7RVPk+rapvT/IV2KNNbxfM2xys=
-github.com/giantswarm/k8scloudconfig/v6 v6.1.1 h1:RDWC8C/Uz47/4sLUFIN0tslHVhAm/xlzcLpGoBX8oso=
-github.com/giantswarm/k8scloudconfig/v6 v6.1.1/go.mod h1:nwERYPiJxyon8TQSaRbblnG+E2fAXUNEF7mUUEmL5qI=
+github.com/giantswarm/k8scloudconfig/v6 v6.2.1 h1:YfPt7peFEZXP9plDC/QhAh175w1zgJye2K5k21TgKnE=
+github.com/giantswarm/k8scloudconfig/v6 v6.2.1/go.mod h1:nwERYPiJxyon8TQSaRbblnG+E2fAXUNEF7mUUEmL5qI=
 github.com/giantswarm/k8sportforward v0.2.0/go.mod h1:+hyTTG0V2f3V28hDyEhJZQ341LTgSeXCgcZO2AeqLlI=
 github.com/giantswarm/kubeconfig v0.2.0 h1:Uelz9nDVrbbnyhsZo+fEwg9/PkfBi7oI9ECvjemZjG8=
 github.com/giantswarm/kubeconfig v0.2.0/go.mod h1:3WrVk85sYExwZ38bYlZwazG/BzWU2FkYOjTyKb7tnU0=
@@ -331,8 +331,8 @@ github.com/giantswarm/operatorkit v1.0.0 h1:eJ0qg7eXucnyOZGyh/dCSaQmZteya6ugHibe
 github.com/giantswarm/operatorkit v1.0.0/go.mod h1:kPuokmqJCXJwd7KKrERDgs8EBhLFovDSokvWCRSZTvY=
 github.com/giantswarm/randomkeys v0.2.0 h1:e03tqr+OemoyF42BrlQpdeHZ/xvqJd4ALW5IM2X26Ek=
 github.com/giantswarm/randomkeys v0.2.0/go.mod h1:24kbDDO8XgP+nx7SKaX/z5I/qhj4X4n+hiSynpD/9Kk=
-github.com/giantswarm/tenantcluster v0.2.0 h1:NDra7kcxt22w4HwxuVgBGjgG5BHjZ5bxtlYk2YmXaEk=
-github.com/giantswarm/tenantcluster v0.2.0/go.mod h1:YMYyVokto7LbAhl3eezMbpKJtzJ9axqNrvM5VbYWLgs=
+github.com/giantswarm/tenantcluster/v2 v2.0.0 h1:4Nj4ARq753tYKjd2VWH7NR0akc/S2mVYHSGxUTFTfCs=
+github.com/giantswarm/tenantcluster/v2 v2.0.0/go.mod h1:pmwAkQidm4EEtHBd0Zi/NJMygN5Fem/pWU9o7hYb9mA=
 github.com/giantswarm/to v0.2.0/go.mod h1:RTRtw+Dyk6YqoiNBOGLO981BqhibtVwogdaFIMO1y/A=
 github.com/giantswarm/to v0.3.0 h1:cEzMYkWLGI3cI8x3a0L3nPCQYJTb/cAaqcIPvxnDmpQ=
 github.com/giantswarm/to v0.3.0/go.mod h1:RTRtw+Dyk6YqoiNBOGLO981BqhibtVwogdaFIMO1y/A=

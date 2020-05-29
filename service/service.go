@@ -9,11 +9,14 @@ import (
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/randomkeys"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
@@ -24,7 +27,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -92,6 +96,7 @@ func New(config Config) (*Service, error) {
 			SchemeBuilder: k8sclient.SchemeBuilder{
 				apiv1alpha2.AddToScheme,
 				infrastructurev1alpha2.AddToScheme,
+				releasev1alpha1.AddToScheme,
 			},
 			Logger:     config.Logger,
 			RestConfig: restConfig,
@@ -109,6 +114,45 @@ func New(config Config) (*Service, error) {
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
+		}
+	}
+
+	var certsSearcher *certs.Searcher
+	{
+		c := certs.Config{
+			K8sClient: k8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		certsSearcher, err = certs.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var ha hamaster.Interface
+	{
+		c := hamaster.Config{
+			K8sClient: k8sClient,
+		}
+
+		ha, err = hamaster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var im images.Interface
+	{
+		c := images.Config{
+			K8sClient: k8sClient,
+
+			RegistryDomain: config.Viper.GetString(config.Flag.Service.RegistryDomain),
+		}
+
+		im, err = images.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
 		}
 	}
 
@@ -134,10 +178,24 @@ func New(config Config) (*Service, error) {
 		ipamNetworkRange = *ipnet
 	}
 
+	var randomKeysSearcher randomkeys.Interface
+	{
+		c := randomkeys.Config{
+			K8sClient: k8sClient.K8sClient(),
+			Logger:    config.Logger,
+		}
+
+		randomKeysSearcher, err = randomkeys.NewSearcher(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var clusterController *controller.Cluster
 	{
 		c := controller.ClusterConfig{
 			K8sClient: k8sClient,
+			HAMaster:  ha,
 			Locker:    kubeLockLocker,
 			Logger:    config.Logger,
 
@@ -176,18 +234,13 @@ func New(config Config) (*Service, error) {
 	var controlPlaneController *controller.ControlPlane
 	{
 		c := controller.ControlPlaneConfig{
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
+			CertsSearcher:      certsSearcher,
+			HAMaster:           ha,
+			Images:             im,
+			K8sClient:          k8sClient,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
 
-			APIWhitelist: tccpn.APIWhitelist{
-				Private: tccpn.Whitelist{
-					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.Enabled),
-					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Private.SubnetList),
-				},
-				Public: tccpn.Whitelist{
-					Enabled:    config.Viper.GetBool(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.Enabled),
-					SubnetList: config.Viper.GetString(config.Flag.Service.Installation.Guest.Kubernetes.API.Security.Whitelist.Public.SubnetList)},
-			},
 			CalicoCIDR:                config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:              config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),
@@ -232,9 +285,13 @@ func New(config Config) (*Service, error) {
 	var machineDeploymentController *controller.MachineDeployment
 	{
 		c := controller.MachineDeploymentConfig{
-			K8sClient: k8sClient,
-			Locker:    kubeLockLocker,
-			Logger:    config.Logger,
+			CertsSearcher:      certsSearcher,
+			HAMaster:           ha,
+			Images:             im,
+			K8sClient:          k8sClient,
+			Locker:             kubeLockLocker,
+			Logger:             config.Logger,
+			RandomKeysSearcher: randomKeysSearcher,
 
 			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),

@@ -6,7 +6,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs"
+	"github.com/giantswarm/certs/v2/pkg/certs"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -23,10 +23,6 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
@@ -43,13 +39,22 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
 type ControlPlaneConfig struct {
-	K8sClient k8sclient.Interface
-	Logger    micrologger.Logger
+	CertsSearcher      certs.Interface
+	HAMaster           hamaster.Interface
+	Images             images.Interface
+	K8sClient          k8sclient.Interface
+	Logger             micrologger.Logger
+	RandomKeysSearcher randomkeys.Interface
 
-	APIWhitelist              tccpn.APIWhitelist
 	CalicoCIDR                int
 	CalicoMTU                 int
 	CalicoSubnet              string
@@ -197,8 +202,13 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := cloudconfig.TCCPNConfig{
 			Config: cloudconfig.Config{
-				Encrypter: encrypterObject,
-				Logger:    config.Logger,
+				CertsSearcher:      certsSearcher,
+				Encrypter:          encrypterObject,
+				HAMaster:           config.HAMaster,
+				Images:             config.Images,
+				K8sClient:          config.K8sClient,
+				Logger:             config.Logger,
+				RandomKeysSearcher: randomKeysSearcher,
 
 				CalicoCIDR:                config.CalicoCIDR,
 				CalicoMTU:                 config.CalicoMTU,
@@ -215,7 +225,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
-			G8sClient: config.K8sClient.G8sClient(),
 		}
 
 		tccpnCloudConfig, err = cloudconfig.NewTCCPN(c)
@@ -227,7 +236,8 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnChangeDetection *changedetection.TCCPN
 	{
 		c := changedetection.TCCPNConfig{
-			Logger: config.Logger,
+			HAMaster: config.HAMaster,
+			Logger:   config.Logger,
 		}
 
 		tccpnChangeDetection, err = changedetection.NewTCCPN(c)
@@ -280,14 +290,8 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
-			CertsSearcher:      certsSearcher,
-			CloudConfig:        tccpnCloudConfig,
-			LabelsFunc:         key.KubeletLabelsTCCPN,
-			Logger:             config.Logger,
-			G8sClient:          config.K8sClient.G8sClient(),
-			PathFunc:           key.S3ObjectPathTCCPN,
-			RandomKeysSearcher: randomKeysSearcher,
-			RegistryDomain:     config.RegistryDomain,
+			CloudConfig: tccpnCloudConfig,
+			Logger:      config.Logger,
 		}
 
 		ops, err := s3object.New(c)
@@ -316,9 +320,8 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
 
 			CIDRBlockAWSCNI: fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),
 		}
@@ -372,11 +375,12 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
-			G8sClient: config.K8sClient.G8sClient(),
+			Detection: tccpnChangeDetection,
+			HAMaster:  config.HAMaster,
+			Images:    config.Images,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
-			APIWhitelist:     config.APIWhitelist,
-			Detection:        tccpnChangeDetection,
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
 		}

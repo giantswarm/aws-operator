@@ -130,6 +130,7 @@ type ContextStatusTenantClusterTCCPN struct {
 	EtcdVolumeSnapshotID string
 	IsTransitioning      bool
 	InstanceType         string
+	MasterReplicas       int
 }
 
 type ContextStatusTenantClusterTCNP struct {

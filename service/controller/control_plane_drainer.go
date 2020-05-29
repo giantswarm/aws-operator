@@ -20,10 +20,10 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
+	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
 type ControlPlaneDrainerConfig struct {
@@ -63,7 +63,8 @@ func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrai
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSControlPlane)
 			},
-			Resources: resources,
+			Resources:    resources,
+			ResyncPeriod: key.DrainerResyncPeriod,
 
 			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-drainer-controller.
@@ -89,17 +90,17 @@ func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrai
 func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resource.Interface, error) {
 	var err error
 
-	var asgNameResource resource.Interface
+	var newASG asg.Interface
 	{
-		c := asgname.Config{
-			Logger: config.Logger,
+		c := asg.Config{
+			K8sClient: config.K8sClient,
 
 			Stack:        key.StackTCCPN,
 			TagKey:       key.TagControlPlane,
 			TagValueFunc: key.ControlPlaneID,
 		}
 
-		asgNameResource, err = asgname.New(c)
+		newASG, err = asg.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -124,11 +125,13 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 	var drainerInitializerResource resource.Interface
 	{
 		c := drainerinitializer.ResourceConfig{
+			ASG:       newASG,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
-			LabelMapFunc:  controlPlaneDrainerLabelMapFunc,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			LabelMapFunc:      controlPlaneDrainerLabelMapFunc,
+			LifeCycleHookName: key.LifeCycleHookControlPlane,
+			ToClusterFunc:     newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)
@@ -140,6 +143,7 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 	var drainerFinalizerResource resource.Interface
 	{
 		c := drainerfinalizer.ResourceConfig{
+			ASG:       newASG,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
@@ -155,7 +159,6 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 
 	resources := []resource.Interface{
 		awsClientResource,
-		asgNameResource,
 		drainerInitializerResource,
 		drainerFinalizerResource,
 	}

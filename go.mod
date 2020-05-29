@@ -9,7 +9,7 @@ require (
 	github.com/giantswarm/apiextensions v0.4.1
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
-	github.com/giantswarm/certs v0.2.0
+	github.com/giantswarm/certs/v2 v2.0.0
 	github.com/giantswarm/e2e-harness v0.2.0
 	github.com/giantswarm/e2eclients v0.2.0
 	github.com/giantswarm/e2esetup v0.1.0
@@ -20,7 +20,7 @@ require (
 	github.com/giantswarm/helmclient v1.0.1
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v3 v3.1.0
-	github.com/giantswarm/k8scloudconfig/v6 v6.1.1
+	github.com/giantswarm/k8scloudconfig/v6 v6.2.1
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
@@ -28,7 +28,7 @@ require (
 	github.com/giantswarm/micrologger v0.3.1
 	github.com/giantswarm/operatorkit v1.0.0
 	github.com/giantswarm/randomkeys v0.2.0
-	github.com/giantswarm/tenantcluster v0.2.0
+	github.com/giantswarm/tenantcluster/v2 v2.0.0
 	github.com/giantswarm/to v0.3.0
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/google/go-cmp v0.4.1

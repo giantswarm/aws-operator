@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
 const (
@@ -27,22 +28,29 @@ const (
 )
 
 type ResourceConfig struct {
+	ASG       asg.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
-	LabelMapFunc  func(cr metav1.Object) map[string]string
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	LabelMapFunc      func(cr metav1.Object) map[string]string
+	LifeCycleHookName string
+	ToClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
+	asg       asg.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
-	labelMapFunc  func(cr metav1.Object) map[string]string
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	labelMapFunc      func(cr metav1.Object) map[string]string
+	lifeCycleHookName string
+	toClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
+	if config.ASG == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -56,13 +64,18 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	if config.ToClusterFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 	}
+	if config.LifeCycleHookName == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.LifeCycleHookName must not be empty", config)
+	}
 
 	r := &Resource{
+		asg:       config.ASG,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
-		labelMapFunc:  config.LabelMapFunc,
-		toClusterFunc: config.ToClusterFunc,
+		labelMapFunc:      config.LabelMapFunc,
+		toClusterFunc:     config.ToClusterFunc,
+		lifeCycleHookName: config.LifeCycleHookName,
 	}
 
 	return r, nil
@@ -129,13 +142,28 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+		drainable, err := r.asg.Drainable(ctx, cr)
+		if asg.IsNoASG(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any auto scaling group")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+
+		} else if asg.IsNoDrainable(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainable auto scaling group yet")
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
 		}
 
-		asgName = cc.Status.TenantCluster.ASG.Name
+		asgName = drainable
 	}
 
 	var instances []*autoscaling.Instance
@@ -157,8 +185,9 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		for _, g := range o.AutoScalingGroups {
 			for _, i := range g.Instances {
 				c++
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("checking instance %#q with state %#q", *i.InstanceId, *i.LifecycleState))
 
-				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 					instances = append(instances, i)
 				}
 			}
@@ -209,6 +238,14 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				// we just stop here and move on with the other instances.
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no private DNS for ec2 instance %#q", *instance.InstanceId))
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not draining ec2 instance %#q", *instance.InstanceId))
+
+				// Terminated instance that still have lifecycle action in the AWS API.
+				// Lets finish lifecycle hook to get rid of the instance in next loop.
+				err = r.completeLifeCycleHook(ctx, *instance.InstanceId, asgName)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook for terminated ec2 instance %#q", *instance.InstanceId))
 				continue
 			}
 
@@ -223,12 +260,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 			} else if err != nil {
 				return microerror.Mask(err)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state ", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
 	return nil
@@ -261,4 +298,32 @@ func (r *Resource) privateDNSForInstance(ctx context.Context, instanceID string)
 	privateDNS := *o.Reservations[0].Instances[0].PrivateDnsName
 
 	return privateDNS, nil
+}
+
+func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgName string) error {
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing life cycle hook action for tenant cluster node %#q", instanceID))
+	i := &autoscaling.CompleteLifecycleActionInput{
+		AutoScalingGroupName:  aws.String(asgName),
+		InstanceId:            aws.String(instanceID),
+		LifecycleActionResult: aws.String("CONTINUE"),
+		LifecycleHookName:     aws.String(r.lifeCycleHookName),
+	}
+
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
+	if IsNoActiveLifeCycleAction(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found life cycle hook action for tenant cluster node %#q", instanceID))
+	} else if err != nil {
+		return microerror.Mask(err)
+	} else {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
+
+	return nil
 }

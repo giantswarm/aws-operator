@@ -14,9 +14,10 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
+	"github.com/giantswarm/aws-operator/service/internal/ebs"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -319,11 +320,28 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 }
 
 func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
+	var err error
+	// We need to fetch the ControlPlane CR for once because it needs to be passed to hamaster interface to get the mapopings.
+	var haMapping []hamaster.Mapping
+	{
+		haMapping, err = r.haMaster.Mapping(ctx, &cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var instance *template.ParamsMainInstance
 	{
 		instance = &template.ParamsMainInstance{
 			Master: template.ParamsMainInstanceMaster{
-				AZ: key.MasterAvailabilityZone(cr),
+				/*
+					This is part of migration code we introduced with the new tccpn stack.
+					We need this to create empty ETCD volume in the first AZ  to do a snapshot
+					and then create volume from that snapshot in the tccpn stack.
+
+					We can take a look at how we could remove it before creating stable release for HA masters.
+				*/
+				AZ: haMapping[0].AZ,
 				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
 					Name: key.VolumeNameEtcd(cr),
 				},
@@ -379,10 +397,6 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 
 	var privateSubnets []string
 	for _, az := range clusterAZs {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		privateSubnets = append(privateSubnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name)))
 	}
 
@@ -435,16 +449,14 @@ func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructur
 
 	var natRoutes []template.ParamsMainNATGatewayNATRoute
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name == key.MasterAvailabilityZone(cr) {
-			{
-				nr := template.ParamsMainNATGatewayNATRoute{
-					NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
-					NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
-					RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
-				}
-
-				natRoutes = append(natRoutes, nr)
+		{
+			nr := template.ParamsMainNATGatewayNATRoute{
+				NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
+				NATRouteName:   key.SanitizeCFResourceName(key.NATRouteName(az.Name)),
+				RouteTableName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 			}
+
+			natRoutes = append(natRoutes, nr)
 		}
 
 		{
@@ -529,10 +541,6 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 
 	var privateRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		rtName := template.ParamsMainRouteTablesRouteTableName{
 			AvailabilityZone:    az.Name,
 			ResourceName:        key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
@@ -632,10 +640,6 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 
 	var privateSubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
@@ -677,10 +681,6 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 		routeTableNames = append(routeTableNames, rtName)
 	}
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		if az.Name != key.MasterAvailabilityZone(cr) {
-			continue
-		}
-
 		rtName := template.ParamsMainVPCRouteTableName{
 			ResourceName: key.SanitizeCFResourceName(key.PrivateRouteTableName(az.Name)),
 		}

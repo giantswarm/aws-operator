@@ -3,14 +3,16 @@ Description: Tenant Cluster Control Plane Nodes Cloud Formation Stack.
 Outputs:
   InstanceType:
     Value: m5.xlarge
+  MasterReplicas:
+    Value: 1
   OperatorVersion:
     Value: 7.3.0
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: 
-    - EtcdVolume
     - MasterEni
+    - EtcdVolume
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -28,18 +30,6 @@ Resources:
       - 8y5ck-api-internal
       - 8y5ck-api
       - 8y5ck-etcd
-
-      # We define a lifecycle hook as part of the ASG in order to drain nodes
-      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
-      # hook referencing the ASG name. In this setting when deleting a Node Pool
-      # the lifecycle hook was never executed. We always want node draining for
-      # reliably managing customer workloads.
-      LifecycleHookSpecificationList:
-        - DefaultResult: CONTINUE
-          HeartbeatTimeout: 3600
-          LifecycleHookName: ControlPlane
-          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
-
       # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
       HealthCheckGracePeriod: 60
@@ -61,9 +51,8 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
-        PauseTime: PT15M
+        # We dont have to pause the roll of the master ASG as we run only 1 instance.
+        PauseTime: PT0S
   MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -73,7 +62,7 @@ Resources:
        SubnetId: subnet-id-eu-central-1b
        Tags:
        - Key: Name
-         Value: 8y5ck-master0-etcd-eni
+         Value: 8y5ck-master0-eni
        - Key: node.k8s.amazonaws.com/no_manage
          Value: "true"
   EtcdVolume:
@@ -243,7 +232,7 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-0"
                     }
                   ]
                 }

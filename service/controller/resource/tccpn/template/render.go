@@ -15,6 +15,7 @@ func Render(v interface{}) (string, error) {
 		TemplateMainIAMPolicies,
 		TemplateMainLaunchTemplate,
 		TemplateMainOutputs,
+		TemplateMainRecordSets,
 	}
 
 	s, err := template.Render(l, v)

@@ -3,6 +3,7 @@ package key
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -11,6 +12,32 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
+
+const (
+	ELBInstanceStateInService = "InService"
+
+	DrainerResyncPeriod = time.Minute * 2
+)
+
+// AMI returns the EC2 AMI for the configured region and given version.
+func AMI(region string, release releasev1alpha1.Release) (string, error) {
+	osVersion, err := OSVersion(release)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	regionAMIs, ok := amiInfo[osVersion]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for version '%s'", osVersion)
+	}
+
+	regionAMI, ok := regionAMIs[region]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for region '%s'", region)
+	}
+
+	return regionAMI, nil
+}
 
 func AWSCNINATRouteName(az string) string {
 	return fmt.Sprintf("AWSCNINATRoute-%s", az)
@@ -81,35 +108,6 @@ func InternalELBNameAPI(getter LabelsGetter) string {
 
 func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
-}
-
-// ImageID returns the EC2 AMI for the configured region and given version.
-func ImageID(region string, release releasev1alpha1.Release) (string, error) {
-	osVersion, err := OSVersion(release)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	regionAMIs, ok := amiInfo[osVersion]
-	if !ok {
-		return "", microerror.Maskf(notFoundError, "no image id for version '%s'", osVersion)
-	}
-
-	regionAMI, ok := regionAMIs[region]
-	if !ok {
-		return "", microerror.Maskf(notFoundError, "no image id for region '%s'", region)
-	}
-
-	return regionAMI, nil
-}
-
-func KubeletLabelsTCCP(getter LabelsGetter) string {
-	var labels string
-
-	labels = ensureLabel(labels, label.Provider, "aws")
-	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
-
-	return labels
 }
 
 func KubeletLabelsTCCPN(getter LabelsGetter) string {
@@ -220,22 +218,15 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 	return fmt.Sprintf("arn:%s:iam::%s:role/gs-cluster-%s-role-*", partition, accountID, clusterID)
 }
 
-// S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded
-// for the TCCP stack.
-//
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
-//
-func S3ObjectPathTCCP(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
-}
-
 // S3ObjectPathTCCPN computes the S3 object path to the cloud config uploaded
-// for the TCCPN stack.
+// for the TCCPN stack. Note that the path is suffixed with the master ID, since
+// Tenant Clusters may be Single Master or HA Masters, where the suffix -0
+// indicates a Single Master configuration.
 //
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn-a2wax-2
 //
-func S3ObjectPathTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCPN(getter))
+func S3ObjectPathTCCPN(cr LabelsGetter, id int) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s-%d", OperatorVersion(cr), CloudConfigVersion, StackNameTCCPN(cr), id)
 }
 
 // S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for
