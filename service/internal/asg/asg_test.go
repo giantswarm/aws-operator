@@ -46,7 +46,7 @@ func Test_ASG_drainable(t *testing.T) {
 				},
 			},
 			expectedName: "",
-			errorMatcher: IsNotFound,
+			errorMatcher: IsNoDrainable,
 		},
 		{
 			name: "case 1",
@@ -232,7 +232,7 @@ func Test_ASG_drainable(t *testing.T) {
 				},
 			},
 			expectedName: "",
-			errorMatcher: IsNotFound,
+			errorMatcher: IsNoDrainable,
 		},
 		{
 			name: "case 7",
@@ -247,7 +247,7 @@ func Test_ASG_drainable(t *testing.T) {
 				},
 			},
 			expectedName: "",
-			errorMatcher: IsNotFound,
+			errorMatcher: IsNoDrainable,
 		},
 		{
 			name: "case 8",
@@ -292,7 +292,7 @@ func Test_ASG_drainable(t *testing.T) {
 				},
 			},
 			expectedName: "",
-			errorMatcher: IsNotFound,
+			errorMatcher: IsNoDrainable,
 		},
 	}
 

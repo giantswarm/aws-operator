@@ -195,6 +195,10 @@ func (a *ASG) lookupASGs(ctx context.Context, names []string) ([]*autoscaling.Gr
 		asgs = o.AutoScalingGroups
 	}
 
+	if len(asgs) == 0 {
+		return nil, microerror.Mask(noASGError)
+	}
+
 	return asgs, nil
 }
 
@@ -247,7 +251,7 @@ func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 	}
 
 	if len(instances) == 0 {
-		return nil, microerror.Mask(notFoundError)
+		return nil, microerror.Mask(noASGError)
 	}
 
 	return instances, nil
@@ -270,7 +274,7 @@ func drainable(ctx context.Context, asgs []*autoscaling.Group) (string, error) {
 		}
 	}
 
-	return "", microerror.Mask(notFoundError)
+	return "", microerror.Mask(noDrainableError)
 }
 
 func toPtrList(l []string) []*string {

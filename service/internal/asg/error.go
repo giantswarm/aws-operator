@@ -11,11 +11,20 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
-var notFoundError = &microerror.Error{
-	Kind: "notFoundError",
+var noASGError = &microerror.Error{
+	Kind: "noASGError",
 }
 
-// IsNotFound asserts notFoundError.
-func IsNotFound(err error) bool {
-	return microerror.Cause(err) == notFoundError
+// IsNoASG asserts noASGError.
+func IsNoASG(err error) bool {
+	return microerror.Cause(err) == noASGError
+}
+
+var noDrainableError = &microerror.Error{
+	Kind: "noDrainableError",
+}
+
+// IsNoDrainable asserts noDrainableError.
+func IsNoDrainable(err error) bool {
+	return microerror.Cause(err) == noDrainableError
 }

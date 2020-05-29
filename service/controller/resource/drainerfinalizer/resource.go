@@ -11,7 +11,6 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -132,8 +131,13 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	var asgName string
 	{
 		drainable, err := r.asg.Drainable(ctx, cr)
-		if asg.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+		if asg.IsNoASG(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any auto scaling group")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+
+		} else if asg.IsNoDrainable(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainable auto scaling group yet")
 
 			if key.IsDeleted(cr) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
@@ -141,9 +145,8 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			resourcecanceledcontext.SetCanceled(ctx)
-
 			return nil
+
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
