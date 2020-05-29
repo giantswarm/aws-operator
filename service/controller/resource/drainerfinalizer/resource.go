@@ -142,8 +142,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		asgName = drainable
 	}
 
-	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
-	var timeoutDrainerConfigs []corev1alpha1.DrainerConfig
+	var drainerConfigs *corev1alpha1.DrainerConfigList
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding drained drainer configs for tenant cluster")
 
@@ -152,7 +151,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(r.labelMapFunc(cr)).String(),
 		}
 
-		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
+		drainerConfigs, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -169,29 +168,26 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		for _, dc := range drainerConfigs.Items {
 			if dc.Status.HasDrainedCondition() {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has drained condition", dc.GetName()))
-				drainedDrainerConfigs = append(drainedDrainerConfigs, dc)
 			}
 
 			if dc.Status.HasTimeoutCondition() {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has timeout condition", dc.GetName()))
-				timeoutDrainerConfigs = append(timeoutDrainerConfigs, dc)
 			}
 		}
 
-		if len(drainedDrainerConfigs) == 0 && len(timeoutDrainerConfigs) == 0 {
+		if len(drainerConfigs.Items) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainer config for tenant cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d drained drainer configs for tenant cluster", len(drainedDrainerConfigs)))
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d timeout drainer configs for tenant cluster", len(timeoutDrainerConfigs)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d drained drainer configs for tenant cluster", len(drainerConfigs.Items)))
 	}
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring finished draining for drained nodes")
 
-		for _, dc := range drainedDrainerConfigs {
+		for _, dc := range drainerConfigs.Items {
 			// This is a special thing for AWS. We use annotations to transport EC2
 			// instance IDs. Otherwise the lookups of all necessary information
 			// again would be quite a ball ache. Se we take the shortcut leveraging
@@ -202,19 +198,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			}
 
 			err = r.completeLifeCycleHook(ctx, instanceID, asgName)
-			if err != nil {
+			// We check only for errors for drained status
+			// In case of timeout status there can be errors in case machine does not exist anymore
+			if dc.Status.HasDrainedCondition() && err != nil {
 				return microerror.Mask(err)
 			}
 
-			err = r.deleteDrainerConfig(ctx, dc)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		// Timeout drainer configs should simply be deleted without draining since
-		// the time window for draining did expire at this point.
-		for _, dc := range timeoutDrainerConfigs {
 			err = r.deleteDrainerConfig(ctx, dc)
 			if err != nil {
 				return microerror.Mask(err)
