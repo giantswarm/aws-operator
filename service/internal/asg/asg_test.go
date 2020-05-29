@@ -138,8 +138,8 @@ func Test_ASG_drainable(t *testing.T) {
 					},
 				},
 			},
-			expectedName: "",
-			errorMatcher: IsNotFound,
+			expectedName: "asg-1",
+			errorMatcher: nil,
 		},
 		{
 			name: "case 4",
@@ -169,8 +169,8 @@ func Test_ASG_drainable(t *testing.T) {
 					},
 				},
 			},
-			expectedName: "",
-			errorMatcher: IsNotFound,
+			expectedName: "asg-1",
+			errorMatcher: nil,
 		},
 		{
 			name: "case 5",

@@ -100,6 +100,11 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 			}
 		}
 
+		fmt.Sprintf("found %d asgs", len(names))
+		for _, n := range names {
+			fmt.Sprintf("%s", n)
+		}
+
 		asgs, err = a.cachedASGs(ctx, cr, names)
 		if err != nil {
 			return "", microerror.Mask(err)
@@ -250,6 +255,11 @@ func (a *ASG) lookupInstances(ctx context.Context, cr metav1.Object) ([]*ec2.Ins
 		return nil, microerror.Mask(notFoundError)
 	}
 
+	fmt.Sprintf("found %d instances", len(instances))
+	for _, i := range instances {
+		fmt.Sprintf("%s", *i.InstanceId)
+	}
+
 	return instances, nil
 }
 
@@ -258,30 +268,6 @@ func asgNameFromInstance(i *ec2.Instance) string {
 }
 
 func drainable(ctx context.Context, asgs []*autoscaling.Group) (string, error) {
-	// The user asks for the next drainable ASG. There is 1 ASG only, for
-	// instance for Node Pools and Single Master setups. There are 3 ASGs in HA
-	// Masters setups. In case there are multiple ASGs we want to be careful and
-	// only drain instances of one of the ASGs at a time. Further, we only want
-	// to drain the next ASG, in case each of the other ASGs contains at least
-	// one healthy instance being InService. This aims to ensure that an HA
-	// Masters setup is most reliable.
-	if len(asgs) > 1 {
-		var c int
-
-		for _, a := range asgs {
-			for _, i := range a.Instances {
-				if *i.LifecycleState == autoscaling.LifecycleStateInService {
-					c++
-					break
-				}
-			}
-		}
-
-		if c < len(asgs)-1 {
-			return "", microerror.Mask(notFoundError)
-		}
-	}
-
 	// At this point we return the first drainable ASG, which we identify based on
 	// the Terminating:Wait condition of its instances. This should be generic
 	// enough to cover all of our cases for Node Pools and Control Planes having 1
