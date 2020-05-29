@@ -11,12 +11,14 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
@@ -78,6 +80,7 @@ func (r *Resource) Name() string {
 
 func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgName string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing life cycle hook action for tenant cluster node %#q", instanceID))
+
 	i := &autoscaling.CompleteLifecycleActionInput{
 		AutoScalingGroupName:  aws.String(asgName),
 		InstanceId:            aws.String(instanceID),
@@ -92,11 +95,9 @@ func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgNam
 
 	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifeCycleAction(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found life cycle hook action for tenant cluster node %#q", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find life cycle hook action for tenant cluster node %#q", instanceID))
 	} else if err != nil {
 		return microerror.Mask(err)
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifen cycle hook action for tenant cluster node %#q", instanceID))
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
@@ -133,7 +134,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		drainable, err := r.asg.Drainable(ctx, cr)
 		if asg.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -161,8 +170,11 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		// might be a delete event.
 		if len(drainerConfigs.Items) != 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found drainer configs for tenant cluster")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
 		}
 
 		for _, dc := range drainerConfigs.Items {

@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -145,7 +146,15 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		drainable, err := r.asg.Drainable(ctx, cr)
 		if asg.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			resourcecanceledcontext.SetCanceled(ctx)
+
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -248,12 +257,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 			} else if err != nil {
 				return microerror.Mask(err)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state ", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
 	return nil
