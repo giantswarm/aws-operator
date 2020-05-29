@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
 const (
@@ -27,6 +28,7 @@ const (
 )
 
 type ResourceConfig struct {
+	ASG       asg.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -36,6 +38,7 @@ type ResourceConfig struct {
 }
 
 type Resource struct {
+	asg       asg.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
@@ -45,6 +48,9 @@ type Resource struct {
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
+	if config.ASG == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -63,6 +69,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	}
 
 	r := &Resource{
+		asg:       config.ASG,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
@@ -135,13 +142,28 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var asgName string
 	{
-		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+		drainable, err := r.asg.Drainable(ctx, cr)
+		if asg.IsNoASG(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any auto scaling group")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+
+		} else if asg.IsNoDrainable(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainable auto scaling group yet")
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
 		}
 
-		asgName = cc.Status.TenantCluster.ASG.Name
+		asgName = drainable
 	}
 
 	var instances []*autoscaling.Instance
@@ -238,12 +260,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 			} else if err != nil {
 				return microerror.Mask(err)
+			} else {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 			}
-
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state ", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
 	return nil

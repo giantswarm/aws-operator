@@ -20,10 +20,10 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
+	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
 type MachineDeploymentDrainerConfig struct {
@@ -90,17 +90,17 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig) ([]resource.Interface, error) {
 	var err error
 
-	var asgNameResource resource.Interface
+	var newASG asg.Interface
 	{
-		c := asgname.Config{
-			Logger: config.Logger,
+		c := asg.Config{
+			K8sClient: config.K8sClient,
 
 			Stack:        key.StackTCNP,
 			TagKey:       key.TagMachineDeployment,
 			TagValueFunc: key.MachineDeploymentID,
 		}
 
-		asgNameResource, err = asgname.New(c)
+		newASG, err = asg.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -125,6 +125,7 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	var drainerInitializerResource resource.Interface
 	{
 		c := drainerinitializer.ResourceConfig{
+			ASG:       newASG,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
@@ -142,6 +143,7 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	var drainerFinalizerResource resource.Interface
 	{
 		c := drainerfinalizer.ResourceConfig{
+			ASG:       newASG,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
@@ -157,7 +159,6 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 
 	resources := []resource.Interface{
 		awsClientResource,
-		asgNameResource,
 		drainerInitializerResource,
 		drainerFinalizerResource,
 	}
