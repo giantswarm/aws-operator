@@ -417,14 +417,14 @@
 
 [[projects]]
   branch = "legacy-fix-conntrack"
-  digest = "1:4bd4fe583b29fcc87485a42d47d5b342c32d58dd8a77da4729cbc2ade583055b"
+  digest = "1:95bc21b5f8a56688652f0daf1fbc24c92c3f1489d5d7c6988b3be58dc811d2ef"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
     "v_4_9_2",
   ]
   pruneopts = "T"
-  revision = "46d1f80734386e7a487bca716361d2404b90705e"
+  revision = "21fdb9d7a13467ed1ab76aa50bfe578d65d02da4"
 
 [[projects]]
   branch = "master"

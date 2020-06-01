@@ -57,11 +57,12 @@ version directory, and  then changes are introduced.
 - Add eviction hard setting for image file system in kubelet.
 - Add Deny All as default Network Policy in `kube-system` and `giantswarm namespaces.
 
-## [v4.9.2] - 2020-05-06
+## [v4.9.2] - 2020-06-01
 
-### Changed
+### Fixed
 
 - Fix conntrack configuration structure for `kube-proxy`.
+- Fix regression when applying `kube-proxy` manifest during cluster upgrades.
 
 ## [v4.9.1] - 2020-03-10
 
