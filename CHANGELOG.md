@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replace CoreOS with Flatcar Container Linux.
+
 ## [5.5.2] - 2020-05-06
 
 ### Fixed
