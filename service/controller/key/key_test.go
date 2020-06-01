@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	v1alpha12 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -1377,9 +1377,9 @@ func Test_ImageID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			release := v1alpha12.Release{
-				Spec: v1alpha12.ReleaseSpec{
-					Components: []v1alpha12.ReleaseSpecComponent{
+			release := releasev1alpha1.Release{
+				Spec: releasev1alpha1.ReleaseSpec{
+					Components: []releasev1alpha1.ReleaseSpecComponent{
 						{
 							Name:    ComponentOS,
 							Version: tc.osVersion,

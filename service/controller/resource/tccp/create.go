@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	v1alpha12 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -291,7 +291,7 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 		return "", microerror.Mask(err)
 	}
 
-	var release *v1alpha12.Release
+	var release *releasev1alpha1.Release
 	{
 		releaseVersion := cr.Labels[label.ReleaseVersion]
 		releaseName := fmt.Sprintf("v%s", releaseVersion)
