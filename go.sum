@@ -301,8 +301,8 @@ github.com/giantswarm/exporterkit v0.2.0 h1:+HTGl4fmT/1OkTox8HbV3JXeavmsZv94+2CD
 github.com/giantswarm/exporterkit v0.2.0/go.mod h1:b4fuHVjsvZgznC9OEPfn0y5zvN8SnEKTiI5zTTfck94=
 github.com/giantswarm/helmclient v0.2.0/go.mod h1:KRqUJrPL3QO/iISztTp+Ds+PJYBU8iGWNe9ZlJCdEAs=
 github.com/giantswarm/helmclient v1.0.0/go.mod h1:2KJ2cg7UTbVnYwpar92Qnm6x60gA6RGIoGATBvAaf/g=
-github.com/giantswarm/helmclient v1.0.1 h1:TkuNhzqQXLXd+iqCjRZIICXZJ2BTXFjmzm3SEs0SbHk=
-github.com/giantswarm/helmclient v1.0.1/go.mod h1:5jfYwrjmyGq8u7Q51qsq9RzsT/Zs27sTcA34c8dkUf4=
+github.com/giantswarm/helmclient v1.0.2 h1:dlGoHxv81T+mZXZaqpwbQTP+QRf9GpzWq+yHYemFuRw=
+github.com/giantswarm/helmclient v1.0.2/go.mod h1:5jfYwrjmyGq8u7Q51qsq9RzsT/Zs27sTcA34c8dkUf4=
 github.com/giantswarm/ipam v0.2.0 h1:nLNmDTfYUlflQsUUlouFzXfE+WaZM843BJGPsHLbgyw=
 github.com/giantswarm/ipam v0.2.0/go.mod h1:xG4cMEKwHlbE0aZ7x2H5j7o81U13LIStA73XCECdk+I=
 github.com/giantswarm/k8sclient v0.2.0 h1:Az+Knfs2UJrNFoqfOsfkudg+rt3fn5EM1aKrnLSg3fU=
