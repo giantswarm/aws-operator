@@ -8,6 +8,7 @@ const (
 	Cluster           = "giantswarm.io/cluster"
 	ControlPlane      = "giantswarm.io/control-plane"
 	MachineDeployment = "giantswarm.io/machine-deployment"
+	MasterID          = "giantswarm.io/master-id"
 	Organization      = "giantswarm.io/organization"
 	Provider          = "giantswarm.io/provider"
 )
