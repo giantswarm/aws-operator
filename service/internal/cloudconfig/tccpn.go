@@ -283,8 +283,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	{
 		params = k8scloudconfig.DefaultParams()
 
-		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr))
-		g8sConfig.Cluster.Kubernetes.Kubelet.Labels += "," + key.ControlPlaneNodeMasterIDLabel(mapping.ID)
+		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.Cluster = g8sConfig.Cluster

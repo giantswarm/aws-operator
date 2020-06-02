@@ -110,12 +110,13 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
 
-func KubeletLabelsTCCPN(getter LabelsGetter) string {
+func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {
 	var labels string
 
 	labels = ensureLabel(labels, label.Provider, "aws")
 	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
 	labels = ensureLabel(labels, label.ControlPlane, ControlPlaneID(getter))
+	labels = ensureLabel(labels, label.MasterID, fmt.Sprintf("%d", masterID))
 
 	return labels
 }
