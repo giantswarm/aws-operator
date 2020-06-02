@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/stretchr/testify/assert"
 )
@@ -1334,79 +1335,59 @@ func Test_ImageID(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		description     string
-		customObject    v1alpha1.AWSConfig
+		region          string
 		osVersion       string
 		errorMatcher    func(error) bool
 		expectedImageID string
 	}{
 		{
-			description: "basic match",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-central-1",
-					},
-				},
-			},
+			description:     "basic match",
+			region:          "eu-central-1",
 			osVersion:       "2191.5.0",
 			errorMatcher:    nil,
-			expectedImageID: "ami-038cea5071a5ee580",
+			expectedImageID: "ami-0f607d2a5a0fd8041",
 		},
 		{
-			description: "different region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-west-1",
-					},
-				},
-			},
+			description:     "different region",
+			region:          "eu-west-1",
 			errorMatcher:    nil,
-			expectedImageID: "ami-067301c1a68e593f5",
+			expectedImageID: "ami-0c75aa1f3a9f34e91",
 			osVersion:       "2191.5.0",
 		},
 		{
-			description: "invalid region",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "invalid-1",
-					},
-				},
-			},
+			description:  "invalid region",
+			region:       "invalid-1",
 			osVersion:    "2191.5.0",
-			errorMatcher: IsInvalidConfig,
+			errorMatcher: IsNotFound,
 		},
 		{
-			description: "invalid version",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "eu-west-1",
-					},
-				},
-			},
+			description:  "invalid version",
+			region:       "eu-west-1",
 			osVersion:    "invalid",
-			errorMatcher: IsInvalidConfig,
+			errorMatcher: IsNotFound,
 		},
 		{
-			description: "different version",
-			customObject: v1alpha1.AWSConfig{
-				Spec: v1alpha1.AWSConfigSpec{
-					AWS: v1alpha1.AWSConfigSpecAWS{
-						Region: "cn-north-1",
-					},
-				},
-			},
+			description:     "different version",
+			region:          "cn-north-1",
 			errorMatcher:    nil,
-			expectedImageID: "ami-026f7fae59b401ac0",
-			osVersion:       "2345.3.0",
+			expectedImageID: "ami-019174dba14053d2a",
+			osVersion:       "2345.3.1",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			imageID, err := ImageID(tc.customObject, tc.osVersion)
+			release := releasev1alpha1.Release{
+				Spec: releasev1alpha1.ReleaseSpec{
+					Components: []releasev1alpha1.ReleaseSpecComponent{
+						{
+							Name:    ComponentOS,
+							Version: tc.osVersion,
+						},
+					},
+				},
+			}
+			imageID, err := ImageID(tc.region, release)
 			if tc.errorMatcher != nil && err == nil {
 				t.Error("expected error didn't happen")
 			}
@@ -1416,7 +1397,7 @@ func Test_ImageID(t *testing.T) {
 			}
 
 			if tc.expectedImageID != imageID {
-				t.Errorf("unexpected imageID, expecting %q, want %q", tc.expectedImageID, imageID)
+				t.Errorf("unexpected imageID, expecting %q, found %q", tc.expectedImageID, imageID)
 			}
 		})
 	}
