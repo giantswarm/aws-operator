@@ -60,10 +60,6 @@ func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string 
 	return fmt.Sprintf("ControlPlaneNodeLaunchTemplate%d", id)
 }
 
-func ControlPlaneNodeMasterIDLabel(id int) string {
-	return fmt.Sprintf("masterID=%d", id)
-}
-
 func ControlPlaneRecordSetsRecordValue(id int) string {
 	return fmt.Sprintf("etcd%d", id)
 }
