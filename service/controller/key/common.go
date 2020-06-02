@@ -99,7 +99,7 @@ func ELBNameEtcd(getter LabelsGetter) string {
 }
 
 func HealthCheckTarget(port int) string {
-	return fmt.Sprintf("TCP:%d", port)
+	return fmt.Sprintf("HTTP:%d/healthz", port)
 }
 
 func InternalELBNameAPI(getter LabelsGetter) string {
