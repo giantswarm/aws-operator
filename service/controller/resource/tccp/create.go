@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -290,26 +291,18 @@ func (r *Resource) newTemplateBody(ctx context.Context, cr v1alpha1.AWSConfig, t
 		return "", microerror.Mask(err)
 	}
 
-	var osVersion string
+	var release *releasev1alpha1.Release
 	{
 		releaseVersion := cr.Labels[label.ReleaseVersion]
 		releaseName := fmt.Sprintf("v%s", releaseVersion)
-		release, err := r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
+		release, err = r.g8sClient.ReleaseV1alpha1().Releases().Get(releaseName, metav1.GetOptions{})
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
-		for _, component := range release.Spec.Components {
-			if component.Name == "containerlinux" {
-				osVersion = component.Version
-				break
-			}
-		}
-		if osVersion == "" {
-			return "", microerror.Mask(executionFailedError)
-		}
 	}
 
-	im, err := key.ImageID(cr, osVersion)
+	region := key.Region(cr)
+	im, err := key.ImageID(region, *release)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

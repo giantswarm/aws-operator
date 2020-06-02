@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/k8scloudconfig/v_4_9_2"
 	"github.com/giantswarm/microerror"
 
@@ -110,6 +111,13 @@ const (
 const (
 	kubectlVersion              = "9ccdc9dc55a01b1fde2aea73901d0a699909c9cd" // 1.15.5
 	kubernetesAPIHealthzVersion = "1c0cdf1ed5ee18fdf59063ecdd84bf3787f80fac"
+)
+
+const (
+	// ComponentOS is the name of the component specified in a Release CR which
+	// determines the version of the OS to be used for tenant cluster nodes and
+	// is ultimately transformed into an AMI based on TC region.
+	ComponentOS = "containerlinux"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -734,22 +742,24 @@ func componentName(domainName string) (string, error) {
 	return splits[0], nil
 }
 
-// ImageID returns the EC2 AMI for the configured region.
-func ImageID(customObject v1alpha1.AWSConfig, osVersion string) (string, error) {
-	region := Region(customObject)
+// ImageID returns the EC2 AMI for the configured region and given version.
+func ImageID(region string, release releasev1alpha1.Release) (string, error) {
+	osVersion, err := OSVersion(release)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
-	versionAMIInfo, ok := amiInfo[osVersion]
+	regionAMIs, ok := amiInfo[osVersion]
 	if !ok {
-		return "", microerror.Maskf(invalidConfigError, "no image id for version '%s'", osVersion)
+		return "", microerror.Maskf(notFoundError, "no image id for version '%s'", osVersion)
 	}
 
-	for _, regionAMIInfo := range versionAMIInfo.AMIs {
-		if regionAMIInfo.Name == region {
-			return regionAMIInfo.HVM, nil
-		}
+	regionAMI, ok := regionAMIs[region]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for region '%s'", region)
 	}
 
-	return "", microerror.Maskf(invalidConfigError, "no image id for region '%s'", region)
+	return regionAMI, nil
 }
 
 // getResourcenameWithTimeHash returns the string compared from specific prefix,
@@ -765,4 +775,17 @@ func getResourcenameWithTimeHash(prefix string, customObject v1alpha1.AWSConfig)
 	upperClusterID := strings.ToUpper(clusterID)
 
 	return fmt.Sprintf("%s%s%s", prefix, upperClusterID, upperTimeHash)
+}
+
+func ComponentVersion(release releasev1alpha1.Release, componentName string) (string, error) {
+	for _, component := range release.Spec.Components {
+		if component.Name == componentName {
+			return component.Version, nil
+		}
+	}
+	return "", microerror.Maskf(notFoundError, "version for component %#v not found on release %#v", componentName, release.Name)
+}
+
+func OSVersion(release releasev1alpha1.Release) (string, error) {
+	return ComponentVersion(release, ComponentOS)
 }

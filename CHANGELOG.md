@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix conntrack configuration structure for `kube-proxy`.
 - Fix regression when applying `kube-proxy` manifest during cluster upgrades.
 
+### Changed
+
+- Replace CoreOS with Flatcar Container Linux.
+
 ## [5.5.2] - 2020-05-06
 
 ### Fixed
