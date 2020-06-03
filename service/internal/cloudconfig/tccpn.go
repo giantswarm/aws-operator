@@ -269,6 +269,15 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		externalSNAT = *key.ExternalSNAT(cl)
 	}
 
+	var etcdInitialClusterState string
+	{
+		if key.IsNewCluster(cl) {
+			etcdInitialClusterState = k8scloudconfig.InitialClusterStateNew
+		} else {
+			etcdInitialClusterState = k8scloudconfig.InitialClusterStateExisting
+		}
+	}
+
 	var multiMasterEnabled bool
 	{
 		multiMasterEnabled, err = t.config.HAMaster.Enabled(ctx, obj)
@@ -276,15 +285,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			return "", microerror.Maskf(notFoundError, "control plane CR")
 		} else if err != nil {
 			return "", microerror.Mask(err)
-		}
-	}
-
-	var etcdInitialClusterState string
-	{
-		if key.IsNewCluster(cl) {
-			etcdInitialClusterState = k8scloudconfig.InitialClusterStateNew
-		} else {
-			etcdInitialClusterState = k8scloudconfig.InitialClusterStateExisting
 		}
 	}
 
