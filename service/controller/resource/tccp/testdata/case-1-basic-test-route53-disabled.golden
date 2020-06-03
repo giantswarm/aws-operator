@@ -127,7 +127,7 @@ Resources:
       HealthCheck:
         HealthyThreshold: 2
         Interval: 5
-        Target: HTTP:2379/healthz
+        Target: TCP:2379
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
