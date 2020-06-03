@@ -403,7 +403,7 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 	var loadBalancers *template.ParamsMainLoadBalancers
 	{
 		loadBalancers = &template.ParamsMainLoadBalancers{
-			APIElbHealthCheckTarget: key.HealthCheckTarget(key.KubernetesApiHealthCheckPort),
+			APIElbHealthCheckTarget: key.HealthCheckHTTPTarget(key.KubernetesApiHealthCheckPort),
 			APIElbName:              key.ELBNameAPI(&cr),
 			APIInternalElbName:      key.InternalELBNameAPI(&cr),
 			APIElbPortsToOpen: []template.ParamsMainLoadBalancersPortPair{
@@ -412,7 +412,7 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 					PortInstance: key.KubernetesSecurePort,
 				},
 			},
-			EtcdElbHealthCheckTarget: key.HealthCheckTarget(key.EtcdPort),
+			EtcdElbHealthCheckTarget: key.HealthCheckTCPTarget(key.EtcdPort),
 			EtcdElbName:              key.ELBNameEtcd(&cr),
 			EtcdElbPortsToOpen: []template.ParamsMainLoadBalancersPortPair{
 				{
