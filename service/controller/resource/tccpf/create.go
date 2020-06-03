@@ -44,7 +44,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			StackName: aws.String(key.StackNameTCCPF(&cr)),
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
+		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane finalizer cloud formation stack")
 			err = r.createStack(ctx, cr)
@@ -129,7 +129,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			TemplateBody:                aws.String(templateBody),
 		}
 
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -279,7 +279,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			TemplateBody: aws.String(templateBody),
 		}
 
-		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
