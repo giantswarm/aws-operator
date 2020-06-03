@@ -98,8 +98,12 @@ func ELBNameEtcd(getter LabelsGetter) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(getter))
 }
 
-func HealthCheckTarget(port int) string {
+func HealthCheckTCPTarget(port int) string {
 	return fmt.Sprintf("TCP:%d", port)
+}
+
+func HealthCheckHTTPTarget(port int) string {
+	return fmt.Sprintf("HTTP:%d/healthz", port)
 }
 
 func InternalELBNameAPI(getter LabelsGetter) string {

@@ -78,7 +78,7 @@ Resources:
       HealthCheck:
         HealthyThreshold: 2
         Interval: 5
-        Target: TCP:443
+        Target: HTTP:8089/healthz
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
@@ -106,7 +106,7 @@ Resources:
       HealthCheck:
         HealthyThreshold: 2
         Interval: 5
-        Target: TCP:443
+        Target: HTTP:8089/healthz
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
@@ -598,6 +598,17 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowAPIInternalELBHealthCheck:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+      - MasterSecurityGroup
+      - APIInternalELBSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 8089
+      ToPort: 8089
+      SourceSecurityGroupId: !Ref APIInternalELBSecurityGroup
   MasterAllowPodsCNIIngressRule:
       Type: AWS::EC2::SecurityGroupIngress
       DependsOn: MasterSecurityGroup

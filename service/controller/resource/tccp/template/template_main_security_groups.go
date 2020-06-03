@@ -224,6 +224,17 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref MasterSecurityGroup
+  MasterAllowAPIInternalELBHealthCheck:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+      - MasterSecurityGroup
+      - APIInternalELBSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 8089
+      ToPort: 8089
+      SourceSecurityGroupId: !Ref APIInternalELBSecurityGroup
   MasterAllowPodsCNIIngressRule:
       Type: AWS::EC2::SecurityGroupIngress
       DependsOn: MasterSecurityGroup
