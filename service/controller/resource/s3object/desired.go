@@ -7,7 +7,7 @@ import (
 
 	"github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	gscerts "github.com/giantswarm/certs"
-	"github.com/giantswarm/k8scloudconfig/v_4_9_1"
+	"github.com/giantswarm/k8scloudconfig/v_4_9_2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
@@ -39,7 +39,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 	}
 
-	versions, err := v_4_9_1.ExtractComponentVersions(release.Spec.Components)
+	versions, err := v_4_9_2.ExtractComponentVersions(release.Spec.Components)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -47,7 +47,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	defaultVersions := key.DefaultVersions()
 	versions.Kubectl = defaultVersions.Kubectl
 	versions.KubernetesAPIHealthz = defaultVersions.KubernetesAPIHealthz
-	images := v_4_9_1.BuildImages(r.registryDomain, versions)
+	images := v_4_9_2.BuildImages(r.registryDomain, versions)
 
 	var clusterCerts gscerts.Cluster
 	var clusterKeys randomkeys.Cluster

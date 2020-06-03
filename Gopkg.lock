@@ -416,15 +416,15 @@
   revision = "079149b6a5df4f16247dd3c1b7c06fb14c03bcca"
 
 [[projects]]
-  digest = "1:43b68f4e77ac094f072817162eb425b4e14b205e6755d0e747aa8c25007bd586"
+  branch = "legacy-fix-conntrack"
+  digest = "1:95bc21b5f8a56688652f0daf1fbc24c92c3f1489d5d7c6988b3be58dc811d2ef"
   name = "github.com/giantswarm/k8scloudconfig"
   packages = [
     "ignition/v_2_2_0",
-    "v_4_9_1",
+    "v_4_9_2",
   ]
   pruneopts = "T"
-  revision = "3e566b1810ccec3dea6ad8de43f40c7aefab7840"
-  version = "v0.1.1"
+  revision = "21fdb9d7a13467ed1ab76aa50bfe578d65d02da4"
 
 [[projects]]
   branch = "master"
@@ -2080,7 +2080,7 @@
     "github.com/giantswarm/ipam",
     "github.com/giantswarm/k8sclient",
     "github.com/giantswarm/k8scloudconfig/ignition/v_2_2_0",
-    "github.com/giantswarm/k8scloudconfig/v_4_9_1",
+    "github.com/giantswarm/k8scloudconfig/v_4_9_2",
     "github.com/giantswarm/kubelock",
     "github.com/giantswarm/microendpoint/endpoint/healthz",
     "github.com/giantswarm/microendpoint/endpoint/version",
