@@ -269,6 +269,15 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		externalSNAT = *key.ExternalSNAT(cl)
 	}
 
+	var etcdInitialClusterState string
+	{
+		if !key.IsAlreadyCreatedCluster(cl) {
+			etcdInitialClusterState = k8scloudconfig.InitialClusterStateNew
+		} else {
+			etcdInitialClusterState = k8scloudconfig.InitialClusterStateExisting
+		}
+	}
+
 	var multiMasterEnabled bool
 	{
 		multiMasterEnabled, err = t.config.HAMaster.Enabled(ctx, obj)
@@ -293,9 +302,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.DisableIngressControllerService = true
 		params.EnableAWSCNI = true
 		params.Etcd = k8scloudconfig.Etcd{
-			ClientPort:       key.EtcdPort,
-			HighAvailability: multiMasterEnabled,
-			NodeName:         key.ControlPlaneEtcdNodeName(mapping.ID),
+			ClientPort:          key.EtcdPort,
+			InitialClusterState: etcdInitialClusterState,
+			HighAvailability:    multiMasterEnabled,
+			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
 		}
 		params.Extension = &TCCPNExtension{
 			cc:               cc,
