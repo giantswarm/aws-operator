@@ -271,7 +271,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	var etcdInitialClusterState string
 	{
-		if key.IsNewCluster(cl) {
+		if !key.IsAlreadyProvisionedCluster(cl) {
 			etcdInitialClusterState = k8scloudconfig.InitialClusterStateNew
 		} else {
 			etcdInitialClusterState = k8scloudconfig.InitialClusterStateExisting
