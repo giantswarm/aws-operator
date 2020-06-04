@@ -188,17 +188,17 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 
 	var privateRoutes []template.ParamsMainRouteTablesRoute
 	{
-		for _, rt := range cc.Status.ControlPlane.RouteTables {
-			for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-				// Only those AZs have private subnet in TCCP that run master
-				// node. Rest of the AZs are there with public subnet only
-				// while the private subnet exists in corresponding node pools.
-				// Therefore we need to skip nil Private.CIDRs because there's
-				// nothing where we can route the traffic to.
-				if az.Subnet.Private.CIDR.IP == nil || az.Subnet.Private.CIDR.Mask == nil {
-					continue
-				}
+		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+			// Only those AZs have private subnet in TCCP that run master
+			// node. Rest of the AZs are there with public subnet only
+			// while the private subnet exists in corresponding node pools.
+			// Therefore we need to skip nil Private.CIDRs because there's
+			// nothing where we can route the traffic to.
+			if az.Subnet.Private.CIDR.IP == nil || az.Subnet.Private.CIDR.Mask == nil {
+				continue
+			}
 
+			for _, rt := range cc.Status.ControlPlane.RouteTables {
 				route := template.ParamsMainRouteTablesRoute{
 					RouteTableID: *rt.RouteTableId,
 					// Requester CIDR block, we create the peering connection from the
@@ -264,6 +264,14 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		if err != nil {
 			return microerror.Mask(err)
 		}
+
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("%s\n", templateBody)
+		fmt.Printf("\n")
+		fmt.Printf("\n")
+		fmt.Printf("\n")
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack")
 	}
