@@ -189,7 +189,7 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	var privateRoutes []template.ParamsMainRouteTablesRoute
 	{
 		for _, rt := range cc.Status.ControlPlane.RouteTables {
-			for _, az := range cc.Status.TenantCluster.TCCP.AvailabilityZones {
+			for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 				// Only those AZs have private subnet in TCCP that run master
 				// node. Rest of the AZs are there with public subnet only
 				// while the private subnet exists in corresponding node pools.
