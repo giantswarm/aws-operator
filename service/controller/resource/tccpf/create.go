@@ -83,7 +83,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
-			err = r.updateStack(ctx, cr)
+			err = r.deleteStack(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			err = r.createStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -188,17 +193,17 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 
 	var privateRoutes []template.ParamsMainRouteTablesRoute
 	{
-		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-			// Only those AZs have private subnet in TCCP that run master
-			// node. Rest of the AZs are there with public subnet only
-			// while the private subnet exists in corresponding node pools.
-			// Therefore we need to skip nil Private.CIDRs because there's
-			// nothing where we can route the traffic to.
-			if az.Subnet.Private.CIDR.IP == nil || az.Subnet.Private.CIDR.Mask == nil {
-				continue
-			}
+		for _, rt := range cc.Status.ControlPlane.RouteTables {
+			for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+				// Only those AZs have private subnet in TCCP that run master
+				// node. Rest of the AZs are there with public subnet only
+				// while the private subnet exists in corresponding node pools.
+				// Therefore we need to skip nil Private.CIDRs because there's
+				// nothing where we can route the traffic to.
+				if az.Subnet.Private.CIDR.IP == nil || az.Subnet.Private.CIDR.Mask == nil {
+					continue
+				}
 
-			for _, rt := range cc.Status.ControlPlane.RouteTables {
 				route := template.ParamsMainRouteTablesRoute{
 					RouteTableID: *rt.RouteTableId,
 					// Requester CIDR block, we create the peering connection from the
@@ -245,54 +250,40 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 	return params, nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) deleteStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 
-		params, err := r.newTemplateParams(ctx, cr)
+		i := &cloudformation.DeleteStackInput{
+			StackName: aws.String(key.StackNameTCCPF(&cr)),
+		}
+
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DeleteStack(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		templateBody, err = template.Render(params)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("%s\n", templateBody)
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-		fmt.Printf("\n")
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 
-		i := &cloudformation.UpdateStackInput{
-			Capabilities: []*string{
-				aws.String(capabilityNamesIAM),
-			},
-			StackName:    aws.String(key.StackNameTCCPF(&cr)),
-			TemplateBody: aws.String(templateBody),
+		i := &cloudformation.DescribeStacksInput{
+			StackName: aws.String(key.StackNameTCCPF(&cr)),
 		}
 
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
+		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackDeleteComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the deletion of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	return nil
