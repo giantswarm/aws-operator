@@ -22,7 +22,7 @@ export KUBECONFIG=/etc/kubernetes/kubeconfig/addons.yaml
 for manifest in "etcd-cluster-migrator.yaml"
 do
     while
-        kubectl apply -f /srv/$manifest
+        /opt/bin/kubectl apply -f /srv/$manifest
         [ "$?" -ne "0" ]
     do
         echo "failed to apply /srv/$manifest, retrying in 10 sec"
