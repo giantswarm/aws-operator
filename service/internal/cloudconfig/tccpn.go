@@ -308,6 +308,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
 		}
 		params.Extension = &TCCPNExtension{
+			baseDomain:       key.TenantClusterBaseDomain(cl),
 			cc:               cc,
 			cluster:          cl,
 			clusterCerts:     certFiles,

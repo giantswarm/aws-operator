@@ -206,11 +206,11 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 					Name: FileOwnerUserName,
 				},
 			},
-			Permissions: 0644,
+			Permissions: 0744,
 		}
 		etcdClusterMigratorManifest := k8scloudconfig.FileMetadata{
 			AssetContent: template.EtcdClusterMigratorManifest,
-			Path:         "/srv/aws-cni.yaml",
+			Path:         "/srv/etcd-cluster-migrator.yaml",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
@@ -357,8 +357,9 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	}
 
 	// We install etcd-cluster-migrator in every case of HA masters.
-	// etcd-cluster-migrator does not break  installation that was created as HA master or was already migrated.
-	// This is jsut workaround for now so we dont spent too much time thinking how to deploy
+	// etcd-cluster-migrator does not break installation that was created
+	// as HA masters or was already migrated. This is just workaround
+	// for now so we dont spent too much time thinking how to deploy
 	// etcd-cluster-migrator on demand.
 	// https://github.com/giantswarm/giantswarm/issues/11397
 	if e.haMasters {
