@@ -156,6 +156,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
 			templateBody, err := template.Render(params)
 			if err != nil {
 				t.Fatal(err)
@@ -165,6 +166,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
