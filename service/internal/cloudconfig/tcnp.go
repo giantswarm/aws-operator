@@ -150,6 +150,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params = k8scloudconfig.DefaultParams()
 
 		params.Cluster = cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)).Cluster
+		params.DisableHyperthreading = true
 		params.EnableAWSCNI = true
 		params.Extension = &TCNPExtension{
 			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),
