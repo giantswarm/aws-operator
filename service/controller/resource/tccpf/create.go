@@ -83,12 +83,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
-			err = r.deleteStack(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.createStack(ctx, cr)
+			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -250,40 +245,138 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 	return params, nil
 }
 
-func (r *Resource) deleteStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
+	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "removing route tables",
+		)
 
-		i := &cloudformation.DeleteStackInput{
-			StackName: aws.String(key.StackNameTCCPF(&cr)),
-		}
-
-		_, err = cc.Client.ControlPlane.AWS.CloudFormation.DeleteStack(i)
+		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane finalizer cloud formation stack")
+		params.RouteTables.PrivateRoutes = nil
+
+		templateBody, err = template.Render(params)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "removing route tables",
+		)
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the deletion of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "requesting the update of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "removing route tables",
+		)
+
+		i := &cloudformation.UpdateStackInput{
+			Capabilities: []*string{
+				aws.String(capabilityNamesIAM),
+			},
+			StackName:    aws.String(key.StackNameTCCPF(&cr)),
+			TemplateBody: aws.String(templateBody),
+		}
+
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "removing route tables",
+		)
+	}
+
+	{
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "waiting for the update of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "removing route tables",
+		)
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCCPF(&cr)),
 		}
 
-		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackDeleteComplete(i)
+		err = cc.Client.ControlPlane.AWS.CloudFormation.WaitUntilStackUpdateComplete(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the deletion of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "waited for the update of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "removing route tables",
+		)
+	}
+
+	{
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "adding route tables",
+		)
+
+		params, err := r.newTemplateParams(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		templateBody, err = template.Render(params)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx,
+			"level", "debug", "message",
+			"computed the template of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "adding route tables",
+		)
+	}
+
+	{
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "requesting the update of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "adding route tables",
+		)
+
+		i := &cloudformation.UpdateStackInput{
+			Capabilities: []*string{
+				aws.String(capabilityNamesIAM),
+			},
+			StackName:    aws.String(key.StackNameTCCPF(&cr)),
+			TemplateBody: aws.String(templateBody),
+		}
+
+		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack",
+			"reason", "adding route tables",
+		)
 	}
 
 	return nil
