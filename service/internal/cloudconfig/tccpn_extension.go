@@ -26,6 +26,7 @@ type TCCPNExtension struct {
 	encrypter        encrypter.Interface
 	encryptionKey    string
 	externalSNAT     bool
+	haMasters        bool
 	masterID         int
 	randomKeyTmplSet RandomKeyTmplSet
 	registryDomain   string
@@ -187,6 +188,41 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 	}
 
+	// We install etcd-cluster-migrator in every case of HA masters.
+	// etcd-cluster-migrator does not break  installation that was created as HA master or was already migrated.
+	// This is jsut workaround for now so we dont spent too much time thinking how to deploy
+	// etcd-cluster-migrator on demand.
+	// https://github.com/giantswarm/giantswarm/issues/11397
+	if e.haMasters {
+		etcdClusterMigratorInstaller := k8scloudconfig.FileMetadata{
+			AssetContent: template.EtcdClusterMigratorInstaller,
+			Path:         "/opt/bin/install-etcd-cluster-migrator",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		}
+		etcdClusterMigratorManifest := k8scloudconfig.FileMetadata{
+			AssetContent: template.EtcdClusterMigratorManifest,
+			Path:         "/srv/aws-cni.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		}
+		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller)
+	}
+
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
 		for _, f := range e.clusterCerts {
@@ -316,6 +352,20 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-log.mount",
 			Enabled:      true,
 		},
+	}
+
+	// We install etcd-cluster-migrator in every case of HA masters.
+	// etcd-cluster-migrator does not break  installation that was created as HA master or was already migrated.
+	// This is jsut workaround for now so we dont spent too much time thinking how to deploy
+	// etcd-cluster-migrator on demand.
+	// https://github.com/giantswarm/giantswarm/issues/11397
+	if e.haMasters {
+		etcdClusterMigratorService := k8scloudconfig.UnitMetadata{
+			AssetContent: template.EtcdClusterMigratorService,
+			Name:         "install-etcd-cluster-migrator",
+			Enabled:      true,
+		}
+		unitsMeta = append(unitsMeta, etcdClusterMigratorService)
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
