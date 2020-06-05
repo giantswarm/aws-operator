@@ -253,7 +253,10 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 // that Cloud Formation is not able to transition properly from current to
 // desired state in case the order of Availability Zones we use for route table
 // definitions changes. Thus the workaround is to delete and re-create instead
-// of update in place.
+// of update in place. The implication during the upgrade process is broken
+// connectivity to the Control Plane for about 60 seconds under normal
+// circumstances. This affects SSH access to EC2 instances and Prometheus
+// scraping.
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
