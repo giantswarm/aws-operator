@@ -364,7 +364,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 	if e.haMasters {
 		etcdClusterMigratorService := k8scloudconfig.UnitMetadata{
 			AssetContent: template.EtcdClusterMigratorService,
-			Name:         "install-etcd-cluster-migrator",
+			Name:         "install-etcd-cluster-migrator.service",
 			Enabled:      true,
 		}
 		unitsMeta = append(unitsMeta, etcdClusterMigratorService)
