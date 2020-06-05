@@ -245,6 +245,15 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 	return params, nil
 }
 
+// updateStack is a special implementation of updating the TCCPF stack in the
+// when we have to update route tables in case of an upgrade from 1 to 3
+// masters. The update is then processed in two update steps. The first stack
+// update removes the registered route tables. The second stack update adds the
+// new route tables. The reason we cannot update the route tables in place is
+// that Cloud Formation is not able to transition properly from current to
+// desired state in case the order of Availability Zones we use for route table
+// definitions changes. Thus the workaround is to delete and re-create instead
+// of update in place.
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
