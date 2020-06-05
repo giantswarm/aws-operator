@@ -20,6 +20,7 @@ type TCCPNExtension struct {
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
+	baseDomain       string
 	cc               *controllercontext.Context
 	cluster          infrastructurev1alpha2.AWSCluster
 	clusterCerts     []certs.File
@@ -257,6 +258,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	data := TemplateData{
 		AWSRegion:            key.Region(e.cluster),
+		BaseDomain:           e.baseDomain,
 		ExternalSNAT:         e.externalSNAT,
 		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
