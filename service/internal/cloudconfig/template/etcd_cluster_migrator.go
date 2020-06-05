@@ -14,8 +14,7 @@ ExecStart=/opt/bin/install-etcd-cluster-migrator
 WantedBy=multi-user.target
 `
 
-const EtcdClusterMigratorInstaller = `
-#!/bin/bash
+const EtcdClusterMigratorInstaller = `#!/bin/bash
 
 export KUBECONFIG=/etc/kubernetes/kubeconfig/addons.yaml
 
