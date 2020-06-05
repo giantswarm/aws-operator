@@ -153,6 +153,11 @@ func IsNewCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
 	return true
 }
 
+func IsAlreadyCreatedCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
+	// if cluster has Created status it has been already provisioned
+	return cluster.Status.Cluster.HasCreatedCondition()
+}
+
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Spec.Provider.Master.AvailabilityZone
 }
