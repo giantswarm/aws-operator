@@ -812,11 +812,13 @@ Resources:
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
-      - Key: Name
-        Value: 8y5ck
+        - Key: Name
+          Value: 8y5ck
   VPCCIDRBlockAWSCNI:
     Type: AWS::EC2::VPCCidrBlock
-    DependsOn: VPCPeeringConnection
+    DependsOn:
+      - VPC
+      - VPCPeeringConnection
     Properties:
       CidrBlock: 172.17.0.1/16
       VpcId: !Ref VPC
