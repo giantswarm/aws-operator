@@ -15,14 +15,6 @@ type ParamsMainAutoScalingGroupItem struct {
 	SubnetID         string
 }
 
-type ParamsMainAutoScalingGroupItemEni struct {
-	Resource string
-}
-
-type ParamsMainAutoScalingGroupItemEtcdVolume struct {
-	Resource string
-}
-
 type ParamsMainAutoScalingGroupItemLaunchTemplate struct {
 	Resource string
 }
