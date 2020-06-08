@@ -10,7 +10,7 @@ Outputs:
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni
     - EtcdVolume
     Properties:
@@ -63,13 +63,15 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # We dont have to pause the roll of the master ASG as we run only 1 instance.
-        PauseTime: PT0S
+        # We pause the roll of the master ASG for 2 mins to give master
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
   ControlPlaneNodeAutoScalingGroup2:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni2
     - EtcdVolume2
+    - ControlPlaneNodeAutoScalingGroup
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -120,13 +122,15 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # We dont have to pause the roll of the master ASG as we run only 1 instance.
-        PauseTime: PT0S
+        # We pause the roll of the master ASG for 2 mins to give master
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
   ControlPlaneNodeAutoScalingGroup3:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni3
     - EtcdVolume3
+    - ControlPlaneNodeAutoScalingGroup2
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1c
@@ -177,8 +181,9 @@ Resources:
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # We dont have to pause the roll of the master ASG as we run only 1 instance.
-        PauseTime: PT0S
+        # We pause the roll of the master ASG for 2 mins to give master
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
   MasterEni:
     Type: AWS::EC2::NetworkInterface
     Properties:
