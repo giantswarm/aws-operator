@@ -288,7 +288,6 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		HAMasters: haMastersEnabled,
 	}
 	for _, m := range mappings {
-
 		dependsOn := []string{key.ControlPlaneENIResourceName(m.ID), key.ControlPlaneVolumeResourceName(m.ID)}
 		// ASG for second and third master will have chain dependency on the previous one
 		// to have rolling update of one ASG after the previous one.
