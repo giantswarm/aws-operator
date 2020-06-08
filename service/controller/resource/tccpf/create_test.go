@@ -9,11 +9,13 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/ghodss/yaml"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf/template"
-	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -30,20 +32,58 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 //
 func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 	testCases := []struct {
-		name string
-		ctx  context.Context
-		cr   infrastructurev1alpha2.AWSCluster
+		name           string
+		ctx            context.Context
+		cr             infrastructurev1alpha2.AWSCluster
+		route53Enabled bool
 	}{
 		{
-			name: "case 0: basic test",
-			ctx:  unittest.DefaultContext(),
-			cr:   unittest.DefaultCluster(),
+			name:           "case 0: basic test",
+			ctx:            unittest.DefaultContext(),
+			cr:             unittest.DefaultCluster(),
+			route53Enabled: true,
+		},
+		{
+			name:           "case 1: without route 53 enabled",
+			ctx:            unittest.DefaultContext(),
+			cr:             unittest.DefaultCluster(),
+			route53Enabled: false,
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, encrypter.KMSBackend, true)
+			var err error
+
+			var d *changedetection.TCCPF
+			{
+				c := changedetection.TCCPFConfig{
+					Logger: microloggertest.New(),
+				}
+
+				d, err = changedetection.NewTCCPF(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			var r *Resource
+			{
+				c := Config{
+					Detection: d,
+					Logger:    microloggertest.New(),
+
+					InstallationName: "dummy",
+					Route53Enabled:   tc.route53Enabled,
+				}
+
+				r, err = New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			params, err := r.newTemplateParams(tc.ctx, tc.cr)
 			if err != nil {
 				if err != nil {
 					t.Fatal(err)
@@ -51,6 +91,11 @@ func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 			}
 
 			templateBody, err := template.Render(params)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = yaml.YAMLToJSONStrict([]byte(templateBody))
 			if err != nil {
 				t.Fatal(err)
 			}
