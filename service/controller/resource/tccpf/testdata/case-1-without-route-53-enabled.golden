@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Control Plane Finalizer Cloud Formation Stack.
+Resources:
+  
+  
+  PrivateRoute0:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-1-id
+      DestinationCidrBlock: 10.100.3.0/27
+      VpcPeeringConnectionId: peering-connection-id
+  PrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-1-id
+      DestinationCidrBlock: 10.100.3.64/27
+      VpcPeeringConnectionId: peering-connection-id
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-1-id
+      DestinationCidrBlock: 10.100.3.128/27
+      VpcPeeringConnectionId: peering-connection-id
+  PrivateRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-2-id
+      DestinationCidrBlock: 10.100.3.0/27
+      VpcPeeringConnectionId: peering-connection-id
+  PrivateRoute4:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-2-id
+      DestinationCidrBlock: 10.100.3.64/27
+      VpcPeeringConnectionId: peering-connection-id
+  PrivateRoute5:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: gauss-private-2-id
+      DestinationCidrBlock: 10.100.3.128/27
+      VpcPeeringConnectionId: peering-connection-id

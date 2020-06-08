@@ -12,34 +12,34 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-type TCCPConfig struct {
+type TCCPFConfig struct {
 	Logger micrologger.Logger
 }
 
-// TCCP is a detection service implementation deciding if the TCCP stack should
-// be updated.
-type TCCP struct {
+// TCCPF is a detection service implementation deciding if the TCCPF stack
+// should be updated.
+type TCCPF struct {
 	logger micrologger.Logger
 }
 
-func NewTCCP(config TCCPConfig) (*TCCP, error) {
+func NewTCCPF(config TCCPFConfig) (*TCCPF, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	t := &TCCP{
+	t := &TCCPF{
 		logger: config.Logger,
 	}
 
 	return t, nil
 }
 
-// ShouldUpdate determines whether the reconciled TCCP stack should be updated.
+// ShouldUpdate determines whether the reconciled TCCPF stack should be updated.
 //
 //     The node pool's combined availability zone configuration changes.
 //     The operator's version changes.
 //
-func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (bool, error) {
+func (t *TCCPF) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -51,7 +51,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	if !azsEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",
-			"message", "detected TCCP stack should update",
+			"message", "detected TCCPF stack should update",
 			"reason", "availability zones changed",
 		)
 		return true, nil
@@ -59,7 +59,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	if !operatorVersionEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",
-			"message", "detected TCCP stack should update",
+			"message", "detected TCCPF stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
 		)
 		return true, nil
