@@ -9,8 +9,6 @@ type ParamsMainAutoScalingGroupItem struct {
 	AvailabilityZone string
 	ClusterID        string
 	DependsOn        []string
-	Eni              ParamsMainAutoScalingGroupItemEni
-	EtcdVolume       ParamsMainAutoScalingGroupItemEtcdVolume
 	LaunchTemplate   ParamsMainAutoScalingGroupItemLaunchTemplate
 	LoadBalancers    ParamsMainAutoScalingGroupItemLoadBalancers
 	Resource         string

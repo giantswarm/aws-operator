@@ -290,19 +290,15 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	for _, m := range mappings {
 
 		dependsOn := []string{key.ControlPlaneENIResourceName(m.ID), key.ControlPlaneVolumeResourceName(m.ID)}
-		if m.ID != 1 {
+		// ASG for second and third master will have chain dependency on the previous one
+		// to have rolling update of one ASG after the previous one.
+		if m.ID == 2 || m.ID == 3 {
 			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, m.ID-1))
 		}
 		item := template.ParamsMainAutoScalingGroupItem{
 			AvailabilityZone: m.AZ,
 			ClusterID:        key.ClusterID(&cr),
 			DependsOn:        dependsOn,
-			Eni: template.ParamsMainAutoScalingGroupItemEni{
-				Resource: key.ControlPlaneENIResourceName(m.ID),
-			},
-			EtcdVolume: template.ParamsMainAutoScalingGroupItemEtcdVolume{
-				Resource: key.ControlPlaneVolumeResourceName(m.ID),
-			},
 			LaunchTemplate: template.ParamsMainAutoScalingGroupItemLaunchTemplate{
 				Resource: key.ControlPlaneLaunchTemplateResourceName(&cr, m.ID),
 			},
