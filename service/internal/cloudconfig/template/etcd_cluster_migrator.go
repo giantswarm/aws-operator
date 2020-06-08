@@ -1,5 +1,14 @@
 package template
 
+	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app 
+	// does not have negative effects on Tenant Clusters that were already created using the HA masters 
+	// setup. Already migrated Tenant Clusters can also safely run this app for the time being. The 
+	// workaround here for now is only so we don't have to spent too much time implementing a proper
+	// managed app via our app catalogue, which only deploys the etcd-cluster-migrator on demand in 
+	// case a Tenant Cluster is migrating automatically from 1 to 3 masters. See also the TODO issue below.
+	// 
+	//     https://github.com/giantswarm/giantswarm/issues/11397
+	//
 const EtcdClusterMigratorService = `
 [Unit]
 Description=Install etcd-cluster-migrator
