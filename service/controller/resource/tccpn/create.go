@@ -294,12 +294,9 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	for _, m := range mappings {
 
 		dependsOn := []string{key.ControlPlaneENIResourceName(m.ID), key.ControlPlaneVolumeResourceName(m.ID)}
-		if m.ID == 2 {
-			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, 1))
-		} else if m.ID == 3 {
-			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, 1), key.ControlPlaneASGResourceName(&cr, 2))
+		if m.ID != 1 {
+			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, m.ID-1))
 		}
-
 		item := template.ParamsMainAutoScalingGroupItem{
 			AvailabilityZone: m.AZ,
 			ClusterID:        key.ClusterID(&cr),

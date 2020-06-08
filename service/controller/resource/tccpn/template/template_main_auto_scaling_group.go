@@ -63,8 +63,9 @@ const TemplateMainAutoScalingGroup = `
         # Maximum amount of nodes being rolled at the same time.
         MaxBatchSize: 1
 
-        # We dont have to pause the roll of the master ASG as we run only 1 instance.
-        PauseTime: PT0S
+        # We pause the roll of the master ASG for 2 mins to give master 
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
 {{- end -}}
 {{- end -}}
 `
