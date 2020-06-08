@@ -10,7 +10,7 @@ Outputs:
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni
     - EtcdVolume
     Properties:

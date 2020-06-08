@@ -10,7 +10,7 @@ Outputs:
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni
     - EtcdVolume
     Properties:
@@ -67,9 +67,10 @@ Resources:
         PauseTime: PT0S
   ControlPlaneNodeAutoScalingGroup2:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni2
     - EtcdVolume2
+    - ControlPlaneNodeAutoScalingGroup
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -124,9 +125,11 @@ Resources:
         PauseTime: PT0S
   ControlPlaneNodeAutoScalingGroup3:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: 
+    DependsOn:
     - MasterEni3
     - EtcdVolume3
+    - ControlPlaneNodeAutoScalingGroup
+    - ControlPlaneNodeAutoScalingGroup2
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1c

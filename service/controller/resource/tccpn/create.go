@@ -292,9 +292,18 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		HAMasters: haMastersEnabled,
 	}
 	for _, m := range mappings {
+
+		dependsOn := []string{key.ControlPlaneENIResourceName(m.ID), key.ControlPlaneVolumeResourceName(m.ID)}
+		if m.ID == 2 {
+			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, 1))
+		} else if m.ID == 3 {
+			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, 1), key.ControlPlaneASGResourceName(&cr, 2))
+		}
+
 		item := template.ParamsMainAutoScalingGroupItem{
 			AvailabilityZone: m.AZ,
 			ClusterID:        key.ClusterID(&cr),
+			DependsOn:        dependsOn,
 			Eni: template.ParamsMainAutoScalingGroupItemEni{
 				Resource: key.ControlPlaneENIResourceName(m.ID),
 			},
