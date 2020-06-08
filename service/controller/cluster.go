@@ -184,6 +184,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var tccpfChangeDetection *changedetection.TCCPF
+	{
+		c := changedetection.TCCPFConfig{
+			Logger: config.Logger,
+		}
+
+		tccpfChangeDetection, err = changedetection.NewTCCPF(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tenantCluster tenantcluster.Interface
 	{
 		c := tenantcluster.Config{
@@ -559,7 +571,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpfResource resource.Interface
 	{
 		c := tccpf.Config{
-			Logger: config.Logger,
+			Detection: tccpfChangeDetection,
+			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
