@@ -1,14 +1,14 @@
 package template
 
-	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app 
-	// does not have negative effects on Tenant Clusters that were already created using the HA masters 
-	// setup. Already migrated Tenant Clusters can also safely run this app for the time being. The 
-	// workaround here for now is only so we don't have to spent too much time implementing a proper
-	// managed app via our app catalogue, which only deploys the etcd-cluster-migrator on demand in 
-	// case a Tenant Cluster is migrating automatically from 1 to 3 masters. See also the TODO issue below.
-	// 
-	//     https://github.com/giantswarm/giantswarm/issues/11397
-	//
+// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app
+// does not have negative effects on Tenant Clusters that were already created using the HA masters
+// setup. Already migrated Tenant Clusters can also safely run this app for the time being. The
+// workaround here for now is only so we don't have to spent too much time implementing a proper
+// managed app via our app catalogue, which only deploys the etcd-cluster-migrator on demand in
+// case a Tenant Cluster is migrating automatically from 1 to 3 masters. See also the TODO issue below.
+//
+//     https://github.com/giantswarm/giantswarm/issues/11397
+//
 const EtcdClusterMigratorService = `
 [Unit]
 Description=Install etcd-cluster-migrator
@@ -72,6 +72,6 @@ spec:
       resourceVersion: ""
   name: etcd-cluster-migrator
   namespace: kube-system
-  tarballURL: https://giantswarm.github.io/giantswarm-playground-test-catalog/etcd-cluster-migrator-0.0.0-52e453cd5007181161e47ee079137debed053780.tgz
+  tarballURL: https://giantswarm.github.io/giantswarm-playground-test-catalog/etcd-cluster-migrator-0.0.0-5c2efc559731d370a162c396282f21d70d23a31a.tgz
   version: 0.0.0
 `
