@@ -1,10 +1,21 @@
 package tccpf
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
+)
+
+var (
+	// noUpdateRegExp is a fuzzy regular expression to match Cloud Formation
+	// errors which we have to string match due to the lack of proper error
+	// types in the AWS SDK.
+	//
+	//     An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed.
+	//
+	noUpdateRegExp = regexp.MustCompile(`(?im)no.*update.*to.*be.*performed`)
 )
 
 // executionFailedError is an error type for situations where Resource execution
@@ -68,6 +79,29 @@ func IsNotExists(err error) bool {
 	}
 
 	if c == notExistsError {
+		return true
+	}
+
+	return false
+}
+
+var noUpdateError = &microerror.Error{
+	Kind: "noUpdateError",
+}
+
+// IsNoUpdate asserts noUpdateError.
+func IsNoUpdate(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if noUpdateRegExp.MatchString(c.Error()) {
+		return true
+	}
+
+	if c == noUpdateError {
 		return true
 	}
 

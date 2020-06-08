@@ -306,7 +306,14 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateStack(i)
-		if err != nil {
+		if IsNoUpdate(err) {
+			// Here we want to fall through in case no real change needs to be
+			// done in this stage of the two step update process. We can end up
+			// here in case the second step below fails and we try to start
+			// over. Retrying will cause the first step here to fail without
+			// matching against the noUpdateError, because the route tables
+			// already got removed.
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
