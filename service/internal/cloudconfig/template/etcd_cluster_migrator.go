@@ -51,6 +51,11 @@ kind: ConfigMap
 metadata:
   name: etcd-cluster-migrator-chart-values
   namespace: giantswarm
+  labels:
+    app: etcd-cluster-migrator
+    giantswarm.io/organization: giantswarm
+    giantswarm.io/managed-by: aws-operator
+    giantswarm.io/service-type: managed
 ---
 apiVersion: application.giantswarm.io/v1alpha1
 kind: Chart
@@ -61,6 +66,7 @@ metadata:
     app: etcd-cluster-migrator
     chart-operator.giantswarm.io/version: 1.0.0
     giantswarm.io/organization: giantswarm
+    giantswarm.io/managed-by: aws-operator
     giantswarm.io/service-type: managed
   name: etcd-cluster-migrator
   namespace: giantswarm
@@ -72,6 +78,6 @@ spec:
       resourceVersion: ""
   name: etcd-cluster-migrator
   namespace: kube-system
-  tarballURL: https://giantswarm.github.io/giantswarm-playground-test-catalog/etcd-cluster-migrator-0.0.0-b16bc6ea0d0b5b0211399f1378c84673b3aa8962.tgz
-  version: 0.0.0
+  tarballURL: https://giantswarm.github.io/giantswarm-playground-test-catalog/etcd-cluster-migrator-1.0.0.tgz
+  version: 1.0.0
 `
