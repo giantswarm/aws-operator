@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `keepforcrs` handler for more reliable CR cleanup.
 - Add Control Plane labels to master nodes.
+- Use the alpine 3.12 base Docker image
 
 ### Fixed
 
 - Fix upgrade problems with pending volume snapshots.
+- Fix cluster deletion issues in AWS using `DependsOn`.
 
 
 
