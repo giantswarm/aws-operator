@@ -20,12 +20,14 @@ type TCCPNExtension struct {
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
+	baseDomain       string
 	cc               *controllercontext.Context
 	cluster          infrastructurev1alpha2.AWSCluster
 	clusterCerts     []certs.File
 	encrypter        encrypter.Interface
 	encryptionKey    string
 	externalSNAT     bool
+	haMasters        bool
 	masterID         int
 	randomKeyTmplSet RandomKeyTmplSet
 	registryDomain   string
@@ -187,6 +189,45 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 	}
 
+	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app
+	// does not have negative effects on Tenant Clusters that were already created using the HA masters
+	// setup. Already migrated Tenant Clusters can also safely run this app for the time being. The
+	// workaround here for now is only so we don't have to spent too much time implementing a proper
+	// managed app via our app catalogue, which only deploys the etcd-cluster-migrator on demand in
+	// case a Tenant Cluster is migrating automatically from 1 to 3 masters. See also the TODO issue below.
+	//
+	//     https://github.com/giantswarm/giantswarm/issues/11397
+	//
+	if e.haMasters {
+		etcdClusterMigratorInstaller := k8scloudconfig.FileMetadata{
+			AssetContent: template.EtcdClusterMigratorInstaller,
+			Path:         "/opt/bin/install-etcd-cluster-migrator",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0744,
+		}
+		etcdClusterMigratorManifest := k8scloudconfig.FileMetadata{
+			AssetContent: template.EtcdClusterMigratorManifest,
+			Path:         "/srv/etcd-cluster-migrator.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		}
+		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller)
+	}
+
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
 		for _, f := range e.clusterCerts {
@@ -221,6 +262,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	data := TemplateData{
 		AWSRegion:            key.Region(e.cluster),
+		BaseDomain:           e.baseDomain,
 		ExternalSNAT:         e.externalSNAT,
 		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
 		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
@@ -316,6 +358,24 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-log.mount",
 			Enabled:      true,
 		},
+	}
+
+	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app
+	// does not have negative effects on Tenant Clusters that were already created using the HA masters
+	// setup. Already migrated Tenant Clusters can also safely run this app for the time being. The
+	// workaround here for now is only so we don't have to spent too much time implementing a proper
+	// managed app via our app catalogue, which only deploys the etcd-cluster-migrator on demand in
+	// case a Tenant Cluster is migrating automatically from 1 to 3 masters. See also the TODO issue below.
+	//
+	//     https://github.com/giantswarm/giantswarm/issues/11397
+	//
+	if e.haMasters {
+		etcdClusterMigratorService := k8scloudconfig.UnitMetadata{
+			AssetContent: template.EtcdClusterMigratorService,
+			Name:         "install-etcd-cluster-migrator.service",
+			Enabled:      true,
+		}
+		unitsMeta = append(unitsMeta, etcdClusterMigratorService)
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
