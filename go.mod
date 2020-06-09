@@ -20,7 +20,7 @@ require (
 	github.com/giantswarm/helmclient v1.0.2
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v3 v3.1.0
-	github.com/giantswarm/k8scloudconfig/v6 v6.2.3-0.20200609081344-2ef102d489b9
+	github.com/giantswarm/k8scloudconfig/v6 v6.2.3
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
