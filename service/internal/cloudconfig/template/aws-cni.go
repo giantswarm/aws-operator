@@ -163,10 +163,6 @@ spec:
               name: cni-net-dir
             - mountPath: /host/var/log
               name: log-dir
-            - mountPath: /var/run/docker.sock
-              name: dockersock
-            - mountPath: /var/run/dockershim.sock
-              name: dockershim
       volumes:
         - name: cni-bin-dir
           hostPath:
@@ -177,12 +173,6 @@ spec:
         - name: log-dir
           hostPath:
             path: /var/log
-        - name: dockersock
-          hostPath:
-            path: /var/run/docker.sock
-        - name: dockershim
-          hostPath:
-            path: /var/run/dockershim.sock
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
