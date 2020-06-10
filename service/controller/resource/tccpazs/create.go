@@ -108,7 +108,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// We need to cancel the resource early in case the ipam resource did not yet
 	// allocate a subnet for the tenant cluster.
 	if key.StatusClusterNetworkCIDR(cl) == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect private and public subnets for availability zones")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster subnet not yet allocated")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
@@ -285,7 +284,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 					return nil, microerror.Mask(err)
 				}
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have public and private subnet allocation", az))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q doesn't have public and private subnet allocation", az))
 
 				// Update available AZ mapping by removing the CIDR we are about to
 				// allocate.
@@ -296,7 +295,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 				azMapping[az] = mapping
 			} else {
-				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
+				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left despite additional availability zone %#q", az)
 			}
 		}
 
@@ -307,7 +306,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 				// and remove it below.
 				awsCNISubnet := awsCNISubnets[0]
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have aws-cni subnet allocation", az))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q doesn't have aws-cni subnet allocation", az))
 
 				// Update available AZ mapping by removing the CIDR we are about to
 				// allocate.
@@ -317,12 +316,10 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 				azMapping[az] = mapping
 			} else {
-				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
+				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left despite additional availability zone %#q", az)
 			}
 		}
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZ subnet mappings: %#v", azMapping))
 
 	return azMapping, nil
 }
