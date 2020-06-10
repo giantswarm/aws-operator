@@ -249,19 +249,35 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
+			createDrainerCR := false
+
+			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
 
-				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
-				if err != nil {
-					return microerror.Mask(err)
-				}
+				createDrainerCR = true
 
 			} else if err != nil {
 				return microerror.Mask(err)
 			} else {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
+				// if the cluster id does not match, delete the bad CR and recreate it
+				if dc.Spec.Guest.Cluster.ID != key.ClusterID(&cl) {
+					err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Delete(privateDNS, &metav1.DeleteOptions{})
+					if err != nil {
+						return microerror.Mask(err)
+					}
+					createDrainerCR = true
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted drainer config with wrong cluster id for ec2 instance %#q", *instance.InstanceId))
+				} else {
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
+				}
+			}
+
+			if createDrainerCR {
+				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 		}
 
