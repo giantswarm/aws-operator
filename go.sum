@@ -99,8 +99,8 @@ github.com/aws/aws-sdk-go v1.16.26/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpi
 github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.29.20/go.mod h1:1KvfttTE3SPKMpo8g2c6jL3ZKfXtFvKscTgahTma5Xg=
 github.com/aws/aws-sdk-go v1.30.4/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/aws/aws-sdk-go v1.31.11 h1:Uz7VGg3giOV9Z4SlLdXO6RHafArHbK59vSc6mnzYjGU=
-github.com/aws/aws-sdk-go v1.31.11/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
+github.com/aws/aws-sdk-go v1.31.14 h1:uRC2riabEXPMHl1CDylsfCod5DKjiOSXhYvxg/Eb9V8=
+github.com/aws/aws-sdk-go v1.31.14/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/bazelbuild/bazel-gazelle v0.18.2/go.mod h1:D0ehMSbS+vesFsLGiD6JXu3mVEzOlfUl8wNnq+x/9p0=
 github.com/bazelbuild/bazel-gazelle v0.19.1-0.20191105222053-70208cbdc798/go.mod h1:rPwzNHUqEzngx1iVBfO/2X2npKaT3tqPqqHW6rVsn/A=
@@ -336,8 +336,8 @@ github.com/giantswarm/micrologger v0.3.1 h1:HbYbQLobvfsLYzRiGTncaO61CCPd4BlT18xa
 github.com/giantswarm/micrologger v0.3.1/go.mod h1:PjAgtcJ922ZMX/Aa05IPi0bdYvOj2P7pZ7+6dBShMQs=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
-github.com/giantswarm/operatorkit v1.0.0 h1:eJ0qg7eXucnyOZGyh/dCSaQmZteya6ugHibelgWAFws=
-github.com/giantswarm/operatorkit v1.0.0/go.mod h1:kPuokmqJCXJwd7KKrERDgs8EBhLFovDSokvWCRSZTvY=
+github.com/giantswarm/operatorkit v1.0.1 h1:8oKmOKBAy7se0wPGaq7XUo6FyipZASvHYktI0HJj+Mo=
+github.com/giantswarm/operatorkit v1.0.1/go.mod h1:kPuokmqJCXJwd7KKrERDgs8EBhLFovDSokvWCRSZTvY=
 github.com/giantswarm/randomkeys v0.2.0 h1:e03tqr+OemoyF42BrlQpdeHZ/xvqJd4ALW5IM2X26Ek=
 github.com/giantswarm/randomkeys v0.2.0/go.mod h1:24kbDDO8XgP+nx7SKaX/z5I/qhj4X4n+hiSynpD/9Kk=
 github.com/giantswarm/tenantcluster/v2 v2.0.0 h1:4Nj4ARq753tYKjd2VWH7NR0akc/S2mVYHSGxUTFTfCs=
