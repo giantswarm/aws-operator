@@ -295,7 +295,7 @@ spec:
           hostNetwork: true
           containers:
             - name: aws-cni-restarter
-              image: {{.RegistryDomain}}/giantswarm/aws-cni-restarter:v1.0.2
+              image: {{.RegistryDomain}}/giantswarm/aws-cni-restarter:1.0.2
           restartPolicy: OnFailure
           affinity:
             nodeAffinity:
