@@ -3,6 +3,8 @@ package drainerinitializer
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/backoff"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -25,6 +27,9 @@ import (
 
 const (
 	Name = "drainerinitializer"
+
+	deleteDrainerMaxWait     = time.Second * 60
+	deleteDrainerMaxInterval = time.Second * 10
 )
 
 type ResourceConfig struct {
@@ -266,8 +271,26 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 					if err != nil {
 						return microerror.Mask(err)
 					}
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting drainer config with wrong cluster id or instance id for ec2 instance %#q", *instance.InstanceId))
+
+					// wait for deletion of drainer CR
+					b := backoff.NewExponential(deleteDrainerMaxWait, deleteDrainerMaxInterval)
+					o := func() error {
+						_, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
+						if errors.IsNotFound(err) {
+							return nil
+						} else {
+							return microerror.Maskf(executionFailedError, "drainer is not deleted")
+						}
+					}
+
+					err := backoff.Retry(o, b)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+
 					createDrainerCR = true
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted drainer config with wrong cluster or instance id for ec2 instance %#q", *instance.InstanceId))
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted drainer config with wrong cluster id or instance id for ec2 instance %#q", *instance.InstanceId))
 				} else {
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 				}
