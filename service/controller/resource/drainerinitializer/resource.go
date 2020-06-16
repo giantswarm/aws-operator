@@ -253,7 +253,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
 				// create drainerConfig for the instance
-				err = r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
+				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
 				if err != nil {
 					return microerror.Mask(err)
 				}
