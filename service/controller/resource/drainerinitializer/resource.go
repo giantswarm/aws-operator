@@ -11,7 +11,6 @@ import (
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
@@ -254,13 +253,9 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			createDrainerCR := false
-
 			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
-
-				createDrainerCR = true
 
 			} else if err != nil {
 				return microerror.Mask(err)
@@ -272,35 +267,17 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 						return microerror.Mask(err)
 					}
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting drainer config with wrong cluster id or instance id for ec2 instance %#q", *instance.InstanceId))
-
-					// wait for deletion of drainer CR
-					b := backoff.NewExponential(deleteDrainerMaxWait, deleteDrainerMaxInterval)
-					o := func() error {
-						_, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
-						if errors.IsNotFound(err) {
-							return nil
-						} else {
-							return microerror.Maskf(executionFailedError, "drainer is not deleted")
-						}
-					}
-
-					err := backoff.Retry(o, b)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-
-					createDrainerCR = true
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted drainer config with wrong cluster id or instance id for ec2 instance %#q", *instance.InstanceId))
+					// cancel resource to let deletion  happen
+					// the drainer will be recreated with proper details next loop
+					return nil
 				} else {
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 				}
 			}
 
-			if createDrainerCR {
-				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
-				if err != nil {
-					return microerror.Mask(err)
-				}
+			err = r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
+			if err != nil {
+				return microerror.Mask(err)
 			}
 		}
 
