@@ -59,6 +59,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
+		if cc.Status.TenantCluster.TCCP.VPC.ID == "" {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc id not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+
 		if len(cc.Status.TenantCluster.TCCP.Subnets) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "subnets not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -284,6 +290,27 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		}
 	}
 
+	var subnets []*ec2.Subnet
+	{
+		i := &ec2.DescribeSubnetsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("vpc-id"),
+					Values: []*string{
+						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+					},
+				},
+			},
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSubnets(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		subnets = o.Subnets
+	}
+
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		HAMasters: haMastersEnabled,
 	}
@@ -307,7 +334,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 				EtcdName:        key.ELBNameEtcd(&cr),
 			},
 			Resource: key.ControlPlaneASGResourceName(&cr, m.ID),
-			SubnetID: idFromSubnets(cc.Status.TenantCluster.TCCP.Subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(m.AZ))),
+			SubnetID: idFromSubnets(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(m.AZ))),
 		}
 
 		autoScalingGroup.List = append(autoScalingGroup.List, item)
