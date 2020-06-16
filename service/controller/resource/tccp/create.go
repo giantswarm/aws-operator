@@ -3,6 +3,7 @@ package tccp
 import (
 	"context"
 	"fmt"
+	"net"
 	"sort"
 	"time"
 
@@ -605,6 +606,27 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		return zones[i].Name < zones[j].Name
 	})
 
+	var subnets []*ec2.Subnet
+	{
+		i := &ec2.DescribeSubnetsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("vpc-id"),
+					Values: []*string{
+						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+					},
+				},
+			},
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSubnets(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		subnets = o.Subnets
+	}
+
 	var awsCNISubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
 		snetName := key.SanitizeCFResourceName(key.AWSCNISubnetName(az.Name))
@@ -626,7 +648,7 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Public.CIDR.String(),
+			CIDR:                mustCIDRFromSubnets(subnets, "public", key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
@@ -643,7 +665,7 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                az.Subnet.Private.CIDR.String(),
+			CIDR:                mustCIDRFromSubnets(subnets, "private", key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
@@ -655,16 +677,16 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		privateSubnets = append(privateSubnets, snet)
 	}
 
-	var subnets *template.ParamsMainSubnets
+	var subnetParams *template.ParamsMainSubnets
 	{
-		subnets = &template.ParamsMainSubnets{
+		subnetParams = &template.ParamsMainSubnets{
 			AWSCNISubnets:  awsCNISubnets,
 			PublicSubnets:  publicSubnets,
 			PrivateSubnets: privateSubnets,
 		}
 	}
 
-	return subnets, nil
+	return subnetParams, nil
 }
 
 func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainVPC, error) {
@@ -833,4 +855,21 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	}
 
 	return nil
+}
+
+func mustCIDRFromSubnets(subnets []*ec2.Subnet, kind string, name string) string {
+	for _, s := range subnets {
+		if awstags.ValueForKey(s.Tags, "Name") != name {
+			continue
+		}
+
+		_, cidr, err := net.ParseCIDR(*s.CidrBlock)
+		if err != nil {
+			panic(err)
+		}
+
+		return cidr.String()
+	}
+
+	return ""
 }
