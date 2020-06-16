@@ -341,9 +341,15 @@ func mapSubnets(azMapping map[string]mapping, subnets []*ec2.Subnet) (map[string
 			// public or private).
 			continue
 		}
-		if awstags.ValueForKey(s.Tags, key.TagStack) != key.StackTCCP {
-			// Filter out EC2 subnets that don't belong to tenant cluster
-			// control plane CF stack.
+		if awstags.ValueForKey(s.Tags, key.TagStack) != key.StackTCCP && awstags.ValueForKey(s.Tags, key.TagStack) != key.StackTCNP {
+			// Filter out EC2 subnets that belong to tenant cluster. The current
+			// implementation allocates subnets for different purposes. This
+			// means either for TCCP or TCNP stacks, which means master or
+			// worker nodes. There is an orchestration conflict in certain
+			// situations when a Node Pool allocates subnets for which masters
+			// should later be used. This leads to the situation that a Node
+			// Pool cannot be deleted anymore because the subnets managed by the
+			// TCNP stack is now occupied by master nodes.
 			continue
 		}
 
