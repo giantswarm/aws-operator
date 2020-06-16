@@ -256,7 +256,11 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
-
+				// create drainerConfig for the instance
+				err = r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			} else if err != nil {
 				return microerror.Mask(err)
 			} else {
@@ -274,13 +278,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
 				}
 			}
-
-			err = r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 		}
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
