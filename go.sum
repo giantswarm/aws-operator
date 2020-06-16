@@ -293,6 +293,10 @@ github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdF
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/certs/v2 v2.0.0 h1:8OJoIKphN7TXSOgZKNHiMOsckn5Rt0HH4lpHLLfl6+8=
 github.com/giantswarm/certs/v2 v2.0.0/go.mod h1:23/sZZKqWxrmADOvGeIbQQ8mtVZrFOBnklxvTl3K9xY=
+github.com/giantswarm/certs/v2 v2.0.1-0.20200615164416-d8c1a3e6f961 h1:M49wRaFoQvShUsrD+DmuLjqpzO9sKKjzncvwTNzMpOQ=
+github.com/giantswarm/certs/v2 v2.0.1-0.20200615164416-d8c1a3e6f961/go.mod h1:23/sZZKqWxrmADOvGeIbQQ8mtVZrFOBnklxvTl3K9xY=
+github.com/giantswarm/certs/v2 v2.0.1-0.20200616122743-5ce95c9cb9ea h1:CTBO3UaEzR6H63ua1iIHIP9guw1j2G5B1ArPiWLWvyI=
+github.com/giantswarm/certs/v2 v2.0.1-0.20200616122743-5ce95c9cb9ea/go.mod h1:23/sZZKqWxrmADOvGeIbQQ8mtVZrFOBnklxvTl3K9xY=
 github.com/giantswarm/e2e-harness v0.2.0 h1:M71fV6T3zIjpg63eAbP8d5eHxCLLT4Q6hskiWelw6jM=
 github.com/giantswarm/e2e-harness v0.2.0/go.mod h1:+2H1VF3hRA75LQHVYno0/GmWxA/f7YEc9Bey03jyGRY=
 github.com/giantswarm/e2eclients v0.2.0 h1:fk3/dU1tAt9NHgSZwz4C9Bm15E9lFuNfYYneLjkw5Sg=

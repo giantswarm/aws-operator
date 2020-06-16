@@ -6,25 +6,39 @@ import (
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8scrdclient"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	kubernetesfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
+	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 type fakeK8sClient struct {
 	ctrlClient client.Client
+	k8sClient  kubernetes.Interface
+	scheme     *runtime.Scheme
 }
 
-func FakeK8sClient() k8sclient.Interface {
+func NewFakeK8sClient() k8sclient.Interface {
 	var err error
 
 	var k8sClient k8sclient.Interface
 	{
 		scheme := runtime.NewScheme()
+
+		err = apiv1alpha2.AddToScheme(scheme)
+		if err != nil {
+			panic(err)
+		}
+		err = corev1.AddToScheme(scheme)
+		if err != nil {
+			panic(err)
+		}
 		err = infrastructurev1alpha2.AddToScheme(scheme)
 		if err != nil {
 			panic(err)
@@ -36,6 +50,8 @@ func FakeK8sClient() k8sclient.Interface {
 
 		k8sClient = &fakeK8sClient{
 			ctrlClient: fake.NewFakeClientWithScheme(scheme),
+			k8sClient:  kubernetesfake.NewSimpleClientset(),
+			scheme:     scheme,
 		}
 	}
 
@@ -63,7 +79,7 @@ func (f *fakeK8sClient) G8sClient() versioned.Interface {
 }
 
 func (f *fakeK8sClient) K8sClient() kubernetes.Interface {
-	return nil
+	return f.k8sClient
 }
 
 func (f *fakeK8sClient) RESTClient() rest.Interface {
@@ -75,5 +91,5 @@ func (f *fakeK8sClient) RESTConfig() *rest.Config {
 }
 
 func (f *fakeK8sClient) Scheme() *runtime.Scheme {
-	return nil
+	return f.scheme
 }

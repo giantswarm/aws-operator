@@ -13,8 +13,20 @@ func DefaultRelease() releasev1alpha1.Release {
 		Spec: releasev1alpha1.ReleaseSpec{
 			Components: []releasev1alpha1.ReleaseSpecComponent{
 				{
+					Name:    "calico",
+					Version: "3.10.1",
+				},
+				{
 					Name:    "containerlinux",
 					Version: "2345.3.1",
+				},
+				{
+					Name:    "etcd",
+					Version: "3.4.9",
+				},
+				{
+					Name:    "kubernetes",
+					Version: "1.16.9",
 				},
 			},
 		},

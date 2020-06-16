@@ -1,0 +1,18 @@
+apiVersion: v1
+data:
+  encryption: Q2hRTW83cnNwb0dGNm9BM24xR0dscXpMdWF3N3hPSmRPdGhqUkxNakt3VT0=
+kind: Secret
+metadata:
+  creationTimestamp: "2020-06-11T09:17:45Z"
+  labels:
+    clusterID: 8y5ck
+    clusterKey: encryption
+    giantswarm.io/cluster: 8y5ck
+    giantswarm.io/managed-by: cluster-operator
+    giantswarm.io/randomkey: encryption
+  name: 8y5ck-encryption
+  namespace: default
+  resourceVersion: "76392510"
+  selfLink: /api/v1/namespaces/default/secrets/8y5ck-encryption
+  uid: 25f05826-9936-4ae2-8003-61051b9a18dd
+type: Opaque

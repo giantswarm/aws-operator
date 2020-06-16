@@ -9,7 +9,7 @@ require (
 	github.com/giantswarm/apiextensions v0.4.6
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
-	github.com/giantswarm/certs/v2 v2.0.0
+	github.com/giantswarm/certs/v2 v2.0.1-0.20200616122743-5ce95c9cb9ea
 	github.com/giantswarm/e2e-harness v0.2.0
 	github.com/giantswarm/e2eclients v0.2.0
 	github.com/giantswarm/e2esetup v0.1.0
