@@ -38,24 +38,24 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		replicas       int
 		route53Enabled bool
 	}{
-		{
-			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
-			azs:            []string{"eu-central-1b"},
-			replicas:       1,
-			route53Enabled: true,
-		},
-		{
-			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
-			azs:            []string{"eu-central-1b"},
-			replicas:       1,
-			route53Enabled: false,
-		},
-		{
-			name:           "case 2: basic test with encrypter backend KMS, ha masters",
-			azs:            []string{"eu-central-1a", "eu-central-1b", "eu-central-1c"},
-			replicas:       3,
-			route53Enabled: true,
-		},
+		//		{
+		//			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
+		//			azs:            []string{"eu-central-1b"},
+		//			replicas:       1,
+		//			route53Enabled: true,
+		//		},
+		//		{
+		//			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
+		//			azs:            []string{"eu-central-1b"},
+		//			replicas:       1,
+		//			route53Enabled: false,
+		//		},
+		//		{
+		//			name:           "case 2: basic test with encrypter backend KMS, ha masters",
+		//			azs:            []string{"eu-central-1a", "eu-central-1b", "eu-central-1c"},
+		//			replicas:       3,
+		//			route53Enabled: true,
+		//		},
 	}
 
 	for i, tc := range testCases {
