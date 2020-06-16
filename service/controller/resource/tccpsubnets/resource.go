@@ -69,12 +69,6 @@ func (r *Resource) addSubnetsToContext(ctx context.Context) error {
 						aws.String(key.StackTCCP),
 					},
 				},
-				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
-					Values: []*string{
-						aws.String(key.StackTCNP),
-					},
-				},
 			},
 		}
 
