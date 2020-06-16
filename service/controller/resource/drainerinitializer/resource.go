@@ -3,7 +3,6 @@ package drainerinitializer
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -26,9 +25,6 @@ import (
 
 const (
 	Name = "drainerinitializer"
-
-	deleteDrainerMaxWait     = time.Second * 60
-	deleteDrainerMaxInterval = time.Second * 10
 )
 
 type ResourceConfig struct {
