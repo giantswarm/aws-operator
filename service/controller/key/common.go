@@ -2,7 +2,6 @@ package key
 
 import (
 	"fmt"
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"strings"
 	"time"
 	"unicode"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
