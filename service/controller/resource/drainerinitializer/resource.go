@@ -267,8 +267,8 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 						return microerror.Mask(err)
 					}
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted leftover drainer config for ec2 instance %#q", *instance.InstanceId))
-					// cancel resource to let deletion  happen
-					// the drainer will be recreated with proper details next loop
+					// cancel resource to let deletion happen the drainer config will be
+					// recreated with proper details next loop
 					return nil
 				} else {
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
