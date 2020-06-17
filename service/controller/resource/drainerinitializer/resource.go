@@ -261,7 +261,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			} else {
 				// if the cluster id or instance id does not match, delete the bad CR and recreate it
-				if dc.Labels[key.TagCluster] != key.ClusterID(&cl) || dc.Annotations[annotation.InstanceID] != *instance.InstanceId {
+				if key.IsWrongDrainerConfig(dc, key.ClusterID(&cl), *instance.InstanceId) {
 					err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Delete(privateDNS, &metav1.DeleteOptions{})
 					if err != nil {
 						return microerror.Mask(err)
@@ -269,6 +269,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting drainer config with wrong cluster id or instance id for ec2 instance %#q", *instance.InstanceId))
 					// cancel resource to let deletion  happen
 					// the drainer will be recreated with proper details next loop
+					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 					return nil
 				} else {
 					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
