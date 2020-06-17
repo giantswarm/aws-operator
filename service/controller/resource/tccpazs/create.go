@@ -326,6 +326,8 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 			// subnet should not change as the split should be the same.
 			mapping.Public.Subnet.CIDR = clusterAZSubnet[0]
 			mapping.Private.Subnet.CIDR = clusterAZSubnet[1]
+
+			azMapping[az] = mapping
 		}
 
 		if mapping.AWSCNISubnetEmpty() {
