@@ -616,6 +616,12 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
 					},
 				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCCP),
+					},
+				},
 			},
 		}
 
@@ -648,7 +654,7 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		snetName := key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))
 		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                mustCIDRFromSubnets(subnets, "public", key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))),
+			CIDR:                mustCIDRFromSubnets(subnets, key.SanitizeCFResourceName(key.PublicSubnetName(az.Name))),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
@@ -665,7 +671,7 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		snetName := key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))
 		snet := template.ParamsMainSubnetsSubnet{
 			AvailabilityZone:    az.Name,
-			CIDR:                mustCIDRFromSubnets(subnets, "private", key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))),
+			CIDR:                mustCIDRFromSubnets(subnets, key.SanitizeCFResourceName(key.PrivateSubnetName(az.Name))),
 			Name:                snetName,
 			MapPublicIPOnLaunch: false,
 			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
@@ -857,7 +863,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func mustCIDRFromSubnets(subnets []*ec2.Subnet, kind string, name string) string {
+func mustCIDRFromSubnets(subnets []*ec2.Subnet, name string) string {
 	for _, s := range subnets {
 		if awstags.ValueForKey(s.Tags, "Name") != name {
 			continue

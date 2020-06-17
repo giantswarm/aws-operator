@@ -300,6 +300,12 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
 					},
 				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
+					Values: []*string{
+						aws.String(key.StackTCCP),
+					},
+				},
 			},
 		}
 
