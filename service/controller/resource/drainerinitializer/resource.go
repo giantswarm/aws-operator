@@ -249,22 +249,34 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			_, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
+			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
-
+				// create drainerConfig for the instance
 				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
 				if err != nil {
 					return microerror.Mask(err)
 				}
-
 			} else if err != nil {
 				return microerror.Mask(err)
 			} else {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
+				// if the cluster id or instance id does not match, delete the bad CR and recreate it
+				if key.IsWrongDrainerConfig(dc, key.ClusterID(&cl), *instance.InstanceId) {
+					err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Delete(privateDNS, &metav1.DeleteOptions{})
+					if err != nil {
+						return microerror.Mask(err)
+					}
+
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted leftover drainer config for ec2 instance %#q", *instance.InstanceId))
+					// cancel resource to let deletion happen the drainer config will be
+					// recreated with proper details next loop
+					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+					return nil
+				} else {
+					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
+				}
 			}
 		}
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
