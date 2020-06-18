@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add caching to the ELB collector
 - Add `keepforcrs` handler for more reliable CR cleanup.
 - Add Control Plane labels to master nodes.
 - Use the alpine 3.12 base Docker image
