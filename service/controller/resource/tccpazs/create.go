@@ -219,6 +219,9 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
+	//
+	// We have 1 /24 subnet here for the whole Tenant Cluster, which we split
+	// into 4 /26 subnets.
 	clusterAZSubnets, err := ipam.Split(tccpSubnet, MaxAZs)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -246,6 +249,10 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 		mapping := azMapping[az]
 
 		// Check if mapping of given availability zone already contain value.
+		//
+		// We check the /27 subnets and compare their parent /26 subnets to
+		// remove them from the bucket we can draw from. This is where we lose
+		// the not allocated private subnets of master nodes of earlier releases.
 		if !mapping.PublicSubnetEmpty() {
 			// Calculate the parent network from public subnet (always present for
 			// functional AZ).
@@ -297,6 +304,30 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 			} else {
 				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left despite additional availability zone %#q", az)
 			}
+		}
+
+		// Fix for legacy mess prior to release 11.3.3 where we only created
+		// private subnets for the running single master nodes.
+		if !mapping.PublicSubnetEmpty() && mapping.PrivateSubnetEmpty() {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does have public subnet assigned", az))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("recovering private subnet for availability zone %#q", az))
+
+			// Get the parent /26 from the public /27 subnet.
+			parent := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
+
+			// Make up the /27 subnets again based on the parent we
+			// partially allocated already.
+			clusterAZSubnet, err := ipam.Split(parent, 2)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			// Set the /27 subnets to fill the gap. Note that the public
+			// subnet should not change as the split should be the same.
+			mapping.Public.Subnet.CIDR = clusterAZSubnet[0]
+			mapping.Private.Subnet.CIDR = clusterAZSubnet[1]
+
+			azMapping[az] = mapping
 		}
 
 		if mapping.AWSCNISubnetEmpty() {
