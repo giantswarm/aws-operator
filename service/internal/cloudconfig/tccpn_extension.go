@@ -67,19 +67,6 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		},
 
 		{
-			AssetContent: e.randomKeyTmplSet.APIServerEncryptionKey,
-			Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0644,
-		},
-		{
 			AssetContent: template.WaitDockerConf,
 			Path:         "/etc/systemd/system/docker.service.d/01-wait-docker.conf",
 			Owner: k8scloudconfig.Owner{
@@ -230,6 +217,24 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
+		{
+			meta := k8scloudconfig.FileMetadata{
+				AssetContent: e.randomKeyTmplSet.APIServerEncryptionKey,
+				Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
+				Owner: k8scloudconfig.Owner{
+					Group: k8scloudconfig.Group{
+						Name: FileOwnerGroupName,
+					},
+					User: k8scloudconfig.User{
+						Name: FileOwnerUserName,
+					},
+				},
+				Permissions: 0644,
+			}
+
+			certsMeta = append(certsMeta, meta)
+		}
+
 		for _, f := range e.clusterCerts {
 			var encrypted string
 			{
