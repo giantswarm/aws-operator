@@ -2,7 +2,9 @@ package collector
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/giantswarm/microerror"
@@ -12,10 +14,13 @@ import (
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cache"
 )
 
 const (
-	labelELB = "elb"
+	// __ELBCache__ is used as temporal cache key to save ELB response.
+	prefixELBcacheKey = "__ELBCache__"
+	labelELB          = "elb"
 	// maxELBsInOneDescribeTagsBatch - https://docs.aws.amazon.com/elasticloadbalancing/2012-06-01/APIReference/API_DescribeTags.html
 	maxELBsInOneDescribeTagsBatch = 20
 )
@@ -51,13 +56,22 @@ type ELBConfig struct {
 }
 
 type ELB struct {
+	cache  *elbCache
 	helper *helper
 	logger micrologger.Logger
 
 	installationName string
 }
 
-type loadBalancer struct {
+type elbCache struct {
+	cache *cache.StringCache
+}
+
+type elbInfoResponse struct {
+	Elbs []elbInfo
+}
+
+type elbInfo struct {
 	InstancesOutOfService float64
 	Name                  string
 	Tags                  map[string]string
@@ -76,6 +90,7 @@ func NewELB(config ELBConfig) (*ELB, error) {
 	}
 
 	e := &ELB{
+		cache:  newELBCache(time.Minute * 5),
 		helper: config.Helper,
 		logger: config.Logger,
 
@@ -83,6 +98,42 @@ func NewELB(config ELBConfig) (*ELB, error) {
 	}
 
 	return e, nil
+}
+
+func newELBCache(expiration time.Duration) *elbCache {
+	cache := &elbCache{
+		cache: cache.NewStringCache(expiration),
+	}
+
+	return cache
+}
+
+func (n *elbCache) Get(key string) (*elbInfoResponse, error) {
+	var c elbInfoResponse
+	raw, exists := n.cache.Get(getELBCacheKey(key))
+	if exists {
+		err := json.Unmarshal(raw, &c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	return &c, nil
+}
+
+func (n *elbCache) Set(key string, content elbInfoResponse) error {
+	contentSerialized, err := json.Marshal(content)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	n.cache.Set(getELBCacheKey(key), contentSerialized)
+
+	return nil
+}
+
+func getELBCacheKey(key string) string {
+	return prefixELBcacheKey + key
 }
 
 func (e *ELB) Collect(ch chan<- prometheus.Metric) error {
@@ -130,12 +181,54 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		return microerror.Mask(err)
 	}
 
+	var elbInfo *elbInfoResponse
+	// Check if response is cached
+	elbInfo, err = e.cache.Get(account)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	//Cache empty, getting from API
+	if elbInfo == nil || elbInfo.Elbs == nil {
+		elbInfo, err = getElbInfoFromAPI(account, e.installationName, awsClients)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		err = e.cache.Set(account, *elbInfo)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
+	if elbInfo != nil {
+		for _, lb := range elbInfo.Elbs {
+			ch <- prometheus.MustNewConstMetric(
+				elbsDesc,
+				prometheus.GaugeValue,
+				lb.InstancesOutOfService,
+				lb.Name,
+				account,
+				lb.Tags[tagCluster],
+				lb.Tags[key.TagInstallation],
+				lb.Tags[tagOrganization],
+			)
+		}
+	}
+
+	return nil
+}
+
+// getElbInfoFromAPI collects ELB Info from AWS API
+func getElbInfoFromAPI(account string, installation string, awsClients clientaws.Clients) (*elbInfoResponse, error) {
+	var res elbInfoResponse
+
 	var loadBalancerNames []*string
 	{
 		i := &elb.DescribeLoadBalancersInput{}
 		o, err := awsClients.ELB.DescribeLoadBalancers(i)
 		if err != nil {
-			return microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 		for _, d := range o.LoadBalancerDescriptions {
 			loadBalancerNames = append(loadBalancerNames, d.LoadBalancerName)
@@ -145,11 +238,11 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			// E.g. during cluster creation there are no load balancers present
 			// yet so further AWS API calls would fail on validation. No
 			// metrics to emit either so we can short circuit here.
-			return nil
+			return nil, nil
 		}
 	}
 
-	var lbs []loadBalancer
+	var lbs []elbInfo
 	{
 		// AWS API has a limit for maximum number of LoadBalancerNames in
 		// single Describe request so it must be done in batches of
@@ -189,14 +282,14 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 		// Now wait for all requests to complete.
 		err := errGroup.Wait()
 		if err != nil {
-			return microerror.Mask(err)
+			return nil, microerror.Mask(err)
 		}
 
 		// Extract tags from responses and create further loadBalancer types
 		// based on these.
 		for _, o := range tagOutputs {
 			for _, d := range o.TagDescriptions {
-				lb := loadBalancer{
+				lb := elbInfo{
 					Name: *d.LoadBalancerName,
 					Tags: make(map[string]string),
 				}
@@ -205,7 +298,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 					lb.Tags[*t.Key] = *t.Value
 				}
 
-				if lb.Tags[key.TagInstallation] != e.installationName {
+				if lb.Tags[key.TagInstallation] != installation {
 					continue
 				}
 
@@ -224,7 +317,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 			o, err := awsClients.ELB.DescribeInstanceHealth(i)
 			if err != nil {
-				return microerror.Mask(err)
+				return nil, microerror.Mask(err)
 			}
 
 			for _, s := range o.InstanceStates {
@@ -234,21 +327,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			}
 		}
 	}
+	res.Elbs = lbs
 
-	{
-		for _, lb := range lbs {
-			ch <- prometheus.MustNewConstMetric(
-				elbsDesc,
-				prometheus.GaugeValue,
-				lb.InstancesOutOfService,
-				lb.Name,
-				account,
-				lb.Tags[tagCluster],
-				lb.Tags[key.TagInstallation],
-				lb.Tags[tagOrganization],
-			)
-		}
-	}
-
-	return nil
+	return &res, nil
 }
