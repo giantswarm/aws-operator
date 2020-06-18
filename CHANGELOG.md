@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix upgrade problems with pending volume snapshots.
 - Fix cluster deletion issues in AWS using `DependsOn`.
 - Fix calico-policy only metrics endpoint.
+- Fix race condition in IPAM locking when lock already acquired.
+
 
 
 ## [8.6.1] 2020-05-21
