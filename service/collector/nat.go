@@ -104,7 +104,7 @@ func newNATCache(expiration time.Duration) *natCache {
 
 func (n *natCache) Get(accID string) (*natInfoResponse, error) {
 	var c natInfoResponse
-	raw, exists := n.cache.Get(getCacheKey(accID))
+	raw, exists := n.cache.Get(getNATCacheKey(accID))
 	if exists {
 		err := json.Unmarshal(raw, &c)
 		if err != nil {
@@ -121,12 +121,12 @@ func (n *natCache) Set(accID string, content natInfoResponse) error {
 		return microerror.Mask(err)
 	}
 
-	n.cache.Set(getCacheKey(accID), contentSerialized)
+	n.cache.Set(getNATCacheKey(accID), contentSerialized)
 
 	return nil
 }
 
-func getCacheKey(accID string) string {
+func getNATCacheKey(accID string) string {
 	return prefixNATcacheKey + accID
 }
 
