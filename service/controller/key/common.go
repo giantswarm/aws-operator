@@ -7,9 +7,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
@@ -308,6 +310,10 @@ func VPCPeeringRouteName(az string) string {
 
 func isChinaRegion(region string) bool {
 	return strings.HasPrefix(region, "cn-")
+}
+
+func IsWrongDrainerConfig(dc *g8sv1alpha1.DrainerConfig, clusterID string, instanceId string) bool {
+	return dc.Labels[TagCluster] != clusterID || dc.Annotations[annotation.InstanceID] != instanceId
 }
 
 func ComponentVersion(release releasev1alpha1.Release, componentName string) (string, error) {

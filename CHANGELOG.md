@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [8.7.0] 2020-06-19
 
 ### Added
 
+- Add caching to the ELB collector
 - Add `keepforcrs` handler for more reliable CR cleanup.
 - Add Control Plane labels to master nodes.
 - Use the alpine 3.12 base Docker image.
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix upgrade problems with pending volume snapshots.
 - Fix cluster deletion issues in AWS using `DependsOn`.
+- Fix calico-policy only metrics endpoint.
+- Fix race condition in IPAM locking when lock already acquired.
 
 ### Changed
 
@@ -138,8 +142,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...HEAD
 
+[8.7.0]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...v8.7.0
 [8.6.1]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...v8.6.1
 [8.6.0]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/giantswarm/aws-operator/compare/v8.4.0...v8.5.0
