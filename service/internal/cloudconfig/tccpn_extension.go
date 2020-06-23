@@ -218,6 +218,8 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
 		{
+			// Add to certsMeta slice so the encrypted encryption config file isn't passed through
+			// k8scloudconfig.RenderFileAssetContent like other files in filesMeta.
 			meta := k8scloudconfig.FileMetadata{
 				AssetContent: e.randomKeyTmplSet.APIServerEncryptionKey,
 				Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
