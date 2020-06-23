@@ -47,6 +47,16 @@ var (
 				WeightedCapacity: 1,
 			},
 		},
+		"m4.16xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.16xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.16xlarge",
+				WeightedCapacity: 1,
+			},
+		},
 		"m5.xlarge": {
 			template.LaunchTemplateOverride{
 				InstanceType:     "m5.xlarge",
@@ -74,6 +84,16 @@ var (
 			},
 			template.LaunchTemplateOverride{
 				InstanceType:     "m4.4xlarge",
+				WeightedCapacity: 1,
+			},
+		},
+		"m5.16xlarge": {
+			template.LaunchTemplateOverride{
+				InstanceType:     "m5.16xlarge",
+				WeightedCapacity: 1,
+			},
+			template.LaunchTemplateOverride{
+				InstanceType:     "m4.16xlarge",
 				WeightedCapacity: 1,
 			},
 		},
