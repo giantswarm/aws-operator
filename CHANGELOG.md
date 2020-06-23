@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Fix failing go template rendering of KMS encryption content.
+
 
 
 ## [8.7.0] 2020-06-19
@@ -26,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix cluster deletion issues in AWS using `DependsOn`.
 - Fix calico-policy only metrics endpoint.
 - Fix race condition in IPAM locking when lock already acquired.
-- Fix failing go template rendering of KMS encryption content.
 
 
 
