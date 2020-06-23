@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Fix failing go template rendering of KMS encryption content.
+
 
 
 ## [8.7.0] 2020-06-19
