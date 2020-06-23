@@ -8,12 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use `k8s-apiserver` image which includes certs.
+
+
 
 ## [8.7.0] 2020-06-19
 
 ### Added
 
-- Add caching to the ELB collector
+- Add caching to the ELB collector.
 - Add `keepforcrs` handler for more reliable CR cleanup.
 - Add Control Plane labels to master nodes.
 - Use the alpine 3.12 base Docker image
