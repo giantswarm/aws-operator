@@ -38,6 +38,14 @@ func AWSTags(getter LabelsGetter, installationName string) map[string]string {
 		TagOrganization:  OrganizationID(getter),
 	}
 
+	labels := getter.GetLabels()
+	for lkey, lvalue := range labels {
+		if strings.HasPrefix(lkey, "aws-tag/") {
+			nkey := strings.Replace(lkey, "aws-tag/", "", 1)
+			tags[nkey] = lvalue
+		}
+	}
+
 	return tags
 }
 
