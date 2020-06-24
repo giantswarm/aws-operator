@@ -3,8 +3,10 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/resource/nodeautorepair"
 	"net"
 	"strings"
+	"time"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
@@ -677,6 +679,20 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var nodeAutoRepairResource resource.Interface
+	{
+		c := nodeautorepair.Config{
+			Logger:            config.Logger,
+			Enabled:           true,
+			NotReadyThreshold: time.Minute * 5,
+		}
+
+		nodeAutoRepairResource, err = nodeautorepair.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var serviceResource resource.Interface
 	{
 		c := service.Config{
@@ -798,6 +814,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		eniConfigCRsResource,
 		ensureCPCRsResource,
 		secretFinalizerResource,
+		nodeAutoRepairResource,
 
 		// All these resources implement logic to update CR status information.
 		tccpVPCIDStatusResource,

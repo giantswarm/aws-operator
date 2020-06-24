@@ -36,6 +36,7 @@ require (
 	github.com/prometheus/client_golang v1.5.1
 	github.com/spf13/afero v1.3.0
 	github.com/spf13/viper v1.6.3
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	k8s.io/api v0.17.2
 	k8s.io/apiextensions-apiserver v0.17.2
