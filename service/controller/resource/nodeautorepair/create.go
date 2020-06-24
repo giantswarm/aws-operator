@@ -69,7 +69,7 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node) error {
 		if len(parts) != 5 || parts[4] == "" {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("invalid providerID %s in node spec %s", node.Spec.ProviderID, node.Name))
 		}
-		instanceID = parts[3]
+		instanceID = parts[4]
 	}
 
 	{
