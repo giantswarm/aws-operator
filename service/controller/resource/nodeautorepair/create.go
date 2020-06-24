@@ -63,10 +63,10 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node) error {
 
 	var instanceID string
 	{
-		// node.spec.providerID for AWS is in format aws://AVAILABILITY_ZONE/INSTANCE-ID
+		// node.spec.providerID for AWS is in format aws:///AVAILABILITY_ZONE/INSTANCE-ID
 		// ie. aws:///eu-west-1c/i-06a1d2fe9b3e8c916
 		parts := strings.Split(node.Spec.ProviderID, "/")
-		if len(parts) != 4 || parts[3] == "" {
+		if len(parts) != 5 || parts[4] == "" {
 			return microerror.Maskf(executionFailedError, fmt.Sprintf("invalid providerID %s in node spec %s", node.Spec.ProviderID, node.Name))
 		}
 		instanceID = parts[3]
