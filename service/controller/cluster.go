@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/controller/resource/nodeautorepair"
 	"net"
 	"strings"
 	"time"
@@ -45,6 +44,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
+	"github.com/giantswarm/aws-operator/service/controller/resource/nodeautorepair"
 	"github.com/giantswarm/aws-operator/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
