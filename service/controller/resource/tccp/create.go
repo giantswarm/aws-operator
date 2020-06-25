@@ -70,7 +70,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	tags := map[string]string{}
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
@@ -108,15 +107,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		for _, v := range o.Stacks[0].Tags {
-			tags[*v.Key] = *v.Value
-		}
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
 	}
 
 	{
-		update, err := r.detection.ShouldUpdate(ctx, cr, tags)
+		update, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
