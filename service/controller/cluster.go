@@ -86,6 +86,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	NodeAutoRepair             bool
 	RouteTables                string
 	Route53Enabled             bool
 }
@@ -682,7 +683,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := nodeautorepair.Config{
 			Logger:            config.Logger,
-			Enabled:           true,
+			Enabled:           config.NodeAutoRepair,
 			NotReadyThreshold: key.NodeNotReadyTickThreshold,
 		}
 

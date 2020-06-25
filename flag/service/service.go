@@ -15,5 +15,6 @@ type Service struct {
 	Guest          guest.Guest
 	Installation   installation.Installation
 	Kubernetes     kubernetes.Kubernetes
+	NodeAutoRepair string
 	RegistryDomain string
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -16,6 +17,10 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
+	cr, err := key.ToCluster(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -50,7 +55,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
 
 	for _, n := range nodesToTerminate {
-		err := r.terminateNode(ctx, n)
+		err := r.terminateNode(ctx, n, key.ClusterID(&cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -59,7 +64,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) terminateNode(ctx context.Context, node corev1.Node) error {
+func (r *Resource) terminateNode(ctx context.Context, node corev1.Node, clusterID string) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -90,6 +95,8 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node) error {
 		}
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated not healthy node %s with instanceID %s", node.Name, instanceID))
 	}
+	// expose metric about node termination
+	reportNodeTermination(clusterID, node.Name, instanceID)
 	return nil
 }
 
@@ -115,8 +122,10 @@ func nodeNotReady(n corev1.Node) bool {
 	for _, c := range n.Status.Conditions {
 		// find kubelet "ready" condition
 		if c.Type == "Ready" && c.Status != "True" {
-			// check for how long kubelet is not ready, if it reached duration threshold
-			return true
+			// kubelet must be in NotReady at least for some time to avoid quick flaps
+			if time.Since(c.LastHeartbeatTime.Time) >= key.NodeNotReadyDuration {
+				return true
+			}
 		}
 	}
 	return false

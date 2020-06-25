@@ -221,6 +221,7 @@ func New(config Config) (*Service, error) {
 			IncludeTags:                config.Viper.GetBool(config.Flag.Service.AWS.IncludeTags),
 			InstallationName:           config.Viper.GetString(config.Flag.Service.Installation.Name),
 			IPAMNetworkRange:           ipamNetworkRange,
+			NodeAutoRepair:             config.Viper.GetBool(config.Flag.Service.NodeAutoRepair),
 			Route53Enabled:             config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 		}

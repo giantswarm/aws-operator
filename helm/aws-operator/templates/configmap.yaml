@@ -51,6 +51,7 @@ data:
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
+      nodeAutoRepair: '{{ .Values.Installation.V1.NodeAutoRepair.Enabled }}'
       registryDomain: '{{ .Values.Installation.V1.Registry.Domain }}'
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
