@@ -254,6 +254,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 				aws.String(capabilityNamesIAM),
 			},
 			StackName:    aws.String(key.StackNameTCCPN(&cr)),
+			Tags:         r.getCloudFormationTags(cr),
 			TemplateBody: aws.String(templateBody),
 		}
 
