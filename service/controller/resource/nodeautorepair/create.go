@@ -102,7 +102,7 @@ func (r *Resource) detectBadNodes(ctx context.Context, nodes []corev1.Node) ([]c
 			return nil, microerror.Mask(err)
 		}
 
-		if notReadyTickCount > r.notReadyThreshold {
+		if notReadyTickCount >= r.notReadyThreshold {
 			badNodes = append(badNodes, n)
 		}
 
