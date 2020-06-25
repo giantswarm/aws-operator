@@ -131,6 +131,7 @@ type ContextStatusTenantClusterTCCPN struct {
 	IsTransitioning      bool
 	InstanceType         string
 	MasterReplicas       int
+	Tags                 map[string]string
 }
 
 type ContextStatusTenantClusterTCNP struct {

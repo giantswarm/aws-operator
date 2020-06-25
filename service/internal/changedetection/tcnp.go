@@ -78,7 +78,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha2.AWSMac
 //     The operator's version changes.
 //     The composition of security groups changes.
 //
-func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
+func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment, tags map[string]string) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -87,6 +87,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(cr)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
+	tagsEqual := reflect.DeepEqual(cr.Labels, tags)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
 
 	if !dockerVolumeEqual {
@@ -110,6 +111,14 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"level", "debug",
 			"message", "detected TCNP stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
+		)
+		return true, nil
+	}
+	if !tagsEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCNP stack should update",
+			"reason", fmt.Sprintf("tags have changed from %#q to %#q", cr.Labels, tags),
 		)
 		return true, nil
 	}
