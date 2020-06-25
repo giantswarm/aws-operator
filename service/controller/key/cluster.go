@@ -90,7 +90,7 @@ const (
 const (
 	// Defines how many times node-auto-repair logic needs to see node
 	// in NotReady state before it will terminate it to repair it.
-	NodeNotReadyTickThreshold = 5
+	NodeNotReadyTickThreshold = 4
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {

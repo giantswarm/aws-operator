@@ -47,7 +47,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d not healthy nodes", len(nodesToTerminate)))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
 
 	for _, n := range nodesToTerminate {
 		err := r.terminateNode(ctx, n)
@@ -97,7 +97,7 @@ func (r *Resource) detectBadNodes(ctx context.Context, nodes []corev1.Node) ([]c
 	var badNodes []corev1.Node
 	for _, n := range nodes {
 		//
-		notReadyTickCount, err := r.updateNodeNotReadyTickAnnotations(ctx, &n)
+		notReadyTickCount, err := r.updateNodeNotReadyTickAnnotations(ctx, n)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -111,7 +111,7 @@ func (r *Resource) detectBadNodes(ctx context.Context, nodes []corev1.Node) ([]c
 	return badNodes, nil
 }
 
-func nodeNotReady(n *corev1.Node) bool {
+func nodeNotReady(n corev1.Node) bool {
 	for _, c := range n.Status.Conditions {
 		// find kubelet "ready" condition
 		if c.Type == "Ready" && c.Status != "True" {
@@ -126,7 +126,7 @@ func nodeNotReady(n *corev1.Node) bool {
 // depending if the node is Ready or not
 // the annotation is used to track how many times node was seen as not ready
 // and in case it will reach a threshold, the node will be marked for termination.
-func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n *corev1.Node) (int, error) {
+func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n corev1.Node) (int, error) {
 	var err error
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -159,11 +159,11 @@ func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n *cor
 	if updated {
 		// update the tick count on the node
 		n.Annotations[key.TagNodeNotReadyTick] = fmt.Sprintf("%d", notReadyTickCount)
-		err = cc.Client.TenantCluster.K8s.CtrlClient().Update(ctx, n)
+		err = cc.Client.TenantCluster.K8s.CtrlClient().Update(ctx, &n)
 		if err != nil {
 			return -1, microerror.Mask(err)
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated not ready tick count to %d for node %s", notReadyTickCount, n.Name))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated not ready tick count to %d/%d for node %s", notReadyTickCount, r.notReadyThreshold, n.Name))
 	}
 	return notReadyTickCount, nil
 }
