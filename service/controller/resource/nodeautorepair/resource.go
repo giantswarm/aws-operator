@@ -1,8 +1,6 @@
 package nodeautorepair
 
 import (
-	"time"
-
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -15,14 +13,14 @@ type Config struct {
 	Logger micrologger.Logger
 
 	Enabled           bool
-	NotReadyThreshold time.Duration
+	NotReadyThreshold int
 }
 
 type Resource struct {
 	logger micrologger.Logger
 
 	enabled           bool
-	notReadyThreshold time.Duration
+	notReadyThreshold int
 }
 
 func New(config Config) (*Resource, error) {

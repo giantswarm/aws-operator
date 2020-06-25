@@ -54,6 +54,7 @@ const (
 	TagControlPlane            = "giantswarm.io/control-plane"
 	TagInstallation            = "giantswarm.io/installation"
 	TagMachineDeployment       = "giantswarm.io/machine-deployment"
+	TagNodeNotReadyTick        = "giantswarm.io/node-not-ready-tick"
 	TagOrganization            = "giantswarm.io/organization"
 	TagRouteTableType          = "giantswarm.io/route-table-type"
 	TagStack                   = "giantswarm.io/stack"
@@ -84,6 +85,12 @@ const (
 	// determines the version of the OS to be used for tenant cluster nodes and
 	// is ultimately transformed into an AMI based on TC region.
 	ComponentOS = "containerlinux"
+)
+
+const (
+	// Defines how many times node-auto-repair logic needs to see node
+	// in NotReady state before it will terminate it to repair it.
+	NodeNotReadyTickThreshold = 5
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {

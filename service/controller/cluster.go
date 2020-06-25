@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"strings"
-	"time"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
@@ -684,7 +683,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := nodeautorepair.Config{
 			Logger:            config.Logger,
 			Enabled:           true,
-			NotReadyThreshold: time.Minute * 5,
+			NotReadyThreshold: key.NodeNotReadyTickThreshold,
 		}
 
 		nodeAutoRepairResource, err = nodeautorepair.New(c)

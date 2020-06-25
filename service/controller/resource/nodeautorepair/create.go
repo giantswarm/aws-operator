@@ -3,8 +3,8 @@ package nodeautorepair
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -41,7 +42,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	nodesToTerminate := r.detectBadNodes(nodeList.Items)
+	nodesToTerminate, err := r.detectBadNodes(ctx, nodeList.Items)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d not healthy nodes", len(nodesToTerminate)))
 
@@ -89,26 +93,77 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node) error {
 	return nil
 }
 
-func (r *Resource) detectBadNodes(nodes []corev1.Node) []corev1.Node {
+func (r *Resource) detectBadNodes(ctx context.Context, nodes []corev1.Node) ([]corev1.Node, error) {
 	var badNodes []corev1.Node
 	for _, n := range nodes {
-		if isNotReadyFor(n, r.notReadyThreshold) {
+		//
+		notReadyTickCount, err := r.updateNodeNotReadyTickAnnotations(ctx, &n)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if notReadyTickCount > r.notReadyThreshold {
 			badNodes = append(badNodes, n)
 		}
+
 	}
 
-	return badNodes
+	return badNodes, nil
 }
 
-func isNotReadyFor(n corev1.Node, duration time.Duration) bool {
+func nodeNotReady(n *corev1.Node) bool {
 	for _, c := range n.Status.Conditions {
 		// find kubelet "ready" condition
 		if c.Type == "Ready" && c.Status != "True" {
 			// check for how long kubelet is not ready, if it reached duration threshold
-			if time.Since(c.LastHeartbeatTime.Time) >= duration {
-				return true
-			}
+			return true
 		}
 	}
 	return false
+}
+
+// updateNodeNotReadyTickAnnotations will update annotations on the node
+// depending if the node is Ready or not
+// the annotation is used to track how many times node was seen as not ready
+// and in case it will reach a threshold, the node will be marked for termination.
+func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n *corev1.Node) (int, error) {
+	var err error
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return -1, microerror.Mask(err)
+	}
+
+	// fetch current notReady tick count from node
+	// if there is no annotation yet, the value will be 0
+	notReadyTickCount := 0
+	{
+		tick, ok := n.Annotations[key.TagNodeNotReadyTick]
+		if ok {
+			notReadyTickCount, err = strconv.Atoi(tick)
+			if err != nil {
+				return -1, microerror.Mask(err)
+			}
+		}
+	}
+
+	updated := false
+	// increase or decrease the tick count depending on the node status
+	if nodeNotReady(n) {
+		notReadyTickCount++
+		updated = true
+	} else if notReadyTickCount > 0 {
+		notReadyTickCount--
+		updated = true
+	}
+
+	if updated {
+		// update the tick count on the node
+		n.Annotations[key.TagNodeNotReadyTick] = fmt.Sprintf("%d", notReadyTickCount)
+		err = cc.Client.TenantCluster.K8s.CtrlClient().Update(ctx, n)
+		if err != nil {
+			return -1, microerror.Mask(err)
+		}
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated not ready tick count to %d for node %s", notReadyTickCount, n.Name))
+	}
+	return notReadyTickCount, nil
 }
