@@ -139,6 +139,45 @@ used for tenant cluster nodes in `service/controller/key/ami.go`. The file is ge
 images have been published on AWS, this mapping can be updating using
 `devctl gen ami --dir service/controller/key`.
 
+## Live editing operator inside an installation
+
+- Download Okteto latest release from https://github.com/okteto/okteto/releases
+- `okteto init -n giantswarm`
+- Set correct label `app.giantswarm.io/branch: $BRANCH` in the manifest
+- Change your kubeconfig to the giantswarm namespace
+- Modify PSP of the current operator `kubectl patch psp aws-operator-$BRANCH-psp -p '{"spec":{"runAsGroup":{"ranges":null,"rule":"RunAsAny"},"runAsUser":{"rule":"RunAsAny"},"volumes":["secret","configMap","hostPath","persistentVolumeClaim","emptyDir"]}}'`
+
+- `okteto up`
+- From this point on, you can modify files locally and will be synced to the remote pod
+
+#### In order to start the operator, you can build it and execute it inside the pod
+- `go build`
+- `aws-operator daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config files=config --config.files=secret`
+
+#### For live debugging in VS Code
+- Install delve debugger: `go get github.com/go-delve/delve/cmd/dlv`
+- `dlv debug --headless --listen=:2345 --log --api-version=2 -- daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret`
+- Create debugging connection:
+```
+  {
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Connect to okteto",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "/okteto",
+            "port": 2345,
+            "host": "127.0.0.1"
+        }
+    ]
+  }
+  ```
+- Wait until debug server is up and create some breakpoints, start the debugger :)
+- If you want to edit the code you will need to stop debugging session and stop the server
+- `okteto down -v`
+
 ## Contact
 
 - Mailing list: [giantswarm](https://groups.google.com/forum/!forum/giantswarm)
