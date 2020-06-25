@@ -14,6 +14,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -25,8 +26,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	b := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
-	k := r.pathFunc(cr)
+	bn := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
 
 	// During deletion, it might happen that the encryption key got already
 	// deleted. In such a case we do not have to do anything here anymore. The
@@ -37,9 +37,9 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// bucket itself.
 	if cc.Status.TenantCluster.Encryption.Key == "" {
 		if key.IsDeleted(cr) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available anymore")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "encryption key not available anymore")
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "encryption key not available yet")
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
@@ -47,36 +47,56 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 		return nil, nil
 	}
 
-	var body []byte
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding S3 object %#q/%#q", b, k))
+	paths, err := r.cloudConfig.NewPaths(ctx, obj)
+	if cloudconfig.IsNotFound(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "control plane CR not available yet")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
+	} else if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var s3Objects []*s3.PutObjectInput
+	for _, p := range paths {
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
 
 		i := &s3.GetObjectInput{
-			Bucket: aws.String(b),
-			Key:    aws.String(k),
+			Bucket: aws.String(bn),
+			Key:    aws.String(p),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.S3.GetObject(i)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 bucket %#q", b))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", fmt.Sprintf("did not find S3 bucket %#q", bn))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
 
 		} else if IsObjectNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q/%#q", b, k))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
 			return nil, nil
 
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		body, err = ioutil.ReadAll(o.Body)
+		body, err := ioutil.ReadAll(o.Body)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q/%#q", b, k))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
+
+		s3Object := &s3.PutObjectInput{
+			Key:           aws.String(p),
+			Body:          strings.NewReader(string(body)),
+			Bucket:        aws.String(bn),
+			ContentLength: aws.Int64(int64(len(body))),
+		}
+
+		s3Objects = append(s3Objects, s3Object)
 	}
 
 	// We want to prevent Cloud Formation stacks from being created without the
@@ -84,12 +104,5 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// value and cancel in case the S3 Object is not yet uploaded.
 	cc.Status.TenantCluster.S3Object.Uploaded = true
 
-	s3Object := &s3.PutObjectInput{
-		Key:           aws.String(k),
-		Body:          strings.NewReader(string(body)),
-		Bucket:        aws.String(b),
-		ContentLength: aws.Int64(int64(len(body))),
-	}
-
-	return s3Object, nil
+	return s3Objects, nil
 }

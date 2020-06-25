@@ -2,17 +2,19 @@ package template
 
 const TemplateMainENI = `
 {{- define "eni" -}}
-  MasterEni:
+{{ range .ENI.List }}
+  {{ .Resource }}:
     Type: AWS::EC2::NetworkInterface
     Properties:
        Description: A Network interface used for etcd.
        GroupSet:
-       - {{ .ENI.SecurityGroupID }}
-       SubnetId: {{ .ENI.SubnetID }}
+       - {{ .SecurityGroupID }}
+       SubnetId: {{ .SubnetID }}
        Tags:
        - Key: Name
-         Value: {{ .ENI.Name }}
+         Value: {{ .Name }}
        - Key: node.k8s.amazonaws.com/no_manage
          Value: "true"
+{{- end -}}
 {{- end -}}
 `

@@ -17,6 +17,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/asg"
 )
 
 const (
@@ -24,6 +26,7 @@ const (
 )
 
 type ResourceConfig struct {
+	ASG       asg.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -32,6 +35,7 @@ type ResourceConfig struct {
 }
 
 type Resource struct {
+	asg       asg.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
@@ -40,6 +44,9 @@ type Resource struct {
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
+	if config.ASG == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
@@ -55,6 +62,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	}
 
 	r := &Resource{
+		asg:       config.ASG,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
@@ -71,6 +79,7 @@ func (r *Resource) Name() string {
 
 func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgName string) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing life cycle hook action for tenant cluster node %#q", instanceID))
+
 	i := &autoscaling.CompleteLifecycleActionInput{
 		AutoScalingGroupName:  aws.String(asgName),
 		InstanceId:            aws.String(instanceID),
@@ -85,11 +94,9 @@ func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgNam
 
 	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifeCycleAction(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found life cycle hook action for tenant cluster node %#q", instanceID))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find life cycle hook action for tenant cluster node %#q", instanceID))
 	} else if err != nil {
 		return microerror.Mask(err)
-	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifen cycle hook action for tenant cluster node %#q", instanceID))
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
@@ -120,24 +127,34 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 
 	var asgName string
 	{
-		if cc.Status.TenantCluster.ASG.Name == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "auto scaling group name is not available yet")
+		drainable, err := r.asg.Drainable(ctx, cr)
+		if asg.IsNoASG(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any auto scaling group")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+
+		} else if asg.IsNoDrainable(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainable auto scaling group yet")
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+
+		} else if err != nil {
+			return microerror.Mask(err)
 		}
 
-		asgName = cc.Status.TenantCluster.ASG.Name
+		asgName = drainable
 	}
 
-	var drainedDrainerConfigs []corev1alpha1.DrainerConfig
-	var timeoutDrainerConfigs []corev1alpha1.DrainerConfig
+	var drainerConfigs *corev1alpha1.DrainerConfigList
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding drained drainer configs for tenant cluster")
 
@@ -146,7 +163,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(r.labelMapFunc(cr)).String(),
 		}
 
-		drainerConfigs, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
+		drainerConfigs, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -156,36 +173,36 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		// might be a delete event.
 		if len(drainerConfigs.Items) != 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found drainer configs for tenant cluster")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
-			finalizerskeptcontext.SetKept(ctx)
+
+			if key.IsDeleted(cr) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
 		}
 
 		for _, dc := range drainerConfigs.Items {
 			if dc.Status.HasDrainedCondition() {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has drained condition", dc.GetName()))
-				drainedDrainerConfigs = append(drainedDrainerConfigs, dc)
 			}
 
 			if dc.Status.HasTimeoutCondition() {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("drainer config %#q of tenant cluster has timeout condition", dc.GetName()))
-				timeoutDrainerConfigs = append(timeoutDrainerConfigs, dc)
 			}
 		}
 
-		if len(drainedDrainerConfigs) == 0 && len(timeoutDrainerConfigs) == 0 {
+		if len(drainerConfigs.Items) == 0 {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainer config for tenant cluster")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d drained drainer configs for tenant cluster", len(drainedDrainerConfigs)))
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d timeout drainer configs for tenant cluster", len(timeoutDrainerConfigs)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d drained drainer configs for tenant cluster", len(drainerConfigs.Items)))
 	}
 
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring finished draining for drained nodes")
 
-		for _, dc := range drainedDrainerConfigs {
+		for _, dc := range drainerConfigs.Items {
 			// This is a special thing for AWS. We use annotations to transport EC2
 			// instance IDs. Otherwise the lookups of all necessary information
 			// again would be quite a ball ache. Se we take the shortcut leveraging
@@ -196,19 +213,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			}
 
 			err = r.completeLifeCycleHook(ctx, instanceID, asgName)
-			if err != nil {
+			// We check only for errors for drained status
+			// In case of timeout status there can be errors in case machine does not exist anymore
+			if dc.Status.HasDrainedCondition() && err != nil {
 				return microerror.Mask(err)
 			}
 
-			err = r.deleteDrainerConfig(ctx, dc)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-		}
-
-		// Timeout drainer configs should simply be deleted without draining since
-		// the time window for draining did expire at this point.
-		for _, dc := range timeoutDrainerConfigs {
 			err = r.deleteDrainerConfig(ctx, dc)
 			if err != nil {
 				return microerror.Mask(err)

@@ -1,9 +1,21 @@
 package collector
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
 )
+
+// IsEndpointNotAvailable asserts that an error is due to service
+// not available in the current region.
+func IsEndpointNotAvailable(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	return strings.Contains(microerror.Cause(err).Error(), "no such host")
+}
 
 var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",

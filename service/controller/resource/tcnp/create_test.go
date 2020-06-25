@@ -2,7 +2,6 @@ package tcnp
 
 import (
 	"bytes"
-	"context"
 	"flag"
 	"io/ioutil"
 	"path/filepath"
@@ -12,10 +11,13 @@ import (
 	"github.com/ghodss/yaml"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
@@ -32,21 +34,84 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
-		ctx  context.Context
 		cr   infrastructurev1alpha2.AWSMachineDeployment
-		r    releasev1alpha1.Release
+		re   releasev1alpha1.Release
 	}{
 		{
 			name: "case 0: basic test",
-			ctx:  unittest.DefaultContext(),
 			cr:   unittest.DefaultMachineDeployment(),
-			r:    unittest.DefaultRelease(),
+			re:   unittest.DefaultRelease(),
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			params, err := newTemplateParams(tc.ctx, tc.cr, tc.r)
+			var err error
+
+			ctx := unittest.DefaultContext()
+			k := unittest.FakeK8sClient()
+
+			var d *changedetection.TCNP
+			{
+				c := changedetection.TCNPConfig{
+					Logger: microloggertest.New(),
+				}
+
+				d, err = changedetection.NewTCNP(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			var i images.Interface
+			{
+				c := images.Config{
+					K8sClient: k,
+
+					RegistryDomain: "dummy",
+				}
+
+				i, err = images.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			{
+				cl := unittest.DefaultCluster()
+				err = k.CtrlClient().Create(ctx, &cl)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = k.CtrlClient().Create(ctx, &tc.cr)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = k.CtrlClient().Create(ctx, &tc.re)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			var r *Resource
+			{
+				c := Config{
+					Detection: d,
+					Images:    i,
+					Logger:    microloggertest.New(),
+
+					InstallationName: "dummy",
+				}
+
+				r, err = New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			params, err := r.newTemplateParams(ctx, tc.cr)
 			if err != nil {
 				t.Fatal(err)
 			}

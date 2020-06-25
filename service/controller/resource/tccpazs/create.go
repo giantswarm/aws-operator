@@ -11,8 +11,8 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -27,13 +27,8 @@ import (
 const MaxAZs = 4
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := r.toClusterFunc(obj)
-	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-		return nil
-	} else if err != nil {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
 		return microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
@@ -41,37 +36,83 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// We need to cancel the resource early in case the ipam resource did not yet
-	// allocate a subnet for the tenant cluster.
-	if key.StatusClusterNetworkCIDR(cr) == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect private and public subnets for availability zones")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster subnet not yet allocated")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-
-		return nil
-	}
-
-	var machineDeployments []infrastructurev1alpha2.AWSMachineDeployment
+	var cl infrastructurev1alpha2.AWSCluster
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding MachineDeployments for tenant cluster")
+		var list infrastructurev1alpha2.AWSClusterList
 
-		l := metav1.AddLabelToSelector(
-			&metav1.LabelSelector{},
-			label.Cluster,
-			key.ClusterID(&cr),
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 		)
-		o := metav1.ListOptions{
-			LabelSelector: labels.Set(l.MatchLabels).String(),
-		}
-
-		list, err := r.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(o)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		machineDeployments = list.Items
+		if len(list.Items) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+		if len(list.Items) > 1 {
+			return microerror.Mask(tooManyCRsError)
+		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d MachineDeployments for tenant cluster", len(machineDeployments)))
+		cl = list.Items[0]
+	}
+
+	var cp infrastructurev1alpha2.AWSControlPlane
+	{
+		var list infrastructurev1alpha2.AWSControlPlaneList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "control plane cr not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
+		}
+		if len(list.Items) > 1 {
+			return microerror.Mask(tooManyCRsError)
+		}
+
+		cp = list.Items[0]
+	}
+
+	var mds []infrastructurev1alpha2.AWSMachineDeployment
+	{
+		var list infrastructurev1alpha2.AWSMachineDeploymentList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		mds = append(mds, list.Items...)
+	}
+
+	// We need to cancel the resource early in case the ipam resource did not
+	// yet allocate a subnet for the tenant cluster. Note that the Tenant
+	// Cluster subnet allocation is performed by the IPAM handler.
+	if key.StatusClusterNetworkCIDR(cl) == "" {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster subnet not yet allocated")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+		return nil
 	}
 
 	// As a first step we initialize the mappings for all the relevant
@@ -81,25 +122,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// below.
 	azMapping := map[string]mapping{}
 	{
-		azMapping[key.MasterAvailabilityZone(cr)] = mapping{
-			RequiredByCR: true,
+		for _, az := range key.ControlPlaneAvailabilityZones(cp) {
+			azMapping[az] = mapping{}
 		}
 
-		for _, md := range machineDeployments {
+		for _, md := range mds {
 			for _, az := range key.MachineDeploymentAvailabilityZones(md) {
-				azMapping[az] = mapping{
-					RequiredByCR: true,
-				}
+				azMapping[az] = mapping{}
 			}
 		}
 
 		for _, az := range azsFromSubnets(cc.Status.TenantCluster.TCCP.Subnets) {
-			_, exists := azMapping[az]
-			if !exists {
-				azMapping[az] = mapping{
-					RequiredByCR: false,
-				}
-			}
+			azMapping[az] = mapping{}
 		}
 	}
 
@@ -120,10 +154,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				"level", "debug",
 				"message", "computed controller context status",
 				"availability-zone", az.Name,
-				"subnet-id", az.Subnet.Public.CIDR,
-				"public-subnet", az.Subnet.Public.CIDR,
-				"private-subnet", az.Subnet.Private.CIDR,
-				"aws-cni-subnet", az.Subnet.AWSCNI.CIDR,
+				"aws-cni-subnet-cidr", az.Subnet.AWSCNI.CIDR.String(),
+				"aws-cni-subnet-id", az.Subnet.AWSCNI.ID,
+				"private-subnet-cidr", az.Subnet.Private.CIDR.String(),
+				"private-subnet-id", az.Subnet.Private.ID,
+				"public-subnet-cidr", az.Subnet.Public.CIDR.String(),
+				"public-subnet-id", az.Subnet.Public.ID,
 			)
 		}
 
@@ -134,8 +170,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 		podSubnet := r.cidrBlockAWSCNI
-		if cr.Spec.Provider.Pods.CIDRBlock != "" {
-			podSubnet = cr.Spec.Provider.Pods.CIDRBlock
+		if cl.Spec.Provider.Pods.CIDRBlock != "" {
+			podSubnet = cl.Spec.Provider.Pods.CIDRBlock
 		}
 
 		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
@@ -144,7 +180,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		// Parse TCCP network CIDR.
-		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cr))
+		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cl))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -161,10 +197,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				"level", "debug",
 				"message", "computed controller context spec",
 				"availability-zone", az.Name,
-				"subnet-id", az.Subnet.Public.CIDR,
-				"public-subnet", az.Subnet.Public.CIDR,
-				"private-subnet", az.Subnet.Private.CIDR,
-				"aws-cni-subnet", az.Subnet.AWSCNI.CIDR,
+				"aws-cni-subnet-cidr", az.Subnet.AWSCNI.CIDR.String(),
+				"aws-cni-subnet-id", az.Subnet.AWSCNI.ID,
+				"private-subnet-cidr", az.Subnet.Private.CIDR.String(),
+				"private-subnet-id", az.Subnet.Private.ID,
+				"public-subnet-cidr", az.Subnet.Public.CIDR.String(),
+				"public-subnet-id", az.Subnet.Public.ID,
 			)
 		}
 
@@ -182,6 +220,9 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
+	//
+	// We have 1 /24 subnet here for the whole Tenant Cluster, which we split
+	// into 4 /26 subnets.
 	clusterAZSubnets, err := ipam.Split(tccpSubnet, MaxAZs)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -209,12 +250,16 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 		mapping := azMapping[az]
 
 		// Check if mapping of given availability zone already contain value.
+		//
+		// We check the /27 subnets and compare their parent /26 subnets to
+		// remove them from the bucket we can draw from. This is where we lose
+		// the not allocated private subnets of master nodes of earlier releases.
 		if !mapping.PublicSubnetEmpty() {
 			// Calculate the parent network from public subnet (always present for
 			// functional AZ).
 			parent := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q has public and private subnet %#q already allocated", az, parent.String()))
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q has parent subnet %#q already allocated", az, parent.String()))
 
 			// Filter out already allocated AZ subnet from available AZ size networks.
 			clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
@@ -241,13 +286,13 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 		if mapping.PublicSubnetEmpty() && mapping.PrivateSubnetEmpty() {
 			if len(clusterAZSubnets) > 0 {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does not have public and private subnet allocated", az))
+
 				// Pick first available AZ subnet and split it to public and private.
 				clusterAZSubnet, err := ipam.Split(clusterAZSubnets[0], 2)
 				if err != nil {
 					return nil, microerror.Mask(err)
 				}
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have public and private subnet allocation", az))
 
 				// Update available AZ mapping by removing the CIDR we are about to
 				// allocate.
@@ -258,18 +303,43 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 				azMapping[az] = mapping
 			} else {
-				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
+				return nil, microerror.Maskf(invalidConfigError, "no free subnets left for allocation despite additional availability zone %#q", az)
 			}
+		}
+
+		// Fix for legacy mess prior to release 11.3.3 where we only created
+		// private subnets for the running single master nodes.
+		if !mapping.PublicSubnetEmpty() && mapping.PrivateSubnetEmpty() {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does not have private subnet allocated", az))
+
+			// Get the parent /26 from the public /27 subnet.
+			parent := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
+
+			// Make up the /27 subnets again based on the parent we
+			// partially allocated already.
+			clusterAZSubnet, err := ipam.Split(parent, 2)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+
+			// Set the /27 subnets to fill the gap. Note that the public
+			// subnet should not change as the split should be the same.
+			mapping.Public.Subnet.CIDR = clusterAZSubnet[0]
+			mapping.Private.Subnet.CIDR = clusterAZSubnet[1]
+
+			azMapping[az] = mapping
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("recovering private subnet %#q for availability zone %#q", mapping.Private.Subnet.CIDR.String(), az))
 		}
 
 		if mapping.AWSCNISubnetEmpty() {
 			if len(awsCNISubnets) > 0 {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does not have aws-cni subnet allocated", az))
+
 				// The AWS CNI CIDRs are not divided into public/private per AZ. We only
 				// split by the IPAM limit. So here we simply take the first free CIDR
 				// and remove it below.
 				awsCNISubnet := awsCNISubnets[0]
-
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %q doesn't have aws-cni subnet allocation", az))
 
 				// Update available AZ mapping by removing the CIDR we are about to
 				// allocate.
@@ -279,12 +349,10 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 				azMapping[az] = mapping
 			} else {
-				return nil, microerror.Maskf(invalidConfigError, "no more unallocated subnets left but there's this AZ still left: %q", az)
+				return nil, microerror.Maskf(invalidConfigError, "no free subnets left for allocation despite additional availability zone %#q", az)
 			}
 		}
 	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("AZ subnet mappings: %#v", azMapping))
 
 	return azMapping, nil
 }

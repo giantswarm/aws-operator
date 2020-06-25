@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
@@ -22,11 +23,11 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	var instance *ec2.Instance
+	var instances []*ec2.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instance")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instances")
 
-		instance, err = r.searchMasterInstance(ctx, cr)
+		instances, err = r.searchMasterInstances(ctx, cr)
 		if IsNotFound(err) {
 			// During updates the master instance is shut down and thus cannot be found.
 			// In such cases we cancel the reconciliation for the endpoint resource.
@@ -46,7 +47,12 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found master instance")
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d master instances", len(instances)))
+	}
+
+	var addresses []corev1.EndpointAddress
+	for _, i := range instances {
+		addresses = append(addresses, corev1.EndpointAddress{IP: *i.PrivateIpAddress})
 	}
 
 	endpoints := &corev1.Endpoints{
@@ -61,11 +67,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		},
 		Subsets: []corev1.EndpointSubset{
 			{
-				Addresses: []corev1.EndpointAddress{
-					{
-						IP: *instance.PrivateIpAddress,
-					},
-				},
+				Addresses: addresses,
 				Ports: []corev1.EndpointPort{
 					{
 						Port: httpsPort,
@@ -78,15 +80,15 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return endpoints, nil
 }
 
-func (r Resource) searchMasterInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*ec2.Instance, error) {
+func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) ([]*ec2.Instance, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var instance *ec2.Instance
+	var instances []*ec2.Instance
 	{
-		i := &ec2.DescribeInstancesInput{
+		instancesInput := &ec2.DescribeInstancesInput{
 			Filters: []*ec2.Filter{
 				{
 					Name: aws.String("tag:Name"),
@@ -109,7 +111,7 @@ func (r Resource) searchMasterInstance(ctx context.Context, cr infrastructurev1a
 			},
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(instancesInput)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -117,15 +119,32 @@ func (r Resource) searchMasterInstance(ctx context.Context, cr infrastructurev1a
 		if len(o.Reservations) == 0 {
 			return nil, microerror.Maskf(notFoundError, "master instance")
 		}
-		if len(o.Reservations) != 1 {
-			return nil, microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations))
-		}
-		if len(o.Reservations[0].Instances) != 1 {
-			return nil, microerror.Maskf(executionFailedError, "expected one master instance, got %d", len(o.Reservations[0].Instances))
+
+		// check for health of the instance
+		instanceHealthInput := &elb.DescribeInstanceHealthInput{
+			LoadBalancerName: aws.String(key.ELBNameAPI(&cr)),
 		}
 
-		instance = o.Reservations[0].Instances[0]
+		o2, err := cc.Client.TenantCluster.AWS.ELB.DescribeInstanceHealth(instanceHealthInput)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, r := range o.Reservations {
+			for _, i := range r.Instances {
+				for _, iState := range o2.InstanceStates {
+					if *i.InstanceId == *iState.InstanceId && *iState.State == key.ELBInstanceStateInService {
+						instances = append(instances, i)
+					}
+				}
+			}
+
+		}
 	}
 
-	return instance, nil
+	if len(instances) == 0 {
+		return nil, microerror.Maskf(notFoundError, "no healthy master instances found")
+	}
+
+	return instances, nil
 }

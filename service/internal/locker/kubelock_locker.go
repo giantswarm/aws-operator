@@ -35,6 +35,14 @@ type KubeLockLocker struct {
 	kubelock kubelock.Interface
 }
 
+// NewKubeLockLocker implements a distributed lock mechanism mainly used for our
+// IPAM management. You can inspect the lock annotations in the giantswarm
+// namespace during Cluster or Node Pool creation in order to see the locking in
+// action.
+//
+//     $ k get namespace -o json giantswarm --watch | jq '.metadata.annotations'
+//     "kubelock.giantswarm.io/ipam": "{\"owner\":\"aws-operator@8.6.1\",\"createdAt\":\"2020-06-18T10:22:12.211418934Z\",\"ttl\":30000000000}"
+//
 func NewKubeLockLocker(config KubeLockLockerConfig) (*KubeLockLocker, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)

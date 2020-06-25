@@ -14,7 +14,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@0.8.14
+  architect: giantswarm/architect@0.9.0
 
 workflows:
   build:
@@ -27,6 +27,8 @@ workflows:
             tags:
               only: /^v.*/
 
+      # Ensure that for every commit (all branches), and for every new release tag,
+      # an image is pushed to Quay.
       - architect/push-to-docker:
           name: push-to-quay
           image: "quay.io/giantswarm/aws-operator"
@@ -38,8 +40,10 @@ workflows:
             tags:
               only: /^v.*/
 
+      # Ensure that for every commit to master, and for every new release tag,
+      # an image gets pushed to the Aliyun registry.
       - architect/push-to-docker:
-          name: push-to-aliyun-master
+          name: push-to-aliyun
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
@@ -51,11 +55,12 @@ workflows:
             tags:
               only: /^v.*/
 
-      - architect/push-to-docker:
-          name: push-to-aliyun-pr
-          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
-          username_envar: "ALIYUN_USERNAME"
-          password_envar: "ALIYUN_PASSWORD"
+      # Allow that for every commit (to a branch other than master),
+      # and for every new tag that is not a release tag,
+      # an image _can_ get pushed to the Aliyun registry
+      # if manually approved.
+      - hold-push-to-aliyun-pr:
+          type: approval
           requires:
             - go-build
           filters:
@@ -63,14 +68,28 @@ workflows:
               ignore: master
             tags:
               ignore: /^v.*/
+      - architect/push-to-docker:
+          name: push-to-aliyun-pr
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          requires:
+            - hold-push-to-aliyun-pr
+          filters:
+            branches:
+              ignore: master
+            tags:
+              ignore: /.*/
 
+      # Ensure that for every commit to master and for every
+      # release tag, there is an app version in the catalog.
       - architect/push-to-app-catalog:
           name: push-to-app-catalog-master
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
-            - push-to-aliyun-master
+            - push-to-aliyun
             - push-to-quay
           filters:
             branches:
@@ -78,6 +97,10 @@ workflows:
             tags:
               only: /^v.*/
 
+      # Ensure that for every commit (branch other than master)
+      # there is an app version in the test catalog.
+      # Note: Making this app usable in china needs manual approval
+      # of the 'hold-push-to-aliyun-pr' job.
       - architect/push-to-app-catalog:
           name: push-to-app-catalog-pr
           app_catalog: "control-plane-catalog"
@@ -89,6 +112,7 @@ workflows:
             branches:
               ignore: master
 
+      # Ensure that a new app is also added to the app collection.
       - architect/push-to-app-collection:
           name: push-to-aws-app-collection
           app_name: "aws-operator"

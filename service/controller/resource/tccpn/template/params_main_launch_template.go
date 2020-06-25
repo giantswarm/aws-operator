@@ -1,49 +1,54 @@
 package template
 
 type ParamsMainLaunchTemplate struct {
-	BlockDeviceMapping    ParamsMainLaunchTemplateBlockDeviceMapping
-	Instance              ParamsMainLaunchTemplateInstance
-	SmallCloudConfig      ParamsMainLaunchTemplateSmallCloudConfig
+	List []ParamsMainLaunchTemplateItem
+}
+
+type ParamsMainLaunchTemplateItem struct {
+	BlockDeviceMapping    ParamsMainLaunchTemplateItemBlockDeviceMapping
+	Instance              ParamsMainLaunchTemplateItemInstance
+	SmallCloudConfig      ParamsMainLaunchTemplateItemSmallCloudConfig
 	MasterSecurityGroupID string
-	ResourceName          string
+	Name                  string
+	Resource              string
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMapping struct {
-	Docker  ParamsMainLaunchTemplateBlockDeviceMappingDocker
-	Kubelet ParamsMainLaunchTemplateBlockDeviceMappingKubelet
-	Logging ParamsMainLaunchTemplateBlockDeviceMappingLogging
+type ParamsMainLaunchTemplateItemBlockDeviceMapping struct {
+	Docker  ParamsMainLaunchTemplateItemBlockDeviceMappingDocker
+	Kubelet ParamsMainLaunchTemplateItemBlockDeviceMappingKubelet
+	Logging ParamsMainLaunchTemplateItemBlockDeviceMappingLogging
 }
 
-type ParamsMainLaunchTemplateInstance struct {
+type ParamsMainLaunchTemplateItemInstance struct {
 	Image      string
 	Monitoring bool
 	Type       string
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMappingDocker struct {
-	Volume ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume
+type ParamsMainLaunchTemplateItemBlockDeviceMappingDocker struct {
+	Volume ParamsMainLaunchTemplateItemBlockDeviceMappingDockerVolume
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume struct {
+type ParamsMainLaunchTemplateItemBlockDeviceMappingDockerVolume struct {
 	Size int
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMappingKubelet struct {
-	Volume ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume
+type ParamsMainLaunchTemplateItemBlockDeviceMappingKubelet struct {
+	Volume ParamsMainLaunchTemplateItemBlockDeviceMappingKubeletVolume
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMappingKubeletVolume struct {
+type ParamsMainLaunchTemplateItemBlockDeviceMappingKubeletVolume struct {
 	Size int
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMappingLogging struct {
-	Volume ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume
+type ParamsMainLaunchTemplateItemBlockDeviceMappingLogging struct {
+	Volume ParamsMainLaunchTemplateItemBlockDeviceMappingLoggingVolume
 }
 
-type ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume struct {
+type ParamsMainLaunchTemplateItemBlockDeviceMappingLoggingVolume struct {
 	Size int
 }
 
-type ParamsMainLaunchTemplateSmallCloudConfig struct {
+type ParamsMainLaunchTemplateItemSmallCloudConfig struct {
 	S3URL string
 }

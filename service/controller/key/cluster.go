@@ -26,9 +26,10 @@ const (
 )
 
 const (
-	EtcdPort             = 2379
-	EtcdPrefix           = "giantswarm.io"
-	KubernetesSecurePort = 443
+	EtcdPort                     = 2379
+	EtcdPrefix                   = "giantswarm.io"
+	KubernetesSecurePort         = 443
+	KubernetesApiHealthCheckPort = 8089
 )
 
 const (
@@ -36,9 +37,6 @@ const (
 )
 
 const (
-	// KubectlVersion is the version of kubectl used on a node to interact with
-	// kubernets. The project is here: https://github.com/giantswarm/docker-kubectl
-	KubectlVersion = "1.16.4"
 	// KubernetesAPIHealthzVersion is a SHA representing the version of
 	// https://github.com/giantswarm/k8s-api-healthz/ used.
 	KubernetesAPIHealthzVersion = "0999549a4c334b646288d08bd2c781c6aae2e12f"
@@ -89,7 +87,7 @@ const (
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("api.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("api.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -97,7 +95,7 @@ func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
 }
 
 func ClusterEtcdEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("etcd.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("etcd.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterEtcdEndpointWithPort(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -105,7 +103,7 @@ func ClusterEtcdEndpointWithPort(cluster infrastructurev1alpha2.AWSCluster) stri
 }
 
 func ClusterKubeletEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("worker.%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
+	return fmt.Sprintf("worker.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
@@ -118,6 +116,10 @@ func CredentialName(cluster infrastructurev1alpha2.AWSCluster) string {
 
 func CredentialNamespace(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Spec.Provider.CredentialSecret.Namespace
+}
+
+func ExternalSNAT(cluster infrastructurev1alpha2.AWSCluster) *bool {
+	return cluster.Spec.Provider.Pods.ExternalSNAT
 }
 
 func IsChinaRegion(awsRegion string) bool {
@@ -149,6 +151,11 @@ func IsNewCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
 
 	// No update event is registered in the versions or conditions lists in cr status so this is new cluster.
 	return true
+}
+
+func IsAlreadyCreatedCluster(cluster infrastructurev1alpha2.AWSCluster) bool {
+	// if cluster has Created status it has been already provisioned
+	return cluster.Status.Cluster.HasCreatedCondition()
 }
 
 func MasterAvailabilityZone(cluster infrastructurev1alpha2.AWSCluster) string {

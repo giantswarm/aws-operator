@@ -10,11 +10,13 @@ const TemplateMainVPC = `
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
-      - Key: Name
-        Value: {{ $v.ClusterID }}
+        - Key: Name
+          Value: {{ $v.ClusterID }}
   VPCCIDRBlockAWSCNI:
     Type: AWS::EC2::VPCCidrBlock
-    DependsOn: VPCPeeringConnection
+    DependsOn:
+      - VPC
+      - VPCPeeringConnection
     Properties:
       CidrBlock: {{ $v.CIDRBlockAWSCNI }}
       VpcId: !Ref VPC

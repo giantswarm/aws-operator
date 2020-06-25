@@ -24,7 +24,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "acquiring lock for IPAM")
 		err := r.locker.Lock(ctx)
 		if locker.IsAlreadyExists(err) {
+			// In case the lock already exists we stop here and try again during
+			// the next reconciliation loop because another process is already
+			// trying to allocate subnets.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "lock for IPAM is already acquired")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		} else {

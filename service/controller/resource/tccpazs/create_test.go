@@ -9,20 +9,20 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/unittest"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
 func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	testCases := []struct {
 		name               string
 		cluster            infrastructurev1alpha2.AWSCluster
+		controlPlane       infrastructurev1alpha2.AWSControlPlane
 		machineDeployments []infrastructurev1alpha2.AWSMachineDeployment
 		ctxStatusSubnets   []*ec2.Subnet
 		expectedAZs        []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone
@@ -30,7 +30,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	}{
 		{
 			name:               "case 0: keep control plane, 0 node pools",
-			cluster:            unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			controlPlane:       unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				{
@@ -61,8 +62,9 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			errorMatcher: nil,
 		},
 		{
-			name:    "case 1: control plane and 1 node pool on same AZ",
-			cluster: unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			name:         "case 1: control plane and 1 node pool on same AZ",
+			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			controlPlane: unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
 			},
@@ -99,8 +101,9 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			errorMatcher: nil,
 		},
 		{
-			name:    "case 2: create control plane and 1 node pool on different AZ",
-			cluster: unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			name:         "case 2: create control plane and 1 node pool on different AZ",
+			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			controlPlane: unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1b"}),
 			},
@@ -139,7 +142,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		},
 		{
 			name:               "case 3: keep control plane and delete 1 node pool from different AZ",
-			cluster:            unittest.ClusterWithNetworkCIDR(unittest.ClusterWithAZ(unittest.DefaultCluster(), "eu-central-1a"), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			controlPlane:       unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				{
@@ -199,17 +203,15 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			// Construct fresh fake client for each test case.
-			fakeClient := fake.NewSimpleClientset()
+			var err error
+
+			ctx := unittest.DefaultContext()
 
 			var r *Resource
 			{
-				var err error
-
 				c := Config{
-					G8sClient:     fakeClient,
-					Logger:        microloggertest.New(),
-					ToClusterFunc: key.ToCluster,
+					K8sClient: unittest.FakeK8sClient(),
+					Logger:    microloggertest.New(),
 
 					CIDRBlockAWSCNI: "172.17.0.0/16",
 				}
@@ -220,15 +222,27 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 				}
 			}
 
-			// Prepare MachineDeployments for fake client.
-			for _, md := range tc.machineDeployments {
-				_, err := fakeClient.InfrastructureV1alpha2().AWSMachineDeployments(md.Namespace).Create(&md)
+			// Prepare all the necessary runtime objects using the abstract controller
+			// client.
+			{
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster)
 				if err != nil {
 					t.Fatal(err)
 				}
+
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.controlPlane)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				for _, md := range tc.machineDeployments {
+					err := r.k8sClient.CtrlClient().Create(ctx, &md)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
 			}
 
-			ctx := unittest.DefaultContext()
 			cc, err := controllercontext.FromContext(ctx)
 			if err != nil {
 				t.Fatal(err)
@@ -253,14 +267,12 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			diff := cmp.Diff(cc.Spec.TenantCluster.TCCP.AvailabilityZones, tc.expectedAZs)
-
+			diff := cmp.Diff(tc.expectedAZs, cc.Spec.TenantCluster.TCCP.AvailabilityZones)
 			if diff != "" {
 				t.Fatalf("\n\n%s\n", diff)
 			}
 		})
 	}
-
 }
 
 func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
@@ -277,15 +289,9 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			awsCNISubnet: mustParseCIDR("172.17.0.0/16"),
 			tccpSubnet:   mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]mapping{
-				"eu-central-1a": {
-					RequiredByCR: true,
-				},
-				"eu-central-1b": {
-					RequiredByCR: true,
-				},
-				"eu-central-1c": {
-					RequiredByCR: true,
-				},
+				"eu-central-1a": {},
+				"eu-central-1b": {},
+				"eu-central-1c": {},
 			},
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
@@ -304,7 +310,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					AWSCNI: network{
@@ -322,7 +327,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					AWSCNI: network{
@@ -340,7 +344,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -366,11 +369,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
-				"eu-central-1b": {
-					RequiredByCR: true,
-				},
+				"eu-central-1b": {},
 				"eu-central-1c": {
 					AWSCNI: network{
 						Subnet: subnet{
@@ -387,7 +387,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 			},
 			expectedAZs: map[string]mapping{
@@ -407,7 +406,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					AWSCNI: network{
@@ -425,7 +423,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					AWSCNI: network{
@@ -443,7 +440,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -453,12 +449,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 			awsCNISubnet: mustParseCIDR("172.17.0.0/16"),
 			tccpSubnet:   mustParseCIDR("10.100.8.0/24"),
 			inputAZs: map[string]mapping{
-				"eu-central-1a": {
-					RequiredByCR: true,
-				},
-				"eu-central-1b": {
-					RequiredByCR: true,
-				},
+				"eu-central-1a": {},
+				"eu-central-1b": {},
 				"eu-central-1c": {
 					AWSCNI: network{
 						Subnet: subnet{
@@ -475,7 +467,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 			},
 			expectedAZs: map[string]mapping{
@@ -495,7 +486,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					AWSCNI: network{
@@ -513,7 +503,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					AWSCNI: network{
@@ -531,7 +520,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -557,7 +545,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					AWSCNI: network{
@@ -575,7 +562,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					AWSCNI: network{
@@ -593,11 +579,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
-				"eu-central-1d": {
-					RequiredByCR: true,
-				},
+				"eu-central-1d": {},
 			},
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
@@ -616,7 +599,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					AWSCNI: network{
@@ -634,7 +616,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					AWSCNI: network{
@@ -652,7 +633,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1d": {
 					AWSCNI: network{
@@ -670,7 +650,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.224/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 			},
 			errorMatcher: nil,
@@ -696,7 +675,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.32/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1b": {
 					AWSCNI: network{
@@ -714,7 +692,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.96/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1c": {
 					AWSCNI: network{
@@ -732,7 +709,6 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.160/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
 				"eu-central-1d": {
 					AWSCNI: network{
@@ -750,11 +726,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 							CIDR: mustParseCIDR("10.100.8.224/27"),
 						},
 					},
-					RequiredByCR: true,
 				},
-				"eu-central-1e": {
-					RequiredByCR: true,
-				},
+				"eu-central-1e": {},
 			},
 			expectedAZs:  nil,
 			errorMatcher: IsInvalidConfig,
@@ -766,9 +739,8 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 		var err error
 
 		c := Config{
-			G8sClient:     fake.NewSimpleClientset(),
-			Logger:        microloggertest.New(),
-			ToClusterFunc: key.ToCluster,
+			K8sClient: unittest.FakeK8sClient(),
+			Logger:    microloggertest.New(),
 
 			CIDRBlockAWSCNI: "dummy",
 		}

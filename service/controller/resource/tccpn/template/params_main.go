@@ -9,4 +9,5 @@ type ParamsMain struct {
 	IAMPolicies      *ParamsMainIAMPolicies
 	LaunchTemplate   *ParamsMainLaunchTemplate
 	Outputs          *ParamsMainOutputs
+	RecordSets       *ParamsMainRecordSets
 }

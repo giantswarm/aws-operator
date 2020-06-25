@@ -6,17 +6,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-
 ## [Unreleased]
 
-### Changed
+- Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Fix failing go template rendering of KMS encryption content.
 
-- Removed static ip FOR ENI to avoid collision with internal API LB.
 
+
+## [8.7.0] 2020-06-19
+
+### Added
+
+- Add caching to the ELB collector
+- Add `keepforcrs` handler for more reliable CR cleanup.
+- Add Control Plane labels to master nodes.
+- Use the alpine 3.12 base Docker image
 
 ### Fixed
 
+- Fix upgrade problems with pending volume snapshots.
+- Fix cluster deletion issues in AWS using `DependsOn`.
+- Fix calico-policy only metrics endpoint.
+- Fix race condition in IPAM locking when lock already acquired.
+
+
+
+## [8.6.1] 2020-05-21
+
+### Added
+
+- Add common labels to `aws-operator` pod.
+
+### Fixed
+
+- Fix collector panic.
+
+
+
+## [8.6.0] 2020-05-21
+
+### Added
+
+- Enable ExternalSNAT to be configurable.
+
+### Changed
+
+- CI: Add optional pushing of WIP work to Aliyun registry.
+- Remove static ip FOR ENI to avoid collision with internal API LB.
+- Remove `--service.feature*` and `--service.test*` flags.
+
+### Fixed
+
+- Check Service Quota endpoint availability for the current AWS region
 - Fix RBAC rules for Control Plane CR migration.
+
 
 
 ## [8.5.0] 2020-05-11
@@ -101,8 +144,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...HEAD
 
+[8.7.0]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...v8.7.0
+[8.6.1]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...v8.6.1
+[8.6.0]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/giantswarm/aws-operator/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/giantswarm/aws-operator/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/giantswarm/aws-operator/compare/v8.2.3...v8.3.0

@@ -18,16 +18,16 @@ spec:
       annotations:
         releaseRevision: {{ .Release.Revision | quote }}
       labels:
-        {{- include "labels.selector" . | nindent 8 }}
+        {{- include "labels.common" . | nindent 8 }}
     spec:
       volumes:
-      - name: {{ .Chart.Name }}-configmap
+      - name: {{ include "name" . }}-configmap
         configMap:
           name: {{ include "resource.default.name"  . }}
           items:
           - key: config.yaml
             path: config.yaml
-      - name: {{ .Chart.Name }}-secret
+      - name: {{ include "name" . }}-secret
         secret:
           secretName: {{ include "resource.default.name"  . }}
           items:
@@ -41,13 +41,13 @@ spec:
         runAsUser: {{ .Values.pod.user.id }}
         runAsGroup: {{ .Values.pod.group.id }}
       containers:
-      - name: {{ .Chart.Name }}
+      - name: {{ include "name" . }}
         image: "{{ .Values.Installation.V1.Registry.Domain }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         volumeMounts:
-        - name: {{ .Chart.Name }}-configmap
-          mountPath: /var/run/{{ .Chart.Name }}/configmap/
-        - name: {{ .Chart.Name }}-secret
-          mountPath: /var/run/{{ .Chart.Name }}/secret/
+        - name: {{ include "name" . }}-configmap
+          mountPath: /var/run/{{ include "name" . }}/configmap/
+        - name: {{ include "name" . }}-secret
+          mountPath: /var/run/{{ include "name" . }}/secret/
           readOnly: true
         - name: certs
           mountPath: /etc/ssl/certs/ca-certificates.crt
@@ -61,8 +61,8 @@ spec:
         {{- end }}
         args:
         - daemon
-        - --config.dirs=/var/run/{{ .Chart.Name }}/configmap/
-        - --config.dirs=/var/run/{{ .Chart.Name }}/secret/
+        - --config.dirs=/var/run/{{ include "name" . }}/configmap/
+        - --config.dirs=/var/run/{{ include "name" . }}/secret/
         - --config.files=config
         - --config.files=secret
         livenessProbe:

@@ -12,8 +12,9 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 const (
@@ -32,6 +33,7 @@ const (
 // resource.
 type Config struct {
 	G8sClient versioned.Interface
+	HAMaster  hamaster.Interface
 	Logger    micrologger.Logger
 
 	APIWhitelist       ConfigAPIWhitelist
@@ -46,6 +48,7 @@ type Config struct {
 // Resource implements the cloudformation resource.
 type Resource struct {
 	g8sClient versioned.Interface
+	haMaster  hamaster.Interface
 	logger    micrologger.Logger
 
 	apiWhitelist       ConfigAPIWhitelist
@@ -65,6 +68,9 @@ func New(config Config) (*Resource, error) {
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
+	if config.HAMaster == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -81,6 +87,7 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		g8sClient: config.G8sClient,
+		haMaster:  config.HAMaster,
 		detection: config.Detection,
 		logger:    config.Logger,
 

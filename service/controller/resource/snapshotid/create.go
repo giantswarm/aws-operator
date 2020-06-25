@@ -41,6 +41,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.HAMasterSnapshotIDValue),
 					},
 				},
+				{
+					Name: aws.String("status"),
+					Values: []*string{
+						aws.String(ec2.SnapshotStateCompleted),
+					},
+				},
 			},
 		}
 

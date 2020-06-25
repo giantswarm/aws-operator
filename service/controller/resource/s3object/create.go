@@ -6,54 +6,51 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
-	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	s3Object, err := toS3Object(createChange)
+	s3Objects, err := toS3Objects(createChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if s3Object != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", *s3Object.Key))
+	if len(s3Objects) != 0 {
+		for _, s3Object := range s3Objects {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 object %#q", *s3Object.Key))
 
-		_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
-		if err != nil {
-			return microerror.Mask(err)
+			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", *s3Object.Key))
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 object %#q", *s3Object.Key))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not create S3 object %#q", r.pathFunc(cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not create any S3 object")
 	}
 
 	return nil
 }
 
 func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentS3Object, err := toS3Object(currentState)
+	currentS3Objects, err := toS3Objects(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredS3Object, err := toS3Object(desiredState)
+	desiredS3Objects, err := toS3Objects(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var createState *s3.PutObjectInput
-	if currentS3Object == nil {
-		createState = desiredS3Object
+	var createState []*s3.PutObjectInput
+	if len(currentS3Objects) == 0 {
+		createState = desiredS3Objects
 	}
 
 	return createState, nil

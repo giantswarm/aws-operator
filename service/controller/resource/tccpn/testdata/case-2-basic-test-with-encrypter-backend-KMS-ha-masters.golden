@@ -1,0 +1,663 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Control Plane Nodes Cloud Formation Stack.
+Outputs:
+  InstanceType:
+    Value: m5.xlarge
+  MasterReplicas:
+    Value: 3
+  OperatorVersion:
+    Value: 7.3.0
+Resources:
+  ControlPlaneNodeAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+    - MasterEni
+    - EtcdVolume
+    Properties:
+      VPCZoneIdentifier:
+        - subnet-id-eu-central-1a
+      AvailabilityZones:
+        - eu-central-1a
+      DesiredCapacity: 1
+      MinSize: 1
+      MaxSize: 1
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate.LatestVersionNumber
+      LoadBalancerNames:
+      - 8y5ck-api-internal
+      - 8y5ck-api
+      - 8y5ck-etcd
+      # We define lifecycle hook only in case of HA masters. In case of 1 masters
+      # the draining would not work as the API is down when we try to roll the instance.
+      # We define a lifecycle hook as part of the ASG in order to drain nodes
+      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
+      # hook referencing the ASG name. In this setting when deleting a Node Pool
+      # the lifecycle hook was never executed. We always want node draining for
+      # reliably managing customer workloads.
+      LifecycleHookSpecificationList:
+        - DefaultResult: CONTINUE
+          HeartbeatTimeout: 3600
+          LifecycleHookName: ControlPlane
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+      # 60 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 60
+
+      MetricsCollection:
+        - Granularity: "1Minute"
+
+      Tags:
+        - Key: Name
+          Value: 8y5ck-master
+          PropagateAtLaunch: true
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
+        MinInstancesInService: 0
+
+        # Maximum amount of nodes being rolled at the same time.
+        MaxBatchSize: 1
+
+        # We pause the roll of the master ASG for 2 mins to give master
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
+  ControlPlaneNodeAutoScalingGroup2:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+    - MasterEni2
+    - EtcdVolume2
+    - ControlPlaneNodeAutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - subnet-id-eu-central-1b
+      AvailabilityZones:
+        - eu-central-1b
+      DesiredCapacity: 1
+      MinSize: 1
+      MaxSize: 1
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate2
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate2.LatestVersionNumber
+      LoadBalancerNames:
+      - 8y5ck-api-internal
+      - 8y5ck-api
+      - 8y5ck-etcd
+      # We define lifecycle hook only in case of HA masters. In case of 1 masters
+      # the draining would not work as the API is down when we try to roll the instance.
+      # We define a lifecycle hook as part of the ASG in order to drain nodes
+      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
+      # hook referencing the ASG name. In this setting when deleting a Node Pool
+      # the lifecycle hook was never executed. We always want node draining for
+      # reliably managing customer workloads.
+      LifecycleHookSpecificationList:
+        - DefaultResult: CONTINUE
+          HeartbeatTimeout: 3600
+          LifecycleHookName: ControlPlane
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+      # 60 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 60
+
+      MetricsCollection:
+        - Granularity: "1Minute"
+
+      Tags:
+        - Key: Name
+          Value: 8y5ck-master
+          PropagateAtLaunch: true
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
+        MinInstancesInService: 0
+
+        # Maximum amount of nodes being rolled at the same time.
+        MaxBatchSize: 1
+
+        # We pause the roll of the master ASG for 2 mins to give master
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
+  ControlPlaneNodeAutoScalingGroup3:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+    - MasterEni3
+    - EtcdVolume3
+    - ControlPlaneNodeAutoScalingGroup2
+    Properties:
+      VPCZoneIdentifier:
+        - subnet-id-eu-central-1c
+      AvailabilityZones:
+        - eu-central-1c
+      DesiredCapacity: 1
+      MinSize: 1
+      MaxSize: 1
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref ControlPlaneNodeLaunchTemplate3
+            Version: !GetAtt ControlPlaneNodeLaunchTemplate3.LatestVersionNumber
+      LoadBalancerNames:
+      - 8y5ck-api-internal
+      - 8y5ck-api
+      - 8y5ck-etcd
+      # We define lifecycle hook only in case of HA masters. In case of 1 masters
+      # the draining would not work as the API is down when we try to roll the instance.
+      # We define a lifecycle hook as part of the ASG in order to drain nodes
+      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
+      # hook referencing the ASG name. In this setting when deleting a Node Pool
+      # the lifecycle hook was never executed. We always want node draining for
+      # reliably managing customer workloads.
+      LifecycleHookSpecificationList:
+        - DefaultResult: CONTINUE
+          HeartbeatTimeout: 3600
+          LifecycleHookName: ControlPlane
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+      # 60 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 60
+
+      MetricsCollection:
+        - Granularity: "1Minute"
+
+      Tags:
+        - Key: Name
+          Value: 8y5ck-master
+          PropagateAtLaunch: true
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
+        MinInstancesInService: 0
+
+        # Maximum amount of nodes being rolled at the same time.
+        MaxBatchSize: 1
+
+        # We pause the roll of the master ASG for 2 mins to give master
+        # time to properly join k8s cluster before rolling another one.
+        PauseTime: PT2M
+  MasterEni:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+       Description: A Network interface used for etcd.
+       GroupSet:
+       - master-security-group-id
+       SubnetId: subnet-id-eu-central-1a
+       Tags:
+       - Key: Name
+         Value: 8y5ck-master1-eni
+       - Key: node.k8s.amazonaws.com/no_manage
+         Value: "true"
+  MasterEni2:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+       Description: A Network interface used for etcd.
+       GroupSet:
+       - master-security-group-id
+       SubnetId: subnet-id-eu-central-1b
+       Tags:
+       - Key: Name
+         Value: 8y5ck-master2-eni
+       - Key: node.k8s.amazonaws.com/no_manage
+         Value: "true"
+  MasterEni3:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+       Description: A Network interface used for etcd.
+       GroupSet:
+       - master-security-group-id
+       SubnetId: subnet-id-eu-central-1c
+       Tags:
+       - Key: Name
+         Value: 8y5ck-master3-eni
+       - Key: node.k8s.amazonaws.com/no_manage
+         Value: "true"
+  EtcdVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: eu-central-1a
+      Encrypted: true
+      Size: 100
+      SnapshotId: snap-1234567890abcdef0
+      Tags:
+      - Key: Name
+        Value: 8y5ck-master1-etcd
+      VolumeType: gp2
+  EtcdVolume2:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: eu-central-1b
+      Encrypted: true
+      Size: 100
+      Tags:
+      - Key: Name
+        Value: 8y5ck-master2-etcd
+      VolumeType: gp2
+  EtcdVolume3:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: eu-central-1c
+      Encrypted: true
+      Size: 100
+      Tags:
+      - Key: Name
+        Value: 8y5ck-master3-etcd
+      VolumeType: gp2
+  ControlPlaneNodesRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: gs-cluster-8y5ck-role-tccpn
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: "sts:AssumeRole"
+  ControlPlaneNodesRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: gs-cluster-8y5ck-policy-tccpn
+      Roles:
+        - Ref: ControlPlaneNodesRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "ec2:*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketLocation"
+              - "s3:ListAllMyBuckets"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
+          - Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
+          - Effect: "Allow"
+            Action: "elasticloadbalancing:*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:DescribeAutoScalingGroups"
+              - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:DescribeTags"
+              - "autoscaling:DescribeLaunchConfigurations"
+              - "ec2:DescribeLaunchTemplateVersions"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "autoscaling:SetDesiredCapacity"
+              - "autoscaling:TerminateInstanceInAutoScalingGroup"
+            Resource: "*"
+            Condition:
+              StringEquals:
+                autoscaling:ResourceTag/giantswarm.io/cluster: "8y5ck"
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
+          # Following rules are required to make the AWS CNI work. See also
+          # https://github.com/aws/amazon-vpc-cni-k8s#setup.
+          - Effect: Allow
+            Action:
+              - ec2:AssignPrivateIpAddresses
+              - ec2:AttachNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceTypes
+              - ec2:DescribeTags
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DetachNetworkInterface
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:UnassignPrivateIpAddresses
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource:
+              - arn:aws:ec2:*:*:network-interface/*
+  ControlPlaneNodesInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: gs-cluster-8y5ck-profile-tccpn
+      Roles:
+        - Ref: ControlPlaneNodesRole
+  IAMManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 8y5ck-IAMManager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt ControlPlaneNodesRole.Arn
+          Action: "sts:AssumeRole"
+  IAMManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: 8y5ck-IAMManager-Policy
+      Roles:
+        - Ref: "IAMManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Action: "sts:AssumeRole"
+          Resource: "*"
+  Route53ManagerRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 8y5ck-Route53Manager-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt IAMManagerRole.Arn
+          Action: "sts:AssumeRole"
+  Route53ManagerRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: 8y5ck-Route53Manager-Policy
+      Roles:
+        - Ref: "Route53ManagerRole"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "route53:ChangeResourceRecordSets"
+            Resource:
+              - "arn:aws:route53:::hostedzone/hosted-zone-id"
+              - "arn:aws:route53:::hostedzone/hosted-zone-internal-id"
+          - Effect: "Allow"
+            Action:
+              - "route53:ListHostedZones"
+              - "route53:ListResourceRecordSets"
+            Resource: "*"
+  ControlPlaneNodeLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: 8y5ck-master1-launch-template
+      LaunchTemplateData:
+        BlockDeviceMappings:
+        - DeviceName: /dev/xvdc
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdg
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        IamInstanceProfile:
+          Name: !Ref ControlPlaneNodesInstanceProfile
+        ImageId: ami-0a9a5d2b65cce04eb
+        InstanceType: m5.xlarge
+        Monitoring:
+          Enabled: false
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeviceIndex: 0
+            Groups:
+            - master-security-group-id
+        UserData:
+          Fn::Base64: |
+            {
+              "ignition": {
+                "version": "2.2.0",
+                "config": {
+                  "append": [
+                    {
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-1"
+                    }
+                  ]
+                }
+              },
+              "storage": {
+                "filesystems": [
+                  {
+                    "name": "docker",
+                    "mount": {
+                      "device": "/dev/xvdc",
+                      "wipeFilesystem": true,
+                      "label": "docker",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "kubelet",
+                    "mount": {
+                      "device": "/dev/xvdg",
+                      "wipeFilesystem": true,
+                      "label": "kubelet",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "log",
+                    "mount": {
+                      "device": "/dev/xvdf",
+                      "wipeFilesystem": true,
+                      "label": "log",
+                      "format": "xfs"
+                    }
+                  }
+                ]
+              }
+            }
+  ControlPlaneNodeLaunchTemplate2:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: 8y5ck-master2-launch-template
+      LaunchTemplateData:
+        BlockDeviceMappings:
+        - DeviceName: /dev/xvdc
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdg
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        IamInstanceProfile:
+          Name: !Ref ControlPlaneNodesInstanceProfile
+        ImageId: ami-0a9a5d2b65cce04eb
+        InstanceType: m5.xlarge
+        Monitoring:
+          Enabled: false
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeviceIndex: 0
+            Groups:
+            - master-security-group-id
+        UserData:
+          Fn::Base64: |
+            {
+              "ignition": {
+                "version": "2.2.0",
+                "config": {
+                  "append": [
+                    {
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-2"
+                    }
+                  ]
+                }
+              },
+              "storage": {
+                "filesystems": [
+                  {
+                    "name": "docker",
+                    "mount": {
+                      "device": "/dev/xvdc",
+                      "wipeFilesystem": true,
+                      "label": "docker",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "kubelet",
+                    "mount": {
+                      "device": "/dev/xvdg",
+                      "wipeFilesystem": true,
+                      "label": "kubelet",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "log",
+                    "mount": {
+                      "device": "/dev/xvdf",
+                      "wipeFilesystem": true,
+                      "label": "log",
+                      "format": "xfs"
+                    }
+                  }
+                ]
+              }
+            }
+  ControlPlaneNodeLaunchTemplate3:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: 8y5ck-master3-launch-template
+      LaunchTemplateData:
+        BlockDeviceMappings:
+        - DeviceName: /dev/xvdc
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdg
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp2
+        IamInstanceProfile:
+          Name: !Ref ControlPlaneNodesInstanceProfile
+        ImageId: ami-0a9a5d2b65cce04eb
+        InstanceType: m5.xlarge
+        Monitoring:
+          Enabled: false
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeviceIndex: 0
+            Groups:
+            - master-security-group-id
+        UserData:
+          Fn::Base64: |
+            {
+              "ignition": {
+                "version": "2.2.0",
+                "config": {
+                  "append": [
+                    {
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-3"
+                    }
+                  ]
+                }
+              },
+              "storage": {
+                "filesystems": [
+                  {
+                    "name": "docker",
+                    "mount": {
+                      "device": "/dev/xvdc",
+                      "wipeFilesystem": true,
+                      "label": "docker",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "kubelet",
+                    "mount": {
+                      "device": "/dev/xvdg",
+                      "wipeFilesystem": true,
+                      "label": "kubelet",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "log",
+                    "mount": {
+                      "device": "/dev/xvdf",
+                      "wipeFilesystem": true,
+                      "label": "log",
+                      "format": "xfs"
+                    }
+                  }
+                ]
+              }
+            }
+  ControlPlaneRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      ResourceRecords:
+      - !GetAtt MasterEni.PrimaryPrivateIpAddress
+      Name: 'etcd1.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: hosted-zone-internal-id
+      Type: A
+      TTL: 60
+  ControlPlaneRecordSet2:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      ResourceRecords:
+      - !GetAtt MasterEni2.PrimaryPrivateIpAddress
+      Name: 'etcd2.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: hosted-zone-internal-id
+      Type: A
+      TTL: 60
+  ControlPlaneRecordSet3:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      ResourceRecords:
+      - !GetAtt MasterEni3.PrimaryPrivateIpAddress
+      Name: 'etcd3.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: hosted-zone-internal-id
+      Type: A
+      TTL: 60

@@ -3,14 +3,43 @@ package key
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
+
+const (
+	ELBInstanceStateInService = "InService"
+
+	DrainerResyncPeriod = time.Minute * 2
+)
+
+// AMI returns the EC2 AMI for the configured region and given version.
+func AMI(region string, release releasev1alpha1.Release) (string, error) {
+	osVersion, err := OSVersion(release)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	regionAMIs, ok := amiInfo[osVersion]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for version '%s'", osVersion)
+	}
+
+	regionAMI, ok := regionAMIs[region]
+	if !ok {
+		return "", microerror.Maskf(notFoundError, "no image id for region '%s'", region)
+	}
+
+	return regionAMI, nil
+}
 
 func AWSCNINATRouteName(az string) string {
 	return fmt.Sprintf("AWSCNINATRoute-%s", az)
@@ -79,8 +108,12 @@ func ELBNameEtcd(getter LabelsGetter) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(getter))
 }
 
-func HealthCheckTarget(port int) string {
+func HealthCheckTCPTarget(port int) string {
 	return fmt.Sprintf("TCP:%d", port)
+}
+
+func HealthCheckHTTPTarget(port int) string {
+	return fmt.Sprintf("HTTP:%d/healthz", port)
 }
 
 func InternalELBNameAPI(getter LabelsGetter) string {
@@ -91,40 +124,13 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
 }
 
-// ImageID returns the EC2 AMI for the configured region and given version.
-func ImageID(region string, release releasev1alpha1.Release) (string, error) {
-	osVersion, err := OSVersion(release)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	regionAMIs, ok := amiInfo[osVersion]
-	if !ok {
-		return "", microerror.Maskf(notFoundError, "no image id for version '%s'", osVersion)
-	}
-
-	regionAMI, ok := regionAMIs[region]
-	if !ok {
-		return "", microerror.Maskf(notFoundError, "no image id for region '%s'", region)
-	}
-
-	return regionAMI, nil
-}
-
-func KubeletLabelsTCCP(getter LabelsGetter) string {
+func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {
 	var labels string
 
 	labels = ensureLabel(labels, label.Provider, "aws")
 	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
-
-	return labels
-}
-
-func KubeletLabelsTCCPN(getter LabelsGetter) string {
-	var labels string
-
-	labels = ensureLabel(labels, label.Provider, "aws")
-	labels = ensureLabel(labels, label.OperatorVersion, OperatorVersion(getter))
+	labels = ensureLabel(labels, label.ControlPlane, ControlPlaneID(getter))
+	labels = ensureLabel(labels, label.MasterID, fmt.Sprintf("%d", masterID))
 
 	return labels
 }
@@ -227,22 +233,15 @@ func RoleARNWorker(getter LabelsGetter, region string, accountID string) string 
 	return fmt.Sprintf("arn:%s:iam::%s:role/gs-cluster-%s-role-*", partition, accountID, clusterID)
 }
 
-// S3ObjectPathTCCP computes the S3 object path to the cloud config uploaded
-// for the TCCP stack.
-//
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccp
-//
-func S3ObjectPathTCCP(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCP(getter))
-}
-
 // S3ObjectPathTCCPN computes the S3 object path to the cloud config uploaded
-// for the TCCPN stack.
+// for the TCCPN stack. Note that the path is suffixed with the master ID, since
+// Tenant Clusters may be Single Master or HA Masters, where the suffix -0
+// indicates a Single Master configuration.
 //
-//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn
+//     version/3.4.0/cloudconfig/v_3_2_5/cluster-al9qy-tccpn-a2wax-2
 //
-func S3ObjectPathTCCPN(getter LabelsGetter) string {
-	return fmt.Sprintf("version/%s/cloudconfig/%s/%s", OperatorVersion(getter), CloudConfigVersion, StackNameTCCPN(getter))
+func S3ObjectPathTCCPN(cr LabelsGetter, id int) string {
+	return fmt.Sprintf("version/%s/cloudconfig/%s/%s-%d", OperatorVersion(cr), CloudConfigVersion, StackNameTCCPN(cr), id)
 }
 
 // S3ObjectPathTCNP computes the S3 object path to the cloud config uploaded for
@@ -319,6 +318,10 @@ func VPCPeeringRouteName(az string) string {
 
 func isChinaRegion(region string) bool {
 	return strings.HasPrefix(region, "cn-")
+}
+
+func IsWrongDrainerConfig(dc *g8sv1alpha1.DrainerConfig, clusterID string, instanceId string) bool {
+	return dc.Labels[TagCluster] != clusterID || dc.Annotations[annotation.InstanceID] != instanceId
 }
 
 func ComponentVersion(release releasev1alpha1.Release, componentName string) (string, error) {

@@ -7,39 +7,35 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/resource/crud"
-	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return microerror.Mask(err)
-	}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	s3Object, err := toS3Object(updateChange)
+	s3Objects, err := toS3Objects(updateChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
-	if s3Object != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", *s3Object.Key))
+	if len(s3Objects) != 0 {
+		for _, s3Object := range s3Objects {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", *s3Object.Key))
 
-		_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
-		if err != nil {
-			return microerror.Mask(err)
+			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", *s3Object.Key))
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", *s3Object.Key))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not update S3 object %#q", r.pathFunc(cr)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", "did not update any S3 object")
 	}
 
 	return nil
@@ -63,36 +59,58 @@ func (r *Resource) NewUpdatePatch(ctx context.Context, obj, currentState, desire
 }
 
 func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desiredState interface{}) (interface{}, error) {
-	currentS3Object, err := toS3Object(currentState)
+	currentS3Objects, err := toS3Objects(currentState)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	desiredS3Object, err := toS3Object(desiredState)
+	desiredS3Objects, err := toS3Objects(desiredState)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	if len(currentS3Objects) == 0 {
+		// In case there is no current state we need to create first and cannot
+		// update.
+		return nil, nil
+	}
+
+	// We do a poor man's comparison here to figure out if we have to deal with a
+	// change between current and desired state. The first and most straight
+	// forward thing to do at this point is to simply check how many S3 Objects we
+	// have. When current and desired state do not have the same number of items,
+	// we simply apply all of the desired state without being smarter about it.
+	var num int
+	{
+		if len(currentS3Objects) != len(desiredS3Objects) {
+			return desiredS3Objects, nil
+		}
+
+		num = len(currentS3Objects)
 	}
 
 	// The passed resource state defines the actual Cloud Config content as
 	// io.ReadSeaker. In order to compare the current and desired state we need to
 	// read and re-apply the byte stream once we read it. Otherwise we would flush
 	// content and it would not be available anymore for create or update calls.
-	var updateState *s3.PutObjectInput
-	{
+	// Note that we apply the same primitive comparison here as described above.
+	// In case one item of current state does equal the desired item at the same
+	// position in the list, we simply apply all of the desired state without
+	// being smarter about it.
+	for i := 0; i < num; i++ {
+		currentS3Object := currentS3Objects[i]
+		desiredS3Object := desiredS3Objects[i]
+
 		var c []byte
-		if currentS3Object != nil {
+		{
 			c, err = ioutil.ReadAll(currentS3Object.Body)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
 			currentS3Object.Body = strings.NewReader(string(c))
-		} else {
-			// In case there is no current state we need to create first and cannot
-			// update.
-			return nil, nil
 		}
 
 		var d []byte
-		if desiredS3Object != nil {
+		{
 			d, err = ioutil.ReadAll(desiredS3Object.Body)
 			if err != nil {
 				return nil, microerror.Mask(err)
@@ -101,9 +119,9 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		}
 
 		if !bytes.Equal(c, d) {
-			updateState = desiredS3Object
+			return desiredS3Objects, nil
 		}
 	}
 
-	return updateState, nil
+	return nil, nil
 }
