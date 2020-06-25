@@ -126,6 +126,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
+		} else {
+			err = r.updateStackTags(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 	}
 
@@ -225,6 +230,33 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
+	}
+
+	return nil
+}
+
+func (r *Resource) updateStackTags(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's node pool cloud formation stack tags")
+
+		i := &cloudformation.UpdateStackInput{
+			Capabilities: []*string{
+				aws.String(capabilityNamesIAM),
+			},
+			StackName: aws.String(key.StackNameTCNP(&cr)),
+			Tags:      r.getCloudFormationTags(cr),
+		}
+		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack tags")
 	}
 
 	return nil
