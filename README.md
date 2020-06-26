@@ -152,7 +152,11 @@ images have been published on AWS, this mapping can be updating using
 
 #### In order to start the operator, you can build it and execute it inside the pod
 - `go build`
-- `aws-operator daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config files=config --config.files=secret`
+- `aws-operator daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret`
+
+#### Live reload code
+- `cd /tmp && go get -u github.com/cosmtrek/air && cd /okteto`
+- `air -c air.conf`
 
 #### For live debugging in VS Code
 - Install delve debugger: `go get github.com/go-delve/delve/cmd/dlv`

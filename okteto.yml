@@ -17,7 +17,7 @@ persistentVolume:
   storageClass: gp2
 resources:
   limits:
-    cpu: "1"
+    cpu: "2"
     memory: 2Gi
 securityContext:
   runAsUser: 0
