@@ -118,7 +118,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCNP stack should update",
-			"reason", fmt.Sprintf("tags have changed from %#q to %#q", cr.Labels, tags),
+			"reason", fmt.Sprintf("tags have changed from %#q to %#q", tags, cr.Labels),
 		)
 		return true, nil
 	}

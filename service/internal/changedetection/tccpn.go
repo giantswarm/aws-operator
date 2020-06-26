@@ -96,7 +96,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCCPN stack should update",
-			"reason", fmt.Sprintf("tags changed from %#q to %#q", cr.Labels, tags),
+			"reason", fmt.Sprintf("tags changed from %#q to %#q", tags, cr.Labels),
 		)
 		return true, nil
 	}
