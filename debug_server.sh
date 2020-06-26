@@ -1,0 +1,1 @@
+dlv debug --headless --listen=:2345 --log --api-version=2 -- daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret

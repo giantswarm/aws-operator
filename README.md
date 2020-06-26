@@ -156,7 +156,7 @@ images have been published on AWS, this mapping can be updating using
 
 #### For live debugging in VS Code
 - Install delve debugger: `go get github.com/go-delve/delve/cmd/dlv`
-- `dlv debug --headless --listen=:2345 --log --api-version=2 -- daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret`
+- `dlv debug --headless --listen=:2345 --log --api-version=2 -- daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret` or `./debug_server.sh`
 - Create debugging connection:
 ```
   {
