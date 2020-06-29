@@ -38,10 +38,6 @@ func New(c Config) (*Images, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", c)
 	}
 
-	if c.RegistryDomain == "" {
-		return nil, microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", c)
-	}
-
 	i := &Images{
 		k8sClient: c.K8sClient,
 

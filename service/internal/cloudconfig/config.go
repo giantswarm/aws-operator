@@ -89,9 +89,6 @@ func (c Config) Validate() error {
 	if c.NetworkSetupDockerImage == "" {
 		return microerror.Maskf(invalidConfigError, "%T.NetworkSetupDockerImage must not be empty", c)
 	}
-	if c.RegistryDomain == "" {
-		return microerror.Maskf(invalidConfigError, "%T.RegistryDomain must not be empty", c)
-	}
 	if c.SSHUserList == "" {
 		return microerror.Maskf(invalidConfigError, "%T.SSHUserList must not be empty", c)
 	}

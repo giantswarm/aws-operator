@@ -39,8 +39,6 @@ func Test_Images_Cache(t *testing.T) {
 			{
 				c := Config{
 					K8sClient: unittest.FakeK8sClient(),
-
-					RegistryDomain: "dummy",
 				}
 
 				im, err = New(c)

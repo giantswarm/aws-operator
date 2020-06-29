@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
 - Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Allow Docker Hub registry and use it by default.
+
+### Fixed
+
 - Fix failing go template rendering of KMS encryption content.
 
 

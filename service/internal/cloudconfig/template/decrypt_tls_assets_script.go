@@ -2,7 +2,7 @@ package template
 
 const DecryptTLSAssetsScript = `#!/bin/bash -e
 kms_tls_assets_decrypt() {
-AWS_CLI_IMAGE="{{.RegistryDomain}}/giantswarm/awscli:1.18.3"
+AWS_CLI_IMAGE="{{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}/giantswarm/awscli:1.18.3"
 
 while ! docker pull ${AWS_CLI_IMAGE};
 do
@@ -33,7 +33,7 @@ docker run --net=host -v /etc/kubernetes/ssl:/etc/kubernetes/ssl \
 
 main() {
   kms_tls_assets_decrypt
-  if [ -d "/etc/kubernetes/ssl/etcd" ]; then 
+  if [ -d "/etc/kubernetes/ssl/etcd" ]; then
     chown -R etcd:etcd /etc/kubernetes/ssl/etcd
   fi
 }
