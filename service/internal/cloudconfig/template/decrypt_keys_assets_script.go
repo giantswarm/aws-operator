@@ -2,7 +2,7 @@ package template
 
 const DecryptKeysAssetsScript = `#!/bin/bash -e
 kms_keys_assets_decrypt() {
-AWS_CLI_IMAGE="{{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}/giantswarm/awscli:1.18.3"
+AWS_CLI_IMAGE="{{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}giantswarm/awscli:1.18.3"
 
 while ! docker pull ${AWS_CLI_IMAGE};
 do

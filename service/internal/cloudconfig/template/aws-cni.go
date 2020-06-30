@@ -101,7 +101,7 @@ spec:
       tolerations:
         - operator: Exists
       containers:
-        - image: {{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}/giantswarm/amazon-k8s-cni:v1.6.0
+        - image: {{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}giantswarm/amazon-k8s-cni:v1.6.0
           ports:
             - containerPort: 61678
               name: metrics
@@ -295,7 +295,7 @@ spec:
           hostNetwork: true
           containers:
             - name: aws-cni-restarter
-              image: {{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}/giantswarm/aws-cni-restarter:1.0.2
+              image: {{ if ne .RegistryDomain "" }}{{ .RegistryDomain }}/{{ end }}giantswarm/aws-cni-restarter:1.0.2
           restartPolicy: OnFailure
           affinity:
             nodeAffinity:
