@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Use `k8s-apiserver` image which includes certs.
+- Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Fix failing go template rendering of KMS encryption content.
+- Use `0.1.0` tag for `k8s-api-heahtz` image.
+- Use `0.1.0` tag for `k8s-setup-network-env` image.
 
 
 

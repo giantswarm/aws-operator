@@ -4,9 +4,9 @@ go 1.14
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.6.2
-	github.com/aws/aws-sdk-go v1.32.1
+	github.com/aws/aws-sdk-go v1.32.6
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions v0.4.7
+	github.com/giantswarm/apiextensions v0.4.8
 	github.com/giantswarm/apprclient v0.2.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs/v2 v2.0.0
@@ -20,21 +20,21 @@ require (
 	github.com/giantswarm/helmclient v1.0.3
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v3 v3.1.0
-	github.com/giantswarm/k8scloudconfig/v6 v6.2.7-0.20200623090521-bf10cd2570a1
+	github.com/giantswarm/k8scloudconfig/v6 v6.3.1-0.20200701091825-a9cd983688b9
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
 	github.com/giantswarm/microkit v0.2.1
 	github.com/giantswarm/micrologger v0.3.1
-	github.com/giantswarm/operatorkit v1.0.1
+	github.com/giantswarm/operatorkit v1.0.2
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster/v2 v2.0.0
 	github.com/giantswarm/to v0.3.0
 	github.com/giantswarm/valuemodifier v0.2.0 // indirect
-	github.com/google/go-cmp v0.4.1
+	github.com/google/go-cmp v0.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.5.1
-	github.com/spf13/afero v1.2.2
+	github.com/spf13/afero v1.3.1
 	github.com/spf13/viper v1.6.3
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	k8s.io/api v0.17.2
