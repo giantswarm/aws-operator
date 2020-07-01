@@ -295,6 +295,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
+		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
