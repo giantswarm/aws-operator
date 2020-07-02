@@ -22,6 +22,9 @@ const (
 	// labelInstance is the metric's label key that will hold the ec2 instance ID.
 	labelInstance = "ec2_instance"
 
+	// labelLifecycle shows the distinction betwen spot and on-demand.
+	labelInstanceLifecycle = "lifecycle"
+
 	// labelInstanceState is a label that will contain the instance state string
 	labelInstanceState = "state"
 
@@ -53,6 +56,7 @@ var (
 			labelPrivateDNS,
 			labelInstanceState,
 			labelInstanceStatus,
+			labelInstanceLifecycle,
 		},
 		nil,
 	)
@@ -218,7 +222,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			continue
 		}
 
-		var az, cluster, instanceType, installation, organization, privateDNS, state, status string
+		var az, cluster, instanceType, installation, lifecycle, organization, privateDNS, state, status string
 		for _, tag := range instances[instanceID].Tags {
 			switch *tag.Key {
 			case tagCluster:
@@ -232,6 +236,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 		instanceType = *instances[instanceID].InstanceType
 		privateDNS = *instances[instanceID].PrivateDnsName
+		lifecycle = "unknown"
 
 		up := 0
 		if statuses.InstanceState.Name != nil {
@@ -245,6 +250,9 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		}
 		if state == "running" && status == "ok" {
 			up = 1
+		}
+		if instances[instanceID].InstanceLifecycle != nil {
+			lifecycle = *instances[instanceID].InstanceLifecycle
 		}
 
 		ch <- prometheus.MustNewConstMetric(
@@ -261,6 +269,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			privateDNS,
 			state,
 			status,
+			lifecycle,
 		)
 	}
 
