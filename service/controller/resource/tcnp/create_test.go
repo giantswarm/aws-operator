@@ -16,6 +16,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
@@ -50,6 +51,19 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 
 			ctx := unittest.DefaultContext()
 			k := unittest.FakeK8sClient()
+
+			var ct cloudtags.Interface
+			{
+				c := cloudtags.Config{
+					K8sClient: k,
+					Logger:    microloggertest.New(),
+				}
+
+				ct, err = cloudtags.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
 
 			var d *changedetection.TCNP
 			{
@@ -98,6 +112,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			var r *Resource
 			{
 				c := Config{
+					CloudTags: ct,
 					Detection: d,
 					Images:    i,
 					Logger:    microloggertest.New(),

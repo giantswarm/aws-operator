@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 )
 
@@ -14,6 +15,7 @@ const (
 )
 
 type Config struct {
+	CloudTags cloudtags.Interface
 	Detection *changedetection.TCNP
 	Images    images.Interface
 	Logger    micrologger.Logger
@@ -24,6 +26,7 @@ type Config struct {
 // Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
+	cloudtags cloudtags.Interface
 	detection *changedetection.TCNP
 	images    images.Interface
 	logger    micrologger.Logger
@@ -32,6 +35,9 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -47,6 +53,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		cloudtags: config.CloudTags,
 		detection: config.Detection,
 		images:    config.Images,
 		logger:    config.Logger,

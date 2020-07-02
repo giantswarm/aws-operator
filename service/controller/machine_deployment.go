@@ -51,6 +51,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -60,6 +61,7 @@ import (
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
+	CloudTags          cloudtags.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface

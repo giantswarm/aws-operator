@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
@@ -88,7 +89,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	tags := map[string]string{}
+	stackTags := map[string]string{}
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane nodes cloud formation stack")
 
@@ -136,19 +137,27 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		for _, v := range o.Stacks[0].Tags {
-			tags[*v.Key] = *v.Value
+			if cloudtags.IsCloudTagKey(*v.Key) {
+				tagKey := cloudtags.TrimCloudTagKey(*v.Key)
+				stackTags[tagKey] = *v.Value
+			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane nodes cloud formation stack already exists")
 	}
 
 	{
-		update, err := r.detection.ShouldUpdate(ctx, cr, tags)
+		update, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		if update {
+		updateTags, err := r.cloudTags.AreClusterTagsEquals(ctx, key.ControlPlaneID(&cr), stackTags)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if update || updateTags {
 			err = r.updateStack(ctx, cr)
 			if IsNotFound(err) || hamaster.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "CR not available yet")
@@ -195,13 +204,18 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane nodes cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(true),
 			StackName:                   aws.String(key.StackNameTCCPN(&cr)),
-			Tags:                        r.getCloudFormationTags(cr),
+			Tags:                        tags,
 			TemplateBody:                aws.String(templateBody),
 		}
 
@@ -216,11 +230,20 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSControlPlane) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) ([]*cloudformation.Tag, error) {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagControlPlane] = key.ControlPlaneID(&cr)
 	tags[key.TagStack] = key.StackTCCPN
-	return awstags.NewCloudFormation(tags)
+
+	cloudtags, err := r.cloudTags.GetTagsByCluster(ctx, key.ControlPlaneID(&cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	for k, v := range cloudtags {
+		tags[k] = v
+	}
+
+	return awstags.NewCloudFormation(tags), nil
 }
 
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) error {
@@ -249,12 +272,17 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's control plane nodes cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			StackName:    aws.String(key.StackNameTCCPN(&cr)),
-			Tags:         r.getCloudFormationTags(cr),
+			Tags:         tags,
 			TemplateBody: aws.String(templateBody),
 		}
 

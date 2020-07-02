@@ -3,7 +3,6 @@ package changedetection
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
@@ -47,7 +46,7 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 //     The master node's instance type changes.
 //     The operator's version changes.
 //
-func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane, tags map[string]string) (bool, error) {
+func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -64,7 +63,6 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	masterInstanceEqual := cc.Status.TenantCluster.TCCPN.InstanceType == key.ControlPlaneInstanceType(cr)
 	masterReplicasEqual := cc.Status.TenantCluster.TCCPN.MasterReplicas == rep
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
-	tagsEqual := reflect.DeepEqual(cr.Labels, tags)
 
 	if !masterInstanceEqual {
 		t.logger.LogCtx(
@@ -89,14 +87,6 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			"level", "debug",
 			"message", "detected TCCPN stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
-		)
-		return true, nil
-	}
-	if !tagsEqual {
-		t.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "detected TCCPN stack should update",
-			"reason", fmt.Sprintf("tags changed from %#q to %#q", tags, cr.Labels),
 		)
 		return true, nil
 	}
