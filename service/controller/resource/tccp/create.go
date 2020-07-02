@@ -125,7 +125,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			return microerror.Mask(err)
 		}
-		updateTags, err := r.cloudtags.AreClusterTagsEquals(ctx, key.ControlPlaneID(&cr), stackTags)
+		updateTags, err := r.cloudtags.AreClusterTagsEquals(ctx, key.ClusterID(&cr), stackTags)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -280,7 +280,7 @@ func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCP
 
-	cloudtags, err := r.cloudtags.GetTagsByCluster(ctx, key.ControlPlaneID(&cr))
+	cloudtags, err := r.cloudtags.GetTagsByCluster(ctx, key.ClusterID(&cr))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
