@@ -34,6 +34,9 @@ const (
 	// labelPrivateDNS will contain the private dns name
 	labelPrivateDNS = "private_dns"
 
+	// labelLifecycle shows the distinction betwen spot and on-demand.
+	labelLifecycle = "lifecycle"
+
 	// subsystemEC2 will become the second part of the metric name, right after namespace.
 	subsystemEC2 = "ec2"
 )
@@ -53,6 +56,7 @@ var (
 			labelPrivateDNS,
 			labelInstanceState,
 			labelInstanceStatus,
+			labelLifecycle,
 		},
 		nil,
 	)
@@ -218,7 +222,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			continue
 		}
 
-		var az, cluster, instanceType, installation, organization, privateDNS, state, status string
+		var az, cluster, instanceType, installation, lifecycle, organization, privateDNS, state, status string
 		for _, tag := range instances[instanceID].Tags {
 			switch *tag.Key {
 			case tagCluster:
@@ -232,6 +236,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 		instanceType = *instances[instanceID].InstanceType
 		privateDNS = *instances[instanceID].PrivateDnsName
+		lifecycle = *instances[instanceID].InstanceLifecycle
 
 		up := 0
 		if statuses.InstanceState.Name != nil {
@@ -261,6 +266,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 			privateDNS,
 			state,
 			status,
+			lifecycle,
 		)
 	}
 
