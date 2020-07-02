@@ -22,6 +22,9 @@ const (
 	// labelInstance is the metric's label key that will hold the ec2 instance ID.
 	labelInstance = "ec2_instance"
 
+	// labelLifecycle shows the distinction betwen spot and on-demand.
+	labelInstanceLifecycle = "lifecycle"
+
 	// labelInstanceState is a label that will contain the instance state string
 	labelInstanceState = "state"
 
@@ -33,9 +36,6 @@ const (
 
 	// labelPrivateDNS will contain the private dns name
 	labelPrivateDNS = "private_dns"
-
-	// labelLifecycle shows the distinction betwen spot and on-demand.
-	labelLifecycle = "lifecycle"
 
 	// subsystemEC2 will become the second part of the metric name, right after namespace.
 	subsystemEC2 = "ec2"
@@ -56,7 +56,7 @@ var (
 			labelPrivateDNS,
 			labelInstanceState,
 			labelInstanceStatus,
-			labelLifecycle,
+			labelInstanceLifecycle,
 		},
 		nil,
 	)
@@ -236,7 +236,7 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 
 		instanceType = *instances[instanceID].InstanceType
 		privateDNS = *instances[instanceID].PrivateDnsName
-		lifecycle = *instances[instanceID].InstanceLifecycle
+		lifecycle = "unknown"
 
 		up := 0
 		if statuses.InstanceState.Name != nil {
@@ -250,6 +250,9 @@ func (e *EC2Instances) collectForAccount(ch chan<- prometheus.Metric, awsClients
 		}
 		if state == "running" && status == "ok" {
 			up = 1
+		}
+		if instances[instanceID].InstanceLifecycle != nil {
+			lifecycle = *instances[instanceID].InstanceLifecycle
 		}
 
 		ch <- prometheus.MustNewConstMetric(
