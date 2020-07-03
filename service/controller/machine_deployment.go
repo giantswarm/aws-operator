@@ -507,6 +507,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
+			CloudTags: config.CloudTags,
 			Detection: tcnpChangeDetection,
 			Images:    config.Images,
 			Logger:    config.Logger,

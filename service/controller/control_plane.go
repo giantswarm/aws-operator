@@ -377,6 +377,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
+			CloudTags: config.CloudTags,
 			Detection: tccpnChangeDetection,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,
