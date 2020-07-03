@@ -155,7 +155,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-		} else if !key.IsNewCluster(cr) && updateTags {
+		} else if key.IsAlreadyCreatedCluster(cr) && updateTags {
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
