@@ -1,7 +1,7 @@
-version: 1
+version: 2
 update_configs:
   - package_manager: "go:modules"
-    default_reviewers:
+    reviewers:
       - "giantswarm/team-firecracker-pe"
     directory: "/"
     ignored_updates:
