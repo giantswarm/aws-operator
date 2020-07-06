@@ -1,9 +1,11 @@
 version: 1
 update_configs:
   - package_manager: "go:modules"
+    default_reviewers:
+      - "giantswarm/team-firecracker-pe"
     directory: "/"
-    update_schedule: "weekly"
     ignored_updates:
       - match:
           dependency_name: "k8s.io/*"
           version_requirement: ">=0.17.0"
+    update_schedule: "weekly"
