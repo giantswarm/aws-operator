@@ -108,6 +108,8 @@ github.com/aws/aws-sdk-go v1.29.20/go.mod h1:1KvfttTE3SPKMpo8g2c6jL3ZKfXtFvKscTg
 github.com/aws/aws-sdk-go v1.30.4/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go v1.32.13 h1:zzyXF7SUxJcJa3hTcYCl1/Ey+kh2N8TjK5tWnL0wieo=
 github.com/aws/aws-sdk-go v1.32.13/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
+github.com/aws/aws-sdk-go v1.33.1 h1:yz9XmNzPshz/lhfAZvLfMnIS9HPo8+boGRcWqDVX+T0=
+github.com/aws/aws-sdk-go v1.33.1/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/bazelbuild/bazel-gazelle v0.18.2/go.mod h1:D0ehMSbS+vesFsLGiD6JXu3mVEzOlfUl8wNnq+x/9p0=
