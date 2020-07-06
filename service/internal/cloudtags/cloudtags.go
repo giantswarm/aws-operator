@@ -15,7 +15,9 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-const keyPrefix = "aws-tag/"
+const keyCloudPrefix = "aws-tag/"
+const keyGiantswarmPrefix = "giantswarm.io/"
+const keyKubernetesPrefix = "kubernetes.io/"
 
 type Config struct {
 	K8sClient k8sclient.Interface
@@ -99,10 +101,15 @@ func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (ma
 
 // IsCloudTagKey check is a tag with proper prefix
 func IsCloudTagKey(tagKey string) bool {
-	return strings.HasPrefix(tagKey, keyPrefix)
+	return strings.HasPrefix(tagKey, keyCloudPrefix)
+}
+
+// IsStackTagKey check is a tag is one of the usuals default keys
+func IsStackTagKey(tagKey string) bool {
+	return strings.HasPrefix(tagKey, keyGiantswarmPrefix) || strings.HasPrefix(tagKey, keyKubernetesPrefix)
 }
 
 // TrimCloudTagKey check is a tag with proper prefix
 func TrimCloudTagKey(tagKey string) string {
-	return strings.Replace(tagKey, keyPrefix, "", 1)
+	return strings.Replace(tagKey, keyCloudPrefix, "", 1)
 }
