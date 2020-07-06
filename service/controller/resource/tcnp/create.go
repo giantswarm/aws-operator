@@ -32,7 +32,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// Ensure some preconditions are met so we have all neccessary information
+	// Ensure some preconditions are met so we have all necessary information
 	// available to manage the TCNP CF stack.
 	{
 		if cc.Status.TenantCluster.Encryption.Key == "" {
