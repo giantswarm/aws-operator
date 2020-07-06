@@ -12,7 +12,7 @@ require (
 	github.com/giantswarm/certs/v2 v2.0.0
 	github.com/giantswarm/e2e-harness v0.2.0
 	github.com/giantswarm/e2eclients v0.2.0
-	github.com/giantswarm/e2esetup v0.1.0
+	github.com/giantswarm/e2esetup v0.3.0
 	github.com/giantswarm/e2etemplates v0.2.0
 	github.com/giantswarm/e2etests v0.3.1
 	github.com/giantswarm/errors v0.2.3
@@ -30,7 +30,6 @@ require (
 	github.com/giantswarm/randomkeys v0.2.0
 	github.com/giantswarm/tenantcluster/v2 v2.0.0
 	github.com/giantswarm/to v0.3.0
-	github.com/giantswarm/valuemodifier v0.2.0 // indirect
 	github.com/google/go-cmp v0.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.7.1
