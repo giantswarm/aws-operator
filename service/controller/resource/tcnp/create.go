@@ -125,7 +125,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		update, err := r.detection.ShouldUpdate(ctx, cr, stackTags)
+		update, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
