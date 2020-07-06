@@ -3,6 +3,8 @@ update_configs:
   - package_manager: "go:modules"
     directory: "/"
     update_schedule: "weekly"
+    default_reviewers:
+      - "giantswarm/team-firecracker"
     ignored_updates:
       - match:
           dependency_name: "k8s.io/*"
