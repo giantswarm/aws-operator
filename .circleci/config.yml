@@ -1,5 +1,5 @@
 orbs:
-  architect: giantswarm/architect@0.4.3
+  architect: giantswarm/architect@0.10.0
 
 version: 2.1
 jobs:

@@ -38,3 +38,72 @@ resource:
   pullSecret:
     name: '{{ .Release.Name | replace "." "-" | trunc 47 }}-pull-secret'
     namespace: "giantswarm"
+
+
+Installation:
+  V1:
+    Name: test
+    Registry:
+      Domain: quay.io
+    Provider:
+      Kind: aws
+      AWS:
+        S3AccessLogsExpiration: false
+        AdvancedMonitoringEC2: false
+        AvailabilityZones:
+        - az1
+        Encrypter: asdf
+        IncludeTags: false
+        DeleteLoggingBucket: false
+        PodInfraContainerImage: asdasdsad
+        Region: asdasdas
+        Route53:
+          Enabled: false
+        RouteTableNames: asdsad
+        TrustedAdvisor:
+          Enabled: false
+    Secret:
+      Registry:
+        PullSecret:
+          DockerConfigJSON: "axax"
+    Guest:
+      Calico:
+        Subnet: "10.0.0.0"
+        CIDR: 24
+      Docker:
+        CIDR: "10.1.1.1/21"
+      Kubernetes:
+        API:
+          Auth:
+            Provider:
+              OIDC:
+                ClientID: asdsdsad
+                IssuerURL: url
+                UsernameClaim: claim1
+                GroupsClaim: claim2
+          ClusterIPRange: "192.68.0.0/24"
+      IPAM:
+        NetworkCIDR: "asdsad"
+        CIDRMask: 22
+        PrivateSubnetMask: 23
+        PublicSubnetMask: 24
+      SSH:
+        UserList: testet
+        SSOPublicKey: test
+    Security:
+      RestrictAccess:
+        GuestAPI:
+          Public: false
+          Private: false
+      Subnet:
+        VPN: "12121.121.12.1"
+        Customer:
+          Public: "test"
+          Private: "test2"
+
+    Auth:
+      Vault:
+        Address: what-eva
+        Certificate:
+          TTL: "10d"
+
