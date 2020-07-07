@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -46,24 +47,19 @@ func New(config Config) (*CloudTags, error) {
 	return l, nil
 }
 
-// AreClusterTagsEquals compares current cluster tags with the input
-func (ct *CloudTags) AreClusterTagsEquals(ctx context.Context, clusterID string, tags map[string]string) (bool, error) {
-	ctags, err := ct.GetTagsByCluster(ctx, clusterID)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	tagsEqual := reflect.DeepEqual(ctags, tags)
+// AreClusterTagsEquals compares current cluster tags with the stack tags
+func (ct *CloudTags) AreClusterTagsEquals(ctx context.Context, ctags map[string]string, stags map[string]string) bool {
+	tagsEqual := reflect.DeepEqual(ctags, stags)
 	if !tagsEqual {
 		ct.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected a change in cloud tags",
-			"reason", fmt.Sprintf("tags changed from %#q to %#q", tags, ctags),
+			"reason", fmt.Sprintf("tags changed from %#q to %#q", stags, ctags),
 		)
-		return true, nil
+		return false
 	}
 
-	return false, nil
+	return true
 }
 
 // GetTagsByCluster the cloud tags from CAPI Cluster CR
@@ -74,7 +70,7 @@ func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (ma
 	err := ct.k8sClient.CtrlClient().List(
 		ctx,
 		&list,
-		client.InNamespace("default"),
+		client.InNamespace(metav1.NamespaceDefault),
 		client.MatchingLabels{label.Cluster: clusterID},
 	)
 	if err != nil {
