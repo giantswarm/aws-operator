@@ -13,9 +13,8 @@ import (
 )
 
 const (
-	InstanceTypeKey    = "InstanceType"
-	OperatorVersionKey = "OperatorVersion"
-	MasterReplicasKey  = "MasterReplicas"
+	InstanceTypeKey   = "InstanceType"
+	MasterReplicasKey = "MasterReplicas"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -76,7 +75,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, OperatorVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, key.OutputOperatorVersion)
 		if err != nil {
 			return microerror.Mask(err)
 		}

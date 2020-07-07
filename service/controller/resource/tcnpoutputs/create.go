@@ -15,7 +15,6 @@ const (
 	DockerVolumeSizeGBKey = "DockerVolumeSizeGB"
 	InstanceImageKey      = "InstanceImage"
 	InstanceTypeKey       = "InstanceType"
-	OperatorVersionKey    = "OperatorVersion"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -92,7 +91,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, OperatorVersionKey)
+		v, err := cloudFormation.GetOutputValue(outputs, key.OutputOperatorVersion)
 		if err != nil {
 			return microerror.Mask(err)
 		}

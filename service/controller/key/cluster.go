@@ -71,6 +71,10 @@ const (
 )
 
 const (
+	OutputOperatorVersion = "OperatorVersion"
+)
+
+const (
 	LifeCycleHookControlPlane = "ControlPlane"
 	LifeCycleHookNodePool     = "NodePool"
 )

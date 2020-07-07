@@ -15,7 +15,6 @@ const (
 	HostedZoneID              = "HostedZoneID"
 	HostedZoneNameServersKey  = "HostedZoneNameServers"
 	InternalHostedZoneID      = "InternalHostedZoneID"
-	OperatorVersion           = "OperatorVersion"
 	VPCIDKey                  = "VPCID"
 	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
 )
@@ -118,7 +117,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		v, err := cloudFormation.GetOutputValue(outputs, OperatorVersion)
+		v, err := cloudFormation.GetOutputValue(outputs, key.OutputOperatorVersion)
 		if err != nil {
 			return microerror.Mask(err)
 		}

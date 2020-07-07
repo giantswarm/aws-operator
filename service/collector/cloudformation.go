@@ -8,6 +8,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	clientaws "github.com/giantswarm/aws-operator/client/aws"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -156,6 +157,10 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 			continue
 		}
 
+		if !isReconciledCluster(stack) {
+			continue
+		}
+
 		ch <- prometheus.MustNewConstMetric(
 			cloudFormationStackDesc,
 			prometheus.GaugeValue,
@@ -177,4 +182,19 @@ func (cf *CloudFormation) collectForAccount(ch chan<- prometheus.Metric, awsClie
 // Check if the input stack is our own by checking the name of the stack type
 func isOwnStack(StackType string) bool {
 	return StackType == key.StackTCCP || StackType == key.StackTCCPF || StackType == key.StackTCCPI || StackType == key.StackTCNP || StackType == key.StackTCNPF
+}
+
+func isReconciledCluster(stack *cloudformation.Stack) bool {
+	for _, o := range stack.Outputs {
+		if *o.OutputKey != key.OutputOperatorVersion {
+			continue
+		}
+		if *o.OutputValue != project.Version() {
+			continue
+		}
+
+		return true
+	}
+
+	return false
 }
