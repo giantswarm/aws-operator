@@ -66,6 +66,8 @@ Installation:
       Registry:
         PullSecret:
           DockerConfigJSON: "axax"
+      AWSOperator:
+        SecretYaml: "whatever"
     Guest:
       Calico:
         Subnet: "10.0.0.0"
