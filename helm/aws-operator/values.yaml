@@ -100,10 +100,8 @@ Installation:
         Customer:
           Public: "test"
           Private: "test2"
-
     Auth:
       Vault:
         Address: what-eva
         Certificate:
           TTL: "10d"
-
