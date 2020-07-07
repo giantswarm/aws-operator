@@ -35,6 +35,7 @@ type Config struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	RegistryMirrors           []string
 	SSHUserList               string
 	SSOPublicKey              string
 }

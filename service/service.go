@@ -255,6 +255,7 @@ func New(config Config) (*Service, error) {
 			PodInfraContainerImage:    config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			Route53Enabled:            config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
 			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryMirrors:           config.Viper.GetStringSlice(config.Flag.Service.RegistryMirrors),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 
@@ -311,6 +312,7 @@ func New(config Config) (*Service, error) {
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryMirrors:            config.Viper.GetStringSlice(config.Flag.Service.RegistryMirrors),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),

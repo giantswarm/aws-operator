@@ -17,7 +17,7 @@ data:
       aws:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
-        availabilityZones: '{{ range $index, $element := .Values.Installation.V1.Provider.AWS.AvailabilityZones }}{{if $index}} {{end}}{{$element}}{{end}}'
+        availabilityZones: '{{ range $i, $e := .Values.Installation.V1.Provider.AWS.AvailabilityZones }}{{ if $i }},{{end}}{{ $e }}{{end}}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
         loggingBucket:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
@@ -52,6 +52,7 @@ data:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
       registryDomain: '{{ .Values.Installation.V1.Registry.Domain }}'
+      registryMirrors: '{{ range $i, $e := .Values.Installation.V1.Registry.Mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
         {{- if .Values.Installation.V1.Guest }}
