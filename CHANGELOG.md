@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `0.1.1` tag for `k8s-api-heahtz` image.
 - Use `0.1.0` tag for `k8s-setup-network-env` image.
 - Add `lifecycle` label to the `aws_operator_ec2_instance_status` metric to distinguish on-demand and spot.
+- Use `0.1.0` tag for `aws-attach-etcd-dep` image.
 
 
 ## [8.7.0] 2020-06-19
