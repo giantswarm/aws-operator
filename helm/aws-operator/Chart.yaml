@@ -1,3 +1,4 @@
+apiVersion: v1
 name: aws-operator
 version: [[ .Version ]]
 appVersion: "[[ .AppVersion ]]"
