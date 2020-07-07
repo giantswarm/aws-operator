@@ -147,7 +147,7 @@ func New(config Config) (*Service, error) {
 		c := images.Config{
 			K8sClient: k8sClient,
 
-			RegistryDomain: config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain: config.Viper.GetString(config.Flag.Service.Registry.Domain),
 		}
 
 		im, err = images.New(c)
@@ -254,8 +254,8 @@ func New(config Config) (*Service, error) {
 			NetworkSetupDockerImage:   config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:    config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			Route53Enabled:            config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
-			RegistryMirrors:           config.Viper.GetStringSlice(config.Flag.Service.RegistryMirrors),
+			RegistryDomain:            config.Viper.GetString(config.Flag.Service.Registry.Domain),
+			RegistryMirrors:           config.Viper.GetStringSlice(config.Flag.Service.Registry.Mirrors),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 
@@ -311,8 +311,8 @@ func New(config Config) (*Service, error) {
 			IPAMNetworkRange:           ipamNetworkRange,
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
-			RegistryMirrors:            config.Viper.GetStringSlice(config.Flag.Service.RegistryMirrors),
+			RegistryDomain:             config.Viper.GetString(config.Flag.Service.Registry.Domain),
+			RegistryMirrors:            config.Viper.GetStringSlice(config.Flag.Service.Registry.Mirrors),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),

@@ -10,11 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `--service.registrymirrors` flag for setting registry mirror domains.
-- Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Add `--service.registry.mirrors` flag for setting registry mirror domains.
 - Add `lifecycle` label to the `aws_operator_ec2_instance_status` metric to distinguish on-demand and spot.
-- Use `0.1.1` tag for `k8s-api-heahtz` image.
+- Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+- Replace `--service.registrydomain` with `--service.registry.domain`.
 - Use `0.1.0` tag for `k8s-setup-network-env` image.
+- Use `0.1.1` tag for `k8s-api-heahtz` image.
 
 ### Fixed
 
