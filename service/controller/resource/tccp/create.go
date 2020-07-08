@@ -123,7 +123,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		update, err := r.detection.ShouldUpdate(ctx, cr)
 		if err != nil {
-
 			return microerror.Mask(err)
 		}
 

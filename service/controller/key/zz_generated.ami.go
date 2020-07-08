@@ -3,6 +3,8 @@ package key
 
 import "encoding/json"
 
+var amiInfo = map[string]map[string]string{}
+
 var amiJSON = []byte(`{
   "2191.5.0": {
     "ap-northeast-1": "ami-0abb8a024e2fca994",
@@ -164,9 +166,52 @@ var amiJSON = []byte(`{
     "us-east-2": "ami-0e30f3d8cbc900ff4",
     "us-west-1": "ami-0360d32ce24f1f05f",
     "us-west-2": "ami-0c1654a9988866a1f"
+  },
+  "2512.2.0": {
+    "ap-east-1": "ami-0fc4cc3502335a06a",
+    "ap-northeast-1": "ami-03b5d6612a5b2ec8b",
+    "ap-northeast-2": "ami-0ec5815355e429952",
+    "ap-south-1": "ami-08a33ecec11b45d1a",
+    "ap-southeast-1": "ami-0922d45771d6fbc5c",
+    "ap-southeast-2": "ami-0f03a2f9d16b9d2b9",
+    "ca-central-1": "ami-00985d7f177e24c76",
+    "cn-north-1": "ami-0c4e9c1d91f27ab3f",
+    "cn-northwest-1": "ami-03ca6476c6483b09f",
+    "eu-central-1": "ami-06071ac001b33824c",
+    "eu-north-1": "ami-0bd13a88480e7b69e",
+    "eu-west-1": "ami-06652549a5f44581a",
+    "eu-west-2": "ami-0ba34e692d93d38d6",
+    "eu-west-3": "ami-0bb5682ae45553922",
+    "me-south-1": "ami-0c37b6687e8c30560",
+    "sa-east-1": "ami-02c75f06066115138",
+    "us-east-1": "ami-07e9d85a5777405b6",
+    "us-east-2": "ami-095e6549e6d67c0cc",
+    "us-west-1": "ami-055a1252b1382338e",
+    "us-west-2": "ami-014b4b19cc0222265"
+  },
+  "2512.2.1": {
+    "ap-east-1": "ami-0c6ce81b14dab9a88",
+    "ap-northeast-1": "ami-095f21ed1ce4b1950",
+    "ap-northeast-2": "ami-0d7eacf9d737bc5db",
+    "ap-south-1": "ami-0af9f9860996f7d6b",
+    "ap-southeast-1": "ami-0170beb17a0899c33",
+    "ap-southeast-2": "ami-0e9e553ab0b54c8d2",
+    "ca-central-1": "ami-0b529c1051737b2d9",
+    "cn-north-1": "ami-0b9e98c5bc5c0bb3f",
+    "cn-northwest-1": "ami-0c6b8814cc7d11a6f",
+    "eu-central-1": "ami-0cefde98784480dd3",
+    "eu-north-1": "ami-0e6370d6bd74415a9",
+    "eu-west-1": "ami-08738afa3d25a1196",
+    "eu-west-2": "ami-0c353732dda0c25c4",
+    "eu-west-3": "ami-07416fa4faa74e021",
+    "me-south-1": "ami-0762545e56fa8d992",
+    "sa-east-1": "ami-0584c315c8d17a8a8",
+    "us-east-1": "ami-01a83a3acf30b4638",
+    "us-east-2": "ami-083c654d2f0469f9e",
+    "us-west-1": "ami-03efdc564552f8ed5",
+    "us-west-2": "ami-0bb54692374ac10a7"
   }
 }`)
-var amiInfo = map[string]map[string]string{}
 
 func init() {
 	err := json.Unmarshal(amiJSON, &amiInfo)
