@@ -113,8 +113,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if cloudtags.IsStackTagKey(*v.Key) {
 				continue
 			}
-			tagKey := cloudtags.TrimCloudTagKey(*v.Key)
-			stackTags[tagKey] = *v.Value
+			stackTags[*v.Key] = *v.Value
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
