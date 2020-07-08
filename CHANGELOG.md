@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.1] - 2020-07-08
+
 ### Added
 
 - Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`.
@@ -154,8 +156,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...HEAD
-
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...HEAD
+[8.7.1]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...v8.7.0
 [8.6.1]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...v8.6.1
 [8.6.0]: https://github.com/giantswarm/aws-operator/compare/v8.5.0...v8.6.0
