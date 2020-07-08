@@ -8,18 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`
+### Added
+
+- Add mapping between similar instance types `m4.16xlarge` and `m5.16xlarge`.
+- Add `lifecycle` label to the `aws_operator_ec2_instance_status` metric to distinguish on-demand and spot.
+
+### Changed
+
+- Use `k8s-apiserver` image which includes CAs to enable OIDC.
 - Fix failing go template rendering of KMS encryption content.
 - Use `0.1.1` tag for `k8s-api-heahtz` image.
 - Use `0.1.0` tag for `k8s-setup-network-env` image.
-- Add `lifecycle` label to the `aws_operator_ec2_instance_status` metric to distinguish on-demand and spot.
 - Use `0.1.0` tag for `aws-attach-etcd-dep` image.
+
+
 
 ## [8.7.0] 2020-06-19
 
 ### Added
 
-- Add caching to the ELB collector
+- Add caching to the ELB collector.
 - Add `keepforcrs` handler for more reliable CR cleanup.
 - Add Control Plane labels to master nodes.
 - Use the alpine 3.12 base Docker image
