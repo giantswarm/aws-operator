@@ -3,8 +3,8 @@ package cloudtags
 import "context"
 
 type Interface interface {
-	// AreClusterTagsEquals compares current cluster tags with the stack tags
-	AreClusterTagsEquals(ctx context.Context, ctags map[string]string, stags map[string]string) bool
+	// ClusterLabelsNotEqual compares current cluster labels with the stack tags passed
+	ClusterLabelsNotEqual(ctx context.Context, clusterID string, stags map[string]string) (bool, error)
 	// Get Labels from cluster API object
 	GetTagsByCluster(ctx context.Context, clusterID string) (map[string]string, error)
 }

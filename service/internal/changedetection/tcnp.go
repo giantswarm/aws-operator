@@ -12,25 +12,32 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 )
 
 type TCNPConfig struct {
-	Logger micrologger.Logger
+	CloudTags cloudtags.Interface
+	Logger    micrologger.Logger
 }
 
 // TCNP is a detection service implementation deciding if the TCNP stack should
 // be updated.
 type TCNP struct {
-	logger micrologger.Logger
+	cloudTags cloudtags.Interface
+	logger    micrologger.Logger
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	t := &TCNP{
-		logger: config.Logger,
+		cloudTags: config.CloudTags,
+		logger:    config.Logger,
 	}
 
 	return t, nil
@@ -123,6 +130,11 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	}
 
 	return false, nil
+}
+
+// ShouldUpdateTags determines whether the reconciled TCNP stack tags should be updated.
+func (t *TCNP) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
+	return t.cloudTags.ClusterLabelsNotEqual(ctx, clusterID, stackTags)
 }
 
 func securityGroupsEqual(cur []string, des []string) bool {

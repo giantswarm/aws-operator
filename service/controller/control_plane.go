@@ -238,8 +238,9 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnChangeDetection *changedetection.TCCPN
 	{
 		c := changedetection.TCCPNConfig{
-			HAMaster: config.HAMaster,
-			Logger:   config.Logger,
+			CloudTags: config.CloudTags,
+			HAMaster:  config.HAMaster,
+			Logger:    config.Logger,
 		}
 
 		tccpnChangeDetection, err = changedetection.NewTCCPN(c)

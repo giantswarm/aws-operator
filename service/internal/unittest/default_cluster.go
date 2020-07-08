@@ -5,6 +5,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
@@ -90,6 +91,20 @@ func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 				},
 			},
 		},
+	}
+
+	return cr
+}
+
+func DefaultCAPIClusterWithLabels(clusterID string, labels map[string]string) apiv1alpha2.Cluster {
+	labels[label.Cluster] = clusterID
+	cr := apiv1alpha2.Cluster{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:    labels,
+			Name:      clusterID,
+			Namespace: metav1.NamespaceDefault,
+		},
+		Spec: apiv1alpha2.ClusterSpec{},
 	}
 
 	return cr

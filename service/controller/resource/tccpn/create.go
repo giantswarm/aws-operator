@@ -153,11 +153,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		ctags, err := r.cloudTags.GetTagsByCluster(ctx, key.ClusterID(&cr))
-		if err != nil {
-			return microerror.Mask(err)
-		}
-		updateTags := !r.cloudTags.AreClusterTagsEquals(ctx, ctags, stackTags)
+		updateTags, err := r.detection.ShouldUpdateTags(ctx, key.ClusterID(&cr), stackTags)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -90,18 +90,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				ctx := unittest.DefaultContextControlPlane()
 				k := unittest.FakeK8sClient()
 
-				var d *changedetection.TCCP
-				{
-					c := changedetection.TCCPConfig{
-						Logger: microloggertest.New(),
-					}
-
-					d, err = changedetection.NewTCCP(c)
-					if err != nil {
-						t.Fatal(err)
-					}
-				}
-
 				var ct cloudtags.Interface
 				{
 					c := cloudtags.Config{
@@ -110,6 +98,19 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 					}
 
 					ct, err = cloudtags.New(c)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+
+				var d *changedetection.TCCP
+				{
+					c := changedetection.TCCPConfig{
+						CloudTags: ct,
+						Logger:    microloggertest.New(),
+					}
+
+					d, err = changedetection.NewTCCP(c)
 					if err != nil {
 						t.Fatal(err)
 					}

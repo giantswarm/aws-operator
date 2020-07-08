@@ -48,18 +48,45 @@ func New(config Config) (*CloudTags, error) {
 }
 
 // AreClusterTagsEquals compares current cluster tags with the stack tags
-func (ct *CloudTags) AreClusterTagsEquals(ctx context.Context, ctags map[string]string, stags map[string]string) bool {
-	tagsEqual := reflect.DeepEqual(ctags, stags)
-	if !tagsEqual {
-		ct.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "detected a change in cloud tags",
-			"reason", fmt.Sprintf("tags changed from %#q to %#q", stags, ctags),
-		)
-		return false
+func (ct *CloudTags) ClusterLabelsNotEqual(ctx context.Context, clusterID string, stags map[string]string) (bool, error) {
+
+	ctags, err := ct.GetTagsByCluster(ctx, clusterID)
+	if err != nil {
+		return true, microerror.Mask(err)
 	}
 
-	return true
+	tagsEqual := reflect.DeepEqual(ctags, stags)
+	if !tagsEqual {
+		// Print changed values and new labels in the cluster CR
+		for ck, cv := range ctags {
+			if sv, ok := stags[ck]; ok {
+				ct.logger.LogCtx(ctx,
+					"level", "debug",
+					"message", "detected a change in cloud tags",
+					"reason", fmt.Sprintf("Existing tag changed from %s to %s", sv, cv),
+				)
+			} else {
+				ct.logger.LogCtx(ctx,
+					"level", "debug",
+					"message", "detected a change in cloud tags",
+					"reason", fmt.Sprintf("New tag %s:%s added to cluster CR", ck, cv),
+				)
+			}
+		}
+		// Print remove tags from stack
+		for sk, sv := range stags {
+			if _, ok := ctags[sk]; !ok {
+				ct.logger.LogCtx(ctx,
+					"level", "debug",
+					"message", "detected a change in cloud tags",
+					"reason", fmt.Sprintf("Removed tag %s:%s changed from stack", sk, sv),
+				)
+			}
+		}
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // GetTagsByCluster the cloud tags from CAPI Cluster CR

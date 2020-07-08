@@ -68,7 +68,8 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			var d *changedetection.TCNP
 			{
 				c := changedetection.TCNPConfig{
-					Logger: microloggertest.New(),
+					CloudTags: ct,
+					Logger:    microloggertest.New(),
 				}
 
 				d, err = changedetection.NewTCNP(c)

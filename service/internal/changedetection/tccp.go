@@ -10,25 +10,32 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 )
 
 type TCCPConfig struct {
-	Logger micrologger.Logger
+	CloudTags cloudtags.Interface
+	Logger    micrologger.Logger
 }
 
 // TCCP is a detection service implementation deciding if the TCCP stack should
 // be updated.
 type TCCP struct {
-	logger micrologger.Logger
+	cloudTags cloudtags.Interface
+	logger    micrologger.Logger
 }
 
 func NewTCCP(config TCCPConfig) (*TCCP, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	t := &TCCP{
-		logger: config.Logger,
+		cloudTags: config.CloudTags,
+		logger:    config.Logger,
 	}
 
 	return t, nil
@@ -66,4 +73,9 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	}
 
 	return false, nil
+}
+
+// ShouldUpdateTags determines whether the reconciled TCCP stack tags should be updated.
+func (t *TCCP) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
+	return t.cloudTags.ClusterLabelsNotEqual(ctx, clusterID, stackTags)
 }

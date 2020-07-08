@@ -7,54 +7,62 @@ import (
 	"testing"
 
 	"github.com/giantswarm/micrologger"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
-func Test_CloudTags_AreEquals(t *testing.T) {
+func Test_CloudTags_ClusterLabelsNotEqual(t *testing.T) {
 	testCases := []struct {
 		name        string
+		clusterID   string
+		ctx         context.Context
 		ctags       map[string]string
 		stags       map[string]string
 		expectValue bool
 	}{
 		{
 			name:        "case 0",
+			clusterID:   "pepe2",
+			ctx:         context.Background(),
 			ctags:       map[string]string{},
 			stags:       map[string]string{},
-			expectValue: true,
+			expectValue: false,
 		},
 		{
-			name: "case 1",
+			name:      "case 1",
+			clusterID: "pepe2",
+			ctx:       context.Background(),
 			ctags: map[string]string{
-				"key": "value",
+				"aws-tag/key": "value",
 			},
 			stags: map[string]string{
 				"key": "value2",
 			},
-			expectValue: false,
+			expectValue: true,
 		},
 		{
-			name: "case 2",
+			name:      "case 2",
+			clusterID: "pepe2",
+			ctx:       context.Background(),
 			ctags: map[string]string{
-				"key": "value",
+				"aws-tag/key": "value",
 			},
 			stags: map[string]string{
 				"key2": "value",
 			},
-			expectValue: false,
+			expectValue: true,
 		},
 		{
-			name: "case 3",
+			name:      "case 3",
+			clusterID: "pepe2",
+			ctx:       context.Background(),
 			ctags: map[string]string{
-				"key": "value",
+				"aws-tag/key": "value",
 			},
 			stags: map[string]string{
 				"key": "value",
 			},
-			expectValue: true,
+			expectValue: false,
 		},
 	}
 
@@ -85,7 +93,16 @@ func Test_CloudTags_AreEquals(t *testing.T) {
 				}
 			}
 
-			result := ct.AreClusterTagsEquals(context.Background(), tc.ctags, tc.stags)
+			cr := unittest.DefaultCAPIClusterWithLabels(tc.clusterID, tc.ctags)
+			err = ct.k8sClient.CtrlClient().Create(tc.ctx, &cr)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			result, err := ct.ClusterLabelsNotEqual(tc.ctx, tc.clusterID, tc.stags)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if result != tc.expectValue {
 				t.Fatalf("expected %t got %t", tc.expectValue, result)
 			}
@@ -151,14 +168,7 @@ func Test_CloudTags_GetTagsByCluster(t *testing.T) {
 				}
 			}
 
-			cr := apiv1alpha2.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:    tc.labels,
-					Namespace: metav1.NamespaceDefault,
-					Name:      tc.clusterID,
-				},
-				Spec: apiv1alpha2.ClusterSpec{},
-			}
+			cr := unittest.DefaultCAPIClusterWithLabels(tc.clusterID, tc.labels)
 			err = ct.k8sClient.CtrlClient().Create(tc.ctx, &cr)
 			if err != nil {
 				t.Fatal(err)
@@ -168,7 +178,6 @@ func Test_CloudTags_GetTagsByCluster(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
 			if !reflect.DeepEqual(tc.expectedTags, result) {
 				t.Fatalf("expected %q got %q", tc.expectedTags, result)
 			}

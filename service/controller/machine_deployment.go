@@ -219,7 +219,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
-			Logger: config.Logger,
+			CloudTags: config.CloudTags,
+			Logger:    config.Logger,
 		}
 
 		tcnpChangeDetection, err = changedetection.NewTCNP(c)

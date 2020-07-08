@@ -94,8 +94,9 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			var d *changedetection.TCCPN
 			{
 				c := changedetection.TCCPNConfig{
-					HAMaster: h,
-					Logger:   microloggertest.New(),
+					CloudTags: ct,
+					HAMaster:  h,
+					Logger:    microloggertest.New(),
 				}
 
 				d, err = changedetection.NewTCCPN(c)

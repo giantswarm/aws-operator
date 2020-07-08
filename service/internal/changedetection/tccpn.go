@@ -10,22 +10,28 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 type TCCPNConfig struct {
-	HAMaster hamaster.Interface
-	Logger   micrologger.Logger
+	CloudTags cloudtags.Interface
+	HAMaster  hamaster.Interface
+	Logger    micrologger.Logger
 }
 
 // TCCPN is a detection service implementation deciding if the TCCPN stack
 // should be updated.
 type TCCPN struct {
-	haMaster hamaster.Interface
-	logger   micrologger.Logger
+	cloudTags cloudtags.Interface
+	haMaster  hamaster.Interface
+	logger    micrologger.Logger
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
 	}
@@ -34,8 +40,9 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	}
 
 	t := &TCCPN{
-		haMaster: config.HAMaster,
-		logger:   config.Logger,
+		cloudTags: config.CloudTags,
+		haMaster:  config.HAMaster,
+		logger:    config.Logger,
 	}
 
 	return t, nil
@@ -92,4 +99,9 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	}
 
 	return false, nil
+}
+
+// ShouldUpdateTags determines whether the reconciled TCCPN stack tags should be updated.
+func (t *TCCPN) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
+	return t.cloudTags.ClusterLabelsNotEqual(ctx, clusterID, stackTags)
 }
