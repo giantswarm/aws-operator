@@ -34,16 +34,9 @@ require (
 	github.com/giantswarm/to v0.3.0
 	github.com/google/go-cmp v0.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-<<<<<<< HEAD
-	github.com/prometheus/client_golang v1.5.1
-	github.com/spf13/afero v1.3.0
-	github.com/spf13/viper v1.6.3
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
-=======
 	github.com/prometheus/client_golang v1.7.1
 	github.com/spf13/afero v1.3.1
 	github.com/spf13/viper v1.7.0
->>>>>>> master
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	k8s.io/api v0.17.2
 	k8s.io/apiextensions-apiserver v0.17.2
