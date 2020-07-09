@@ -1,3 +1,7 @@
+# DO NOT EDIT. Generated with:
+#
+#    devctl gen dependabot
+#
 # Credit: https://github.com/crazy-max/diun
 name: auto-go-mod-tidy
 
