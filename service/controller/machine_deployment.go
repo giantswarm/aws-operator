@@ -85,6 +85,7 @@ type MachineDeploymentConfig struct {
 	NetworkSetupDockerImage    string
 	PodInfraContainerImage     string
 	RegistryDomain             string
+	RegistryMirrors            []string
 	RouteTables                string
 	SSHUserList                string
 	SSOPublicKey               string
@@ -250,6 +251,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
+				RegistryMirrors:           config.RegistryMirrors,
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
