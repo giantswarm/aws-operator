@@ -57,8 +57,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	maxNodeTermination := maximumNodeTermination(len(nodeList.Items))
 
+	// check for node termination limit, to prevent termination of all nodes at once
 	if len(nodesToTerminate) > maxNodeTermination {
 		nodesToTerminate = nodesToTerminate[:maxNodeTermination]
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("limited node termination to %d nodes", maxNodeTermination))
+
 	}
 
 	for _, n := range nodesToTerminate {
@@ -67,7 +70,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 	}
-
 	return nil
 }
 
@@ -119,9 +121,7 @@ func (r *Resource) detectBadNodes(ctx context.Context, nodes []corev1.Node) ([]c
 		if notReadyTickCount >= r.notReadyThreshold {
 			badNodes = append(badNodes, n)
 		}
-
 	}
-
 	return badNodes, nil
 }
 
