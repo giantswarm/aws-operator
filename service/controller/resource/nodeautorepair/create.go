@@ -169,7 +169,7 @@ func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n core
 	// if there is no annotation yet, the value will be 0
 	notReadyTickCount := 0
 	{
-		tick, ok := n.Annotations[key.TagNodeNotReadyTick]
+		tick, ok := n.Annotations[key.AnnotationNodeNotReadyTick]
 		if ok {
 			notReadyTickCount, err = strconv.Atoi(tick)
 			if err != nil {
@@ -190,7 +190,7 @@ func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n core
 
 	if updated {
 		// update the tick count on the node
-		n.Annotations[key.TagNodeNotReadyTick] = fmt.Sprintf("%d", notReadyTickCount)
+		n.Annotations[key.AnnotationNodeNotReadyTick] = fmt.Sprintf("%d", notReadyTickCount)
 		err = cc.Client.TenantCluster.K8s.CtrlClient().Update(ctx, &n)
 		if err != nil {
 			return -1, microerror.Mask(err)

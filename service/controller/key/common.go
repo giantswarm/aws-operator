@@ -41,6 +41,8 @@ const (
 )
 
 const (
+	AnnotationNodeNotReadyTick = "giantswarm.io/node-not-ready-tick"
+
 	LabelNodeRole       = "role"
 	LabelNodeRoleMaster = "master"
 )

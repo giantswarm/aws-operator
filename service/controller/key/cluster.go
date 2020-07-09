@@ -54,7 +54,6 @@ const (
 	TagControlPlane            = "giantswarm.io/control-plane"
 	TagInstallation            = "giantswarm.io/installation"
 	TagMachineDeployment       = "giantswarm.io/machine-deployment"
-	TagNodeNotReadyTick        = "giantswarm.io/node-not-ready-tick"
 	TagOrganization            = "giantswarm.io/organization"
 	TagRouteTableType          = "giantswarm.io/route-table-type"
 	TagStack                   = "giantswarm.io/stack"
