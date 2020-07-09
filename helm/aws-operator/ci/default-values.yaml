@@ -42,7 +42,7 @@ Installation:
     Registry:
       Domain: ""
     NodeAutoRepair:
-      Enabled: true
+      Enabled: false
     Secret:
       AWSOperator:
         SecretYaml: ""
