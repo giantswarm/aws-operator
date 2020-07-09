@@ -53,6 +53,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// remove additional master nodes to avoid multiple master node termination at the same time
+	nodesToTerminate = removeMultipleMasterNodes(nodesToTerminate)
+
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
 
 	maxNodeTermination := maximumNodeTermination(len(nodeList.Items))
@@ -64,7 +67,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	}
 
+	terminatedMaster := false
+
 	for _, n := range nodesToTerminate {
+		// avoid terminating multiple master nodes
+		if n.Labels["role"] == "master" {
+			if terminatedMaster {
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping master node termination %s to avoid multiple master node termination at same time", n.Name))
+				continue
+			} else {
+				terminatedMaster = true
+			}
+		}
+
 		err := r.terminateNode(ctx, n, key.ClusterID(&cr))
 		if err != nil {
 			return microerror.Mask(err)
@@ -196,4 +211,25 @@ func maximumNodeTermination(nodeCount int) int {
 		limit = 1
 	}
 	return int(limit)
+}
+
+// removeMultipleMasterNodes removes multiple master nodes from the list to avoid more than 1 master node termination at same time
+func removeMultipleMasterNodes(nodeList []corev1.Node) []corev1.Node {
+	foundMasterNode := false
+	var filteredNodes []corev1.Node
+
+	for _, n := range nodeList {
+		if n.Labels[key.LabelNodeRole] == key.LabelNodeRoleMaster {
+			if !foundMasterNode {
+				filteredNodes = append(filteredNodes, n)
+				foundMasterNode = true
+			} else {
+				// removing additional master nodes from the list
+				continue
+			}
+		} else {
+			filteredNodes = append(filteredNodes, n)
+		}
+	}
+	return filteredNodes
 }
