@@ -11,11 +11,11 @@ import (
 )
 
 type Service struct {
-	AWS          aws.AWS
-	Cluster      cluster.Cluster
-	Guest        guest.Guest
-	Installation installation.Installation
-	Kubernetes   kubernetes.Kubernetes
-  NodeAutoRepair string
-	Registry     registry.Registry
+	AWS            aws.AWS
+	Cluster        cluster.Cluster
+	Guest          guest.Guest
+	Installation   installation.Installation
+	Kubernetes     kubernetes.Kubernetes
+	NodeAutoRepair string
+	Registry       registry.Registry
 }
