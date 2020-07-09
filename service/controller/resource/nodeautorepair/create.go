@@ -55,31 +55,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	// remove additional master nodes to avoid multiple master node termination at the same time
 	nodesToTerminate = removeMultipleMasterNodes(nodesToTerminate)
-
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
 
-	maxNodeTermination := maximumNodeTermination(len(nodeList.Items))
-
 	// check for node termination limit, to prevent termination of all nodes at once
+	maxNodeTermination := maximumNodeTermination(len(nodeList.Items))
 	if len(nodesToTerminate) > maxNodeTermination {
 		nodesToTerminate = nodesToTerminate[:maxNodeTermination]
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("limited node termination to %d nodes", maxNodeTermination))
-
 	}
 
-	terminatedMaster := false
-
 	for _, n := range nodesToTerminate {
-		// avoid terminating multiple master nodes
-		if n.Labels["role"] == "master" {
-			if terminatedMaster {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping master node termination %s to avoid multiple master node termination at same time", n.Name))
-				continue
-			} else {
-				terminatedMaster = true
-			}
-		}
-
 		err := r.terminateNode(ctx, n, key.ClusterID(&cr))
 		if err != nil {
 			return microerror.Mask(err)
