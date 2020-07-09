@@ -34,9 +34,8 @@ type NodeAutoRepairConfig struct {
 	Locker    locker.Interface
 	Logger    micrologger.Logger
 
-
-	HostAWSConfig              aws.Config
-	NodeAutoRepair             bool
+	HostAWSConfig  aws.Config
+	NodeAutoRepair bool
 }
 
 type NodeAutoRepair struct {
@@ -69,7 +68,7 @@ func NewNodeAutoRepair(config NodeAutoRepairConfig) (*NodeAutoRepair, error) {
 			NewRuntimeObjectFunc: func() runtime.Object {
 				return new(infrastructurev1alpha2.AWSCluster)
 			},
-			Resources: resources,
+			Resources:    resources,
 			ResyncPeriod: key.NodeAutoRepairResyncPeriod,
 
 			// Name is used to compute finalizer names. This results in something
@@ -114,7 +113,7 @@ func newNodeAutoRepairResources(config NodeAutoRepairConfig) ([]resource.Interfa
 		c := tenantcluster.Config{
 			CertsSearcher: certsSearcher,
 			Logger:        config.Logger,
-			CertID: certs.AWSOperatorAPICert,
+			CertID:        certs.AWSOperatorAPICert,
 		}
 
 		tenantCluster, err = tenantcluster.New(c)
@@ -176,7 +175,6 @@ func newNodeAutoRepairResources(config NodeAutoRepairConfig) ([]resource.Interfa
 			return nil, microerror.Mask(err)
 		}
 	}
-
 
 	var nodeAutoRepairResource resource.Interface
 	{
