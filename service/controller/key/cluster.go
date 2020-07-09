@@ -89,7 +89,7 @@ const (
 
 const (
 	// NodeAutoRepairResyncPeriod defines resync period fro the nodeautorepair controller
-	NodeAutoRepairResyncPeriod = time.Minute * 2
+	NodeAutoRepairResyncPeriod = time.Minute * 3
 
 	// NodeAuoRepairTerminationPercentage defines how much percentage of nodes can be terminated at once.
 	// ie: if cluster has 10 nodes and  terminationPercentage is 10% than 1 nde can be terminated at once
@@ -103,7 +103,7 @@ const (
 	// NodeNotReadyTickThreshold defines how many times node-auto-repair logic needs to see node
 	// in NotReady state before it will terminate it to repair it.
 	// The tick counter is changed every reconciliation loop and can be increased or decreased by 1.
-	NodeNotReadyTickThreshold = 10
+	NodeNotReadyTickThreshold = 6
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
