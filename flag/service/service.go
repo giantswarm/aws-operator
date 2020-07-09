@@ -7,14 +7,15 @@ import (
 	"github.com/giantswarm/aws-operator/flag/service/cluster"
 	"github.com/giantswarm/aws-operator/flag/service/guest"
 	"github.com/giantswarm/aws-operator/flag/service/installation"
+	"github.com/giantswarm/aws-operator/flag/service/registry"
 )
 
 type Service struct {
-	AWS            aws.AWS
-	Cluster        cluster.Cluster
-	Guest          guest.Guest
-	Installation   installation.Installation
-	Kubernetes     kubernetes.Kubernetes
-	NodeAutoRepair string
-	RegistryDomain string
+	AWS          aws.AWS
+	Cluster      cluster.Cluster
+	Guest        guest.Guest
+	Installation installation.Installation
+	Kubernetes   kubernetes.Kubernetes
+  NodeAutoRepair string
+	Registry     registry.Registry
 }
