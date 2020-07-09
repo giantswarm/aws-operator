@@ -8,10 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ### Added
 
 - Add `--service.registry.mirrors` flag for setting registry mirror domains.
 - Replace `--service.registrydomain` with `--service.registry.domain`.
+
+### Changed
+
+- Update `k8s-setup-network-env` image to `0.2.0`.
 
 ## [8.7.1] - 2020-07-08
 
