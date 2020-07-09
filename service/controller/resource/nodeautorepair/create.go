@@ -54,7 +54,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	// remove additional master nodes to avoid multiple master node termination at the same time
-	nodesToTerminate = removeMultipleMasterNodes(nodesToTerminate)
+	nodesToTerminate = r.removeMultipleMasterNodes(ctx, nodesToTerminate)
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
 
 	// check for node termination limit, to prevent termination of all nodes at once
@@ -199,7 +199,7 @@ func maximumNodeTermination(nodeCount int) int {
 }
 
 // removeMultipleMasterNodes removes multiple master nodes from the list to avoid more than 1 master node termination at same time
-func removeMultipleMasterNodes(nodeList []corev1.Node) []corev1.Node {
+func (r *Resource) removeMultipleMasterNodes(ctx context.Context, nodeList []corev1.Node) []corev1.Node {
 	foundMasterNode := false
 	var filteredNodes []corev1.Node
 
@@ -210,6 +210,7 @@ func removeMultipleMasterNodes(nodeList []corev1.Node) []corev1.Node {
 				foundMasterNode = true
 			} else {
 				// removing additional master nodes from the list
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removed master node %s from node termination list to avoid multiple master nodes termination at once", n.Name))
 				continue
 			}
 		} else {
