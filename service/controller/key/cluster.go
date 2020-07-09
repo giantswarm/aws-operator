@@ -103,7 +103,7 @@ const (
 	// NodeNotReadyTickThreshold defines how many times node-auto-repair logic needs to see node
 	// in NotReady state before it will terminate it to repair it.
 	// The tick counter is changed every reconciliation loop and can be increased or decreased by 1.
-	NodeNotReadyTickThreshold = 8
+	NodeNotReadyTickThreshold = 10
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
