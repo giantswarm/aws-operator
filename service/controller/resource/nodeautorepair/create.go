@@ -135,6 +135,7 @@ func nodeNotReady(n corev1.Node) bool {
 // depending if the node is Ready or not
 // the annotation is used to track how many times node was seen as not ready
 // and in case it will reach a threshold, the node will be marked for termination.
+// Each reconcilation loop can increase or decrease the tick count by 1.
 func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n corev1.Node) (int, error) {
 	var err error
 	cc, err := controllercontext.FromContext(ctx)

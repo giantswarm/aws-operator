@@ -88,13 +88,17 @@ const (
 )
 
 const (
-	// Defines how many times node-auto-repair logic needs to see node
+	// NodeNotReadyTickThreshold defines how many times node-auto-repair logic needs to see node
 	// in NotReady state before it will terminate it to repair it.
-	NodeNotReadyTickThreshold = 4
+	// The tick counter is changed every reconciliation loop and can be increased or decreased by 1.
+	NodeNotReadyTickThreshold = 9
 
-	// Defines how long must have NotReady status to be considered NotReady,
+	// NodeNotReadyDuration defines how long must have NotReady status to be considered NotReady,
 	// to avoid weird situation where nodes is not ready for 1 sec every 5 minutes and so on.
 	NodeNotReadyDuration = time.Second * 30
+
+	// NodeAutoRepairResyncPeriod defines resync period fro the nodeautorepair controller
+	NodeAutoRepairResyncPeriod = time.Minute * 2
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {

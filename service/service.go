@@ -49,6 +49,7 @@ type Service struct {
 	controlPlaneDrainerController      *controller.ControlPlaneDrainer
 	machineDeploymentController        *controller.MachineDeployment
 	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
+	nodeAutoRepairController           *controller.NodeAutoRepair
 	operatorCollector                  *collector.Set
 }
 
@@ -338,6 +339,23 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var nodeAutoRepairController *controller.NodeAutoRepair
+	{
+		c := controller.NodeAutoRepairConfig{
+			K8sClient: k8sClient,
+			Locker:    kubeLockLocker,
+			Logger:    config.Logger,
+
+			HostAWSConfig:  awsConfig,
+			NodeAutoRepair: config.Viper.GetBool(config.Flag.Service.NodeAutoRepair),
+		}
+
+		nodeAutoRepairController, err = controller.NewNodeAutoRepair(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var operatorCollector *collector.Set
 	{
 		c := collector.SetConfig{
@@ -380,6 +398,7 @@ func New(config Config) (*Service, error) {
 		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
+		nodeAutoRepairController:           nodeAutoRepairController,
 		operatorCollector:                  operatorCollector,
 	}
 
@@ -395,5 +414,6 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.controlPlaneDrainerController.Boot(ctx)
 		go s.machineDeploymentController.Boot(ctx)
 		go s.machineDeploymentDrainerController.Boot(ctx)
+		go s.nodeAutoRepairController.Boot(ctx)
 	})
 }
