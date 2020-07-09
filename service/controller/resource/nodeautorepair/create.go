@@ -3,6 +3,7 @@ package nodeautorepair
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -53,6 +54,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
+
+	maxNodeTermination := maximumNodeTermination(len(nodeList.Items))
+
+	if len(nodesToTerminate) > maxNodeTermination {
+		nodesToTerminate = nodesToTerminate[:maxNodeTermination]
+	}
 
 	for _, n := range nodesToTerminate {
 		err := r.terminateNode(ctx, n, key.ClusterID(&cr))
@@ -176,4 +183,17 @@ func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n core
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated not ready tick count to %d/%d for node %s", notReadyTickCount, r.notReadyThreshold, n.Name))
 	}
 	return notReadyTickCount, nil
+}
+
+// maximumNodeTermination calculates the maximum number of nodes that can be terminated in single loop
+// the number is calculated with help of key.NodeAutoRepairTerminationPercentage
+// which determines how much percentage of nodes can be terminated
+// the minimum is 1 node termination per reconciliation loop
+func maximumNodeTermination(nodeCount int) int {
+	limit := math.Round(float64(nodeCount) * key.NodeAutoRepairTerminationPercentage)
+
+	if limit < 1 {
+		limit = 1
+	}
+	return int(limit)
 }
