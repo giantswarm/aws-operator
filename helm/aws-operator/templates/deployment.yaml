@@ -42,11 +42,7 @@ spec:
         runAsGroup: {{ .Values.pod.group.id }}
       containers:
       - name: {{ include "name" . }}
-        {{- if hasPrefix .Values.Installation.V1.Provider.AWS.Region "cn-" }}
         image: "{{ .Values.Installation.V1.Registry.Domain }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-        {{ else }}
-        image: "docker.io/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-        {{- end }}
         volumeMounts:
         - name: {{ include "name" . }}-configmap
           mountPath: /var/run/{{ include "name" . }}/configmap/
