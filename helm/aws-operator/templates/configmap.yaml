@@ -45,15 +45,25 @@ data:
           clusterDomain: '{{ .Values.Installation.V1.Guest.Kubernetes.ClusterDomain }}'
           networkSetup:
             docker:
+              {{- if hasPrefix .Values.Installation.V1.Provider.AWS.Region 'cn-' }}
               image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
+              {{ else }}
+              image: 'docker.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
+              {{- end }}
           ssh:
             userList: '{{ .Values.Installation.V1.Guest.SSH.UserList }}'
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
+
       registry:
+      {{- if hasPrefix .Values.Installation.V1.Provider.AWS.Region 'cn-' }}
         domain: '{{ .Values.Installation.V1.Registry.Domain }}'
         mirrors: '{{ range $i, $e := .Values.Installation.V1.Registry.Mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
+      {{ else }}
+        domain: 'docker.io'
+        mirrors: 'giantswarm.azurecr.io'
+      {{- end }}
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
         {{- if .Values.Installation.V1.Guest }}
