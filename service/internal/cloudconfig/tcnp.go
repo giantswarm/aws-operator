@@ -162,6 +162,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			registryDomain: t.config.RegistryDomain,
 		}
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
+		params.RegistryMirrors = t.config.RegistryMirrors
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Versions = v
