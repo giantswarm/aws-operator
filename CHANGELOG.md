@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `--service.registry.mirrors` flag for setting registry mirror domains.
 - Replace `--service.registrydomain` with `--service.registry.domain`.
+- Make registry domain & mirrors configurable based on region
 
 ### Changed
 
