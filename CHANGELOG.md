@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace `--service.registrydomain` with `--service.registry.domain`.
 - Update `k8s-setup-network-env` image to `0.2.0`.
 
+### Fixed
+
+- Fix failing of ELB collector cache in case there is no ELB in AWS account
 
 
 ## [8.7.1] - 2020-07-08
