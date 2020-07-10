@@ -1,4 +1,4 @@
-FROM golang:1.13 AS builder
+FROM golang:1.14.4 AS builder
 ENV GO111MODULE=on
 COPY go.mod /etc/go.mod
 RUN cat /etc/go.mod | grep k8scloudconfig | awk '{print $1"/...@"$2}' | xargs -I{} go get {}
