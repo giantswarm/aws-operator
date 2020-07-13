@@ -195,9 +195,11 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 			return microerror.Mask(err)
 		}
 
-		err = e.cache.Set(account, *elbInfo)
-		if err != nil {
-			return microerror.Mask(err)
+		if elbInfo != nil {
+			err = e.cache.Set(account, *elbInfo)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 		}
 	}
 
