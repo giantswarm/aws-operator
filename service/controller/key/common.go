@@ -38,6 +38,9 @@ const (
 	// in NotReady state before it will terminate it to repair it.
 	// The tick counter is changed every reconciliation loop and can be increased or decreased by 1.
 	NodeNotReadyTickThreshold = 6
+
+	// NodeAutoRepairCooldownPeriod defines how long will operator pause between another nodes termination.
+	NodeAutoRepairCooldownPeriod = time.Minute * 10
 )
 
 const (

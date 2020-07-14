@@ -3,6 +3,7 @@ package nodeautorepair
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/internal/locker"
 	"math"
 	"strconv"
 	"strings"
@@ -40,6 +41,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
+	var timeLock *locker.TimeLock
+	{
+		c := locker.TimeLockConfig{
+			ClusterCRNamespace: cr.Namespace,
+			ClusterID:          cr.Name,
+			K8sClient:          cc.Client.TenantCluster.K8s.CtrlClient(),
+			TTL:                key.NodeAutoRepairCooldownPeriod,
+			Logger:             r.logger,
+		}
+
+		timeLock, err = locker.NewTimeLock(c)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+	}
+
 	var nodeList corev1.NodeList
 	{
 		err := cc.Client.TenantCluster.K8s.CtrlClient().List(ctx, &nodeList)
@@ -62,6 +79,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if len(nodesToTerminate) > maxNodeTermination {
 		nodesToTerminate = nodesToTerminate[:maxNodeTermination]
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("limited node termination to %d nodes", maxNodeTermination))
+	}
+
+	err = timeLock.Lock(ctx)
+	if locker.IsAlreadyExists(err) {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "skipping node termination due to cooldown period between another termination ")
+
+	} else if err != nil {
+		return microerror.Mask(err)
 	}
 
 	for _, n := range nodesToTerminate {
