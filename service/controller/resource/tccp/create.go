@@ -8,7 +8,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
@@ -16,8 +15,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
-	"github.com/giantswarm/aws-operator/service/internal/ebs"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -117,42 +114,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
-			err = r.stopMasterInstance(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.detachVolumes(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.snapshotEtcdVolume(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			err = r.terminateMasterInstance(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
-	}
-
-	// TODO remove etcd snapshot migration code
-	// https://github.com/giantswarm/giantswarm/issues/9979
-	if key.IsNewCluster(cr) && cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
-		err = r.snapshotEtcdVolume(ctx, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "created etcd volume snapshot for newly created cluster")
 	}
 
 	return nil
@@ -205,53 +171,6 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) detachVolumes(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	var ebsService ebs.Interface
-	{
-		c := ebs.Config{
-			Client: cc.Client.TenantCluster.AWS.EC2,
-			Logger: r.logger,
-		}
-
-		ebsService, err = ebs.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	{
-		// Fetch the etcd volume information.
-		filterFuncs := []func(t *ec2.Tag) bool{
-			ebs.NewDockerVolumeFilter(cr),
-			ebs.NewEtcdVolumeFilter(cr),
-		}
-		volumes, err := ebsService.ListVolumes(cr, filterFuncs...)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		force := false
-		shutdown := false
-		wait := false
-
-		for _, v := range volumes {
-			for _, a := range v.Attachments {
-				err := ebsService.DetachVolume(ctx, v.VolumeID, a, force, shutdown, wait)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCP
@@ -262,10 +181,6 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 	var params *template.ParamsMain
 	{
 		internetGateway, err := r.newParamsMainInternetGateway(ctx, cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-		instance, err := r.newParamsMainInstance(ctx, cr, t)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -304,7 +219,6 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 
 		params = &template.ParamsMain{
 			InternetGateway: internetGateway,
-			Instance:        instance,
 			LoadBalancers:   loadBalancers,
 			NATGateway:      natGateway,
 			Outputs:         outputs,
@@ -317,38 +231,6 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha2.
 	}
 
 	return params, nil
-}
-
-func (r *Resource) newParamsMainInstance(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, t time.Time) (*template.ParamsMainInstance, error) {
-	var err error
-	// We need to fetch the ControlPlane CR for once because it needs to be passed to hamaster interface to get the mapopings.
-	var haMapping []hamaster.Mapping
-	{
-		haMapping, err = r.haMaster.Mapping(ctx, &cr)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var instance *template.ParamsMainInstance
-	{
-		instance = &template.ParamsMainInstance{
-			Master: template.ParamsMainInstanceMaster{
-				/*
-					This is part of migration code we introduced with the new tccpn stack.
-					We need this to create empty ETCD volume in the first AZ  to do a snapshot
-					and then create volume from that snapshot in the tccpn stack.
-
-					We can take a look at how we could remove it before creating stable release for HA masters.
-				*/
-				AZ: haMapping[0].AZ,
-				EtcdVolume: template.ParamsMainInstanceMasterEtcdVolume{
-					Name: key.VolumeNameEtcd(cr),
-				},
-			},
-		}
-	}
-	return instance, nil
 }
 
 func (r *Resource) newParamsMainInternetGateway(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainInternetGateway, error) {
@@ -710,84 +592,6 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 	}
 
 	return vpc, nil
-}
-
-func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID != "" {
-		// In case there is a snapshot ID, we already created the snapshot and do
-		// not need to do it again.
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not creating etcd volume snapshot")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "etcd volume snapshot already created")
-		return nil
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "creating etcd volume snapshot")
-
-	var ebsService ebs.Interface
-	{
-		c := ebs.Config{
-			Client: cc.Client.TenantCluster.AWS.EC2,
-			Logger: r.logger,
-		}
-
-		ebsService, err = ebs.New(c)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	var etcdVolumeID string
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding etcd volume ID")
-
-		volumes, err := ebsService.ListVolumes(cr, ebs.NewEtcdVolumeFilter(cr))
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		if len(volumes) != 1 {
-			return microerror.Maskf(executionFailedError, "1 etcd volume must exist, got %d", len(volumes))
-		}
-
-		etcdVolumeID = volumes[0].VolumeID
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found etcd volume ID %#q", etcdVolumeID))
-	}
-
-	{
-		i := &ec2.CreateSnapshotInput{
-			TagSpecifications: []*ec2.TagSpecification{
-				{
-					ResourceType: aws.String("snapshot"),
-					Tags: []*ec2.Tag{
-						{
-							Key:   aws.String(key.TagSnapshot),
-							Value: aws.String(key.HAMasterSnapshotIDValue),
-						},
-						{
-							Key:   aws.String(key.TagCluster),
-							Value: aws.String(key.ClusterID(&cr)),
-						},
-					},
-				},
-			},
-			VolumeId: aws.String(etcdVolumeID),
-		}
-
-		_, err := cc.Client.TenantCluster.AWS.EC2.CreateSnapshot(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	r.logger.LogCtx(ctx, "level", "debug", "message", "created etcd volume snapshot")
-
-	return nil
 }
 
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
