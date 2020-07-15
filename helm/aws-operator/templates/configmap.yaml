@@ -45,7 +45,7 @@ data:
           clusterDomain: '{{ .Values.Installation.V1.Guest.Kubernetes.ClusterDomain }}'
           networkSetup:
             docker:
-              {{- if hasPrefix .Values.Installation.V1.Provider.AWS.Region "cn-" }}
+              {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
               image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
               {{ else }}
               image: 'docker.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
@@ -57,7 +57,7 @@ data:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
 
       registry:
-      {{- if hasPrefix .Values.Installation.V1.Provider.AWS.Region "cn-" }}
+      {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
         domain: '{{ .Values.Installation.V1.Registry.Domain }}'
         mirrors: '{{ range $i, $e := .Values.Installation.V1.Registry.Mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
       {{ else }}

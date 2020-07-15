@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.3] - 2020-07-15
+
+### Fixed
+
+- Fix regional switch in helm chart.
+
 ## [8.7.2] - 2020-07-14
 
 ### Added
@@ -176,7 +182,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...HEAD
+[8.7.3]: https://github.com/giantswarm/aws-operator/compare/v8.7.2...v8.7.3
 [8.7.2]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...v8.7.2
 [8.7.1]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...v8.7.0
