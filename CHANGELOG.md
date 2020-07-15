@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.7.3] - 2020-07-15
 
+### Fixed
+
+- Fix regional switch in helm chart.
+
 ## [8.7.2] - 2020-07-14
 
 ### Added
