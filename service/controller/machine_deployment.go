@@ -56,10 +56,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
+	Event              recorder.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -233,6 +235,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 			Config: cloudconfig.Config{
 				CertsSearcher:      certsSearcher,
 				Encrypter:          encrypterObject,
+				Event:              config.Event,
 				HAMaster:           config.HAMaster,
 				Images:             config.Images,
 				K8sClient:          config.K8sClient,
@@ -508,7 +511,9 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tcnp.Config{
 			Detection: tcnpChangeDetection,
+			Event:     config.Event,
 			Images:    config.Images,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -523,6 +528,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,

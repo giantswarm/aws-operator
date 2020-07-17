@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -32,8 +34,10 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
+	Event     recorder.Interface
 	G8sClient versioned.Interface
 	HAMaster  hamaster.Interface
+	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
 	APIWhitelist       ConfigAPIWhitelist
@@ -47,8 +51,10 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
+	event     recorder.Interface
 	g8sClient versioned.Interface
 	haMaster  hamaster.Interface
+	k8sClient k8sclient.Interface
 	logger    micrologger.Logger
 
 	apiWhitelist       ConfigAPIWhitelist
@@ -65,11 +71,17 @@ func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
+	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
+	}
+	if config.K8sClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -86,9 +98,11 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		event:     config.Event,
 		g8sClient: config.G8sClient,
 		haMaster:  config.HAMaster,
 		detection: config.Detection,
+		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
 		apiWhitelist:       config.APIWhitelist,
@@ -217,6 +231,7 @@ func (r *Resource) stopMasterInstance(ctx context.Context, cr infrastructurev1al
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested to stop instance %#q", instanceID))
+		r.event.Emit(ctx, &cr, "TerminateInstanceRequested", fmt.Sprintf("Requested to stop instance %#q", instanceID))
 	}
 
 	{
@@ -300,6 +315,7 @@ func (r *Resource) terminateMasterInstance(ctx context.Context, cr infrastructur
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance %#q", instanceID))
+		r.event.Emit(ctx, &cr, "TerminatedInstance", fmt.Sprintf("Terminated master instance %#q", instanceID))
 	}
 
 	return nil

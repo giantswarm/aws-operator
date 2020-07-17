@@ -99,12 +99,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
+			r.event.Emit(ctx, &cr, "CFCreate", fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
+			r.event.Emit(ctx, &cr, "CFUpdate", fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+		}
+
+		if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateComplete {
+			r.event.Emit(ctx, &cr, "CFCreated", fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateComplete))
+		}
+		if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateComplete {
+			r.event.Emit(ctx, &cr, "CFUpdated", fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateComplete))
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
@@ -200,6 +209,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane cloud formation stack")
+		r.event.Emit(ctx, &cr, "CFCreateRequested", "Requested the creation of the tenant cluster's control plane cloud formation stack")
 	}
 
 	return nil
@@ -786,6 +796,7 @@ func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1al
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "created etcd volume snapshot")
+	r.event.Emit(ctx, &cr, "ETCDVolumeCreated", "Created etcd volume snapshot")
 
 	return nil
 }
@@ -830,6 +841,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane cloud formation stack")
+		r.event.Emit(ctx, &cr, "CFUpdateRequested", "Requested the update of the tenant cluster's control plane cloud formation stack")
 	}
 
 	return nil

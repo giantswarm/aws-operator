@@ -10,6 +10,8 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
@@ -37,9 +39,20 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 
 	var err error
 
+	var event recorder.Interface
+	{
+		c := recorder.Config{
+			K8sClient: unittest.FakeK8sClient(),
+
+			Component: "dummy",
+		}
+
+		event = recorder.New(c)
+	}
 	var newResource *Resource
 	{
 		c := Config{
+			Event:            event,
 			Logger:           microloggertest.New(),
 			InstallationName: "test-install",
 		}

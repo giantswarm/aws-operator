@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCCPN
+	Event     recorder.Interface
 	HAMaster  hamaster.Interface
 	Images    images.Interface
 	K8sClient k8sclient.Interface
@@ -31,6 +33,7 @@ type Config struct {
 // pool.
 type Resource struct {
 	detection *changedetection.TCCPN
+	event     recorder.Interface
 	haMaster  hamaster.Interface
 	images    images.Interface
 	k8sClient k8sclient.Interface
@@ -43,6 +46,9 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
@@ -62,10 +68,11 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		k8sClient: config.K8sClient,
 		detection: config.Detection,
+		event:     config.Event,
 		haMaster:  config.HAMaster,
 		images:    config.Images,
+		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
 		installationName: config.InstallationName,

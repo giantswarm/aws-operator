@@ -47,6 +47,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("added finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
+			r.event.Emit(ctx, &cr, "FinalizerSecretCreated", fmt.Sprintf("Added finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finalizer already added for secret %#q in namespace %#q", s.Name, s.Namespace))
 		}

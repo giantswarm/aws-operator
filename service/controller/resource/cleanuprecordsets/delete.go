@@ -105,6 +105,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted non-managed record sets in hosted zone %#q", *hostedZone.Id))
+			r.event.Emit(ctx, &cr, "RecordSetsDeleted", fmt.Sprintf("Deleted non-managed record sets in hosted zone %#q", *hostedZone.Id))
 		}
 	}
 

@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"strings"
 	"sync"
@@ -30,6 +31,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 // Config represents the configuration used to create a new service.
@@ -130,6 +132,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var eventRecorder recorder.Interface
+	{
+		c := recorder.Config{
+			K8sClient: k8sClient,
+
+			Component: fmt.Sprintf("%s-%s", project.Name(), project.Version()),
+		}
+
+		eventRecorder = recorder.New(c)
+	}
+
 	var ha hamaster.Interface
 	{
 		c := hamaster.Config{
@@ -194,6 +207,7 @@ func New(config Config) (*Service, error) {
 	var clusterController *controller.Cluster
 	{
 		c := controller.ClusterConfig{
+			Event:     eventRecorder,
 			K8sClient: k8sClient,
 			HAMaster:  ha,
 			Locker:    kubeLockLocker,
@@ -235,6 +249,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.ControlPlaneConfig{
 			CertsSearcher:      certsSearcher,
+			Event:              eventRecorder,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -271,6 +286,7 @@ func New(config Config) (*Service, error) {
 	var controlPlaneDrainerController *controller.ControlPlaneDrainer
 	{
 		c := controller.ControlPlaneDrainerConfig{
+			Event:     eventRecorder,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -287,6 +303,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.MachineDeploymentConfig{
 			CertsSearcher:      certsSearcher,
+			Event:              eventRecorder,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -327,6 +344,7 @@ func New(config Config) (*Service, error) {
 	var machineDeploymentDrainerController *controller.MachineDeploymentDrainer
 	{
 		c := controller.MachineDeploymentDrainerConfig{
+			Event:     eventRecorder,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 

@@ -24,9 +24,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type MachineDeploymentDrainerConfig struct {
+	Event     recorder.Interface
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
@@ -126,6 +128,7 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	{
 		c := drainerinitializer.ResourceConfig{
 			ASG:       newASG,
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
@@ -144,6 +147,7 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	{
 		c := drainerfinalizer.ResourceConfig{
 			ASG:       newASG,
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 

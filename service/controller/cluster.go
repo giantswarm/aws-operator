@@ -64,9 +64,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ClusterConfig struct {
+	Event     recorder.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
 	Locker    locker.Interface
@@ -424,6 +426,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var s3BucketResource resource.Interface
 	{
 		c := s3bucket.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
@@ -470,6 +473,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupMachineDeploymentsResource resource.Interface
 	{
 		c := cleanupmachinedeployments.Config{
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
@@ -483,6 +487,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupRecordSets resource.Interface
 	{
 		c := cleanuprecordsets.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
@@ -497,6 +502,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupSecurityGroups resource.Interface
 	{
 		c := cleanupsecuritygroups.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 		}
 
@@ -522,8 +528,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
@@ -571,6 +579,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpfResource resource.Interface
 	{
 		c := tccpf.Config{
+			Event:     config.Event,
 			Detection: tccpfChangeDetection,
 			Logger:    config.Logger,
 
@@ -587,6 +596,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpiResource resource.Interface
 	{
 		c := tccpi.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -667,6 +677,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var secretFinalizerResource resource.Interface
 	{
 		c := secretfinalizer.Config{
+			Event:     config.Event,
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}

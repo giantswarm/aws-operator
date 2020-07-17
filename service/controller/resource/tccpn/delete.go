@@ -77,6 +77,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane nodes cloud formation stack")
+		r.event.Emit(ctx, &cr, "CFDeleteRequested", "Requested the deletion of the tenant cluster's control plane nodes cloud formation stack")
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)

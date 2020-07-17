@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -17,6 +18,7 @@ import (
 
 type fakeK8sClient struct {
 	ctrlClient client.Client
+	k8sClient  *fakek8s.Clientset
 }
 
 func FakeK8sClient() k8sclient.Interface {
@@ -36,6 +38,7 @@ func FakeK8sClient() k8sclient.Interface {
 
 		k8sClient = &fakeK8sClient{
 			ctrlClient: fake.NewFakeClientWithScheme(scheme),
+			k8sClient:  fakek8s.NewSimpleClientset(),
 		}
 	}
 
@@ -63,7 +66,7 @@ func (f *fakeK8sClient) G8sClient() versioned.Interface {
 }
 
 func (f *fakeK8sClient) K8sClient() kubernetes.Interface {
-	return nil
+	return f.k8sClient
 }
 
 func (f *fakeK8sClient) RESTClient() rest.Interface {

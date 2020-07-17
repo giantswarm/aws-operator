@@ -13,6 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -25,11 +26,14 @@ const (
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
+	cr, err := key.ToCluster(obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
 	bucketsInput, err := toBucketState(deleteChange)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -117,6 +121,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %#q", bucketName))
+			r.event.Emit(ctx, &cr, "S3BucketDeleted", fmt.Sprintf("Deleted S3 bucket %#q", bucketName))
 
 			return nil
 		})

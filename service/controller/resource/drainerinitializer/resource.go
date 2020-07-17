@@ -21,6 +21,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -29,6 +30,7 @@ const (
 
 type ResourceConfig struct {
 	ASG       asg.Interface
+	Event     recorder.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -39,6 +41,7 @@ type ResourceConfig struct {
 
 type Resource struct {
 	asg       asg.Interface
+	event     recorder.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
@@ -50,6 +53,9 @@ type Resource struct {
 func NewResource(config ResourceConfig) (*Resource, error) {
 	if config.ASG == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
+	}
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
@@ -70,6 +76,7 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 
 	r := &Resource{
 		asg:       config.ASG,
+		event:     config.Event,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 
@@ -120,6 +127,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created drainer config for ec2 instance %#q", instanceID))
+	r.event.Emit(ctx, &cl, "DrainerConfigCreated", fmt.Sprintf("Created drainer config for ec2 instance %#q", instanceID))
 
 	return nil
 }
@@ -278,6 +286,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			}
 		}
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.event.Emit(ctx, &cl, "DrainerConfigEnsured", fmt.Sprintf("Ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
 	}
 
 	return nil

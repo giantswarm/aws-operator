@@ -65,10 +65,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
+			r.event.Emit(ctx, &cr, "CFCreate", fmt.Sprintf("The tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
+			r.event.Emit(ctx, &cr, "CFUpdate", fmt.Sprintf("The tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -135,6 +137,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.event.Emit(ctx, &cr, "CFCreateRequested", "Requested the creation of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	{
@@ -322,6 +325,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			"message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack",
 			"reason", "removing route tables",
 		)
+		r.event.Emit(ctx,
+			&cr,
+			"CFUpdateRequested",
+			"Requested the update of the tenant cluster's control plane finalizer cloud formation stack, removing route tables",
+		)
 	}
 
 	{
@@ -395,6 +403,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			"level", "debug",
 			"message", "requested the update of the tenant cluster's control plane finalizer cloud formation stack",
 			"reason", "adding route tables",
+		)
+		r.event.Emit(ctx,
+			&cr,
+			"CFUpdateRequested",
+			"Requested the update of the tenant cluster's control plane finalizer cloud formation stack, adding route tables",
 		)
 	}
 
