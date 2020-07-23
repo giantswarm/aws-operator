@@ -9,6 +9,7 @@ Before=etcd3.service
 What=/dev/disk/by-label/etcd
 Where=/var/lib/etcd
 Type=ext4
+DirectoryMode=0700
 
 [Install]
 WantedBy=multi-user.target
