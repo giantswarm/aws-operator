@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	AWSCNIComponentName = "aws-cni"
+
 	ELBInstanceStateInService = "InService"
 
 	DrainerResyncPeriod = time.Minute * 2

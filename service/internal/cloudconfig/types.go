@@ -1,6 +1,7 @@
 package cloudconfig
 
 type TemplateData struct {
+	AWSCNIVersion        string
 	AWSRegion            string
 	BaseDomain           string
 	ExternalSNAT         bool
