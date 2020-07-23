@@ -144,8 +144,8 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "route53:ChangeResourceRecordSets"
             Resource:
-              - "arn:aws:route53:::hostedzone/{{ .IAMPolicies.HostedZoneID }}"
-              - "arn:aws:route53:::hostedzone/{{ .IAMPolicies.InternalHostedZoneID }}"
+              - "arn:{{ .IAMPolicies.RegionARN }}:route53:::hostedzone/{{ .IAMPolicies.HostedZoneID }}"
+              - "arn:{{ .IAMPolicies.RegionARN }}:route53:::hostedzone/{{ .IAMPolicies.InternalHostedZoneID }}"
           - Effect: "Allow"
             Action:
               - "route53:ListHostedZones"
