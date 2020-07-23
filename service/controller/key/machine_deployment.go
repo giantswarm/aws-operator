@@ -230,7 +230,7 @@ func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha2.AWSMachineD
 }
 
 func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
-	return cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
+	return *cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
 }
 
 func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {
