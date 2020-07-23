@@ -117,6 +117,26 @@ func (i *Images) Versions(ctx context.Context, obj interface{}) (k8scloudconfig.
 	return v, nil
 }
 
+func (i *Images) AWSCNI(ctx context.Context, obj interface{}) (string, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	re, err := i.cachedRelease(ctx, cr)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	for _, c := range re.Spec.Components {
+		if c.Name == key.AWSCNIComponentName {
+			return c.Version, nil
+		}
+	}
+
+	return "", microerror.Maskf(notFoundError, "aws cni version not found in the release")
+}
+
 func (i *Images) cachedCluster(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSCluster, error) {
 	var err error
 	var ok bool

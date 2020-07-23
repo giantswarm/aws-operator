@@ -20,6 +20,7 @@ type TCCPNExtension struct {
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
+	awsCNIVersion    string
 	baseDomain       string
 	cc               *controllercontext.Context
 	cluster          infrastructurev1alpha2.AWSCluster
@@ -268,6 +269,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var fileAssets []k8scloudconfig.FileAsset
 
 	data := TemplateData{
+		AWSCNIVersion:        e.awsCNIVersion,
 		AWSRegion:            key.Region(e.cluster),
 		BaseDomain:           e.baseDomain,
 		ExternalSNAT:         e.externalSNAT,

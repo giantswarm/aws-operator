@@ -118,6 +118,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	awsCNIVersion, err := t.config.Images.AWSCNI(ctx, obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 
 	var cl infrastructurev1alpha2.AWSCluster
 	{
@@ -309,6 +313,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
 		}
 		params.Extension = &TCCPNExtension{
+			awsCNIVersion:    awsCNIVersion,
 			baseDomain:       key.TenantClusterBaseDomain(cl),
 			cc:               cc,
 			cluster:          cl,

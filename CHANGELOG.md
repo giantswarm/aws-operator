@@ -8,9 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Updated
+### Changed
 
 - `k8scloudconfig` version updated to 7.0.2.
+- Use aws-cni version from the release.
 
 ## [8.7.3] - 2020-07-15
 
