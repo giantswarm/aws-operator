@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 type Config struct {
-	Event  recorder.Interface
+	Event  event.Interface
 	Logger micrologger.Logger
 
 	InstallationName string
@@ -28,7 +28,7 @@ type Config struct {
 // Connections made between the AWS Control Plane Accounts and the AWS Tenant
 // Cluster Accounts.
 type Resource struct {
-	event  recorder.Interface
+	event  event.Interface
 	logger micrologger.Logger
 
 	installationName string

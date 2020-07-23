@@ -16,7 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -34,7 +34,7 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	Event     recorder.Interface
+	Event     event.Interface
 	G8sClient versioned.Interface
 	HAMaster  hamaster.Interface
 	K8sClient k8sclient.Interface
@@ -51,7 +51,7 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	event     recorder.Interface
+	event     event.Interface
 	g8sClient versioned.Interface
 	haMaster  hamaster.Interface
 	k8sClient k8sclient.Interface

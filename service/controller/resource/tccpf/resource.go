@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCCPF
-	Event     recorder.Interface
+	Event     event.Interface
 	Logger    micrologger.Logger
 
 	InstallationName string
@@ -27,7 +27,7 @@ type Config struct {
 // manage a dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
 	detection *changedetection.TCCPF
-	event     recorder.Interface
+	event     event.Interface
 	logger    micrologger.Logger
 
 	installationName string

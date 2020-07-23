@@ -5,9 +5,8 @@ import (
 
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/service/internal/unittest"
-
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
 func Test_ContainsBucketState(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,13 +17,13 @@ const (
 )
 
 type Config struct {
-	Event     recorder.Interface
+	Event     event.Interface
 	K8sClient kubernetes.Interface
 	Logger    micrologger.Logger
 }
 
 type Resource struct {
-	event     recorder.Interface
+	event     event.Interface
 	k8sClient kubernetes.Interface
 	logger    micrologger.Logger
 }

@@ -134,12 +134,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.event.Emit(ctx, &cr, "CFUpdate", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
-		}
-
-		if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateComplete {
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateComplete {
 			r.event.Emit(ctx, &cr, "CFCreated", fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusCreateComplete))
-		}
-		if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateComplete {
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateComplete {
 			r.event.Emit(ctx, &cr, "CFUpdated", fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateComplete))
 		}
 

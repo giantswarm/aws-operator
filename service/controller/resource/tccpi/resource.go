@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 type Config struct {
-	Event  recorder.Interface
+	Event  event.Interface
 	Logger micrologger.Logger
 
 	InstallationName string
@@ -27,7 +27,7 @@ type Config struct {
 // Initializer. This was formerly known as the host pre stack. We manage a
 // dedicated CF stack for the IAM role and VPC Peering setup.
 type Resource struct {
-	event  recorder.Interface
+	event  event.Interface
 	logger micrologger.Logger
 
 	installationName string

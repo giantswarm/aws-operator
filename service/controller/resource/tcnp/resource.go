@@ -7,7 +7,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/images"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCNP
-	Event     recorder.Interface
+	Event     event.Interface
 	Images    images.Interface
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
@@ -29,7 +29,7 @@ type Config struct {
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
 	detection *changedetection.TCNP
-	event     recorder.Interface
+	event     event.Interface
 	images    images.Interface
 	k8sClient k8sclient.Interface
 	logger    micrologger.Logger

@@ -19,7 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 
 type ResourceConfig struct {
 	ASG       asg.Interface
-	Event     recorder.Interface
+	Event     event.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -38,7 +38,7 @@ type ResourceConfig struct {
 
 type Resource struct {
 	asg       asg.Interface
-	event     recorder.Interface
+	event     event.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 

@@ -5,7 +5,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -13,13 +13,13 @@ const (
 )
 
 type Config struct {
-	Event     recorder.Interface
+	Event     event.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 }
 
 type Resource struct {
-	event     recorder.Interface
+	event     event.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 }

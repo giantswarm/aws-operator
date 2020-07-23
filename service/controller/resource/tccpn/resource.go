@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCCPN
-	Event     recorder.Interface
+	Event     event.Interface
 	HAMaster  hamaster.Interface
 	Images    images.Interface
 	K8sClient k8sclient.Interface
@@ -33,7 +33,7 @@ type Config struct {
 // pool.
 type Resource struct {
 	detection *changedetection.TCCPN
-	event     recorder.Interface
+	event     event.Interface
 	haMaster  hamaster.Interface
 	images    images.Interface
 	k8sClient k8sclient.Interface

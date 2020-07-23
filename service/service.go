@@ -132,7 +132,7 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var eventRecorder recorder.Interface
+	var event recorder.Interface
 	{
 		c := recorder.Config{
 			K8sClient: k8sClient,
@@ -140,7 +140,7 @@ func New(config Config) (*Service, error) {
 			Component: fmt.Sprintf("%s-%s", project.Name(), project.Version()),
 		}
 
-		eventRecorder = recorder.New(c)
+		event = recorder.New(c)
 	}
 
 	var ha hamaster.Interface
@@ -207,7 +207,7 @@ func New(config Config) (*Service, error) {
 	var clusterController *controller.Cluster
 	{
 		c := controller.ClusterConfig{
-			Event:     eventRecorder,
+			Event:     event,
 			K8sClient: k8sClient,
 			HAMaster:  ha,
 			Locker:    kubeLockLocker,
@@ -249,7 +249,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.ControlPlaneConfig{
 			CertsSearcher:      certsSearcher,
-			Event:              eventRecorder,
+			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -286,7 +286,7 @@ func New(config Config) (*Service, error) {
 	var controlPlaneDrainerController *controller.ControlPlaneDrainer
 	{
 		c := controller.ControlPlaneDrainerConfig{
-			Event:     eventRecorder,
+			Event:     event,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -303,7 +303,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.MachineDeploymentConfig{
 			CertsSearcher:      certsSearcher,
-			Event:              eventRecorder,
+			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -344,7 +344,7 @@ func New(config Config) (*Service, error) {
 	var machineDeploymentDrainerController *controller.MachineDeploymentDrainer
 	{
 		c := controller.MachineDeploymentDrainerConfig{
-			Event:     eventRecorder,
+			Event:     event,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 

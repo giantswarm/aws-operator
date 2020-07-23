@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -12,14 +12,14 @@ const (
 )
 
 type Config struct {
-	Event  recorder.Interface
+	Event  event.Interface
 	Logger micrologger.Logger
 
 	Route53Enabled bool
 }
 
 type Resource struct {
-	event  recorder.Interface
+	event  event.Interface
 	logger micrologger.Logger
 
 	route53Enabled bool

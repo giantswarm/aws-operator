@@ -56,12 +56,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
-	Event              recorder.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
