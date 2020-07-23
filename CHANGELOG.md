@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Updated
 
 - `k8scloudconfig` version updated to 7.0.2.
-
+- Set permissions of etcd data dir(`/var/lib/etcd`) to `0700`.
 ## [8.7.3] - 2020-07-15
 
 ### Fixed
