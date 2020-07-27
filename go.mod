@@ -16,7 +16,7 @@ require (
 	github.com/giantswarm/k8scloudconfig/v7 v7.0.3
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
-	github.com/giantswarm/microerror v0.2.0
+	github.com/giantswarm/microerror v0.2.1
 	github.com/giantswarm/microkit v0.2.1
 	github.com/giantswarm/micrologger v0.3.1
 	github.com/giantswarm/operatorkit v1.2.0
