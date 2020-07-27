@@ -210,7 +210,6 @@ github.com/giantswarm/kubelock v0.2.0 h1:4zSD/DSRUKuLoabheYHyHb7dEbC172GPinG0/NS
 github.com/giantswarm/kubelock v0.2.0/go.mod h1:3qkQ4O8J/452GErW0nSwSR/XBuNwUonrcH3biQ5HTCE=
 github.com/giantswarm/microendpoint v0.2.0 h1:xCAqAVRjTw/4ifEuBeNavALdbQsLk6+k/ukzdy0GWZE=
 github.com/giantswarm/microendpoint v0.2.0/go.mod h1:SSkSp4Q4iSW7vwkil+/E3IXy9Q8To8vXmT5VCg24RDg=
-github.com/giantswarm/microerror v0.2.0 h1:SaE7S34mp/wEiQkgtPiq8wQbNUTCj1gjiCWPjO3wgJo=
 github.com/giantswarm/microerror v0.2.0/go.mod h1:1YtJq/m7Vlq1Y6NP7B+SODOKCGlG7e5wctV2OoE9n34=
 github.com/giantswarm/microerror v0.2.1 h1:4y88WstqZ4OSSq6T/TvTJaefRe/JbrbuwoWQNVxOOyU=
 github.com/giantswarm/microerror v0.2.1/go.mod h1:1YtJq/m7Vlq1Y6NP7B+SODOKCGlG7e5wctV2OoE9n34=
