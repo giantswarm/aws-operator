@@ -101,7 +101,7 @@ spec:
       tolerations:
         - operator: Exists
       containers:
-        - image: {{.RegistryDomain}}/giantswarm/amazon-k8s-cni:v{{.AWSCNIVersion}}
+        - image: {{.RegistryDomain}}/giantswarm/aws-cni:v{{.AWSCNIVersion}}
           ports:
             - containerPort: 61678
               name: metrics
