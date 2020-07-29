@@ -29,9 +29,8 @@ import (
 const (
 	name = "migration"
 
-	awsConfigNamespace               = "default"
 	credentialSecretDefaultNamespace = "giantswarm"
-	credentialSecretDefaultName      = "credential-default"
+	credentialSecretDefaultName      = "credential-default" // nolint:gosec
 )
 
 type Config struct {

@@ -33,15 +33,6 @@ func IsWrongType(err error) bool {
 	return microerror.Cause(err) == wrongTypeError
 }
 
-var missingMetadataError = &microerror.Error{
-	Kind: "missingMetadataError",
-}
-
-// IsMissingMetadata asserts missingMetadataError.
-func IsMissingMetadata(err error) bool {
-	return microerror.Cause(err) == wrongTypeError
-}
-
 // IsObjectNotFound asserts object not found error from upstream's API message.
 func IsObjectNotFound(err error) bool {
 	if err == nil {

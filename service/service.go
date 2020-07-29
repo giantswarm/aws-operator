@@ -305,8 +305,8 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.operatorCollector.Boot(ctx)
-		go s.statusResourceCollector.Boot(ctx)
+		go s.operatorCollector.Boot(ctx)       // nolint:errcheck
+		go s.statusResourceCollector.Boot(ctx) // nolint:errcheck
 
 		go s.legacyClusterController.Boot(ctx)
 		go s.legacyDrainerController.Boot(ctx)

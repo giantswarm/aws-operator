@@ -128,11 +128,7 @@ func (r *Resource) getLoggingConfiguration(ctx context.Context, name string) (*s
 }
 
 func isLoggingEnabled(lc *s3.GetBucketLoggingOutput) bool {
-	if lc.LoggingEnabled != nil {
-		return true
-	}
-
-	return false
+	return lc.LoggingEnabled != nil
 }
 
 func isLoggingBucket(name string, lc *s3.GetBucketLoggingOutput) bool {

@@ -5,9 +5,10 @@ import (
 	"reflect"
 
 	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/aws-operator/service/internal/network"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+
+	"github.com/giantswarm/aws-operator/service/internal/network"
 )
 
 const (

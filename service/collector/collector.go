@@ -1,7 +1,7 @@
 package collector
 
 const (
-	GaugeValue float64 = 1
+	GaugeValue float64 = 1 // nolint:staticcheck
 	namespace          = "aws_operator"
 )
 

@@ -162,7 +162,10 @@ func mainE(ctx context.Context) error {
 
 	daemonCommand.PersistentFlags().String(f.Service.Test.LabelSelector.Version, "", "Overrides version value used with aws-operator.giantswarm.io/version label selector. Should be used only for testing.")
 
-	newCommand.CobraCommand().Execute()
+	err = newCommand.CobraCommand().Execute()
+	if err != nil {
+		return microerror.Mask(err)
+	}
 
 	return nil
 }

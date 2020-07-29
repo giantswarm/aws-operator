@@ -11,6 +11,67 @@ image:
   tag: "[[ .Version ]]"
 Installation:
   V1:
+    Provider:
+      AWS:
+        TrustedAdvisor:
+          Enabled: yeah
+        RouteTableNames: asd
+        Route53:
+          Enabled: yooo
+        Region: asd
+        PodInfraContainerImage: asd2
+        DeleteLoggingBucket: asd
+        IncludeTags: asd
+        Encrypter: asd
+        AvailabilityZones:
+          - asd
+          - asd2
+        AdvancedMonitoringEC2: asd
+        S3AccessLogsExpiration: asd
+    Auth:
+      Vault:
+        Address: asd
+    Secret:
+      AWSOperator:
+        SecretYaml: asdasdasd
+      Registry:
+        PullSecret:
+          DockerConfigJSON: asdsadad
+    Security:
+      Subnet:
+        VPN: asds
+        Customer:
+          Private: asdsad
+          Public: asdsad
+      RestrictAccess:
+        GuestAPI:
+          Private: asd
+          Public: asd
+    Guest:
+      Calico:
+        Subnet: asd
+        CIDR: asd2
+      Docker:
+        CIDR: asd
+      SSH:
+        SSOPublicKey: asd
+        UserList: asd
+      Kubernetes:
+        API:
+          ClusterIPRange: asd
+          Auth:
+            Provider:
+              OIDC:
+                GroupsClaim: asd
+                UsernameClaim: asd
+                IssuerURL: asd
+                ClientID: asd
+      IPAM:
+        PrivateSubnetMask: 22
+        PublicSubnetMask: 23
+        CIDRMask: 22
+        NetworkCIDR: 1.1.1.1
+    Name: test
     Registry:
       Domain: quay.io
 pod:
