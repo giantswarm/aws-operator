@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	allPorts             = -1
 	cadvisorPort         = 4194
 	etcdPort             = 2379
 	kubeletPort          = 10250
