@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.4] - 2020-07-29
+
+## Changed
+
+- Added support for latest Container Linux.
+
 ## [5.5.3] - 2020-06-02
 
 ### Fixed
