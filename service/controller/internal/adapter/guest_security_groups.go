@@ -19,8 +19,7 @@ const (
 	kubeStateMetricsPort = 10301
 	sshPort              = 22
 
-	allProtocols = "-1"
-	tcpProtocol  = "tcp"
+	tcpProtocol = "tcp"
 
 	defaultCIDR = "0.0.0.0/0"
 
@@ -319,9 +318,7 @@ func getKubernetesPublicAPIRules(cfg Config, hostClusterCIDR string) ([]security
 			return []securityGroupRule{}, microerror.Mask(err)
 		}
 
-		for _, gatewayRule := range hostClusterNATGatewayRules {
-			rules = append(rules, gatewayRule)
-		}
+		rules = append(rules, hostClusterNATGatewayRules...)
 
 		return rules, nil
 	} else {

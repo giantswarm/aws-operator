@@ -13,15 +13,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	clusterID = "test-cluster"
+	groupName = "worker"
+)
+
 func Test_AutoScalingGroupName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker"
-	groupName := "worker"
+	groupName := groupName
 
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 				Customer: v1alpha1.ClusterCustomer{
 					ID: "test-customer",
 				},
@@ -81,7 +86,7 @@ func Test_BucketName(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 			},
 		},
 	}
@@ -120,7 +125,7 @@ func Test_ClusterCustomer(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 				Customer: v1alpha1.ClusterCustomer{
 					ID: "test-customer",
 				},
@@ -135,7 +140,7 @@ func Test_ClusterCustomer(t *testing.T) {
 
 func Test_ClusterCloudProviderTag(t *testing.T) {
 	t.Parallel()
-	expectedID := "test-cluster"
+	expectedID := clusterID
 	expectedTag := "kubernetes.io/cluster/test-cluster"
 
 	customObject := v1alpha1.AWSConfig{
@@ -153,7 +158,7 @@ func Test_ClusterCloudProviderTag(t *testing.T) {
 
 func Test_ClusterNamespace(t *testing.T) {
 	t.Parallel()
-	expectedID := "test-cluster"
+	expectedID := clusterID
 
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
@@ -175,7 +180,7 @@ func Test_ClusterOrganization(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 				Customer: v1alpha1.ClusterCustomer{
 					ID: "test-org",
 				},
@@ -192,10 +197,10 @@ func Test_ClusterTags(t *testing.T) {
 	t.Parallel()
 	installName := "test-install"
 
-	expectedID := "test-cluster"
+	expectedID := clusterID
 	expectedTags := map[string]string{
 		"kubernetes.io/cluster/test-cluster": "owned",
-		"giantswarm.io/cluster":              "test-cluster",
+		"giantswarm.io/cluster":              clusterID,
 		"giantswarm.io/installation":         "test-install",
 		"giantswarm.io/organization":         "test-org",
 	}
@@ -276,7 +281,7 @@ func Test_DockerVolumeResourceName_Format(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 			},
 		},
 	}
@@ -296,7 +301,7 @@ func Test_DockerVolumeResourceName_Inequivalence(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 			},
 		},
 	}
@@ -315,7 +320,7 @@ func Test_EtcdVolumeName(t *testing.T) {
 	expectedName := "test-cluster-etcd"
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 		Customer: v1alpha1.ClusterCustomer{
 			ID: "test-customer",
 		},
@@ -337,7 +342,7 @@ func Test_LogVolumeName(t *testing.T) {
 	expectedName := "test-cluster-log"
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 		Customer: v1alpha1.ClusterCustomer{
 			ID: "test-customer",
 		},
@@ -486,7 +491,7 @@ func Test_MasterInstanceName(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
+						ID: clusterID,
 					},
 				},
 			},
@@ -507,7 +512,7 @@ func Test_MasterInstanceResourceName_Format(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 			},
 		},
 	}
@@ -527,7 +532,7 @@ func Test_MasterInstanceResourceName_Inequivalence(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 			},
 		},
 	}
@@ -627,7 +632,7 @@ func Test_RouteTableName(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
+						ID: clusterID,
 					},
 				},
 			},
@@ -640,7 +645,7 @@ func Test_RouteTableName(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
+						ID: clusterID,
 					},
 				},
 			},
@@ -653,7 +658,7 @@ func Test_RouteTableName(t *testing.T) {
 			customObject: v1alpha1.AWSConfig{
 				Spec: v1alpha1.AWSConfigSpec{
 					Cluster: v1alpha1.Cluster{
-						ID: "test-cluster",
+						ID: clusterID,
 					},
 				},
 			},
@@ -729,10 +734,10 @@ func Test_S3ServiceDomain(t *testing.T) {
 func Test_SecurityGroupName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker"
-	groupName := "worker"
+	groupName := groupName
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 		Customer: v1alpha1.ClusterCustomer{
 			ID: "test-customer",
 		},
@@ -755,7 +760,7 @@ func Test_SubnetName(t *testing.T) {
 	suffix := "private"
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 	}
 
 	customObject := v1alpha1.AWSConfig{
@@ -950,10 +955,10 @@ func Test_MainHostPostStackName(t *testing.T) {
 func Test_InstanceProfileName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker-EC2-K8S-Role"
-	profileType := "worker"
+	profileType := groupName
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 	}
 
 	customObject := v1alpha1.AWSConfig{
@@ -1127,10 +1132,10 @@ func Test_BucketObjectName(t *testing.T) {
 func Test_RoleName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker-EC2-K8S-Role"
-	profileType := "worker"
+	profileType := groupName
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 	}
 
 	customObject := v1alpha1.AWSConfig{
@@ -1148,10 +1153,10 @@ func Test_RoleName(t *testing.T) {
 func Test_PolicyName(t *testing.T) {
 	t.Parallel()
 	expectedName := "test-cluster-worker-EC2-K8S-Policy"
-	profileType := "worker"
+	profileType := groupName
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 	}
 
 	customObject := v1alpha1.AWSConfig{
@@ -1171,7 +1176,7 @@ func Test_PeerAccessRoleName(t *testing.T) {
 	expectedName := "test-cluster-vpc-peer-access"
 
 	cluster := v1alpha1.Cluster{
-		ID: "test-cluster",
+		ID: clusterID,
 	}
 
 	customObject := v1alpha1.AWSConfig{
@@ -1357,7 +1362,7 @@ func Test_TargetLogBucketName(t *testing.T) {
 	customObject := v1alpha1.AWSConfig{
 		Spec: v1alpha1.AWSConfigSpec{
 			Cluster: v1alpha1.Cluster{
-				ID: "test-cluster",
+				ID: clusterID,
 			},
 		},
 	}

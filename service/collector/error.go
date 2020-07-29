@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/giantswarm/microerror"
 )
 
@@ -39,28 +38,4 @@ var nilUsageError = &microerror.Error{
 // IsNilUsage asserts nilUsageError.
 func IsNilUsage(err error) bool {
 	return microerror.Cause(err) == nilUsageError
-}
-
-var unsupportedPlanError = &microerror.Error{
-	Kind: "unsupportedPlanError",
-}
-
-// IsUnsupportedPlan asserts that an error is due to Trusted Advisor not being
-// available with the current support plan.
-func IsUnsupportedPlan(err error) bool {
-	c := microerror.Cause(err)
-
-	if c == nilUsageError {
-		return true
-	}
-
-	aerr, ok := c.(awserr.Error)
-	if !ok {
-		return false
-	}
-	if aerr.Code() == "SubscriptionRequiredException" {
-		return true
-	}
-
-	return false
 }

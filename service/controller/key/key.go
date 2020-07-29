@@ -1,7 +1,7 @@
 package key
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" // nolint:gosec
 	"fmt"
 	"strconv"
 	"strings"
@@ -742,8 +742,8 @@ func ImageID(customObject v1alpha1.AWSConfig, release releasev1alpha1.Release) (
 func getResourcenameWithTimeHash(prefix string, customObject v1alpha1.AWSConfig) string {
 	clusterID := strings.Replace(ClusterID(customObject), "-", "", -1)
 
-	h := sha1.New()
-	h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
+	h := sha1.New() // nolint:gosec
+	_, _ = h.Write([]byte(strconv.FormatInt(time.Now().UnixNano(), 10)))
 	timeHash := fmt.Sprintf("%x", h.Sum(nil))[0:5]
 
 	upperTimeHash := strings.ToUpper(timeHash)

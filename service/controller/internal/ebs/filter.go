@@ -26,27 +26,18 @@ func IsFiltered(vol *ec2.Volume, filterFuncs []func(t *ec2.Tag) bool) bool {
 
 func NewDockerVolumeFilter(customObject v1alpha1.AWSConfig) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
-		if *t.Key == nameTagKey && *t.Value == key.DockerVolumeName(customObject) {
-			return true
-		}
-		return false
+		return *t.Key == nameTagKey && *t.Value == key.DockerVolumeName(customObject)
 	}
 }
 
 func NewEtcdVolumeFilter(customObject v1alpha1.AWSConfig) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
-		if *t.Key == nameTagKey && *t.Value == key.EtcdVolumeName(customObject) {
-			return true
-		}
-		return false
+		return *t.Key == nameTagKey && *t.Value == key.EtcdVolumeName(customObject)
 	}
 }
 
 func NewPersistentVolumeFilter(customObject v1alpha1.AWSConfig) func(t *ec2.Tag) bool {
 	return func(t *ec2.Tag) bool {
-		if *t.Key == cloudProviderPersistentVolumeTagKey {
-			return true
-		}
-		return false
+		return *t.Key == cloudProviderPersistentVolumeTagKey
 	}
 }

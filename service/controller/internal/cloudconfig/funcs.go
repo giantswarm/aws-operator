@@ -1,7 +1,7 @@
 package cloudconfig
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" // nolint:gosec
 	"encoding/hex"
 	"encoding/json"
 
@@ -27,7 +27,7 @@ func hashIgnition(encoded string, replacements map[string]string) (string, error
 		return "", microerror.Mask(err)
 	}
 
-	rawSum := sha1.Sum(reencoded)
+	rawSum := sha1.Sum(reencoded) // nolint:gosec
 	sum := rawSum[:]
 	encodedSum := make([]byte, hex.EncodedLen(len(sum)))
 	hex.Encode(encodedSum, sum)
