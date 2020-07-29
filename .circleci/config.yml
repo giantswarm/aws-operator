@@ -19,7 +19,7 @@ e2eTest: &e2eTest
         when: always
 
 orbs:
-  architect: giantswarm/architect@0.3.0
+  architect: giantswarm/architect@0.10.0
 
 version: 2.1
 jobs:
@@ -29,7 +29,9 @@ jobs:
     - checkout
 
     - run: |
-        wget -q $(curl -sS -H "Authorization: token $RELEASE_TOKEN" https://api.github.com/repos/giantswarm/architect/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+        wget -q https://github.com/giantswarm/architect/releases/download/v2.1.0/architect-v2.1.0-linux-amd64.tar.gz
+        tar -xf architect-v2.1.0-linux-amd64.tar.gz
+        cp architect-v2.1.0-linux-amd64/architect ./
         chmod +x ./architect
         ./architect version
 
