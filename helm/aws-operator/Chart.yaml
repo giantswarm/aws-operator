@@ -1,2 +1,6 @@
 name: aws-operator
 version: [[ .Version ]]
+appVersion: [[ .AppVersion ]]
+apiVersion: v1
+home: https://github.com/giantswarm/aws-operator
+description: some desc
