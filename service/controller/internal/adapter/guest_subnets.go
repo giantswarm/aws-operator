@@ -3,8 +3,9 @@ package adapter
 import (
 	"sort"
 
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 type Subnet struct {
