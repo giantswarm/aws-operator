@@ -111,16 +111,3 @@ workflows:
           filters:
             branches:
               ignore: master
-
-      # Ensure that a new app is also added to the app collection.
-      - architect/push-to-app-collection:
-          name: push-to-aws-app-collection
-          app_name: "aws-operator"
-          app_collection_repo: "aws-app-collection"
-          requires:
-            - push-to-app-catalog-master
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
