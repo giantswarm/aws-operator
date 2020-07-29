@@ -1,292 +1,126 @@
-e2eTest: &e2eTest
-    machine: true
-    working_directory: /home/circleci/.go_workspace/src/github.com/giantswarm/aws-operator
-    steps:
-    - checkout
-    - attach_workspace:
-        at: .
-    - run: |
-        wget -q $(curl -sS https://api.github.com/repos/giantswarm/e2e-harness/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./e2e-harness
-    - run: ./e2e-harness localkube
-    - run: ./e2e-harness setup --remote=false
-    - run: ./e2e-harness test --test-dir=${TEST_DIR}
-    - store_artifacts:
-        path: .e2e-harness/workdir/logs
-        destination: logs
-    - run:
-        command: ./e2e-harness teardown
-        when: always
+# TODO the workflow is unnecessary complicated due to some deficiencies in our
+# deployment pipeline as of time of writing. Therefore the push to Aliyun is
+# kind of optional in pull requests so that it does not block the push to the
+# app catalog. This is to have faster iterations when working on a daily basis.
+# Nevertheless we want the image push to Aliyun to be finished before we want to
+# push to the app catalog in case we merge to master or push a tag, which
+# indicates a new release. This is to have a more reliable pipeline, with the
+# caveat that it takes longer and sometimes even breaks. Once the situation got
+# improved we can simplify the circle config again as modified in the pull
+# request linked below.
+#
+#     https://github.com/giantswarm/aws-operator/pull/2347
+#
+version: 2.1
 
 orbs:
-  architect: giantswarm/architect@0.5.1
-
-version: 2.1
-jobs:
-  build:
-    machine: true
-    steps:
-    - checkout
-
-    - run: |
-        wget -q $(curl -sS -H "Authorization: token $RELEASE_TOKEN" https://api.github.com/repos/giantswarm/architect/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-        chmod +x ./architect
-        ./architect version
-
-    - run: |
-        date +"%Y" > /tmp/year
-        date +"%m" > /tmp/month
-        date +"%d" > /tmp/day
-    - restore_cache:
-        keys:
-        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
-        - go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}
-        - go-cache-v1-{{ checksum "/tmp/year" }}
-
-    - run: ./architect build
-
-    - store_test_results:
-        path: /tmp/results
-
-    - save_cache:
-        key: go-cache-v1-{{ checksum "/tmp/year" }}-{{ checksum "/tmp/month" }}-{{ checksum "/tmp/day" }}
-        paths:
-        - /tmp/go/cache
-
-    - persist_to_workspace:
-        root: .
-        paths:
-        - ./aws-operator
-
-  master:
-    docker:
-      - image: busybox
-    steps:
-      - run: "true"
-  pr:
-    docker:
-      - image: busybox
-    steps:
-      - run: "true"
-
-
-
-  e2eTestPRClusterState:
-    environment:
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-  e2eTestMasterClusterState:
-    environment:
-      TEST_DIR: "integration/test/clusterstate"
-    <<: *e2eTest
-
-
-
-  e2eTestPRDraining:
-    environment:
-      TEST_DIR: "integration/test/draining"
-    <<: *e2eTest
-
-  e2eTestMasterDraining:
-    environment:
-      TEST_DIR: "integration/test/draining"
-    <<: *e2eTest
-
-
-
-# e2eTestPRIPAM:
-#   environment:
-#     TEST_DIR: "integration/test/ipam"
-#   <<: *e2eTest
-#
-# e2eTestMasterIPAM:
-#   environment:
-#     TEST_DIR: "integration/test/ipam"
-#   <<: *e2eTest
-
-
-
-  e2eTestPRRecreateCluster:
-    environment:
-      TEST_DIR: "integration/test/recreatecluster"
-    <<: *e2eTest
-
-  e2eTestMasterRecreateCluster:
-    environment:
-      TEST_DIR: "integration/test/recreatecluster"
-    <<: *e2eTest
-
-
-
-  e2eTestPRScaling:
-    environment:
-      TEST_DIR: "integration/test/scaling"
-    <<: *e2eTest
-
-  e2eTestMasterScaling:
-    environment:
-      TEST_DIR: "integration/test/scaling"
-    <<: *e2eTest
-
-
-  # Update test is disabled now. We need to figure how to create previous
-  # version of the cluster with flattened operator in integration tests.
-  #e2eTestMasterUpdate:
-  #  environment:
-  #    TEST_DIR: "integration/test/update"
-  #  <<: *e2eTest
-  #e2eTestPRUpdate:
-  #  environment:
-  #    TEST_DIR: "integration/test/update"
-  #  <<: *e2eTest
-
-
+  architect: giantswarm/architect@0.10.0
 
 workflows:
-  version: 2
   build:
     jobs:
-      - build:
+      - architect/go-build:
+          name: go-build
+          binary: aws-operator
+          resource_class: xlarge
           filters:
             tags:
               only: /^v.*/
+
+      # Ensure that for every commit (all branches), and for every new release tag,
+      # an image is pushed to Quay.
       - architect/push-to-docker:
-          name: push-aws-operator-to-docker
+          name: push-to-quay
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
           requires:
-            - build
-          # Needed to trigger job also on git tag.
+            - go-build
           filters:
             tags:
               only: /^v.*/
-      - hold-push-aws-operator-to-aliyun-pr:
-          type: approval
-          requires:
-            - build
-          filters:
-            # Do not trigger the job on merge to master.
-            branches:
-              ignore: master
 
+      # Ensure that for every commit to master, and for every new release tag,
+      # an image gets pushed to the Aliyun registry.
       - architect/push-to-docker:
-          name: push-aws-operator-to-aliyun-pr
-          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
-          username_envar: "ALIYUN_USERNAME"
-          password_envar: "ALIYUN_PASSWORD"
-          # Push to Aliyun should execute for non-master branches only once manually approved.
-          requires:
-            - hold-push-aws-operator-to-aliyun-pr
-          filters:
-            # Do not trigger the job on merge to master.
-            branches:
-              ignore: master
-
-      # Push to Aliyun should execute without manual approval on master.
-      - architect/push-to-docker:
-          name: push-aws-operator-to-aliyun-master
+          name: push-to-aliyun
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
           requires:
-            - build
+            - go-build
           filters:
-            # Trigger the job on merge to master.
             branches:
               only: master
-            # Trigger the job also on git tag.
             tags:
               only: /^v.*/
+
+      # Allow that for every commit (to a branch other than master),
+      # and for every new tag that is not a release tag,
+      # an image _can_ get pushed to the Aliyun registry
+      # if manually approved.
+      - hold-push-to-aliyun-pr:
+          type: approval
+          requires:
+            - go-build
+          filters:
+            branches:
+              ignore: master
+            tags:
+              ignore: /^v.*/
+      - architect/push-to-docker:
+          name: push-to-aliyun-pr
+          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          username_envar: "ALIYUN_USERNAME"
+          password_envar: "ALIYUN_PASSWORD"
+          requires:
+            - hold-push-to-aliyun-pr
+          filters:
+            branches:
+              ignore: master
+            tags:
+              ignore: /.*/
+
+      # Ensure that for every commit to master and for every
+      # release tag, there is an app version in the catalog.
       - architect/push-to-app-catalog:
-          name: push-aws-operator-to-control-plane-app-catalog
+          name: push-to-app-catalog-master
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
           requires:
-            - push-aws-operator-to-docker
-          # Needed to trigger job also on git tag.
+            - push-to-aliyun
+            - push-to-quay
           filters:
+            branches:
+              only: master
             tags:
               only: /^v.*/
+
+      # Ensure that for every commit (branch other than master)
+      # there is an app version in the test catalog.
+      # Note: Making this app usable in china needs manual approval
+      # of the 'hold-push-to-aliyun-pr' job.
+      - architect/push-to-app-catalog:
+          name: push-to-app-catalog-pr
+          app_catalog: "control-plane-catalog"
+          app_catalog_test: "control-plane-test-catalog"
+          chart: "aws-operator"
+          requires:
+            - push-to-quay
+          filters:
+            branches:
+              ignore: master
+
+      # Ensure that a new app is also added to the app collection.
       - architect/push-to-app-collection:
-          name: push-aws-operator-to-aws-app-collection
+          name: push-to-aws-app-collection
           app_name: "aws-operator"
           app_collection_repo: "aws-app-collection"
           requires:
-            - push-aws-operator-to-control-plane-app-catalog
+            - push-to-app-catalog-master
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /^v.*/
-      - hold:
-          type: approval
-      - master:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-      - pr:
-          requires:
-            - build
-            - hold
-          filters:
-            branches:
-              ignore: master
-
-
-
-#     - e2eTestMasterClusterState:
-#         requires:
-#           - master
-      - e2eTestPRClusterState:
-          requires:
-            - pr
-
-
-
-#     - e2eTestMasterDraining:
-#         requires:
-#           - master
-      - e2eTestPRDraining:
-          requires:
-            - pr
-
-
-
-#     - e2eTestMasterIPAM:
-#         requires:
-#           - master
-#     - e2eTestPRIPAM:
-#         requires:
-#           - pr
-
-
-
-#     - e2eTestMasterRecreateCluster:
-#         requires:
-#           - master
-      - e2eTestPRRecreateCluster:
-          requires:
-            - pr
-
-
-
-#     - e2eTestMasterScaling:
-#         requires:
-#           - master
-      - e2eTestPRScaling:
-          requires:
-            - pr
-
-
-
-#     - e2eTestMasterUpdate:
-#         requires:
-#         - master
-#     - e2eTestPRUpdate:
-#         requires:
-#         - pr
