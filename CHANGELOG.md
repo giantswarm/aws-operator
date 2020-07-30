@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Adjust number of host network pods on worker node for aws-cni
+
 ## [8.7.4] - 2020-07-29
 
 ### Fixed
