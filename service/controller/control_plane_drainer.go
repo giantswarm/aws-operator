@@ -128,7 +128,6 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 	{
 		c := drainerinitializer.ResourceConfig{
 			ASG:       newASG,
-			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 
@@ -147,7 +146,6 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 	{
 		c := drainerfinalizer.ResourceConfig{
 			ASG:       newASG,
-			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 

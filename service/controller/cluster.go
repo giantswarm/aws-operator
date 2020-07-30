@@ -64,11 +64,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ClusterConfig struct {
-	Event     recorder.Interface
+	Event     event.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
 	Locker    locker.Interface
@@ -426,7 +426,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var s3BucketResource resource.Interface
 	{
 		c := s3bucket.Config{
-			Event:  config.Event,
 			Logger: config.Logger,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
@@ -502,7 +501,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupSecurityGroups resource.Interface
 	{
 		c := cleanupsecuritygroups.Config{
-			Event:  config.Event,
 			Logger: config.Logger,
 		}
 
@@ -677,7 +675,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var secretFinalizerResource resource.Interface
 	{
 		c := secretfinalizer.Config{
-			Event:     config.Event,
 			K8sClient: config.K8sClient.K8sClient(),
 			Logger:    config.Logger,
 		}

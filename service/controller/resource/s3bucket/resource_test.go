@@ -4,9 +4,6 @@ import (
 	"testing"
 
 	"github.com/giantswarm/micrologger/microloggertest"
-
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
 func Test_ContainsBucketState(t *testing.T) {
@@ -95,20 +92,9 @@ func Test_BucketCanBeDeleted(t *testing.T) {
 		},
 	}
 
-	var event recorder.Interface
-	{
-		c := recorder.Config{
-			K8sClient: unittest.FakeK8sClient(),
-
-			Component: "dummy",
-		}
-
-		event = recorder.New(c)
-	}
 	c := Config{}
 
 	c.Logger = microloggertest.New()
-	c.Event = event
 	c.AccessLogsExpiration = 0
 
 	for _, tc := range testCases {

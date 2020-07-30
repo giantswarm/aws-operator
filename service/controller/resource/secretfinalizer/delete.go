@@ -60,7 +60,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removed finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
-			r.event.Emit(ctx, &cr, "FinalizerSecretRemoved", fmt.Sprintf("Removed finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finalizer already removed for secret %#q in namespace %#q", s.Name, s.Namespace))
 		}

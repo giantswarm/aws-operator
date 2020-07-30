@@ -19,7 +19,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -28,7 +27,6 @@ const (
 
 type ResourceConfig struct {
 	ASG       asg.Interface
-	Event     event.Interface
 	G8sClient versioned.Interface
 	Logger    micrologger.Logger
 
@@ -38,7 +36,6 @@ type ResourceConfig struct {
 
 type Resource struct {
 	asg       asg.Interface
-	event     event.Interface
 	g8sClient versioned.Interface
 	logger    micrologger.Logger
 
@@ -49,9 +46,6 @@ type Resource struct {
 func NewResource(config ResourceConfig) (*Resource, error) {
 	if config.ASG == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
-	}
-	if config.Event == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
@@ -69,7 +63,6 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 
 	r := &Resource{
 		asg:       config.ASG,
-		event:     config.Event,
 		g8sClient: config.G8sClient,
 		logger:    config.Logger,
 

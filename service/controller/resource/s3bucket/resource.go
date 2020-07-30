@@ -8,7 +8,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -21,7 +20,6 @@ const (
 // Config represents the configuration used to create a new s3bucket resource.
 type Config struct {
 	// Dependencies.
-	Event  event.Interface
 	Logger micrologger.Logger
 
 	// Settings.
@@ -34,7 +32,6 @@ type Config struct {
 // Resource implements the s3bucket resource.
 type Resource struct {
 	// Dependencies.
-	event  event.Interface
 	logger micrologger.Logger
 
 	// Settings.
@@ -47,9 +44,6 @@ type Resource struct {
 // New creates a new configured s3bucket resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
-	if config.Event == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -64,7 +58,6 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		// Dependencies.
-		event:  config.Event,
 		logger: config.Logger,
 
 		// Settings.

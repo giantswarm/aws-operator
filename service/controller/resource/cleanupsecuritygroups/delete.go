@@ -84,7 +84,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d security groups for tenant cluster %#q", deleted, key.ClusterID(&cr)))
-		r.event.Emit(ctx, &cr, "SecurityGroupsDeleted", fmt.Sprintf("Deleted %d security groups for tenant cluster %#q", deleted, key.ClusterID(&cr)))
 	} else {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no security groups to be deleted for tenant cluster %#q", key.ClusterID(&cr)))
 	}

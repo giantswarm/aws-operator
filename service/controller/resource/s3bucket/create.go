@@ -139,7 +139,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bucketInput.Name))
-		r.event.Emit(ctx, &cr, "S3BucketCreated", fmt.Sprintf("Created S3 bucket %#q", bucketInput.Name))
 	}
 
 	return nil
