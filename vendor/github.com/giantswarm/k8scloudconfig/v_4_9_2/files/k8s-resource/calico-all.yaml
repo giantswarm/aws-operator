@@ -620,6 +620,7 @@ rules:
   - pods
   - namespaces
   - serviceaccounts
+  - configmaps
   verbs:
   - watch
   - list
@@ -685,6 +686,7 @@ rules:
       - pods
       - nodes
       - namespaces
+      - configmaps
     verbs:
       - get
   - apiGroups: [""]
