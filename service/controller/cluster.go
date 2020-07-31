@@ -577,7 +577,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpfResource resource.Interface
 	{
 		c := tccpf.Config{
-			Event:     config.Event,
 			Detection: tccpfChangeDetection,
 			Logger:    config.Logger,
 
@@ -594,7 +593,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpiResource resource.Interface
 	{
 		c := tccpi.Config{
-			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,

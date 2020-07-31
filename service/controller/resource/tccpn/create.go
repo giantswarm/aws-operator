@@ -134,10 +134,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			r.event.Emit(ctx, &cr, "CFUpdate", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusRollbackInProgress {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusRollbackInProgress))
+			r.event.Emit(ctx, &cr, "CFUpdate", fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusRollbackInProgress))
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			return nil
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateComplete {
 			r.event.Emit(ctx, &cr, "CFCreated", fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusCreateComplete))
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateComplete {
 			r.event.Emit(ctx, &cr, "CFUpdated", fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateComplete))
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusRollbackComplete {
+			r.event.Emit(ctx, &cr, "CFRollback", fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusRollbackComplete))
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane nodes cloud formation stack already exists")

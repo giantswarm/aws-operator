@@ -5,7 +5,6 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -15,7 +14,6 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCCPF
-	Event     event.Interface
 	Logger    micrologger.Logger
 
 	InstallationName string
@@ -27,7 +25,6 @@ type Config struct {
 // manage a dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
 	detection *changedetection.TCCPF
-	event     event.Interface
 	logger    micrologger.Logger
 
 	installationName string
@@ -38,16 +35,12 @@ func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
-	if config.Event == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
 		detection: config.Detection,
-		event:     config.Event,
 		logger:    config.Logger,
 
 		installationName: config.InstallationName,

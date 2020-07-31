@@ -16,7 +16,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -68,21 +67,9 @@ func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 				}
 			}
 
-			var e recorder.Interface
-			{
-				c := recorder.Config{
-					K8sClient: unittest.FakeK8sClient(),
-
-					Component: "dummy",
-				}
-
-				e = recorder.New(c)
-			}
-
 			var r *Resource
 			{
 				c := Config{
-					Event:     e,
 					Detection: d,
 					Logger:    microloggertest.New(),
 
