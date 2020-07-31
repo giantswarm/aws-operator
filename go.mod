@@ -19,7 +19,7 @@ require (
 	github.com/giantswarm/helmclient v0.2.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient v0.2.0
-	github.com/giantswarm/k8scloudconfig/v6 v6.1.1-fix-calico-rbac2
+	github.com/giantswarm/k8scloudconfig/v6 v6.1.1-fix-calico-rbac3
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.0
