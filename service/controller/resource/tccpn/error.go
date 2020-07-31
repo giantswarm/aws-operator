@@ -20,27 +20,43 @@ var executionFailedError = &microerror.Error{
 	Kind: "executionFailedError",
 }
 
-// executionCF... is an error type for situations where Resource execution
-// cannot continue and must always fall back to operatorkit.
-//
-// Operatorkit creates an error event when Kind and Desc are set and writes it on the corresponding Kubernetes objects.
-var executionCFCreateError = &microerror.Error{
+// event... is an error type for situations where we want to create an Kubernetes event in operatorkit.
+var eventCFCreateError = &microerror.Error{
 	Kind: "CFCreateFailed",
 	Desc: fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusCreateFailed),
 }
-var executionCFUpdateRollbackError = &microerror.Error{
+var eventCFUpdateRollbackError = &microerror.Error{
 	Kind: "CFUpdateRollbackFailed",
 	Desc: fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateRollbackFailed),
 }
 
-var executionCFRollbackError = &microerror.Error{
+var eventCFRollbackError = &microerror.Error{
 	Kind: "CFRollbackFailed",
 	Desc: fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusRollbackFailed),
 }
 
-var executionCFDeleteError = &microerror.Error{
+var eventCFDeleteError = &microerror.Error{
 	Kind: "CFDeleteFailed",
 	Desc: fmt.Sprintf("The tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteFailed),
+}
+
+// IsDeleteFailed asserts eventCFDeleteError.
+func IsDeleteFailed(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), cloudformation.ResourceStatusDeleteFailed) {
+		return true
+	}
+
+	if c == eventCFDeleteError {
+		return true
+	}
+
+	return false
 }
 
 var deleteInProgressError = &microerror.Error{
