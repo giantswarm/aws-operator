@@ -811,7 +811,6 @@ func (r *Resource) snapshotEtcdVolume(ctx context.Context, cr infrastructurev1al
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "created etcd volume snapshot")
-	r.event.Emit(ctx, &cr, "ETCDVolumeCreated", "Created etcd volume snapshot")
 
 	return nil
 }

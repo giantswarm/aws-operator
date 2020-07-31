@@ -486,7 +486,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupRecordSets resource.Interface
 	{
 		c := cleanuprecordsets.Config{
-			Event:  config.Event,
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
