@@ -8,7 +8,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,7 +16,6 @@ const (
 )
 
 type Config struct {
-	Event  event.Interface
 	Logger micrologger.Logger
 
 	InstallationName string
@@ -28,22 +26,17 @@ type Config struct {
 // Connections made between the AWS Control Plane Accounts and the AWS Tenant
 // Cluster Accounts.
 type Resource struct {
-	event  event.Interface
 	logger micrologger.Logger
 
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
-	if config.Event == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		event:  config.Event,
 		logger: config.Logger,
 
 		installationName: config.InstallationName,

@@ -528,7 +528,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
-			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,

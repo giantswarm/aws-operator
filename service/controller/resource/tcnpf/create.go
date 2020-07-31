@@ -102,7 +102,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's node pool finalizer cloud formation stack")
-		r.event.Emit(ctx, &cr, "CFCreateRequested", "Requested the creation of the tenant cluster's node pool finalizer cloud formation stack")
 	}
 
 	{

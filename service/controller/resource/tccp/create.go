@@ -96,10 +96,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
 			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
-		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
-		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
