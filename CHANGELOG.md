@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.5] - 2020-07-30
+
+### Changed
+
+- Adjust number of host network pods on worker node for aws-cni
+
 ## [8.7.4] - 2020-07-29
 
 ### Fixed
@@ -194,7 +200,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...HEAD
+[8.7.5]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...v8.7.5
 [8.7.4]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...v8.7.4
 [8.7.3]: https://github.com/giantswarm/aws-operator/compare/v8.7.2...v8.7.3
 [8.7.2]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...v8.7.2
