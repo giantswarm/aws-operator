@@ -231,7 +231,6 @@ func (r *Resource) stopMasterInstance(ctx context.Context, cr infrastructurev1al
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested to stop instance %#q", instanceID))
-		r.event.Emit(ctx, &cr, "TerminateInstanceRequested", fmt.Sprintf("Requested to stop instance %#q", instanceID))
 	}
 
 	{
@@ -315,7 +314,6 @@ func (r *Resource) terminateMasterInstance(ctx context.Context, cr infrastructur
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated master instance %#q", instanceID))
-		r.event.Emit(ctx, &cr, "TerminatedInstance", fmt.Sprintf("Terminated master instance %#q", instanceID))
 	}
 
 	return nil
