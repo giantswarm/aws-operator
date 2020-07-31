@@ -1,6 +1,7 @@
 package tccp
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -18,6 +19,29 @@ import (
 //
 var executionFailedError = &microerror.Error{
 	Kind: "executionFailedError",
+}
+
+// executionCF... is an error type for situations where Resource execution
+// cannot continue and must always fall back to operatorkit.
+//
+// Operatorkit creates an error event when Kind and Desc are set and writes it on the corresponding Kubernetes objects.
+var executionCFCreateError = &microerror.Error{
+	Kind: "CFCreateFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusCreateFailed),
+}
+var executionCFUpdateRollbackError = &microerror.Error{
+	Kind: "CFUpdateRollbackFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateRollbackFailed),
+}
+
+var executionCFRollbackError = &microerror.Error{
+	Kind: "CFRollbackFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusRollbackFailed),
+}
+
+var executionCFDeleteError = &microerror.Error{
+	Kind: "CFDeleteFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteFailed),
 }
 
 var alreadyTerminatedError = &microerror.Error{
