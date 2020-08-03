@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -102,12 +101,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateRollbackFailed {
 			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
-		} else if stackInProgress(*o.Stacks[0].StackStatus) {
+		} else if key.StackInProgress(*o.Stacks[0].StackStatus) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 			r.event.Emit(ctx, &cr, "CFInProgress", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
-		} else if stackComplete(*o.Stacks[0].StackStatus) {
+		} else if key.StackComplete(*o.Stacks[0].StackStatus) {
 			r.event.Emit(ctx, &cr, "CFCompleted", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 		}
 
@@ -839,12 +838,4 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	}
 
 	return nil
-}
-
-func stackComplete(status string) bool {
-	return strings.Contains(status, "COMPLETE")
-}
-
-func stackInProgress(status string) bool {
-	return strings.Contains(status, "IN_PROGRESS")
 }
