@@ -2,6 +2,7 @@ package recorder
 
 import (
 	"context"
+	"unicode"
 
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclienttest"
@@ -40,5 +41,12 @@ func New(c Config) Interface {
 // Emit writes only informative events like status of creation or updates.
 // Error events will be handled by operatorkit when using microerror.
 func (r *Recorder) Emit(ctx context.Context, obj pkgruntime.Object, reason, message string) {
-	r.Event(obj, corev1.EventTypeNormal, reason, message)
+	r.Event(obj, corev1.EventTypeNormal, reason, upper(message))
+}
+
+// upper is a helper function to uppercase first letter of the event message
+func upper(in string) string {
+	out := []rune(in)
+	out[0] = unicode.ToUpper(out[0])
+	return string(out)
 }

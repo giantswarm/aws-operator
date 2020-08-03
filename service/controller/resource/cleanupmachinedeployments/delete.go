@@ -52,7 +52,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted aws machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr)))
-		r.event.Emit(ctx, &cr, "MachineDeploymentDeleted", fmt.Sprintf("Deleted aws machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr)))
+		r.event.Emit(ctx, &cr, "MachineDeploymentDeleted", fmt.Sprintf("deleted aws machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr)))
 	}
 
 	return nil
