@@ -45,10 +45,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ControlPlaneConfig struct {
 	CertsSearcher      certs.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -205,6 +207,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 			Config: cloudconfig.Config{
 				CertsSearcher:      certsSearcher,
 				Encrypter:          encrypterObject,
+				Event:              config.Event,
 				HAMaster:           config.HAMaster,
 				Images:             config.Images,
 				K8sClient:          config.K8sClient,
@@ -378,6 +381,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := tccpn.Config{
 			Detection: tccpnChangeDetection,
+			Event:     config.Event,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,
 			K8sClient: config.K8sClient,

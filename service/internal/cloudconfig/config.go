@@ -10,11 +10,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type Config struct {
 	CertsSearcher      certs.Interface
 	Encrypter          encrypter.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -46,6 +48,9 @@ func (c Config) Validate() error {
 	}
 	if c.Encrypter == nil {
 		return microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", c)
+	}
+	if c.Event == nil {
+		return microerror.Maskf(invalidConfigError, "%T.Event must not be empty", c)
 	}
 	if c.HAMaster == nil {
 		return microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", c)

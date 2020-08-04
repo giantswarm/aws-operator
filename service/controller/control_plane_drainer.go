@@ -24,9 +24,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/drainerinitializer"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ControlPlaneDrainerConfig struct {
+	Event     event.Interface
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
