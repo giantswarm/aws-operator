@@ -192,17 +192,6 @@ workflows:
           filters:
             tags:
               only: /^v.*/
-      - architect/push-to-app-collection:
-          name: push-to-aws-app-collection
-          app_name: "aws-operator"
-          app_collection_repo: "aws-app-collection"
-          requires:
-            - push-aws-operator-to-control-plane-app-catalog
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
       - hold:
           type: approval
       - master:
