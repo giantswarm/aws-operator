@@ -45,7 +45,10 @@ const TemplateMainLaunchTemplate = `
                 "config": {
                   "append": [
                     {
-                      "source": "{{ .LaunchTemplate.SmallCloudConfig.S3URL }}"
+                      "source": "{{ .LaunchTemplate.SmallCloudConfig.S3URL }}",
+                      "verification": {
+                        "hash": "{{ .LaunchTemplate.SmallCloudConfig.Hash }}"
+                      }
                     }
                   ]
                 }

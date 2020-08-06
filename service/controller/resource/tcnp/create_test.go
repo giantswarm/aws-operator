@@ -110,11 +110,12 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			var r *Resource
 			{
 				c := Config{
-					Detection: d,
-					Event:     e,
-					Images:    i,
-					K8sClient: k,
-					Logger:    microloggertest.New(),
+					CloudConfig: &unittest.CloudConfig{},
+					Detection:   d,
+					Event:       e,
+					Images:      i,
+					K8sClient:   k,
+					Logger:      microloggertest.New(),
 
 					InstallationName: "dummy",
 				}

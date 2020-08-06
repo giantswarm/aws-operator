@@ -2,6 +2,7 @@ package cloudconfig
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"sync"
 
@@ -38,6 +39,23 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	}
 
 	return t, nil
+}
+
+func (t *TCNP) NewHashes(ctx context.Context, obj interface{}) ([]string, error) {
+	var hashes []string
+
+	templates, err := t.NewTemplates(ctx, obj)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	for _, t := range templates {
+		h := sha256.New()
+		h.Write([]byte(t))
+		hashes = append(hashes, string(h.Sum(nil)))
+	}
+
+	return hashes, nil
 }
 
 func (t *TCNP) NewPaths(ctx context.Context, obj interface{}) ([]string, error) {

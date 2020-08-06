@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
@@ -17,12 +18,13 @@ const (
 )
 
 type Config struct {
-	Detection *changedetection.TCCPN
-	Event     event.Interface
-	HAMaster  hamaster.Interface
-	Images    images.Interface
-	K8sClient k8sclient.Interface
-	Logger    micrologger.Logger
+	CloudConfig cloudconfig.Interface
+	Detection   *changedetection.TCCPN
+	Event       event.Interface
+	HAMaster    hamaster.Interface
+	Images      images.Interface
+	K8sClient   k8sclient.Interface
+	Logger      micrologger.Logger
 
 	InstallationName string
 	Route53Enabled   bool
@@ -32,18 +34,22 @@ type Config struct {
 // Control Plane Node. We manage a dedicated Cloud Formation stack for each node
 // pool.
 type Resource struct {
-	detection *changedetection.TCCPN
-	event     event.Interface
-	haMaster  hamaster.Interface
-	images    images.Interface
-	k8sClient k8sclient.Interface
-	logger    micrologger.Logger
+	cloudConfig cloudconfig.Interface
+	detection   *changedetection.TCCPN
+	event       event.Interface
+	haMaster    hamaster.Interface
+	images      images.Interface
+	k8sClient   k8sclient.Interface
+	logger      micrologger.Logger
 
 	installationName string
 	route53Enabled   bool
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CloudConfig == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -68,12 +74,13 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		detection: config.Detection,
-		event:     config.Event,
-		haMaster:  config.HAMaster,
-		images:    config.Images,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		cloudConfig: config.CloudConfig,
+		detection:   config.Detection,
+		event:       config.Event,
+		haMaster:    config.HAMaster,
+		images:      config.Images,
+		k8sClient:   config.K8sClient,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 		route53Enabled:   config.Route53Enabled,

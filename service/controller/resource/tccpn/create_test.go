@@ -148,12 +148,13 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			var r *Resource
 			{
 				c := Config{
-					Event:     e,
-					K8sClient: k,
-					Detection: d,
-					HAMaster:  h,
-					Images:    i,
-					Logger:    microloggertest.New(),
+					CloudConfig: &unittest.CloudConfig{},
+					Event:       e,
+					K8sClient:   k,
+					Detection:   d,
+					HAMaster:    h,
+					Images:      i,
+					Logger:      microloggertest.New(),
 
 					InstallationName: "dummy",
 					Route53Enabled:   tc.route53Enabled,

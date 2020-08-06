@@ -510,11 +510,12 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
-			Detection: tcnpChangeDetection,
-			Event:     config.Event,
-			Images:    config.Images,
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
+			CloudConfig: tcnpCloudConfig,
+			Detection:   tcnpChangeDetection,
+			Event:       config.Event,
+			Images:      config.Images,
+			K8sClient:   config.K8sClient,
+			Logger:      config.Logger,
 
 			InstallationName: config.InstallationName,
 		}
