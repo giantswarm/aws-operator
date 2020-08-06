@@ -2,7 +2,7 @@ package cloudconfig
 
 import (
 	"context"
-	"crypto/sha256"
+	"crypto/sha512"
 	"fmt"
 	"sync"
 
@@ -50,8 +50,8 @@ func (t *TCNP) NewHashes(ctx context.Context, obj interface{}) ([]string, error)
 	}
 
 	for _, t := range templates {
-		h := sha256.New()
-		h.Write([]byte(t))
+		h := sha512.New()
+		h.Write([]byte("sha512-" + t))
 		hashes = append(hashes, string(h.Sum(nil)))
 	}
 
