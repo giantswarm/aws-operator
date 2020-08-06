@@ -51,7 +51,10 @@ func (t *TCCPN) NewHashes(ctx context.Context, obj interface{}) ([]string, error
 
 	for _, t := range templates {
 		h := sha512.New()
-		h.Write([]byte("sha512-" + t))
+		_, err := h.Write([]byte("sha512-" + t))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 		hashes = append(hashes, string(h.Sum(nil)))
 	}
 
