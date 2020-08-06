@@ -107,8 +107,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		targetRelease, err = t.releases.Release(ctx, key.ReleaseVersion(&cr))
 		if releases.IsNotFound(err) {
 			// fall through
-		}
-		if err != nil {
+		} else if err != nil {
 			return false, microerror.Mask(err)
 		}
 	}
