@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Set vpc peering connection tag 'Name' to cluster id.
+
 ## [8.7.5] - 2020-07-30
 
 ### Changed
