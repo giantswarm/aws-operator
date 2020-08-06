@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add verification hash calculation for Cloud Formation stack update improvements.
+
 ## [8.7.5] - 2020-07-30
 
 ### Changed
