@@ -6,6 +6,7 @@ import (
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -82,7 +83,9 @@ func (r *Releases) lookupRelease(ctx context.Context, version string) (releasev1
 		types.NamespacedName{Name: key.ReleaseName(version)},
 		&re,
 	)
-	if err != nil {
+	if apierrors.IsNotFound(err) {
+		return releasev1alpha1.Release{}, microerror.Mask(notFoundError)
+	} else if err != nil {
 		return releasev1alpha1.Release{}, microerror.Mask(err)
 	}
 

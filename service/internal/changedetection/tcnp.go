@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -91,21 +92,33 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		return false, microerror.Mask(err)
 	}
 
+	var currentRelease releasev1alpha1.Release
+	{
+		currentRelease, err = t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
+		if releases.IsNotFound(err) {
+			// fall through
+		}
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	var targetRelease releasev1alpha1.Release
+	{
+		targetRelease, err = t.releases.Release(ctx, key.ReleaseVersion(&cr))
+		if releases.IsNotFound(err) {
+			// fall through
+		}
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(cr)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
-
-	currentRelease, err := t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-	targetRelease, err := t.releases.Release(ctx, key.ReleaseVersion(&cr))
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
 
 	if !componentVersionsEqual {
 		t.logger.LogCtx(ctx,
