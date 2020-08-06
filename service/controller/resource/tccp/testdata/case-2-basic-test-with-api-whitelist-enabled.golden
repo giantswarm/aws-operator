@@ -789,6 +789,9 @@ Resources:
       # string. Otherwise stack creation fails.
       PeerOwnerId: "control-plane-account"
       PeerRoleArn: peer-role-arn
+      Tags:
+        - Key: Name
+          Value: 8y5ck
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
