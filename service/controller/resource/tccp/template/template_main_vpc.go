@@ -31,6 +31,9 @@ const TemplateMainVPC = `
       # string. Otherwise stack creation fails.
       PeerOwnerId: "{{ $v.HostAccountID }}"
       PeerRoleArn: {{ $v.PeerRoleArn }}
+      Tags:
+        - Key: Name
+          Value: {{ $v.ClusterID }}
   VPCS3Endpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
