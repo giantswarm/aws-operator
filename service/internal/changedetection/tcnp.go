@@ -12,25 +12,32 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCNPConfig struct {
-	Logger micrologger.Logger
+	Logger   micrologger.Logger
+	Releases releases.Interface
 }
 
 // TCNP is a detection service implementation deciding if the TCNP stack should
 // be updated.
 type TCNP struct {
-	logger micrologger.Logger
+	logger   micrologger.Logger
+	releases releases.Interface
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.Releases == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Releases must not be empty", config)
+	}
 
 	t := &TCNP{
-		logger: config.Logger,
+		logger:   config.Logger,
+		releases: config.Releases,
 	}
 
 	return t, nil
@@ -89,6 +96,25 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
 
+	currentRelease, err := t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+	targetRelease, err := t.releases.Release(ctx, key.ReleaseVersion(&cr))
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
+
+	if !componentVersionsEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCP stack should update",
+			"reason", "component versions changed",
+		)
+		return true, nil
+	}
 	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",

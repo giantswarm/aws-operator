@@ -65,7 +65,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type ClusterConfig struct {
@@ -175,23 +174,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var r releases.Interface
-	{
-		c := releases.Config{
-			K8sClient: config.K8sClient,
-		}
-
-		r, err = releases.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpChangeDetection *changedetection.TCCP
 	{
 		c := changedetection.TCCPConfig{
-			Logger:   config.Logger,
-			Releases: r,
+			Logger: config.Logger,
 		}
 
 		tccpChangeDetection, err = changedetection.NewTCCP(c)

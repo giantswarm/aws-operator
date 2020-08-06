@@ -11,11 +11,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCCPNConfig struct {
 	HAMaster hamaster.Interface
 	Logger   micrologger.Logger
+	Releases releases.Interface
 }
 
 // TCCPN is a detection service implementation deciding if the TCCPN stack
@@ -23,6 +25,7 @@ type TCCPNConfig struct {
 type TCCPN struct {
 	haMaster hamaster.Interface
 	logger   micrologger.Logger
+	releases releases.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
@@ -32,10 +35,14 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.Releases == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Releases must not be empty", config)
+	}
 
 	t := &TCCPN{
 		haMaster: config.HAMaster,
 		logger:   config.Logger,
+		releases: config.Releases,
 	}
 
 	return t, nil
@@ -64,6 +71,25 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	masterReplicasEqual := cc.Status.TenantCluster.TCCPN.MasterReplicas == rep
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
+	currentRelease, err := t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+	targetRelease, err := t.releases.Release(ctx, key.ReleaseVersion(&cr))
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
+
+	if !componentVersionsEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCP stack should update",
+			"reason", "component versions changed",
+		)
+		return true, nil
+	}
 	if !masterInstanceEqual {
 		t.logger.LogCtx(
 			ctx,

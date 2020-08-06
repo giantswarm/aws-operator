@@ -10,32 +10,25 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCCPConfig struct {
-	Logger   micrologger.Logger
-	Releases releases.Interface
+	Logger micrologger.Logger
 }
 
 // TCCP is a detection service implementation deciding if the TCCP stack should
 // be updated.
 type TCCP struct {
-	logger   micrologger.Logger
-	releases releases.Interface
+	logger micrologger.Logger
 }
 
 func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-	if config.Releases == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Release must not be empty", config)
-	}
 
 	t := &TCCP{
-		logger:   config.Logger,
-		releases: config.Releases,
+		logger: config.Logger,
 	}
 
 	return t, nil
@@ -54,15 +47,6 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 
 	azsEqual := availabilityZonesEqual(cc.Spec.TenantCluster.TCCP.AvailabilityZones, cc.Status.TenantCluster.TCCP.AvailabilityZones)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
-	currentRelease, err := t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-	targetRelease, err := t.releases.Release(ctx, key.ReleaseVersion(&cr))
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-	_ = releaseComponentsEqual(currentRelease, targetRelease)
 
 	if !azsEqual {
 		t.logger.LogCtx(ctx,

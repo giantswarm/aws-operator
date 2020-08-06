@@ -20,7 +20,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/service/internal/releases"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -91,23 +90,10 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				ctx := unittest.DefaultContextControlPlane()
 				k := unittest.FakeK8sClient()
 
-				var rel releases.Interface
-				{
-					c := releases.Config{
-						K8sClient: k,
-					}
-
-					rel, err = releases.New(c)
-					if err != nil {
-						t.Fatal(err)
-					}
-				}
-
 				var d *changedetection.TCCP
 				{
 					c := changedetection.TCCPConfig{
-						Logger:   microloggertest.New(),
-						Releases: rel,
+						Logger: microloggertest.New(),
 					}
 
 					d, err = changedetection.NewTCCP(c)
