@@ -439,7 +439,10 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-1"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-1",
+                      "verification": {
+                        "hash": "sha512-foobar1"
+                      }
                     }
                   ]
                 }
@@ -519,7 +522,10 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-2"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-2",
+                      "verification": {
+                        "hash": "sha512-foobar2"
+                      }
                     }
                   ]
                 }
@@ -599,7 +605,10 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-3"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-3",
+                      "verification": {
+                        "hash": "sha512-foobar3"
+                      }
                     }
                   ]
                 }

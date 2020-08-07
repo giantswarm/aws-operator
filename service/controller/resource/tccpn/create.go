@@ -425,8 +425,16 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 		}
 	}
 
+	var hashes []string
+	{
+		hashes, err = r.cloudConfig.NewHashes(ctx, cr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	launchTemplate := &template.ParamsMainLaunchTemplate{}
-	for _, m := range mappings {
+	for i, m := range mappings {
 		item := template.ParamsMainLaunchTemplateItem{
 			BlockDeviceMapping: template.ParamsMainLaunchTemplateItemBlockDeviceMapping{
 				Docker: template.ParamsMainLaunchTemplateItemBlockDeviceMappingDocker{
@@ -454,6 +462,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 			Name:                  key.ControlPlaneLaunchTemplateName(&cr, m.ID),
 			Resource:              key.ControlPlaneLaunchTemplateResourceName(&cr, m.ID),
 			SmallCloudConfig: template.ParamsMainLaunchTemplateItemSmallCloudConfig{
+				Hash:  hashes[i],
 				S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, m.ID)),
 			},
 		}

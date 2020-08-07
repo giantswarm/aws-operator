@@ -265,7 +265,10 @@ Resources:
                 "config": {
                   "append": [
                     {
-                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-0"
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-0",
+                      "verification": {
+                        "hash": "sha512-foobar1"
+                      }
                     }
                   ]
                 }

@@ -5,6 +5,10 @@ import (
 )
 
 type Interface interface {
+	// NewHashes generates the ignition verification hashes according to the
+	// generated templates. All calls are indempotent and alligned within the
+	// same reconciliation loop.
+	NewHashes(ctx context.Context, obj interface{}) ([]string, error)
 	// NewPaths returns a list of S3 Object paths aligned with the templates
 	// returned by NewTemplates.
 	NewPaths(ctx context.Context, obj interface{}) ([]string, error)

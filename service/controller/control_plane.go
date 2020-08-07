@@ -394,12 +394,13 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
-			Detection: tccpnChangeDetection,
-			Event:     config.Event,
-			HAMaster:  config.HAMaster,
-			Images:    config.Images,
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
+			CloudConfig: tccpnCloudConfig,
+			Detection:   tccpnChangeDetection,
+			Event:       config.Event,
+			HAMaster:    config.HAMaster,
+			Images:      config.Images,
+			K8sClient:   config.K8sClient,
+			Logger:      config.Logger,
 
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,

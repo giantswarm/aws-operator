@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
@@ -16,11 +17,12 @@ const (
 )
 
 type Config struct {
-	Detection *changedetection.TCNP
-	Event     event.Interface
-	Images    images.Interface
-	K8sClient k8sclient.Interface
-	Logger    micrologger.Logger
+	CloudConfig cloudconfig.Interface
+	Detection   *changedetection.TCNP
+	Event       event.Interface
+	Images      images.Interface
+	K8sClient   k8sclient.Interface
+	Logger      micrologger.Logger
 
 	InstallationName string
 }
@@ -28,16 +30,20 @@ type Config struct {
 // Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
-	detection *changedetection.TCNP
-	event     event.Interface
-	images    images.Interface
-	k8sClient k8sclient.Interface
-	logger    micrologger.Logger
+	cloudConfig cloudconfig.Interface
+	detection   *changedetection.TCNP
+	event       event.Interface
+	images      images.Interface
+	k8sClient   k8sclient.Interface
+	logger      micrologger.Logger
 
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CloudConfig == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudConfig must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -59,11 +65,12 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		detection: config.Detection,
-		event:     config.Event,
-		images:    config.Images,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		cloudConfig: config.CloudConfig,
+		detection:   config.Detection,
+		event:       config.Event,
+		images:      config.Images,
+		k8sClient:   config.K8sClient,
+		logger:      config.Logger,
 
 		installationName: config.InstallationName,
 	}

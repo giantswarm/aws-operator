@@ -44,5 +44,6 @@ type ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume struct {
 }
 
 type ParamsMainLaunchTemplateSmallCloudConfig struct {
+	Hash  string
 	S3URL string
 }
