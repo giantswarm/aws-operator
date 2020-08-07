@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"crypto/sha512"
+	"encoding/hex"
 	"fmt"
 	"sync"
 
@@ -55,7 +56,7 @@ func (t *TCNP) NewHashes(ctx context.Context, obj interface{}) ([]string, error)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		hashes = append(hashes, string(h.Sum(nil)))
+		hashes = append(hashes, hex.EncodeToString(h.Sum(nil)))
 	}
 
 	return hashes, nil
