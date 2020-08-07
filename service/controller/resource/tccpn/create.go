@@ -427,7 +427,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 
 	var hashes []string
 	{
-		hashes, err = r.cloudConfig.NewHashes(ctx, cr)
+		hashes, err = r.cloudConfig.NewHashes(ctx, &cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
