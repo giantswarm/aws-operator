@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/davecgh/go-spew/spew"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -202,6 +203,8 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			Tags:                        r.getCloudFormationTags(cr),
 			TemplateBody:                aws.String(templateBody),
 		}
+
+		spew.Dump(templateBody)
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.CreateStack(i)
 		if err != nil {
