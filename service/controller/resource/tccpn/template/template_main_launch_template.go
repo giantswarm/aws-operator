@@ -38,7 +38,7 @@ const TemplateMainLaunchTemplate = `
             DeviceIndex: 0
             Groups:
             - {{ .MasterSecurityGroupID }}
-        TagSpecification:
+        TagSpecifications:
         - ResourceType: instance
           Tags:
             - Key: giantswarm.io/release
