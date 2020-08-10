@@ -43,10 +43,6 @@ const TemplateMainLaunchTemplate = `
           Tags:
             - Key: giantswarm.io/release
               Value: {{ .ReleaseVersion }}
-        - ResourceType: launch-template
-          Tags:
-            - Key: giantswarm.io/release
-              Value: {{ .ReleaseVersion }}
         UserData:
           Fn::Base64: |
             {

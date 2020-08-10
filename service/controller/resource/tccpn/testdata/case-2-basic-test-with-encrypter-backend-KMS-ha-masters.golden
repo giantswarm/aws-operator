@@ -434,10 +434,6 @@ Resources:
           Tags:
             - Key: giantswarm.io/release
               Value: 100.0.0
-        - ResourceType: launch-template
-          Tags:
-            - Key: giantswarm.io/release
-              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -523,10 +519,6 @@ Resources:
           Tags:
             - Key: giantswarm.io/release
               Value: 100.0.0
-        - ResourceType: launch-template
-          Tags:
-            - Key: giantswarm.io/release
-              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -609,10 +601,6 @@ Resources:
             - master-security-group-id
         TagSpecifications:
         - ResourceType: instance
-          Tags:
-            - Key: giantswarm.io/release
-              Value: 100.0.0
-        - ResourceType: launch-template
           Tags:
             - Key: giantswarm.io/release
               Value: 100.0.0
