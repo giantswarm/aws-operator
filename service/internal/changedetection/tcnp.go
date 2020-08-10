@@ -7,30 +7,38 @@ import (
 	"sort"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCNPConfig struct {
-	Logger micrologger.Logger
+	Logger   micrologger.Logger
+	Releases releases.Interface
 }
 
 // TCNP is a detection service implementation deciding if the TCNP stack should
 // be updated.
 type TCNP struct {
-	logger micrologger.Logger
+	logger   micrologger.Logger
+	releases releases.Interface
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.Releases == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Releases must not be empty", config)
+	}
 
 	t := &TCNP{
-		logger: config.Logger,
+		logger:   config.Logger,
+		releases: config.Releases,
 	}
 
 	return t, nil
@@ -84,11 +92,40 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		return false, microerror.Mask(err)
 	}
 
+	var currentRelease releasev1alpha1.Release
+	{
+		currentRelease, err = t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
+		if releases.IsNotFound(err) {
+			// fall through
+		} else if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	var targetRelease releasev1alpha1.Release
+	{
+		targetRelease, err = t.releases.Release(ctx, key.ReleaseVersion(&cr))
+		if releases.IsNotFound(err) {
+			// fall through
+		} else if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(cr)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
 
+	if !componentVersionsEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCP stack should update",
+			"reason", "component versions changed",
+		)
+		return true, nil
+	}
 	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",

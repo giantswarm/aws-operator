@@ -405,6 +405,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWS
 			Type:  key.MachineDeploymentInstanceType(cr),
 		},
 		OperatorVersion: key.OperatorVersion(&cr),
+		ReleaseVersion:  key.ReleaseVersion(&cr),
 	}
 
 	return outputs, nil

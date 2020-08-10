@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -52,10 +53,23 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			ctx := unittest.DefaultContext()
 			k := unittest.FakeK8sClient()
 
+			var rel releases.Interface
+			{
+				c := releases.Config{
+					K8sClient: k,
+				}
+
+				rel, err = releases.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var d *changedetection.TCNP
 			{
 				c := changedetection.TCNPConfig{
-					Logger: microloggertest.New(),
+					Logger:   microloggertest.New(),
+					Releases: rel,
 				}
 
 				d, err = changedetection.NewTCNP(c)

@@ -57,6 +57,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type MachineDeploymentConfig struct {
@@ -217,10 +218,23 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var rel releases.Interface
+	{
+		c := releases.Config{
+			K8sClient: config.K8sClient,
+		}
+
+		rel, err = releases.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
-			Logger: config.Logger,
+			Logger:   config.Logger,
+			Releases: rel,
 		}
 
 		tcnpChangeDetection, err = changedetection.NewTCNP(c)
