@@ -8,6 +8,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fix IAM policy on Tenant Clusters to manages IAM Role tags.
+
+## [8.7.5] - 2020-07-30
+
+### Changed
+
+- Adjust number of host network pods on worker node for aws-cni
+
+## [8.7.4] - 2020-07-29
+
+### Fixed
+
+- Adjust MAX_PODS for master and worker nodes to max IP's per ENI when using aws-cni
+
+### Changed
+
+- Use aws-cni version from the release.
+- Use aws-cni image built based on https://github.com/giantswarm/aws-cni
+- `k8scloudconfig` version updated to 7.0.4.
+
+## [8.7.3] - 2020-07-15
+
+### Fixed
+
+- Fix regional switch in helm chart.
+
+## [8.7.2] - 2020-07-14
+
+### Added
+
+- Add `--service.registry.mirrors` flag for setting registry mirror domains.
+- Make registry domain & mirrors configurable based on region.
+
+### Changed
+
+- Replace `--service.registrydomain` with `--service.registry.domain`.
+- Update `k8s-setup-network-env` image to `0.2.0`.
+
+### Fixed
+
+- Fix failing of ELB collector cache in case there is no ELB in AWS account
+
+
 ## [8.7.1] - 2020-07-08
 
 ### Added
@@ -18,10 +61,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Use `k8s-apiserver` image which includes CAs to enable OIDC.
-- Fix failing go template rendering of KMS encryption content.
-- Use `0.1.1` tag for `k8s-api-heahtz` image.
-- Use `0.1.0` tag for `k8s-setup-network-env` image.
 - Use `0.1.0` tag for `aws-attach-etcd-dep` image.
+- Use `0.1.0` tag for `k8s-setup-network-env` image.
+- Use `0.1.1` tag for `k8s-api-healthz` image.
+
+### Fixed
+
+- Fix failing go template rendering of KMS encryption content.
 
 
 
@@ -156,7 +202,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...HEAD
+[8.7.5]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...v8.7.5
+[8.7.4]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...v8.7.4
+[8.7.3]: https://github.com/giantswarm/aws-operator/compare/v8.7.2...v8.7.3
+[8.7.2]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...v8.7.2
 [8.7.1]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...v8.7.0
 [8.6.1]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...v8.6.1

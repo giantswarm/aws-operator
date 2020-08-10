@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -119,6 +120,17 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
+			var e recorder.Interface
+			{
+				c := recorder.Config{
+					K8sClient: k,
+
+					Component: "dummy",
+				}
+
+				e = recorder.New(c)
+			}
+
 			var aws infrastructurev1alpha2.AWSControlPlane
 			{
 				cl := unittest.DefaultCluster()
@@ -152,6 +164,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			{
 				c := Config{
 					CloudTags: ct,
+					Event:     e,
 					K8sClient: k,
 					Detection: d,
 					HAMaster:  h,

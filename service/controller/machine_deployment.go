@@ -57,11 +57,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
 	CloudTags          cloudtags.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -87,6 +89,7 @@ type MachineDeploymentConfig struct {
 	NetworkSetupDockerImage    string
 	PodInfraContainerImage     string
 	RegistryDomain             string
+	RegistryMirrors            []string
 	RouteTables                string
 	SSHUserList                string
 	SSOPublicKey               string
@@ -235,6 +238,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 			Config: cloudconfig.Config{
 				CertsSearcher:      certsSearcher,
 				Encrypter:          encrypterObject,
+				Event:              config.Event,
 				HAMaster:           config.HAMaster,
 				Images:             config.Images,
 				K8sClient:          config.K8sClient,
@@ -253,6 +257,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
+				RegistryMirrors:           config.RegistryMirrors,
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
@@ -510,7 +515,9 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		c := tcnp.Config{
 			CloudTags: config.CloudTags,
 			Detection: tcnpChangeDetection,
+			Event:     config.Event,
 			Images:    config.Images,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,

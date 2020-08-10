@@ -3,7 +3,7 @@ package images
 import (
 	"context"
 
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
 )
 
 type Interface interface {
@@ -12,6 +12,10 @@ type Interface interface {
 	// metav1.Object and contain the Giant Swarm specific cluster ID label and
 	// release version label.
 	AMI(ctx context.Context, obj interface{}) (string, error)
+	// AWSCNI looks up aws-cni version to compute the relevant Cloud Config
+	// images for the given object's release version. Paramter obj must be a
+	// metav1.Object and contain the Giant Swarm specific release version label.
+	AWSCNI(ctx context.Context, obj interface{}) (string, error)
 	// CC looks up necessary information to compute the relevant Cloud Config
 	// images for the given object's release version. Paramter obj must be a
 	// metav1.Object and contain the Giant Swarm specific release version label.

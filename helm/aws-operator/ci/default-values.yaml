@@ -38,6 +38,7 @@ Installation:
           Enabled: false
         CNI:
           ExternalSNAT: false
+        Region: ""
       Kind: ""
     Registry:
       Domain: ""

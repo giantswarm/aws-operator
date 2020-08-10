@@ -42,7 +42,7 @@ const (
 	KubernetesAPIHealthzVersion = "0.1.1"
 	// K8sSetupNetworkEnvironment is a tag representing the version of
 	// https://github.com/giantswarm/k8s-setup-network-environment used.
-	K8sSetupNetworkEnvironment = "0.1.0"
+	K8sSetupNetworkEnvironment = "0.2.0"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.

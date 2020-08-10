@@ -46,11 +46,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ControlPlaneConfig struct {
 	CertsSearcher      certs.Interface
 	CloudTags          cloudtags.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -71,6 +73,7 @@ type ControlPlaneConfig struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	RegistryMirrors           []string
 	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
@@ -206,6 +209,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 			Config: cloudconfig.Config{
 				CertsSearcher:      certsSearcher,
 				Encrypter:          encrypterObject,
+				Event:              config.Event,
 				HAMaster:           config.HAMaster,
 				Images:             config.Images,
 				K8sClient:          config.K8sClient,
@@ -224,6 +228,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
+				RegistryMirrors:           config.RegistryMirrors,
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
@@ -380,6 +385,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		c := tccpn.Config{
 			CloudTags: config.CloudTags,
 			Detection: tccpnChangeDetection,
+			Event:     config.Event,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,
 			K8sClient: config.K8sClient,

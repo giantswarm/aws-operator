@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"strings"
 	"sync"
@@ -31,6 +32,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 // Config represents the configuration used to create a new service.
@@ -142,6 +144,16 @@ func New(config Config) (*Service, error) {
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
+
+  var event recorder.Interface
+	{
+		c := recorder.Config{
+			K8sClient: k8sClient,
+
+			Component: fmt.Sprintf("%s-%s", project.Name(), project.Version()),
+		}
+
+		event = recorder.New(c)
 	}
 
 	var ha hamaster.Interface
@@ -161,7 +173,7 @@ func New(config Config) (*Service, error) {
 		c := images.Config{
 			K8sClient: k8sClient,
 
-			RegistryDomain: config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain: config.Viper.GetString(config.Flag.Service.Registry.Domain),
 		}
 
 		im, err = images.New(c)
@@ -209,6 +221,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.ClusterConfig{
 			CloudTags: ct,
+			Event:     event,
 			K8sClient: k8sClient,
 			HAMaster:  ha,
 			Locker:    kubeLockLocker,
@@ -251,6 +264,7 @@ func New(config Config) (*Service, error) {
 		c := controller.ControlPlaneConfig{
 			CertsSearcher:      certsSearcher,
 			CloudTags:          ct,
+			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -270,7 +284,8 @@ func New(config Config) (*Service, error) {
 			NetworkSetupDockerImage:   config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:    config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			Route53Enabled:            config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain:            config.Viper.GetString(config.Flag.Service.Registry.Domain),
+			RegistryMirrors:           config.Viper.GetStringSlice(config.Flag.Service.Registry.Mirrors),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 
@@ -286,6 +301,7 @@ func New(config Config) (*Service, error) {
 	var controlPlaneDrainerController *controller.ControlPlaneDrainer
 	{
 		c := controller.ControlPlaneDrainerConfig{
+			Event:     event,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -303,6 +319,7 @@ func New(config Config) (*Service, error) {
 		c := controller.MachineDeploymentConfig{
 			CertsSearcher:      certsSearcher,
 			CloudTags:          ct,
+			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -327,7 +344,8 @@ func New(config Config) (*Service, error) {
 			IPAMNetworkRange:           ipamNetworkRange,
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain:             config.Viper.GetString(config.Flag.Service.Registry.Domain),
+			RegistryMirrors:            config.Viper.GetStringSlice(config.Flag.Service.Registry.Mirrors),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
@@ -342,6 +360,7 @@ func New(config Config) (*Service, error) {
 	var machineDeploymentDrainerController *controller.MachineDeploymentDrainer
 	{
 		c := controller.MachineDeploymentDrainerConfig{
+			Event:     event,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 

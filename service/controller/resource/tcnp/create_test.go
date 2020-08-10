@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -78,6 +79,17 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				}
 			}
 
+			var e recorder.Interface
+			{
+				c := recorder.Config{
+					K8sClient: k,
+
+					Component: "dummy",
+				}
+
+				e = recorder.New(c)
+			}
+
 			var i images.Interface
 			{
 				c := images.Config{
@@ -115,7 +127,9 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				c := Config{
 					CloudTags: ct,
 					Detection: d,
+					Event:     e,
 					Images:    i,
+					K8sClient: k,
 					Logger:    microloggertest.New(),
 
 					InstallationName: "dummy",

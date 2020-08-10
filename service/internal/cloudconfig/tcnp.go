@@ -7,7 +7,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
@@ -162,6 +162,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			registryDomain: t.config.RegistryDomain,
 		}
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
+		params.RegistryMirrors = t.config.RegistryMirrors
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Versions = v

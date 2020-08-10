@@ -2,6 +2,7 @@ package unittest
 
 import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/to"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
@@ -38,7 +39,7 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 				AvailabilityZones: []string{"eu-central-1a", "eu-central-1c"},
 				InstanceDistribution: infrastructurev1alpha2.AWSMachineDeploymentSpecInstanceDistribution{
 					OnDemandBaseCapacity:                0,
-					OnDemandPercentageAboveBaseCapacity: 100,
+					OnDemandPercentageAboveBaseCapacity: to.IntP(100),
 				},
 				Worker: infrastructurev1alpha2.AWSMachineDeploymentSpecProviderWorker{
 					InstanceType:          "m5.2xlarge",

@@ -65,10 +65,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ClusterConfig struct {
 	CloudTags cloudtags.Interface
+	Event     event.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
 	Locker    locker.Interface
@@ -473,6 +475,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupMachineDeploymentsResource resource.Interface
 	{
 		c := cleanupmachinedeployments.Config{
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
@@ -526,8 +529,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := tccp.Config{
 			CloudTags: config.CloudTags,
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
