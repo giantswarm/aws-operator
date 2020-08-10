@@ -121,8 +121,8 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	if !componentVersionsEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",
-			"message", "detected TCCP stack should update",
-			"reason", "component versions changed",
+			"message", "detected TCNP stack should update",
+			"reason", fmt.Sprintf("component versions changed: %v", componentsDiff(currentRelease, targetRelease)),
 		)
 		return true, nil
 	}

@@ -1,6 +1,8 @@
 package changedetection
 
 import (
+	"fmt"
+
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 )
 
@@ -23,6 +25,24 @@ func releaseComponentsEqual(currentRelease releasev1alpha1.Release, targetReleas
 		}
 	}
 	return true
+}
+
+func componentsDiff(currentRelease releasev1alpha1.Release, targetRelease releasev1alpha1.Release) map[string]string {
+	var diff = make(map[string]string)
+
+	for _, current := range currentRelease.Spec.Components {
+		if findComponent(current.Name) {
+			for _, target := range targetRelease.Spec.Components {
+				if current.Name == target.Name {
+					if current.Version != target.Version {
+						diff[current.Name] = fmt.Sprintf("v%s -> v%s", current.Version, target.Version)
+					}
+				}
+			}
+		}
+	}
+
+	return diff
 }
 
 func findComponent(val string) bool {
