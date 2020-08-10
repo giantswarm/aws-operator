@@ -37,6 +37,15 @@ const TemplateMainLaunchTemplate = `
             DeviceIndex: 0
             Groups:
               - !Ref GeneralSecurityGroup
+        TagSpecification:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: {{ .LaunchTemplate.ReleaseVersion }}
+        - ResourceType: launch-template
+          Tags:
+            - Key: giantswarm.io/release
+              Value: {{ .LaunchTemplate.ReleaseVersion }}
         UserData:
           Fn::Base64: |
             {

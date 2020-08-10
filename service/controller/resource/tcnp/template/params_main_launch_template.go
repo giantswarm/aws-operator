@@ -4,6 +4,7 @@ type ParamsMainLaunchTemplate struct {
 	BlockDeviceMapping ParamsMainLaunchTemplateBlockDeviceMapping
 	Instance           ParamsMainLaunchTemplateInstance
 	Name               string
+	ReleaseVersion     string
 	SmallCloudConfig   ParamsMainLaunchTemplateSmallCloudConfig
 }
 
