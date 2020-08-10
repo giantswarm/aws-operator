@@ -83,7 +83,9 @@
                 "iam:TagRole"
             ],
             "Resource": [
-                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/gs-*"
+                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/gs-*",
+                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-IAMManager-Role",
+                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-Route53Manager-Role"
             ]
         },
         {
