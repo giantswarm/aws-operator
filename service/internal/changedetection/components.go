@@ -4,9 +4,6 @@ import (
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 )
 
-//components which matter to trigger update
-// Kubernetes, aws-cni, ...
-
 var components = []string{"kubernetes", "etcd", "aws-cni", "calico", "containerlinux"}
 
 func releaseComponentsEqual(currentRelease releasev1alpha1.Release, targetRelease releasev1alpha1.Release) bool {
