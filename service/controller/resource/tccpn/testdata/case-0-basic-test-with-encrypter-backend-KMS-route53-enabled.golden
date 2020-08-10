@@ -255,7 +255,7 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
-        TagSpecification:
+        TagSpecifications:
         - ResourceType: instance
           Tags:
             - Key: giantswarm.io/release
