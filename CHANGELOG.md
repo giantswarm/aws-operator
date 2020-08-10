@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add release version tag for ec2 instances
+
 ## [8.7.5] - 2020-07-30
 
 ### Changed
