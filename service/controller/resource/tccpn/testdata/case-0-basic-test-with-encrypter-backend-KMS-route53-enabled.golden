@@ -255,6 +255,15 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecification:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
+        - ResourceType: launch-template
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {

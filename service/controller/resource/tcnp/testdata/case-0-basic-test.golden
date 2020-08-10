@@ -191,6 +191,15 @@ Resources:
             DeviceIndex: 0
             Groups:
               - !Ref GeneralSecurityGroup
+        TagSpecification:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
+        - ResourceType: launch-template
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {

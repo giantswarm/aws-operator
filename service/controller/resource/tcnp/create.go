@@ -378,7 +378,8 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 			Monitoring: true,
 			Type:       key.MachineDeploymentInstanceType(cr),
 		},
-		Name: key.MachineDeploymentLaunchTemplateName(cr),
+		Name:           key.MachineDeploymentLaunchTemplateName(cr),
+		ReleaseVersion: key.ReleaseVersion(&cr),
 		SmallCloudConfig: template.ParamsMainLaunchTemplateSmallCloudConfig{
 			S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCNP(&cr)),
 		},
