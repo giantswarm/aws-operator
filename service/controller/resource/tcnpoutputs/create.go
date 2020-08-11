@@ -16,6 +16,7 @@ const (
 	InstanceImageKey      = "InstanceImage"
 	InstanceTypeKey       = "InstanceType"
 	OperatorVersionKey    = "OperatorVersion"
+	ReleaseVersionKey     = "ReleaseVersion"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -97,6 +98,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 		cc.Status.TenantCluster.OperatorVersion = v
+	}
+
+	{
+		v, err := cloudFormation.GetOutputValue(outputs, ReleaseVersionKey)
+		if cloudformation.IsOutputNotFound(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes ReleaseVersion output")
+		} else if err != nil {
+			return microerror.Mask(err)
+		}
+		cc.Status.TenantCluster.ReleaseVersion = v
 	}
 
 	return nil

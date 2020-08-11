@@ -7,6 +7,8 @@ Outputs:
     Value: 1
   OperatorVersion:
     Value: 7.3.0
+  ReleaseVersion:
+    Value: 100.0.0
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup

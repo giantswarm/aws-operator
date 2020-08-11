@@ -3,19 +3,23 @@ package changedetection
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCCPNConfig struct {
 	HAMaster hamaster.Interface
 	Logger   micrologger.Logger
+	Releases releases.Interface
 }
 
 // TCCPN is a detection service implementation deciding if the TCCPN stack
@@ -23,6 +27,7 @@ type TCCPNConfig struct {
 type TCCPN struct {
 	haMaster hamaster.Interface
 	logger   micrologger.Logger
+	releases releases.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
@@ -32,10 +37,14 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
+	if config.Releases == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Releases must not be empty", config)
+	}
 
 	t := &TCCPN{
 		haMaster: config.HAMaster,
 		logger:   config.Logger,
+		releases: config.Releases,
 	}
 
 	return t, nil
@@ -60,10 +69,39 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 		}
 	}
 
+	var currentRelease releasev1alpha1.Release
+	{
+		currentRelease, err = t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
+		if releases.IsNotFound(err) {
+			// fall through
+		} else if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	var targetRelease releasev1alpha1.Release
+	{
+		targetRelease, err = t.releases.Release(ctx, key.ReleaseVersion(&cr))
+		if releases.IsNotFound(err) {
+			// fall through
+		} else if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
 	masterInstanceEqual := cc.Status.TenantCluster.TCCPN.InstanceType == key.ControlPlaneInstanceType(cr)
 	masterReplicasEqual := cc.Status.TenantCluster.TCCPN.MasterReplicas == rep
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
+	if !componentVersionsEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCPN stack should update",
+			"reason", strings.Join(componentsDiff(currentRelease, targetRelease), ", "),
+		)
+		return true, nil
+	}
 	if !masterInstanceEqual {
 		t.logger.LogCtx(
 			ctx,

@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Update Cloudformation Stack when components version differ
+
+### Fixed
+
 - Fix IAM policy on Tenant Clusters to manages IAM Role tags.
 
 ## [8.7.5] - 2020-07-30

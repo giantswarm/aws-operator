@@ -43,6 +43,7 @@ type ContextStatusTenantCluster struct {
 	TCCPN           ContextStatusTenantClusterTCCPN
 	TCNP            ContextStatusTenantClusterTCNP
 	OperatorVersion string
+	ReleaseVersion  string
 }
 
 type ContextStatusTenantClusterASG struct {
