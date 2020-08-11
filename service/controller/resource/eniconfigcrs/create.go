@@ -6,7 +6,6 @@ import (
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -56,7 +55,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					annotation.Docs: "https://godoc.org/github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1#ENIConfig",
 				},
 				Name:      az.Name,
-				Namespace: corev1.NamespaceDefault,
+				Namespace: cr.GetNamespace(),
 			},
 			Spec: v1alpha1.ENIConfigSpec{
 				SecurityGroups: []string{
