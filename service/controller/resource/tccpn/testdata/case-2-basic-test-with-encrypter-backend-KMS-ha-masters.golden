@@ -431,6 +431,11 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -511,6 +516,11 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -591,6 +601,11 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {

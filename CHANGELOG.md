@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add release version tag for ec2 instances
 - Update Cloudformation Stack when components version differ
 
 ### Fixed

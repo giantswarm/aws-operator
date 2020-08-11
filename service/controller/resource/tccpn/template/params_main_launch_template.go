@@ -11,6 +11,7 @@ type ParamsMainLaunchTemplateItem struct {
 	MasterSecurityGroupID string
 	Name                  string
 	Resource              string
+	ReleaseVersion        string
 }
 
 type ParamsMainLaunchTemplateItemBlockDeviceMapping struct {
