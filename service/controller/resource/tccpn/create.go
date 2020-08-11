@@ -483,6 +483,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWS
 		InstanceType:    key.ControlPlaneInstanceType(cr),
 		MasterReplicas:  rep,
 		OperatorVersion: key.OperatorVersion(&cr),
+		ReleaseVersion:  key.ReleaseVersion(&cr),
 	}
 
 	return outputs, nil

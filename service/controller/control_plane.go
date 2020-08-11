@@ -46,6 +46,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type ControlPlaneConfig struct {
@@ -238,11 +239,24 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var rel releases.Interface
+	{
+		c := releases.Config{
+			K8sClient: config.K8sClient,
+		}
+
+		rel, err = releases.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnChangeDetection *changedetection.TCCPN
 	{
 		c := changedetection.TCCPNConfig{
 			HAMaster: config.HAMaster,
 			Logger:   config.Logger,
+			Releases: rel,
 		}
 
 		tccpnChangeDetection, err = changedetection.NewTCCPN(c)
