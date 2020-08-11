@@ -2,6 +2,7 @@ package changedetection
 
 import (
 	"strconv"
+	"strings"
 	"testing"
 
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
@@ -15,7 +16,7 @@ func TestReleaseComponentsEqual(t *testing.T) {
 		targetRelease  releasev1alpha1.Release
 		result         bool
 	}{
-		// Trigger Cloudformation stack update
+		// Trigger Cloudformation stack update, empty current release will always trigger an update
 		{
 			name:           "case 0",
 			currentRelease: releasev1alpha1.Release{},
@@ -219,14 +220,14 @@ func TestReleaseComponentsEqual(t *testing.T) {
 							Name:                  "etcd",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "3.4.10",
+							Version:               "3.4.10", // this version changed
 						},
 						{
 							Catalog:               "",
 							Name:                  "kubernetes",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "1.17.9",
+							Version:               "1.17.9", // this version changed
 						},
 					},
 				},
@@ -348,7 +349,7 @@ func TestReleaseComponentsEqual(t *testing.T) {
 							Name:                  "cluster-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "2.3.3",
+							Version:               "2.3.3", // this version changed
 						},
 						{
 							Catalog:               "",
@@ -380,6 +381,7 @@ func TestReleaseComponentsEqual(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			result := releaseComponentsEqual(tc.currentRelease, tc.targetRelease)
+			t.Log(strings.Join(componentsDiff(tc.currentRelease, tc.targetRelease), ", "))
 			if result != tc.result {
 				t.Fatalf("\n\n%s\n", cmp.Diff(tc.result, result))
 			}
