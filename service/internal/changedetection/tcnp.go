@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
@@ -122,7 +123,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCNP stack should update",
-			"reason", fmt.Sprintf("component versions changed: %v", componentsDiff(currentRelease, targetRelease)),
+			"reason", strings.Join(componentsDiff(currentRelease, targetRelease), ", "),
 		)
 		return true, nil
 	}

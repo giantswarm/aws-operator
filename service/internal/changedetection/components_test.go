@@ -15,151 +15,84 @@ func TestReleaseComponentsEqual(t *testing.T) {
 		targetRelease  releasev1alpha1.Release
 		result         bool
 	}{
+		// Trigger Cloudformation stack update
 		{
-			name: "case 0",
-			currentRelease: releasev1alpha1.Release{
-				Spec: releasev1alpha1.ReleaseSpec{
-					Components: []releasev1alpha1.ReleaseSpecComponent{
-						{
-							Catalog:               "",
-							Name:                  "calico",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.1.0",
-						},
-					},
-				},
-			},
-			targetRelease: releasev1alpha1.Release{
-				Spec: releasev1alpha1.ReleaseSpec{
-					Components: []releasev1alpha1.ReleaseSpecComponent{
-						{
-							Catalog:               "",
-							Name:                  "calico",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.1.1",
-						},
-					},
-				},
-			},
-			result: false,
-		},
-		{
-			name: "case 1",
-			currentRelease: releasev1alpha1.Release{
-				Spec: releasev1alpha1.ReleaseSpec{
-					Components: []releasev1alpha1.ReleaseSpecComponent{
-						{
-							Catalog:               "",
-							Name:                  "kubernetes",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.16.9",
-						},
-						{
-							Catalog:               "",
-							Name:                  "aws-cni",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.7.0",
-						},
-					},
-				},
-			},
-			targetRelease: releasev1alpha1.Release{
-				Spec: releasev1alpha1.ReleaseSpec{
-					Components: []releasev1alpha1.ReleaseSpecComponent{
-						{
-							Catalog:               "",
-							Name:                  "kubernetes",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.17.11",
-						},
-						{
-							Catalog:               "",
-							Name:                  "calico",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.1.1",
-						},
-					},
-				},
-			},
-			result: false,
-		},
-		{
-			name:           "case 2",
+			name:           "case 0",
 			currentRelease: releasev1alpha1.Release{},
 			targetRelease: releasev1alpha1.Release{
 				Spec: releasev1alpha1.ReleaseSpec{
 					Components: []releasev1alpha1.ReleaseSpecComponent{
 						{
 							Catalog:               "",
-							Name:                  "kubernetes",
+							Name:                  "app-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "1.17.11",
-						},
-						{
-							Catalog:               "",
-							Name:                  "calico",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.1.1",
-						},
-					},
-				},
-			},
-			result: false,
-		},
-		{
-			name: "case 3",
-			currentRelease: releasev1alpha1.Release{
-				Spec: releasev1alpha1.ReleaseSpec{
-					Components: []releasev1alpha1.ReleaseSpecComponent{
-						{
-							Catalog:               "",
-							Name:                  "kubernetes",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.16.9",
+							Version:               "1.0.0",
 						},
 						{
 							Catalog:               "",
 							Name:                  "aws-cni",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "1.7.0",
+							Version:               "1.6.0",
 						},
-					},
-				},
-			},
-			targetRelease: releasev1alpha1.Release{
-				Spec: releasev1alpha1.ReleaseSpec{
-					Components: []releasev1alpha1.ReleaseSpecComponent{
 						{
 							Catalog:               "",
-							Name:                  "kubernetes",
+							Name:                  "aws-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "1.16.9",
+							Version:               "8.7.6",
 						},
 						{
 							Catalog:               "",
 							Name:                  "calico",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "1.7.0",
+							Version:               "3.10.4",
+						},
+						{
+							Catalog:               "",
+							Name:                  "cert-operator",
+							Reference:             "",
+							ReleaseOperatorDeploy: false,
+							Version:               "0.1.0",
+						},
+						{
+							Catalog:               "",
+							Name:                  "cluster-operator",
+							Reference:             "",
+							ReleaseOperatorDeploy: false,
+							Version:               "2.3.2",
+						},
+						{
+							Catalog:               "",
+							Name:                  "containerlinux",
+							Reference:             "",
+							ReleaseOperatorDeploy: false,
+							Version:               "2512.2.1",
+						},
+						{
+							Catalog:               "",
+							Name:                  "etcd",
+							Reference:             "",
+							ReleaseOperatorDeploy: false,
+							Version:               "3.4.9",
+						},
+						{
+							Catalog:               "",
+							Name:                  "kubernetes",
+							Reference:             "",
+							ReleaseOperatorDeploy: false,
+							Version:               "1.16.13",
 						},
 					},
 				},
 			},
-			result: true,
+			result: false,
 		},
+		// Trigger Cloudformation stack update
 		{
-			name: "case 4",
+			name: "case 1",
 			currentRelease: releasev1alpha1.Release{
 				Spec: releasev1alpha1.ReleaseSpec{
 					Components: []releasev1alpha1.ReleaseSpecComponent{
@@ -300,6 +233,7 @@ func TestReleaseComponentsEqual(t *testing.T) {
 			},
 			result: false,
 		},
+		// Cloudformation stack update won't trigger
 		{
 			name: "case 4",
 			currentRelease: releasev1alpha1.Release{
@@ -393,7 +327,7 @@ func TestReleaseComponentsEqual(t *testing.T) {
 							Name:                  "aws-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
-							Version:               "8.7.7",
+							Version:               "8.7.6",
 						},
 						{
 							Catalog:               "",
