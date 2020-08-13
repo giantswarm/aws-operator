@@ -14,10 +14,12 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCNPConfig struct {
+	Event    recorder.Interface
 	Logger   micrologger.Logger
 	Releases releases.Interface
 }
@@ -25,11 +27,15 @@ type TCNPConfig struct {
 // TCNP is a detection service implementation deciding if the TCNP stack should
 // be updated.
 type TCNP struct {
+	event    recorder.Interface
 	logger   micrologger.Logger
 	releases releases.Interface
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -38,6 +44,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	}
 
 	t := &TCNP{
+		event:    config.Event,
 		logger:   config.Logger,
 		releases: config.Releases,
 	}
@@ -125,6 +132,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"message", "detected TCNP stack should update",
 			"reason", strings.Join(componentsDiff(currentRelease, targetRelease), ", "),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCNP stack should update: %s", strings.Join(componentsDiff(currentRelease, targetRelease), ", ")))
 		return true, nil
 	}
 	if !dockerVolumeEqual {
@@ -133,6 +141,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"message", "detected TCNP stack should update",
 			"reason", fmt.Sprintf("worker instance docker volume size changed from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(cr)),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCNP stack should update: worker instance docker volume size changed from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB, key.MachineDeploymentDockerVolumeSizeGB(cr)))
 		return true, nil
 	}
 	if !instanceTypeEqual {
@@ -141,6 +150,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"message", "detected TCNP stack should update",
 			"reason", fmt.Sprintf("worker instance type changed from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.Type, key.MachineDeploymentInstanceType(cr)),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCNP stack should update: worker instance type changed from %#q to %#q", cc.Status.TenantCluster.TCNP.WorkerInstance.Type, key.MachineDeploymentInstanceType(cr)))
 		return true, nil
 	}
 	if !operatorVersionEqual {
@@ -149,6 +159,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"message", "detected TCNP stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCNP stack should update: operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
 		return true, nil
 	}
 	if !securityGroupsEqual {
@@ -157,6 +168,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"message", "detected TCNP stack should update",
 			"reason", "security groups changed",
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", "detected TCNP stack should update: security groups changed")
 		return true, nil
 	}
 
