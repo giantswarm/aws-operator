@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"net"
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
@@ -149,7 +150,19 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.DefaultParams()
 
-		params.Cluster = cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)).Cluster
+		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
+
+		if cl.Spec.Provider.Pods.CIDRBlock != "" {
+			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+			if err != nil {
+				return []string{""}, microerror.Mask(err)
+			}
+			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
+			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
+		}
+
+		params.CalicoPolicyOnly = true
+		params.Cluster = g8sConfig.Cluster
 		params.EnableAWSCNI = true
 		params.Extension = &TCNPExtension{
 			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),
