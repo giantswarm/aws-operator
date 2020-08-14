@@ -70,7 +70,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 			"message", "detected TCCP stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
 		)
-		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCP stack should update:operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCP stack should update: operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
 		return true, nil
 	}
 
