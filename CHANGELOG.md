@@ -8,12 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- Fixed passing custom pod CIDR to k8scloudconfig.
-
-## [8.7.6] - 2020-08-11
-
 ### Added
 
 - Add release version tag for ec2 instances
@@ -22,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix IAM policy on Tenant Clusters to manages IAM Role tags.
+- Fixed passing custom pod CIDR to k8scloudconfig.
 
 ## [8.7.5] - 2020-07-30
 
