@@ -155,7 +155,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		if cl.Spec.Provider.Pods.CIDRBlock != "" {
 			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
 			if err != nil {
-				return []string{""}, microerror.Mask(err)
+				return nil, microerror.Mask(err)
 			}
 			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
