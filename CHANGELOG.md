@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add release version tag for ec2 instances
 - Update Cloudformation Stack when components version differ
+- Emit Kubernetes events in case of change detection for tccp, tccpn and tcpn CF stacks
 
 ### Fixed
 
