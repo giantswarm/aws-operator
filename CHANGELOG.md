@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.6] - 2020-08-14
+
 ### Added
 
 - Add release version tag for ec2 instances
@@ -211,6 +213,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...HEAD
+[8.7.6]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...v8.7.6
 [8.7.6]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...v8.7.6
 [8.7.5]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...v8.7.5
 [8.7.4]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...v8.7.4
