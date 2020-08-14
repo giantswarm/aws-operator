@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.8.0] - 2020-08-14
 
+- New version for a new kubernetes release.
+
 ## [8.7.6] - 2020-08-14
 
 ### Added
