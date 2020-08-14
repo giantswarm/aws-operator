@@ -1,12 +1,16 @@
 package unittest
 
 import (
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/to"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
+)
+
+const (
+	DefaultMachineDeploymentID = "al9qy"
 )
 
 func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
@@ -17,10 +21,11 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 			},
 			Labels: map[string]string{
 				label.Cluster:           DefaultClusterID,
-				label.MachineDeployment: "al9qy",
+				label.MachineDeployment: DefaultMachineDeploymentID,
 				label.OperatorVersion:   "7.3.0",
 				label.Release:           "100.0.0",
 			},
+			Name:      DefaultMachineDeploymentID,
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSMachineDeploymentSpec{

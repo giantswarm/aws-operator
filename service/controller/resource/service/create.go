@@ -4,15 +4,16 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/resourcecanceledcontext"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -25,7 +26,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "creating service")
 
 		namespace := key.ClusterNamespace(cr)
-		_, err = r.k8sClient.CoreV1().Services(namespace).Create(serviceToCreate)
+		_, err = r.k8sClient.CoreV1().Services(namespace).Create(ctx, serviceToCreate, metav1.CreateOptions{})
 		if apierrors.IsAlreadyExists(err) {
 			// fall through
 		} else if apierrors.IsNotFound(err) {

@@ -3,7 +3,7 @@ package awsclient
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
@@ -22,7 +22,7 @@ type Config struct {
 	Logger    micrologger.Logger
 
 	CPAWSConfig   aws.Config
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
@@ -30,7 +30,7 @@ type Resource struct {
 	logger    micrologger.Logger
 
 	cpAWSConfig   aws.Config
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {
@@ -78,7 +78,7 @@ func (r *Resource) addAWSClientsToContext(ctx context.Context, cr infrastructure
 	}
 
 	{
-		arn, err := credential.GetARN(r.k8sClient, cr)
+		arn, err := credential.GetARN(ctx, r.k8sClient, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
