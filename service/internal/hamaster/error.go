@@ -29,3 +29,13 @@ var tooManyCRsError = &microerror.Error{
 func IsTooManyCRsError(err error) bool {
 	return microerror.Cause(err) == tooManyCRsError
 }
+
+var availabilityZonesNilError = &microerror.Error{
+	Kind: "availabilityZonesNilError",
+	Desc: "The availability zones in AWSControlPlane CR must not be nil.",
+}
+
+// IsAvalailabilityZonesNilError asserts tooManyCRsError.
+func IsAvalailabilityZonesNilError(err error) bool {
+	return microerror.Cause(err) == availabilityZonesNilError
+}
