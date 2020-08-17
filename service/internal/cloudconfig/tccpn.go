@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"net"
 	"sync"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
@@ -297,6 +298,15 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params = k8scloudconfig.Params{}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
+
+		if cl.Spec.Provider.Pods.CIDRBlock != "" {
+			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+			if err != nil {
+				return "", microerror.Mask(err)
+			}
+			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
+			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
+		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.CalicoPolicyOnly = true
