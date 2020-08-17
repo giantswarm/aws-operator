@@ -79,7 +79,6 @@ func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, err
 
 	if aws.Spec.AvailabilityZones == nil {
 		return nil, microerror.Mask(availabilityZonesNilError)
-
 	}
 
 	// We need a deterministic list of availability zones which we can loop over
