@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -135,7 +135,7 @@ func (c *SubnetCollector) Collect(ctx context.Context) ([]net.IPNet, error) {
 }
 
 func (c *SubnetCollector) getSubnetsFromAWSConfigs(ctx context.Context) ([]net.IPNet, error) {
-	awsConfigList, err := c.g8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll).List(metav1.ListOptions{})
+	awsConfigList, err := c.g8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -159,7 +159,7 @@ func (c *SubnetCollector) getSubnetsFromAWSConfigs(ctx context.Context) ([]net.I
 }
 
 func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPNet, error) {
-	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -183,7 +183,7 @@ func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPN
 }
 
 func (c *SubnetCollector) getSubnetsFromMachineDeployments(ctx context.Context) ([]net.IPNet, error) {
-	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
+	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

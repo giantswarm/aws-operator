@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -96,7 +98,7 @@ func (a *ASG) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
-	awsClientsList, err := a.helper.GetAWSClients(reconciledClusters)
+	awsClientsList, err := a.helper.GetAWSClients(context.Background(), reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

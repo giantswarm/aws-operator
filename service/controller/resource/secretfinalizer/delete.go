@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/finalizerskeptcontext"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,7 +14,7 @@ import (
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -36,7 +36,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding secret %#q in namespace %#q", s.Name, s.Namespace))
 
-			secret, err = r.k8sClient.CoreV1().Secrets(s.Namespace).Get(s.Name, metav1.GetOptions{})
+			secret, err = r.k8sClient.CoreV1().Secrets(s.Namespace).Get(ctx, s.Name, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find secret %#q in namespace %#q", s.Name, s.Namespace))
 				r.logger.LogCtx(ctx, "level", "debug", "message", "continuing with next secret")
@@ -54,7 +54,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 			secret.Finalizers = filterString(secret.Finalizers, secretFinalizer)
 
-			_, err := r.k8sClient.CoreV1().Secrets(s.Namespace).Update(secret)
+			_, err := r.k8sClient.CoreV1().Secrets(s.Namespace).Update(ctx, secret, metav1.UpdateOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}

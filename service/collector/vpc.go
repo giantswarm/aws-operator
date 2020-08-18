@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -83,7 +85,7 @@ func (v *VPC) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
-	awsClientsList, err := v.helper.GetAWSClients(reconciledClusters)
+	awsClientsList, err := v.helper.GetAWSClients(context.Background(), reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

@@ -6,17 +6,17 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/resource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -674,14 +674,14 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	return resources, nil
 }
 
-func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
-	return func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}

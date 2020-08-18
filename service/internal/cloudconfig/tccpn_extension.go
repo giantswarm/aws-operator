@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"

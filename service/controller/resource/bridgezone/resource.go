@@ -271,7 +271,7 @@ func (r *Resource) route53Clients(ctx context.Context) (guest, defaultGuest *rou
 
 	// defaultGuest
 	{
-		arn, err := credential.GetDefaultARN(r.k8sClient)
+		arn, err := credential.GetDefaultARN(ctx, r.k8sClient)
 		if err != nil {
 			return nil, nil, microerror.Mask(err)
 		}

@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/service/support"
@@ -103,7 +104,7 @@ func (t *TrustedAdvisor) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
-	awsClientsList, err := t.helper.GetAWSClients(reconciledClusters)
+	awsClientsList, err := t.helper.GetAWSClients(context.Background(), reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

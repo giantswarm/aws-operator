@@ -3,13 +3,14 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"net"
 	"sync"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -150,7 +151,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		m := sync.Mutex{}
 
 		g.Go(func() error {
-			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.APICert)
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.APICert)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -167,13 +168,13 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 			switch mapping.ID {
 			case 0:
-				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.EtcdCert)
+				tls, err = t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.EtcdCert)
 			case 1:
-				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.Etcd1Cert)
+				tls, err = t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.Etcd1Cert)
 			case 2:
-				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.Etcd2Cert)
+				tls, err = t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.Etcd2Cert)
 			case 3:
-				tls, err = t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.Etcd3Cert)
+				tls, err = t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.Etcd3Cert)
 			default:
 				return microerror.Maskf(executionFailedError, "invalid master id %d", mapping.ID)
 			}
@@ -190,7 +191,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		})
 
 		g.Go(func() error {
-			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.ServiceAccountCert)
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.ServiceAccountCert)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -202,7 +203,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		})
 
 		g.Go(func() error {
-			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.WorkerCert)
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.WorkerCert)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -214,7 +215,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		})
 
 		g.Go(func() error {
-			k, err := t.config.RandomKeysSearcher.SearchCluster(key.ClusterID(&cr))
+			k, err := t.config.RandomKeysSearcher.SearchCluster(ctx, key.ClusterID(&cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -294,9 +295,18 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	var params k8scloudconfig.Params
 	{
-		params = k8scloudconfig.DefaultParams()
+		params = k8scloudconfig.Params{}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
+
+		if cl.Spec.Provider.Pods.CIDRBlock != "" {
+			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+			if err != nil {
+				return "", microerror.Mask(err)
+			}
+			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
+			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
+		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.CalicoPolicyOnly = true

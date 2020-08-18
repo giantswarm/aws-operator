@@ -1,7 +1,7 @@
 package unittest
 
 import (
-	"github.com/giantswarm/certs/v2/pkg/certs"
+	"github.com/giantswarm/certs/v3/pkg/certs"
 )
 
 func DefaultCerts() []certs.File {
