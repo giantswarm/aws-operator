@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated workflows for automatic release.
 - Updated backward incompatible Kubernetes dependencies to v1.18.5.
 
+### Fixed
+
+- Fix image-pull-progress-deadline argument for tcnp nodes.
+
 ## [8.8.0] - 2020-08-14
 
 - New version for a new kubernetes release.
