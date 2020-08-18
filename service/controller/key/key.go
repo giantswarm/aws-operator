@@ -3,6 +3,7 @@ package key
 import (
 	"crypto/sha1" // nolint:gosec
 	"fmt"
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"strconv"
 	"strings"
 	"time"
@@ -336,6 +337,10 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)
 
 	return lbName, nil
+}
+
+func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
 func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
