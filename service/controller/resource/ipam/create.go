@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	versionedinfrastructure "github.com/giantswarm/aws-operator/pkg/clientset/versioned"
 	"math/bits"
 	"math/rand"
 	"net"
@@ -147,7 +148,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSCluster CRs")
 
-		subnets, err := getSubnetsFromAWSClusters(r.g8sClient)
+		subnets, err := getSubnetsFromAWSClusters(ctx, r.g8sClientInfra)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -163,7 +164,7 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from MachineDeployment CRs")
 
-		subnets, err := getSubnetsFromMachineDeployments(r.g8sClient)
+		subnets, err := getSubnetsFromMachineDeployments(ctx, r.g8sClientInfra)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -278,8 +279,8 @@ func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
 	return results, nil
 }
 
-func getSubnetsFromAWSClusters(g8sClient versioned.Interface) ([]net.IPNet, error) {
-	clusterList, err := g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+func getSubnetsFromAWSClusters(ctx context.Context, g8sClient versionedinfrastructure.Interface) ([]net.IPNet, error) {
+	clusterList, err := g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -302,8 +303,8 @@ func getSubnetsFromAWSClusters(g8sClient versioned.Interface) ([]net.IPNet, erro
 	return results, nil
 }
 
-func getSubnetsFromMachineDeployments(g8sClient versioned.Interface) ([]net.IPNet, error) {
-	machineDeploymentList, err := g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
+func getSubnetsFromMachineDeployments(ctx context.Context, g8sClient versionedinfrastructure.Interface) ([]net.IPNet, error) {
+	machineDeploymentList, err := g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

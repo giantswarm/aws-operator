@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/k8scloudconfig/v_4_9_2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
+	infrastructurev1alpha2 "github.com/giantswarm/aws-operator/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"

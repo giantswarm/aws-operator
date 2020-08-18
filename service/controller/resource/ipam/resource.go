@@ -9,6 +9,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
+
+	versionedinfrastructure "github.com/giantswarm/aws-operator/pkg/clientset/versioned"
 )
 
 const (
@@ -18,6 +20,7 @@ const (
 type Config struct {
 	CMAClient        clientset.Interface
 	G8sClient        versioned.Interface
+	G8sClientInfra   versionedinfrastructure.Interface
 	Logger           micrologger.Logger
 	NetworkAllocator network.Allocator
 
@@ -29,6 +32,7 @@ type Config struct {
 type Resource struct {
 	cmaClient        clientset.Interface
 	g8sClient        versioned.Interface
+	g8sClientInfra   versionedinfrastructure.Interface
 	logger           micrologger.Logger
 	networkAllocator network.Allocator
 
@@ -43,6 +47,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	}
+	if config.G8sClientInfra == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClientInfra must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -61,6 +68,7 @@ func New(config Config) (*Resource, error) {
 	newResource := &Resource{
 		cmaClient:        config.CMAClient,
 		g8sClient:        config.G8sClient,
+		g8sClientInfra:   config.G8sClientInfra,
 		logger:           config.Logger,
 		networkAllocator: config.NetworkAllocator,
 

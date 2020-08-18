@@ -22,6 +22,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
+	versionedinfrastructure "github.com/giantswarm/aws-operator/pkg/clientset/versioned"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
@@ -95,6 +96,11 @@ func New(config Config) (*Service, error) {
 		return nil, microerror.Mask(err)
 	}
 
+	g8sClientInfra, err := versionedinfrastructure.NewForConfig(restConfig)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	k8sClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -151,6 +157,7 @@ func New(config Config) (*Service, error) {
 		c := controller.ClusterConfig{
 			CMAClient:        cmaClient,
 			G8sClient:        g8sClient,
+			G8sClientInfra:   g8sClientInfra,
 			K8sClient:        k8sClient,
 			K8sExtClient:     k8sExtClient,
 			Logger:           config.Logger,
