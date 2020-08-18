@@ -3,7 +3,7 @@ package ipam
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,7 +38,7 @@ func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*Machin
 }
 
 func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	cr, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Get(name, metav1.GetOptions{})
+	cr, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

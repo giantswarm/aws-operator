@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/resource/crud"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
@@ -16,7 +17,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	if serviceToUpdate != nil && serviceToUpdate.Spec.ClusterIP != "" {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating services")
 
-		_, err := r.k8sClient.CoreV1().Services(serviceToUpdate.Namespace).Update(serviceToUpdate)
+		_, err := r.k8sClient.CoreV1().Services(serviceToUpdate.Namespace).Update(ctx, serviceToUpdate, metav1.UpdateOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}

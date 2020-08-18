@@ -142,7 +142,7 @@ func (e *ELB) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
-	awsClientsList, err := e.helper.GetAWSClients(reconciledClusters)
+	awsClientsList, err := e.helper.GetAWSClients(context.Background(), reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -153,7 +153,7 @@ func (e *ELB) Collect(ch chan<- prometheus.Metric) error {
 		awsClients := item
 
 		g.Go(func() error {
-			err := e.collectForAccount(ch, awsClients)
+			err := e.collectForAccount(context.Background(), ch, awsClients)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -175,7 +175,7 @@ func (e *ELB) Describe(ch chan<- *prometheus.Desc) error {
 	return nil
 }
 
-func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
+func (e *ELB) collectForAccount(ctx context.Context, ch chan<- prometheus.Metric, awsClients clientaws.Clients) error {
 	account, err := e.helper.AWSAccountID(awsClients)
 	if err != nil {
 		return microerror.Mask(err)
@@ -190,7 +190,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 
 	//Cache empty, getting from API
 	if elbInfo == nil || elbInfo.Elbs == nil {
-		elbInfo, err = getElbInfoFromAPI(account, e.installationName, awsClients)
+		elbInfo, err = getElbInfoFromAPI(ctx, account, e.installationName, awsClients)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -222,7 +222,7 @@ func (e *ELB) collectForAccount(ch chan<- prometheus.Metric, awsClients clientaw
 }
 
 // getElbInfoFromAPI collects ELB Info from AWS API
-func getElbInfoFromAPI(account string, installation string, awsClients clientaws.Clients) (*elbInfoResponse, error) {
+func getElbInfoFromAPI(ctx context.Context, account string, installation string, awsClients clientaws.Clients) (*elbInfoResponse, error) {
 	var res elbInfoResponse
 
 	var loadBalancerNames []*string
@@ -250,7 +250,7 @@ func getElbInfoFromAPI(account string, installation string, awsClients clientaws
 		// single Describe request so it must be done in batches of
 		// maxELBsInOneBatch. In order to not spend so much time on this,
 		// perform requests concurrently and synchronize them with errgroup.
-		errGroup, _ := errgroup.WithContext(context.TODO())
+		errGroup, _ := errgroup.WithContext(ctx)
 		// Slice for ELB tag description results.
 		var tagOutputs []*elb.DescribeTagsOutput
 

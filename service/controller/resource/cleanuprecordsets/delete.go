@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}

@@ -1,13 +1,14 @@
 package key
 
 import (
+	"context"
 	"crypto/sha512"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -238,7 +239,7 @@ func TenantClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
-func ToCluster(v interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func ToCluster(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 	if v == nil {
 		return infrastructurev1alpha2.AWSCluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSCluster{}, v)
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -23,7 +23,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -88,7 +88,7 @@ func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructur
 		TypeMeta: infrastructurev1alpha2.NewAWSControlPlaneTypeMeta(),
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				annotation.Docs: "https://godoc.org/github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2#AWSControlPlane",
+				annotation.Docs: "https://godoc.org/github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2#AWSControlPlane",
 			},
 			Labels: map[string]string{
 				label.OperatorVersion: key.OperatorVersion(&cr),
@@ -107,7 +107,7 @@ func (r *Resource) createAWSControlPlaneCR(ctx context.Context, cr infrastructur
 		},
 	}
 
-	_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Create(cp)
+	_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Create(ctx, cp, metav1.CreateOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -142,7 +142,7 @@ func (r *Resource) createG8sControlPlaneCR(ctx context.Context, cr infrastructur
 		TypeMeta: infrastructurev1alpha2.NewG8sControlPlaneTypeMeta(),
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				annotation.Docs: "https://godoc.org/github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2#G8sControlPlane",
+				annotation.Docs: "https://godoc.org/github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2#G8sControlPlane",
 			},
 			Labels: map[string]string{
 				label.ClusterOperatorVersion: ov,
@@ -169,7 +169,7 @@ func (r *Resource) createG8sControlPlaneCR(ctx context.Context, cr infrastructur
 		},
 	}
 
-	_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().G8sControlPlanes(cr.GetNamespace()).Create(cp)
+	_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().G8sControlPlanes(cr.GetNamespace()).Create(ctx, cp, metav1.CreateOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -182,7 +182,7 @@ func (r *Resource) awsControlPlaneCRExists(ctx context.Context, cr infrastructur
 		LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
 	}
 
-	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).List(o)
+	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).List(ctx, o)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -204,7 +204,7 @@ func (r *Resource) g8sControlPlaneCRExists(ctx context.Context, cr infrastructur
 		LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
 	}
 
-	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().G8sControlPlanes(cr.GetNamespace()).List(o)
+	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().G8sControlPlanes(cr.GetNamespace()).List(ctx, o)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
@@ -226,7 +226,7 @@ func (r *Resource) idFromAWSControlPlaneCR(ctx context.Context, cr infrastructur
 		LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
 	}
 
-	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).List(o)
+	list, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).List(ctx, o)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -242,7 +242,7 @@ func (r *Resource) uniqueControlPlaneID(ctx context.Context, cr infrastructurev1
 	for retries := 0; retries < maxIDGenRetries; retries++ {
 		id := entityid.New()
 
-		_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Get(id, metav1.GetOptions{})
+		_, err := r.k8sClient.G8sClient().InfrastructureV1alpha2().AWSControlPlanes(cr.GetNamespace()).Get(ctx, id, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			return id, nil
 		} else if err != nil {

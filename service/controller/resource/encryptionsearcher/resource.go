@@ -1,8 +1,10 @@
 package encryptionsearcher
 
 import (
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"context"
+
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -17,7 +19,7 @@ type Config struct {
 	G8sClient     versioned.Interface
 	Encrypter     encrypter.Interface
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 // Resource implements the operatorkit Resource interface to fill the operator's
@@ -32,7 +34,7 @@ type Resource struct {
 	g8sClient     versioned.Interface
 	encrypter     encrypter.Interface
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {

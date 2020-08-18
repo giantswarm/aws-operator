@@ -3,7 +3,7 @@ package unittest
 import (
 	"net"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -21,6 +21,7 @@ func ChinaCluster() infrastructurev1alpha2.AWSCluster {
 				label.OperatorVersion: "7.3.0",
 				label.Release:         "100.0.0",
 			},
+			Name:      DefaultClusterID,
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSClusterSpec{
@@ -62,6 +63,7 @@ func DefaultCluster() infrastructurev1alpha2.AWSCluster {
 				label.OperatorVersion: "7.3.0",
 				label.Release:         "100.0.0",
 			},
+			Name:      DefaultClusterID,
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: infrastructurev1alpha2.AWSClusterSpec{
