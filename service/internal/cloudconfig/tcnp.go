@@ -160,7 +160,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
 		}
-
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
 		params.EnableAWSCNI = true
@@ -175,6 +174,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			registryDomain: t.config.RegistryDomain,
 		}
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
+		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryMirrors = t.config.RegistryMirrors
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
