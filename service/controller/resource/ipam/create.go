@@ -141,6 +141,22 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 	})
 
 	g.Go(func() error {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSCluster CRs")
+
+		subnets, err := getSubnetsFromAWSClusters(r.g8sClient)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSCluster CRs")
+
+		return nil
+	})
+
+	g.Go(func() error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from MachineDeployment CRs")
 
 		subnets, err := getSubnetsFromMachineDeployments(r.g8sClient)
@@ -244,6 +260,30 @@ func getClusterSubnets(g8sClient versioned.Interface) ([]net.IPNet, error) {
 
 	for _, c := range clusterList.Items {
 		cidr := key.StatusClusterNetworkCIDR(c)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
+func getSubnetsFromAWSClusters(g8sClient versioned.Interface) ([]net.IPNet, error) {
+	clusterList, err := g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, c := range clusterList.Items {
+		cidr := key.StatusAWSInfrastructureClusterNetworkCIDR(c)
 		if cidr == "" {
 			continue
 		}

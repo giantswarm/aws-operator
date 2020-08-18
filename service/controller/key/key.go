@@ -561,6 +561,11 @@ func StatusClusterNetworkCIDR(cluster v1alpha2.AWSCluster) string {
 	return cluster.Status.Provider.Network.CIDR
 }
 
+// StatusAWSInfrastructureClusterNetworkCIDR returns the allocated tenant cluster subnet CIDR.
+func StatusAWSInfrastructureClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Status.Provider.Network.CIDR
+}
+
 // StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.
 func StatusNetworkCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Status.Cluster.Network.CIDR
