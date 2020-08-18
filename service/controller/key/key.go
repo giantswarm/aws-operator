@@ -3,7 +3,6 @@ package key
 import (
 	"crypto/sha1" // nolint:gosec
 	"fmt"
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
 
