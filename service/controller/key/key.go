@@ -7,11 +7,13 @@ import (
 	"strings"
 	"time"
 
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/k8scloudconfig/v_4_9_2"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
@@ -343,6 +345,10 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 	lbName := fmt.Sprintf("%s-%s", ClusterID(cluster), componentName)
 
 	return lbName, nil
+}
+
+func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
 func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
