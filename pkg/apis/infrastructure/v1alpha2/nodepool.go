@@ -19,4 +19,3 @@ type NodePoolCRsConfig struct {
 }
 
 // +k8s:deepcopy-gen=false
-

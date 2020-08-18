@@ -2,14 +2,12 @@ package v1alpha2
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 )
 
 const (
 	kindAWSControlPlane              = "AWSControlPlane"
 	awsControlPlaneDocumentationLink = "https://docs.giantswarm.io/reference/cp-k8s-api/awscontrolplanes.infrastructure.giantswarm.io/"
 )
-
 
 // +genclient
 // +genclient:noStatus
