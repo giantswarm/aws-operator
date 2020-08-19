@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.4] - 2020-08-19
+
 - Check subnets from node pools clusters when collecting allocated subnets.
 
 ## [5.7.2] - 2020-07-29
