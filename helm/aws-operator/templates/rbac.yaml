@@ -81,6 +81,21 @@ rules:
       - releases
     verbs:
       - get
+  # The aws-operator needs read and write access to all AWS specific
+  # infrastructure CRs we manage for Tenant Clusters.
+  - apiGroups:
+      - infrastructure.giantswarm.io
+    resources:
+      - awsclusters
+      - awsclusters/status
+      - awscontrolplanes
+      - awscontrolplanes/status
+      - awsmachinedeployments
+      - awsmachinedeployments/status
+      - g8scontrolplanes
+      - g8scontrolplanes/status
+    verbs:
+      - "*"
   # TODO drop create and delete permissions for namespaces when
   # legacy bundles are gone and clusterapi bundle v29 is the latest version.
   #
