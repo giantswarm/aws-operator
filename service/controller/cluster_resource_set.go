@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	"github.com/giantswarm/aws-operator/client/aws"
+	versionedinfrastructure "github.com/giantswarm/aws-operator/pkg/clientset/versioned"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
@@ -70,6 +71,7 @@ type clusterResourceSetConfig struct {
 	ControlPlaneAWSClients aws.Clients
 	CMAClient              clientset.Interface
 	G8sClient              versioned.Interface
+	G8sClientInfra         versionedinfrastructure.Interface
 	HostAWSConfig          aws.Config
 	K8sClient              kubernetes.Interface
 	Logger                 micrologger.Logger
@@ -107,7 +109,9 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 	if config.G8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
 	}
-
+	if config.G8sClientInfra == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClientInfra must not be empty", config)
+	}
 	if config.GuestSubnetMaskBits < minAllocatedSubnetMaskBits {
 		return nil, microerror.Maskf(invalidConfigError, "%T.GuestSubnetMaskBits (%d) must not be smaller than %d", config, config.GuestSubnetMaskBits, minAllocatedSubnetMaskBits)
 	}
@@ -145,6 +149,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 
 	var encrypterObject encrypter.Interface
 	var encrypterRoleManager encrypter.RoleManager
+
 	switch config.EncrypterBackend {
 	case encrypter.VaultBackend:
 		c := &vault.EncrypterConfig{
@@ -273,6 +278,7 @@ func newClusterResourceSet(config clusterResourceSetConfig) (*controller.Resourc
 		c := ipam.Config{
 			CMAClient:        config.CMAClient,
 			G8sClient:        config.G8sClient,
+			G8sClientInfra:   config.G8sClientInfra,
 			Logger:           config.Logger,
 			NetworkAllocator: config.NetworkAllocator,
 

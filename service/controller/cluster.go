@@ -18,6 +18,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 
 	awsclient "github.com/giantswarm/aws-operator/client/aws"
+	versionedinfrastructure "github.com/giantswarm/aws-operator/pkg/clientset/versioned"
 	"github.com/giantswarm/aws-operator/service/controller/internal/adapter"
 	"github.com/giantswarm/aws-operator/service/controller/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -27,6 +28,7 @@ import (
 type ClusterConfig struct {
 	CMAClient        clientset.Interface
 	G8sClient        versioned.Interface
+	G8sClientInfra   versionedinfrastructure.Interface
 	K8sClient        kubernetes.Interface
 	K8sExtClient     apiextensionsclient.Interface
 	Logger           micrologger.Logger
@@ -219,6 +221,7 @@ func newClusterResourceSets(config ClusterConfig) ([]*controller.ResourceSet, er
 			CMAClient:              config.CMAClient,
 			ControlPlaneAWSClients: controlPlaneAWSClients,
 			G8sClient:              config.G8sClient,
+			G8sClientInfra:         config.G8sClientInfra,
 			HostAWSConfig: awsclient.Config{
 				AccessKeyID:     config.HostAWSConfig.AccessKeyID,
 				AccessKeySecret: config.HostAWSConfig.AccessKeySecret,

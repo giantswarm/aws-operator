@@ -12,6 +12,8 @@ import (
 	"github.com/giantswarm/k8scloudconfig/v_4_9_2"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
+	infrastructurev1alpha2 "github.com/giantswarm/aws-operator/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
@@ -345,6 +347,10 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 	return lbName, nil
 }
 
+func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
+}
+
 func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
@@ -574,6 +580,11 @@ func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConf
 // StatusNetworkCIDR returns the allocated tenant cluster subnet CIDR.
 func StatusNetworkCIDR(customObject v1alpha1.AWSConfig) string {
 	return customObject.Status.Cluster.Network.CIDR
+}
+
+// StatusAWSInfrastructureClusterNetworkCIDR returns the allocated tenant cluster subnet CIDR.
+func StatusAWSInfrastructureClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Status.Provider.Network.CIDR
 }
 
 func StatusScalingDesiredCapacity(customObject v1alpha1.AWSConfig) int {

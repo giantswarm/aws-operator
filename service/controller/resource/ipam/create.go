@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	versionedinfrastructure "github.com/giantswarm/aws-operator/pkg/clientset/versioned"
 	"math/bits"
 	"math/rand"
 	"net"
@@ -144,6 +145,38 @@ func (r *Resource) getReservedNetworks(ctx context.Context) ([]net.IPNet, error)
 		return nil
 	})
 
+	g.Go(func() error {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSCluster CRs")
+
+		subnets, err := getSubnetsFromAWSClusters(ctx, r.g8sClientInfra)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSCluster CRs")
+
+		return nil
+	})
+
+	g.Go(func() error {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from MachineDeployment CRs")
+
+		subnets, err := getSubnetsFromMachineDeployments(ctx, r.g8sClientInfra)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+		mutex.Lock()
+		reservedSubnets = append(reservedSubnets, subnets...)
+		mutex.Unlock()
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from MachineDeployment CRs")
+
+		return nil
+	})
+
 	err = g.Wait()
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -231,6 +264,54 @@ func getClusterSubnets(cmaClient clientset.Interface) ([]net.IPNet, error) {
 	var results []net.IPNet
 	for _, c := range clusterList.Items {
 		cidr := statusClusterNetworkCIDR(c)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
+func getSubnetsFromAWSClusters(ctx context.Context, g8sClient versionedinfrastructure.Interface) ([]net.IPNet, error) {
+	clusterList, err := g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, c := range clusterList.Items {
+		cidr := key.StatusAWSInfrastructureClusterNetworkCIDR(c)
+		if cidr == "" {
+			continue
+		}
+
+		_, n, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		results = append(results, *n)
+	}
+
+	return results, nil
+}
+
+func getSubnetsFromMachineDeployments(ctx context.Context, g8sClient versionedinfrastructure.Interface) ([]net.IPNet, error) {
+	machineDeploymentList, err := g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
+	var results []net.IPNet
+	for _, md := range machineDeploymentList.Items {
+		cidr := key.MachineDeploymentSubnet(md)
 		if cidr == "" {
 			continue
 		}
