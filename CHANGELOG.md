@@ -7,11 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *Note: This changelog only tracks changes in the `legacy-1-15` branch.*
 
-## [Unreleased]
+## [Unreleaed]
+
+## [5.5.6] - 2020-08-19
+
+### Changed
+
+- Check node pools cluster for reserved subnet.
 
 ## [5.5.4] - 2020-07-29
 
-## Changed
+### Changed
 
 - Added support for latest Container Linux.
 
