@@ -8,11 +8,13 @@ import (
 	"time"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
@@ -338,6 +340,10 @@ func LoadBalancerName(domainName string, cluster v1alpha1.AWSConfig) (string, er
 	return lbName, nil
 }
 
+func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return cr.Annotations[annotation.MachineDeploymentSubnet]
+}
+
 func MainGuestStackName(customObject v1alpha1.AWSConfig) string {
 	clusterID := ClusterID(customObject)
 
@@ -552,6 +558,11 @@ func StatusAvailabilityZones(customObject v1alpha1.AWSConfig) []v1alpha1.AWSConf
 
 // StatusClusterNetworkCIDR returns the allocated tenant cluster subnet CIDR.
 func StatusClusterNetworkCIDR(cluster v1alpha2.AWSCluster) string {
+	return cluster.Status.Provider.Network.CIDR
+}
+
+// StatusAWSInfrastructureClusterNetworkCIDR returns the allocated tenant cluster subnet CIDR.
+func StatusAWSInfrastructureClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Status.Provider.Network.CIDR
 }
 

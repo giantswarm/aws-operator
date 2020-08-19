@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Check subnets from node pools clusters when collecting allocated subnets.
+
 ## [5.7.2] - 2020-07-29
 
 - Add support for latest Container Linux AMIs.
