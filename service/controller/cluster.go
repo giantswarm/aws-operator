@@ -177,6 +177,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpChangeDetection *changedetection.TCCP
 	{
 		c := changedetection.TCCPConfig{
+			Event:  config.Event,
 			Logger: config.Logger,
 		}
 

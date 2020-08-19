@@ -233,6 +233,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
+			Event:    config.Event,
 			Logger:   config.Logger,
 			Releases: rel,
 		}

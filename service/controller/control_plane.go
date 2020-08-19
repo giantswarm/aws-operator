@@ -254,6 +254,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnChangeDetection *changedetection.TCCPN
 	{
 		c := changedetection.TCCPNConfig{
+			Event:    config.Event,
 			HAMaster: config.HAMaster,
 			Logger:   config.Logger,
 			Releases: rel,

@@ -67,6 +67,17 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			ctx := unittest.DefaultContextControlPlane()
 			k := unittest.FakeK8sClient()
 
+			var e recorder.Interface
+			{
+				c := recorder.Config{
+					K8sClient: k,
+
+					Component: "dummy",
+				}
+
+				e = recorder.New(c)
+			}
+
 			var h hamaster.Interface
 			{
 				c := hamaster.Config{
@@ -94,6 +105,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			var d *changedetection.TCCPN
 			{
 				c := changedetection.TCCPNConfig{
+					Event:    e,
 					HAMaster: h,
 					Logger:   microloggertest.New(),
 					Releases: rel,
@@ -117,17 +129,6 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-			}
-
-			var e recorder.Interface
-			{
-				c := recorder.Config{
-					K8sClient: k,
-
-					Component: "dummy",
-				}
-
-				e = recorder.New(c)
 			}
 
 			var aws infrastructurev1alpha2.AWSControlPlane

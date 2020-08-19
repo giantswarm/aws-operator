@@ -65,19 +65,6 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				}
 			}
 
-			var d *changedetection.TCNP
-			{
-				c := changedetection.TCNPConfig{
-					Logger:   microloggertest.New(),
-					Releases: rel,
-				}
-
-				d, err = changedetection.NewTCNP(c)
-				if err != nil {
-					t.Fatal(err)
-				}
-			}
-
 			var e recorder.Interface
 			{
 				c := recorder.Config{
@@ -87,6 +74,20 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				}
 
 				e = recorder.New(c)
+			}
+
+			var d *changedetection.TCNP
+			{
+				c := changedetection.TCNPConfig{
+					Event:    e,
+					Logger:   microloggertest.New(),
+					Releases: rel,
+				}
+
+				d, err = changedetection.NewTCNP(c)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
 			var i images.Interface

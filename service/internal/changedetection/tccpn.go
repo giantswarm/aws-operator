@@ -13,10 +13,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCCPNConfig struct {
+	Event    recorder.Interface
 	HAMaster hamaster.Interface
 	Logger   micrologger.Logger
 	Releases releases.Interface
@@ -25,12 +27,16 @@ type TCCPNConfig struct {
 // TCCPN is a detection service implementation deciding if the TCCPN stack
 // should be updated.
 type TCCPN struct {
+	event    recorder.Interface
 	haMaster hamaster.Interface
 	logger   micrologger.Logger
 	releases releases.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
+	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
 	}
@@ -42,6 +48,7 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	}
 
 	t := &TCCPN{
+		event:    config.Event,
 		haMaster: config.HAMaster,
 		logger:   config.Logger,
 		releases: config.Releases,
@@ -100,6 +107,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			"message", "detected TCCPN stack should update",
 			"reason", strings.Join(componentsDiff(currentRelease, targetRelease), ", "),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCPN stack should update: %s", strings.Join(componentsDiff(currentRelease, targetRelease), ", ")))
 		return true, nil
 	}
 	if !masterInstanceEqual {
@@ -109,6 +117,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			"message", "detected TCCPN stack should update",
 			"reason", fmt.Sprintf("master instance type changed from %#q to %#q", cc.Status.TenantCluster.TCCPN.InstanceType, key.ControlPlaneInstanceType(cr)),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCPN stack should update: master instance type changed from %#q to %#q", cc.Status.TenantCluster.TCCPN.InstanceType, key.ControlPlaneInstanceType(cr)))
 		return true, nil
 	}
 	if !masterReplicasEqual {
@@ -118,6 +127,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			"message", "detected TCCPN stack should update",
 			"reason", fmt.Sprintf("master replicas changed from %d to %d", cc.Status.TenantCluster.TCCPN.MasterReplicas, rep),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCPN stack should update: master replicas changed from %d to %d", cc.Status.TenantCluster.TCCPN.MasterReplicas, rep))
 		return true, nil
 	}
 	if !operatorVersionEqual {
@@ -126,6 +136,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			"message", "detected TCCPN stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCPN stack should update: operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
 		return true, nil
 	}
 
