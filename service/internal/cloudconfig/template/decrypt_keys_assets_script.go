@@ -1,6 +1,8 @@
 package template
 
 const DecryptKeysAssetsScript = `#!/bin/bash -e
+set -o errexit
+
 kms_keys_assets_decrypt() {
 AWS_CLI_IMAGE="{{.RegistryDomain}}/giantswarm/awscli:1.18.3"
 
@@ -16,7 +18,8 @@ docker run --net=host -v /etc/kubernetes/encryption:/etc/kubernetes/encryption \
         --entrypoint=/bin/sh \
         ${AWS_CLI_IMAGE} \
         -ec \
-        'echo decrypting tls assets
+        'set -o errexit
+    echo decrypting tls assets
     for encKey in $(find /etc/kubernetes/encryption -name "*.enc"); do
       echo decrypting $encKey
       f=$(mktemp $encKey.XXXXXXXX)
