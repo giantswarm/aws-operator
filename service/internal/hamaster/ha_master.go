@@ -77,6 +77,10 @@ func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, err
 		return nil, microerror.Mask(err)
 	}
 
+	if aws.Spec.AvailabilityZones == nil {
+		return nil, microerror.Mask(availabilityZonesNilError)
+	}
+
 	// We need a deterministic list of availability zones which we can loop over
 	// through for the required amount of masters. Eventually it happens that
 	// there is only 1 availability zone in a HA Masters setup. Therefore the
