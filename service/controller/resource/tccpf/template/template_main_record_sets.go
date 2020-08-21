@@ -6,7 +6,7 @@ const TemplateMainRecordSets = `
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'
     Properties:
-      HostedZoneID: '{{ .RecordSets.ControlPlanePublicHostedZoneID }}'
+      HostedZoneId: '{{ .RecordSets.ControlPlanePublicHostedZoneID }}'
       Name: '{{ .RecordSets.ClusterID }}.k8s.{{ .RecordSets.BaseDomain }}.'
       Type: 'NS'
       TTL: '300'
