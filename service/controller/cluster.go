@@ -39,7 +39,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
@@ -731,19 +730,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var ensureCPCRsResource resource.Interface
-	{
-		c := ensurecpcrs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ensureCPCRsResource, err = ensurecpcrs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -802,7 +788,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		serviceResource,
 		endpointsResource,
 		eniConfigCRsResource,
-		ensureCPCRsResource,
 		secretFinalizerResource,
 
 		// All these resources implement logic to update CR status information.
