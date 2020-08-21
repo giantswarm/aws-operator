@@ -105,7 +105,7 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 
 		for _, zone := range o.HostedZones {
 			if *zone.Name == baseDomain && !*zone.Config.PrivateZone {
-				cpHostedZoneID = zone.String()
+				cpHostedZoneID = *zone.Id
 				break
 			}
 		}
