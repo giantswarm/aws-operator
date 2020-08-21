@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/route53"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
@@ -167,13 +168,35 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 		return nil, microerror.Mask(err)
 	}
 
+	var cpHostedZoneID *route53.HostedZone
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding control-plane public hosted zone")
+
+		hostedZonesInput := &route53.ListHostedZonesByNameInput{}
+
+		o, err := cc.Client.ControlPlane.AWS.Route53.ListHostedZonesByName(hostedZonesInput)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		for _, zone := range o.HostedZones {
+			baseDomain := fmt.Sprintf("%s.", key.ClusterBaseDomain(cr))
+
+			if *zone.Name == baseDomain && !*zone.Config.PrivateZone {
+				cpHostedZoneID = zone
+				r.logger.LogCtx(ctx, "level", "debug", "message", "found control-plane public hosted zone")
+			}
+		}
+	}
+
 	var recordSets *template.ParamsMainRecordSets
 	{
 		recordSets = &template.ParamsMainRecordSets{
-			BaseDomain:                 key.ClusterBaseDomain(cr),
-			ClusterID:                  key.ClusterID(&cr),
-			GuestHostedZoneNameServers: cc.Status.TenantCluster.DNS.HostedZoneNameServers,
-			Route53Enabled:             r.route53Enabled,
+			BaseDomain:                     key.ClusterBaseDomain(cr),
+			ClusterID:                      key.ClusterID(&cr),
+			ControlPlanePublicHostedZoneID: cpHostedZoneID.String(),
+			GuestHostedZoneNameServers:     cc.Status.TenantCluster.DNS.HostedZoneNameServers,
+			Route53Enabled:                 r.route53Enabled,
 		}
 	}
 
