@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"testing"
 
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/operatorkit/controller/context/cachekeycontext"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/cachekeycontext"
 
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
@@ -49,15 +50,23 @@ func Test_Images_Cache(t *testing.T) {
 				}
 			}
 
+			var cl infrastructurev1alpha2.AWSCluster
 			{
-				cl := unittest.DefaultCluster()
+				cl = unittest.DefaultCluster()
+			}
+
+			var re releasev1alpha1.Release
+			{
+				re = unittest.DefaultRelease()
+			}
+
+			{
 				cl.Spec.Provider.Region = "eu-central-1"
 				err = im.k8sClient.CtrlClient().Create(tc.ctx, &cl)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				re := unittest.DefaultRelease()
 				re.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
 					{
 						Name:    "containerlinux",
@@ -71,7 +80,6 @@ func Test_Images_Cache(t *testing.T) {
 			}
 
 			{
-				cl := unittest.DefaultCluster()
 				ami1, err = im.AMI(tc.ctx, &cl)
 				if err != nil {
 					t.Fatal(err)
@@ -79,14 +87,12 @@ func Test_Images_Cache(t *testing.T) {
 			}
 
 			{
-				cl := unittest.DefaultCluster()
 				cl.Spec.Provider.Region = "eu-west-1"
 				err = im.k8sClient.CtrlClient().Update(tc.ctx, &cl)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				re := unittest.DefaultRelease()
 				re.Spec.Components = []releasev1alpha1.ReleaseSpecComponent{
 					{
 						Name:    "containerlinux",
@@ -100,7 +106,6 @@ func Test_Images_Cache(t *testing.T) {
 			}
 
 			{
-				cl := unittest.DefaultCluster()
 				ami2, err = im.AMI(tc.ctx, &cl)
 				if err != nil {
 					t.Fatal(err)

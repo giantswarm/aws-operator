@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -84,7 +86,7 @@ func (cf *CloudFormation) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
-	awsClientsList, err := cf.helper.GetAWSClients(reconciledClusters)
+	awsClientsList, err := cf.helper.GetAWSClients(context.Background(), reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

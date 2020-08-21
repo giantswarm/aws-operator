@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -108,7 +109,7 @@ func (e *EC2Instances) Collect(ch chan<- prometheus.Metric) error {
 		return microerror.Mask(err)
 	}
 
-	awsClientsList, err := e.helper.GetAWSClients(reconciledClusters)
+	awsClientsList, err := e.helper.GetAWSClients(context.Background(), reconciledClusters)
 	if err != nil {
 		return microerror.Mask(err)
 	}

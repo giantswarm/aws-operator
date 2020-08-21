@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,13 +55,13 @@ func newHelper(config helperConfig) (*helper, error) {
 }
 
 // GetARNs list all unique aws IAM ARN from credential secret.
-func (h *helper) GetARNs(clusterList *infrastructurev1alpha2.AWSClusterList) ([]string, error) {
+func (h *helper) GetARNs(ctx context.Context, clusterList *infrastructurev1alpha2.AWSClusterList) ([]string, error) {
 	var arns []string
 
 	// Get unique ARNs.
 	arnsMap := make(map[string]bool)
 	for _, clusterCR := range clusterList.Items {
-		arn, err := credential.GetARN(h.clients.K8sClient(), clusterCR)
+		arn, err := credential.GetARN(ctx, h.clients.K8sClient(), clusterCR)
 		// Collect as many ARNs as possible in order to provide most metrics.
 		// Ignore old cluster which do not have credential.
 		if credential.IsCredentialNameEmptyError(err) {
@@ -76,7 +76,7 @@ func (h *helper) GetARNs(clusterList *infrastructurev1alpha2.AWSClusterList) ([]
 	}
 
 	// Ensure we check the default guest account for old cluster not having credential.
-	arn, err := credential.GetDefaultARN(h.clients.K8sClient())
+	arn, err := credential.GetDefaultARN(ctx, h.clients.K8sClient())
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -91,13 +91,13 @@ func (h *helper) GetARNs(clusterList *infrastructurev1alpha2.AWSClusterList) ([]
 
 // GetAWSClients return a list of aws clients for every guest cluster account plus
 // the host cluster account.
-func (h *helper) GetAWSClients(clusterList *infrastructurev1alpha2.AWSClusterList) ([]clientaws.Clients, error) {
+func (h *helper) GetAWSClients(ctx context.Context, clusterList *infrastructurev1alpha2.AWSClusterList) ([]clientaws.Clients, error) {
 	var (
 		clients    []clientaws.Clients
 		clientsMap = make(map[string]clientaws.Clients)
 	)
 
-	arns, err := h.GetARNs(clusterList)
+	arns, err := h.GetARNs(ctx, clusterList)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

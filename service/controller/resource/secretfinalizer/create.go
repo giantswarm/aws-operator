@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -23,7 +23,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		{
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding secret %#q in namespace %#q", s.Name, s.Namespace))
 
-			secret, err = r.k8sClient.CoreV1().Secrets(s.Namespace).Get(s.Name, metav1.GetOptions{})
+			secret, err = r.k8sClient.CoreV1().Secrets(s.Namespace).Get(ctx, s.Name, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find secret %#q in namespace %#q", s.Name, s.Namespace))
 				r.logger.LogCtx(ctx, "level", "debug", "message", "continuing with next secret")
@@ -41,7 +41,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			secret.Finalizers = append(secret.Finalizers, secretFinalizer)
 
-			_, err := r.k8sClient.CoreV1().Secrets(s.Namespace).Update(secret)
+			_, err := r.k8sClient.CoreV1().Secrets(s.Namespace).Update(ctx, secret, metav1.UpdateOptions{})
 			if err != nil {
 				return microerror.Mask(err)
 			}

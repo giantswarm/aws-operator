@@ -9,6 +9,8 @@ Outputs:
     Value: m5.2xlarge
   OperatorVersion:
     Value: 7.3.0
+  ReleaseVersion:
+    Value: 100.0.0
 Resources:
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -191,6 +193,11 @@ Resources:
             DeviceIndex: 0
             Groups:
               - !Ref GeneralSecurityGroup
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {

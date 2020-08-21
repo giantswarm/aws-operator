@@ -6,17 +6,17 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/resource"
-	"github.com/giantswarm/operatorkit/resource/crud"
-	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/tenantcluster/v2/pkg/tenantcluster"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -39,7 +39,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
@@ -63,9 +62,11 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ClusterConfig struct {
+	Event     event.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
 	Locker    locker.Interface
@@ -174,6 +175,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpChangeDetection *changedetection.TCCP
 	{
 		c := changedetection.TCCPConfig{
+			Event:  config.Event,
 			Logger: config.Logger,
 		}
 
@@ -457,6 +459,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupMachineDeploymentsResource resource.Interface
 	{
 		c := cleanupmachinedeployments.Config{
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
@@ -509,8 +512,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
@@ -712,19 +717,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var ensureCPCRsResource resource.Interface
-	{
-		c := ensurecpcrs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ensureCPCRsResource, err = ensurecpcrs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -782,7 +774,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		serviceResource,
 		endpointsResource,
 		eniConfigCRsResource,
-		ensureCPCRsResource,
 		secretFinalizerResource,
 
 		// All these resources implement logic to update CR status information.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
@@ -230,7 +230,7 @@ func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha2.AWSMachineD
 }
 
 func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
-	return cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
+	return *cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
 }
 
 func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {

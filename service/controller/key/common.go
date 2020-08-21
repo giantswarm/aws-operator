@@ -7,8 +7,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/core/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	AWSCNIComponentName = "aws-cni"
+
 	ELBInstanceStateInService = "InService"
 
 	DrainerResyncPeriod = time.Minute * 2
@@ -278,6 +280,14 @@ func SanitizeCFResourceName(l ...string) string {
 
 func SecurityGroupName(getter LabelsGetter, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(getter), groupName)
+}
+
+func StackComplete(status string) bool {
+	return strings.Contains(status, "COMPLETE")
+}
+
+func StackInProgress(status string) bool {
+	return strings.Contains(status, "IN_PROGRESS")
 }
 
 func StackNameTCCP(getter LabelsGetter) string {

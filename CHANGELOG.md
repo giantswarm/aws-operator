@@ -8,6 +8,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Don't panic when AWSControlPlane CR AZs are nil.
+
+### Changed
+
+- Updated workflows for automatic release.
+- Updated backward incompatible Kubernetes dependencies to v1.18.5.
+- Removed migration code to ensure the Control Plane CRs for existing Node Pool clusters.
+
+### Fixed
+
+- Fix image-pull-progress-deadline argument for tcnp nodes.
+
+## [8.8.0] - 2020-08-14
+
+- New version for a new kubernetes release.
+
+## [8.7.6] - 2020-08-14
+
+### Added
+
+- Add release version tag for ec2 instances
+- Update Cloudformation Stack when components version differ
+- Emit Kubernetes events in case of change detection for tccp, tccpn and tcnp CF stacks
+
+### Fixed
+
+- Fix IAM policy on Tenant Clusters to manages IAM Role tags.
+- Fixed passing custom pod CIDR to k8scloudconfig.
+
+## [8.7.5] - 2020-07-30
+
+### Changed
+
+- Adjust number of host network pods on worker node for aws-cni
+
+## [8.7.4] - 2020-07-29
+
+### Fixed
+
+- Adjust MAX_PODS for master and worker nodes to max IP's per ENI when using aws-cni
+
+### Changed
+
+- Use aws-cni version from the release.
+- Use aws-cni image built based on https://github.com/giantswarm/aws-cni
+- `k8scloudconfig` version updated to 7.0.4.
+
 ## [8.7.3] - 2020-07-15
 
 ### Fixed
@@ -182,7 +231,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.8.0...HEAD
+[8.8.0]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...v8.8.0
+[8.7.6]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...v8.7.6
+[8.7.5]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...v8.7.5
+[8.7.4]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...v8.7.4
 [8.7.3]: https://github.com/giantswarm/aws-operator/compare/v8.7.2...v8.7.3
 [8.7.2]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...v8.7.2
 [8.7.1]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...v8.7.1
