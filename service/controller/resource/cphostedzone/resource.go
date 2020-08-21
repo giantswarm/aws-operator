@@ -81,7 +81,7 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached CP public HostedZone ID")
 
 		if r.cachedCPHostedZoneID != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found cached CP public HostedZone ID %#q", r.cachedCPHostedZoneID)
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found cached CP public HostedZone ID %#q", r.cachedCPHostedZoneID))
 			return r.cachedCPHostedZoneID, nil
 		}
 
