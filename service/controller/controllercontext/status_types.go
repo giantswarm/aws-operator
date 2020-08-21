@@ -13,10 +13,15 @@ type ContextStatus struct {
 
 type ContextStatusControlPlane struct {
 	AWSAccountID string
+	HostedZone   ContextStatusControlPlaneHostedZone
 	NATGateway   ContextStatusControlPlaneNATGateway
 	RouteTables  []*ec2.RouteTable
 	PeerRole     ContextStatusControlPlanePeerRole
 	VPC          ContextStatusControlPlaneVPC
+}
+
+type ContextStatusControlPlaneHostedZone struct {
+	ID string
 }
 
 type ContextStatusControlPlaneNATGateway struct {

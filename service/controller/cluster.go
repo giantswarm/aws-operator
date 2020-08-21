@@ -34,6 +34,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
@@ -656,6 +657,20 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var cpHostedZoneResource resource.Interface
+	{
+		c := cphostedzone.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		cpHostedZoneResource, err = cphostedzone.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
@@ -779,6 +794,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
+		cpHostedZoneResource,
 		cpRouteTablesResource,
 		cpVPCResource,
 		tccpVPCIDResource,
