@@ -3,8 +3,9 @@ package cphostedzone
 import (
 	"context"
 
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/microerror"
+
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
