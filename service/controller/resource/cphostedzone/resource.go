@@ -21,7 +21,7 @@ const (
 type Config struct {
 	Logger micrologger.Logger
 
-	Route53Enabled
+	Route53Enabled bool
 }
 
 type Resource struct {
