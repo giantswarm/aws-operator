@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	gscerts "github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
@@ -33,7 +33,6 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		}
 
 		defaultVersions := key.DefaultVersions()
-		versions.Kubectl = defaultVersions.Kubectl
 		versions.KubernetesAPIHealthz = defaultVersions.KubernetesAPIHealthz
 		versions.KubernetesNetworkSetupDocker = defaultVersions.KubernetesNetworkSetupDocker
 		images = k8scloudconfig.BuildImages(r.registryDomain, versions)

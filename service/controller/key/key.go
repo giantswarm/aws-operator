@@ -11,7 +11,7 @@ import (
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
@@ -224,7 +224,6 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 
 func DefaultVersions() k8scloudconfig.Versions {
 	return k8scloudconfig.Versions{
-		Kubectl:                      kubectlVersion,
 		KubernetesAPIHealthz:         kubernetesAPIHealthzVersion,
 		KubernetesNetworkSetupDocker: kubernetesSetupNetworkEnvironmentVersion,
 	}

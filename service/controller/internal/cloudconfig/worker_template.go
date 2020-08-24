@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 
 	"github.com/giantswarm/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -43,9 +43,10 @@ func (c *CloudConfig) NewWorkerTemplate(ctx context.Context, data IgnitionTempla
 
 		params.Cluster = data.CustomObject.Spec.Cluster
 		params.Extension = &extension
-		params.Hyperkube.Kubelet.Docker.CommandExtraArgs = c.k8sKubeletExtraArgs
+		params.Kubernetes.Kubelet.CommandExtraArgs = c.k8sKubeletExtraArgs
 		params.ImagePullProgressDeadline = c.imagePullProgressDeadline
 		params.Images = data.Images
+		params.Versions = data.Versions
 		params.SSOPublicKey = c.SSOPublicKey
 		params.EnableAWSCNI = false
 

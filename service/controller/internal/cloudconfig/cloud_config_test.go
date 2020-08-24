@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/giantswarm/apiextensions/pkg/apis/provider/v1alpha1"
-	"github.com/giantswarm/k8scloudconfig/v6/pkg/ignition"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	"github.com/giantswarm/k8scloudconfig/v7/pkg/ignition"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/randomkeys"
@@ -49,9 +49,20 @@ func Test_Service_CloudConfig_NewMasterTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
+		versions := k8scloudconfig.Versions{
+			Calico:                       "3.14.1",
+			CRITools:                     "0.1.0",
+			Etcd:                         "3.4.9",
+			Kubernetes:                   "1.16.12",
+			KubernetesAPIHealthz:         "0.1.1",
+			KubernetesNetworkSetupDocker: "0.2.0",
+		}
+		images := k8scloudconfig.BuildImages("quay.io", versions)
 		data := IgnitionTemplateData{
 			CustomObject: tc.CustomObject,
 			ClusterKeys:  tc.ClusterKeys,
+			Images:       images,
+			Versions:     versions,
 		}
 		template, _, err := ccService.NewMasterTemplate(ctx, data)
 		if err != nil {
@@ -107,8 +118,19 @@ func Test_Service_CloudConfig_NewWorkerTemplate(t *testing.T) {
 			t.Fatalf("expected %#v got %#v", nil, err)
 		}
 
+		versions := k8scloudconfig.Versions{
+			Calico:                       "3.14.1",
+			CRITools:                     "0.1.0",
+			Etcd:                         "3.4.9",
+			Kubernetes:                   "1.16.12",
+			KubernetesAPIHealthz:         "0.1.1",
+			KubernetesNetworkSetupDocker: "0.2.0",
+		}
+		images := k8scloudconfig.BuildImages("quay.io", versions)
 		data := IgnitionTemplateData{
 			CustomObject: tc.CustomObject,
+			Images:       images,
+			Versions:     versions,
 		}
 		template, _, err := ccService.NewWorkerTemplate(ctx, data)
 		if err != nil {
