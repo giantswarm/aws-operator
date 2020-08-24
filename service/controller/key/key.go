@@ -113,9 +113,12 @@ const (
 )
 
 const (
-	kubectlVersion                           = "1.16.4"
-	kubernetesAPIHealthzVersion              = "0999549a4c334b646288d08bd2c781c6aae2e12f"
-	kubernetesSetupNetworkEnvironmentVersion = "68e90113331feca3b9ffe6a75a601b381ba8c1f7"
+	// KubernetesAPIHealthzVersion is a tag representing the version of
+	// https://github.com/giantswarm/k8s-api-healthz/ used.
+	KubernetesAPIHealthzVersion = "0.1.1"
+	// K8sSetupNetworkEnvironment is a tag representing the version of
+	// https://github.com/giantswarm/k8s-setup-network-environment used.
+	K8sSetupNetworkEnvironment = "0.2.0"
 )
 
 func ClusterAPIEndpoint(customObject v1alpha1.AWSConfig) string {
@@ -224,8 +227,8 @@ func CustomerID(customObject v1alpha1.AWSConfig) string {
 
 func DefaultVersions() k8scloudconfig.Versions {
 	return k8scloudconfig.Versions{
-		KubernetesAPIHealthz:         kubernetesAPIHealthzVersion,
-		KubernetesNetworkSetupDocker: kubernetesSetupNetworkEnvironmentVersion,
+		KubernetesAPIHealthz:         KubernetesAPIHealthzVersion,
+		KubernetesNetworkSetupDocker: K8sSetupNetworkEnvironment,
 	}
 }
 
