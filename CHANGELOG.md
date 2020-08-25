@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix image-pull-progress-deadline argument for tcnp nodes.
 
+### Removed
+
+- Remove etcd snapshot migration code.
+
 ## [8.8.0] - 2020-08-14
 
 - New version for a new kubernetes release.

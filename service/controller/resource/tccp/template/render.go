@@ -9,7 +9,6 @@ import (
 func Render(v interface{}) (string, error) {
 	l := []string{
 		TemplateMain,
-		TemplateMainInstance,
 		TemplateMainInternetGateway,
 		TemplateMainLoadBalancers,
 		TemplateMainNatGateway,

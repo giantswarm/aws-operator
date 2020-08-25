@@ -8,16 +8,6 @@ Outputs:
   VPCPeeringConnectionID:
     Value: !Ref VPCPeeringConnection
 Resources:
-  EtcdVolume:
-    Type: AWS::EC2::Volume
-    Properties:
-      Encrypted: true
-      Size: 100
-      VolumeType: gp2
-      AvailabilityZone: eu-central-1c
-      Tags:
-      - Key: Name
-        Value: 8y5ck-etcd
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
