@@ -80,7 +80,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			ClusterCerts: clusterCerts,
 			ClusterKeys:  clusterKeys,
 			Images:       images,
-			Versions: versions,
+			Versions:     versions,
 		}
 		g.Go(func() error {
 			ignition, hash, err := r.cloudConfig.NewMasterTemplate(ctx, data)
