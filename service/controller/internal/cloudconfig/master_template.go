@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/internal/encrypter/vault"
 	"github.com/giantswarm/aws-operator/service/controller/internal/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 // NewMasterTemplate generates a new master cloud config template and returns it
@@ -46,11 +47,13 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 
 		params = k8scloudconfig.DefaultParams()
 
+		params.BaseDomain = key.BaseDomain(data.CustomObject)
 		params.Cluster = data.CustomObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
+		params.EnableAWSCNI = false
 		params.Etcd.ClientPort = data.CustomObject.Spec.Cluster.Etcd.Port
 		params.Extension = &extension
 		params.Kubernetes.Apiserver.CommandExtraArgs = c.k8sAPIExtraArgs
@@ -60,6 +63,10 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		params.Versions = data.Versions
 		params.SSOPublicKey = c.SSOPublicKey
 		params.EnableAWSCNI = false
+		params.Etcd = k8scloudconfig.Etcd{
+			ClientPort:          key.EtcdPort(data.CustomObject),
+			InitialClusterState: k8scloudconfig.InitialClusterStateNew,
+		}
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
