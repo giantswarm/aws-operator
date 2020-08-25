@@ -120,9 +120,8 @@ func (r *Resource) lookup(ctx context.Context, client EC2, name string) (*ec2.Ro
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-
-	if len(o.RouteTables) == 0 {
-		return nil, microerror.Maskf(executionFailedError, "expected at least one route table, got %d", len(o.RouteTables))
+	if len(o.RouteTables) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected one route table, got %d", len(o.RouteTables))
 	}
 
 	rt := o.RouteTables[0]
