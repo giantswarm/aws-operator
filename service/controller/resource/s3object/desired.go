@@ -25,9 +25,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		return nil, microerror.Mask(err)
 	}
 
-	var images k8scloudconfig.Images
+	var versions k8scloudconfig.Versions
 	{
-		versions, err := k8scloudconfig.ExtractComponentVersions(cc.Spec.TenantCluster.Release.Spec.Components)
+		versions, err = k8scloudconfig.ExtractComponentVersions(cc.Spec.TenantCluster.Release.Spec.Components)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -35,8 +35,9 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 		defaultVersions := key.DefaultVersions()
 		versions.KubernetesAPIHealthz = defaultVersions.KubernetesAPIHealthz
 		versions.KubernetesNetworkSetupDocker = defaultVersions.KubernetesNetworkSetupDocker
-		images = k8scloudconfig.BuildImages(r.registryDomain, versions)
 	}
+
+	images := k8scloudconfig.BuildImages(r.registryDomain, versions)
 
 	var clusterCerts gscerts.Cluster
 	var clusterKeys randomkeys.Cluster
@@ -79,6 +80,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			ClusterCerts: clusterCerts,
 			ClusterKeys:  clusterKeys,
 			Images:       images,
+			Versions: versions,
 		}
 		g.Go(func() error {
 			ignition, hash, err := r.cloudConfig.NewMasterTemplate(ctx, data)
