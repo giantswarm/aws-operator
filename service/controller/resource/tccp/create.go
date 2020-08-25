@@ -410,8 +410,9 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 	var awsCNIRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone: az.Name,
-			ResourceName:     key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+			AvailabilityZone:       az.Name,
+			AvailabilityZoneRegion: key.AvailabilityZoneRegionSuffix(az.Name),
+			ResourceName:           key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
 		}
 		awsCNIRouteTableNames = append(awsCNIRouteTableNames, rtName)
 	}
@@ -419,8 +420,9 @@ func (r *Resource) newParamsMainRouteTables(ctx context.Context, cr infrastructu
 	var publicRouteTableNames []template.ParamsMainRouteTablesRouteTableName
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		rtName := template.ParamsMainRouteTablesRouteTableName{
-			AvailabilityZone: az.Name,
-			ResourceName:     key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
+			AvailabilityZone:       az.Name,
+			AvailabilityZoneRegion: key.AvailabilityZoneRegionSuffix(az.Name),
+			ResourceName:           key.SanitizeCFResourceName(key.PublicRouteTableName(az.Name)),
 		}
 		publicRouteTableNames = append(publicRouteTableNames, rtName)
 	}
