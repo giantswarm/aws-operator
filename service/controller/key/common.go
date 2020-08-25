@@ -72,6 +72,11 @@ func AWSTags(getter LabelsGetter, installationName string) map[string]string {
 	return tags
 }
 
+func AvailabilityZoneRegionSuffix(az string) string {
+	elements := strings.Split(az, "-")
+	return elements[len(elements)-1]
+}
+
 func BucketName(getter LabelsGetter, accountID string) string {
 	return fmt.Sprintf("%s-g8s-%s", accountID, ClusterID(getter))
 }

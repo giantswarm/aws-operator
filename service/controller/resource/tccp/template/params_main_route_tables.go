@@ -10,7 +10,8 @@ type ParamsMainRouteTables struct {
 }
 
 type ParamsMainRouteTablesRouteTableName struct {
-	AvailabilityZone    string
-	ResourceName        string
-	VPCPeeringRouteName string
+	AvailabilityZone       string
+	AvailabilityZoneRegion string
+	ResourceName           string
+	VPCPeeringRouteName    string
 }
