@@ -30,14 +30,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		if r.route53Enabled && cc.Status.ControlPlane.HostedZone.ID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the CP public HostedZone ID in the controller context")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-	}
-
-	{
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
