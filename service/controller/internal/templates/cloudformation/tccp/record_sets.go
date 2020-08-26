@@ -71,7 +71,7 @@ const RecordSets = `
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
-      - !GetAtt {{ $v.Master.Instance.ResourceName }}.NetworkInterface.PrivateIpAddress
+      - !GetAtt {{ $v.MasterInstanceResourceName }}.NetworkInterface.PrivateIpAddress
       Name: 'etcd0.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
