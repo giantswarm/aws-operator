@@ -250,7 +250,7 @@ Resources:
       VpcId: vpc-id
       Tags:
       - Key: Name
-        Value: 8y5ck-private
+        Value: 8y5ck-private-al9qy
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
@@ -267,7 +267,7 @@ Resources:
       VpcId: vpc-id
       Tags:
       - Key: Name
-        Value: 8y5ck-private
+        Value: 8y5ck-private-al9qy
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type
