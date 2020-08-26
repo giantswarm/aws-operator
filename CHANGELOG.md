@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Don't panic when AWSControlPlane CR AZs are nil.
+- Add suffix to Route Tables to get rid of naming collision.
 
 ### Changed
 
