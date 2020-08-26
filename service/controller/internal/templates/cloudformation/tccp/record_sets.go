@@ -75,6 +75,7 @@ const RecordSets = `
       Name: 'etcd0.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
+      TTL: '60'
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
