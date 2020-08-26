@@ -67,7 +67,7 @@ const RecordSets = `
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
-	EtcdNodeRecordSet:
+  EtcdNodeRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       ResourceRecords:
