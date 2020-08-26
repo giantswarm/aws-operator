@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"strings"
 
 	"github.com/giantswarm/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
@@ -47,7 +48,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 
 		params = k8scloudconfig.DefaultParams()
 
-		params.BaseDomain = key.EtcdDomain(data.CustomObject)
+		params.BaseDomain = strings.Join([]string{key.ClusterID(data.CustomObject), "k8s", key.BaseDomain(data.CustomObject)}, ".")
 		params.Cluster = data.CustomObject.Spec.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress controller service remains in k8scloudconfig and will be
