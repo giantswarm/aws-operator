@@ -55,7 +55,13 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		// removed in a later migration.
 		params.DisableIngressControllerService = false
 		params.EnableAWSCNI = false
-		params.Etcd.ClientPort = data.CustomObject.Spec.Cluster.Etcd.Port
+		params.Etcd = k8scloudconfig.Etcd{
+			ClientPort:          key.EtcdPort(data.CustomObject),
+			HighAvailability:    false,
+			InitialCluster:      "etcd0=https://127.0.0.1:2380",
+			InitialClusterState: k8scloudconfig.InitialClusterStateNew,
+			NodeName:            "etcd0",
+		}
 		params.Extension = &extension
 		params.Kubernetes.Apiserver.CommandExtraArgs = c.k8sAPIExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = c.k8sKubeletExtraArgs
@@ -63,11 +69,6 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		params.Images = data.Images
 		params.Versions = data.Versions
 		params.SSOPublicKey = c.SSOPublicKey
-		params.EnableAWSCNI = false
-		params.Etcd = k8scloudconfig.Etcd{
-			ClientPort:          key.EtcdPort(data.CustomObject),
-			InitialClusterState: k8scloudconfig.InitialClusterStateNew,
-		}
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(c.ignitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
