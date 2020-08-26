@@ -67,6 +67,14 @@ const RecordSets = `
       Name: '{{ $v.EtcdDomain }}.'
       HostedZoneId: !Ref 'HostedZone'
       Type: A
+	EtcdNodeRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      ResourceRecords:
+      - !GetAtt {{ $v.Master.Instance.ResourceName }}.NetworkInterface.PrivateIpAddress
+      Name: 'etcd0.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
+      HostedZoneId: !Ref 'HostedZone'
+      Type: A
   IngressRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:

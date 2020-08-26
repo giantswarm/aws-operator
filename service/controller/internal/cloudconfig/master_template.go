@@ -58,7 +58,7 @@ func (c *CloudConfig) NewMasterTemplate(ctx context.Context, data IgnitionTempla
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort(data.CustomObject),
 			HighAvailability:    false,
-			InitialCluster:      "etcd0=https://127.0.0.1:2380",
+			InitialCluster:      "etcd0=etcd0."+params.BaseDomain,
 			InitialClusterState: k8scloudconfig.InitialClusterStateNew,
 			NodeName:            "etcd0",
 		}
