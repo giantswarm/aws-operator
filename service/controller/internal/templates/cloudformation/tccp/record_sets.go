@@ -73,7 +73,7 @@ const RecordSets = `
       ResourceRecords:
       - !GetAtt {{ $v.MasterInstanceResourceName }}.PrivateIp
       Name: 'etcd0.{{ $v.ClusterID }}.k8s.{{ $v.BaseDomain }}.'
-      HostedZoneId: !Ref 'HostedZone'
+      HostedZoneId: !Ref 'InternalHostedZone'
       Type: A
       TTL: '60'
   IngressRecordSet:
