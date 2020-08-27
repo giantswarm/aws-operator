@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- Add monitoring label
 - Handle the case when there are both public and private hosted zones for CP
   base domain.
 - Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
