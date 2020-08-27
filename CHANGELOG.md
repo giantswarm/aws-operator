@@ -8,13 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Handle the case when there are both public and private hosted zones for CP
+  base domain.
+
 ### Fixed
 
 - Don't panic when AWSControlPlane CR AZs are nil.
 
 ### Changed
 
-- Updated workflows for automatic release.
 - Updated backward incompatible Kubernetes dependencies to v1.18.5.
 - Removed migration code to ensure the Control Plane CRs for existing Node Pool clusters.
 
