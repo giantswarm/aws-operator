@@ -52,8 +52,9 @@ func New(config Config) (*Resource, error) {
 		logger:       config.Logger,
 		installation: config.Installation,
 
-		routeTables: []*ec2.RouteTable{},
-		mutex:       sync.Mutex{},
+		routeTables:        []*ec2.RouteTable{},
+		mutex:              sync.Mutex{},
+		expectedTableCount: 0,
 
 		names: config.Names,
 	}
@@ -106,6 +107,7 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "cached route tables")
 
 	cc.Status.ControlPlane.RouteTables = r.routeTables
+	r.expectedTableCount = len(r.routeTables)
 
 	return nil
 }
