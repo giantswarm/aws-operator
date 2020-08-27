@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated workflows for automatic release.
 - Updated backward incompatible Kubernetes dependencies to v1.18.5.
 - Removed migration code to ensure the Control Plane CRs for existing Node Pool clusters.
+- Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
 
 ### Fixed
 
