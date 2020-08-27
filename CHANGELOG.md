@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures 
 - Add monitoring label
 - Handle the case when there are both public and private hosted zones for CP
   base domain.
