@@ -4,7 +4,7 @@ Resources:
   GuestNSRecordSet:
     Type: 'AWS::Route53::RecordSet'
     Properties:
-      HostedZoneName: 'gauss.eu-central-1.aws.gigantic.io.'
+      HostedZoneId: 'hosted-zone-test-id'
       Name: '8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
       Type: 'NS'
       TTL: '300'
