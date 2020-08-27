@@ -13,10 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   base domain.
 - Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
 
+
 ### Changed
 
-- Updated backward incompatible Kubernetes dependencies to v1.18.5.
-- Removed migration code to ensure the Control Plane CRs for existing Node Pool clusters.
+- Update backward incompatible Kubernetes dependencies to v1.18.5.
+- Remove migration code to ensure the Control Plane CRs for existing Node Pool clusters.
 
 ### Deprecated
 
@@ -31,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Remove etcd snapshot migration code.
+- Remove unused `--service.aws.accesskey.id`, `--service.aws.accesskey.secret`
+  and `--service.aws.accesskey.session` flags.
 
 ## [8.8.0] - 2020-08-14
 

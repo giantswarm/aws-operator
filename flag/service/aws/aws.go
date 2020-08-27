@@ -1,18 +1,17 @@
 package aws
 
 import (
-	"github.com/giantswarm/aws-operator/flag/service/aws/accesskey"
 	"github.com/giantswarm/aws-operator/flag/service/aws/cni"
+	"github.com/giantswarm/aws-operator/flag/service/aws/hostaccesskey"
 	"github.com/giantswarm/aws-operator/flag/service/aws/loggingbucket"
 	"github.com/giantswarm/aws-operator/flag/service/aws/route53"
 	"github.com/giantswarm/aws-operator/flag/service/aws/trustedadvisor"
 )
 
 type AWS struct {
-	AccessKey              accesskey.AccessKey
 	AdvancedMonitoringEC2  string
 	AvailabilityZones      string
-	HostAccessKey          accesskey.AccessKey
+	HostAccessKey          hostaccesskey.HostAccessKey
 	IncludeTags            string
 	LoggingBucket          loggingbucket.LoggingBucket
 	PodInfraContainerImage string
