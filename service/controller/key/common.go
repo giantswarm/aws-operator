@@ -72,6 +72,8 @@ func AWSTags(getter LabelsGetter, installationName string) map[string]string {
 	return tags
 }
 
+// AvailabilityZoneRegionSuffix takes region's full name and returns its
+// suffix: e.g. "eu-central-1b" -> "1b"
 func AvailabilityZoneRegionSuffix(az string) string {
 	elements := strings.Split(az, "-")
 	return elements[len(elements)-1]
