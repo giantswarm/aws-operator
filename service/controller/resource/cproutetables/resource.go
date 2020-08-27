@@ -31,10 +31,6 @@ type Resource struct {
 
 	mutex       sync.Mutex
 	routeTables []*ec2.RouteTable
-	// expectedTableCount is set depending on the collection method. If
-	// filtering by tag yields result, it defaults to the count of RouteTables
-	// returned this way. Otherwise it is set to len(names).
-	expectedTableCount int
 
 	names []string
 }
@@ -52,9 +48,8 @@ func New(config Config) (*Resource, error) {
 		logger:       config.Logger,
 		installation: config.Installation,
 
-		routeTables:        []*ec2.RouteTable{},
-		mutex:              sync.Mutex{},
-		expectedTableCount: 0,
+		routeTables: []*ec2.RouteTable{},
+		mutex:       sync.Mutex{},
 
 		names: config.Names,
 	}
@@ -76,7 +71,7 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 	}
 
 	r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route tables")
-	if len(r.routeTables) == r.expectedTableCount && r.expectedTableCount > 0 {
+	if len(r.routeTables) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route tables")
 		cc.Status.ControlPlane.RouteTables = r.routeTables
 
@@ -108,7 +103,6 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 	r.logger.LogCtx(ctx, "level", "debug", "message", "cached route tables")
 
 	cc.Status.ControlPlane.RouteTables = r.routeTables
-	r.expectedTableCount = len(r.routeTables)
 
 	return nil
 }
