@@ -102,7 +102,7 @@ func (h *helper) GetAWSClients(ctx context.Context, clusterList *infrastructurev
 		return nil, microerror.Mask(err)
 	}
 
-	// addClientFunc add awsClients to clients using account id as key to guaranatee uniqueness.
+	// addClientFunc add awsClients to clients using account id as key to guarantee uniqueness.
 	addClientFunc := func(awsClients clientaws.Clients, clients map[string]clientaws.Clients) error {
 		accountID, err := h.AWSAccountID(awsClients)
 		if err != nil {
