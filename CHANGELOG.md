@@ -8,20 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
-- Don't panic when AWSControlPlane CR AZs are nil.
-- Add suffix to Route Tables to get rid of naming collision.
+- Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
 
 ### Changed
 
 - Updated workflows for automatic release.
 - Updated backward incompatible Kubernetes dependencies to v1.18.5.
 - Removed migration code to ensure the Control Plane CRs for existing Node Pool clusters.
-- Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
+
+### Deprecated
+
+- `RouteTables` flag will be deprecated.
 
 ### Fixed
 
+- Don't panic when AWSControlPlane CR AZs are nil.
+- Add suffix to Route Tables to get rid of naming collision.
 - Fix image-pull-progress-deadline argument for tcnp nodes.
 
 ### Removed
