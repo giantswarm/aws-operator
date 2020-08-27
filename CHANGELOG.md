@@ -13,22 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle the case when there are both public and private hosted zones for CP
   base domain.
 
+### Changed
+
+- Update backward incompatible Kubernetes dependencies to v1.18.5.
+- Remove migration code to ensure the Control Plane CRs for existing Node Pool clusters.
+
 ### Fixed
 
 - Don't panic when AWSControlPlane CR AZs are nil.
-
-### Changed
-
-- Updated backward incompatible Kubernetes dependencies to v1.18.5.
-- Removed migration code to ensure the Control Plane CRs for existing Node Pool clusters.
-
-### Fixed
-
 - Fix image-pull-progress-deadline argument for tcnp nodes.
 
 ### Removed
 
 - Remove etcd snapshot migration code.
+- Remove unused `--service.aws.accesskey.id`, `--service.aws.accesskey.secret`
+  and `--service.aws.accesskey.session` flags.
 
 ## [8.8.0] - 2020-08-14
 
