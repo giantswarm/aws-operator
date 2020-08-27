@@ -44,6 +44,7 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	// TODO: Get installation from flags
 	if config.Installation == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Installation must not be empty", config)
 	}
@@ -75,6 +76,7 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route tables")
 	if len(r.routeTables) == r.expectedTableCount && r.expectedTableCount > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route tables")
 		cc.Status.ControlPlane.RouteTables = r.routeTables
