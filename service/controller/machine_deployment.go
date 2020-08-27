@@ -353,7 +353,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
-			Logger: config.Logger,
+			Logger:       config.Logger,
+			Installation: config.InstallationName,
 
 			Names: strings.Split(config.RouteTables, ","),
 		}
