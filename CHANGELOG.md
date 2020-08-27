@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Updated AMI mapping to add Flatcar Container Linux 2512.3.0 AMIs.
+
+### Changed
+
+- Removed memory and CPU limits from calico-kube-controllers.
+
 ## [5.7.4] - 2020-08-19
 
 - Check subnets from node pools clusters when collecting allocated subnets.
