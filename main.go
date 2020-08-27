@@ -101,9 +101,6 @@ func mainE(ctx context.Context) error {
 
 	daemonCommand := newCommand.DaemonCommand().CobraCommand()
 
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.ID, "", "ID of the AWS access key for the account to create guest clusters in.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Secret, "", "Secret of the AWS access key for the  account to create guest clusters in.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.AccessKey.Session, "", "Session token of the AWS access key for the  account to create guest clusters in. (Can be empty)")
 	daemonCommand.PersistentFlags().StringSlice(f.Service.AWS.AvailabilityZones, []string{}, "Availability zones as a slice.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "ID of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "Secret of the AWS access key for the host cluster account. If empty, guest cluster account is used.")
