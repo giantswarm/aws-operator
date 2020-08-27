@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -147,13 +148,13 @@ func (r *Resource) lookupByTag(ctx context.Context, client EC2, installation str
 	i := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String("tag:giantswarm.io/cluster"),
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 				Values: []*string{
 					aws.String(installation),
 				},
 			},
 			{
-				Name: aws.String("tag:giantswarm.io/route-table-type"),
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagRouteTableType)),
 				Values: []*string{
 					aws.String("private"),
 				},
