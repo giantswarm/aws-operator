@@ -44,7 +44,6 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	// TODO: Get installation from flags
 	if config.Installation == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Installation must not be empty", config)
 	}
