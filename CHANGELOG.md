@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.5] - 2020-08-28
+
 ### Added
 
 - Updated AMI mapping to add Flatcar Container Linux 2512.3.0 AMIs.
@@ -69,7 +71,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update to Kubernetes 1.15.5.
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.7.1...legacy
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.7.5...legacy
+[5.7.5]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.5
+[5.7.4]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.4
+[5.7.3]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.3
+[5.7.2]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.2
 [5.7.1]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.1
 [5.7.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.0
 [5.6.0]: https://github.com/giantswarm/aws-operator/releases/tag/v5.6.0
