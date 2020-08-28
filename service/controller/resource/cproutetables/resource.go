@@ -144,32 +144,55 @@ func (r *Resource) lookupByName(ctx context.Context, client EC2, name string) (*
 func (r *Resource) lookupByTag(ctx context.Context, client EC2, installation string) ([]*ec2.RouteTable, error) {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route tables for installation %#q", installation))
 
-	i := &ec2.DescribeRouteTablesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
-				Values: []*string{
-					aws.String(installation),
+	var privateTables []*ec2.RouteTable
+	{
+		i := &ec2.DescribeRouteTablesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+					Values: []*string{
+						aws.String(installation),
+					},
+				},
+				{
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagRouteTableType)),
+					Values: []*string{
+						aws.String("private"),
+					},
 				},
 			},
-			{
-				Name: aws.String(fmt.Sprintf("tag:%s", key.TagRouteTableType)),
-				Values: []*string{
-					aws.String("private"),
-				},
-			},
-		},
+		}
+
+		o, err := client.DescribeRouteTables(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		privateTables = o.RouteTables
 	}
 
-	o, err := client.DescribeRouteTables(i)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	output := []*ec2.RouteTable{}
+	{
+		// filter out TCNP tables
+		for _, table := range privateTables {
+			isTCNPTable := false
+			for _, tag := range table.Tags {
+				if *tag.Key == key.TagStack && *tag.Value == "tcnp" {
+					isTCNPTable = true
+					break
+				}
+			}
+			if !isTCNPTable {
+				output = append(output, table)
+			}
+		}
 	}
-	if len(o.RouteTables) == 0 {
+
+	if len(output) == 0 {
 		return nil, microerror.Maskf(executionFailedError, "expected at least one route table, got 0")
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d route tables for installation %#q", len(o.RouteTables), installation))
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d route tables for installation %#q", len(output), installation))
 
-	return o.RouteTables, nil
+	return output, nil
 }
