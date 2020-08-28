@@ -44,6 +44,11 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Installation must not be empty", config)
 	}
 
+	// TODO: This is temporary fix until we get rid of routeTables flag.
+	if len(config.Names) == 1 && config.Names[0] == "" {
+		config.Names = []string{}
+	}
+
 	r := &Resource{
 		logger:       config.Logger,
 		installation: config.Installation,
