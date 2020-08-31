@@ -1,12 +1,12 @@
 package project
 
 var (
-	bundleVersion        = "5.7.6-dev"
+	bundleVersion        = "5.7.6"
 	description          = "The aws-operator handles Kubernetes clusters running on a Kubernetes cluster inside of AWS."
 	gitSHA               = "n/a"
 	name          string = "aws-operator"
 	source        string = "https://github.com/giantswarm/aws-operator"
-	version              = "5.7.6-dev"
+	version              = "5.7.6"
 )
 
 func BundleVersion() string {
