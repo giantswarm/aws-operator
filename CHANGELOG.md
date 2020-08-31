@@ -77,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update to Kubernetes 1.15.5.
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.7.5...legacy
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v5.7.6...legacy
+[5.7.6]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.6
 [5.7.5]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.5
 [5.7.4]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.4
 [5.7.3]: https://github.com/giantswarm/aws-operator/releases/tag/v5.7.3
