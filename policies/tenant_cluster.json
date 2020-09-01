@@ -58,9 +58,10 @@
             ],
             "Resource": [
                 "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-EC2-K8S-Role",
+                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-IAMManager-Role",
                 "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-Route53Manager-Role",
-                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/gs-*",
-                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-IAMManager-Role"
+                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/*-vpc-peer-access",
+                "arn:aws:iam::<CUSTOMER_ACCOUNT_ID>:role/gs-*"
             ]
         },
         {
