@@ -2,6 +2,7 @@ package tccpf
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -33,6 +34,17 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		_, err = cc.Client.ControlPlane.AWS.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane finalizer cloud formation stack is being deleted")
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			finalizerskeptcontext.SetKept(ctx)
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+
+			return nil
+
+		} else if IsDeleteFailed(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane finalizer cloud formation stack failed to delete")
+			r.event.Emit(ctx, &cr, "CFDeleteFailed", fmt.Sprintf("the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteFailed))
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)

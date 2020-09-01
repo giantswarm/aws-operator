@@ -5,6 +5,7 @@ metadata:
   namespace: {{ include "resource.default.namespace" . }}
   labels:
     {{- include "labels.common" . | nindent 4 }}
+    giantswarm.io/monitoring: "true"
   annotations:
     prometheus.io/scrape: "true"
 spec:

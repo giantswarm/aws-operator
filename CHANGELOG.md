@@ -10,8 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Emit Kubernetes events for tcnpf Cloudformation stack failures
+- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures 
+- Add monitoring label
 - Handle the case when there are both public and private hosted zones for CP
   base domain.
+- Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
+
 
 ### Changed
 
@@ -21,9 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update backward incompatible Kubernetes dependencies to v1.18.5.
 - Remove migration code to ensure the Control Plane CRs for existing Node Pool clusters.
 
+### Deprecated
+
+- `RouteTables` flag will be deprecated.
+
 ### Fixed
 
 - Don't panic when AWSControlPlane CR AZs are nil.
+- Add suffix to Route Tables to get rid of naming collision.
 - Fix image-pull-progress-deadline argument for tcnp nodes.
 
 ### Removed
