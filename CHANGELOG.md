@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Emit Kubernetes events for tcnpf Cloudformation stack failures
-- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures
+- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures 
 - Add monitoring label
 - Handle the case when there are both public and private hosted zones for CP
   base domain.
@@ -26,11 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 - `RouteTables` flag will be deprecated.
-
-### Documentation
-
-- Move policies/tenant_cluster.json to policies/aws-operator.json as they are
-  supposed to be used for both Control Plane and Tenant Clusters AWS accounts.
 
 ### Fixed
 
