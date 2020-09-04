@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove etcd snapshot migration code.
 - Remove unused `--service.aws.accesskey.id`, `--service.aws.accesskey.secret`
   and `--service.aws.accesskey.session` flags.
+- Remove the prometheus collector and move it to the separate `aws-collector` project.
 
 ## [8.8.0] - 2020-08-14
 
