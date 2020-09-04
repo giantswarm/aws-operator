@@ -10,7 +10,6 @@ require (
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs/v3 v3.0.0
 	github.com/giantswarm/errors v0.2.3
-	github.com/giantswarm/exporterkit v0.2.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v4 v4.0.0
 	github.com/giantswarm/k8scloudconfig/v8 v8.0.0
@@ -25,7 +24,6 @@ require (
 	github.com/giantswarm/to v0.3.0
 	github.com/google/go-cmp v0.5.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.7.1
 	github.com/spf13/afero v1.3.1 // indirect
 	github.com/spf13/viper v1.7.1
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
