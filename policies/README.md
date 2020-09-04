@@ -1,4 +1,4 @@
- Policies
+# Policies
 
 The `aws-operator` needs IAM permissions in order to properly manage tenant
 clusters on AWS.
