@@ -25,7 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -51,7 +50,6 @@ type Service struct {
 	controlPlaneDrainerController      *controller.ControlPlaneDrainer
 	machineDeploymentController        *controller.MachineDeployment
 	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
-	operatorCollector                  *collector.Set
 }
 
 // New creates a new configured service object.
@@ -357,23 +355,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var operatorCollector *collector.Set
-	{
-		c := collector.SetConfig{
-			Clients: k8sClient,
-			Logger:  config.Logger,
-
-			AWSConfig:             awsConfig,
-			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
-			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
-		}
-
-		operatorCollector, err = collector.NewSet(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var versionService *version.Service
 	{
 		c := version.Config{
@@ -399,7 +380,6 @@ func New(config Config) (*Service, error) {
 		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
-		operatorCollector:                  operatorCollector,
 	}
 
 	return s, nil
@@ -407,8 +387,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.operatorCollector.Boot(ctx) // nolint: errcheck
-
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
 		go s.controlPlaneDrainerController.Boot(ctx)
