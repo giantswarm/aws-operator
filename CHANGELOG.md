@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated AWS CNI
+- Updated k8scloudconfig to disable Calico installing the CNI binaries
+
 ## [8.7.6] - 2020-08-14
 
 ### Added
