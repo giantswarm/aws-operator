@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
@@ -62,11 +64,39 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
+	// This is the custom network range configured by the NetworkPool CR. Since
+	// this is dynamic we need to look it up in order to consider it for network
+	// allocation, if the NetworkPool CR is given.
+	var networkRange net.IPNet
+	{
+		var cr v1alpha2.AWSCluster
+		err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: m.GetName(), Namespace: m.GetNamespace()}, &cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if cr.Spec.Provider.Nodes.NetworkPool == "" {
+			networkRange = r.networkRange
+		} else {
+			var np v1alpha2.NetworkPool
+			err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: cr.Spec.Provider.Nodes.NetworkPool, Namespace: cr.GetNamespace()}, &np)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			_, ipnet, err := net.ParseCIDR(np.Spec.CIDRBlock)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			networkRange = *ipnet
+		}
+	}
+
 	var allocatedSubnets []net.IPNet
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets")
 
-		allocatedSubnets, err = r.collector.Collect(ctx)
+		allocatedSubnets, err = r.collector.Collect(ctx, networkRange)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -78,7 +108,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
 
-		freeSubnet, err = ipam.Free(r.networkRange, r.allocatedSubnetMask, allocatedSubnets)
+		freeSubnet, err = ipam.Free(networkRange, r.allocatedSubnetMask, allocatedSubnets)
 		if err != nil {
 			return microerror.Mask(err)
 		}

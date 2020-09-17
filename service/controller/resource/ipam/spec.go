@@ -13,9 +13,11 @@ type Checker interface {
 }
 
 // Collector implementation must return all networks that are allocated on any
-// given moment. Failing to do that will result in overlapping allocations.
+// given moment. Failing to do that will result in overlapping allocations which
+// causes cluster creation failures. The network range provided here is a custom
+// override. If it is empty we fall back to some globally configured default.
 type Collector interface {
-	Collect(ctx context.Context) ([]net.IPNet, error)
+	Collect(ctx context.Context, networkRange net.IPNet) ([]net.IPNet, error)
 }
 
 // Persister must mutate shared persistent state so that on successful execution

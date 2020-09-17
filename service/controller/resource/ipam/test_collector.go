@@ -17,6 +17,6 @@ func NewTestCollector(subnets []net.IPNet) *TestCollector {
 	return c
 }
 
-func (c *TestCollector) Collect(ctx context.Context) ([]net.IPNet, error) {
+func (c *TestCollector) Collect(ctx context.Context, networkRange net.IPNet) ([]net.IPNet, error) {
 	return c.subnets, nil
 }
