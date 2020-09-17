@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
@@ -52,6 +53,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		k8sClient, err = k8sclient.NewClients(c)
+		spew.Dump(err)
 		if tenant.IsAPINotAvailable(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant API not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
