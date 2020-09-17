@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Update AWS CNI manifests
+- Disable Calico CNI binaries installation
+
 ## [9.0.1] - 2020-09-17
 
 - Update flatcar releases
@@ -17,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Emit Kubernetes events for tcnpf Cloudformation stack failures
-- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures 
+- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures
 - Add monitoring label
 - Handle the case when there are both public and private hosted zones for CP
   base domain.
