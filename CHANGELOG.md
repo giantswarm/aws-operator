@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.1] - 2020-09-17
+
 - Update flatcar releases
 
 ## [9.0.0] - 2020-09-15
@@ -253,7 +255,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.0.1...HEAD
+[9.0.1]: https://github.com/giantswarm/aws-operator/compare/v9.0.0...v9.0.1
 [9.0.0]: https://github.com/giantswarm/aws-operator/compare/v8.8.0...v9.0.0
 [8.8.0]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...v8.8.0
 [8.7.6]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...v8.7.6
