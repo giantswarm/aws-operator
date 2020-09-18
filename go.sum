@@ -70,6 +70,7 @@ github.com/aws/amazon-vpc-cni-k8s v1.7.3 h1:xFs0dQknrxebo8ijApr9VFwtBr4NkF8dUNKF
 github.com/aws/amazon-vpc-cni-k8s v1.7.3/go.mod h1:WFg/NerFMpie+WZBSWvlSojmKkqGV2cznQPdQS6Uwh4=
 github.com/aws/aws-lambda-go v1.13.3/go.mod h1:4UKl9IzQMoD+QF79YdCuzCwp8VbmG4VAQwij/eHl5CU=
 github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
+github.com/aws/aws-sdk-go v1.33.14/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go v1.34.4 h1:Yx49/+ZMCD9YqIVsO3CsiMs4hnUnokd9otKvWYFjnYw=
 github.com/aws/aws-sdk-go v1.34.4/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
@@ -185,6 +186,7 @@ github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeME
 github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 h1:Mn26/9ZMNWSw9C9ERFA1PUxfmGpolnw2v0bKOREu5ew=
 github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32/go.mod h1:GIjDIg/heH5DOkXY3YJ/wNhfHsQHoXGjl8G8amsYQ1I=
 github.com/giantswarm/apiextensions v0.2.0/go.mod h1:iw66G0WDcrQl9mi2m/6mov2fWTD6ZiT2+FC62b2Mczw=
+github.com/giantswarm/apiextensions v0.3.4/go.mod h1:l6m0M9R0oL1C57afMZXjWO1cZ1roIzmpA62nqJFYp40=
 github.com/giantswarm/apiextensions v0.3.9/go.mod h1:l6m0M9R0oL1C57afMZXjWO1cZ1roIzmpA62nqJFYp40=
 github.com/giantswarm/apiextensions v0.4.15/go.mod h1:iMZLjyvqRIVPTAQGbjwTSqifwrGB41a4mW8MwC45mYI=
 github.com/giantswarm/apiextensions v0.4.20 h1:ggXORM5p/kWv9kcmPfmeD2FV10XAsrcGvqVka0CrIcI=
@@ -204,6 +206,7 @@ github.com/giantswarm/k8sclient v0.2.0/go.mod h1:tUgUynwKgMnjnN2PldGmxJW6+8eZn2p
 github.com/giantswarm/k8sclient/v3 v3.1.0/go.mod h1:kDOgbAQ3V8YqroN4T7RVPk+rapvT/IV2KNNbxfM2xys=
 github.com/giantswarm/k8sclient/v3 v3.1.2 h1:/X1OqiWDm+4IjZn3HYkTJbNkqH6/T9j+lJfZRQ4R30A=
 github.com/giantswarm/k8sclient/v3 v3.1.2/go.mod h1:BTcd+oxkukuu+NBIs9yWN4ZIh+Ca8PmsoYTK7GXZErg=
+github.com/giantswarm/k8scloudconfig/v7 v7.1.0 h1:TKvZ8w94/Twki4UnkleOvjQP0umPxESH2zspxac/lNg=
 github.com/giantswarm/k8scloudconfig/v7 v7.1.0/go.mod h1:EnsZfiL+f8Kv5jro26yhnw/6Yj5dboz/QgW/pEyXUqg=
 github.com/giantswarm/kubelock v0.2.0 h1:4zSD/DSRUKuLoabheYHyHb7dEbC172GPinG0/NSIuJY=
 github.com/giantswarm/kubelock v0.2.0/go.mod h1:3qkQ4O8J/452GErW0nSwSR/XBuNwUonrcH3biQ5HTCE=
