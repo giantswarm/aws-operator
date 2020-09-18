@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"reflect"
 
 	"github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
@@ -11,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
@@ -69,8 +71,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// allocation, if the NetworkPool CR is given.
 	var networkRange net.IPNet
 	{
+		var clusterID string
+
+		// We need to check if the request comes from a Cluster or a MachineDeployment in order to fetch the name of the Cluster accordingly
+		if reflect.TypeOf(r.checker) == reflect.TypeOf(ClusterChecker{}) {
+			clusterID = m.GetName()
+		} else if reflect.TypeOf(r.checker) == reflect.TypeOf(MachineDeploymentChecker{}) {
+			var md v1alpha2.AWSMachineDeployment
+			err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: m.GetName(), Namespace: m.GetNamespace()}, &md)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			clusterID = md.Labels[key.TagCluster]
+		}
+
 		var cr v1alpha2.AWSCluster
-		err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: m.GetName(), Namespace: m.GetNamespace()}, &cr)
+		err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: clusterID, Namespace: m.GetNamespace()}, &cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
