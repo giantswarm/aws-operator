@@ -74,9 +74,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		var clusterID string
 
 		// We need to check if the request comes from a Cluster or a MachineDeployment in order to fetch the name of the Cluster accordingly
-		if reflect.TypeOf(r.checker) == reflect.TypeOf(ClusterChecker{}) {
-			clusterID = m.GetName()
-		} else if reflect.TypeOf(r.checker) == reflect.TypeOf(MachineDeploymentChecker{}) {
+		clusterID = m.GetName()
+		if reflect.TypeOf(r.checker) == reflect.TypeOf(MachineDeploymentChecker{}) {
 			var md v1alpha2.AWSMachineDeployment
 			err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: m.GetName(), Namespace: m.GetNamespace()}, &md)
 			if err != nil {
