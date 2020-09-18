@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [8.7.6] - 2020-08-11
+### Changed
+
+- Updated AWS CNI
+- Updated k8scloudconfig to disable Calico installing the CNI binaries
+
+## [8.7.6] - 2020-08-14
 
 ### Added
 
@@ -18,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix IAM policy on Tenant Clusters to manages IAM Role tags.
+- Fixed passing custom pod CIDR to k8scloudconfig.
 
 ## [8.7.5] - 2020-07-30
 

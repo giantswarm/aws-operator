@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.7.3
-	github.com/aws/aws-sdk-go v1.34.1
+	github.com/aws/aws-sdk-go v1.34.4
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions v0.4.20
 	github.com/giantswarm/backoff v0.2.0
@@ -12,7 +12,7 @@ require (
 	github.com/giantswarm/errors v0.2.3
 	github.com/giantswarm/exporterkit v0.2.0
 	github.com/giantswarm/ipam v0.2.0
-	github.com/giantswarm/k8sclient/v3 v3.1.1
+	github.com/giantswarm/k8sclient/v3 v3.1.2
 	github.com/giantswarm/k8scloudconfig/v8 v8.0.1
 	github.com/giantswarm/kubelock v0.2.0
 	github.com/giantswarm/microendpoint v0.2.0
