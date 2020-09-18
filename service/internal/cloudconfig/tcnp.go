@@ -8,7 +8,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v2/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys"
 	"golang.org/x/sync/errgroup"
