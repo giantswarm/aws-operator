@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.7] - 2020-09-21
+
 ### Changed
 
 - Updated AWS CNI
@@ -217,7 +219,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.7...HEAD
+[8.7.7]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...v8.7.7
 [8.7.6]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...v8.7.6
 [8.7.5]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...v8.7.5
 [8.7.4]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...v8.7.4
