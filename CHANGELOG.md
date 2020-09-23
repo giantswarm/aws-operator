@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Update flatcar AMI for China
+
 ## [8.7.8] - 2020-09-21
 
 ### Changed
