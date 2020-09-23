@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Update flatcar AMI for China
+
 ## [9.1.0] - 2020-09-22
 
 - Update AWS CNI manifests
