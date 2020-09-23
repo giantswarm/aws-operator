@@ -183,10 +183,7 @@ github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2H
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 h1:Mn26/9ZMNWSw9C9ERFA1PUxfmGpolnw2v0bKOREu5ew=
 github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32/go.mod h1:GIjDIg/heH5DOkXY3YJ/wNhfHsQHoXGjl8G8amsYQ1I=
-github.com/giantswarm/apiextensions v0.4.20 h1:ggXORM5p/kWv9kcmPfmeD2FV10XAsrcGvqVka0CrIcI=
 github.com/giantswarm/apiextensions/v2 v2.0.0/go.mod h1:/qSx5jA2F5um0ipvVDMZJz+rJqsPZewzz4jjMXkXYFw=
-github.com/giantswarm/apiextensions/v2 v2.5.0 h1:4+g83PaLA6dhlIKBVFPjKo5P3dQjcYvNLPFt/WcxJV0=
-github.com/giantswarm/apiextensions/v2 v2.5.0/go.mod h1:/qSx5jA2F5um0ipvVDMZJz+rJqsPZewzz4jjMXkXYFw=
 github.com/giantswarm/apiextensions/v2 v2.5.1 h1:HAJRfSIR8yjvJUOAYafL32Cwcr0L8yCWp5Hh8/Iauf4=
 github.com/giantswarm/apiextensions/v2 v2.5.1/go.mod h1:/qSx5jA2F5um0ipvVDMZJz+rJqsPZewzz4jjMXkXYFw=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
