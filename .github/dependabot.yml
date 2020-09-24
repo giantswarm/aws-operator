@@ -15,7 +15,7 @@ updates:
   ignore:
   - dependency-name: k8s.io/*
     versions:
-    - ">=0.17.0"
+    - ">=0.19.0"
 - package-ecosystem: docker
   directory: "/"
   schedule:
