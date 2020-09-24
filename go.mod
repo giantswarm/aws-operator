@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.7.3
-	github.com/aws/aws-sdk-go v1.34.29
+	github.com/aws/aws-sdk-go v1.34.30
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions/v2 v2.5.1
 	github.com/giantswarm/backoff v0.2.0
