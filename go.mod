@@ -18,7 +18,7 @@ require (
 	github.com/giantswarm/microerror v0.2.1
 	github.com/giantswarm/microkit v0.2.2
 	github.com/giantswarm/micrologger v0.3.3
-	github.com/giantswarm/operatorkit/v2 v2.0.0
+	github.com/giantswarm/operatorkit/v2 v2.0.1
 	github.com/giantswarm/randomkeys/v2 v2.0.0
 	github.com/giantswarm/tenantcluster/v3 v3.0.0
 	github.com/giantswarm/to v0.3.0
@@ -27,10 +27,10 @@ require (
 	github.com/spf13/afero v1.3.1 // indirect
 	github.com/spf13/viper v1.7.1
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	k8s.io/api v0.18.6
-	k8s.io/apiextensions-apiserver v0.18.6
-	k8s.io/apimachinery v0.18.6
-	k8s.io/client-go v0.18.6
+	k8s.io/api v0.18.9
+	k8s.io/apiextensions-apiserver v0.18.9
+	k8s.io/apimachinery v0.18.9
+	k8s.io/client-go v0.18.9
 	sigs.k8s.io/cluster-api v0.3.8
 	sigs.k8s.io/controller-runtime v0.6.3
 )
