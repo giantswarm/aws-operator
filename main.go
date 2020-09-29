@@ -103,7 +103,7 @@ func mainE(ctx context.Context) error {
 
 	daemonCommand.PersistentFlags().StringSlice(f.Service.AWS.AvailabilityZones, []string{}, "Availability zones as a slice.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "AWS access key ID for the Control Plane cluster account.")
-	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.RoleARN, "", "AWS role ARN for the Control Plane cluster account.")
+	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Role, "GiantSwarmAWSOperator", "AWS role name for the Control Plane cluster account.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "AWS access key secret for the Control Plane cluster account.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Session, "", "AWS session token for the Control Plane cluster account.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.Region, "", "Region for checking for orphaned AWS resources.")

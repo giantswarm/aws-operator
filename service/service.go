@@ -109,11 +109,25 @@ func New(config Config) (*Service, error) {
 
 	var awsConfig aws.Config
 	{
+		accessKeyID := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID)
+		region := config.Viper.GetString(config.Flag.Service.AWS.Region)
+		role := config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Role)
+
+		var roleARN string
+		{
+			if strings.HasPrefix("cn-", region) {
+				roleARN = "arn:aws-cn"
+			} else {
+				roleARN = "arn:aws"
+			}
+			roleARN += ":iam::" + accessKeyID + ":role/" + role
+		}
+
 		awsConfig = aws.Config{
-			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
+			AccessKeyID:     accessKeyID,
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
-			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
-			RoleARN:         config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.RoleARN),
+			Region:          region,
+			RoleARN:         roleARN,
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}

@@ -2,7 +2,7 @@ package hostaccesskey
 
 type HostAccessKey struct {
 	ID      string
-	RoleARN string
+	Role    string
 	Secret  string
 	Session string
 }

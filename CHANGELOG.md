@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add etcd client certificates for Prometheus.
+- Add `--service.aws.hostaccesskey.role` flag.
+
+### Changed
+
+- Access Control Plane AWS account using role assumption. This is to prepare
+  running aws-operator inside a Tenant Cluster.
 
 ## [9.1.1] - 2020-09-23
 
@@ -41,9 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Add required `--service.aws.hostaccesskey.rolearn` flag.
-- Access Control Plane AWS account using role assumption. This is to prepare
-  running aws-operator inside a Tenant Cluster.
 - Update backward incompatible Kubernetes dependencies to v1.18.5.
 - Remove migration code to ensure the Control Plane CRs for existing Node Pool clusters.
 
