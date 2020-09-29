@@ -52,6 +52,8 @@ rules:
       - awsmachinedeployments/status
       - g8scontrolplanes
       - g8scontrolplanes/status
+      - networkpools
+      - networkpools/status
     verbs:
       - "*"
 

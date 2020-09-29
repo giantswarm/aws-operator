@@ -400,6 +400,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		c := ipam.Config{
 			Checker:   machineDeploymentChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: machineDeploymentPersister,

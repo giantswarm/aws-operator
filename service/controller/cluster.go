@@ -379,6 +379,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := ipam.Config{
 			Checker:   clusterChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: clusterPersister,
