@@ -191,6 +191,18 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		})
 
 		g.Go(func() error {
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.PrometheusEtcdClientCert)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			m.Lock()
+			certFiles = append(certFiles, certs.NewFilesPrometheusEtcdClient(tls)...)
+			m.Unlock()
+
+			return nil
+		})
+
+		g.Go(func() error {
 			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.ServiceAccountCert)
 			if err != nil {
 				return microerror.Mask(err)
