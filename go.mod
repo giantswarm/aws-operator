@@ -18,7 +18,7 @@ require (
 	github.com/giantswarm/microerror v0.2.1
 	github.com/giantswarm/microkit v0.2.2
 	github.com/giantswarm/micrologger v0.3.3
-	github.com/giantswarm/operatorkit/v2 v2.0.1
+	github.com/giantswarm/operatorkit/v2 v2.0.2-0.20201001113458-634b76c31453
 	github.com/giantswarm/randomkeys/v2 v2.0.0
 	github.com/giantswarm/tenantcluster/v3 v3.0.0
 	github.com/giantswarm/to v0.3.0
