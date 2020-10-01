@@ -55,8 +55,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	//
 	var attached []*ec2.NetworkInterface
 	var detached []*ec2.NetworkInterface
+	var transitioning []*ec2.NetworkInterface
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding attached and detached network interfaces")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "grouping network interfaces")
 
 		for _, eni := range enis {
 			switch *eni.Status {
@@ -65,12 +66,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			case ec2.NetworkInterfaceStatusAvailable:
 				detached = append(detached, eni)
 			default:
-				return microerror.Maskf(invalidENIStatusError, *eni.Status)
+				transitioning = append(transitioning, eni)
 			}
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d attached network interfaces", len(attached)))
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d detached network interfaces", len(detached)))
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d transitioning network interfaces", len(transitioning)))
 	}
 
 	// For all the detached ENIs we try to delete them. This is the cleanup
@@ -90,9 +92,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted detached network interface %#q", *eni.NetworkInterfaceId))
 	}
 
-	// For all attached ENIs we just keep finalizers and try cleaning up again
-	// during the next reconciliation loop.
-	if len(attached) > 0 {
+	// For all attached ENIs we just keep finalizers and try cleaning them up
+	// again during the next reconciliation loop. The same applies for any
+	// network interfaces transitioning between states. Transitioning states
+	// indicate that e.g. ENIs are currently being detached from their
+	// respective instances during Tenant Cluster deletion.
+	if len(attached) > 0 || len(transitioning) > 0 {
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found network interfaces which are not yet detached")
 		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)
