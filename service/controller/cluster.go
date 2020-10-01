@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupenis"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
@@ -446,6 +447,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var cleanupENIs resource.Interface
+	{
+		c := cleanupenis.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupENIs, err = cleanupenis.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cleanupLoadBalancersResource resource.Interface
 	{
 		c := cleanuploadbalancers.Config{
@@ -806,6 +819,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupMachineDeploymentsResource,
 		cleanupRecordSets,
 		cleanupSecurityGroups,
+		cleanupENIs,
 		keepForAWSControlPlaneCRsResource,
 		keepForAWSMachineDeploymentCRsResource,
 	}
