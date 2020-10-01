@@ -18,9 +18,33 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// We need to fetch all subnets of the Tenant Cluster in order to find all
+	// relevant ENIs.
 	var values []*string
-	for _, s := range cc.Status.TenantCluster.TCCP.Subnets {
-		values = append(values, s.SubnetId)
+	{
+		r.logger.LogCtx(ctx, "level", "debug", "message", "finding all subnets")
+
+		i := &ec2.DescribeSubnetsInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("vpc-id"),
+					Values: []*string{
+						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+					},
+				},
+			},
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeSubnets(i)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		for _, s := range o.Subnets {
+			values = append(values, s.SubnetId)
+		}
+
+		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d subnets", len(values)))
 	}
 
 	var enis []*ec2.NetworkInterface
