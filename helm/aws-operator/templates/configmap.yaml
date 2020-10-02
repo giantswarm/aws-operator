@@ -23,6 +23,8 @@ data:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
         podInfraContainerImage: '{{ .Values.Installation.V1.Provider.AWS.PodInfraContainerImage }}'
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
+        role:
+          arn: '{{ .Values.Installation.V1.Provider.AWS.Role.ARN }}'
         route53:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
         routeTables: '{{ .Values.Installation.V1.Provider.AWS.RouteTableNames }}'
