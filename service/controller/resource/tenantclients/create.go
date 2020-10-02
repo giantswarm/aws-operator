@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1"
-	"github.com/giantswarm/errors/tenant"
 	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
@@ -52,13 +51,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		k8sClient, err = k8sclient.NewClients(c)
-		if tenant.IsAPINotAvailable(err) {
+		if err != nil {
+			// On any error we want to handle the situation gracefully in order
+			// to not block the whole reconciliation. Our former approach of
+			// matching against specific errors was extremely brittle because
+			// every now and then new errors popped up which we never knew or
+			// handled before. This is extremely painful after fact in a
+			// immutable infrastructure because it is super hard to fix once it
+			// breaks after it is released.
 			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant API not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
-
-		} else if err != nil {
-			return microerror.Mask(err)
 		}
 	}
 
