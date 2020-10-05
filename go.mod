@@ -9,7 +9,6 @@ require (
 	github.com/giantswarm/apiextensions/v2 v2.5.3
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs/v3 v3.1.0
-	github.com/giantswarm/errors v0.2.3
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v4 v4.0.0
 	github.com/giantswarm/k8scloudconfig/v8 v8.0.2
