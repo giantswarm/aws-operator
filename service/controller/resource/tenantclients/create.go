@@ -59,7 +59,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			// handled before. This is extremely painful after fact in a
 			// immutable infrastructure because it is super hard to fix once it
 			// breaks after it is released.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant API not available yet")
+			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant API not available yet", "stack", microerror.JSON(err))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
