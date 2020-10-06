@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add etcd client certificates for Prometheus.
 
+### Changed
+
+- Update `k8scloudconfig` to `v8.0.3`.
+
+
 ## [9.1.1] - 2020-09-23
 
 ### Fixed
