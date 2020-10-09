@@ -6,7 +6,7 @@ require (
 	github.com/aws/amazon-vpc-cni-k8s v1.7.5
 	github.com/aws/aws-sdk-go v1.35.6
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions/v2 v2.6.0
+	github.com/giantswarm/apiextensions/v2 v2.6.1
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/certs/v3 v3.1.0
 	github.com/giantswarm/ipam v0.2.0
@@ -30,6 +30,6 @@ require (
 	k8s.io/apiextensions-apiserver v0.18.9
 	k8s.io/apimachinery v0.18.9
 	k8s.io/client-go v0.18.9
-	sigs.k8s.io/cluster-api v0.3.8
+	sigs.k8s.io/cluster-api v0.3.10
 	sigs.k8s.io/controller-runtime v0.6.3
 )
