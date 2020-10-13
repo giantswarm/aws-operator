@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add etcd client certificates for Prometheus.
 - Add `--service.aws.hostaccesskey.role` flag.
 
+### Fixes
+
+- Fix `vpc`/`route-table` lookups.
+
 ### Changed
 
 - Access Control Plane AWS account using role assumption. This is to prepare
