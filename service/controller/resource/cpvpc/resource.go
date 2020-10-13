@@ -100,35 +100,26 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 	var vpcCIDR string
 	var vpcID string
 	{
-		i := &ec2.DescribeVpcsInput{}
-
-		o, err := client.DescribeVpcs(i)
-		if err != nil {
-			return "", "", microerror.Mask(err)
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "volmessage", fmt.Sprintf("vpcs: %v", o.Vpcs))
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc info for %#q", installationName))
 
-		i = &ec2.DescribeVpcsInput{
+		i := &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagInstallation)),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagName)),
 					Values: []*string{
 						aws.String(installationName),
 					},
 				},
 				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagClusterType)),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
-						aws.String(key.TagClusterTypeControlPlane),
+						aws.String(installationName),
 					},
 				},
 			},
 		}
 
-		o, err = client.DescribeVpcs(i)
+		o, err := client.DescribeVpcs(i)
 		if err != nil {
 			return "", "", microerror.Mask(err)
 		}
