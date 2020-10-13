@@ -353,7 +353,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
-			Logger: config.Logger,
+			Logger:       config.Logger,
+			Installation: config.InstallationName,
 
 			Names: strings.Split(config.RouteTables, ","),
 		}
@@ -399,6 +400,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		c := ipam.Config{
 			Checker:   machineDeploymentChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: machineDeploymentPersister,
@@ -543,6 +545,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,

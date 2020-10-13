@@ -1,6 +1,7 @@
 package tccpf
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -28,6 +29,45 @@ var (
 //
 var executionFailedError = &microerror.Error{
 	Kind: "executionFailedError",
+}
+
+// event... is an error type for situations where we want to create an Kubernetes event in operatorkit.
+var eventCFCreateError = &microerror.Error{
+	Kind: "CFCreateFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusCreateFailed),
+}
+var eventCFUpdateRollbackError = &microerror.Error{
+	Kind: "CFUpdateRollbackFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateRollbackFailed),
+}
+
+var eventCFRollbackError = &microerror.Error{
+	Kind: "CFRollbackFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusRollbackFailed),
+}
+
+var eventCFDeleteError = &microerror.Error{
+	Kind: "CFDeleteFailed",
+	Desc: fmt.Sprintf("The tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteFailed),
+}
+
+// IsDeleteFailed asserts eventCFDeleteError.
+func IsDeleteFailed(err error) bool {
+	c := microerror.Cause(err)
+
+	if c == nil {
+		return false
+	}
+
+	if strings.Contains(c.Error(), cloudformation.ResourceStatusDeleteFailed) {
+		return true
+	}
+
+	if c == eventCFDeleteError {
+		return true
+	}
+
+	return false
 }
 
 var deleteInProgressError = &microerror.Error{

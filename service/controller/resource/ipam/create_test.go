@@ -10,6 +10,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
 func Test_SubnetAllocator(t *testing.T) {
@@ -24,6 +25,9 @@ func Test_SubnetAllocator(t *testing.T) {
 		networkRange            net.IPNet
 		privateSubnetMaskBits   int
 		publicSubnetMaskBits    int
+		// If the network pool CIDR is given the test simulates the injection of
+		// a user configured custom network range.
+		networkPool net.IPNet
 	}{
 		{
 			name: "case 0 allocate first subnet",
@@ -36,6 +40,7 @@ func Test_SubnetAllocator(t *testing.T) {
 			networkRange:            mustParseCIDR("10.100.0.0/16"),
 			privateSubnetMaskBits:   25,
 			publicSubnetMaskBits:    25,
+			networkPool:             net.IPNet{},
 		},
 		{
 			name: "case 1 allocate fourth subnet",
@@ -52,12 +57,46 @@ func Test_SubnetAllocator(t *testing.T) {
 			networkRange:            mustParseCIDR("10.100.0.0/16"),
 			privateSubnetMaskBits:   25,
 			publicSubnetMaskBits:    25,
+			networkPool:             net.IPNet{},
+		},
+		{
+			name: "case 2 allocate first subnet via network pool",
+
+			checker:   NewTestChecker(true),
+			collector: NewTestCollector([]net.IPNet{}),
+			persister: NewTestPersister(mustParseCIDR("10.100.0.0/24")),
+
+			allocatedSubnetMaskBits: 24,
+			networkRange:            mustParseCIDR("127.0.0.1/8"), // dummy we ignore in the test
+			privateSubnetMaskBits:   25,
+			publicSubnetMaskBits:    25,
+			networkPool:             mustParseCIDR("10.100.0.0/16"),
+		},
+		{
+			name: "case 3 allocate fourth subnet via network pool",
+
+			checker: NewTestChecker(true),
+			collector: NewTestCollector([]net.IPNet{
+				mustParseCIDR("10.100.0.0/24"),
+				mustParseCIDR("10.100.1.0/24"),
+				mustParseCIDR("10.100.3.0/24"),
+			}),
+			persister: NewTestPersister(mustParseCIDR("10.100.2.0/24")),
+
+			allocatedSubnetMaskBits: 24,
+			networkRange:            mustParseCIDR("127.0.0.1/8"), // dummy we ignore in the test
+			privateSubnetMaskBits:   25,
+			publicSubnetMaskBits:    25,
+			networkPool:             mustParseCIDR("10.100.0.0/16"),
 		},
 	}
 
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var err error
+
+			ctx := unittest.DefaultContextControlPlane()
+			k := unittest.FakeK8sClient()
 
 			var mutexLocker locker.Interface
 			{
@@ -71,11 +110,35 @@ func Test_SubnetAllocator(t *testing.T) {
 				}
 			}
 
+			var cr infrastructurev1alpha2.AWSCluster
+			{
+				cr = unittest.DefaultCluster()
+
+				if !netIPEmpty(tc.networkPool) {
+					cr.Spec.Provider.Nodes.NetworkPool = cr.GetName()
+				}
+
+				err = k.CtrlClient().Create(ctx, &cr)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			if !netIPEmpty(tc.networkPool) {
+				cr := unittest.DefaultNetworkPool(tc.networkPool.String())
+
+				err = k.CtrlClient().Create(ctx, &cr)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var newResource *Resource
 			{
 				c := Config{
 					Checker:   tc.checker,
 					Collector: tc.collector,
+					K8sClient: k,
 					Locker:    mutexLocker,
 					Logger:    microloggertest.New(),
 					Persister: tc.persister,
@@ -92,12 +155,16 @@ func Test_SubnetAllocator(t *testing.T) {
 				}
 			}
 
-			err = newResource.EnsureCreated(context.Background(), &infrastructurev1alpha2.AWSCluster{})
+			err = newResource.EnsureCreated(context.Background(), &cr)
 			if err != nil {
 				t.Fatal(err)
 			}
 		})
 	}
+}
+
+func netIPEmpty(netip net.IPNet) bool {
+	return netip.String() == "<nil>"
 }
 
 func mustParseCIDR(val string) net.IPNet {

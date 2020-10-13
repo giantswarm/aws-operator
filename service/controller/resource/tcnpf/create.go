@@ -57,7 +57,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+			return microerror.Maskf(eventCFCreateError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusRollbackFailed {
+			return microerror.Maskf(eventCFRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateRollbackFailed {
+			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool finalizer cloud formation stack already exists")

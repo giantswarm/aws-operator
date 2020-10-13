@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
@@ -18,13 +19,15 @@ const (
 )
 
 type Config struct {
-	Logger micrologger.Logger
+	Logger       micrologger.Logger
+	Installation string
 
 	Names []string
 }
 
 type Resource struct {
-	logger micrologger.Logger
+	logger       micrologger.Logger
+	installation string
 
 	mutex       sync.Mutex
 	routeTables []*ec2.RouteTable
@@ -37,12 +40,13 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	if len(config.Names) == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.Names must not be empty", config)
+	if config.Installation == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Installation must not be empty", config)
 	}
 
 	r := &Resource{
-		logger: config.Logger,
+		logger:       config.Logger,
+		installation: config.Installation,
 
 		routeTables: []*ec2.RouteTable{},
 		mutex:       sync.Mutex{},
@@ -66,43 +70,44 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	// We check if we have all route tables cached for the configured route table
-	// names. If we find all information, we return them.
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route tables")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route tables")
+	if len(r.routeTables) > 0 {
+		r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route tables")
+		cc.Status.ControlPlane.RouteTables = r.routeTables
 
-		if len(r.routeTables) == len(r.names) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route tables")
-			cc.Status.ControlPlane.RouteTables = r.routeTables
-
-			return nil
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached route tables")
-		}
+		return nil
 	}
+	r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached route tables")
 
-	// We do not have the cached route tables, so we look them up.
-	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "caching route tables")
+	r.logger.LogCtx(ctx, "level", "debug", "message", "caching route tables")
+	if len(r.names) == 0 {
+		// We do not have the cached route tables, so we look them up using tags.
+		tables, err := r.lookupByTag(ctx, cc.Client.ControlPlane.AWS.EC2, r.installation)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
+		r.routeTables = tables
+	} else {
+		// We do not have the cached route tables, so we look them up using names
+		// supplied via RouteTables flag.
 		for _, name := range r.names {
-			rt, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.EC2, name)
+			rt, err := r.lookupByName(ctx, cc.Client.ControlPlane.AWS.EC2, name)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
 			r.routeTables = append(r.routeTables, rt)
 		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cached route tables")
 	}
+	r.logger.LogCtx(ctx, "level", "debug", "message", "cached route tables")
 
 	cc.Status.ControlPlane.RouteTables = r.routeTables
 
 	return nil
 }
 
-func (r *Resource) lookup(ctx context.Context, client EC2, name string) (*ec2.RouteTable, error) {
+func (r *Resource) lookupByName(ctx context.Context, client EC2, name string) (*ec2.RouteTable, error) {
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route table ID for %#q", name))
 
 	i := &ec2.DescribeRouteTablesInput{
@@ -130,4 +135,37 @@ func (r *Resource) lookup(ctx context.Context, client EC2, name string) (*ec2.Ro
 	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found route table for %#q", name))
 
 	return rt, nil
+}
+
+func (r *Resource) lookupByTag(ctx context.Context, client EC2, installation string) ([]*ec2.RouteTable, error) {
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route tables for installation %#q", installation))
+
+	i := &ec2.DescribeRouteTablesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+				Values: []*string{
+					aws.String(installation),
+				},
+			},
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagRouteTableType)),
+				Values: []*string{
+					aws.String("private"),
+				},
+			},
+		},
+	}
+
+	o, err := client.DescribeRouteTables(i)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	if len(o.RouteTables) == 0 {
+		return nil, microerror.Maskf(executionFailedError, "expected at least one route table, got 0")
+	}
+
+	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d route tables for installation %#q", len(o.RouteTables), installation))
+
+	return o.RouteTables, nil
 }

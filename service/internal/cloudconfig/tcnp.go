@@ -117,6 +117,18 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			return nil
 		})
 
+		g.Go(func() error {
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.PrometheusEtcdClientCert)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			m.Lock()
+			certFiles = append(certFiles, certs.NewFilesPrometheusEtcdClient(tls)...)
+			m.Unlock()
+
+			return nil
+		})
+
 		err := g.Wait()
 		if certs.IsTimeout(err) {
 			return nil, microerror.Maskf(timeoutError, "waited too long for certificates")

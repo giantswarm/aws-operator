@@ -424,6 +424,7 @@ func (r *Resource) newRouteTables(ctx context.Context, cr infrastructurev1alpha2
 		r := template.ParamsMainRouteTablesListItem{
 			AvailabilityZone: a.Name,
 			ClusterID:        key.ClusterID(&cr),
+			NodePoolID:       cr.GetName(),
 			Name:             key.SanitizeCFResourceName(key.PrivateRouteTableName(a.Name)),
 			Route: template.ParamsMainRouteTablesListItemRoute{
 				Name: key.SanitizeCFResourceName(key.NATRouteName(a.Name)),

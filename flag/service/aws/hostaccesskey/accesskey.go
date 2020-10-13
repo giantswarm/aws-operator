@@ -1,6 +1,6 @@
-package accesskey
+package hostaccesskey
 
-type AccessKey struct {
+type HostAccessKey struct {
 	ID      string
 	Secret  string
 	Session string

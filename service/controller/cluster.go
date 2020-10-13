@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupenis"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
@@ -40,7 +41,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
@@ -49,7 +49,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/service"
-	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
@@ -335,18 +334,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var snapshotIDResource resource.Interface
-	{
-		c := snapshotid.Config{
-			Logger: config.Logger,
-		}
-
-		snapshotIDResource, err = snapshotid.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
@@ -393,6 +380,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := ipam.Config{
 			Checker:   clusterChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: clusterPersister,
@@ -454,6 +442,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		cleanupEBSVolumesResource, err = cleanupebsvolumes.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupENIs resource.Interface
+	{
+		c := cleanupenis.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupENIs, err = cleanupenis.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -579,6 +579,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := tccpf.Config{
 			Detection: tccpfChangeDetection,
+			Event:     config.Event,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -594,6 +595,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpiResource resource.Interface
 	{
 		c := tccpi.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -674,7 +676,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cpRouteTablesResource resource.Interface
 	{
 		c := cproutetables.Config{
-			Logger: config.Logger,
+			Logger:       config.Logger,
+			Installation: config.InstallationName,
 
 			Names: strings.Split(config.RouteTables, ","),
 		}
@@ -746,19 +749,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var ensureCPCRsResource resource.Interface
-	{
-		c := ensurecpcrs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ensureCPCRsResource, err = ensurecpcrs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -790,7 +780,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
-		snapshotIDResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
@@ -818,7 +807,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		serviceResource,
 		endpointsResource,
 		eniConfigCRsResource,
-		ensureCPCRsResource,
 		secretFinalizerResource,
 
 		// All these resources implement logic to update CR status information.
@@ -831,6 +819,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupMachineDeploymentsResource,
 		cleanupRecordSets,
 		cleanupSecurityGroups,
+		cleanupENIs,
 		keepForAWSControlPlaneCRsResource,
 		keepForAWSMachineDeploymentCRsResource,
 	}
