@@ -675,11 +675,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 
 	var cpRouteTablesResource resource.Interface
 	{
+		var routeTableNames []string
+		{
+			if config.RouteTables != "" {
+				routeTableNames = strings.Split(config.RouteTables, ",")
+			}
+		}
+
 		c := cproutetables.Config{
 			Logger:       config.Logger,
 			Installation: config.InstallationName,
 
-			Names: strings.Split(config.RouteTables, ","),
+			Names: routeTableNames,
 		}
 
 		cpRouteTablesResource, err = cproutetables.New(c)
