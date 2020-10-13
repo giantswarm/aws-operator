@@ -113,6 +113,7 @@ func New(config Config) (*Service, error) {
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			RoleARN:         config.Viper.GetString(config.Flag.Service.AWS.Role.ARN),
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}

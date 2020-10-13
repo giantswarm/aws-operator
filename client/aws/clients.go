@@ -65,6 +65,9 @@ func NewClients(config Config) (Clients, error) {
 	if config.Region == "" {
 		return Clients{}, microerror.Maskf(invalidConfigError, "%T.Region must not be empty", config)
 	}
+	if config.RoleARN == "" {
+		return Clients{}, microerror.Maskf(invalidConfigError, "%T.RoleARN must not be empty", config)
+	}
 
 	var err error
 
@@ -81,32 +84,28 @@ func NewClients(config Config) (Clients, error) {
 		}
 	}
 
-	var c Clients
-	if config.RoleARN != "" {
-		creds := stscreds.NewCredentials(s, config.RoleARN)
-		c = newClients(s, &aws.Config{Credentials: creds})
-	} else {
-		c = newClients(s)
-	}
-
+	c := newClients(s, config.RoleARN)
 	return c, nil
 }
 
-func newClients(session *session.Session, configs ...*aws.Config) Clients {
-	supportConfigs := append(configs, aws.NewConfig().WithRegion(trustedAdvisorRegion))
+func newClients(session *session.Session, roleARN string) Clients {
+	credentialsConfig := &aws.Config{
+		Credentials: stscreds.NewCredentials(session, roleARN),
+	}
+	supportConfig := aws.NewConfig().WithRegion(trustedAdvisorRegion)
 
 	c := Clients{
-		AutoScaling:    autoscaling.New(session, configs...),
-		CloudFormation: cloudformation.New(session, configs...),
-		EC2:            ec2.New(session, configs...),
-		ELB:            elb.New(session, configs...),
-		IAM:            iam.New(session, configs...),
-		KMS:            kms.New(session, configs...),
-		Route53:        route53.New(session, configs...),
-		S3:             s3.New(session, configs...),
-		ServiceQuotas:  servicequotas.New(session, configs...),
-		STS:            sts.New(session, configs...),
-		Support:        support.New(session, supportConfigs...),
+		AutoScaling:    autoscaling.New(session, credentialsConfig),
+		CloudFormation: cloudformation.New(session, credentialsConfig),
+		EC2:            ec2.New(session, credentialsConfig),
+		ELB:            elb.New(session, credentialsConfig),
+		IAM:            iam.New(session, credentialsConfig),
+		KMS:            kms.New(session, credentialsConfig),
+		Route53:        route53.New(session, credentialsConfig),
+		S3:             s3.New(session, credentialsConfig),
+		ServiceQuotas:  servicequotas.New(session, credentialsConfig),
+		STS:            sts.New(session, credentialsConfig),
+		Support:        support.New(session, credentialsConfig, supportConfig),
 	}
 
 	return c
