@@ -20,7 +20,7 @@ const TemplateMainRecordSets = `
       Type: 'CNAME'
       TTL: '300'
       ResourceRecords:
-	    - '{{.RecordSets.TenantAPIPublicLoadBalancer }}'
+        - '{{.RecordSets.TenantAPIPublicLoadBalancer }}'
   TenantIngressRecordSet:
     Type: 'AWS::Route53::RecordSet'
     Properties:
@@ -29,7 +29,7 @@ const TemplateMainRecordSets = `
       Type: 'CNAME'
       TTL: '300'
       ResourceRecords:
-	    - 'ingress.{{ .RecordSets.ClusterID }}.k8s.{{ .RecordSets.BaseDomain }}'
+        - 'ingress.{{ .RecordSets.ClusterID }}.k8s.{{ .RecordSets.BaseDomain }}'
 {{- end -}}
 {{- end -}}
 {{- end -}}
