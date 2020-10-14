@@ -120,10 +120,6 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
-	r.logger.LogCtx(ctx,
-		"level", "voldebug",
-		"message", fmt.Sprintf("voldebug template:\n%v\n", templateBody))
-
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane finalizer cloud formation stack")
 
