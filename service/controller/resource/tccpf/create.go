@@ -290,7 +290,9 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		fmt.Printf("voldebug template:\n%v\n", templateBody)
+		r.logger.LogCtx(ctx,
+			"level", "voldebug",
+			"message", fmt.Sprintf("voldebug template:\n%v\n", templateBody))
 
 		r.logger.LogCtx(ctx,
 			"level", "debug",
