@@ -48,18 +48,18 @@ const (
 
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagAvailabilityZone        = "giantswarm.io/availability-zone"
-	TagCluster                 = "giantswarm.io/cluster"
-	TagClusterType             = "giantswarm.io/cluster-type"
-	TagClusterTypeControlPlane = "control-plane"
-	TagControlPlane            = "giantswarm.io/control-plane"
-	TagInstallation            = "giantswarm.io/installation"
-	TagMachineDeployment       = "giantswarm.io/machine-deployment"
-	TagOrganization            = "giantswarm.io/organization"
-	TagRouteTableType          = "giantswarm.io/route-table-type"
-	TagStack                   = "giantswarm.io/stack"
-	TagSnapshot                = "giantswarm.io/snapshot"
-	TagSubnetType              = "giantswarm.io/subnet-type"
+	TagAvailabilityZone  = "giantswarm.io/availability-zone"
+	TagCluster           = "giantswarm.io/cluster"
+	TagClusterType       = "giantswarm.io/cluster-type"
+	TagControlPlane      = "giantswarm.io/control-plane"
+	TagInstallation      = "giantswarm.io/installation"
+	TagMachineDeployment = "giantswarm.io/machine-deployment"
+	TagName              = "Name"
+	TagOrganization      = "giantswarm.io/organization"
+	TagRouteTableType    = "giantswarm.io/route-table-type"
+	TagStack             = "giantswarm.io/stack"
+	TagSnapshot          = "giantswarm.io/snapshot"
+	TagSubnetType        = "giantswarm.io/subnet-type"
 )
 
 const (
