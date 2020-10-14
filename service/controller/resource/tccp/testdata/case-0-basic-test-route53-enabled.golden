@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Control Plane Cloud Formation Stack.
 Outputs:
+  APIServerPublicLoadBalancer:
+    Value: !GetAtt ApiLoadBalancer.DNSName
   HostedZoneID: 
     Value: !Ref HostedZone
   InternalHostedZoneID: 
