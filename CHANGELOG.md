@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Access Control Plane AWS account using role assumption. This is to prepare
   running aws-operator inside a Tenant Cluster.
+- Changed AWS CNI parameters to be more conservative with preallocated IPs while not hitting the AWS API too hard.
 
 ### Changed
 
