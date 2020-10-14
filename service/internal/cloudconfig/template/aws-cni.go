@@ -192,8 +192,10 @@ spec:
               value: "false"
             - name: DISABLE_METRICS
               value: "false"
-            - name: WARM_ENI_TARGET
-              value: "1"
+            - name: WARM_IP_TARGET
+              value: "10"
+            - name: MINIMUM_IP_TARGET
+              value: "40"
             ## Deviation from original manifest - 1
             ## This config value is important - See here https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md#cni-configuration-variables
             - name: AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG
