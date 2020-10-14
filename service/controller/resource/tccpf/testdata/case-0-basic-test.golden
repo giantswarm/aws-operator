@@ -10,7 +10,6 @@ Resources:
       TTL: '300'
       ResourceRecords: !Split [ ',', '1.1.1.1,8.8.8.8' ]
   
-  
   PrivateRoute0:
     Type: AWS::EC2::Route
     Properties:

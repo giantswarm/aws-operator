@@ -75,12 +75,11 @@ func (r *Resource) addHostedZoneInfoToContext(ctx context.Context, cr infrastruc
 	return nil
 }
 
-func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructurev1alpha2.AWSCluster) (string, string, error) {
+func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructurev1alpha2.AWSCluster) (cpHostedZoneID, cpInternalHostedZoneID string, err error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
 	// We check if we have CP public HostedZone info cached.
-	var cpHostedZoneID string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached CP public HostedZone ID")
 
@@ -93,7 +92,6 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 	}
 
 	// We check if we have CP public HostedZone info cached.
-	var cpInternalHostedZoneID string
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached CP private HostedZone ID")
 
