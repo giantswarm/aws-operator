@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add etcd client certificates for Prometheus.
 - Add `--service.aws.hostaccesskey.role` flag.
+- Add `api.<cluster ID>.k8s.<base domain>` and `*.<cluster ID>.k8s.<base domain>` records into CP internal hosted zone.
 
 ### Fixes
 

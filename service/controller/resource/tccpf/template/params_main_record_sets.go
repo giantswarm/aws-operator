@@ -1,9 +1,11 @@
 package template
 
 type ParamsMainRecordSets struct {
-	BaseDomain                     string
-	ClusterID                      string
-	ControlPlanePublicHostedZoneID string
-	GuestHostedZoneNameServers     string
-	Route53Enabled                 bool
+	BaseDomain                       string
+	ClusterID                        string
+	ControlPlaneInternalHostedZoneID string
+	ControlPlaneHostedZoneID         string
+	TenantAPIPublicLoadBalancer      string
+	TenantHostedZoneNameServers      string
+	Route53Enabled                   bool
 }
