@@ -11,7 +11,9 @@ const TemplateMainRecordSets = `
       Type: 'NS'
       TTL: '300'
       ResourceRecords: !Split [ ',', '{{ .RecordSets.TenantHostedZoneNameServers }}' ]
+
 {{- if ne .RecordSets.ControlPlaneInternalHostedZoneID "" -}}
+
   TenantAPIServerRecordSet:
     Type: 'AWS::Route53::RecordSet'
     Properties:
@@ -31,6 +33,7 @@ const TemplateMainRecordSets = `
       ResourceRecords:
         - 'ingress.{{ .RecordSets.ClusterID }}.k8s.{{ .RecordSets.BaseDomain }}'
 {{- end -}}
+
 {{- end -}}
 {{- end -}}
 `
