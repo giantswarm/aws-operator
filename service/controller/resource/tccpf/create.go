@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
@@ -20,7 +20,7 @@ const (
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -61,7 +61,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+			return microerror.Maskf(eventCFCreateError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusRollbackFailed {
+			return microerror.Maskf(eventCFRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateRollbackFailed {
+			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
 			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
@@ -170,10 +174,13 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 	var recordSets *template.ParamsMainRecordSets
 	{
 		recordSets = &template.ParamsMainRecordSets{
-			BaseDomain:                 key.ClusterBaseDomain(cr),
-			ClusterID:                  key.ClusterID(&cr),
-			GuestHostedZoneNameServers: cc.Status.TenantCluster.DNS.HostedZoneNameServers,
-			Route53Enabled:             r.route53Enabled,
+			BaseDomain:                       key.ClusterBaseDomain(cr),
+			ClusterID:                        key.ClusterID(&cr),
+			ControlPlaneInternalHostedZoneID: cc.Status.ControlPlane.InternalHostedZone.ID,
+			ControlPlaneHostedZoneID:         cc.Status.ControlPlane.HostedZone.ID,
+			TenantAPIPublicLoadBalancer:      cc.Status.TenantCluster.DNS.APIPublicLoadBalancer,
+			TenantHostedZoneNameServers:      cc.Status.TenantCluster.DNS.HostedZoneNameServers,
+			Route53Enabled:                   r.route53Enabled,
 		}
 	}
 

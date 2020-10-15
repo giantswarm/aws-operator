@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/operatorkit/controller/context/cachekeycontext"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

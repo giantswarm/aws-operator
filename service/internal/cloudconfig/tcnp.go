@@ -3,13 +3,14 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"net"
 	"sync"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v7/pkg/template"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -93,7 +94,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		m := sync.Mutex{}
 
 		g.Go(func() error {
-			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.ServiceAccountCert)
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.ServiceAccountCert)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -105,12 +106,24 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		})
 
 		g.Go(func() error {
-			tls, err := t.config.CertsSearcher.SearchTLS(key.ClusterID(&cr), certs.WorkerCert)
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.WorkerCert)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 			m.Lock()
 			certFiles = append(certFiles, certs.NewFilesWorker(tls)...)
+			m.Unlock()
+
+			return nil
+		})
+
+		g.Go(func() error {
+			tls, err := t.config.CertsSearcher.SearchTLS(ctx, key.ClusterID(&cr), certs.PrometheusEtcdClientCert)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			m.Lock()
+			certFiles = append(certFiles, certs.NewFilesPrometheusEtcdClient(tls)...)
 			m.Unlock()
 
 			return nil
@@ -147,9 +160,21 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 	{
 		// Default registry, kubernetes, etcd images etcd.
 		// Required for proper rending of the templates.
-		params = k8scloudconfig.DefaultParams()
+		params = k8scloudconfig.Params{}
 
-		params.Cluster = cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)).Cluster
+		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
+
+		if cl.Spec.Provider.Pods.CIDRBlock != "" {
+			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
+			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
+		}
+
+		params.CalicoPolicyOnly = true
+		params.Cluster = g8sConfig.Cluster
 		params.EnableAWSCNI = true
 		params.Extension = &TCNPExtension{
 			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),
@@ -162,6 +187,8 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			registryDomain: t.config.RegistryDomain,
 		}
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
+		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
+		params.RegistryMirrors = t.config.RegistryMirrors
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Versions = v

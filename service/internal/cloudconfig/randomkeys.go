@@ -6,7 +6,7 @@ import (
 	"text/template"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/randomkeys/v2"
 
 	cloudconfigtemplate "github.com/giantswarm/aws-operator/service/internal/cloudconfig/template"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"

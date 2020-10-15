@@ -2,7 +2,6 @@ package template
 
 type ParamsMain struct {
 	InternetGateway *ParamsMainInternetGateway
-	Instance        *ParamsMainInstance
 	LoadBalancers   *ParamsMainLoadBalancers
 	NATGateway      *ParamsMainNATGateway
 	Outputs         *ParamsMainOutputs

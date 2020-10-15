@@ -97,43 +97,6 @@ jobs:
         with:
           name: "${{ env.BINARY }}"
           path: "${{ env.DIR }}/${{ env.BINARY }}"
-  install_hub:
-    name: Install hub
-    runs-on: ubuntu-18.04
-    env:
-      BINARY: "hub"
-      DIR: "/opt/cache"
-      VERSION: "2.14.2"
-      URL: "https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz"
-    outputs:
-      cache_key: ${{ steps.get_cache_key.outputs.cache_key }}
-    steps:
-      - name: Get cache key
-        id: get_cache_key
-        run: |
-          cache_key="install-${{ env.BINARY }}-${{ env.VERSION }}"
-          echo "::set-output name=cache_key::${cache_key}"
-      - name: Cache
-        id: cache
-        uses: actions/cache@v1
-        with:
-          key: "${{ steps.get_cache_key.outputs.cache_key }}"
-          path: "${{ env.DIR }}"
-      - name: Download
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        run: |
-          mkdir ${{ env.DIR }}
-          curl -fsSLo - ${{ env.URL }} | tar xvz --strip-components=1 --wildcards '*/bin/${{ env.BINARY }}'
-          mv bin/${{ env.BINARY }} ${{ env.DIR }}
-          chmod +x ${{ env.DIR }}/${{ env.BINARY }}
-      - name: Smoke test
-        run: |
-          ${{ env.DIR }}/${{ env.BINARY }} version
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: "${{ env.BINARY }}"
-          path: "${{ env.DIR }}/${{ env.BINARY }}"
   create_release_pr:
     name: Create release PR
     runs-on: ubuntu-18.04
@@ -141,7 +104,6 @@ jobs:
     needs:
       - gather_facts
       - install_architect
-      - install_hub
     env:
       architect_flags: "--organisation ${{ github.repository_owner }} --project ${{ github.event.repository.name }}"
     steps:
@@ -149,19 +111,13 @@ jobs:
         id: cache
         uses: actions/cache@v1
         with:
-          key: "${{ needs.install_architect.outputs.cache_key }}+++${{ needs.install_hub.outputs.cache_key }}"
+          key: "${{ needs.install_architect.outputs.cache_key }}"
           path: /opt/bin
       - name: Download architect artifact to /opt/bin
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         uses: actions/download-artifact@v2
         with:
           name: architect
-          path: /opt/bin
-      - name: Download hub artifact to /opt/bin
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        uses: actions/download-artifact@v2
-        with:
-          name: hub
           path: /opt/bin
       - name: Prepare /opt/bin
         run: |

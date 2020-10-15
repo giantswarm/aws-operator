@@ -3,6 +3,8 @@ package template
 const TemplateMainOutputs = `
 {{- define "outputs" -}}
   {{- if .Outputs.Route53Enabled -}}
+  APIServerPublicLoadBalancer:
+    Value: !GetAtt ApiLoadBalancer.DNSName
   HostedZoneID: 
     Value: !Ref HostedZone
   InternalHostedZoneID: 

@@ -10,7 +10,7 @@ const TemplateMainRouteTables = `
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.ClusterID }}-aws-cni
+        Value: {{ $v.ClusterID }}-aws-cni-{{ .AvailabilityZoneRegion }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
@@ -23,7 +23,7 @@ const TemplateMainRouteTables = `
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.ClusterID }}-public
+        Value: {{ $v.ClusterID }}-public-{{ .AvailabilityZoneRegion }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
@@ -36,7 +36,7 @@ const TemplateMainRouteTables = `
       VpcId: !Ref VPC
       Tags:
       - Key: Name
-        Value: {{ $v.ClusterID }}-private
+        Value: {{ $v.ClusterID }}-private-{{ .AvailabilityZoneRegion }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type

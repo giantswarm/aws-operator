@@ -6,11 +6,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	corev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	corev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/core/v1alpha1"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -111,7 +111,7 @@ func (r *Resource) deleteDrainerConfig(ctx context.Context, dc corev1alpha1.Drai
 	i := dc.GetName()
 	o := &metav1.DeleteOptions{}
 
-	err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Delete(i, o)
+	err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Delete(ctx, i, *o)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -163,7 +163,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(r.labelMapFunc(cr)).String(),
 		}
 
-		drainerConfigs, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(o)
+		drainerConfigs, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(ctx, o)
 		if err != nil {
 			return microerror.Mask(err)
 		}

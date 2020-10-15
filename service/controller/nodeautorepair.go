@@ -34,8 +34,7 @@ type NodeAutoRepairConfig struct {
 	Locker    locker.Interface
 	Logger    micrologger.Logger
 
-	HostAWSConfig  aws.Config
-	NodeAutoRepair bool
+	HostAWSConfig aws.Config
 }
 
 type NodeAutoRepair struct {
@@ -180,7 +179,6 @@ func newNodeAutoRepairResources(config NodeAutoRepairConfig) ([]resource.Interfa
 	{
 		c := nodeautorepair.Config{
 			Logger:            config.Logger,
-			Enabled:           config.NodeAutoRepair,
 			NotReadyThreshold: key.NodeNotReadyTickThreshold,
 		}
 

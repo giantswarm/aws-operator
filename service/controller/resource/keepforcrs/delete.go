@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"

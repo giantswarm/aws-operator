@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/resource/crud"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -26,7 +26,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting Kubernetes service")
 
 		namespace := key.ClusterNamespace(cr)
-		err := r.k8sClient.CoreV1().Services(namespace).Delete(serviceToDelete.Name, &metav1.DeleteOptions{})
+		err := r.k8sClient.CoreV1().Services(namespace).Delete(ctx, serviceToDelete.Name, metav1.DeleteOptions{})
 		if apierrors.IsNotFound(err) {
 			// fall through
 		} else if err != nil {

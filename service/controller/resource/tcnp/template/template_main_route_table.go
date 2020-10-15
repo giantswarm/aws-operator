@@ -9,7 +9,7 @@ const TemplateMainRouteTables = `
       VpcId: {{ .TCCP.VPC.ID }}
       Tags:
       - Key: Name
-        Value: {{ .ClusterID }}-private
+        Value: {{ .ClusterID }}-private-{{ .NodePoolID }}
       - Key: giantswarm.io/availability-zone
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type

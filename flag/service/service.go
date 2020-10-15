@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/giantswarm/operatorkit/flag/service/kubernetes"
+	"github.com/giantswarm/operatorkit/v2/pkg/flag/service/kubernetes"
 
 	"github.com/giantswarm/aws-operator/flag/service/aws"
 	"github.com/giantswarm/aws-operator/flag/service/cluster"
@@ -11,11 +11,10 @@ import (
 )
 
 type Service struct {
-	AWS            aws.AWS
-	Cluster        cluster.Cluster
-	Guest          guest.Guest
-	Installation   installation.Installation
-	Kubernetes     kubernetes.Kubernetes
-	NodeAutoRepair string
-	Registry       registry.Registry
+	AWS          aws.AWS
+	Cluster      cluster.Cluster
+	Guest        guest.Guest
+	Installation installation.Installation
+	Kubernetes   kubernetes.Kubernetes
+	Registry     registry.Registry
 }

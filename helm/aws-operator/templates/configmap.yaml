@@ -23,6 +23,8 @@ data:
           delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
         podInfraContainerImage: '{{ .Values.Installation.V1.Provider.AWS.PodInfraContainerImage }}'
         region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
+        role:
+          arn: '{{ .Values.Installation.V1.Provider.AWS.Role.ARN }}'
         route53:
           enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
         routeTables: '{{ .Values.Installation.V1.Provider.AWS.RouteTableNames }}'
@@ -45,16 +47,24 @@ data:
           clusterDomain: '{{ .Values.Installation.V1.Guest.Kubernetes.ClusterDomain }}'
           networkSetup:
             docker:
+              {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
               image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
+              {{ else }}
+              image: 'docker.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
+              {{- end }}
           ssh:
             userList: '{{ .Values.Installation.V1.Guest.SSH.UserList }}'
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
-      nodeAutoRepair: '{{ .Values.Installation.V1.NodeAutoRepair.Enabled }}'
       registry:
+      {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
         domain: '{{ .Values.Installation.V1.Registry.Domain }}'
         mirrors: '{{ range $i, $e := .Values.Installation.V1.Registry.Mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
+      {{ else }}
+        domain: 'docker.io'
+        mirrors: 'giantswarm.azurecr.io'
+      {{- end }}
       installation:
         name: '{{ .Values.Installation.V1.Name }}'
         {{- if .Values.Installation.V1.Guest }}

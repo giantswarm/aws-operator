@@ -6,17 +6,17 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/resource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -56,10 +56,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -215,10 +218,24 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var rel releases.Interface
+	{
+		c := releases.Config{
+			K8sClient: config.K8sClient,
+		}
+
+		rel, err = releases.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
-			Logger: config.Logger,
+			Event:    config.Event,
+			Logger:   config.Logger,
+			Releases: rel,
 		}
 
 		tcnpChangeDetection, err = changedetection.NewTCNP(c)
@@ -233,6 +250,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 			Config: cloudconfig.Config{
 				CertsSearcher:      certsSearcher,
 				Encrypter:          encrypterObject,
+				Event:              config.Event,
 				HAMaster:           config.HAMaster,
 				Images:             config.Images,
 				K8sClient:          config.K8sClient,
@@ -334,10 +352,18 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 
 	var cpRouteTablesResource resource.Interface
 	{
-		c := cproutetables.Config{
-			Logger: config.Logger,
+		var routeTableNames []string
+		{
+			if config.RouteTables != "" {
+				routeTableNames = strings.Split(config.RouteTables, ",")
+			}
+		}
 
-			Names: strings.Split(config.RouteTables, ","),
+		c := cproutetables.Config{
+			Logger:       config.Logger,
+			Installation: config.InstallationName,
+
+			Names: routeTableNames,
 		}
 
 		cpRouteTablesResource, err = cproutetables.New(c)
@@ -381,6 +407,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		c := ipam.Config{
 			Checker:   machineDeploymentChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: machineDeploymentPersister,
@@ -508,7 +535,9 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tcnp.Config{
 			Detection: tcnpChangeDetection,
+			Event:     config.Event,
 			Images:    config.Images,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -523,6 +552,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpfResource resource.Interface
 	{
 		c := tcnpf.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -654,14 +684,14 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	return resources, nil
 }
 
-func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
-	return func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}

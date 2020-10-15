@@ -8,15 +8,133 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add etcd client certificates for Prometheus.
+- Add `--service.aws.hostaccesskey.role` flag.
+- Add `api.<cluster ID>.k8s.<base domain>` and `*.<cluster ID>.k8s.<base domain>` records into CP internal hosted zone.
+
+### Fixes
+
+- Fix `vpc`/`route-table` lookups.
+
+### Changed
+
+- Access Control Plane AWS account using role assumption. This is to prepare
+  running aws-operator inside a Tenant Cluster.
+- Changed AWS CNI parameters to be more conservative with preallocated IPs while not hitting the AWS API too hard.
+
+### Changed
+
+- Update `k8scloudconfig` to `v8.0.3`.
+
+
+## [9.1.1] - 2020-09-23
+
+### Fixed
+
+- Update flatcar AMI for China
+
+## [9.1.0] - 2020-09-22
+
+- Update AWS CNI manifests
+- Disable Calico CNI binaries installation
+
+## [9.0.1] - 2020-09-17
+
+- Update flatcar releases
+
+## [9.0.0] - 2020-09-15
+
+### Added
+
+- Emit Kubernetes events for tcnpf Cloudformation stack failures
+- Emit Kubernetes events for tccpi and tccpf Cloudformation stack failures
+- Add monitoring label
+- Handle the case when there are both public and private hosted zones for CP
+  base domain.
+- Add Route Table lookup using tags, so `RouteTables` flag can be phased out in the future.
+
+
+### Changed
+
+- Update backward incompatible Kubernetes dependencies to v1.18.5.
+- Remove migration code to ensure the Control Plane CRs for existing Node Pool clusters.
+
+### Deprecated
+
+- `RouteTables` flag will be deprecated.
+
+### Fixed
+
+- Don't panic when AWSControlPlane CR AZs are nil.
+- Add suffix to Route Tables to get rid of naming collision.
+- Fix image-pull-progress-deadline argument for tcnp nodes.
+
+### Removed
+
+- Remove etcd snapshot migration code.
+- Remove unused `--service.aws.accesskey.id`, `--service.aws.accesskey.secret`
+  and `--service.aws.accesskey.session` flags.
+- Remove the prometheus collector and move it to the separate `aws-collector` project.
+
+## [8.8.0] - 2020-08-14
+
+- New version for a new kubernetes release.
+
+## [8.7.6] - 2020-08-14
+
+### Added
+
+- Add release version tag for ec2 instances
+- Update Cloudformation Stack when components version differ
+- Emit Kubernetes events in case of change detection for tccp, tccpn and tcnp CF stacks
+
+### Fixed
+
+- Fix IAM policy on Tenant Clusters to manages IAM Role tags.
+- Fixed passing custom pod CIDR to k8scloudconfig.
+
+## [8.7.5] - 2020-07-30
+
+### Changed
+
+- Adjust number of host network pods on worker node for aws-cni
+
+## [8.7.4] - 2020-07-29
+
+### Fixed
+
+- Adjust MAX_PODS for master and worker nodes to max IP's per ENI when using aws-cni
+
+### Changed
+
+- Use aws-cni version from the release.
+- Use aws-cni image built based on https://github.com/giantswarm/aws-cni
+- `k8scloudconfig` version updated to 7.0.4.
+
+## [8.7.3] - 2020-07-15
+
+### Fixed
+
+- Fix regional switch in helm chart.
+
+## [8.7.2] - 2020-07-14
 
 ### Added
 
 - Add `--service.registry.mirrors` flag for setting registry mirror domains.
-- Replace `--service.registrydomain` with `--service.registry.domain`.
+- Make registry domain & mirrors configurable based on region.
 
 ### Changed
 
+- Replace `--service.registrydomain` with `--service.registry.domain`.
 - Update `k8s-setup-network-env` image to `0.2.0`.
+
+### Fixed
+
+- Fix failing of ELB collector cache in case there is no ELB in AWS account
+
 
 ## [8.7.1] - 2020-07-08
 
@@ -30,7 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `k8s-apiserver` image which includes CAs to enable OIDC.
 - Use `0.1.0` tag for `aws-attach-etcd-dep` image.
 - Use `0.1.0` tag for `k8s-setup-network-env` image.
-- Use `0.1.1` tag for `k8s-api-heahtz` image.
+- Use `0.1.1` tag for `k8s-api-healthz` image.
 
 ### Fixed
 
@@ -169,7 +287,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.1.1...HEAD
+[9.1.1]: https://github.com/giantswarm/aws-operator/compare/v9.1.0...v9.1.1
+[9.1.0]: https://github.com/giantswarm/aws-operator/compare/v9.0.1...v9.1.0
+[9.0.1]: https://github.com/giantswarm/aws-operator/compare/v9.0.0...v9.0.1
+[9.0.0]: https://github.com/giantswarm/aws-operator/compare/v8.8.0...v9.0.0
+[8.8.0]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...v8.8.0
+[8.7.6]: https://github.com/giantswarm/aws-operator/compare/v8.7.5...v8.7.6
+[8.7.5]: https://github.com/giantswarm/aws-operator/compare/v8.7.4...v8.7.5
+[8.7.4]: https://github.com/giantswarm/aws-operator/compare/v8.7.3...v8.7.4
+[8.7.3]: https://github.com/giantswarm/aws-operator/compare/v8.7.2...v8.7.3
+[8.7.2]: https://github.com/giantswarm/aws-operator/compare/v8.7.1...v8.7.2
 [8.7.1]: https://github.com/giantswarm/aws-operator/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/giantswarm/aws-operator/compare/v8.6.1...v8.7.0
 [8.6.1]: https://github.com/giantswarm/aws-operator/compare/v8.6.0...v8.6.1

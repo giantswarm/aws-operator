@@ -14,7 +14,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@0.10.0
+  architect: giantswarm/architect@0.10.2
 
 workflows:
   build:
@@ -22,7 +22,7 @@ workflows:
       - architect/go-build:
           name: go-build
           binary: aws-operator
-          resource_class: large
+          resource_class: xlarge
           filters:
             tags:
               only: /^v.*/
@@ -111,16 +111,3 @@ workflows:
           filters:
             branches:
               ignore: master
-
-      # Ensure that a new app is also added to the app collection.
-      - architect/push-to-app-collection:
-          name: push-to-aws-app-collection
-          app_name: "aws-operator"
-          app_collection_repo: "aws-app-collection"
-          requires:
-            - push-to-app-catalog-master
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/

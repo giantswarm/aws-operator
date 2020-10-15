@@ -1,7 +1,9 @@
 package tccpnatgateways
 
 import (
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	"context"
+
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -12,12 +14,12 @@ const (
 
 type Config struct {
 	Logger        micrologger.Logger
-	ToClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
 	logger        micrologger.Logger
-	toClusterFunc func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {

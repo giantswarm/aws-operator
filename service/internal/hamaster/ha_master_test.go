@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/giantswarm/operatorkit/controller/context/cachekeycontext"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/cachekeycontext"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
@@ -46,15 +47,23 @@ func Test_HAMaster_Caching(t *testing.T) {
 				}
 			}
 
+			var aws infrastructurev1alpha2.AWSControlPlane
 			{
-				aws := unittest.DefaultAWSControlPlane()
+				aws = unittest.DefaultAWSControlPlane()
+			}
+
+			var g8s infrastructurev1alpha2.G8sControlPlane
+			{
+				g8s = unittest.DefaultG8sControlPlane()
+			}
+
+			{
 				aws.Spec.AvailabilityZones = []string{"a"}
 				err = h.k8sClient.CtrlClient().Create(tc.ctx, &aws)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				g8s := unittest.DefaultG8sControlPlane()
 				g8s.Spec.Replicas = 1
 				err = h.k8sClient.CtrlClient().Create(tc.ctx, &g8s)
 				if err != nil {
@@ -81,14 +90,12 @@ func Test_HAMaster_Caching(t *testing.T) {
 			}
 
 			{
-				aws := unittest.DefaultAWSControlPlane()
 				aws.Spec.AvailabilityZones = []string{"a", "b", "c"}
 				err = h.k8sClient.CtrlClient().Update(tc.ctx, &aws)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				g8s := unittest.DefaultG8sControlPlane()
 				g8s.Spec.Replicas = 3
 				err = h.k8sClient.CtrlClient().Update(tc.ctx, &g8s)
 				if err != nil {
@@ -212,15 +219,23 @@ func Test_HAMaster_Reconcile(t *testing.T) {
 				}
 			}
 
+			var aws infrastructurev1alpha2.AWSControlPlane
 			{
-				aws := unittest.DefaultAWSControlPlane()
+				aws = unittest.DefaultAWSControlPlane()
+			}
+
+			var g8s infrastructurev1alpha2.G8sControlPlane
+			{
+				g8s = unittest.DefaultG8sControlPlane()
+			}
+
+			{
 				aws.Spec.AvailabilityZones = tc.azs
 				err = h.k8sClient.CtrlClient().Create(ctx, &aws)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				g8s := unittest.DefaultG8sControlPlane()
 				g8s.Spec.Replicas = tc.replicas
 				err = h.k8sClient.CtrlClient().Create(ctx, &g8s)
 				if err != nil {
