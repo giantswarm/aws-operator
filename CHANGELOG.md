@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ignore error when missing APIServerPublicLoadBalancer CF Stack output to allow upgrade.
+
 ## [9.1.2] - 2020-10-15
 
 ### Added
