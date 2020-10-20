@@ -73,10 +73,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if r.route53Enabled {
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, APIServerPublicLoadBalancerKey)
-			if err != nil {
-				return microerror.Mask(err)
+			// migration code to dont throw error  when the old CF Stack dont yet have the new output value
+			// TODO https://github.com/giantswarm/giantswarm/issues/13851
+			// Related: https://github.com/giantswarm/giantswarm/issues/10139
+			// after migration we can remove the check for IsOutputNotFound
+			if cloudformation.IsOutputNotFound(err) {
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane APIServerPublicLoadBalancer output")
+			} else {
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				cc.Status.TenantCluster.DNS.APIPublicLoadBalancer = v
 			}
-			cc.Status.TenantCluster.DNS.APIPublicLoadBalancer = v
 		}
 
 		{
