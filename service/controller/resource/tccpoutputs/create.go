@@ -78,7 +78,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			// Related: https://github.com/giantswarm/giantswarm/issues/10139
 			// after migration we can remove the check for IsOutputNotFound
 			if cloudformation.IsOutputNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "did not found the tenant cluster's control plane APIServerPublicLoadBalancer output")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane APIServerPublicLoadBalancer output")
 			} else {
 				if err != nil {
 					return microerror.Mask(err)
