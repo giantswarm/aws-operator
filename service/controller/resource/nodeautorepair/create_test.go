@@ -7,7 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func Test_maximumNodeTermination(t *testing.T) {
+func Test_getInstanceId(t *testing.T) {
 	testCases := []struct {
 		name               string
 		node               corev1.Node
