@@ -11,30 +11,19 @@ const (
 
 type Config struct {
 	Logger micrologger.Logger
-
-	Enabled           bool
-	NotReadyThreshold int
 }
 
 type Resource struct {
 	logger micrologger.Logger
-
-	enabled           bool
-	notReadyThreshold int
 }
 
 func New(config Config) (*Resource, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
-	if config.NotReadyThreshold == 0 {
-		return nil, microerror.Maskf(invalidConfigError, "%T.NotReadyThreshold must not be zero", config)
-	}
 
 	r := &Resource{
-		logger:            config.Logger,
-		enabled:           config.Enabled,
-		notReadyThreshold: config.NotReadyThreshold,
+		logger: config.Logger,
 	}
 
 	return r, nil

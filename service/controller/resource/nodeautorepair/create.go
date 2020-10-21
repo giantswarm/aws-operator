@@ -3,22 +3,28 @@ package nodeautorepair
 import (
 	"context"
 	"fmt"
-	"math"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/giantswarm/badnodedetector/pkg/detector"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
+const (
+	annotationEnableNodeTermination = "node-auto-repair.giantswarm.io"
+
+	nodeTerminationTickThreshold = 6
+)
+
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToCluster(obj)
+	var err error
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -26,10 +32,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	if !r.enabled {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "node auto repair feature is disabled")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 
+	// check for annotation enabling the node auto repair feature
+	if _, ok := cr.Annotations[annotationEnableNodeTermination]; !ok {
+		r.logger.LogCtx(ctx, "level", "debug", "message", " node auto repair is not enabled for this cluster, cancelling")
 		return nil
 	}
 
@@ -40,51 +46,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	var timeLock *locker.TimeLock
+	var detectorService *detector.Detector
 	{
-		c := locker.TimeLockConfig{
-			ClusterCRNamespace: cr.Namespace,
-			ClusterID:          cr.Name,
-			K8sClient:          cc.Client.TenantCluster.K8s.CtrlClient(),
-			TTL:                key.NodeAutoRepairCooldownPeriod,
-			Logger:             r.logger,
+		detectorConfig := detector.Config{
+			K8sClient: cc.Client.TenantCluster.K8s.CtrlClient(),
+			Logger:    r.logger,
+
+			LockName:              project.Name(),
+			NotReadyTickThreshold: nodeTerminationTickThreshold,
 		}
 
-		timeLock, err = locker.NewTimeLock(c)
+		detectorService, err = detector.NewDetector(detectorConfig)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 	}
 
-	var nodeList corev1.NodeList
-	{
-		err := cc.Client.TenantCluster.K8s.CtrlClient().List(ctx, &nodeList)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	nodesToTerminate, err := r.detectBadNodes(ctx, nodeList.Items)
+	nodesToTerminate, err := detectorService.DetectBadNodes(ctx)
 	if err != nil {
-		return microerror.Mask(err)
-	}
-
-	// remove additional master nodes to avoid multiple master node termination at the same time
-	nodesToTerminate = r.removeMultipleMasterNodes(ctx, nodesToTerminate)
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d nodes marked for termination", len(nodesToTerminate)))
-
-	// check for node termination limit, to prevent termination of all nodes at once
-	maxNodeTermination := maximumNodeTermination(len(nodeList.Items))
-	if len(nodesToTerminate) > maxNodeTermination {
-		nodesToTerminate = nodesToTerminate[:maxNodeTermination]
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("limited node termination to %d nodes", maxNodeTermination))
-	}
-
-	err = timeLock.Lock(ctx)
-	if locker.IsAlreadyExists(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "skipping node termination due to cooldown period between another termination ")
-
-	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
@@ -103,15 +82,9 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node, clusterI
 		return microerror.Mask(err)
 	}
 
-	var instanceID string
-	{
-		// node.spec.providerID for AWS is in format aws:///AVAILABILITY_ZONE/INSTANCE-ID
-		// ie. aws:///eu-west-1c/i-06a1d2fe9b3e8c916
-		parts := strings.Split(node.Spec.ProviderID, "/")
-		if len(parts) != 5 || parts[4] == "" {
-			return microerror.Maskf(executionFailedError, fmt.Sprintf("invalid providerID %s in node spec %s", node.Spec.ProviderID, node.Name))
-		}
-		instanceID = parts[4]
+	instanceID, err := getInstanceId(node)
+	if err != nil {
+		return microerror.Mask(err)
 	}
 
 	{
@@ -133,113 +106,12 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node, clusterI
 	return nil
 }
 
-func (r *Resource) detectBadNodes(ctx context.Context, nodes []corev1.Node) ([]corev1.Node, error) {
-	var badNodes []corev1.Node
-	for _, n := range nodes {
-		//
-		notReadyTickCount, err := r.updateNodeNotReadyTickAnnotations(ctx, n)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-
-		if notReadyTickCount >= r.notReadyThreshold {
-			badNodes = append(badNodes, n)
-		}
+func getInstanceId(n corev1.Node) (string, error) {
+	// node.spec.providerID for AWS is in format aws:///AVAILABILITY_ZONE/INSTANCE-ID
+	// ie. aws:///eu-west-1c/i-06a1d2fe9b3e8c916
+	parts := strings.Split(n.Spec.ProviderID, "/")
+	if len(parts) != 5 || parts[4] == "" {
+		return "", microerror.Maskf(executionFailedError, fmt.Sprintf("invalid providerID %s in node spec %s", n.Spec.ProviderID, n.Name))
 	}
-	return badNodes, nil
-}
-
-func nodeNotReady(n corev1.Node) bool {
-	for _, c := range n.Status.Conditions {
-		// find kubelet "ready" condition
-		if c.Type == "Ready" && c.Status != "True" {
-			// kubelet must be in NotReady at least for some time to avoid quick flaps
-			if time.Since(c.LastHeartbeatTime.Time) >= key.NodeNotReadyDuration {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// updateNodeNotReadyTickAnnotations will update annotations on the node
-// depending if the node is Ready or not
-// the annotation is used to track how many times node was seen as not ready
-// and in case it will reach a threshold, the node will be marked for termination.
-// Each reconcilation loop can increase or decrease the tick count by 1.
-func (r *Resource) updateNodeNotReadyTickAnnotations(ctx context.Context, n corev1.Node) (int, error) {
-	var err error
-	cc, err := controllercontext.FromContext(ctx)
-	if err != nil {
-		return -1, microerror.Mask(err)
-	}
-
-	// fetch current notReady tick count from node
-	// if there is no annotation yet, the value will be 0
-	notReadyTickCount := 0
-	{
-		tick, ok := n.Annotations[key.AnnotationNodeNotReadyTick]
-		if ok {
-			notReadyTickCount, err = strconv.Atoi(tick)
-			if err != nil {
-				return -1, microerror.Mask(err)
-			}
-		}
-	}
-
-	updated := false
-	// increase or decrease the tick count depending on the node status
-	if nodeNotReady(n) {
-		notReadyTickCount++
-		updated = true
-	} else if notReadyTickCount > 0 {
-		notReadyTickCount--
-		updated = true
-	}
-
-	if updated {
-		// update the tick count on the node
-		n.Annotations[key.AnnotationNodeNotReadyTick] = fmt.Sprintf("%d", notReadyTickCount)
-		err = cc.Client.TenantCluster.K8s.CtrlClient().Update(ctx, &n)
-		if err != nil {
-			return -1, microerror.Mask(err)
-		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated not ready tick count to %d/%d for node %s", notReadyTickCount, r.notReadyThreshold, n.Name))
-	}
-	return notReadyTickCount, nil
-}
-
-// maximumNodeTermination calculates the maximum number of nodes that can be terminated in single loop
-// the number is calculated with help of key.NodeAutoRepairTerminationPercentage
-// which determines how much percentage of nodes can be terminated
-// the minimum is 1 node termination per reconciliation loop
-func maximumNodeTermination(nodeCount int) int {
-	limit := math.Round(float64(nodeCount) * key.NodeAutoRepairTerminationPercentage)
-
-	if limit < 1 {
-		limit = 1
-	}
-	return int(limit)
-}
-
-// removeMultipleMasterNodes removes multiple master nodes from the list to avoid more than 1 master node termination at same time
-func (r *Resource) removeMultipleMasterNodes(ctx context.Context, nodeList []corev1.Node) []corev1.Node {
-	foundMasterNode := false
-	var filteredNodes []corev1.Node
-
-	for _, n := range nodeList {
-		if n.Labels[key.LabelNodeRole] == key.LabelNodeRoleMaster {
-			if !foundMasterNode {
-				filteredNodes = append(filteredNodes, n)
-				foundMasterNode = true
-			} else {
-				// removing additional master nodes from the list
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removed master node %s from node termination list to avoid multiple master nodes termination at once", n.Name))
-				continue
-			}
-		} else {
-			filteredNodes = append(filteredNodes, n)
-		}
-	}
-	return filteredNodes
+	return parts[4], nil
 }
