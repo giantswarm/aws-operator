@@ -45,13 +45,6 @@ const (
 	NodeAutoRepairCooldownPeriod = time.Minute * 10
 )
 
-const (
-	AnnotationNodeNotReadyTick = "giantswarm.io/node-not-ready-tick"
-
-	LabelNodeRole       = "role"
-	LabelNodeRoleMaster = "master"
-)
-
 // AMI returns the EC2 AMI for the configured region and given version.
 func AMI(region string, release releasev1alpha1.Release) (string, error) {
 	osVersion, err := OSVersion(release)

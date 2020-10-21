@@ -3,7 +3,6 @@ package nodeautorepair
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/internal/locker"
 	"math"
 	"strconv"
 	"strings"
