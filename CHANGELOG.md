@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.3] - 2020-10-21
+
+### Fixed
+
+- Ignore error when missing APIServerPublicLoadBalancer CF Stack output to allow upgrade.
+
+## [9.1.2] - 2020-10-15
+
 ### Added
 
 - Add etcd client certificates for Prometheus.
@@ -287,7 +295,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.1.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...HEAD
+[9.1.3]: https://github.com/giantswarm/aws-operator/compare/v9.1.2...v9.1.3
+[9.1.2]: https://github.com/giantswarm/aws-operator/compare/v9.1.1...v9.1.2
 [9.1.1]: https://github.com/giantswarm/aws-operator/compare/v9.1.0...v9.1.1
 [9.1.0]: https://github.com/giantswarm/aws-operator/compare/v9.0.1...v9.1.0
 [9.0.1]: https://github.com/giantswarm/aws-operator/compare/v9.0.0...v9.0.1

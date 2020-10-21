@@ -71,8 +71,8 @@ github.com/aws/amazon-vpc-cni-k8s v1.7.5/go.mod h1:WFg/NerFMpie+WZBSWvlSojmKkqGV
 github.com/aws/aws-lambda-go v1.13.3/go.mod h1:4UKl9IzQMoD+QF79YdCuzCwp8VbmG4VAQwij/eHl5CU=
 github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.33.14/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/aws/aws-sdk-go v1.35.7 h1:FHMhVhyc/9jljgFAcGkQDYjpC9btM0B8VfkLBfctdNE=
-github.com/aws/aws-sdk-go v1.35.7/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
+github.com/aws/aws-sdk-go v1.35.11 h1:LICFl2K+3Y5dMTW6PCV6ycK8fzIxs21HvDhI5A3Ee3Y=
+github.com/aws/aws-sdk-go v1.35.11/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -195,7 +195,6 @@ github.com/giantswarm/apiextensions v0.4.15/go.mod h1:iMZLjyvqRIVPTAQGbjwTSqifwr
 github.com/giantswarm/apiextensions v0.4.20 h1:ggXORM5p/kWv9kcmPfmeD2FV10XAsrcGvqVka0CrIcI=
 github.com/giantswarm/apiextensions v0.4.20/go.mod h1:dOiXE5ZQDN1vDpZjcCgKhPN/Id8BQKlI7mqYyn+mCJk=
 github.com/giantswarm/apiextensions/v2 v2.0.0/go.mod h1:/qSx5jA2F5um0ipvVDMZJz+rJqsPZewzz4jjMXkXYFw=
-github.com/giantswarm/apiextensions/v2 v2.5.1/go.mod h1:/qSx5jA2F5um0ipvVDMZJz+rJqsPZewzz4jjMXkXYFw=
 github.com/giantswarm/apiextensions/v2 v2.6.2 h1:ECdw6G5QCr5TN95SIFtD63PfNVS7vBnPcreqqFGIFh4=
 github.com/giantswarm/apiextensions/v2 v2.6.2/go.mod h1:/qSx5jA2F5um0ipvVDMZJz+rJqsPZewzz4jjMXkXYFw=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
@@ -235,10 +234,8 @@ github.com/giantswarm/micrologger v0.3.3 h1:RGUOHlpFVvT9vK/BhZGqfzb9AjFxLLBns20o
 github.com/giantswarm/micrologger v0.3.3/go.mod h1:fkzQdDBC6HjJq4nllBDt6XB4t4yeVyhdHKblFX6QoMQ=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
-github.com/giantswarm/operatorkit v1.2.0 h1:QHUVsaTLB88auQlbADerryMti+svVwsapOw+rYEp2jI=
-github.com/giantswarm/operatorkit v1.2.0/go.mod h1:5F6ai1OJBUsGLC6+sOgstHSPwN51TtfRfkI77FaT6kM=
-github.com/giantswarm/operatorkit/v2 v2.0.1 h1:gt1hdr9N57h5H5O3SayrGDhwcZYXTpgF7VV0/oFtuUQ=
-github.com/giantswarm/operatorkit/v2 v2.0.1/go.mod h1:xlN/LMZaQExWKwQUAI9m9xaHZCCL6WHVYGpd7Wx7LTg=
+github.com/giantswarm/operatorkit/v2 v2.0.2 h1:S2O5lZBT1yeGFfR+/so5TSIXgbgCSrVceM3EccNmoGE=
+github.com/giantswarm/operatorkit/v2 v2.0.2/go.mod h1:Bl8gK7hYhvRQP0Ds26rwYdoSXbbr+NKRZmWtwqI7HFI=
 github.com/giantswarm/randomkeys/v2 v2.0.0 h1:WSdM/aAX65v6Ft44NZPNmolhfxtfG9ZfsZJodq+hxEU=
 github.com/giantswarm/randomkeys/v2 v2.0.0/go.mod h1:0jAWR4s12tY4BMX6BhsGKdSonFplJZnzwH7jP25T8bo=
 github.com/giantswarm/tenantcluster/v2 v2.0.0 h1:4Nj4ARq753tYKjd2VWH7NR0akc/S2mVYHSGxUTFTfCs=
