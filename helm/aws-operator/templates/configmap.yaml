@@ -57,6 +57,7 @@ data:
       guest:
         ssh:
           ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
+
       registry:
       {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
         domain: '{{ .Values.Installation.V1.Registry.Domain }}'

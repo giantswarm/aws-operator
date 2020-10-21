@@ -44,8 +44,6 @@ Installation:
       Kind: ""
     Registry:
       Domain: ""
-    NodeAutoRepair:
-      Enabled: false
     Secret:
       AWSOperator:
         SecretYaml: ""

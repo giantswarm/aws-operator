@@ -87,7 +87,6 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
-	NodeAutoRepair             bool
 	RouteTables                string
 	Route53Enabled             bool
 }
