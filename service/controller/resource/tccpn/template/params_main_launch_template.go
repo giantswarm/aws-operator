@@ -28,7 +28,7 @@ type ParamsMainLaunchTemplateItemInstance struct {
 }
 
 type ParamsMainLaunchTemplateMetadata struct {
-	HttpsTokens string
+	HttpTokens string
 }
 
 type ParamsMainLaunchTemplateItemBlockDeviceMappingDocker struct {

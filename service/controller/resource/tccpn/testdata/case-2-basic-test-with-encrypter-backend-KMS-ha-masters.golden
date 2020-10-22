@@ -425,7 +425,7 @@ Resources:
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
         MetadataOptions:
-          HttpsTokens: optional
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:
@@ -512,7 +512,7 @@ Resources:
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
         MetadataOptions:
-          HttpsTokens: optional
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:
@@ -599,7 +599,7 @@ Resources:
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
         MetadataOptions:
-          HttpsTokens: optional
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:

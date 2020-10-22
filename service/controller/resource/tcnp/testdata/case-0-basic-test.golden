@@ -187,7 +187,7 @@ Resources:
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.2xlarge
         MetadataOptions:
-          HttpsTokens: optional
+          HttpTokens: optional
         Monitoring:
           Enabled: true
         NetworkInterfaces:
@@ -245,7 +245,7 @@ Resources:
                 ]
               }
             }
-  
+
   PrivateRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -379,7 +379,7 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: master-security-group-id
-  
+
   NodePoolToNodePoolRuleSgTest1:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
@@ -394,7 +394,7 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: sg-test1
-  
+
   PrivateSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:

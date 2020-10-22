@@ -31,7 +31,7 @@ const TemplateMainLaunchTemplate = `
         ImageId: {{ .LaunchTemplate.Instance.Image }}
         InstanceType: {{ .LaunchTemplate.Instance.Type }}
         MetadataOptions:
-          HttpsTokens: {{ .LaunchTemplate.Metadata.HttpsTokens }}
+          HttpTokens: {{ .LaunchTemplate.Metadata.HttpTokens }}
         Monitoring:
           Enabled: {{ .LaunchTemplate.Instance.Monitoring }}
         NetworkInterfaces:

@@ -446,7 +446,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 			},
 			MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
 			Metadata: template.ParamsMainLaunchTemplateMetadata{
-				HttpsTokens: key.ControlPlaneMetadataV2(cr),
+				HttpTokens: key.ControlPlaneMetadataV2(cr),
 			},
 			Name:           key.ControlPlaneLaunchTemplateName(&cr, m.ID),
 			ReleaseVersion: key.ReleaseVersion(&cr),

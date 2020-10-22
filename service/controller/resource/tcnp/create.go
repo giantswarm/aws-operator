@@ -379,7 +379,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 			Type:       key.MachineDeploymentInstanceType(cr),
 		},
 		Metadata: template.ParamsMainLaunchTemplateMetadata{
-			HttpsTokens: key.MachineDeploymentMetadataV2(cr),
+			HttpTokens: key.MachineDeploymentMetadataV2(cr),
 		},
 		Name:           key.MachineDeploymentLaunchTemplateName(cr),
 		ReleaseVersion: key.ReleaseVersion(&cr),
