@@ -3,6 +3,7 @@ package template
 type ParamsMainLaunchTemplate struct {
 	BlockDeviceMapping ParamsMainLaunchTemplateBlockDeviceMapping
 	Instance           ParamsMainLaunchTemplateInstance
+	Metadata           ParamsMainLaunchTemplateMetadata
 	Name               string
 	ReleaseVersion     string
 	SmallCloudConfig   ParamsMainLaunchTemplateSmallCloudConfig
@@ -18,6 +19,10 @@ type ParamsMainLaunchTemplateInstance struct {
 	Image      string
 	Monitoring bool
 	Type       string
+}
+
+type ParamsMainLaunchTemplateMetadata struct {
+	HttpsTokens string
 }
 
 type ParamsMainLaunchTemplateBlockDeviceMappingDocker struct {

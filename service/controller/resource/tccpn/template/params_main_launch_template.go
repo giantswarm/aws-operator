@@ -7,6 +7,7 @@ type ParamsMainLaunchTemplate struct {
 type ParamsMainLaunchTemplateItem struct {
 	BlockDeviceMapping    ParamsMainLaunchTemplateItemBlockDeviceMapping
 	Instance              ParamsMainLaunchTemplateItemInstance
+	Metadata              ParamsMainLaunchTemplateMetadata
 	SmallCloudConfig      ParamsMainLaunchTemplateItemSmallCloudConfig
 	MasterSecurityGroupID string
 	Name                  string
@@ -24,6 +25,10 @@ type ParamsMainLaunchTemplateItemInstance struct {
 	Image      string
 	Monitoring bool
 	Type       string
+}
+
+type ParamsMainLaunchTemplateMetadata struct {
+	HttpsTokens string
 }
 
 type ParamsMainLaunchTemplateItemBlockDeviceMappingDocker struct {
