@@ -110,7 +110,7 @@ func getInstanceId(n corev1.Node) (string, error) {
 	// ie. aws:///eu-west-1c/i-06a1d2fe9b3e8c916
 	parts := strings.Split(n.Spec.ProviderID, "/")
 	if len(parts) != 5 || parts[4] == "" {
-		return "", microerror.Maskf(executionFailedError, fmt.Sprintf("invalid providerID %s in node spec %s", n.Spec.ProviderID, n.Name))
+		return "", microerror.Maskf(invalidProviderIDError, fmt.Sprintf("invalid providerID %s in node spec %s", n.Spec.ProviderID, n.Name))
 	}
 	return parts[4], nil
 }
