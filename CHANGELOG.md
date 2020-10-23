@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `node-auto-repair` feature to automaticaly terminate bad and unhealthy nodes.
+
 ## [9.1.3] - 2020-10-21
 
 ### Fixed
