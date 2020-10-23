@@ -13,6 +13,15 @@ func IsInvalidConfig(err error) bool {
 	return microerror.Cause(err) == invalidConfigError
 }
 
+var invalidProviderIDError = &microerror.Error{
+	Kind: "invalidProviderID",
+}
+
+// IsInvalidProviderID asserts invalidConfigError.
+func IsInvalidProviderID(err error) bool {
+	return microerror.Cause(err) == invalidProviderIDError
+}
+
 // executionFailedError is an error type for situations where Resource execution
 // cannot continue and must always fall back to operatorkit.
 //

@@ -12,7 +12,7 @@ func Test_getInstanceId(t *testing.T) {
 		name               string
 		node               corev1.Node
 		expectedInstanceID string
-		expectedError      bool
+		errorMatcher       func(error) bool
 	}{
 		{
 			name: "test 0 - basic test",
@@ -22,7 +22,7 @@ func Test_getInstanceId(t *testing.T) {
 				},
 			},
 			expectedInstanceID: "i-06a1d2fe9b3e8c916",
-			expectedError:      false,
+			errorMatcher:       nil,
 		},
 		{
 			name: "test 1 - basic test",
@@ -32,7 +32,7 @@ func Test_getInstanceId(t *testing.T) {
 				},
 			},
 			expectedInstanceID: "i-a1dasd1wddas3e8c916",
-			expectedError:      false,
+			errorMatcher:       nil,
 		},
 		{
 			name: "test 2 - bad provider ID",
@@ -42,7 +42,7 @@ func Test_getInstanceId(t *testing.T) {
 				},
 			},
 			expectedInstanceID: "",
-			expectedError:      true,
+			errorMatcher:       IsInvalidProviderID,
 		},
 		{
 			name: "test 3 - bad provider ID",
@@ -52,7 +52,7 @@ func Test_getInstanceId(t *testing.T) {
 				},
 			},
 			expectedInstanceID: "",
-			expectedError:      true,
+			errorMatcher:       IsInvalidProviderID,
 		},
 		{
 			name: "test 3 - bad provider ID",
@@ -62,7 +62,7 @@ func Test_getInstanceId(t *testing.T) {
 				},
 			},
 			expectedInstanceID: "",
-			expectedError:      true,
+			errorMatcher:       IsInvalidProviderID,
 		},
 	}
 
@@ -71,12 +71,16 @@ func Test_getInstanceId(t *testing.T) {
 			t.Log(tc.name)
 
 			instanceID, err := getInstanceId(tc.node)
-			if err != nil && !tc.expectedError {
-				t.Fatalf("Encountered an error when parsing valid providerID '%s'.\n", tc.node.Spec.ProviderID)
-			}
 
-			if err == nil && tc.expectedError {
-				t.Fatalf("Expected an error during parsiong of instanceID '%s' but there was none.\n", tc.node.Spec.ProviderID)
+			switch {
+			case err == nil && tc.errorMatcher == nil:
+				// correct; carry on
+			case err != nil && tc.errorMatcher == nil:
+				t.Fatalf("error == %#v, want nil", err)
+			case err == nil && tc.errorMatcher != nil:
+				t.Fatalf("error == nil, want non-nil")
+			case !tc.errorMatcher(err):
+				t.Fatalf("error == %#v, want matching", err)
 			}
 
 			if instanceID != tc.expectedInstanceID {
