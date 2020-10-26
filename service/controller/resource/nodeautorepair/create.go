@@ -3,11 +3,14 @@ package nodeautorepair
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/pkg/project"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/giantswarm/badnodedetector/pkg/detector"
+	"github.com/giantswarm/kubelock/v2"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
 
@@ -19,6 +22,8 @@ const (
 	annotationEnableNodeTermination = "node-auto-repair.giantswarm.io"
 
 	nodeTerminationTickThreshold = 6
+	lockNamespace                = "default"
+	pauseBetweenTermination      = time.Minute * 10
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -45,13 +50,23 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
+	var lock *kubelock.KubeLock
+	{
+		kubelockConfig := kubelock.Config{}
+
+		lock, err = kubelock.New(kubelockConfig)
+	}
+
+	acquiredOptions := kubelock.AcquireOptions{
+		TTL: pauseBetweenTermination,
+	}
+
 	var detectorService *detector.Detector
 	{
 		detectorConfig := detector.Config{
 			K8sClient: cc.Client.TenantCluster.K8s.CtrlClient(),
 			Logger:    r.logger,
 
-			LockName:              Name,
 			NotReadyTickThreshold: nodeTerminationTickThreshold,
 		}
 
@@ -66,12 +81,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	for _, n := range nodesToTerminate {
-		err := r.terminateNode(ctx, n, key.ClusterID(&cr))
-		if err != nil {
+	if len(nodesToTerminate) > 0 {
+		err = lock.Lock(lockNamespace).Acquire(ctx, project.Name(), acquiredOptions)
+		if kubelock.IsAlreadyExists(err) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", "skipping termination of unhealthy nodes due to the pause between terminations")
+
+			return nil
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
+
+		for _, n := range nodesToTerminate {
+			err := r.terminateNode(ctx, n, key.ClusterID(&cr))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
 	}
+
 	return nil
 }
 
