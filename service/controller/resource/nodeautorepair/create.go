@@ -55,6 +55,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		kubelockConfig := kubelock.Config{}
 
 		lock, err = kubelock.New(kubelockConfig)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 	}
 
 	acquiredOptions := kubelock.AcquireOptions{
