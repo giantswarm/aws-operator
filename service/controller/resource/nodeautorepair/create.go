@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/kubelock/v2"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -52,7 +53,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var lock *kubelock.KubeLock
 	{
-		kubelockConfig := kubelock.Config{}
+		kubelockConfig := kubelock.Config{
+			DynClient: cc.Client.TenantCluster.K8s.DynClient(),
+			GVR: schema.GroupVersionResource{
+				Group:    "",
+				Version:  "v1",
+				Resource: "namespaces",
+			},
+		}
 
 		lock, err = kubelock.New(kubelockConfig)
 		if err != nil {
