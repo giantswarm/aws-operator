@@ -8,11 +8,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	"github.com/giantswarm/badnodedetector/pkg/detector"
 	"github.com/giantswarm/kubelock/v2"
 	"github.com/giantswarm/microerror"
-
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -21,6 +19,8 @@ import (
 )
 
 const (
+	annotationEnableNodeTermination = "node-auto-repair.giantswarm.io"
+
 	nodeTerminationTickThreshold = 6
 	lockNamespace                = "default"
 	pauseBetweenTermination      = time.Minute * 10
@@ -38,7 +38,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	// check for annotation enabling the node auto repair feature
-	if _, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; !ok {
+	if _, ok := cr.Annotations[annotationEnableNodeTermination]; !ok {
 		r.logger.LogCtx(ctx, "level", "debug", "message", " node auto repair is not enabled for this cluster, cancelling")
 		return nil
 	}
