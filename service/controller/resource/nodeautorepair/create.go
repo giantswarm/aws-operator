@@ -93,7 +93,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if len(nodesToTerminate) > 0 {
-		err = lock.Lock(lockNamespace).Acquire(ctx, project.Name(), acquiredOptions)
+		err = lock.Lock(project.Name()).Acquire(ctx, lockNamespace, acquiredOptions)
 		if kubelock.IsAlreadyExists(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "skipping termination of unhealthy nodes due to the pause between terminations")
 
