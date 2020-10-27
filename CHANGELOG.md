@@ -8,9 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ### Added
 
 - Add AMIs for flatcar `2605.5.0` and `2605.6.0`.
+
+### Fixed
+
+- Remove dependency on `var-lib-etcd.automount` to avoid dependency cycle on new systemd.
 
 ## [9.1.3] - 2020-10-21
 
