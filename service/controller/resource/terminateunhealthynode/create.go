@@ -1,4 +1,4 @@
-package nodeautorepair
+package terminateunhealthynode
 
 import (
 	"context"
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	annotationEnableNodeTermination = "node-auto-repair.giantswarm.io"
+	annotationEnableNodeTermination = "node.giantswarm.io/terminate-unhealthy"
 
 	nodeTerminationTickThreshold = 6
 	lockNamespace                = "default"

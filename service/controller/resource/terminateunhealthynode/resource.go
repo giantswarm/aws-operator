@@ -1,4 +1,4 @@
-package nodeautorepair
+package terminateunhealthynode
 
 import (
 	"github.com/giantswarm/microerror"
@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Name = "nodeautorepair"
+	Name = "terminateunhealthynode"
 )
 
 type Config struct {

@@ -24,12 +24,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/apiendpoint"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/resource/nodeautorepair"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
+	"github.com/giantswarm/aws-operator/service/controller/resource/terminateunhealthynode"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
 
-type NodeAutoRepairConfig struct {
+type TerminateUnhealthyNodeConfig struct {
 	K8sClient k8sclient.Interface
 	Locker    locker.Interface
 	Logger    micrologger.Logger
@@ -37,11 +37,11 @@ type NodeAutoRepairConfig struct {
 	HostAWSConfig aws.Config
 }
 
-type NodeAutoRepair struct {
+type TerminateUnhealthyNode struct {
 	*controller.Controller
 }
 
-func NewNodeAutoRepair(config NodeAutoRepairConfig) (*NodeAutoRepair, error) {
+func NewTerminateUnhealthyNode(config TerminateUnhealthyNodeConfig) (*TerminateUnhealthyNode, error) {
 	var err error
 
 	if config.K8sClient == nil {
@@ -50,7 +50,7 @@ func NewNodeAutoRepair(config NodeAutoRepairConfig) (*NodeAutoRepair, error) {
 
 	var resources []resource.Interface
 	{
-		resources, err = newNodeAutoRepairResources(config)
+		resources, err = newTerminateUnhealthyNodeResources(config)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -84,14 +84,14 @@ func NewNodeAutoRepair(config NodeAutoRepairConfig) (*NodeAutoRepair, error) {
 		}
 	}
 
-	c := &NodeAutoRepair{
+	c := &TerminateUnhealthyNode{
 		Controller: operatorkitController,
 	}
 
 	return c, nil
 }
 
-func newNodeAutoRepairResources(config NodeAutoRepairConfig) ([]resource.Interface, error) {
+func newTerminateUnhealthyNodeResources(config TerminateUnhealthyNodeConfig) ([]resource.Interface, error) {
 	var err error
 
 	var certsSearcher *certs.Searcher
@@ -175,13 +175,13 @@ func newNodeAutoRepairResources(config NodeAutoRepairConfig) ([]resource.Interfa
 		}
 	}
 
-	var nodeAutoRepairResource resource.Interface
+	var terminateUnhealthyNodeResource resource.Interface
 	{
-		c := nodeautorepair.Config{
+		c := terminateunhealthynode.Config{
 			Logger: config.Logger,
 		}
 
-		nodeAutoRepairResource, err = nodeautorepair.New(c)
+		terminateUnhealthyNodeResource, err = terminateunhealthynode.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -197,7 +197,7 @@ func newNodeAutoRepairResources(config NodeAutoRepairConfig) ([]resource.Interfa
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		apiEndpointResource,
-		nodeAutoRepairResource,
+		terminateUnhealthyNodeResource,
 	}
 
 	{

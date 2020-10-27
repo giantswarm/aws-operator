@@ -24,7 +24,7 @@ const (
 )
 
 const (
-	// NodeAutoRepairResyncPeriod defines resync period fro the nodeautorepair controller
+	// NodeAutoRepairResyncPeriod defines resync period fro the terminateunhealthynode controller
 	NodeAutoRepairResyncPeriod = time.Minute * 3
 )
 

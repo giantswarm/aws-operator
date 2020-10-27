@@ -1,4 +1,4 @@
-package nodeautorepair
+package terminateunhealthynode
 
 import (
 	"github.com/giantswarm/microerror"
