@@ -58,14 +58,17 @@ host Kubernetes cluster also running on AWS.
 ### CloudFormation
 
 The guest Kubernetes clusters are provisioned using [AWS CloudFormation][4]. The
-resources are split between 3 CloudFormation stacks.
+resources are split between CloudFormation stacks:
 
-* guest-main manages the guest cluster resources.
-* host-setup manages an IAM role used for VPC peering.
-* host-main manages network routes for the VPC peering connection.
+In control plane account
+* tccpi - Tenant cluster control plane role setup.
+* tccpf - Tenant cluster control plane routes setup.
+* tcnpf - Tenant cluster nodepool peering.
 
-The host cluster may run in a separate AWS account. If so resources are created
-in both the host and guest AWS accounts.
+In tenant account:
+* tccp -  Tenant cluster network setup.
+* tccpn - Tenant cluster control plane resources (masters).
+* tcnp -  Tenant cluster nodepool resources (workers).
 
 [4]:https://aws.amazon.com/cloudformation
 
