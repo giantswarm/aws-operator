@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-
 ### Added
 
 - Add AMIs for flatcar `2605.5.0` and `2605.6.0`.
+- Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
 
 ### Fixed
 
