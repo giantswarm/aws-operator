@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
+
 ### Fixed
 
 - Remove dependency on `var-lib-etcd.automount` to avoid dependency cycle on new systemd.

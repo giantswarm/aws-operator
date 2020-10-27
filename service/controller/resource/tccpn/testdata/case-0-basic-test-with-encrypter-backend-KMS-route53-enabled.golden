@@ -250,6 +250,8 @@ Resources:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
+        MetadataOptions:
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:

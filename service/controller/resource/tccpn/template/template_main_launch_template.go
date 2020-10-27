@@ -31,6 +31,8 @@ const TemplateMainLaunchTemplate = `
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: {{ .Instance.Image }}
         InstanceType: {{ .Instance.Type }}
+        MetadataOptions:
+          HttpTokens: {{ .Metadata.HttpTokens }}
         Monitoring:
           Enabled: {{ .Instance.Monitoring }}
         NetworkInterfaces:
