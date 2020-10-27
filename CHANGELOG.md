@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Annotation `beta.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
+
 ## [9.1.3] - 2020-10-21
 
 ### Fixed
