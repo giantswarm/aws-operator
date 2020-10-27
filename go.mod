@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.35.11
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions/v2 v2.6.2
+	github.com/giantswarm/apiextensions/v3 v3.4.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/badnodedetector v1.0.0
 	github.com/giantswarm/certs/v3 v3.1.0
@@ -32,6 +33,6 @@ require (
 	k8s.io/apiextensions-apiserver v0.18.9
 	k8s.io/apimachinery v0.18.9
 	k8s.io/client-go v0.18.9
-	sigs.k8s.io/cluster-api v0.3.8
+	sigs.k8s.io/cluster-api v0.3.10
 	sigs.k8s.io/controller-runtime v0.6.3
 )
