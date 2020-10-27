@@ -24,8 +24,8 @@ const (
 )
 
 const (
-	// NodeAutoRepairResyncPeriod defines resync period fro the terminateunhealthynode controller
-	NodeAutoRepairResyncPeriod = time.Minute * 3
+	// TerminateUnhealthyNodeResyncPeriod defines resync period for the terminateunhealthynode controller
+	TerminateUnhealthyNodeResyncPeriod = time.Minute * 3
 )
 
 // AMI returns the EC2 AMI for the configured region and given version.

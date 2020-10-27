@@ -68,7 +68,7 @@ func NewTerminateUnhealthyNode(config TerminateUnhealthyNodeConfig) (*TerminateU
 				return new(infrastructurev1alpha2.AWSCluster)
 			},
 			Resources:    resources,
-			ResyncPeriod: key.NodeAutoRepairResyncPeriod,
+			ResyncPeriod: key.TerminateUnhealthyNodeResyncPeriod,
 
 			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
