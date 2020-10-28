@@ -18,6 +18,8 @@ type ParamsMainAutoScalingGroup struct {
 	// capacity that must be fulfilled by On-Demand Instances. This base portion is
 	// provisioned first as your group scales.
 	OnDemandBaseCapacity int
+	// PauseTime is defining the pause time between each batch in the ASG update
+	PauseTime string
 	// SpotAllocationStrategy If the allocation strategy is lowest-price, the Auto
 	// Scaling group launches instances using the Spot pools with the lowest price,
 	// and evenly allocates your instances across the number of Spot pools that you

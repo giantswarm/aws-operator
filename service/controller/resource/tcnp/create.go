@@ -3,15 +3,16 @@ package tcnp
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
@@ -277,6 +278,25 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		cl = list.Items[0]
+	}
 
 	var subnets []string
 	for _, az := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
@@ -294,17 +314,54 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		}
 	}
 
+	var maxBatchSize string
+	{
+		// try read the value from cluster CR
+		if val, ok := cl.Annotations["aws.giantswarm.io/update-max-batch-size"]; ok {
+			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
+		}
+		// override the value with machine deployment value if its set
+		if val, ok := cr.Annotations["aws.giantswarm.io/update-max-batch-size"]; ok {
+			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
+		}
+		// if nothing is set use the default
+		if maxBatchSize == "" {
+			maxBatchSize = key.MachineDeploymentWorkerCountRatio(minDesiredNodes, 0.3)
+		}
+	}
+
+	var pauseTime string
+	{
+		// try read the value from cluster CR
+		if val, ok := cl.Annotations["aws.giantswarm.io/update-pause-time"]; ok {
+			if key.MachineDeploymentPauseTimeIsValid(val) {
+				pauseTime = val
+			}
+		}
+		// override the value with machine deployment value if its set
+		if val, ok := cr.Annotations["aws.giantswarm.io/update-pause-time"]; ok {
+			if key.MachineDeploymentPauseTimeIsValid(val) {
+				pauseTime = val
+			}
+		}
+		// if nothing is set use the default
+		if pauseTime == "" {
+			pauseTime = key.DefaultPauseTimeBetweenUpdates
+		}
+	}
+
 	autoScalingGroup := &template.ParamsMainAutoScalingGroup{
 		AvailabilityZones: key.MachineDeploymentAvailabilityZones(cr),
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
 		DesiredCapacity:                     minDesiredNodes,
-		MaxBatchSize:                        workerCountRatio(minDesiredNodes, 0.3),
+		MaxBatchSize:                        maxBatchSize,
 		MaxSize:                             key.MachineDeploymentScalingMax(cr),
-		MinInstancesInService:               workerCountRatio(minDesiredNodes, 0.7),
+		MinInstancesInService:               key.MachineDeploymentWorkerCountRatio(minDesiredNodes, 0.7),
 		MinSize:                             key.MachineDeploymentScalingMin(cr),
 		Subnets:                             subnets,
+		PauseTime:                           pauseTime,
 		OnDemandPercentageAboveBaseCapacity: key.MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr),
 		OnDemandBaseCapacity:                key.MachineDeploymentOnDemandBaseCapacity(cr),
 		SpotInstancePools:                   key.MachineDeploymentSpotInstancePools(launchTemplateOverride),
@@ -630,15 +687,4 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	}
 
 	return ""
-}
-
-func workerCountRatio(workers int, ratio float32) string {
-	value := float32(workers) * ratio
-	rounded := int(value + 0.5)
-
-	if rounded == 0 {
-		rounded = 1
-	}
-
-	return strconv.Itoa(rounded)
 }

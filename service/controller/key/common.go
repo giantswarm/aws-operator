@@ -21,6 +21,8 @@ const (
 	ELBInstanceStateInService = "InService"
 
 	DrainerResyncPeriod = time.Minute * 2
+
+	DefaultPauseTimeBetweenUpdates = "PT15M"
 )
 
 // AMI returns the EC2 AMI for the configured region and given version.
