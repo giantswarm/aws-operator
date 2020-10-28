@@ -248,11 +248,7 @@ func MachineDeploymentParseMaxBatchSize(val string, workers int) string {
 // MachineDeploymentPauseTimeIsValid checks if the value is in proper ISO 8601 duration format
 func MachineDeploymentPauseTimeIsValid(val string) bool {
 	_, err := iso8601.ParseDuration(val)
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
 func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {
