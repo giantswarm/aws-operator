@@ -95,6 +95,10 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
+	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, cr, "tcpn")
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
 
 	if !dockerVolumeEqual {
 		t.logger.LogCtx(ctx,
@@ -128,13 +132,16 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 		)
 		return true, nil
 	}
+	if cloudTagsNotEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCPN stack should update",
+			"reason", "cloud tags are not synced",
+		)
+		return true, nil
+	}
 
 	return false, nil
-}
-
-// ShouldUpdateTags determines whether the reconciled TCNP stack tags should be updated.
-func (t *TCNP) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
-	return t.cloudTags.ClusterLabelsNotEqual(ctx, clusterID, stackTags)
 }
 
 func securityGroupsEqual(cur []string, des []string) bool {

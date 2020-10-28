@@ -71,6 +71,11 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	masterReplicasEqual := cc.Status.TenantCluster.TCCPN.MasterReplicas == rep
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
+	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, cr, "tccpn")
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
 	if !masterInstanceEqual {
 		t.logger.LogCtx(
 			ctx,
@@ -97,11 +102,14 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 		)
 		return true, nil
 	}
+	if cloudTagsNotEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCCPN stack should update",
+			"reason", "cloud tags are not synced",
+		)
+		return true, nil
+	}
 
 	return false, nil
-}
-
-// ShouldUpdateTags determines whether the reconciled TCCPN stack tags should be updated.
-func (t *TCCPN) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
-	return t.cloudTags.ClusterLabelsNotEqual(ctx, clusterID, stackTags)
 }

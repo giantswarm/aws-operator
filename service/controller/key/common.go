@@ -281,7 +281,7 @@ func SecurityGroupName(getter LabelsGetter, groupName string) string {
 }
 
 func StackNameTCCP(getter LabelsGetter) string {
-	return fmt.Sprintf("cluster-%s-tccp", ClusterID(getter))
+	return fmt.Sprintf("cluster-%s-tccp", clusterID(getter))
 }
 
 func StackNameTCCPF(getter LabelsGetter) string {

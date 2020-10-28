@@ -16,7 +16,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/ebs"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
@@ -71,7 +70,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	stackTags := map[string]string{}
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane cloud formation stack")
 
@@ -109,13 +107,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		for _, v := range o.Stacks[0].Tags {
-			if cloudtags.IsStackTagKey(*v.Key) {
-				continue
-			}
-			stackTags[*v.Key] = *v.Value
-		}
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane cloud formation stack")
 	}
 
@@ -125,7 +116,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		updateTags, err := r.detection.ShouldUpdateTags(ctx, key.ClusterID(&cr), stackTags)
+		updateTags, err := r.detection.ShouldUpdateTags(ctx, key.ClusterID(&cr))
 		if err != nil {
 			return microerror.Mask(err)
 		}

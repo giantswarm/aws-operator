@@ -16,7 +16,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
@@ -89,7 +88,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	stackTags := map[string]string{}
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane nodes cloud formation stack")
 
@@ -136,13 +134,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return nil
 		}
 
-		for _, v := range o.Stacks[0].Tags {
-			if cloudtags.IsStackTagKey(*v.Key) {
-				continue
-			}
-			stackTags[*v.Key] = *v.Value
-		}
-
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane nodes cloud formation stack already exists")
 	}
 
@@ -152,12 +143,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		updateTags, err := r.detection.ShouldUpdateTags(ctx, key.ClusterID(&cr), stackTags)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+		// updateTags, err := r.detection.ShouldUpdateTags(ctx, key.ClusterID(&cr), stackTags)
+		// if err != nil {
+		// 	return microerror.Mask(err)
+		// }
 
-		if update || updateTags {
+		if update {
 			err = r.updateStack(ctx, cr)
 			if IsNotFound(err) || hamaster.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "CR not available yet")

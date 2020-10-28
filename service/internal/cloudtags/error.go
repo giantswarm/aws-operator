@@ -20,6 +20,15 @@ func IsNotFound(err error) bool {
 	return microerror.Cause(err) == notFoundError
 }
 
+var noStackTypeFound = &microerror.Error{
+	Kind: "noStackTypeFound",
+}
+
+// IsInvalidConfig asserts noStackTypeFound.
+func IsNoStackTypeFound(err error) bool {
+	return microerror.Cause(err) == noStackTypeFound
+}
+
 var tooManyCRsError = &microerror.Error{
 	Kind: "tooManyCRsError",
 	Desc: "There is only a single Cluster CR allowed with the current implementation.",

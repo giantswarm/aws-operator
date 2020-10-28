@@ -77,5 +77,10 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 
 // ShouldUpdateTags determines whether the reconciled TCCP stack tags should be updated.
 func (t *TCCP) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
-	return t.cloudTags.ClusterLabelsNotEqual(ctx, clusterID, stackTags)
+	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, cr, "tccp")
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	return !cloudTagsNotEqual, nil
 }
