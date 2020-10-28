@@ -7,12 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/core/v1alpha1"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/core/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +34,7 @@ type ResourceConfig struct {
 
 	LabelMapFunc      func(cr metav1.Object) map[string]string
 	LifeCycleHookName string
-	ToClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc     func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 type Resource struct {
@@ -44,7 +44,7 @@ type Resource struct {
 
 	labelMapFunc      func(cr metav1.Object) map[string]string
 	lifeCycleHookName string
-	toClusterFunc     func(v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc     func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
@@ -114,7 +114,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 		},
 	}
 
-	_, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Create(dc)
+	_, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Create(ctx, dc, metav1.CreateOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -131,7 +131,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	if err != nil {
 		return microerror.Mask(err)
 	}
-	cl, err := r.toClusterFunc(obj)
+	cl, err := r.toClusterFunc(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -249,7 +249,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(privateDNS, metav1.GetOptions{})
+			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(ctx, privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
 				// create drainerConfig for the instance
@@ -262,7 +262,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			} else {
 				// if the cluster id or instance id does not match, delete the bad CR and recreate it
 				if key.IsWrongDrainerConfig(dc, key.ClusterID(&cl), *instance.InstanceId) {
-					err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Delete(privateDNS, &metav1.DeleteOptions{})
+					err = r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Delete(ctx, privateDNS, metav1.DeleteOptions{})
 					if err != nil {
 						return microerror.Mask(err)
 					}

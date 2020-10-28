@@ -6,17 +6,17 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/resource"
-	"github.com/giantswarm/operatorkit/resource/crud"
-	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/tenantcluster/v2/pkg/tenantcluster"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -30,16 +30,17 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupebsvolumes"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupenis"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuploadbalancers"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/endpoints"
 	"github.com/giantswarm/aws-operator/service/controller/resource/eniconfigcrs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/ensurecpcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/natgatewayaddresses"
@@ -48,7 +49,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/service/controller/resource/service"
-	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf"
@@ -65,10 +65,12 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type ClusterConfig struct {
 	CloudTags cloudtags.Interface
+	Event     event.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
 	Locker    locker.Interface
@@ -178,6 +180,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := changedetection.TCCPConfig{
 			CloudTags: config.CloudTags,
+			Event:     config.Event,
 			Logger:    config.Logger,
 		}
 
@@ -334,18 +337,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var snapshotIDResource resource.Interface
-	{
-		c := snapshotid.Config{
-			Logger: config.Logger,
-		}
-
-		snapshotIDResource, err = snapshotid.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
@@ -392,6 +383,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := ipam.Config{
 			Checker:   clusterChecker,
 			Collector: subnetCollector,
+			K8sClient: config.K8sClient,
 			Locker:    config.Locker,
 			Logger:    config.Logger,
 			Persister: clusterPersister,
@@ -458,6 +450,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var cleanupENIs resource.Interface
+	{
+		c := cleanupenis.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupENIs, err = cleanupenis.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cleanupLoadBalancersResource resource.Interface
 	{
 		c := cleanuploadbalancers.Config{
@@ -473,6 +477,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupMachineDeploymentsResource resource.Interface
 	{
 		c := cleanupmachinedeployments.Config{
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			Logger:    config.Logger,
 		}
@@ -526,8 +531,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := tccp.Config{
 			CloudTags: config.CloudTags,
+			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,
+			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
@@ -576,6 +583,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	{
 		c := tccpf.Config{
 			Detection: tccpfChangeDetection,
+			Event:     config.Event,
 			Logger:    config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -591,6 +599,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpiResource resource.Interface
 	{
 		c := tccpi.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 
 			InstallationName: config.InstallationName,
@@ -654,12 +663,34 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var cpRouteTablesResource resource.Interface
+	var cpHostedZoneResource resource.Interface
 	{
-		c := cproutetables.Config{
+		c := cphostedzone.Config{
 			Logger: config.Logger,
 
-			Names: strings.Split(config.RouteTables, ","),
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		cpHostedZoneResource, err = cphostedzone.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cpRouteTablesResource resource.Interface
+	{
+		var routeTableNames []string
+		{
+			if config.RouteTables != "" {
+				routeTableNames = strings.Split(config.RouteTables, ",")
+			}
+		}
+
+		c := cproutetables.Config{
+			Logger:       config.Logger,
+			Installation: config.InstallationName,
+
+			Names: routeTableNames,
 		}
 
 		cpRouteTablesResource, err = cproutetables.New(c)
@@ -729,19 +760,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var ensureCPCRsResource resource.Interface
-	{
-		c := ensurecpcrs.Config{
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
-		}
-
-		ensureCPCRsResource, err = ensurecpcrs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -773,10 +791,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
-		snapshotIDResource,
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
+		cpHostedZoneResource,
 		cpRouteTablesResource,
 		cpVPCResource,
 		tccpVPCIDResource,
@@ -800,7 +818,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		serviceResource,
 		endpointsResource,
 		eniConfigCRsResource,
-		ensureCPCRsResource,
 		secretFinalizerResource,
 
 		// All these resources implement logic to update CR status information.
@@ -813,6 +830,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupMachineDeploymentsResource,
 		cleanupRecordSets,
 		cleanupSecurityGroups,
+		cleanupENIs,
 		keepForAWSControlPlaneCRsResource,
 		keepForAWSMachineDeploymentCRsResource,
 	}

@@ -12,16 +12,17 @@ import (
 )
 
 const (
-	HostedZoneID              = "HostedZoneID"
-	HostedZoneNameServersKey  = "HostedZoneNameServers"
-	InternalHostedZoneID      = "InternalHostedZoneID"
-	OperatorVersion           = "OperatorVersion"
-	VPCIDKey                  = "VPCID"
-	VPCPeeringConnectionIDKey = "VPCPeeringConnectionID"
+	APIServerPublicLoadBalancerKey = "APIServerPublicLoadBalancer"
+	HostedZoneID                   = "HostedZoneID"
+	HostedZoneNameServersKey       = "HostedZoneNameServers"
+	InternalHostedZoneID           = "InternalHostedZoneID"
+	OperatorVersion                = "OperatorVersion"
+	VPCIDKey                       = "VPCID"
+	VPCPeeringConnectionIDKey      = "VPCPeeringConnectionID"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
-	cr, err := r.toClusterFunc(obj)
+	cr, err := r.toClusterFunc(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -71,22 +72,27 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	if r.route53Enabled {
 		{
-			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
-			// TODO migration code to dont throw error when the old TC does not yet
-			// have the new output value. Once the aws-operator graduated to v9.0.0 we
-			// can remove the check for IsOutputNotFound.
-			//
-			//     https://github.com/giantswarm/giantswarm/issues/10139
-			//
+			v, err := cloudFormation.GetOutputValue(outputs, APIServerPublicLoadBalancerKey)
+			// migration code to dont throw error  when the old CF Stack dont yet have the new output value
+			// TODO https://github.com/giantswarm/giantswarm/issues/13851
+			// Related: https://github.com/giantswarm/giantswarm/issues/10139
+			// after migration we can remove the check for IsOutputNotFound
 			if cloudformation.IsOutputNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane hostedZoneID output")
+				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane APIServerPublicLoadBalancer output")
 			} else {
 				if err != nil {
 					return microerror.Mask(err)
 				}
-				cc.Status.TenantCluster.DNS.HostedZoneID = v
+				cc.Status.TenantCluster.DNS.APIPublicLoadBalancer = v
 			}
+		}
 
+		{
+			v, err := cloudFormation.GetOutputValue(outputs, HostedZoneID)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			cc.Status.TenantCluster.DNS.HostedZoneID = v
 		}
 
 		{
@@ -99,11 +105,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		{
 			v, err := cloudFormation.GetOutputValue(outputs, InternalHostedZoneID)
-			// TODO migration code to dont throw error when the old TC does not yet
-			// have the new output value. Once the aws-operator graduated to v9.0.0 we
-			// can remove the check for IsOutputNotFound.
-			//
-			//     https://github.com/giantswarm/giantswarm/issues/10139
+			// We do not throw error when the TC does not
+			// have internal hosted zone as it is not a strict requirement.
 			//
 			if cloudformation.IsOutputNotFound(err) {
 				r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane internalHostedZoneID output")

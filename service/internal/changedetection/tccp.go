@@ -4,17 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type TCCPConfig struct {
 	CloudTags cloudtags.Interface
+	Event     recorder.Interface
 	Logger    micrologger.Logger
 }
 
@@ -29,12 +31,16 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	if config.CloudTags == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
 	}
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	t := &TCCP{
 		cloudTags: config.CloudTags,
+		event:     config.Event,
 		logger:    config.Logger,
 	}
 
@@ -61,6 +67,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 			"message", "detected TCCP stack should update",
 			"reason", "availability zones changed",
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", "detected TCCP stack should update: availability zones changed")
 		return true, nil
 	}
 	if !operatorVersionEqual {
@@ -69,6 +76,7 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 			"message", "detected TCCP stack should update",
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
 		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCP stack should update: operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
 		return true, nil
 	}
 

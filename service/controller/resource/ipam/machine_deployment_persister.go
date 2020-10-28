@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +39,7 @@ func NewMachineDeploymentPersister(config MachineDeploymentPersisterConfig) (*Ma
 }
 
 func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Get(name, metav1.GetOptions{})
+	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -53,7 +53,7 @@ func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPN
 	}
 
 	{
-		_, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Update(cr)
+		_, err := p.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Update(ctx, cr, metav1.UpdateOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -9,6 +9,8 @@ Outputs:
     Value: m5.2xlarge
   OperatorVersion:
     Value: 7.3.0
+  ReleaseVersion:
+    Value: 100.0.0
 Resources:
   NodePoolAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -184,6 +186,8 @@ Resources:
           Name: !Ref NodePoolInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.2xlarge
+        MetadataOptions:
+          HttpTokens: optional
         Monitoring:
           Enabled: true
         NetworkInterfaces:
@@ -191,6 +195,11 @@ Resources:
             DeviceIndex: 0
             Groups:
               - !Ref GeneralSecurityGroup
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -243,7 +252,7 @@ Resources:
       VpcId: vpc-id
       Tags:
       - Key: Name
-        Value: 8y5ck-private
+        Value: 8y5ck-private-al9qy
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1a
       - Key: giantswarm.io/route-table-type
@@ -260,7 +269,7 @@ Resources:
       VpcId: vpc-id
       Tags:
       - Key: Name
-        Value: 8y5ck-private
+        Value: 8y5ck-private-al9qy
       - Key: giantswarm.io/availability-zone
         Value: eu-central-1c
       - Key: giantswarm.io/route-table-type

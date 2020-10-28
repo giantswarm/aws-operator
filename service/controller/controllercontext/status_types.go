@@ -12,11 +12,21 @@ type ContextStatus struct {
 }
 
 type ContextStatusControlPlane struct {
-	AWSAccountID string
-	NATGateway   ContextStatusControlPlaneNATGateway
-	RouteTables  []*ec2.RouteTable
-	PeerRole     ContextStatusControlPlanePeerRole
-	VPC          ContextStatusControlPlaneVPC
+	AWSAccountID       string
+	HostedZone         ContextStatusControlPlaneHostedZone
+	InternalHostedZone ContextStatusControlPlaneInternalHostedZone
+	NATGateway         ContextStatusControlPlaneNATGateway
+	RouteTables        []*ec2.RouteTable
+	PeerRole           ContextStatusControlPlanePeerRole
+	VPC                ContextStatusControlPlaneVPC
+}
+
+type ContextStatusControlPlaneHostedZone struct {
+	ID string
+}
+
+type ContextStatusControlPlaneInternalHostedZone struct {
+	ID string
 }
 
 type ContextStatusControlPlaneNATGateway struct {
@@ -43,6 +53,7 @@ type ContextStatusTenantCluster struct {
 	TCCPN           ContextStatusTenantClusterTCCPN
 	TCNP            ContextStatusTenantClusterTCNP
 	OperatorVersion string
+	ReleaseVersion  string
 }
 
 type ContextStatusTenantClusterASG struct {
@@ -58,9 +69,11 @@ type ContextStatusTenantClusterAWS struct {
 }
 
 type ContextStatusTenantClusterDNS struct {
-	HostedZoneID          string
-	HostedZoneNameServers string
-	InternalHostedZoneID  string
+	APIPublicLoadBalancer     string
+	HostedZoneID              string
+	HostedZoneNameServers     string
+	IngressPublicLoadBalancer string
+	InternalHostedZoneID      string
 }
 
 type ContextStatusTenantClusterEncryption struct {

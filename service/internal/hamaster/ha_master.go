@@ -3,8 +3,8 @@ package hamaster
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -75,6 +75,10 @@ func (h *HAMaster) Mapping(ctx context.Context, obj interface{}) ([]Mapping, err
 	g8s, err := h.cachedG8s(ctx, cr)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	if aws.Spec.AvailabilityZones == nil {
+		return nil, microerror.Mask(availabilityZonesNilError)
 	}
 
 	// We need a deterministic list of availability zones which we can loop over

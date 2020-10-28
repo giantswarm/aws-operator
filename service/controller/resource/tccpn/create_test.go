@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -18,6 +18,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -78,6 +80,16 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
+			var e recorder.Interface
+			{
+				c := recorder.Config{
+					K8sClient: k,
+
+					Component: "dummy",
+				}
+
+				e = recorder.New(c)
+			}
 
 			var h hamaster.Interface
 			{
@@ -91,12 +103,26 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
+			var rel releases.Interface
+			{
+				c := releases.Config{
+					K8sClient: k,
+				}
+
+				rel, err = releases.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var d *changedetection.TCCPN
 			{
 				c := changedetection.TCCPNConfig{
 					CloudTags: ct,
+					Event:     e,
 					HAMaster:  h,
 					Logger:    microloggertest.New(),
+					Releases:  rel,
 				}
 
 				d, err = changedetection.NewTCCPN(c)
@@ -152,6 +178,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			{
 				c := Config{
 					CloudTags: ct,
+					Event:     e,
 					K8sClient: k,
 					Detection: d,
 					HAMaster:  h,
@@ -186,7 +213,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
-				err := ioutil.WriteFile(p, []byte(templateBody), 0644)
+				err := ioutil.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
 				if err != nil {
 					t.Fatal(err)
 				}

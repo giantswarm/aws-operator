@@ -4,15 +4,17 @@ import (
 	"context"
 	"reflect"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/resource/crud"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange interface{}) error {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -25,7 +27,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 		r.logger.LogCtx(ctx, "level", "debug", "message", "updating endpoint")
 
 		namespace := key.ClusterNamespace(cr)
-		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(endpointsToUpdate)
+		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(ctx, endpointsToUpdate, metav1.UpdateOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}

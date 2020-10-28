@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -43,12 +43,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		if cc.Status.TenantCluster.Encryption.Key == "" {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
-		if cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "etcd volume snapshot id not available yet")
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
 		}
@@ -122,16 +116,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(executionFailedError, "expected one stack, got %d", len(o.Stacks))
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateFailed {
-			return microerror.Maskf(executionFailedError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+			return microerror.Maskf(eventCFCreateError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusRollbackFailed {
+			return microerror.Maskf(eventCFRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
+		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateRollbackFailed {
+			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
-		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
+		} else if key.StackInProgress(*o.Stacks[0].StackStatus) {
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
+			r.event.Emit(ctx, &cr, "CFInProgress", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
 			return nil
-		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateInProgress {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
+		} else if key.StackComplete(*o.Stacks[0].StackStatus) {
+			r.event.Emit(ctx, &cr, "CFCompleted", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane nodes cloud formation stack already exists")
@@ -216,6 +213,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane nodes cloud formation stack")
+		r.event.Emit(ctx, &cr, "CFCreateRequested", "requested the creation of the tenant cluster's control plane nodes cloud formation stack")
 	}
 
 	return nil
@@ -283,6 +281,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 		}
 
 		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane nodes cloud formation stack")
+		r.event.Emit(ctx, &cr, "CFUpdateRequested", "requested the update of the tenant cluster's control plane nodes cloud formation stack")
 	}
 
 	return nil
@@ -471,8 +470,12 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 				Type:       key.ControlPlaneInstanceType(cr),
 			},
 			MasterSecurityGroupID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "master")),
-			Name:                  key.ControlPlaneLaunchTemplateName(&cr, m.ID),
-			Resource:              key.ControlPlaneLaunchTemplateResourceName(&cr, m.ID),
+			Metadata: template.ParamsMainLaunchTemplateMetadata{
+				HttpTokens: key.ControlPlaneMetadataV2(cr),
+			},
+			Name:           key.ControlPlaneLaunchTemplateName(&cr, m.ID),
+			ReleaseVersion: key.ReleaseVersion(&cr),
+			Resource:       key.ControlPlaneLaunchTemplateResourceName(&cr, m.ID),
 			SmallCloudConfig: template.ParamsMainLaunchTemplateItemSmallCloudConfig{
 				S3URL: fmt.Sprintf("s3://%s/%s", key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID), key.S3ObjectPathTCCPN(&cr, m.ID)),
 			},
@@ -502,6 +505,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWS
 		InstanceType:    key.ControlPlaneInstanceType(cr),
 		MasterReplicas:  rep,
 		OperatorVersion: key.OperatorVersion(&cr),
+		ReleaseVersion:  key.ReleaseVersion(&cr),
 	}
 
 	return outputs, nil

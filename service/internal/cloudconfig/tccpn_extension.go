@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -20,6 +20,7 @@ type TCCPNExtension struct {
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
+	awsCNIVersion    string
 	baseDomain       string
 	cc               *controllercontext.Context
 	cluster          infrastructurev1alpha2.AWSCluster
@@ -268,6 +269,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var fileAssets []k8scloudconfig.FileAsset
 
 	data := TemplateData{
+		AWSCNIVersion:        e.awsCNIVersion,
 		AWSRegion:            key.Region(e.cluster),
 		BaseDomain:           e.baseDomain,
 		ExternalSNAT:         e.externalSNAT,

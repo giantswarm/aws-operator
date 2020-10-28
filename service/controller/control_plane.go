@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/controller"
-	"github.com/giantswarm/operatorkit/resource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/resource/wrapper/retryresource"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/randomkeys/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -46,11 +46,14 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type ControlPlaneConfig struct {
 	CertsSearcher      certs.Interface
 	CloudTags          cloudtags.Interface
+	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
 	K8sClient          k8sclient.Interface
@@ -71,6 +74,7 @@ type ControlPlaneConfig struct {
 	NetworkSetupDockerImage   string
 	PodInfraContainerImage    string
 	RegistryDomain            string
+	RegistryMirrors           []string
 	Route53Enabled            bool
 	SSHUserList               string
 	SSOPublicKey              string
@@ -206,6 +210,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 			Config: cloudconfig.Config{
 				CertsSearcher:      certsSearcher,
 				Encrypter:          encrypterObject,
+				Event:              config.Event,
 				HAMaster:           config.HAMaster,
 				Images:             config.Images,
 				K8sClient:          config.K8sClient,
@@ -224,6 +229,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
 				PodInfraContainerImage:    config.PodInfraContainerImage,
 				RegistryDomain:            config.RegistryDomain,
+				RegistryMirrors:           config.RegistryMirrors,
 				SSHUserList:               config.SSHUserList,
 				SSOPublicKey:              config.SSOPublicKey,
 			},
@@ -235,12 +241,28 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var rel releases.Interface
+	{
+		c := releases.Config{
+			K8sClient: config.K8sClient,
+		}
+
+		rel, err = releases.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnChangeDetection *changedetection.TCCPN
 	{
 		c := changedetection.TCCPNConfig{
 			CloudTags: config.CloudTags,
 			HAMaster:  config.HAMaster,
 			Logger:    config.Logger,
+			Event:     config.Event,
+			HAMaster:  config.HAMaster,
+			Logger:    config.Logger,
+			Releases:  rel,
 		}
 
 		tccpnChangeDetection, err = changedetection.NewTCCPN(c)
@@ -380,6 +402,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		c := tccpn.Config{
 			CloudTags: config.CloudTags,
 			Detection: tccpnChangeDetection,
+			Event:     config.Event,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,
 			K8sClient: config.K8sClient,
@@ -480,14 +503,14 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	return resources, nil
 }
 
-func newControlPlaneToClusterFunc(g8sClient versioned.Interface) func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
-	return func(obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func newControlPlaneToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 		cr, err := key.ToControlPlane(obj)
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(key.ClusterID(&cr), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
 			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
 		}

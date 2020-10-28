@@ -4,19 +4,20 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"strings"
 	"sync"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/certs/v2/pkg/certs"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8srestconfig"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8srestconfig"
 	"github.com/giantswarm/microendpoint/service/version"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/randomkeys"
+	"github.com/giantswarm/randomkeys/v2"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
@@ -24,13 +25,13 @@ import (
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
 	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/collector"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 // Config represents the configuration used to create a new service.
@@ -50,7 +51,6 @@ type Service struct {
 	controlPlaneDrainerController      *controller.ControlPlaneDrainer
 	machineDeploymentController        *controller.MachineDeployment
 	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
-	operatorCollector                  *collector.Set
 }
 
 // New creates a new configured service object.
@@ -114,6 +114,7 @@ func New(config Config) (*Service, error) {
 			AccessKeyID:     config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.ID),
 			AccessKeySecret: config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Secret),
 			Region:          config.Viper.GetString(config.Flag.Service.AWS.Region),
+			RoleARN:         config.Viper.GetString(config.Flag.Service.AWS.Role.ARN),
 			SessionToken:    config.Viper.GetString(config.Flag.Service.AWS.HostAccessKey.Session),
 		}
 	}
@@ -144,6 +145,17 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var event recorder.Interface
+	{
+		c := recorder.Config{
+			K8sClient: k8sClient,
+
+			Component: fmt.Sprintf("%s-%s", project.Name(), project.Version()),
+		}
+
+		event = recorder.New(c)
+	}
+
 	var ha hamaster.Interface
 	{
 		c := hamaster.Config{
@@ -161,7 +173,7 @@ func New(config Config) (*Service, error) {
 		c := images.Config{
 			K8sClient: k8sClient,
 
-			RegistryDomain: config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain: config.Viper.GetString(config.Flag.Service.Registry.Domain),
 		}
 
 		im, err = images.New(c)
@@ -209,6 +221,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.ClusterConfig{
 			CloudTags: ct,
+			Event:     event,
 			K8sClient: k8sClient,
 			HAMaster:  ha,
 			Locker:    kubeLockLocker,
@@ -251,6 +264,7 @@ func New(config Config) (*Service, error) {
 		c := controller.ControlPlaneConfig{
 			CertsSearcher:      certsSearcher,
 			CloudTags:          ct,
+			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -270,7 +284,8 @@ func New(config Config) (*Service, error) {
 			NetworkSetupDockerImage:   config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:    config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
 			Route53Enabled:            config.Viper.GetBool(config.Flag.Service.AWS.Route53.Enabled),
-			RegistryDomain:            config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain:            config.Viper.GetString(config.Flag.Service.Registry.Domain),
+			RegistryMirrors:           config.Viper.GetStringSlice(config.Flag.Service.Registry.Mirrors),
 			SSHUserList:               config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:              config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
 
@@ -286,6 +301,7 @@ func New(config Config) (*Service, error) {
 	var controlPlaneDrainerController *controller.ControlPlaneDrainer
 	{
 		c := controller.ControlPlaneDrainerConfig{
+			Event:     event,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -303,6 +319,7 @@ func New(config Config) (*Service, error) {
 		c := controller.MachineDeploymentConfig{
 			CertsSearcher:      certsSearcher,
 			CloudTags:          ct,
+			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
 			K8sClient:          k8sClient,
@@ -327,7 +344,8 @@ func New(config Config) (*Service, error) {
 			IPAMNetworkRange:           ipamNetworkRange,
 			NetworkSetupDockerImage:    config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image),
 			PodInfraContainerImage:     config.Viper.GetString(config.Flag.Service.AWS.PodInfraContainerImage),
-			RegistryDomain:             config.Viper.GetString(config.Flag.Service.RegistryDomain),
+			RegistryDomain:             config.Viper.GetString(config.Flag.Service.Registry.Domain),
+			RegistryMirrors:            config.Viper.GetStringSlice(config.Flag.Service.Registry.Mirrors),
 			RouteTables:                config.Viper.GetString(config.Flag.Service.AWS.RouteTables),
 			SSHUserList:                config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.SSH.UserList),
 			SSOPublicKey:               config.Viper.GetString(config.Flag.Service.Guest.SSH.SSOPublicKey),
@@ -342,6 +360,7 @@ func New(config Config) (*Service, error) {
 	var machineDeploymentDrainerController *controller.MachineDeploymentDrainer
 	{
 		c := controller.MachineDeploymentDrainerConfig{
+			Event:     event,
 			K8sClient: k8sClient,
 			Logger:    config.Logger,
 
@@ -349,23 +368,6 @@ func New(config Config) (*Service, error) {
 		}
 
 		machineDeploymentDrainerController, err = controller.NewMachineDeploymentDrainer(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var operatorCollector *collector.Set
-	{
-		c := collector.SetConfig{
-			Clients: k8sClient,
-			Logger:  config.Logger,
-
-			AWSConfig:             awsConfig,
-			InstallationName:      config.Viper.GetString(config.Flag.Service.Installation.Name),
-			TrustedAdvisorEnabled: config.Viper.GetBool(config.Flag.Service.AWS.TrustedAdvisor.Enabled),
-		}
-
-		operatorCollector, err = collector.NewSet(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -396,7 +398,6 @@ func New(config Config) (*Service, error) {
 		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
-		operatorCollector:                  operatorCollector,
 	}
 
 	return s, nil
@@ -404,8 +405,6 @@ func New(config Config) (*Service, error) {
 
 func (s *Service) Boot(ctx context.Context) {
 	s.bootOnce.Do(func() {
-		go s.operatorCollector.Boot(ctx) // nolint:errcheck
-
 		go s.clusterController.Boot(ctx)
 		go s.controlPlaneController.Boot(ctx)
 		go s.controlPlaneDrainerController.Boot(ctx)

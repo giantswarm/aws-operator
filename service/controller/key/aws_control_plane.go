@@ -3,9 +3,10 @@ package key
 import (
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
@@ -82,6 +83,14 @@ func ControlPlaneVolumeResourceName(id int) string {
 	}
 
 	return fmt.Sprintf("EtcdVolume%d", id)
+}
+
+func ControlPlaneMetadataV2(cr infrastructurev1alpha2.AWSControlPlane) string {
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadata]
+	if !ok {
+		return "optional"
+	}
+	return result
 }
 
 func ControlPlaneVolumeSnapshotID(snapshot string, master int) string {

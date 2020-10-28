@@ -3,10 +3,10 @@ package images
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v6/pkg/template"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -76,6 +76,26 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 	}
 
 	return ami, nil
+}
+
+func (i *Images) AWSCNI(ctx context.Context, obj interface{}) (string, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	re, err := i.cachedRelease(ctx, cr)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	for _, c := range re.Spec.Components {
+		if c.Name == key.AWSCNIComponentName {
+			return c.Version, nil
+		}
+	}
+
+	return "", microerror.Maskf(notFoundError, "aws cni version not found in the release")
 }
 
 func (i *Images) CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error) {

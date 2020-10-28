@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/pkg/apis/release/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -18,6 +18,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/releases"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -60,16 +62,38 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				}
 
 				ct, err = cloudtags.New(c)
+			}
+
+			var rel releases.Interface
+			{
+				c := releases.Config{
+					K8sClient: k,
+				}
+
+				rel, err = releases.New(c)
 				if err != nil {
 					t.Fatal(err)
 				}
+			}
+
+			var e recorder.Interface
+			{
+				c := recorder.Config{
+					K8sClient: k,
+
+					Component: "dummy",
+				}
+
+				e = recorder.New(c)
 			}
 
 			var d *changedetection.TCNP
 			{
 				c := changedetection.TCNPConfig{
 					CloudTags: ct,
+					Event:     e,
 					Logger:    microloggertest.New(),
+					Releases:  rel,
 				}
 
 				d, err = changedetection.NewTCNP(c)
@@ -115,7 +139,9 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				c := Config{
 					CloudTags: ct,
 					Detection: d,
+					Event:     e,
 					Images:    i,
+					K8sClient: k,
 					Logger:    microloggertest.New(),
 
 					InstallationName: "dummy",
@@ -143,7 +169,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
-				err := ioutil.WriteFile(p, []byte(templateBody), 0644)
+				err := ioutil.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
 				if err != nil {
 					t.Fatal(err)
 				}

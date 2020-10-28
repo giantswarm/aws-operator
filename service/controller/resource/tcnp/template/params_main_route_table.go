@@ -7,6 +7,7 @@ type ParamsMainRouteTables struct {
 type ParamsMainRouteTablesListItem struct {
 	AvailabilityZone string
 	ClusterID        string
+	NodePoolID       string
 	Name             string
 	Route            ParamsMainRouteTablesListItemRoute
 	TCCP             ParamsMainRouteTablesListItemTCCP

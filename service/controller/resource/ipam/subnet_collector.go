@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -53,7 +53,7 @@ func NewSubnetCollector(config SubnetCollectorConfig) (*SubnetCollector, error) 
 	return c, nil
 }
 
-func (c *SubnetCollector) Collect(ctx context.Context) ([]net.IPNet, error) {
+func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) ([]net.IPNet, error) {
 	var err error
 	var mutex sync.Mutex
 	var reservedSubnets []net.IPNet
@@ -129,13 +129,25 @@ func (c *SubnetCollector) Collect(ctx context.Context) ([]net.IPNet, error) {
 		return nil, microerror.Mask(err)
 	}
 
-	reservedSubnets = ipam.CanonicalizeSubnets(c.networkRange, reservedSubnets)
+	// Here we decide which network range to consider when collected allocated
+	// subnets. The given network range is the custom network range configured
+	// in the NetworkPool CR. If it is empty we simply fall back to the network
+	// range configured in the control plane.
+	var nr net.IPNet
+	{
+		nr = networkRange
+		if nr.IP.Equal(net.IP{}) {
+			nr = c.networkRange
+		}
+	}
+
+	reservedSubnets = ipam.CanonicalizeSubnets(nr, reservedSubnets)
 
 	return reservedSubnets, nil
 }
 
 func (c *SubnetCollector) getSubnetsFromAWSConfigs(ctx context.Context) ([]net.IPNet, error) {
-	awsConfigList, err := c.g8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll).List(metav1.ListOptions{})
+	awsConfigList, err := c.g8sClient.ProviderV1alpha1().AWSConfigs(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -159,7 +171,7 @@ func (c *SubnetCollector) getSubnetsFromAWSConfigs(ctx context.Context) ([]net.I
 }
 
 func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPNet, error) {
-	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(metav1.ListOptions{})
+	clusterList, err := c.g8sClient.InfrastructureV1alpha2().AWSClusters(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -183,7 +195,7 @@ func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPN
 }
 
 func (c *SubnetCollector) getSubnetsFromMachineDeployments(ctx context.Context) ([]net.IPNet, error) {
-	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(metav1.ListOptions{})
+	machineDeploymentList, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}

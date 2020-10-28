@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/pkg/clientset/versioned/fake"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
 
@@ -102,11 +103,22 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
+				var e recorder.Interface
+				{
+					c := recorder.Config{
+						K8sClient: k,
+
+						Component: "dummy",
+					}
+
+					e = recorder.New(c)
+				}
 
 				var d *changedetection.TCCP
 				{
 					c := changedetection.TCCPConfig{
 						CloudTags: ct,
+						Event:     e,
 						Logger:    microloggertest.New(),
 					}
 
@@ -159,9 +171,11 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 				c := Config{
 					CloudTags: ct,
+					Event:     e,
 					G8sClient: fake.NewSimpleClientset(),
 					HAMaster:  h,
 					Detection: d,
+					K8sClient: k,
 					Logger:    microloggertest.New(),
 
 					APIWhitelist: ConfigAPIWhitelist{
@@ -201,7 +215,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
-				err := ioutil.WriteFile(p, []byte(templateBody), 0644)
+				err := ioutil.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -7,6 +7,8 @@ Outputs:
     Value: 3
   OperatorVersion:
     Value: 7.3.0
+  ReleaseVersion:
+    Value: 100.0.0
 Resources:
   ControlPlaneNodeAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -422,6 +424,8 @@ Resources:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
+        MetadataOptions:
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:
@@ -429,6 +433,11 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -502,6 +511,8 @@ Resources:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
+        MetadataOptions:
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:
@@ -509,6 +520,11 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {
@@ -582,6 +598,8 @@ Resources:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.xlarge
+        MetadataOptions:
+          HttpTokens: optional
         Monitoring:
           Enabled: false
         NetworkInterfaces:
@@ -589,6 +607,11 @@ Resources:
             DeviceIndex: 0
             Groups:
             - master-security-group-id
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
         UserData:
           Fn::Base64: |
             {

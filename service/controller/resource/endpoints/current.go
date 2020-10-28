@@ -12,7 +12,7 @@ import (
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
-	cr, err := key.ToCluster(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -21,7 +21,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding endpoint")
 
-		manifest, err := r.k8sClient.CoreV1().Endpoints(key.ClusterNamespace(cr)).Get(masterEndpointsName, metav1.GetOptions{})
+		manifest, err := r.k8sClient.CoreV1().Endpoints(key.ClusterNamespace(cr)).Get(ctx, masterEndpointsName, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find endpoint")
 		} else if err != nil {

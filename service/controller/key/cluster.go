@@ -1,13 +1,14 @@
 package key
 
 import (
+	"context"
 	"crypto/sha512"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -42,23 +43,23 @@ const (
 	KubernetesAPIHealthzVersion = "0.1.1"
 	// K8sSetupNetworkEnvironment is a tag representing the version of
 	// https://github.com/giantswarm/k8s-setup-network-environment used.
-	K8sSetupNetworkEnvironment = "0.1.0"
+	K8sSetupNetworkEnvironment = "0.2.0"
 )
 
 // AWS Tags used for cost analysis and general resource tagging.
 const (
-	TagAvailabilityZone        = "giantswarm.io/availability-zone"
-	TagCluster                 = "giantswarm.io/cluster"
-	TagClusterType             = "giantswarm.io/cluster-type"
-	TagClusterTypeControlPlane = "control-plane"
-	TagControlPlane            = "giantswarm.io/control-plane"
-	TagInstallation            = "giantswarm.io/installation"
-	TagMachineDeployment       = "giantswarm.io/machine-deployment"
-	TagOrganization            = "giantswarm.io/organization"
-	TagRouteTableType          = "giantswarm.io/route-table-type"
-	TagStack                   = "giantswarm.io/stack"
-	TagSnapshot                = "giantswarm.io/snapshot"
-	TagSubnetType              = "giantswarm.io/subnet-type"
+	TagAvailabilityZone  = "giantswarm.io/availability-zone"
+	TagCluster           = "giantswarm.io/cluster"
+	TagClusterType       = "giantswarm.io/cluster-type"
+	TagControlPlane      = "giantswarm.io/control-plane"
+	TagInstallation      = "giantswarm.io/installation"
+	TagMachineDeployment = "giantswarm.io/machine-deployment"
+	TagName              = "Name"
+	TagOrganization      = "giantswarm.io/organization"
+	TagRouteTableType    = "giantswarm.io/route-table-type"
+	TagStack             = "giantswarm.io/stack"
+	TagSnapshot          = "giantswarm.io/snapshot"
+	TagSubnetType        = "giantswarm.io/subnet-type"
 )
 
 const (
@@ -238,7 +239,7 @@ func TenantClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }
 
-func ToCluster(v interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func ToCluster(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error) {
 	if v == nil {
 		return infrastructurev1alpha2.AWSCluster{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSCluster{}, v)
 	}

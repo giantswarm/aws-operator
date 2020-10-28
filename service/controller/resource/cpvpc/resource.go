@@ -105,15 +105,15 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 		i := &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagInstallation)),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagName)),
 					Values: []*string{
 						aws.String(installationName),
 					},
 				},
 				{
-					Name: aws.String(fmt.Sprintf("tag:%s", key.TagClusterType)),
+					Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
 					Values: []*string{
-						aws.String(key.TagClusterTypeControlPlane),
+						aws.String(installationName),
 					},
 				},
 			},

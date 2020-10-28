@@ -1,7 +1,7 @@
 package tccpn
 
 import (
-	"github.com/giantswarm/k8sclient/v3/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -9,6 +9,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
+	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -19,6 +20,7 @@ const (
 type Config struct {
 	CloudTags cloudtags.Interface
 	Detection *changedetection.TCCPN
+	Event     event.Interface
 	HAMaster  hamaster.Interface
 	Images    images.Interface
 	K8sClient k8sclient.Interface
@@ -34,6 +36,7 @@ type Config struct {
 type Resource struct {
 	cloudTags cloudtags.Interface
 	detection *changedetection.TCCPN
+	event     event.Interface
 	haMaster  hamaster.Interface
 	images    images.Interface
 	k8sClient k8sclient.Interface
@@ -49,6 +52,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
@@ -71,8 +77,10 @@ func New(config Config) (*Resource, error) {
 		cloudTags: config.CloudTags,
 		k8sClient: config.K8sClient,
 		detection: config.Detection,
+		event:     config.Event,
 		haMaster:  config.HAMaster,
 		images:    config.Images,
+		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
 		installationName: config.InstallationName,
