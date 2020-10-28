@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/giantswarm/operatorkit/controller/context/cachekeycontext"
+	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 )
 
