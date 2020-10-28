@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
-- Annotation `aws.giantswarm.io/update-max-batch-size` to configure ASG update policy.
-- Annotation `aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update.
+- Annotation `aws.giantswarm.io/update-max-batch-size` to configure max batch size in ASG update policy on cluster or machine deployment CR.
+- Annotation `aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update on cluster or machine deployment CR.
 
 ### Fixed
 
