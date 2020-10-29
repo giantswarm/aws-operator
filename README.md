@@ -183,7 +183,8 @@ images have been published on AWS, this mapping can be updating using
   ```
 - Wait until debug server is up and create some breakpoints, start the debugger :)
 - If you want to edit the code you will need to stop debugging session and stop the server
-- `okteto down -v`
+- `okteto down -v` (-v will delete volume with go cache)
+- Revert psp with `kubectl patch psp aws-operator-$BRANCH-psp -p '{"spec":{"runAsGroup":{"ranges": [{"max":65535, "min":1}],"rule":"MustRunAs"},"runAsUser":{"rule":"MustRunAsNonRoot"},"volumes":["secret","configMap"]}}'` or redeploy application
 
 ## Contact
 
