@@ -3,16 +3,17 @@ package terminateunhealthynode
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/badnodedetector/pkg/detector"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
-	"strings"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
+	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 const (
