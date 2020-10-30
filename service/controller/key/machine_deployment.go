@@ -245,6 +245,8 @@ func MachineDeploymentParseMaxBatchSize(val string, workers int) string {
 	return ""
 }
 
+// MachineDeploymentMinInstanceInServiceFromMaxBatchSize will calculate the minInstanceInService
+// value for ASG, the value is calculated by subtracting  maxBatchSize from the worker count
 func MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize string, workers int) (string, error) {
 	v, err := strconv.Atoi(maxBatchSize)
 	if err != nil {
