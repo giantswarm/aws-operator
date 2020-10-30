@@ -50,6 +50,7 @@ type Service struct {
 	controlPlaneDrainerController      *controller.ControlPlaneDrainer
 	machineDeploymentController        *controller.MachineDeployment
 	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
+	terminateUnhealthyNodeController   *controller.TerminateUnhealthyNode
 }
 
 // New creates a new configured service object.
@@ -356,6 +357,22 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var terminateUnhealthyNodeController *controller.TerminateUnhealthyNode
+	{
+		c := controller.TerminateUnhealthyNodeConfig{
+			K8sClient: k8sClient,
+			Locker:    kubeLockLocker,
+			Logger:    config.Logger,
+
+			HostAWSConfig: awsConfig,
+		}
+
+		terminateUnhealthyNodeController, err = controller.NewTerminateUnhealthyNode(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var versionService *version.Service
 	{
 		c := version.Config{
@@ -381,6 +398,7 @@ func New(config Config) (*Service, error) {
 		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
+		terminateUnhealthyNodeController:   terminateUnhealthyNodeController,
 	}
 
 	return s, nil
@@ -393,5 +411,6 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.controlPlaneDrainerController.Boot(ctx)
 		go s.machineDeploymentController.Boot(ctx)
 		go s.machineDeploymentDrainerController.Boot(ctx)
+		go s.terminateUnhealthyNodeController.Boot(ctx)
 	})
 }
