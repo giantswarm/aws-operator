@@ -163,6 +163,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
+		params.DockerhubToken = t.config.DockerhubToken
 		params.EnableAWSCNI = true
 		params.Extension = &TCNPExtension{
 			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),
