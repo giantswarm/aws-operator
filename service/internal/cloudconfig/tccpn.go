@@ -315,6 +315,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		// Ingress Controller service is not created via ignition.
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
+		params.DockerhubToken = t.config.DockerhubToken
 		params.EnableAWSCNI = true
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort,
