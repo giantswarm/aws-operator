@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -315,31 +316,37 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	}
 
 	var maxBatchSize string
+	var minInstancesInService string
 	{
 		// try read the value from cluster CR
-		if val, ok := cl.Annotations["aws.giantswarm.io/update-max-batch-size"]; ok {
+		if val, ok := cl.Annotations[annotation.UpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 		}
 		// override the value with machine deployment value if its set
-		if val, ok := cr.Annotations["aws.giantswarm.io/update-max-batch-size"]; ok {
+		if val, ok := cr.Annotations[annotation.UpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 		}
 		// if nothing is set use the default
 		if maxBatchSize == "" {
 			maxBatchSize = key.MachineDeploymentWorkerCountRatio(minDesiredNodes, 0.3)
 		}
+		// set minInstancesInService based on the maxBatchSize value
+		minInstancesInService, err = key.MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize, minDesiredNodes)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var pauseTime string
 	{
 		// try read the value from cluster CR
-		if val, ok := cl.Annotations["aws.giantswarm.io/update-pause-time"]; ok {
+		if val, ok := cl.Annotations[annotation.UpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 			}
 		}
 		// override the value with machine deployment value if its set
-		if val, ok := cr.Annotations["aws.giantswarm.io/update-pause-time"]; ok {
+		if val, ok := cr.Annotations[annotation.UpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 			}
@@ -358,7 +365,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		DesiredCapacity:                     minDesiredNodes,
 		MaxBatchSize:                        maxBatchSize,
 		MaxSize:                             key.MachineDeploymentScalingMax(cr),
-		MinInstancesInService:               key.MachineDeploymentWorkerCountRatio(minDesiredNodes, 0.7),
+		MinInstancesInService:               minInstancesInService,
 		MinSize:                             key.MachineDeploymentScalingMin(cr),
 		Subnets:                             subnets,
 		PauseTime:                           pauseTime,

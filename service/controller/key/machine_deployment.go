@@ -245,6 +245,15 @@ func MachineDeploymentParseMaxBatchSize(val string, workers int) string {
 	return ""
 }
 
+func MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize string, workers int) (string, error) {
+	v, err := strconv.Atoi(maxBatchSize)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return strconv.Itoa(workers - v), nil
+}
+
 // MachineDeploymentPauseTimeIsValid checks if the value is in proper ISO 8601 duration format
 func MachineDeploymentPauseTimeIsValid(val string) bool {
 	_, err := iso8601.ParseDuration(val)
