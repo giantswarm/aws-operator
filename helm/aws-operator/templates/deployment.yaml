@@ -66,8 +66,7 @@ spec:
         - --config.dirs=/var/run/{{ include "name" . }}/configmap/
         - --config.dirs=/var/run/{{ include "name" . }}/secret/
         - --config.files=config
-        - --config.files=aws-secret
-        - --config.files=dockerhub-secret
+        - --config.files=aws-secret,dockerhub-secret
         livenessProbe:
           httpGet:
             path: /healthz
