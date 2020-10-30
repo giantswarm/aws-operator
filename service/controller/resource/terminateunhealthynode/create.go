@@ -3,29 +3,20 @@ package terminateunhealthynode
 import (
 	"context"
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
-	"github.com/giantswarm/badnodedetector/pkg/detector"
-	"github.com/giantswarm/kubelock/v2"
-	"github.com/giantswarm/microerror"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/badnodedetector/pkg/detector"
+	"github.com/giantswarm/microerror"
+	corev1 "k8s.io/api/core/v1"
+	"strings"
+
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 )
 
 const (
-	annotationEnableNodeTermination = "node.giantswarm.io/terminate-unhealthy"
-
 	nodeTerminationTickThreshold = 6
-	lockNamespace                = "default"
-	pauseBetweenTermination      = time.Minute * 10
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -52,27 +43,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	var lock *kubelock.KubeLock
-	{
-		kubelockConfig := kubelock.Config{
-			DynClient: cc.Client.TenantCluster.K8s.DynClient(),
-			GVR: schema.GroupVersionResource{
-				Group:    "",
-				Version:  "v1",
-				Resource: "namespaces",
-			},
-		}
-
-		lock, err = kubelock.New(kubelockConfig)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-	}
-
-	acquiredOptions := kubelock.AcquireOptions{
-		TTL: pauseBetweenTermination,
-	}
-
 	var detectorService *detector.Detector
 	{
 		detectorConfig := detector.Config{
@@ -94,21 +64,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if len(nodesToTerminate) > 0 {
-		err = lock.Lock(project.Name()).Acquire(ctx, lockNamespace, acquiredOptions)
-		if kubelock.IsAlreadyExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "skipping termination of unhealthy nodes due to the pause between terminations")
-
-			return nil
-		} else if err != nil {
-			return microerror.Mask(err)
-		}
-
 		for _, n := range nodesToTerminate {
 			err := r.terminateNode(ctx, n, key.ClusterID(&cr))
 			if err != nil {
 				return microerror.Mask(err)
 			}
 		}
+
+		// reset tick counters on all nodes in cluster to have a graceful period after terminating nodes
+		{
+			err := detectorService.ResetTickCounters(ctx)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			r.logger.LogCtx(ctx, "level", "debug", "message", "resetting tick node counters on all nodes in tenant cluster")
+		}
+
 	}
 
 	return nil
