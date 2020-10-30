@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix dockerhub QPS by using paid user token for pulls.
+
 ## [8.7.9] - 2020-09-23
 
 ### Fixed

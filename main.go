@@ -154,6 +154,7 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.CrtFile, "", "Certificate file path to use to authenticate with Kubernetes.")
 	daemonCommand.PersistentFlags().String(f.Service.Kubernetes.TLS.KeyFile, "", "Key file path to use to authenticate with Kubernetes.")
 
+	daemonCommand.PersistentFlags().String(f.Service.Registry.DockerhubToken, "", "Token used to authenticate/authorize to DockerHub.")
 	daemonCommand.PersistentFlags().String(f.Service.Registry.Domain, "docker.io", "Image registry domain.")
 	daemonCommand.PersistentFlags().StringSlice(f.Service.Registry.Mirrors, []string{}, `Image registry mirror domains. Can be set only if registry domain is "docker.io".`)
 

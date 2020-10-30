@@ -29,6 +29,7 @@ type Config struct {
 	CalicoSubnet              string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
+	DockerhubToken            string
 	ExternalSNAT              bool
 	IgnitionPath              string
 	ImagePullProgressDeadline string
@@ -86,6 +87,10 @@ func (c Config) Validate() error {
 	if c.DockerDaemonCIDR == "" {
 		return microerror.Maskf(invalidConfigError, "%T.DockerDaemonCIDR must not be empty", c)
 	}
+	if c.DockerhubToken == "" {
+		return microerror.Maskf(invalidConfigError, "%T.DockerhubToken must not be empty", c)
+	}
+
 	if c.IgnitionPath == "" {
 		return microerror.Maskf(invalidConfigError, "%T.IgnitionPath must not be empty", c)
 	}
