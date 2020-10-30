@@ -33,7 +33,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	// check for annotation enabling the node auto repair feature
 	if _, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; !ok {
-		r.logger.LogCtx(ctx, "level", "debug", "message", " node auto repair is not enabled for this cluster, cancelling")
+		r.logger.LogCtx(ctx, "level", "debug", "message", "node auto repair is not enabled for this cluster, cancelling")
 		return nil
 	}
 
