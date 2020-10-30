@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.10] - 2020-10-30
+
 ### Fixed
 
 - Fix dockerhub QPS by using paid user token for pulls.
@@ -235,7 +237,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.9...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v8.7.10...HEAD
+[8.7.10]: https://github.com/giantswarm/aws-operator/compare/v8.7.9...v8.7.10
 [8.7.9]: https://github.com/giantswarm/aws-operator/compare/v8.7.8...v8.7.9
 [8.7.8]: https://github.com/giantswarm/aws-operator/compare/v8.7.7...v8.7.8
 [8.7.7]: https://github.com/giantswarm/aws-operator/compare/v8.7.6...v8.7.7
