@@ -73,14 +73,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		// reset tick counters on all nodes in cluster to have a graceful period after terminating nodes
-		{
-			err := detectorService.ResetTickCounters(ctx)
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			r.logger.LogCtx(ctx, "level", "debug", "message", "resetting tick node counters on all nodes in tenant cluster")
+		err := detectorService.ResetTickCounters(ctx)
+		if err != nil {
+			return microerror.Mask(err)
 		}
-
+		r.logger.LogCtx(ctx, "level", "debug", "message", "resetting tick node counters on all nodes in tenant cluster")
 	}
 
 	return nil
