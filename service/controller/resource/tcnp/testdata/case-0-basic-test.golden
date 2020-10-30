@@ -186,6 +186,8 @@ Resources:
           Name: !Ref NodePoolInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
         InstanceType: m5.2xlarge
+        MetadataOptions:
+          HttpTokens: optional
         Monitoring:
           Enabled: true
         NetworkInterfaces:

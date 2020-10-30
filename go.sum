@@ -71,8 +71,8 @@ github.com/aws/amazon-vpc-cni-k8s v1.7.5/go.mod h1:WFg/NerFMpie+WZBSWvlSojmKkqGV
 github.com/aws/aws-lambda-go v1.13.3/go.mod h1:4UKl9IzQMoD+QF79YdCuzCwp8VbmG4VAQwij/eHl5CU=
 github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.33.14/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/aws/aws-sdk-go v1.35.11 h1:LICFl2K+3Y5dMTW6PCV6ycK8fzIxs21HvDhI5A3Ee3Y=
-github.com/aws/aws-sdk-go v1.35.11/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
+github.com/aws/aws-sdk-go v1.35.18 h1:Gka1bopihF2e9XFhuVZPrgafmOFpCsRtAPMYLp/0AfA=
+github.com/aws/aws-sdk-go v1.35.18/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -199,8 +199,8 @@ github.com/giantswarm/ipam v0.2.0 h1:nLNmDTfYUlflQsUUlouFzXfE+WaZM843BJGPsHLbgyw
 github.com/giantswarm/ipam v0.2.0/go.mod h1:xG4cMEKwHlbE0aZ7x2H5j7o81U13LIStA73XCECdk+I=
 github.com/giantswarm/k8sclient/v4 v4.0.0 h1:K18A0FomGjxTMElcGrjO3uLkYobUtcNh8e8PhTgFr2w=
 github.com/giantswarm/k8sclient/v4 v4.0.0/go.mod h1:jTwQ8q0YbJJu3ZxbjoI6hkXeuvKm15xyI/c+zwxnUH0=
-github.com/giantswarm/k8scloudconfig/v8 v8.0.3 h1:7YHxG6g9d7ccxEHcRfy5EsqYEoKIE9oZbsckgFps65c=
-github.com/giantswarm/k8scloudconfig/v8 v8.0.3/go.mod h1:J7PbLvfxEq9ZFQTsOL6N9QKnG5sPQUwpdbpRUfPBhek=
+github.com/giantswarm/k8scloudconfig/v8 v8.0.4 h1:oT3NNIHYPkHhlOjxbYKerHEnuX3l0/YOEejFfvGXAvk=
+github.com/giantswarm/k8scloudconfig/v8 v8.0.4/go.mod h1:J7PbLvfxEq9ZFQTsOL6N9QKnG5sPQUwpdbpRUfPBhek=
 github.com/giantswarm/kubelock/v2 v2.0.0 h1:s5mJc32HD0cX7hRS3sZ+d0J7d7g9CZtz9uxyDv+24II=
 github.com/giantswarm/kubelock/v2 v2.0.0/go.mod h1:x0bQ6poerC12lXz2j0k01kjV8xx9qg6OVfbGe6dFjcM=
 github.com/giantswarm/microendpoint v0.2.0 h1:xCAqAVRjTw/4ifEuBeNavALdbQsLk6+k/ukzdy0GWZE=

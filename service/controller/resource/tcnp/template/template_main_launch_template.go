@@ -30,6 +30,8 @@ const TemplateMainLaunchTemplate = `
           Name: !Ref NodePoolInstanceProfile
         ImageId: {{ .LaunchTemplate.Instance.Image }}
         InstanceType: {{ .LaunchTemplate.Instance.Type }}
+        MetadataOptions:
+          HttpTokens: {{ .LaunchTemplate.Metadata.HttpTokens }}
         Monitoring:
           Enabled: {{ .LaunchTemplate.Instance.Monitoring }}
         NetworkInterfaces:

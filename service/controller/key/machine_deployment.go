@@ -192,6 +192,14 @@ func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeploymen
 	return cr.Spec.Provider.Worker.InstanceType
 }
 
+func MachineDeploymentMetadataV2(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadata]
+	if !ok {
+		return "optional"
+	}
+	return result
+}
+
 func MachineDeploymentLaunchTemplateName(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return fmt.Sprintf("%s-%s-LaunchTemplate", ClusterID(&cr), MachineDeploymentID(&cr))
 }

@@ -58,14 +58,17 @@ host Kubernetes cluster also running on AWS.
 ### CloudFormation
 
 The guest Kubernetes clusters are provisioned using [AWS CloudFormation][4]. The
-resources are split between 3 CloudFormation stacks.
+resources are split between CloudFormation stacks:
 
-* guest-main manages the guest cluster resources.
-* host-setup manages an IAM role used for VPC peering.
-* host-main manages network routes for the VPC peering connection.
+In control plane account
+* tccpi - Tenant cluster control plane role setup.
+* tccpf - Tenant cluster control plane routes setup.
+* tcnpf - Tenant cluster nodepool peering.
 
-The host cluster may run in a separate AWS account. If so resources are created
-in both the host and guest AWS accounts.
+In tenant account:
+* tccp -  Tenant cluster network setup.
+* tccpn - Tenant cluster control plane resources (masters).
+* tcnp -  Tenant cluster nodepool resources (workers).
 
 [4]:https://aws.amazon.com/cloudformation
 
@@ -138,6 +141,50 @@ used for tenant cluster nodes in `service/controller/key/ami.go`. The file is ge
 `devctl` and should not be edited manually. When a new version of the OS is released and new
 images have been published on AWS, this mapping can be updating using
 `devctl gen ami --dir service/controller/key`.
+
+## Live editing operator inside an installation
+
+- Download Okteto latest release from https://github.com/okteto/okteto/releases
+- `okteto init -n giantswarm`
+- Set correct label `app.giantswarm.io/branch: $BRANCH` in the manifest
+- Change your kubeconfig to the giantswarm namespace
+- Modify PSP of the current operator `kubectl patch psp aws-operator-$BRANCH-psp -p '{"spec":{"runAsGroup":{"ranges":null,"rule":"RunAsAny"},"runAsUser":{"rule":"RunAsAny"},"volumes":["secret","configMap","hostPath","persistentVolumeClaim","emptyDir"]}}'`
+
+- `okteto up`
+- From this point on, you can modify files locally and will be synced to the remote pod
+
+#### In order to start the operator, you can build it and execute it inside the pod
+- `go build`
+- `aws-operator daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret`
+
+#### Live reload code
+- `cd /tmp && go get -u github.com/cosmtrek/air && cd /okteto`
+- `air -c air.conf`
+
+#### For live debugging in VS Code
+- Install delve debugger: `go get github.com/go-delve/delve/cmd/dlv`
+- `dlv debug --headless --listen=:2345 --log --api-version=2 -- daemon --config.dirs=/var/run/aws-operator/configmap/ --config.dirs=/var/run/aws-operator/secret/ --config.files=config --config.files=secret` or `./debug_server.sh`
+- Create debugging connection:
+```
+  {
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Connect to okteto",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "/okteto",
+            "port": 2345,
+            "host": "127.0.0.1"
+        }
+    ]
+  }
+  ```
+- Wait until debug server is up and create some breakpoints, start the debugger :)
+- If you want to edit the code you will need to stop debugging session and stop the server
+- `okteto down -v` (-v will delete volume with go cache)
+- Revert psp with `kubectl patch psp aws-operator-$BRANCH-psp -p '{"spec":{"runAsGroup":{"ranges": [{"max":65535, "min":1}],"rule":"MustRunAs"},"runAsUser":{"rule":"MustRunAsNonRoot"},"volumes":["secret","configMap"]}}'` or redeploy application
 
 ## Contact
 
