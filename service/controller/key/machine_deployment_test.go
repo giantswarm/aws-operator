@@ -104,3 +104,59 @@ func Test_MachineDeploymentParseMaxBatchSize(t *testing.T) {
 		})
 	}
 }
+
+func Test_MachineDeploymentWorkerCountRatio(t *testing.T) {
+	testCases := []struct {
+		name     string
+		ratio    float32
+		workers  int
+		expected string
+	}{
+		{
+			name:     "case 0: simple value",
+			ratio:    0.3,
+			workers:  10,
+			expected: "3",
+		},
+		{
+			name:     "case 1: simple value",
+			ratio:    0.9,
+			workers:  10,
+			expected: "9",
+		},
+		{
+			name:     "case 2: big value",
+			ratio:    0.35,
+			workers:  1000,
+			expected: "350",
+		},
+		{
+			name:     "case 3: rounding",
+			ratio:    0.43,
+			workers:  10,
+			expected: "4",
+		},
+		{
+			name:     "case 4: rounding",
+			ratio:    0.55,
+			workers:  10,
+			expected: "6",
+		},
+		{
+			name:     "case 5: minimal result",
+			ratio:    0.20,
+			workers:  2,
+			expected: "1",
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			output := MachineDeploymentWorkerCountRatio(tc.workers, tc.ratio)
+
+			if output != tc.expected {
+				t.Fatalf("%s -  expected '%s' got '%s'\n", tc.name, tc.expected, output)
+			}
+		})
+	}
+}

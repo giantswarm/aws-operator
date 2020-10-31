@@ -321,6 +321,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		// try read the value from cluster CR
 		if val, ok := cl.Annotations[annotation.UpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
+
 		}
 		// override the value with machine deployment value if its set
 		if val, ok := cr.Annotations[annotation.UpdateMaxBatchSize]; ok {
