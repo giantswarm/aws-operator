@@ -77,7 +77,7 @@ Resources:
         MaxBatchSize: 1
 
         # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
+        # specified time.
         PauseTime: PT15M
   NodePoolRole:
     Type: AWS::IAM::Role
