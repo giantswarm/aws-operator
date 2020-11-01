@@ -322,10 +322,13 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		if val, ok := cl.Annotations[annotation.UpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of MaxBatchSize for ASG updates set by annotation from %s CR", cl.Kind))
 		}
 		// override the value with machine deployment value if its set
 		if val, ok := cr.Annotations[annotation.UpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
+
+			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of MaxBatchSize for ASG updates overridden by annotation from %s CR", cr.Kind))
 		}
 		// if nothing is set use the default
 		if maxBatchSize == "" {
@@ -344,12 +347,16 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		if val, ok := cl.Annotations[annotation.UpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of PauseTime for ASG updates set by annotation from %s CR", cl.Kind))
 			}
 		}
 		// override the value with machine deployment value if its set
 		if val, ok := cr.Annotations[annotation.UpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
+
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of PauseTime for ASG updates overridden by annotation from %s CR", cr.Kind))
 			}
 		}
 		// if nothing is set use the default
