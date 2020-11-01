@@ -348,7 +348,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of PauseTime for ASG updates set by annotation from %s CR", cl.Kind))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of PauseTime for ASG updates set by annotation from %s CR", cl.GetObjectKind()))
 			}
 		}
 		// override the value with machine deployment value if its set
@@ -356,7 +356,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of PauseTime for ASG updates overridden by annotation from %s CR", cr.Kind))
+				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("value of PauseTime for ASG updates overridden by annotation from %s CR", cr.GetObjectKind()))
 			}
 		}
 		// if nothing is set use the default
