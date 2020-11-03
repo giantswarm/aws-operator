@@ -37,12 +37,6 @@ func Test_MachineDeploymentParseMaxBatchSize(t *testing.T) {
 			expected: "",
 		},
 		{
-			name:     "case 3: int - invalid value - value bigger than worker count",
-			input:    "20",
-			workers:  5,
-			expected: "",
-		},
-		{
 			name:     "case 4: percentage - simple value",
 			input:    "0.5",
 			workers:  10,
