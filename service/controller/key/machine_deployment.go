@@ -253,6 +253,10 @@ func MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize string, 
 		return "", microerror.Mask(err)
 	}
 
+	if v < 0 {
+		v = 0
+	}
+
 	return strconv.Itoa(workers - v), nil
 }
 
