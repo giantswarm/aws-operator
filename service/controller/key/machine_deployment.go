@@ -211,15 +211,15 @@ func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDe
 
 // MachineDeploymentParseMaxBatchSize will try parse the value into valid maxBatchSize
 // valid values can be either:
-// an integer between 0 < x <= worker count
+// an integer between 0 < x
 // a float between 0 < x <= 1
 // float value is used as ratio of a total worker count
 func MachineDeploymentParseMaxBatchSize(val string, workers int) string {
 	// try parse an integer
 	integer, err := strconv.Atoi(val)
 	if err == nil {
-		// check if the value is bigger than zero but lower-or-equal to maximum number of workers
-		if integer > 0 && integer <= workers {
+		// check if the value is bigger than zero
+		if integer > 0 {
 			// integer value can be directly used, no need for any adjustment
 			return val
 		} else {
