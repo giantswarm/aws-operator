@@ -253,11 +253,12 @@ func MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize string, 
 		return "", microerror.Mask(err)
 	}
 
-	if v < 0 {
-		v = 0
+	o := workers - v
+	if o < 0 {
+		o = 0
 	}
 
-	return strconv.Itoa(workers - v), nil
+	return strconv.Itoa(o), nil
 }
 
 // MachineDeploymentPauseTimeIsValid checks if the value is in proper ISO 8601 duration format
