@@ -58,23 +58,23 @@ func New(config Config) (*CloudTags, error) {
 	return l, nil
 }
 
-// AreClusterTagsEquals compares current cluster tags with the stack tags
-func (ct *CloudTags) CloudTagsNotInSync(ctx context.Context, clusterID string, stackType string) (bool, error) {
+// CloudTagsNotInSync compares current cluster tags with the stack tags
+func (ct *CloudTags) CloudTagsNotInSync(ctx context.Context, crGetter key.LabelsGetter, stackType string) (bool, error) {
 	var err error
 
 	stags := map[string]string{}
-	ctags, err := ct.GetTagsByCluster(ctx, clusterID)
+	ctags, err := ct.GetTagsByCluster(ctx, key.ClusterID(crGetter))
 	if err != nil {
 		return true, microerror.Mask(err)
 	}
 
 	switch stackType {
-	case "tccp":
-		stags, err = ct.GetAWSTagsByTCCP(ctx, clusterID)
-	case "tccpn":
-		stags, err = ct.GetAWSTagsByTCCPN(ctx, clusterID)
-	case "tcpn":
-		stags, err = ct.GetAWSTagsByTCPN(ctx, clusterID)
+	case key.StackTCCP:
+		stags, err = ct.GetAWSTagsByTCCP(ctx, crGetter)
+	case key.StackTCCPN:
+		stags, err = ct.GetAWSTagsByTCCPN(ctx, crGetter)
+	case key.StackTCNP:
+		stags, err = ct.GetAWSTagsByTCPN(ctx, crGetter)
 	default:
 		return false, noStackTypeFound
 	}
@@ -118,20 +118,21 @@ func (ct *CloudTags) CloudTagsNotInSync(ctx context.Context, clusterID string, s
 
 // GetTagsByCluster the cloud tags from CAPI Cluster CR
 func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (map[string]string, error) {
+	var ok bool
 
 	tags := map[string]string{}
 	{
-		ck := ct.awsCache.Key(ctx, cr)
+		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err = ct.lookupCloudTags(ctx, cr)
+			tags, err := ct.lookupCloudTags(ctx, clusterID)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
 		} else {
 			tags, ok = ct.awsCache.Get(ctx, ck)
 			if !ok {
-				tags, err = ct.lookupCloudTags(ctx, cr)
+				tags, err := ct.lookupCloudTags(ctx, clusterID)
 				if err != nil {
 					return tags, microerror.Mask(err)
 				}
@@ -145,21 +146,23 @@ func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (ma
 }
 
 // GetAWSTagsByTCCPN the cloud tags from AWS Cloud Formation Stack
-func (ct *CloudTags) GetAWSTagsByTCCPN(ctx context.Context, clusterID string) (map[string]string, error) {
+func (ct *CloudTags) GetAWSTagsByTCCPN(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
+	var ok bool
 
+	clusterID := key.ClusterID(crGetter)
 	tags := map[string]string{}
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err := ct.lookupAWStagsForTCCPN(ctx, clusterID)
+			tags, err := ct.lookupAWStagsForTCCPN(ctx, crGetter)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
 		} else {
-			tags, ok := ct.awsCache.Get(ctx, ck)
+			tags, ok = ct.awsCache.Get(ctx, ck)
 			if !ok {
-				tags, err := ct.lookupAWStagsForTCCPN(ctx, clusterID)
+				tags, err := ct.lookupAWStagsForTCCPN(ctx, crGetter)
 				if err != nil {
 					return tags, microerror.Mask(err)
 				}
@@ -173,21 +176,23 @@ func (ct *CloudTags) GetAWSTagsByTCCPN(ctx context.Context, clusterID string) (m
 }
 
 // GetAWSTagsByTCPN the cloud tags from AWS Cloud Formation Stack
-func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, clusterID string) (map[string]string, error) {
+func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
+	var ok bool
 
+	clusterID := key.ClusterID(crGetter)
 	tags := map[string]string{}
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err := ct.lookupAWStagsForTCCPN(ctx, clusterID)
+			tags, err := ct.lookupAWStagsForTCPN(ctx, crGetter)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
 		} else {
-			tags, ok := ct.awsCache.Get(ctx, ck)
+			tags, ok = ct.awsCache.Get(ctx, ck)
 			if !ok {
-				tags, err := ct.lookupAWStagsForTCPN(ctx, clusterID)
+				tags, err := ct.lookupAWStagsForTCPN(ctx, crGetter)
 				if err != nil {
 					return tags, microerror.Mask(err)
 				}
@@ -201,21 +206,23 @@ func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, clusterID string) (ma
 }
 
 // GetAWSTagsByTCCP the cloud tags from AWS Cloud Formation Stack
-func (ct *CloudTags) GetAWSTagsByTCCP(ctx context.Context, clusterID string) (map[string]string, error) {
+func (ct *CloudTags) GetAWSTagsByTCCP(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
+	var ok bool
 
+	clusterID := key.ClusterID(crGetter)
 	tags := map[string]string{}
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err := lookupAWStagsForTCCP(ctx, clusterID)
+			tags, err := ct.lookupAWStagsForTCCP(ctx, crGetter)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
 		} else {
-			tags, ok := ct.awsCache.Get(ctx, ck)
+			tags, ok = ct.awsCache.Get(ctx, ck)
 			if !ok {
-				tags, err := ct.lookupAWStagsForTCCPN(ctx, clusterID)
+				tags, err := ct.lookupAWStagsForTCCP(ctx, crGetter)
 				if err != nil {
 					return tags, microerror.Mask(err)
 				}
@@ -260,7 +267,7 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 	return tags, nil
 }
 
-func (ct *CloudTags) lookupAWStagsForTCCPN(ctx context.Context, clusterID string) (map[string]string, error) {
+func (ct *CloudTags) lookupAWStagsForTCCPN(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
 	stackTags := map[string]string{}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -268,7 +275,7 @@ func (ct *CloudTags) lookupAWStagsForTCCPN(ctx context.Context, clusterID string
 	}
 
 	i := &cloudformation.DescribeStacksInput{
-		StackName: aws.String(key.StackNameTCCPNByClusterID(clusterID)),
+		StackName: aws.String(key.StackNameTCCPN(crGetter)),
 	}
 
 	o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -286,7 +293,7 @@ func (ct *CloudTags) lookupAWStagsForTCCPN(ctx context.Context, clusterID string
 	return stackTags, nil
 }
 
-func (ct *CloudTags) lookupAWStagsForTCCP(ctx context.Context, getter LabelsGetter) (map[string]string, error) {
+func (ct *CloudTags) lookupAWStagsForTCCP(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
 	stackTags := map[string]string{}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -294,7 +301,7 @@ func (ct *CloudTags) lookupAWStagsForTCCP(ctx context.Context, getter LabelsGett
 	}
 
 	i := &cloudformation.DescribeStacksInput{
-		StackName: aws.String(key.StackNameTCCP(clusterID)),
+		StackName: aws.String(key.StackNameTCCP(crGetter)),
 	}
 
 	o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
@@ -312,7 +319,7 @@ func (ct *CloudTags) lookupAWStagsForTCCP(ctx context.Context, getter LabelsGett
 	return stackTags, nil
 }
 
-func (ct *CloudTags) lookupAWStagsForTCPN(ctx context.Context, clusterID string) (map[string]string, error) {
+func (ct *CloudTags) lookupAWStagsForTCPN(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
 	stackTags := map[string]string{}
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -320,7 +327,7 @@ func (ct *CloudTags) lookupAWStagsForTCPN(ctx context.Context, clusterID string)
 	}
 
 	i := &cloudformation.DescribeStacksInput{
-		StackName: aws.String(key.StackNameTCPNByClusterID(clusterID)),
+		StackName: aws.String(key.StackNameTCNP(crGetter)),
 	}
 
 	o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)

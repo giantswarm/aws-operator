@@ -106,7 +106,7 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	masterReplicasEqual := cc.Status.TenantCluster.TCCPN.MasterReplicas == rep
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
-	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, cr, "tccpn")
+	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, &cr.ObjectMeta, key.StackTCCPN)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

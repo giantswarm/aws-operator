@@ -131,7 +131,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
-	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, cr, "tcpn")
+	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, key.ClusterID(&cr.ObjectMeta), key.StackTCNP)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
