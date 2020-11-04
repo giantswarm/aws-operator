@@ -48,6 +48,8 @@ Installation:
       AWSOperator:
         SecretYaml: ""
       Registry:
+        Dockerhub:
+          Token: ""
         PullSecret:
           DockerConfigJSON: ""
     Security:

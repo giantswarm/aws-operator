@@ -23,6 +23,11 @@ const (
 	DrainerResyncPeriod = time.Minute * 2
 )
 
+const (
+	// TerminateUnhealthyNodeResyncPeriod defines resync period for the terminateunhealthynode controller
+	TerminateUnhealthyNodeResyncPeriod = time.Minute * 3
+)
+
 // AMI returns the EC2 AMI for the configured region and given version.
 func AMI(region string, release releasev1alpha1.Release) (string, error) {
 	osVersion, err := OSVersion(release)

@@ -8,14 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.2.0] - 2020-11-03
+
 ### Added
 
 - Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
 - Annotation `alpha.giantswarm.io/aws-subnet-size` to customize subnet size of Control Plane and Node Pools
+- Add `terminate-unhealthy-node` feature to automatically terminate bad and
+  unhealthy nodes in a Cluster.
 
 ### Fixed
 
-- Remove dependency on `var-lib-etcd.automount` to avoid dependency cycle on new systemd.
+- Fix dockerhub QPS by using paid user token for pulls.
+- Remove dependency on `var-lib-etcd.automount` to avoid dependency cycle on
+  new systemd.
 
 ## [9.1.3] - 2020-10-21
 
@@ -304,7 +310,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...HEAD
+[9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
 [9.1.3]: https://github.com/giantswarm/aws-operator/compare/v9.1.2...v9.1.3
 [9.1.2]: https://github.com/giantswarm/aws-operator/compare/v9.1.1...v9.1.2
 [9.1.1]: https://github.com/giantswarm/aws-operator/compare/v9.1.0...v9.1.1
