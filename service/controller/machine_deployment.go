@@ -77,6 +77,7 @@ type MachineDeploymentConfig struct {
 	CalicoSubnet               string
 	ClusterIPRange             string
 	DockerDaemonCIDR           string
+	DockerhubToken             string
 	ExternalSNAT               bool
 	GuestPrivateSubnetMaskBits int
 	GuestPublicSubnetMaskBits  int
@@ -103,6 +104,9 @@ type MachineDeployment struct {
 func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, error) {
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
+	}
+	if config.DockerhubToken == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.DockerhubToken must not be empty", config)
 	}
 
 	var err error
@@ -265,6 +269,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 				CalicoSubnet:              config.CalicoSubnet,
 				ClusterIPRange:            config.ClusterIPRange,
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				DockerhubToken:            config.DockerhubToken,
 				ExternalSNAT:              config.ExternalSNAT,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,

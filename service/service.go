@@ -51,6 +51,7 @@ type Service struct {
 	controlPlaneDrainerController      *controller.ControlPlaneDrainer
 	machineDeploymentController        *controller.MachineDeployment
 	machineDeploymentDrainerController *controller.MachineDeploymentDrainer
+	terminateUnhealthyNodeController   *controller.TerminateUnhealthyNode
 }
 
 // New creates a new configured service object.
@@ -277,6 +278,7 @@ func New(config Config) (*Service, error) {
 			ClusterDomain:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:            config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DockerDaemonCIDR:          config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
+			DockerhubToken:            config.Viper.GetString(config.Flag.Service.Registry.DockerhubToken),
 			ExternalSNAT:              config.Viper.GetBool(config.Flag.Service.AWS.CNI.ExternalSNAT),
 			IgnitionPath:              config.Viper.GetString(config.Flag.Service.Guest.Ignition.Path),
 			ImagePullProgressDeadline: config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline),
@@ -333,6 +335,7 @@ func New(config Config) (*Service, error) {
 			ClusterDomain:              config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.ClusterDomain),
 			ClusterIPRange:             config.Viper.GetString(config.Flag.Service.Cluster.Kubernetes.API.ClusterIPRange),
 			DockerDaemonCIDR:           config.Viper.GetString(config.Flag.Service.Cluster.Docker.Daemon.CIDR),
+			DockerhubToken:             config.Viper.GetString(config.Flag.Service.Registry.DockerhubToken),
 			ExternalSNAT:               config.Viper.GetBool(config.Flag.Service.AWS.CNI.ExternalSNAT),
 			GuestPrivateSubnetMaskBits: config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PrivateSubnetMaskBits),
 			GuestPublicSubnetMaskBits:  config.Viper.GetInt(config.Flag.Service.Installation.Guest.IPAM.Network.PublicSubnetMaskBits),
@@ -373,6 +376,22 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
+	var terminateUnhealthyNodeController *controller.TerminateUnhealthyNode
+	{
+		c := controller.TerminateUnhealthyNodeConfig{
+			K8sClient: k8sClient,
+			Locker:    kubeLockLocker,
+			Logger:    config.Logger,
+
+			HostAWSConfig: awsConfig,
+		}
+
+		terminateUnhealthyNodeController, err = controller.NewTerminateUnhealthyNode(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var versionService *version.Service
 	{
 		c := version.Config{
@@ -398,6 +417,7 @@ func New(config Config) (*Service, error) {
 		controlPlaneDrainerController:      controlPlaneDrainerController,
 		machineDeploymentController:        machineDeploymentController,
 		machineDeploymentDrainerController: machineDeploymentDrainerController,
+		terminateUnhealthyNodeController:   terminateUnhealthyNodeController,
 	}
 
 	return s, nil
@@ -410,5 +430,6 @@ func (s *Service) Boot(ctx context.Context) {
 		go s.controlPlaneDrainerController.Boot(ctx)
 		go s.machineDeploymentController.Boot(ctx)
 		go s.machineDeploymentDrainerController.Boot(ctx)
+		go s.terminateUnhealthyNodeController.Boot(ctx)
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/dylanmei/iso8601"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
@@ -208,6 +209,64 @@ func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDe
 	return strconv.Itoa(cr.Spec.NodePool.Machine.KubeletVolumeSizeGB)
 }
 
+// MachineDeploymentParseMaxBatchSize will try parse the value into valid maxBatchSize
+// valid values can be either:
+// an integer between 0 < x
+// a float between 0 < x <= 1
+// float value is used as ratio of a total worker count
+func MachineDeploymentParseMaxBatchSize(val string, workers int) string {
+	// try parse an integer
+	integer, err := strconv.Atoi(val)
+	if err == nil {
+		// check if the value is bigger than zero
+		if integer > 0 {
+			// integer value can be directly used, no need for any adjustment
+			return val
+		} else {
+			// the value is outside of valid bounds, it cannot be used
+			return ""
+		}
+	}
+	// try parse float
+	ratio, err := strconv.ParseFloat(val, 10)
+	if err != nil {
+		// not integer or float which means invalid value
+		return ""
+	}
+	// valid value is a decimal representing a percentage
+	// anything smaller than 0 or bigger than 1 is not valid
+	if ratio > 0 && ratio <= 1.0 {
+		// compute the maxBatchSize with the ratio
+		maxBatchSize := MachineDeploymentWorkerCountRatio(workers, float32(ratio))
+
+		return maxBatchSize
+	}
+
+	return ""
+}
+
+// MachineDeploymentMinInstanceInServiceFromMaxBatchSize will calculate the minInstanceInService
+// value for ASG, the value is calculated by subtracting  maxBatchSize from the worker count
+func MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize string, workers int) (string, error) {
+	v, err := strconv.Atoi(maxBatchSize)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	o := workers - v
+	if o < 0 {
+		o = 0
+	}
+
+	return strconv.Itoa(o), nil
+}
+
+// MachineDeploymentPauseTimeIsValid checks if the value is in proper ISO 8601 duration format
+func MachineDeploymentPauseTimeIsValid(val string) bool {
+	_, err := iso8601.ParseDuration(val)
+	return err == nil
+}
+
 func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {
 	return cr.Spec.NodePool.Scaling.Max
 }
@@ -239,6 +298,17 @@ func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha2.AWSMachineD
 
 func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
 	return *cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
+}
+
+func MachineDeploymentWorkerCountRatio(workers int, ratio float32) string {
+	value := float32(workers) * ratio
+	rounded := int(value + 0.5)
+
+	if rounded == 0 {
+		rounded = 1
+	}
+
+	return strconv.Itoa(rounded)
 }
 
 func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {

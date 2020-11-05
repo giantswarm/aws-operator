@@ -66,6 +66,7 @@ type ControlPlaneConfig struct {
 	ClusterDomain             string
 	ClusterIPRange            string
 	DockerDaemonCIDR          string
+	DockerhubToken            string
 	ExternalSNAT              bool
 	HostAWSConfig             aws.Config
 	IgnitionPath              string
@@ -223,6 +224,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 				ClusterDomain:             config.ClusterDomain,
 				ClusterIPRange:            config.ClusterIPRange,
 				DockerDaemonCIDR:          config.DockerDaemonCIDR,
+				DockerhubToken:            config.DockerhubToken,
 				ExternalSNAT:              config.ExternalSNAT,
 				IgnitionPath:              config.IgnitionPath,
 				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
