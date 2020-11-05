@@ -24,6 +24,7 @@ type TCCPConfig struct {
 // be updated.
 type TCCP struct {
 	cloudTags cloudtags.Interface
+	event     recorder.Interface
 	logger    micrologger.Logger
 }
 
@@ -81,14 +82,4 @@ func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSCl
 	}
 
 	return false, nil
-}
-
-// ShouldUpdateTags determines whether the reconciled TCCP stack tags should be updated.
-func (t *TCCP) ShouldUpdateTags(ctx context.Context, clusterID string, stackTags map[string]string) (bool, error) {
-	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, clusterID, key.StackTCCP)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
-	return !cloudTagsNotEqual, nil
 }

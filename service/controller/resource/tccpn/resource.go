@@ -80,7 +80,6 @@ func New(config Config) (*Resource, error) {
 		event:     config.Event,
 		haMaster:  config.HAMaster,
 		images:    config.Images,
-		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
 		installationName: config.InstallationName,

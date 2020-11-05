@@ -260,8 +260,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 			HAMaster:  config.HAMaster,
 			Logger:    config.Logger,
 			Event:     config.Event,
-			HAMaster:  config.HAMaster,
-			Logger:    config.Logger,
 			Releases:  rel,
 		}
 

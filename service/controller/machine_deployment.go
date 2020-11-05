@@ -238,7 +238,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 			CloudTags: config.CloudTags,
 			Logger:    config.Logger,
 			Event:     config.Event,
-			Logger:    config.Logger,
 			Releases:  rel,
 		}
 

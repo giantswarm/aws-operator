@@ -30,8 +30,10 @@ type TCCPNConfig struct {
 // should be updated.
 type TCCPN struct {
 	cloudTags cloudtags.Interface
+	event     recorder.Interface
 	haMaster  hamaster.Interface
 	logger    micrologger.Logger
+	releases  releases.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {

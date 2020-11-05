@@ -140,11 +140,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		// updateTags, err := r.detection.ShouldUpdateTags(ctx, key.ClusterID(&cr), stackTags)
-		// if err != nil {
-		// 	return microerror.Mask(err)
-		// }
-
 		if update {
 			err = r.updateStack(ctx, cr)
 			if IsNotFound(err) || hamaster.IsNotFound(err) {

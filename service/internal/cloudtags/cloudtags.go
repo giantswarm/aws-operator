@@ -119,13 +119,14 @@ func (ct *CloudTags) CloudTagsNotInSync(ctx context.Context, crGetter key.Labels
 // GetTagsByCluster the cloud tags from CAPI Cluster CR
 func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (map[string]string, error) {
 	var ok bool
+	var err error
 
 	tags := map[string]string{}
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err := ct.lookupCloudTags(ctx, clusterID)
+			tags, err = ct.lookupCloudTags(ctx, clusterID)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
@@ -178,6 +179,7 @@ func (ct *CloudTags) GetAWSTagsByTCCPN(ctx context.Context, crGetter key.LabelsG
 // GetAWSTagsByTCPN the cloud tags from AWS Cloud Formation Stack
 func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
 	var ok bool
+	var err error
 
 	clusterID := key.ClusterID(crGetter)
 	tags := map[string]string{}
@@ -185,14 +187,14 @@ func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, crGetter key.LabelsGe
 		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err := ct.lookupAWStagsForTCPN(ctx, crGetter)
+			tags, err = ct.lookupAWStagsForTCPN(ctx, crGetter)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
 		} else {
 			tags, ok = ct.awsCache.Get(ctx, ck)
 			if !ok {
-				tags, err := ct.lookupAWStagsForTCPN(ctx, crGetter)
+				tags, err = ct.lookupAWStagsForTCPN(ctx, crGetter)
 				if err != nil {
 					return tags, microerror.Mask(err)
 				}
@@ -208,6 +210,7 @@ func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, crGetter key.LabelsGe
 // GetAWSTagsByTCCP the cloud tags from AWS Cloud Formation Stack
 func (ct *CloudTags) GetAWSTagsByTCCP(ctx context.Context, crGetter key.LabelsGetter) (map[string]string, error) {
 	var ok bool
+	var err error
 
 	clusterID := key.ClusterID(crGetter)
 	tags := map[string]string{}
@@ -215,14 +218,14 @@ func (ct *CloudTags) GetAWSTagsByTCCP(ctx context.Context, crGetter key.LabelsGe
 		ck := ct.awsCache.Key(ctx, clusterID)
 
 		if ck == "" {
-			tags, err := ct.lookupAWStagsForTCCP(ctx, crGetter)
+			tags, err = ct.lookupAWStagsForTCCP(ctx, crGetter)
 			if err != nil {
 				return tags, microerror.Mask(err)
 			}
 		} else {
 			tags, ok = ct.awsCache.Get(ctx, ck)
 			if !ok {
-				tags, err := ct.lookupAWStagsForTCCP(ctx, crGetter)
+				tags, err = ct.lookupAWStagsForTCCP(ctx, crGetter)
 				if err != nil {
 					return tags, microerror.Mask(err)
 				}
@@ -248,7 +251,6 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 	if err != nil {
 		return tags, microerror.Mask(err)
 	}
-
 	if len(list.Items) == 0 {
 		return tags, microerror.Mask(notFoundError)
 	}
@@ -264,6 +266,7 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 		}
 	}
 
+	fmt.Printf("tags inside: %+v", tags)
 	return tags, nil
 }
 

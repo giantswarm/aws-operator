@@ -30,7 +30,9 @@ type TCNPConfig struct {
 // be updated.
 type TCNP struct {
 	cloudTags cloudtags.Interface
+	event     recorder.Interface
 	logger    micrologger.Logger
+	releases  releases.Interface
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
@@ -51,7 +53,6 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 		cloudTags: config.CloudTags,
 		logger:    config.Logger,
 		event:     config.Event,
-		logger:    config.Logger,
 		releases:  config.Releases,
 	}
 
@@ -131,7 +132,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
-	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, key.ClusterID(&cr.ObjectMeta), key.StackTCNP)
+	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, &cr.ObjectMeta, key.StackTCNP)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}
