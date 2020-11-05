@@ -71,7 +71,7 @@ const TemplateMainAutoScalingGroup = `
         MaxBatchSize: {{ .AutoScalingGroup.MaxBatchSize }}
 
         # After creating a new instance, pause the rolling update on the ASG for
-        # 15 minutes.
-        PauseTime: PT15M
+        # specified time.
+        PauseTime: {{ .AutoScalingGroup.PauseTime }}
 {{- end -}}
 `

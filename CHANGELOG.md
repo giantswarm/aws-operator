@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
+- Annotation `alpha.aws.giantswarm.io/update-max-batch-size` to configure max batch size in ASG update policy on cluster or machine deployment CR.
+- Annotation `alpha.aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update on cluster or machine deployment CR.
 - Add `terminate-unhealthy-node` feature to automatically terminate bad and
   unhealthy nodes in a Cluster.
 - Add `alpha.giantswarm.io/aws-metadata-v2` annotation to enable AWS Metadata
