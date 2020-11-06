@@ -26,7 +26,7 @@ data:
         role:
           arn: '{{ .Values.aws.role.arn }}'
         route53:
-          enabled: '{{ .Values.aws.rout53.enabled }}'
+          enabled: '{{ .Values.aws.route53.enabled }}'
         routeTables: '{{ .Values.aws.routeTables }}'
         trustedAdvisor:
           enabled: '{{ .Values.aws.trustedAdvisor.enabled }}'
@@ -72,14 +72,14 @@ data:
               auth:
                 provider:
                   oidc:
-                    clientID: '{{ .Values.installation.tenant.kuberetes.api.auth.provider.oidc.clientID }}'
-                    issuerURL: '{{ .Values.installation.tenant.kubernes.api.auth.provider.oidc.issuerURL }}'
+                    clientID: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.clientID }}'
+                    issuerURL: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.issuerURL }}'
                     usernameClaim: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.usernameClaim }}'
                     groupsClaim: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.groupsClaim }}'
               security:
                 whitelist:
                   public:
-                    enabled: {{ .Values.instalation.tenant.kubernetes.api.security.whitelist.public.enabled }}
+                    enabled: {{ .Values.installation.tenant.kubernetes.api.security.whitelist.public.enabled }}
                     {{- if .Values.installation.tenant.kubernetes.api.security.whitelist.public.enabled }}
                     subnetList: "{{ .Values.installation.tenant.kubernetes.api.security.whitelist.public.subnetList }}"
                     {{- end }}
