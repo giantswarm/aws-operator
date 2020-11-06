@@ -62,6 +62,9 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				}
 
 				ct, err = cloudtags.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
 			var rel releases.Interface

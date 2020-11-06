@@ -62,12 +62,12 @@ func New(config Config) (*CloudTags, error) {
 func (ct *CloudTags) CloudTagsNotInSync(ctx context.Context, crGetter key.LabelsGetter, stackType string) (bool, error) {
 	var err error
 
-	stags := map[string]string{}
 	ctags, err := ct.GetTagsByCluster(ctx, key.ClusterID(crGetter))
 	if err != nil {
 		return true, microerror.Mask(err)
 	}
 
+	var stags map[string]string
 	switch stackType {
 	case key.StackTCCP:
 		stags, err = ct.GetAWSTagsByTCCP(ctx, crGetter)
@@ -121,7 +121,7 @@ func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (ma
 	var ok bool
 	var err error
 
-	tags := map[string]string{}
+	var tags map[string]string
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
@@ -151,7 +151,7 @@ func (ct *CloudTags) GetAWSTagsByTCCPN(ctx context.Context, crGetter key.LabelsG
 	var ok bool
 
 	clusterID := key.ClusterID(crGetter)
-	tags := map[string]string{}
+	var tags map[string]string
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
@@ -182,7 +182,7 @@ func (ct *CloudTags) GetAWSTagsByTCPN(ctx context.Context, crGetter key.LabelsGe
 	var err error
 
 	clusterID := key.ClusterID(crGetter)
-	tags := map[string]string{}
+	var tags map[string]string
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
@@ -213,7 +213,7 @@ func (ct *CloudTags) GetAWSTagsByTCCP(ctx context.Context, crGetter key.LabelsGe
 	var err error
 
 	clusterID := key.ClusterID(crGetter)
-	tags := map[string]string{}
+	var tags map[string]string
 	{
 		ck := ct.awsCache.Key(ctx, clusterID)
 
