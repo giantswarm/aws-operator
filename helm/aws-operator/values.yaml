@@ -13,7 +13,7 @@ aws:
     delete: true
   podInfraContainerImage: giantswarm/pause-amd64:3.3
   region: ""
-    route53:
+  route53:
     enabled: true
   role:
     arn: ""
@@ -21,7 +21,8 @@ aws:
   s3AccessLogsExpiration: 365
   trustedAdvisor:
     enabled: false
-  vaultAddress: "http://localhost:8200"
+  vault:
+    address: "http://localhost:8200"
 
 cluster:
   calico: # replace with cni
@@ -34,18 +35,20 @@ cluster:
   kubernetes:
     api:
       clusterIPRange: 172.31.0.0/16 # replace with service IP range?
-      networkSetup:
-        docker:
-          image: docker.io/giantswarm/k8s-setup-network-environment:v0.1.0
+    clusterDomain: cluster.local
+    networkSetup:
+      docker:
+        image: docker.io/giantswarm/k8s-setup-network-environment:v0.1.0
   ssh:
     userList: ""
+    ssoPublicKey: ""
 
 installation:
   name: ""
   tenant:
     ipam:
       network:
-        cidrMaskBits: 24
+        ssubnetMaskBits: 24
         networkCIDR: 10.1.0.0/16
         privateSubnetMaskBits: 25
         publicSubnetMaskBits: 25
@@ -69,7 +72,10 @@ installation:
 
 registry:
   domain: docker.io
-  mirrors: giantswarm.azurecr.io
+  mirrors:
+  - giantswarm.azurecr.io
+  pullSecret:
+    dockerConfigJSON: ""
 
 dockerhub:
   token: token
