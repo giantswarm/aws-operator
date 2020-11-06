@@ -1,10 +1,84 @@
+# aws-operator configuration
+aws:
+  access_key_id: access
+  secret_access_key: secret
+
+  advancedMonitoringEC2: false
+  availabilityZone: ""
+  availabilityZones: []
+  cni:
+    externalSNAT: true
+  includeTags: true
+  loggingBucket:
+    delete: true
+  podInfraContainerImage: giantswarm/pause-amd64:3.3
+  region: ""
+    route53:
+    enabled: true
+  role:
+    arn: ""
+  routeTables: ""
+  s3AccessLogsExpiration: 365
+  trustedAdvisor:
+    enabled: false
+  vaultAddress: "http://localhost:8200"
+
+cluster:
+  calico: # replace with cni
+    cidr: 16 # replace with size
+    mtu: 1430
+    subnet: 10.2.0.0
+  docker:
+    daemon:
+      cidr: 172.17.0.1/16
+  kubernetes:
+    api:
+      clusterIPRange: 172.31.0.0/16 # replace with service IP range?
+      networkSetup:
+        docker:
+          image: docker.io/giantswarm/k8s-setup-network-environment:v0.1.0
+  ssh:
+    userList: ""
+
+installation:
+  name: ""
+  tenant:
+    ipam:
+      network:
+        cidrMaskBits: 24
+        networkCIDR: 10.1.0.0/16
+        privateSubnetMaskBits: 25
+        publicSubnetMaskBits: 25
+    kubernetes:
+      api:
+        auth:
+          provider:
+            oidc:
+              clientID: ""
+              issuerURL: ""
+              usernameClaim: ""
+              groupsClaim: ""
+        security:
+          whitelist:
+            private:
+              enabled: false
+              subnetList: ""
+            public: 
+              enabled: false
+              subnetList: ""
+
+registry:
+  domain: docker.io
+  mirrors: giantswarm.azurecr.io
+
+dockerhub:
+  token: token
+
+# generic configuration
+
 image:
   name: "giantswarm/aws-operator"
   tag: "[[ .Version ]]"
-Installation:
-  V1:
-    Registry:
-      Domain: quay.io
 pod:
   user:
     id: 1000
@@ -18,3 +92,5 @@ ports:
 project:
   branch: "[[ .Branch ]]"
   commit: "[[ .SHA ]]"
+
+
