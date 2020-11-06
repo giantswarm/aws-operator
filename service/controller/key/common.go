@@ -21,6 +21,8 @@ const (
 	ELBInstanceStateInService = "InService"
 
 	DrainerResyncPeriod = time.Minute * 2
+
+	DefaultPauseTimeBetweenUpdates = "PT15M"
 )
 
 const (
