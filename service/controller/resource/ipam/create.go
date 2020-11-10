@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strconv"
 
 	"github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
@@ -11,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
 )
@@ -110,7 +112,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
 
-		freeSubnet, err = ipam.Free(networkRange, r.allocatedSubnetMask, allocatedSubnets)
+		var subnetMask net.IPMask
+		{
+			subnetMaskString, ok := m.GetAnnotations()[annotation.AWSSubnetSize]
+			if ok {
+				subnetBits, err := strconv.Atoi(subnetMaskString)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				subnetMask = net.CIDRMask(subnetBits, 32)
+			} else {
+				subnetMask = r.allocatedSubnetMask
+			}
+		}
+
+		freeSubnet, err = ipam.Free(networkRange, subnetMask, allocatedSubnets)
 		if err != nil {
 			return microerror.Mask(err)
 		}
