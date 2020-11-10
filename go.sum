@@ -72,8 +72,8 @@ github.com/aws/amazon-vpc-cni-k8s v1.7.5/go.mod h1:WFg/NerFMpie+WZBSWvlSojmKkqGV
 github.com/aws/aws-lambda-go v1.13.3/go.mod h1:4UKl9IzQMoD+QF79YdCuzCwp8VbmG4VAQwij/eHl5CU=
 github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.33.14/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/aws/aws-sdk-go v1.35.19 h1:vdIqQnOIqTNtvnOdt9r3Bf/FiCJ7KV/7O2BIj4TPx2w=
-github.com/aws/aws-sdk-go v1.35.19/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
+github.com/aws/aws-sdk-go v1.35.23 h1:SCP0d0XvyJTDmfnHEQPvBaYi3kea1VNUo7uQmkVgFts=
+github.com/aws/aws-sdk-go v1.35.23/go.mod h1:tlPOdRjfxPBpNIwqDj61rmsnA85v9jc0Ps9+muhnW+k=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -215,8 +215,9 @@ github.com/giantswarm/microkit v0.2.0/go.mod h1:1vDHFUN+ZsUahZJ2hgZxcU7nG35Rj484
 github.com/giantswarm/microkit v0.2.2 h1:BNK55FyS+AXls6mH+81Iloo3z2+FRWqeEz2jYb7ZUhc=
 github.com/giantswarm/microkit v0.2.2/go.mod h1:XCj0vA/+jHiM03XDMlcWuvYdgZQyNS3O7ZVHDOUCYA8=
 github.com/giantswarm/micrologger v0.3.1/go.mod h1:PjAgtcJ922ZMX/Aa05IPi0bdYvOj2P7pZ7+6dBShMQs=
-github.com/giantswarm/micrologger v0.3.3 h1:RGUOHlpFVvT9vK/BhZGqfzb9AjFxLLBns20oCdlTt8A=
 github.com/giantswarm/micrologger v0.3.3/go.mod h1:fkzQdDBC6HjJq4nllBDt6XB4t4yeVyhdHKblFX6QoMQ=
+github.com/giantswarm/micrologger v0.3.4 h1:NKD6pz1++Hkq/ulOT9iu7hwTnG3ZfjnPUtuK/tbeCc8=
+github.com/giantswarm/micrologger v0.3.4/go.mod h1:fkzQdDBC6HjJq4nllBDt6XB4t4yeVyhdHKblFX6QoMQ=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
 github.com/giantswarm/operatorkit/v2 v2.0.2 h1:S2O5lZBT1yeGFfR+/so5TSIXgbgCSrVceM3EccNmoGE=

@@ -99,6 +99,40 @@ func Test_MachineDeploymentParseMaxBatchSize(t *testing.T) {
 	}
 }
 
+func Test_PauseTimeIsValid(t *testing.T) {
+	testCases := []struct {
+		name  string
+		value string
+		valid bool
+	}{
+		{
+			name:  "case 0: simple value",
+			value: "PT15M",
+			valid: true,
+		},
+		{
+			name:  "case 1: invalid value value",
+			value: "10m",
+			valid: false,
+		},
+		{
+			name:  "case 2: duration too big",
+			value: "PT1H2M",
+			valid: false,
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			result := MachineDeploymentPauseTimeIsValid(tc.value)
+
+			if result != tc.valid {
+				t.Fatalf("%s -  expected '%t' got '%t'\n", tc.name, tc.valid, result)
+			}
+		})
+	}
+}
+
 func Test_MachineDeploymentWorkerCountRatio(t *testing.T) {
 	testCases := []struct {
 		name     string
