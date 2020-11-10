@@ -15,11 +15,11 @@ const (
 	// version 1.0 credentials are not available.
 	// Default: 'optional'
 	// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-launchtemplate-launchtemplatedata-metadataoptions.html#cfn-ec2-launchtemplate-launchtemplatedata-metadataoptions-httptokens
-	AWSMetadata             = "alpha.aws.giantswarm.io/metadata-v2"
+	AWSMetadata = "alpha.aws.giantswarm.io/metadata-v2"
 	// AWSSubnetSize is the aws update annotation used for configuring
 	// the subnet size of AWSCluster or AWSMachineDeployment.
 	// The value is a number that will represent the subnet mask used when creating the subnet. This value must be smaller than 28 due to AWS restrictions.
-	AWSSubnetSize           = "alpha.aws.giantswarm.io/aws-subnet-size"
+	AWSSubnetSize = "alpha.aws.giantswarm.io/aws-subnet-size"
 	// UpdateMaxBatchSize is the aws update annotation used for configuring
 	// maximum batch size for instances during ASG update.
 	// The value can be either a whole number specifying the number of instances
