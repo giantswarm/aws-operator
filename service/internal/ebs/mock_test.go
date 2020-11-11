@@ -23,6 +23,30 @@ func (e *EC2ClientMock) DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeO
 	return nil, nil
 }
 
+func (e *EC2ClientMock) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
+	o := &ec2.DescribeInstancesOutput{}
+
+	// test case for instance that does not belong to the cluster
+	// to test behavior of ignoring volume when its mounted to an instance from different cluster
+	if *input.InstanceIds[0] == "i-555555" {
+
+		t := &ec2.Tag{
+			Key:   aws.String(key.TagCluster),
+			Value: aws.String("invalid-cluster"),
+		}
+		i := &ec2.Instance{
+			Tags: []*ec2.Tag{t},
+		}
+		r := &ec2.Reservation{
+			Instances: []*ec2.Instance{i},
+		}
+
+		o.Reservations = []*ec2.Reservation{r}
+	}
+
+	return o, nil
+}
+
 func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {
 	output := &ec2.DescribeVolumesOutput{}
 	volumes := []*ec2.Volume{}

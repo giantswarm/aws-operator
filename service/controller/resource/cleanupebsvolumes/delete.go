@@ -43,7 +43,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		ebs.NewEtcdVolumeFilter(cr),
 		ebs.NewPersistentVolumeFilter(cr),
 	}
-	volumes, err := ebsService.ListVolumes(cr, filterFuncs...)
+	volumes, err := ebsService.ListVolumes(ctx, cr, filterFuncs...)
 	if err != nil {
 		return microerror.Mask(err)
 	}
