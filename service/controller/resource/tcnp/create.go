@@ -7,11 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -319,13 +320,13 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	var minInstancesInService string
 	{
 		// try read the value from cluster CR
-		if val, ok := cl.Annotations[annotation.UpdateMaxBatchSize]; ok {
+		if val, ok := cl.Annotations[annotation.AWSUpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "value of MaxBatchSize for ASG updates set by annotation from AWSCluster CR")
 		}
 		// override the value with machine deployment value if its set
-		if val, ok := cr.Annotations[annotation.UpdateMaxBatchSize]; ok {
+		if val, ok := cr.Annotations[annotation.AWSUpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
 			r.logger.LogCtx(ctx, "level", "debug", "message", "value of MaxBatchSize for ASG updates overridden by annotation from AWSMachineDeployment CR")
@@ -344,7 +345,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	var pauseTime string
 	{
 		// try read the value from cluster CR
-		if val, ok := cl.Annotations[annotation.UpdatePauseTime]; ok {
+		if val, ok := cl.Annotations[annotation.AWSUpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
@@ -352,7 +353,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			}
 		}
 		// override the value with machine deployment value if its set
-		if val, ok := cr.Annotations[annotation.UpdatePauseTime]; ok {
+		if val, ok := cr.Annotations[annotation.AWSUpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
