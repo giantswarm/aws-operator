@@ -225,11 +225,13 @@ func (e *EBS) ListVolumes(ctx context.Context, cr infrastructurev1alpha2.AWSClus
 						return nil, microerror.Mask(err)
 					}
 
-					hasInstances := len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0
-					hasWrongClusterID := awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, key.TagCluster) != cr.Labels[key.TagCluster]
+					hasWrongClusterID := false
+					if len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0 {
+						hasWrongClusterID = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, key.TagCluster) != cr.Labels[key.TagCluster]
+					}
 
 					// if the instance does not have the proper cluster-id tag than ignore the volume
-					if hasInstances && hasWrongClusterID {
+					if hasWrongClusterID {
 						e.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("EBS volume %#q is attached to instance %#q which does not belong to the cluster %#q, ignoring the volume", *a.VolumeId, *a.InstanceId, cr.Labels[key.TagCluster]))
 
 						// do not add this volume to the volume list
