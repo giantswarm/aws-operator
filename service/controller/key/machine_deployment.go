@@ -5,10 +5,10 @@ import (
 	"strconv"
 
 	"github.com/dylanmei/iso8601"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 )
 
@@ -194,7 +194,7 @@ func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeploymen
 }
 
 func MachineDeploymentMetadataV2(cr infrastructurev1alpha2.AWSMachineDeployment) string {
-	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadata]
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadataV2]
 	if !ok {
 		return "optional"
 	}
@@ -262,9 +262,19 @@ func MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize string, 
 }
 
 // MachineDeploymentPauseTimeIsValid checks if the value is in proper ISO 8601 duration format
+// and ensure that the duration is not bigger than 1 Hour
 func MachineDeploymentPauseTimeIsValid(val string) bool {
-	_, err := iso8601.ParseDuration(val)
-	return err == nil
+	d, err := iso8601.ParseDuration(val)
+	if err != nil {
+		return false
+	}
+
+	// AWS limits the duration to 1 hour
+	if d.Hours() > 1.0 {
+		return false
+	}
+
+	return true
 }
 
 func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {

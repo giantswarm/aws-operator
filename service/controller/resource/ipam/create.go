@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strconv"
 
-	"github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
+	"github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -110,7 +112,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.LogCtx(ctx, "level", "debug", "message", "finding free subnet")
 
-		freeSubnet, err = ipam.Free(networkRange, r.allocatedSubnetMask, allocatedSubnets)
+		var subnetMask net.IPMask
+		{
+			subnetMaskString, ok := m.GetAnnotations()[annotation.AWSSubnetSize]
+			if ok {
+				subnetBits, err := strconv.Atoi(subnetMaskString)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				subnetMask = net.CIDRMask(subnetBits, 32)
+			} else {
+				subnetMask = r.allocatedSubnetMask
+			}
+		}
+
+		freeSubnet, err = ipam.Free(networkRange, subnetMask, allocatedSubnets)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -8,17 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update dependencies to next major versions.
+
+## [9.3.0] - 2020-11-09
+
+### Added
+
+- Annotation `alpha.aws.giantswarm.io/metadata-v2` to enable AWS Metadata API v2
+- Annotation `alpha.aws.giantswarm.io/aws-subnet-size` to customize subnet size of Control Plane and Node Pools
+- Annotation `alpha.aws.giantswarm.io/update-max-batch-size` to configure max batch size in ASG update policy on cluster or machine deployment CR.
+- Annotation `alpha.aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update on cluster or machine deployment CR.
+
 ## [9.2.0] - 2020-11-03
 
 ### Added
 
 - Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
-- Annotation `alpha.aws.giantswarm.io/update-max-batch-size` to configure max batch size in ASG update policy on cluster or machine deployment CR.
-- Annotation `alpha.aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update on cluster or machine deployment CR.
 - Add `terminate-unhealthy-node` feature to automatically terminate bad and
   unhealthy nodes in a Cluster.
-- Add `alpha.giantswarm.io/aws-metadata-v2` annotation to enable AWS Metadata
-  API v2.
 
 ### Fixed
 
@@ -313,7 +322,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...HEAD
+[9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
 [9.1.3]: https://github.com/giantswarm/aws-operator/compare/v9.1.2...v9.1.3
 [9.1.2]: https://github.com/giantswarm/aws-operator/compare/v9.1.1...v9.1.2

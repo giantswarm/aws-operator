@@ -1,7 +1,7 @@
 package controllercontext
 
 import (
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 )
