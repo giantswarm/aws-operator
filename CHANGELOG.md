@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- During a deletion fo a cluster, ignore volumes that are mounted to an instance in different cluster.
+
 ## [9.3.0] - 2020-11-09
 
 ### Added
