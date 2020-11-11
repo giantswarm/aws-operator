@@ -35,24 +35,24 @@ data:
           externalSNAT: '{{ .Values.aws.cni.externalSNAT }}'
       cluster:
         calico:
-          cidr: '{{ .Values.cluster.calico.cidr }}'
-          mtu: '{{ .Values.cluster.calico.mtu }}'
-          subnet: '{{ .Values.cluster.calico.subnet }}'
+          cidr: '{{ .Values.tenant.calico.cidr }}'
+          mtu: '{{ .Values.tenant.calico.mtu }}'
+          subnet: '{{ .Values.tenant.calico.subnet }}'
         docker:
           daemon:
-            cidr: '{{ .Values.cluster.docker.daemon.cidr }}'
+            cidr: '{{ .Values.tenant.docker.daemon.cidr }}'
         kubernetes:
           api:
-            clusterIPRange: '{{ .Values.cluster.kubernetes.api.ClusterIPRange }}'
-          clusterDomain: '{{ .Values.cluster.kubernetes.clusterDomain }}'
+            clusterIPRange: '{{ .Values.tenant.kubernetes.api.ClusterIPRange }}'
+          clusterDomain: '{{ .Values.tenant.kubernetes.clusterDomain }}'
           networkSetup:
             docker:
-              image: '{{ .Values.cluster.kubernetes.networkSetup.image }}'
+              image: '{{ .Values.tenant.kubernetes.networkSetup.image }}'
           ssh:
-            userList: '{{ .Values.cluster.ssh.userList }}'
+            userList: '{{ .Values.tenant.ssh.userList }}'
       guest:
         ssh:
-          ssoPublicKey: '{{ .Values.cluster.ssh.ssoPublicKey }}'
+          ssoPublicKey: '{{ .Values.tenant.ssh.ssoPublicKey }}'
 
       registry:
         domain: '{{ .Values.registry.domain }}'
