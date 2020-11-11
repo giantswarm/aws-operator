@@ -3,6 +3,7 @@ package ebs
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -224,9 +225,11 @@ func (e *EBS) ListVolumes(ctx context.Context, cr infrastructurev1alpha2.AWSClus
 						return nil, microerror.Mask(err)
 					}
 
+					hasInstances := len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0
+					hasTags := awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, key.TagCluster) == cr.Labels[key.TagCluster]
+
 					// if the instance does not have the proper cluster-id tag than ignore the volume
-					if len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0 &&
-						!instanceHasTag(o.Reservations[0].Instances[0], key.TagCluster, cr.Labels[key.TagCluster]) {
+					if hasInstances && hasTags {
 						e.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("EBS volume %#q is attached to instance %#q which does not belong to the cluster %#q, ignoring the volume", *a.VolumeId, *a.InstanceId, cr.Labels[key.TagCluster]))
 
 						// do not add this volume to the volume list
@@ -243,25 +246,17 @@ func (e *EBS) ListVolumes(ctx context.Context, cr infrastructurev1alpha2.AWSClus
 			}
 		}
 
-		if !ignoreVolume {
-			volume := Volume{
-				VolumeID:    *v.VolumeId,
-				Attachments: attachments,
-			}
-
-			volumes = append(volumes, volume)
+		if ignoreVolume {
+			continue
 		}
+
+		volume := Volume{
+			VolumeID:    *v.VolumeId,
+			Attachments: attachments,
+		}
+
+		volumes = append(volumes, volume)
 	}
 
 	return volumes, nil
-}
-
-func instanceHasTag(instance *ec2.Instance, tagKey string, tagValue string) bool {
-	for _, t := range instance.Tags {
-		if *t.Key == tagKey && *t.Value == tagValue {
-			return true
-		}
-	}
-
-	return false
 }
