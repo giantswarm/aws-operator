@@ -29,7 +29,7 @@ tenant:
     cidr: 16 # replace with size
     mtu: 1430
     subnet: 10.2.0.0
-  
+
   docker:
     daemon:
       cidr: 172.17.0.1/16
@@ -56,7 +56,7 @@ tenant:
           private:
             enabled: false
             subnetList: ""
-          public: 
+          public:
             enabled: false
             subnetList: ""
 
