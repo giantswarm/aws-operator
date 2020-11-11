@@ -3,7 +3,6 @@ package ebs
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,6 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
