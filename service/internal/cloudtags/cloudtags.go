@@ -100,7 +100,7 @@ func (ct *CloudTags) CloudTagsNotInSync(ctx context.Context, crGetter key.Labels
 				)
 			}
 		}
-		// Print remove tags from stack
+		// Print removed tags from stack
 		for sk, sv := range stags {
 			if _, ok := ctags[sk]; !ok {
 				ct.logger.LogCtx(ctx,
@@ -266,7 +266,6 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 		}
 	}
 
-	fmt.Printf("tags inside: %+v", tags)
 	return tags, nil
 }
 
