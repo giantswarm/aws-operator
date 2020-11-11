@@ -35,15 +35,15 @@ data:
           externalSNAT: '{{ .Values.aws.cni.externalSNAT }}'
       cluster:
         calico:
-          cidr: '{{ .Values.tenant.calico.cidr }}'
-          mtu: '{{ .Values.tenant.calico.mtu }}'
-          subnet: '{{ .Values.tenant.calico.subnet }}'
+          cidr: '{{ .Values.tenant.cni.mask }}'
+          mtu: '{{ .Values.tenant.cni.mtu }}'
+          subnet: '{{ .Values.tenant.cni.subnet }}'
         docker:
           daemon:
             cidr: '{{ .Values.tenant.docker.daemon.cidr }}'
         kubernetes:
           api:
-            clusterIPRange: '{{ .Values.tenant.kubernetes.api.ClusterIPRange }}'
+            clusterIPRange: '{{ .Values.tenant.kubernetes.api.serviceIPRange }}'
           clusterDomain: '{{ .Values.tenant.kubernetes.clusterDomain }}'
           networkSetup:
             docker:
