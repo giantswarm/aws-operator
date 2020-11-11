@@ -25,8 +25,8 @@ aws:
     address: "http://localhost:8200"
 
 tenant:
-  calico: # replace with cni
-    cidr: 16 # replace with size
+  cni:
+    mask: 16
     mtu: 1430
     subnet: 10.2.0.0
 
@@ -43,7 +43,6 @@ tenant:
 
   kubernetes:
     api:
-      clusterIPRange: 172.31.0.0/16 # replace with service IP range?
       auth:
         provider:
           oidc:
@@ -59,6 +58,8 @@ tenant:
           public:
             enabled: false
             subnetList: ""
+      serviceIPRange: 172.31.0.0/16
+
 
     clusterDomain: cluster.local
     networkSetup:
