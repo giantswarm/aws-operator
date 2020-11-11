@@ -3,7 +3,7 @@ package tenantclients
 import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 )
 
 const (

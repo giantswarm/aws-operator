@@ -3,7 +3,7 @@ package s3object
 import (
 	"context"
 
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/crud"
 )
 
 // ApplyDeleteChange is a noop as deletion for now is covered with the deletion
