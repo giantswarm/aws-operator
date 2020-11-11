@@ -21,7 +21,7 @@ data:
         includeTags: '{{ .Values.aws.includeTags }}'
         loggingBucket:
           delete: '{{ .Values.aws.loggingBucket.delete }}'
-        podInfraContainerImage: '{{ .Values.aws.podInfraContainerImage }}'
+        podInfraContainerImage: '{{ .Values.registry.domain }}/{{ .Values.aws.podInfraContainerImage }}'
         region: '{{ .Values.aws.region }}'
         role:
           arn: '{{ .Values.aws.role.arn }}'
@@ -59,34 +59,34 @@ data:
         mirrors: '{{ range $i, $e := .Values.registry.mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
       installation:
         name: '{{ .Values.installation.name }}'
-        {{- if .Values.installation.tenant }}
+        {{- if .Values.tenant }}
         guest:
           ipam:
             network:
-              CIDR: '{{ .Values.installation.tenant.ipam.networkCIDR }}'
-              subnetMaskBits: '{{ .Values.installation.tenant.ipam.network.subnetMaskBits }}'
-              privateSubnetMaskBits: '{{ .Values.installation.tenant.ipam.network.privateSubnetMask }}'
-              publicSubnetMaskBits: '{{ .Values.installation.tenant.ipam.network.publicSubnetMaskBits }}'
+              CIDR: '{{ .Values.tenant.ipam.networkCIDR }}'
+              subnetMaskBits: '{{ .Values.tenant.ipam.network.subnetMaskBits }}'
+              privateSubnetMaskBits: '{{ .Values.tenant.ipam.network.privateSubnetMask }}'
+              publicSubnetMaskBits: '{{ .Values.tenant.ipam.network.publicSubnetMaskBits }}'
           kubernetes:
             api:
               auth:
                 provider:
                   oidc:
-                    clientID: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.clientID }}'
-                    issuerURL: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.issuerURL }}'
-                    usernameClaim: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.usernameClaim }}'
-                    groupsClaim: '{{ .Values.installation.tenant.kubernetes.api.auth.provider.oidc.groupsClaim }}'
+                    clientID: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.clientID }}'
+                    issuerURL: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.issuerURL }}'
+                    usernameClaim: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.usernameClaim }}'
+                    groupsClaim: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.groupsClaim }}'
               security:
                 whitelist:
                   public:
-                    enabled: {{ .Values.installation.tenant.kubernetes.api.security.whitelist.public.enabled }}
-                    {{- if .Values.installation.tenant.kubernetes.api.security.whitelist.public.enabled }}
-                    subnetList: "{{ .Values.installation.tenant.kubernetes.api.security.whitelist.public.subnetList }}"
+                    enabled: {{ .Values.tenant.kubernetes.api.security.whitelist.public.enabled }}
+                    {{- if .Values.tenant.kubernetes.api.security.whitelist.public.enabled }}
+                    subnetList: "{{ .Values.tenant.kubernetes.api.security.whitelist.public.subnetList }}"
                     {{- end }}
                   private:
-                    enabled: {{ .Values.installation.tenant.kubernetes.api.security.whitelist.private.enabled }}
-                    {{- if .Values.installation.tenant.kubernetes.api.security.whitelist.private.enabled }}
-                    subnetList: "{{ .Values.installation.tenant.kubernetes.api.security.whitelist.private.subnetList }}"
+                    enabled: {{ .Values.tenant.kubernetes.api.security.whitelist.private.enabled }}
+                    {{- if .Values.tenant.kubernetes.api.security.whitelist.private.enabled }}
+                    subnetList: "{{ .Values.tenant.kubernetes.api.security.whitelist.private.subnetList }}"
                     {{- end }}
         {{- end }}
       kubernetes:

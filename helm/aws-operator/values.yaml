@@ -24,51 +24,53 @@ aws:
   vault:
     address: "http://localhost:8200"
 
-cluster:
+tenant:
   calico: # replace with cni
     cidr: 16 # replace with size
     mtu: 1430
     subnet: 10.2.0.0
+  
   docker:
     daemon:
       cidr: 172.17.0.1/16
+
+  ipam:
+    network:
+      ssubnetMaskBits: 24
+      networkCIDR: 10.1.0.0/16
+      privateSubnetMaskBits: 25
+      publicSubnetMaskBits: 25
+
   kubernetes:
     api:
       clusterIPRange: 172.31.0.0/16 # replace with service IP range?
+      auth:
+        provider:
+          oidc:
+            clientID: ""
+            issuerURL: ""
+            usernameClaim: ""
+            groupsClaim: ""
+      security:
+        whitelist:
+          private:
+            enabled: false
+            subnetList: ""
+          public: 
+            enabled: false
+            subnetList: ""
+
     clusterDomain: cluster.local
     networkSetup:
       docker:
         image: docker.io/giantswarm/k8s-setup-network-environment:v0.1.0
+
   ssh:
     userList: ""
     ssoPublicKey: ""
 
 installation:
   name: ""
-  tenant:
-    ipam:
-      network:
-        ssubnetMaskBits: 24
-        networkCIDR: 10.1.0.0/16
-        privateSubnetMaskBits: 25
-        publicSubnetMaskBits: 25
-    kubernetes:
-      api:
-        auth:
-          provider:
-            oidc:
-              clientID: ""
-              issuerURL: ""
-              usernameClaim: ""
-              groupsClaim: ""
-        security:
-          whitelist:
-            private:
-              enabled: false
-              subnetList: ""
-            public: 
-              enabled: false
-              subnetList: ""
 
 registry:
   domain: docker.io
