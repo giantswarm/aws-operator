@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.1] - 2020-11-12
+
 ### Changed
 
 - Update dependencies to next major versions.
@@ -326,7 +328,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...HEAD
+[9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
 [9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
 [9.1.3]: https://github.com/giantswarm/aws-operator/compare/v9.1.2...v9.1.3
