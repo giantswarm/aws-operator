@@ -1,7 +1,7 @@
 # aws-operator configuration
 aws:
-  access_key_id: access
-  secret_access_key: secret
+  accessKeyID: access
+  secretAccessKey: secret
 
   advancedMonitoringEC2: false
   availabilityZone: ""
