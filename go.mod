@@ -23,7 +23,7 @@ require (
 	github.com/giantswarm/randomkeys/v2 v2.0.0
 	github.com/giantswarm/tenantcluster/v4 v4.0.0
 	github.com/giantswarm/to v0.3.0
-	github.com/google/go-cmp v0.5.2
+	github.com/google/go-cmp v0.5.3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.8.0
 	github.com/spf13/afero v1.3.1 // indirect
