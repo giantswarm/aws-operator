@@ -131,6 +131,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 					K8sClient: k,
 					Logger:    microloggertest.New(),
 
+					AlikeInstances:   `{"m5.2xlarge":[{"InstanceType":"m5.2xlarge","WeightedCapacity":1},{"InstanceType":"m4.2xlarge","WeightedCapacity":1}]}`,
 					InstallationName: "dummy",
 				}
 

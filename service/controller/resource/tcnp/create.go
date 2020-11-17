@@ -308,7 +308,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 
 	var launchTemplateOverride []template.LaunchTemplateOverride
 	{
-		val, ok := key.MachineDeploymentLaunchTemplateOverrides[key.MachineDeploymentInstanceType(cr)]
+		val, ok := r.alikeInstances[key.MachineDeploymentInstanceType(cr)]
 
 		if cr.Spec.Provider.Worker.UseAlikeInstanceTypes && ok {
 			launchTemplateOverride = val
