@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Make it mandatory to configure alike instances via e.g. the installations repo.
+- Fix naming and logs for `terminate-unhealthy-node` feature.
 
 ## [9.3.1] - 2020-11-12
 
