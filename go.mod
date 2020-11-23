@@ -13,7 +13,7 @@ require (
 	github.com/giantswarm/certs/v3 v3.1.0
 	github.com/giantswarm/ipam v0.2.0
 	github.com/giantswarm/k8sclient/v5 v5.0.0
-	github.com/giantswarm/k8scloudconfig/v9 v9.1.3-0.20201123203949-3b713bc4ffa8
+	github.com/giantswarm/k8scloudconfig/v9 v9.1.3-0.20201123211739-402814d6d952
 	github.com/giantswarm/kubelock/v2 v2.0.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.2.1
