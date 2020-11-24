@@ -329,6 +329,7 @@ func New(config Config) (*Service, error) {
 			Logger:             config.Logger,
 			RandomKeysSearcher: randomKeysSearcher,
 
+			AlikeInstances:             config.Viper.GetString(config.Flag.Service.AWS.AlikeInstances),
 			CalicoCIDR:                 config.Viper.GetInt(config.Flag.Service.Cluster.Calico.CIDR),
 			CalicoMTU:                  config.Viper.GetInt(config.Flag.Service.Cluster.Calico.MTU),
 			CalicoSubnet:               config.Viper.GetString(config.Flag.Service.Cluster.Calico.Subnet),

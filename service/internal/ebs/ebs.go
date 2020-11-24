@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
@@ -184,7 +185,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 // the Etcd volume for the master instance will be returned. If persistentVolume
 // is set then any Persistent Volumes associated with the cluster will be
 // returned.
-func (e *EBS) ListVolumes(cr infrastructurev1alpha2.AWSCluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
+func (e *EBS) ListVolumes(ctx context.Context, cr infrastructurev1alpha2.AWSCluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error) {
 	var volumes []Volume
 
 	// We filter to only select clusters with the cluster cloud provider tag.
@@ -208,16 +209,47 @@ func (e *EBS) ListVolumes(cr infrastructurev1alpha2.AWSCluster, filterFuncs ...f
 		if !IsFiltered(v, filterFuncs) {
 			continue
 		}
-
+		ignoreVolume := false
 		attachments := []VolumeAttachment{}
 
 		if len(v.Attachments) > 0 {
 			for _, a := range v.Attachments {
+
+				if *a.InstanceId != "" {
+					i := &ec2.DescribeInstancesInput{
+						InstanceIds: aws.StringSlice([]string{*a.InstanceId}),
+					}
+
+					o, err := e.client.DescribeInstances(i)
+					if err != nil {
+						return nil, microerror.Mask(err)
+					}
+
+					hasWrongClusterID := false
+					if len(o.Reservations) > 0 && len(o.Reservations[0].Instances) > 0 {
+						hasWrongClusterID = awstags.ValueForKey(o.Reservations[0].Instances[0].Tags, key.TagCluster) != cr.Labels[key.TagCluster]
+					}
+
+					// if the instance does not have the proper cluster-id tag than ignore the volume
+					if hasWrongClusterID {
+						e.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("EBS volume %#q is attached to instance %#q which does not belong to the cluster %#q, ignoring the volume", *a.VolumeId, *a.InstanceId, cr.Labels[key.TagCluster]))
+
+						// do not add this volume to the volume list
+						// this volume will be ignored by the operator
+						ignoreVolume = true
+						break
+					}
+				}
+
 				attachments = append(attachments, VolumeAttachment{
 					Device:     *a.Device,
 					InstanceID: *a.InstanceId,
 				})
 			}
+		}
+
+		if ignoreVolume {
+			continue
 		}
 
 		volume := Volume{

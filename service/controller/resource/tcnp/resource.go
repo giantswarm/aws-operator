@@ -1,14 +1,17 @@
 package tcnp
 
 import (
+	"encoding/json"
+
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/images"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -19,11 +22,12 @@ const (
 type Config struct {
 	CloudTags cloudtags.Interface
 	Detection *changedetection.TCNP
-	Event     event.Interface
+	Event     recorder.Interface
 	Images    images.Interface
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
+	AlikeInstances   string
 	InstallationName string
 }
 
@@ -32,11 +36,12 @@ type Config struct {
 type Resource struct {
 	cloudtags cloudtags.Interface
 	detection *changedetection.TCNP
-	event     event.Interface
+	event     recorder.Interface
 	images    images.Interface
 	k8sClient k8sclient.Interface
 	logger    micrologger.Logger
 
+	alikeInstances   map[string][]template.LaunchTemplateOverride
 	installationName string
 }
 
@@ -60,8 +65,19 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.AlikeInstances == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AlikeInstances must not be empty", config)
+	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
+	}
+
+	var alikeInstances map[string][]template.LaunchTemplateOverride
+	{
+		err := json.Unmarshal([]byte(config.AlikeInstances), &alikeInstances)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	r := &Resource{
@@ -72,6 +88,7 @@ func New(config Config) (*Resource, error) {
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
+		alikeInstances:   alikeInstances,
 		installationName: config.InstallationName,
 	}
 

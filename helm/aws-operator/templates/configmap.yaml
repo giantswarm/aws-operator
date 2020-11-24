@@ -16,6 +16,7 @@ data:
     service:
       aws:
         accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
+        alikeInstances: '{{ .Values.Installation.V1.Provider.AWS.EC2.Instance.Alike | toJson }}'
         advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
         availabilityZones: '{{ range $i, $e := .Values.Installation.V1.Provider.AWS.AvailabilityZones }}{{ if $i }},{{end}}{{ $e }}{{end}}'
         includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
