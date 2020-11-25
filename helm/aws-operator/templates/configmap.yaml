@@ -47,7 +47,7 @@ data:
           clusterDomain: '{{ .Values.tenant.kubernetes.clusterDomain }}'
           networkSetup:
             docker:
-              image: '{{ .Values.tenant.kubernetes.networkSetup.image }}'
+              image: '{{ .Values.tenant.kubernetes.networkSetup.docker.image }}'
           ssh:
             userList: '{{ .Values.tenant.ssh.userList }}'
       guest:
@@ -63,7 +63,7 @@ data:
         guest:
           ipam:
             network:
-              CIDR: '{{ .Values.tenant.ipam.networkCIDR }}'
+              cidr: '{{ .Values.tenant.ipam.network.cidr }}'
               subnetMaskBits: '{{ .Values.tenant.ipam.network.subnetMaskBits }}'
               privateSubnetMaskBits: '{{ .Values.tenant.ipam.network.privateSubnetMask }}'
               publicSubnetMaskBits: '{{ .Values.tenant.ipam.network.publicSubnetMaskBits }}'
