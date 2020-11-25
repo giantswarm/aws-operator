@@ -65,7 +65,7 @@ data:
             network:
               cidr: '{{ .Values.tenant.ipam.network.cidr }}'
               subnetMaskBits: '{{ .Values.tenant.ipam.network.subnetMaskBits }}'
-              privateSubnetMaskBits: '{{ .Values.tenant.ipam.network.privateSubnetMask }}'
+              privateSubnetMaskBits: '{{ .Values.tenant.ipam.network.privateSubnetMaskBits }}'
               publicSubnetMaskBits: '{{ .Values.tenant.ipam.network.publicSubnetMaskBits }}'
           kubernetes:
             api:
