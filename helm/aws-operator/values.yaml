@@ -36,8 +36,8 @@ tenant:
 
   ipam:
     network:
-      ssubnetMaskBits: 24
-      networkCIDR: 10.1.0.0/16
+      subnetMaskBits: 24
+      cidr: 10.1.0.0/16
       privateSubnetMaskBits: 25
       publicSubnetMaskBits: 25
 
@@ -80,8 +80,8 @@ registry:
   pullSecret:
     dockerConfigJSON: ""
 
-dockerhub:
-  token: token
+  dockerhub:
+    token: token
 
 # generic configuration
 
