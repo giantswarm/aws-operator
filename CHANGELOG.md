@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.2] - 2020-11-26
+
 ### Changed
 
 - Make it mandatory to configure alike instances via e.g. the installations repo.
@@ -333,7 +335,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...HEAD
+[9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
 [9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
 [9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
