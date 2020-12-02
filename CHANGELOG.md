@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update `k8scloudconfig` version to `v9.2.0` to include change for kubelet pull QPS.
+
 ## [9.3.2] - 2020-11-26
 
 ### Changed
