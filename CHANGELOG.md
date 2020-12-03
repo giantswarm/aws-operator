@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add vertical pod autoscaler support.
+
 ## [9.3.3] - 2020-12-02
 ### Changed
 
