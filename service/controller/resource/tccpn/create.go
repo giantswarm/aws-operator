@@ -36,38 +36,38 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		if !cc.Status.TenantCluster.S3Object.Uploaded {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "s3 object not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "s3 object not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "encryption key not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "vpc peering connection id not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.Subnets) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "subnets not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "subnets not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "security groups not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "security groups not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if r.route53Enabled && (cc.Status.TenantCluster.DNS.HostedZoneID == "" || cc.Status.TenantCluster.DNS.InternalHostedZoneID == "") {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "hosted zone id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "hosted zone id not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
@@ -76,14 +76,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		// process and stop here. We will then check on the next reconciliation loop
 		// and continue eventually.
 		if cc.Status.TenantCluster.TCCPN.IsTransitioning {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane nodes cloud formation stack is in transitioning state")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane nodes cloud formation stack is in transitioning state")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "finding the tenant cluster's control plane nodes cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCCPN(&cr)),
@@ -91,16 +91,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane nodes cloud formation stack")
 			err = r.createStack(ctx, cr)
 			if IsNotFound(err) || hamaster.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "CR not available yet")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "not updating cloud formation stack", "reason", "CR not available yet")
+				r.logger.Debugf(ctx, "canceling resource")
 				return nil
 
 			} else if IsTooManyCRsError(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "too many CRs found")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "not updating cloud formation stack", "reason", "too many CRs found")
+				r.logger.Debugf(ctx, "canceling resource")
 				return nil
 
 			} else if err != nil {
@@ -123,15 +123,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if key.StackInProgress(*o.Stacks[0].StackStatus) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
+			r.logger.Debugf(ctx, "the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus)
 			r.event.Emit(ctx, &cr, "CFInProgress", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if key.StackComplete(*o.Stacks[0].StackStatus) {
 			r.event.Emit(ctx, &cr, "CFCompleted", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane nodes cloud formation stack already exists")
+		r.logger.Debugf(ctx, "found the tenant cluster's control plane nodes cloud formation stack already exists")
 	}
 
 	{
@@ -143,13 +143,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if update {
 			err = r.updateStack(ctx, cr)
 			if IsNotFound(err) || hamaster.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "CR not available yet")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "not updating cloud formation stack", "reason", "CR not available yet")
+				r.logger.Debugf(ctx, "canceling resource")
 				return nil
 
 			} else if IsTooManyCRsError(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "not updating cloud formation stack", "reason", "too many CRs found")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "not updating cloud formation stack", "reason", "too many CRs found")
+				r.logger.Debugf(ctx, "canceling resource")
 				return nil
 
 			} else if err != nil {
@@ -169,7 +169,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -181,11 +181,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's control plane nodes cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's control plane nodes cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
@@ -202,7 +202,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "requested the creation of the tenant cluster's control plane nodes cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFCreateRequested", "requested the creation of the tenant cluster's control plane nodes cloud formation stack")
 	}
 
@@ -224,7 +224,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -236,11 +236,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's control plane nodes cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the update of the tenant cluster's control plane nodes cloud formation stack")
 
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
@@ -255,7 +255,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's control plane nodes cloud formation stack")
+		r.logger.Debugf(ctx, "requested the update of the tenant cluster's control plane nodes cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFUpdateRequested", "requested the update of the tenant cluster's control plane nodes cloud formation stack")
 	}
 

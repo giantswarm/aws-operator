@@ -17,8 +17,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if !r.route53Enabled {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "route53 disabled")
+		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	}
 
@@ -35,11 +35,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var intermediateZoneID string
 	g.Go(func() error {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
+		r.logger.Debugf(ctx, "getting intermediate zone ID")
 
 		id, err := r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
+			r.logger.Debugf(ctx, "intermediate zone not found")
 
 			return microerror.Mask(err)
 		} else if err != nil {
@@ -47,18 +47,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 		intermediateZoneID = id
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
+		r.logger.Debugf(ctx, "got intermediate zone ID")
 
 		return nil
 	})
 
 	var finalZoneID string
 	g.Go(func() error {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone ID")
+		r.logger.Debugf(ctx, "getting final zone ID")
 
 		id, err := r.findHostedZoneID(ctx, guest, finalZone)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone not found")
+			r.logger.Debugf(ctx, "final zone not found")
 
 			return microerror.Mask(err)
 		} else if err != nil {
@@ -66,14 +66,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 		finalZoneID = id
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone ID")
+		r.logger.Debugf(ctx, "got final zone ID")
 
 		return nil
 	})
 
 	err = g.Wait()
 	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	} else if err != nil {
@@ -82,7 +82,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var finalZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone name servers")
+		r.logger.Debugf(ctx, "getting final zone name servers")
 
 		nameServers, _, err := r.getNameServersAndTTL(ctx, guest, finalZoneID, finalZone)
 		if err != nil {
@@ -97,11 +97,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			finalZoneRecords = append(finalZoneRecords, v)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone name servers")
+		r.logger.Debugf(ctx, "got final zone name servers")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring final zone delegation from intermediate zone")
+		r.logger.Debugf(ctx, "ensuring final zone delegation from intermediate zone")
 
 		upsert := route53.ChangeActionUpsert
 		ns := route53.RRTypeNs
@@ -128,7 +128,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured final zone delegation from intermediate zone")
+		r.logger.Debugf(ctx, "ensured final zone delegation from intermediate zone")
 	}
 
 	return nil

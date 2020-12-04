@@ -2,7 +2,6 @@ package tccpvpcidstatus
 
 import (
 	"context"
-	"fmt"
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
@@ -33,14 +32,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if cr.Status.Provider.Network.VPCID != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("cluster %#q already has vpc id in status", cr.GetName()))
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "cluster %#q already has vpc id in status", cr.GetName())
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating cluster status with vpc id")
+		r.logger.Debugf(ctx, "updating cluster status with vpc id")
 
 		cr.Status.Provider.Network.VPCID = cc.Status.TenantCluster.TCCP.VPC.ID
 
@@ -49,8 +48,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated cluster status with vpc id")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
+		r.logger.Debugf(ctx, "updated cluster status with vpc id")
+		r.logger.Debugf(ctx, "canceling reconciliation")
 		reconciliationcanceledcontext.SetCanceled(ctx)
 	}
 

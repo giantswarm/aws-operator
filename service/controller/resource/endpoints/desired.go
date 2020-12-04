@@ -25,7 +25,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	var instances []*ec2.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding master instances")
+		r.logger.Debugf(ctx, "finding master instances")
 
 		instances, err = r.searchMasterInstances(ctx, cr)
 		if IsNotFound(err) {
@@ -38,8 +38,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			// TODO we might want to alert at some point when the master instance was
 			// not seen for too long. Like we should be able to find it again after
 			// three resync periods max or something.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find master instance")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find master instance")
+			r.logger.Debugf(ctx, "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
 
@@ -47,7 +47,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d master instances", len(instances)))
+		r.logger.Debugf(ctx, "found %d master instances", len(instances))
 	}
 
 	var addresses []corev1.EndpointAddress
