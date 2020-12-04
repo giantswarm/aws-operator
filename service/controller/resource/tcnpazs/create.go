@@ -27,9 +27,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// We need to cancel the resource early in case the ipam resource did not yet
 	// allocate a subnet for the node pool.
 	if key.MachineDeploymentSubnet(cr) == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cannot collect private subnets for availability zones")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "node pool subnet not yet allocated")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "cannot collect private subnets for availability zones")
+		r.logger.Debugf(ctx, "node pool subnet not yet allocated")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	}
@@ -66,8 +66,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		for i, az := range azs {
 			ng := natGatewayForAvailabilityZone(cc.Status.TenantCluster.TCCP.NATGateways, az)
 			if ng == nil {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "nat gateway information not available yet")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "nat gateway information not available yet")
+				r.logger.Debugf(ctx, "canceling resource")
 
 				return nil
 			}

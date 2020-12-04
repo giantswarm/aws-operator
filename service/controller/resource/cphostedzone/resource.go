@@ -81,26 +81,26 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 
 	// We check if we have CP public HostedZone info cached.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached CP public HostedZone ID")
+		r.logger.Debugf(ctx, "finding cached CP public HostedZone ID")
 
 		if r.cachedCPHostedZoneID != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found cached CP public HostedZone ID %#q", r.cachedCPHostedZoneID))
+			r.logger.Debugf(ctx, "found cached CP public HostedZone ID %#q", r.cachedCPHostedZoneID)
 			cpHostedZoneID = r.cachedCPHostedZoneID
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached CP public HostedZone ID")
+		r.logger.Debugf(ctx, "did not find cached CP public HostedZone ID")
 	}
 
 	// We check if we have CP public HostedZone info cached.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached CP private HostedZone ID")
+		r.logger.Debugf(ctx, "finding cached CP private HostedZone ID")
 
 		if r.cachedCPInternalHostedZoneID != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found cached CP private HostedZone ID %#q", r.cachedCPInternalHostedZoneID))
+			r.logger.Debugf(ctx, "found cached CP private HostedZone ID %#q", r.cachedCPInternalHostedZoneID)
 			cpInternalHostedZoneID = r.cachedCPInternalHostedZoneID
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached CP private HostedZone ID")
+		r.logger.Debugf(ctx, "did not find cached CP private HostedZone ID")
 	}
 
 	if cpHostedZoneID != "" && cpInternalHostedZoneID != "" {
@@ -109,7 +109,7 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 
 	// We do not have a cached CP HostedZones Info for the requested
 	// installation. So we look it up.
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding CP HostedZone IDs")
+	r.logger.Debugf(ctx, "finding CP HostedZone IDs")
 
 	hostedZonesInput := &route53.ListHostedZonesByNameInput{}
 
@@ -122,22 +122,22 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 
 	for _, zone := range o.HostedZones {
 		if *zone.Name == baseDomain && !*zone.Config.PrivateZone {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found CP public HostedZone ID %#q", cpHostedZoneID))
+			r.logger.Debugf(ctx, "found CP public HostedZone ID %#q", cpHostedZoneID)
 			cpHostedZoneID = *zone.Id
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "caching CP public HostedZone ID")
+			r.logger.Debugf(ctx, "caching CP public HostedZone ID")
 			r.cachedCPHostedZoneID = cpHostedZoneID
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cached CP public HostedZone ID")
+			r.logger.Debugf(ctx, "cached CP public HostedZone ID")
 
 		}
 
 		if *zone.Name == baseDomain && *zone.Config.PrivateZone {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found CP private HostedZone ID %#q", cpInternalHostedZoneID))
+			r.logger.Debugf(ctx, "found CP private HostedZone ID %#q", cpInternalHostedZoneID)
 			cpInternalHostedZoneID = *zone.Id
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "caching CP private HostedZone ID")
+			r.logger.Debugf(ctx, "caching CP private HostedZone ID")
 			r.cachedCPInternalHostedZoneID = cpInternalHostedZoneID
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cached CP private HostedZone ID")
+			r.logger.Debugf(ctx, "cached CP private HostedZone ID")
 		}
 	}
 

@@ -49,7 +49,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if len(volumes) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d EBS volumes", len(volumes)))
+		r.logger.Debugf(ctx, "deleting %d EBS volumes", len(volumes))
 
 		// First detach any attached volumes without forcing but shutdown the
 		// instances.
@@ -60,8 +60,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				wait := false
 				err := ebsService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 				if ebs.IsVolumeAttached(err) {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "volume is still attached")
-					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+					r.logger.Debugf(ctx, "volume is still attached")
+					r.logger.Debugf(ctx, "canceling resource")
 					return nil
 				} else if err != nil {
 					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
@@ -78,8 +78,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				wait := false
 				err := ebsService.DetachVolume(ctx, vol.VolumeID, a, force, shutdown, wait)
 				if ebs.IsVolumeAttached(err) {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "volume is still attached")
-					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+					r.logger.Debugf(ctx, "volume is still attached")
+					r.logger.Debugf(ctx, "canceling resource")
 					return nil
 				} else if err != nil {
 					r.logger.LogCtx(ctx, "level", "warning", "message", fmt.Sprintf("failed to force detach EBS volume %s", vol.VolumeID), "stack", fmt.Sprintf("%#v", err))
@@ -95,9 +95,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d EBS volumes", len(volumes)))
+		r.logger.Debugf(ctx, "deleted %d EBS volumes", len(volumes))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting EBS volumes because there aren't any")
+		r.logger.Debugf(ctx, "not deleting EBS volumes because there aren't any")
 	}
 
 	return nil

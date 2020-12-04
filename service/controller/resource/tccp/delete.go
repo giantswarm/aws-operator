@@ -27,7 +27,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding machine deployments for the tenant cluster")
+		r.logger.Debugf(ctx, "finding machine deployments for the tenant cluster")
 
 		l := metav1.AddLabelToSelector(
 			&metav1.LabelSelector{},
@@ -44,20 +44,20 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(list.Items) != 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d machine deployments for the tenant cluster", len(list.Items)))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting the tenant cluster's control plane cloud formation stack")
+			r.logger.Debugf(ctx, "found %d machine deployments for the tenant cluster", len(list.Items))
+			r.logger.Debugf(ctx, "not deleting the tenant cluster's control plane cloud formation stack")
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			r.logger.Debugf(ctx, "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not find machine deployments for the tenant cluster")
+		r.logger.Debugf(ctx, "did not find machine deployments for the tenant cluster")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabling the termination protection of the tenant cluster's control plane cloud formation stack")
+		r.logger.Debugf(ctx, "disabling the termination protection of the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.UpdateTerminationProtectionInput{
 			EnableTerminationProtection: aws.Bool(false),
@@ -66,30 +66,30 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateTerminationProtection(i)
 		if IsDeleteInProgress(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is being deleted")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane cloud formation stack is being deleted")
 			r.event.Emit(ctx, &cr, "CFDelete", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteInProgress))
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			r.logger.Debugf(ctx, "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 		} else if IsDeleteFailed(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack failed to delete")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane cloud formation stack failed to delete")
 			r.event.Emit(ctx, &cr, "CFDeleteFailed", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteFailed))
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			r.logger.Debugf(ctx, "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 
 		} else if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack does not exist")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane cloud formation stack does not exist")
 			r.event.Emit(ctx, &cr, "CFDeleted", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", cloudformation.StackStatusDeleteComplete))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 
@@ -97,11 +97,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "disabled the termination protection of the tenant cluster's control plane cloud formation stack")
+		r.logger.Debugf(ctx, "disabled the termination protection of the tenant cluster's control plane cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the deletion of the tenant cluster's control plane cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the deletion of the tenant cluster's control plane cloud formation stack")
 
 		i := &cloudformation.DeleteStackInput{
 			StackName: aws.String(key.StackNameTCCP(&cr)),
@@ -109,12 +109,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.DeleteStack(i)
 		if IsUpdateInProgress(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane cloud formation stack is being updated")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane cloud formation stack is being updated")
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+			r.logger.Debugf(ctx, "keeping finalizers")
 			finalizerskeptcontext.SetKept(ctx)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 
@@ -122,10 +122,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the deletion of the tenant cluster's control plane cloud formation stack")
+		r.logger.Debugf(ctx, "requested the deletion of the tenant cluster's control plane cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFDeleteRequested", "requested the deletion of the tenant cluster's control plane cloud formation stack")
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+		r.logger.Debugf(ctx, "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)
 	}
 
