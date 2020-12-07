@@ -2,7 +2,6 @@ package s3bucket
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -34,7 +33,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 
 	for _, bucketInput := range createBucketsState {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %#q", bucketInput.Name))
+		r.logger.Debugf(ctx, "creating S3 bucket %#q", bucketInput.Name)
 
 		{
 			i := &s3.CreateBucketInput{
@@ -138,7 +137,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bucketInput.Name))
+		r.logger.Debugf(ctx, "created S3 bucket %#q", bucketInput.Name)
 	}
 
 	return nil

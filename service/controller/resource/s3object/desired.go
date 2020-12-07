@@ -27,8 +27,8 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	paths, err := r.cloudConfig.NewPaths(ctx, obj)
 	if cloudconfig.IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing desired state", "reason", "control plane CR not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "not computing desired state", "reason", "control plane CR not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		resourcecanceledcontext.SetCanceled(ctx)
 		return nil, nil
 
@@ -38,14 +38,14 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 
 	templates, err := r.cloudConfig.NewTemplates(ctx, obj)
 	if cloudconfig.IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing desired state", "reason", "control plane CR not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "not computing desired state", "reason", "control plane CR not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		resourcecanceledcontext.SetCanceled(ctx)
 		return nil, nil
 
 	} else if cloudconfig.IsTimeout(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing desired state", "reason", "secrets are not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "not computing desired state", "reason", "secrets are not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		resourcecanceledcontext.SetCanceled(ctx)
 		return nil, nil
 
