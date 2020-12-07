@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.4] - 2020-12-07
+
 ### Added
 
 - Add vertical pod autoscaler support.
@@ -345,7 +347,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...HEAD
+[9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
 [9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
 [9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
 [9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
