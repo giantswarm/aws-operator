@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID. 
+
 ## [9.3.4] - 2020-12-07
 
 ### Added
