@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.5] - 2020-12-08
+
 ### Changed
 
 - Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID. 
@@ -351,7 +353,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...HEAD
+[9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
 [9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
 [9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
 [9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
