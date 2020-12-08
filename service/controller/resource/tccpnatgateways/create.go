@@ -45,6 +45,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.StackTCCP),
 					},
 				},
+				// ignore NAT gateway in state 'deleting'
+				{
+					Name: aws.String("state"),
+					Values: []*string{
+						aws.String("available"),
+						aws.String("pending"),
+					},
+				},
 			},
 		}
 		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeNatGateways(i)
