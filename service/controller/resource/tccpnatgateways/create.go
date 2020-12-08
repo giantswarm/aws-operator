@@ -45,7 +45,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.StackTCCP),
 					},
 				},
-				// ignore NAT gateway in state 'deleting'
+				// ignore NAT gateway in state 'deleting' or 'deleted'
 				{
 					Name: aws.String("state"),
 					Values: []*string{
