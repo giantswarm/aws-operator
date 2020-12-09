@@ -183,7 +183,7 @@ spec:
             - name: AWS_VPC_K8S_CNI_LOG_FILE
               value: stdout
             - name: AWS_VPC_K8S_PLUGIN_LOG_FILE
-              value: stdout
+              value: /host/var/log/aws-routed-eni/plugin.log
             - name: AWS_VPC_ENI_MTU
               value: "9001"
             - name: AWS_VPC_K8S_CNI_CONFIGURE_RPFILTER
