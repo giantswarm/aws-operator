@@ -29,7 +29,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 				},
 			},
 			expectedNames: []string{
-				"5xchu-g8s-access-logs",
+				"myaccountid-g8s-5xchu-access-logs",
 				"myaccountid-g8s-5xchu",
 			},
 		},
