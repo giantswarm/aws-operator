@@ -66,7 +66,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketAclInput{
-				Bucket:       aws.String(key.TargetLogBucketName(cr)),
+				Bucket:       aws.String(bucketInput.Name),
 				GrantReadACP: aws.String(LogDeliveryURI),
 				GrantWrite:   aws.String(LogDeliveryURI),
 			}
@@ -79,7 +79,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketLifecycleConfigurationInput{
-				Bucket: aws.String(key.TargetLogBucketName(cr)),
+				Bucket: aws.String(bucketInput.Name),
 				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 					Rules: []*s3.LifecycleRule{
 						{
@@ -105,7 +105,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
 					LoggingEnabled: &s3.LoggingEnabled{
-						TargetBucket: aws.String(key.TargetLogBucketName(cr)),
+						TargetBucket: aws.String(key.TargetLogBucketName(&cr, cc.Status.TenantCluster.AWS.AccountID)),
 						TargetPrefix: aws.String(bucketInput.Name + "/"),
 					},
 				},
