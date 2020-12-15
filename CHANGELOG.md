@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Include Account ID in the s3bucket for access logs.
+
 ## [9.3.5] - 2020-12-08
 
 ### Changed
