@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Change AWS CNI and AWS CNI k8s plugin log verbosity to `INFO`.
+- Change AWS CNI log file to `stdout`.
+
 ## [9.3.5] - 2020-12-08
 
 ### Changed
