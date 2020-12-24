@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.1-fix] - 2020-12-24
+
+### Changed
+
+- Remove explicit registry pull limits defaulting to less restrictive upstream settings.
+
 ## [9.3.1] - 2020-11-12
 
 ### Changed
@@ -328,7 +334,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1-fix...HEAD
+[9.3.1-fix]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.1-fix
 [9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
 [9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
