@@ -32,7 +32,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -393,21 +392,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
-	var encryptionSearcherResource resource.Interface
-	{
-		c := encryptionsearcher.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		encryptionSearcherResource, err = encryptionsearcher.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var ipamResource resource.Interface
 	{
 		c := ipam.Config{
@@ -640,7 +624,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		encryptionSearcherResource,
 		regionResource,
 		cpRouteTablesResource,
 		cpVPCResource,
