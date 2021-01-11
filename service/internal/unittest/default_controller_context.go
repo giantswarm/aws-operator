@@ -345,10 +345,7 @@ func DefaultControllerContext() controllercontext.Context {
 		Status: controllercontext.ContextStatus{
 			ControlPlane: controllercontext.ContextStatusControlPlane{
 				AWSAccountID: "control-plane-account",
-				HostedZone: controllercontext.ContextStatusControlPlaneHostedZone{
-					ID: "hosted-zone-test-id",
-				},
-				NATGateway: controllercontext.ContextStatusControlPlaneNATGateway{},
+				NATGateway:   controllercontext.ContextStatusControlPlaneNATGateway{},
 				RouteTables: []*ec2.RouteTable{
 					{
 						RouteTableId: aws.String("gauss-private-1-id"),
