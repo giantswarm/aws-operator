@@ -90,9 +90,8 @@ type ContextStatusTenantClusterTCCP struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
-	Name       string
-	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
-	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
+	Name   string
+	Subnet ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -114,14 +113,6 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	CIDR net.IPNet
 	ID   string
-}
-
-type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable struct {
-	Public ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic
-}
-
-type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
-	ID string
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {
