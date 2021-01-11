@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/to"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -21,16 +20,12 @@ import (
 )
 
 type Config struct {
-	K8sClient k8sclient.Interface
-
 	Stack        string
 	TagKey       string
 	TagValueFunc func(cr key.LabelsGetter) string
 }
 
 type ASG struct {
-	k8sClient k8sclient.Interface
-
 	asgsCache      *cache.ASGs
 	instancesCache *cache.Instances
 
@@ -40,10 +35,6 @@ type ASG struct {
 }
 
 func New(config Config) (*ASG, error) {
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
-
 	if config.Stack == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Stack must not be empty", config)
 	}
@@ -55,8 +46,6 @@ func New(config Config) (*ASG, error) {
 	}
 
 	a := &ASG{
-		k8sClient: config.K8sClient,
-
 		asgsCache:      cache.NewASGs(),
 		instancesCache: cache.NewInstances(),
 
