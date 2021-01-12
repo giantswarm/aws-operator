@@ -156,7 +156,9 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	var createState []BucketState
 	for _, bucket := range desiredBuckets {
 		if !containsBucketState(bucket.Name, currentBuckets) {
-			createState = append(createState, bucket)
+			// in case any of the bucket is missing
+			// rerun all code for all buckets to update bucket logging as well
+			createState = desiredBuckets
 		}
 	}
 
