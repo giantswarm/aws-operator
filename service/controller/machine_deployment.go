@@ -525,6 +525,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tcnp.Config{
 			Detection: tcnpChangeDetection,
+			Encrypter: encrypterObject,
 			Event:     config.Event,
 			Images:    config.Images,
 			K8sClient: config.K8sClient,

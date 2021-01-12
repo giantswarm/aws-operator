@@ -382,6 +382,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := tccpn.Config{
 			Detection: tccpnChangeDetection,
+			Encrypter: encrypterObject,
 			Event:     config.Event,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,

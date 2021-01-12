@@ -346,7 +346,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			cluster:          cl,
 			clusterCerts:     certFiles,
 			encrypter:        t.config.Encrypter,
-			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
+			encryptionKey:    ek,
 			externalSNAT:     externalSNAT,
 			haMasters:        multiMasterEnabled,
 			masterID:         mapping.ID,
