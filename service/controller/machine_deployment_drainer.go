@@ -95,8 +95,6 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	var newASG asg.Interface
 	{
 		c := asg.Config{
-			K8sClient: config.K8sClient,
-
 			Stack:        key.StackTCNP,
 			TagKey:       key.TagMachineDeployment,
 			TagValueFunc: key.MachineDeploymentID,

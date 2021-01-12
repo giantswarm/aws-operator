@@ -12,21 +12,11 @@ type ContextStatus struct {
 }
 
 type ContextStatusControlPlane struct {
-	AWSAccountID       string
-	HostedZone         ContextStatusControlPlaneHostedZone
-	InternalHostedZone ContextStatusControlPlaneInternalHostedZone
-	NATGateway         ContextStatusControlPlaneNATGateway
-	RouteTables        []*ec2.RouteTable
-	PeerRole           ContextStatusControlPlanePeerRole
-	VPC                ContextStatusControlPlaneVPC
-}
-
-type ContextStatusControlPlaneHostedZone struct {
-	ID string
-}
-
-type ContextStatusControlPlaneInternalHostedZone struct {
-	ID string
+	AWSAccountID string
+	NATGateway   ContextStatusControlPlaneNATGateway
+	RouteTables  []*ec2.RouteTable
+	PeerRole     ContextStatusControlPlanePeerRole
+	VPC          ContextStatusControlPlaneVPC
 }
 
 type ContextStatusControlPlaneNATGateway struct {
@@ -100,9 +90,8 @@ type ContextStatusTenantClusterTCCP struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
-	Name       string
-	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
-	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
+	Name   string
+	Subnet ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -124,14 +113,6 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate struct {
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	CIDR net.IPNet
 	ID   string
-}
-
-type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable struct {
-	Public ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic
-}
-
-type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
-	ID string
 }
 
 type ContextStatusTenantClusterTCCPVPC struct {

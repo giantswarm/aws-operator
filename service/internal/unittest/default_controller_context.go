@@ -135,11 +135,6 @@ func ChinaControllerContext() controllercontext.Context {
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "cn-north-1a",
-							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1a",
-								},
-							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -153,11 +148,6 @@ func ChinaControllerContext() controllercontext.Context {
 						},
 						{
 							Name: "cn-north-1b",
-							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1b",
-								},
-							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -171,11 +161,6 @@ func ChinaControllerContext() controllercontext.Context {
 						},
 						{
 							Name: "cn-north-1c",
-							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1c",
-								},
-							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.128/27"),
@@ -345,10 +330,7 @@ func DefaultControllerContext() controllercontext.Context {
 		Status: controllercontext.ContextStatus{
 			ControlPlane: controllercontext.ContextStatusControlPlane{
 				AWSAccountID: "control-plane-account",
-				HostedZone: controllercontext.ContextStatusControlPlaneHostedZone{
-					ID: "hosted-zone-test-id",
-				},
-				NATGateway: controllercontext.ContextStatusControlPlaneNATGateway{},
+				NATGateway:   controllercontext.ContextStatusControlPlaneNATGateway{},
 				RouteTables: []*ec2.RouteTable{
 					{
 						RouteTableId: aws.String("gauss-private-1-id"),
@@ -394,11 +376,6 @@ func DefaultControllerContext() controllercontext.Context {
 					AvailabilityZones: []controllercontext.ContextStatusTenantClusterTCCPAvailabilityZone{
 						{
 							Name: "eu-central-1a",
-							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1a",
-								},
-							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.0/27"),
@@ -412,11 +389,6 @@ func DefaultControllerContext() controllercontext.Context {
 						},
 						{
 							Name: "eu-central-1b",
-							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1b",
-								},
-							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.64/27"),
@@ -430,11 +402,6 @@ func DefaultControllerContext() controllercontext.Context {
 						},
 						{
 							Name: "eu-central-1c",
-							RouteTable: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable{
-								Public: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic{
-									ID: "public-route-table-id-1c",
-								},
-							},
 							Subnet: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnet{
 								Private: controllercontext.ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 									CIDR: mustParseCIDR("10.100.3.128/27"),

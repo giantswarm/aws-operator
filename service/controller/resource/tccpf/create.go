@@ -170,13 +170,18 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 		return nil, microerror.Mask(err)
 	}
 
+	external, internal, err := r.hostedZone.Search(ctx, &cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var recordSets *template.ParamsMainRecordSets
 	{
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                       key.ClusterBaseDomain(cr),
 			ClusterID:                        key.ClusterID(&cr),
-			ControlPlaneInternalHostedZoneID: cc.Status.ControlPlane.InternalHostedZone.ID,
-			ControlPlaneHostedZoneID:         cc.Status.ControlPlane.HostedZone.ID,
+			ControlPlaneInternalHostedZoneID: internal,
+			ControlPlaneHostedZoneID:         external,
 			TenantAPIPublicLoadBalancer:      cc.Status.TenantCluster.DNS.APIPublicLoadBalancer,
 			TenantHostedZoneNameServers:      cc.Status.TenantCluster.DNS.HostedZoneNameServers,
 			Route53Enabled:                   r.route53Enabled,
