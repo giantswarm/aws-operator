@@ -159,6 +159,7 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 			// in case any of the bucket is missing
 			// rerun all code for all buckets to update bucket logging as well
 			createState = desiredBuckets
+			break
 		}
 	}
 
