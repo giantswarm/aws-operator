@@ -38,3 +38,5 @@ require (
 )
 
 replace sigs.k8s.io/cluster-api v0.3.11 => github.com/giantswarm/cluster-api v0.3.10-gs
+
+replace github.com/coreos/etcd/v3 v3.3.13 => github.com/coreos/etcd/v3 v3.3.25
