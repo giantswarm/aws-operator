@@ -328,6 +328,10 @@ func StackNameTCNPF(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
 }
 
+func TargetLogBucketName(getter LabelsGetter, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s-access-logs", accountID, ClusterID(getter))
+}
+
 func VPCPeeringRouteName(az string) string {
 	return fmt.Sprintf("VPCPeeringRoute-%s", az)
 }

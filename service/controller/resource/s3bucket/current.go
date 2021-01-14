@@ -25,7 +25,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 
 	bucketStateNames := []string{
-		key.TargetLogBucketName(cr),
+		key.TargetLogBucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 		key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 	}
 

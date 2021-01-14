@@ -24,7 +24,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	// other buckets can not forward logs to it
 	bucketsState := []BucketState{
 		{
-			Name:             key.TargetLogBucketName(cr),
+			Name:             key.TargetLogBucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 			IsLoggingBucket:  true,
 			IsLoggingEnabled: true,
 		},
