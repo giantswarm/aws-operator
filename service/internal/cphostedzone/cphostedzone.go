@@ -14,17 +14,13 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-const (
-	Name = "cphostedzone"
-)
-
 type Config struct {
 	Logger micrologger.Logger
 
 	Route53Enabled bool
 }
 
-type Resource struct {
+type HostedZone struct {
 	logger micrologger.Logger
 
 	cachedCPHostedZoneID         string
@@ -35,12 +31,12 @@ type Resource struct {
 	route53Enabled bool
 }
 
-func New(config Config) (*Resource, error) {
+func New(config Config) (*HostedZone, error) {
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
-	r := &Resource{
+	h := &HostedZone{
 		logger: config.Logger,
 
 		cachedCPHostedZoneID: "",
@@ -49,58 +45,60 @@ func New(config Config) (*Resource, error) {
 		route53Enabled: config.Route53Enabled,
 	}
 
-	return r, nil
+	return h, nil
 }
 
-func (r *Resource) Name() string {
-	return Name
-}
+func (h *HostedZone) Search(ctx context.Context, obj interface{}) (string, string, error) {
+	cr, err := key.ToCluster(ctx, obj)
+	if err != nil {
+		return "", "", microerror.Mask(err)
+	}
 
-func (r *Resource) addHostedZoneInfoToContext(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+	if !h.route53Enabled {
+		h.logger.Debugf(ctx, "route53 disabled")
+		h.logger.Debugf(ctx, "canceling resource")
+		return "", "", nil
+	}
+
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
-		return microerror.Mask(err)
+		return "", "", microerror.Mask(err)
 	}
 
-	{
-		cpHostedZoneID, cpInternalHostedZoneID, err := r.lookup(ctx, cc.Client.ControlPlane.AWS.Route53, cr)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		cc.Status.ControlPlane.HostedZone.ID = cpHostedZoneID
-		cc.Status.ControlPlane.InternalHostedZone.ID = cpInternalHostedZoneID
+	cpHostedZoneID, cpInternalHostedZoneID, err := h.lookup(ctx, cc.Client.ControlPlane.AWS.Route53, cr)
+	if err != nil {
+		return "", "", microerror.Mask(err)
 	}
 
-	return nil
+	return cpHostedZoneID, cpInternalHostedZoneID, nil
 }
 
-func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructurev1alpha2.AWSCluster) (cpHostedZoneID, cpInternalHostedZoneID string, err error) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+func (h *HostedZone) lookup(ctx context.Context, client Route53, cr infrastructurev1alpha2.AWSCluster) (cpHostedZoneID, cpInternalHostedZoneID string, err error) {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 
 	// We check if we have CP public HostedZone info cached.
 	{
-		r.logger.Debugf(ctx, "finding cached CP public HostedZone ID")
+		h.logger.Debugf(ctx, "finding cached CP public HostedZone ID")
 
-		if r.cachedCPHostedZoneID != "" {
-			r.logger.Debugf(ctx, "found cached CP public HostedZone ID %#q", r.cachedCPHostedZoneID)
-			cpHostedZoneID = r.cachedCPHostedZoneID
+		if h.cachedCPHostedZoneID != "" {
+			h.logger.Debugf(ctx, "found cached CP public HostedZone ID %#q", h.cachedCPHostedZoneID)
+			cpHostedZoneID = h.cachedCPHostedZoneID
 		}
 
-		r.logger.Debugf(ctx, "did not find cached CP public HostedZone ID")
+		h.logger.Debugf(ctx, "did not find cached CP public HostedZone ID")
 	}
 
 	// We check if we have CP public HostedZone info cached.
 	{
-		r.logger.Debugf(ctx, "finding cached CP private HostedZone ID")
+		h.logger.Debugf(ctx, "finding cached CP private HostedZone ID")
 
-		if r.cachedCPInternalHostedZoneID != "" {
-			r.logger.Debugf(ctx, "found cached CP private HostedZone ID %#q", r.cachedCPInternalHostedZoneID)
-			cpInternalHostedZoneID = r.cachedCPInternalHostedZoneID
+		if h.cachedCPInternalHostedZoneID != "" {
+			h.logger.Debugf(ctx, "found cached CP private HostedZone ID %#q", h.cachedCPInternalHostedZoneID)
+			cpInternalHostedZoneID = h.cachedCPInternalHostedZoneID
 		}
 
-		r.logger.Debugf(ctx, "did not find cached CP private HostedZone ID")
+		h.logger.Debugf(ctx, "did not find cached CP private HostedZone ID")
 	}
 
 	if cpHostedZoneID != "" && cpInternalHostedZoneID != "" {
@@ -109,7 +107,7 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 
 	// We do not have a cached CP HostedZones Info for the requested
 	// installation. So we look it up.
-	r.logger.Debugf(ctx, "finding CP HostedZone IDs")
+	h.logger.Debugf(ctx, "finding CP HostedZone IDs")
 
 	hostedZonesInput := &route53.ListHostedZonesByNameInput{}
 
@@ -122,22 +120,22 @@ func (r *Resource) lookup(ctx context.Context, client Route53, cr infrastructure
 
 	for _, zone := range o.HostedZones {
 		if *zone.Name == baseDomain && !*zone.Config.PrivateZone {
-			r.logger.Debugf(ctx, "found CP public HostedZone ID %#q", cpHostedZoneID)
+			h.logger.Debugf(ctx, "found CP public HostedZone ID %#q", cpHostedZoneID)
 			cpHostedZoneID = *zone.Id
 
-			r.logger.Debugf(ctx, "caching CP public HostedZone ID")
-			r.cachedCPHostedZoneID = cpHostedZoneID
-			r.logger.Debugf(ctx, "cached CP public HostedZone ID")
+			h.logger.Debugf(ctx, "caching CP public HostedZone ID")
+			h.cachedCPHostedZoneID = cpHostedZoneID
+			h.logger.Debugf(ctx, "cached CP public HostedZone ID")
 
 		}
 
 		if *zone.Name == baseDomain && *zone.Config.PrivateZone {
-			r.logger.Debugf(ctx, "found CP private HostedZone ID %#q", cpInternalHostedZoneID)
+			h.logger.Debugf(ctx, "found CP private HostedZone ID %#q", cpInternalHostedZoneID)
 			cpInternalHostedZoneID = *zone.Id
 
-			r.logger.Debugf(ctx, "caching CP private HostedZone ID")
-			r.cachedCPInternalHostedZoneID = cpInternalHostedZoneID
-			r.logger.Debugf(ctx, "cached CP private HostedZone ID")
+			h.logger.Debugf(ctx, "caching CP private HostedZone ID")
+			h.cachedCPInternalHostedZoneID = cpInternalHostedZoneID
+			h.logger.Debugf(ctx, "cached CP private HostedZone ID")
 		}
 	}
 
