@@ -37,6 +37,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.6.4
 )
 
-replace sigs.k8s.io/cluster-api v0.3.11 => github.com/giantswarm/cluster-api v0.3.10-gs
-
-replace github.com/coreos/etcd/v3 v3.3.13 => github.com/coreos/etcd/v3 v3.3.25
+replace (
+	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
+	sigs.k8s.io/cluster-api v0.3.11 => github.com/giantswarm/cluster-api v0.3.10-gs
+)
