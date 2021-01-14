@@ -5,4 +5,4 @@ home: https://github.com/giantswarm/aws-operator
 version: [[ .Version ]]
 appVersion: [[ .AppVersion ]]
 annotations:
-  config.giantswarm.io/version: 1.x.x
+  config.giantswarm.io/version: alike
