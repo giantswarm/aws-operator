@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -26,11 +27,17 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	bn := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
+
 	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(cr))
-	if err != nil {
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
+	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	bn := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
 
 	// During deletion, it might happen that the encryption key got already
 	// deleted. In such a case we do not have to do anything here anymore. The
