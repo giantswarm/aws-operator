@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Include Account ID in the s3bucket for access logs. It is a breaking change, that will put access logs to a new s3 bucket.
 - Change AWS CNI and AWS CNI k8s plugin log verbosity to `INFO`.
 - Change AWS CNI log file to `stdout`.
+- Add retry logic for decrypt units to avoid flapping.
 
 ## [9.3.5] - 2020-12-08
 
