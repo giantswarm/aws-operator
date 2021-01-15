@@ -26,6 +26,10 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 	bn := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
 
 	// During deletion, it might happen that the encryption key got already
@@ -35,7 +39,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	// anything here anymore. The current implementation relies on the bucket
 	// deletion of the s3bucket resource, which deletes all S3 objects and the
 	// bucket itself.
-	if cc.Status.TenantCluster.Encryption.Key == "" {
+	if ek == "" {
 		if key.IsDeleted(cr) {
 			r.logger.Debugf(ctx, "not computing current state", "reason", "encryption key not available anymore")
 		} else {

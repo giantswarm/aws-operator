@@ -111,6 +111,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
+	ek, err := t.config.Encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
 	im, err := t.config.Images.CC(ctx, obj)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -246,7 +250,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, randKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, ek, randKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -342,7 +346,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			cluster:          cl,
 			clusterCerts:     certFiles,
 			encrypter:        t.config.Encrypter,
-			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
+			encryptionKey:    ek,
 			externalSNAT:     externalSNAT,
 			haMasters:        multiMasterEnabled,
 			masterID:         mapping.ID,

@@ -33,10 +33,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
-		if cc.Status.TenantCluster.Encryption.Key == "" {
+		if ek == "" {
 			r.logger.Debugf(ctx, "encryption key not available yet")
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
@@ -394,6 +399,11 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 		return nil, microerror.Mask(err)
 	}
 
+	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
@@ -401,7 +411,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 				ID: key.ClusterID(&cr),
 			},
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
+			KMSKeyARN:        ek,
 			NodePool: template.ParamsMainIAMPoliciesNodePool{
 				ID: key.MachineDeploymentID(&cr),
 			},

@@ -123,7 +123,6 @@ func ChinaControllerContext() controllercontext.Context {
 					AccountID: "tenant-account",
 					Region:    "cn-north-1",
 				},
-				Encryption: controllercontext.ContextStatusTenantClusterEncryption{},
 				DNS: controllercontext.ContextStatusTenantClusterDNS{
 					HostedZoneID:          "hosted-zone-id",
 					HostedZoneNameServers: "1.1.1.1,8.8.8.8",
@@ -364,7 +363,6 @@ func DefaultControllerContext() controllercontext.Context {
 					AccountID: "tenant-account",
 					Region:    "eu-central-1",
 				},
-				Encryption: controllercontext.ContextStatusTenantClusterEncryption{},
 				DNS: controllercontext.ContextStatusTenantClusterDNS{
 					HostedZoneID:          "hosted-zone-id",
 					HostedZoneNameServers: "1.1.1.1,8.8.8.8",

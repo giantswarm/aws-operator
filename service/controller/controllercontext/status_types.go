@@ -36,7 +36,6 @@ type ContextStatusTenantCluster struct {
 	ASG             ContextStatusTenantClusterASG
 	AWS             ContextStatusTenantClusterAWS
 	DNS             ContextStatusTenantClusterDNS
-	Encryption      ContextStatusTenantClusterEncryption
 	MasterInstance  ContextStatusTenantClusterMasterInstance
 	S3Object        ContextStatusTenantClusterS3Object
 	TCCP            ContextStatusTenantClusterTCCP
@@ -64,10 +63,6 @@ type ContextStatusTenantClusterDNS struct {
 	HostedZoneNameServers     string
 	IngressPublicLoadBalancer string
 	InternalHostedZoneID      string
-}
-
-type ContextStatusTenantClusterEncryption struct {
-	Key string
 }
 
 type ContextStatusTenantClusterMasterInstance struct {
@@ -121,10 +116,9 @@ type ContextStatusTenantClusterTCCPVPC struct {
 }
 
 type ContextStatusTenantClusterTCCPN struct {
-	EtcdVolumeSnapshotID string
-	IsTransitioning      bool
-	InstanceType         string
-	MasterReplicas       int
+	IsTransitioning bool
+	InstanceType    string
+	MasterReplicas  int
 }
 
 type ContextStatusTenantClusterTCNP struct {

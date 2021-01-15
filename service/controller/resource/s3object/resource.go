@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 // Config represents the configuration used to create a new cloudformation resource.
 type Config struct {
 	CloudConfig cloudconfig.Interface
+	Encrypter   encrypter.Interface
 	Logger      micrologger.Logger
 }
 
@@ -31,6 +33,7 @@ type Config struct {
 // effectively not change most of the time.
 type Resource struct {
 	cloudConfig cloudconfig.Interface
+	encrypter   encrypter.Interface
 	logger      micrologger.Logger
 }
 

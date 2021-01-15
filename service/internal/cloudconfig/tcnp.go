@@ -59,6 +59,10 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+	ek, err := t.config.Encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 	im, err := t.config.Images.CC(ctx, obj)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -183,7 +187,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			cluster:        cl,
 			clusterCerts:   certFiles,
 			encrypter:      t.config.Encrypter,
-			encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+			encryptionKey:  ek,
 			externalSNAT:   externalSNAT,
 			registryDomain: t.config.RegistryDomain,
 		}
