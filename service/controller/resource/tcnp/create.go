@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
 const (
@@ -33,20 +34,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
-	if err != nil {
+	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil
+
+	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
-		if ek == "" {
-			r.logger.Debugf(ctx, "encryption key not available yet")
-			r.logger.Debugf(ctx, "canceling resource")
-			return nil
-		}
-
 		if !cc.Status.TenantCluster.S3Object.Uploaded {
 			r.logger.Debugf(ctx, "s3 object not available yet")
 			r.logger.Debugf(ctx, "canceling resource")
@@ -400,7 +399,11 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 	}
 
 	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
-	if err != nil {
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil, nil
+
+	} else if err != nil {
 		return nil, microerror.Mask(err)
 	}
 

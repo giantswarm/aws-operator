@@ -297,6 +297,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := s3object.Config{
 			CloudConfig: tccpnCloudConfig,
+			Encrypter:   encrypterObject,
 			Logger:      config.Logger,
 		}
 
