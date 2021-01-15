@@ -48,6 +48,7 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		cloudConfig: config.CloudConfig,
+		encrypter:   config.Encrypter,
 		logger:      config.Logger,
 	}
 
