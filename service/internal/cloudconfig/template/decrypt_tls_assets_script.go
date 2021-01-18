@@ -14,7 +14,7 @@ done
 echo "Successfully fetched docker image ${AWS_CLI_IMAGE}."
 
 
-docker run --net=host -v /etc/kubernetes/ssl:/etc/kubernetes/ssl \
+while ! docker run --net=host -v /etc/kubernetes/ssl:/etc/kubernetes/ssl \
         --entrypoint=/bin/sh \
         ${AWS_CLI_IMAGE} \
         -ec \
@@ -22,15 +22,21 @@ docker run --net=host -v /etc/kubernetes/ssl:/etc/kubernetes/ssl \
     echo decrypting tls assets
     for encKey in $(find /etc/kubernetes/ssl -name "*.pem.enc"); do
       echo decrypting $encKey
-      f=$(mktemp $encKey.XXXXXXXX)
+      f=$(mktemp $encKeyb64.XXXXXXXX)
+      f2=$(mktemp $encKey.XXXXXXXX)
       aws \
         --region {{.AWSRegion}} kms decrypt \
         --ciphertext-blob fileb://$encKey \
         --output text \
-        --query Plaintext \
-      | base64 -d > $f
-      mv -f $f ${encKey%.enc}
+        --query Plaintext > $f
+      base64 -d $f > $f2
+      mv -f $f2 ${encKey%.enc}
     done;'
+do
+		echo "Failed to decrypt TLS assets, retrying in 5 sec."
+        sleep 5s
+done
+
 }
 
 
