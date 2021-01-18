@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupiamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
@@ -355,6 +356,18 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var cleanupIAMRolesResource resource.Interface
+	{
+		c := cleanupiamroles.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupIAMRolesResource, err = cleanupiamroles.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpRouteTablesResource resource.Interface
 	{
 		var routeTableNames []string
@@ -651,6 +664,10 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 
 		// All these resources implement logic to update CR status information.
 		tcnpStatusResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupIAMRolesResource,
 	}
 
 	{

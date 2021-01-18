@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `cleanupiamroles` resource for detaching third party policies from our IAM
+  roles.
+
 ### Changed
 
 - Include Account ID in the s3bucket for access logs. It is a breaking change, that will put access logs to a new s3 bucket.
@@ -19,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID. 
+- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID.
 
 ## [9.3.4] - 2020-12-07
 
