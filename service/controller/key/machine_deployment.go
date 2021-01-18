@@ -152,6 +152,10 @@ func MachineDeploymentWorkerCountRatio(workers int, ratio float32) string {
 	return strconv.Itoa(rounded)
 }
 
+func NodeRole(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+	return fmt.Sprintf("gs-cluster-%s-role-%s", ClusterID(&cr), MachineDeploymentID(&cr))
+}
+
 func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {
 	if v == nil {
 		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
