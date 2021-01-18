@@ -5,9 +5,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/giantswarm/microerror"
+
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/microerror"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
