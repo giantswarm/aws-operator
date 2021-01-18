@@ -5,7 +5,7 @@ var (
 	gitSHA             = "n/a"
 	name        string = "aws-operator"
 	source      string = "https://github.com/giantswarm/aws-operator"
-	version            = "9.3.6-xh3b4sd"
+	version            = "9.3.6-dev"
 )
 
 func Description() string {
