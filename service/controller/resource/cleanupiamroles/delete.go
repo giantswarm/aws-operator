@@ -31,7 +31,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.IAM.ListAttachedRolePolicies(i)
 		if IsNotFound(err) {
-			r.logger.Debugf(ctx, "canceling resource", "reason", "no attached policies")
+			r.logger.Debugf(ctx, "no attached policies")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
