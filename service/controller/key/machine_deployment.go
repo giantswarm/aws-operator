@@ -152,7 +152,7 @@ func MachineDeploymentWorkerCountRatio(workers int, ratio float32) string {
 	return strconv.Itoa(rounded)
 }
 
-func NodeRole(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentNodeRole(cr infrastructurev1alpha2.AWSMachineDeployment) string {
 	return fmt.Sprintf("gs-cluster-%s-role-%s", ClusterID(&cr), MachineDeploymentID(&cr))
 }
 
