@@ -26,7 +26,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptccpnpiamroles"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptccpniamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -191,11 +191,11 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 
 	var cleanupIAMRolesResource resource.Interface
 	{
-		c := cleanuptccpnpiamroles.Config{
+		c := cleanuptccpniamroles.Config{
 			Logger: config.Logger,
 		}
 
-		cleanupIAMRolesResource, err = cleanuptccpnpiamroles.New(c)
+		cleanupIAMRolesResource, err = cleanuptccpniamroles.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

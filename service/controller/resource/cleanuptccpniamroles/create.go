@@ -1,4 +1,4 @@
-package cleanuptccpnpiamroles
+package cleanuptccpniamroles
 
 import (
 	"context"

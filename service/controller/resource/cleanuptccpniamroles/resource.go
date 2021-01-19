@@ -1,4 +1,4 @@
-package cleanuptccpnpiamroles
+package cleanuptccpniamroles
 
 import (
 	"github.com/giantswarm/microerror"
@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Name = "cleanuptccpnpiamroles"
+	Name = "cleanuptccpniamroles"
 )
 
 type Config struct {
