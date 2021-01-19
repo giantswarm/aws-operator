@@ -30,7 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupiamroles"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptcnpiamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
@@ -358,11 +358,11 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 
 	var cleanupIAMRolesResource resource.Interface
 	{
-		c := cleanupiamroles.Config{
+		c := cleanuptcnpiamroles.Config{
 			Logger: config.Logger,
 		}
 
-		cleanupIAMRolesResource, err = cleanupiamroles.New(c)
+		cleanupIAMRolesResource, err = cleanuptcnpiamroles.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
