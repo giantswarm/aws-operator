@@ -1,4 +1,4 @@
-package cleanupiamroles
+package cleanuptcnpiamroles
 
 import (
 	"strings"
