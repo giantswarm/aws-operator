@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `cleanupiamroles` resource for detaching third party policies from our IAM
   roles.
+- Allow configuration of `MINIMUM_IP_TARGET` and `WARM_IP_TARGET` for AWS CNI via annotations on `AWSCluster`
 
 ### Changed
 
