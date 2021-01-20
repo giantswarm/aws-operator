@@ -1,4 +1,4 @@
-package cleanuptcnpiamroles
+package cleanuptccpniamroles
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
-	cr, err := key.ToMachineDeployment(obj)
+	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -26,7 +26,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "finding all policies")
 
 		i := &iam.ListAttachedRolePoliciesInput{
-			RoleName: aws.String(key.MachineDeploymentNodeRole(cr)),
+			RoleName: aws.String(key.ControlPlaneNodeRole(cr)),
 		}
 
 		o, err := cc.Client.TenantCluster.AWS.IAM.ListAttachedRolePolicies(i)
@@ -50,7 +50,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		i := &iam.DetachRolePolicyInput{
 			PolicyArn: aws.String(p),
-			RoleName:  aws.String(key.MachineDeploymentNodeRole(cr)),
+			RoleName:  aws.String(key.ControlPlaneNodeRole(cr)),
 		}
 
 		_, err := cc.Client.TenantCluster.AWS.IAM.DetachRolePolicy(i)

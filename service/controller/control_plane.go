@@ -26,6 +26,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptccpniamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -183,6 +184,18 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 
 		accountIDResource, err = accountid.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cleanupIAMRolesResource resource.Interface
+	{
+		c := cleanuptccpniamroles.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupIAMRolesResource, err = cleanuptccpniamroles.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -459,6 +472,10 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// the information given in the controller context.
 		s3ObjectResource,
 		tccpnResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupIAMRolesResource,
 	}
 
 	{
