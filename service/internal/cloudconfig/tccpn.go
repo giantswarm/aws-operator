@@ -3,10 +3,10 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	"net"
 	"sync"
 
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v9/pkg/template"
