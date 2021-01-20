@@ -314,12 +314,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	var awsCNIWarmIPTarget string
 	{
 		awsCNIMinimumIPTarget = key.AWSCNIDefaultMinimumIPTarget
-		if v, ok := cl.GetAnnotations()[annotation.AWSSubnetSize]; ok {
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
 			awsCNIMinimumIPTarget = v
 		}
 
 		awsCNIWarmIPTarget = key.AWSCNIDefaultWarmIPTarget
-		if v, ok := cl.GetAnnotations()[annotation.AWSMetadataV2]; ok {
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
 			awsCNIWarmIPTarget = v
 		}
 	}
