@@ -28,8 +28,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if cc.Client.TenantCluster.K8s == nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "kubernetes clients are not available in controller context yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "kubernetes clients are not available in controller context yet")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	}
@@ -73,7 +73,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// present, we update them according to our desired state. This is some simple
 	// fire and forget approach for now.
 	for _, ec := range eniConfigs {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring ENIConfig CR")
+		r.logger.Debugf(ctx, "ensuring ENIConfig CR")
 
 		err := cc.Client.TenantCluster.K8s.CtrlClient().Create(ctx, ec)
 		if errors.IsAlreadyExists(err) {
@@ -94,7 +94,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured ENIConfig CR")
+		r.logger.Debugf(ctx, "ensured ENIConfig CR")
 	}
 
 	return nil

@@ -9,12 +9,13 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
@@ -66,6 +67,11 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 
 			ctx := unittest.DefaultContextControlPlane()
 			k := unittest.FakeK8sClient()
+
+			var m encrypter.Interface
+			{
+				m = &encrypter.Mock{}
+			}
 
 			var e recorder.Interface
 			{
@@ -163,6 +169,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			var r *Resource
 			{
 				c := Config{
+					Encrypter: m,
 					Event:     e,
 					K8sClient: k,
 					Detection: d,

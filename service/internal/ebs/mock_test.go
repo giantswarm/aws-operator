@@ -3,7 +3,7 @@ package ebs
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
@@ -21,6 +21,30 @@ type ebsVolumeMock struct {
 
 func (e *EC2ClientMock) DeleteVolume(*ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error) {
 	return nil, nil
+}
+
+func (e *EC2ClientMock) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
+	o := &ec2.DescribeInstancesOutput{}
+
+	// test case for instance that does not belong to the cluster
+	// to test behavior of ignoring volume when its mounted to an instance from different cluster
+	if *input.InstanceIds[0] == "i-555555" {
+
+		t := &ec2.Tag{
+			Key:   aws.String(key.TagCluster),
+			Value: aws.String("invalid-cluster"),
+		}
+		i := &ec2.Instance{
+			Tags: []*ec2.Tag{t},
+		}
+		r := &ec2.Reservation{
+			Instances: []*ec2.Instance{i},
+		}
+
+		o.Reservations = []*ec2.Reservation{r}
+	}
+
+	return o, nil
 }
 
 func (e *EC2ClientMock) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {

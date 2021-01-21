@@ -1,11 +1,12 @@
 package tccpn
 
 import (
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
@@ -18,6 +19,7 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCCPN
+	Encrypter encrypter.Interface
 	Event     event.Interface
 	HAMaster  hamaster.Interface
 	Images    images.Interface
@@ -33,6 +35,7 @@ type Config struct {
 // pool.
 type Resource struct {
 	detection *changedetection.TCCPN
+	encrypter encrypter.Interface
 	event     event.Interface
 	haMaster  hamaster.Interface
 	images    images.Interface
@@ -46,6 +49,9 @@ type Resource struct {
 func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
+	if config.Encrypter == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
@@ -69,6 +75,7 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		detection: config.Detection,
+		encrypter: config.Encrypter,
 		event:     config.Event,
 		haMaster:  config.HAMaster,
 		images:    config.Images,

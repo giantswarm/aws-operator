@@ -6,17 +6,17 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
-	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -35,7 +35,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
@@ -60,6 +59,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -254,6 +254,20 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		clusterPersister, err = ipam.NewClusterPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var hostedZone *cphostedzone.HostedZone
+	{
+		c := cphostedzone.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		hostedZone, err = cphostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -578,9 +592,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpfResource resource.Interface
 	{
 		c := tccpf.Config{
-			Detection: tccpfChangeDetection,
-			Event:     config.Event,
-			Logger:    config.Logger,
+			Detection:  tccpfChangeDetection,
+			Event:      config.Event,
+			HostedZone: hostedZone,
+			Logger:     config.Logger,
 
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
@@ -654,20 +669,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		peerRoleARNResource, err = peerrolearn.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var cpHostedZoneResource resource.Interface
-	{
-		c := cphostedzone.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		cpHostedZoneResource, err = cphostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -790,7 +791,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
-		cpHostedZoneResource,
 		cpRouteTablesResource,
 		cpVPCResource,
 		tccpVPCIDResource,

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -29,7 +29,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 				},
 			},
 			expectedNames: []string{
-				"5xchu-g8s-access-logs",
+				"myaccountid-g8s-5xchu-access-logs",
 				"myaccountid-g8s-5xchu",
 			},
 		},

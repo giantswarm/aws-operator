@@ -25,7 +25,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var id string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster snapshot id")
+		r.logger.Debugf(ctx, "finding the tenant cluster snapshot id")
 
 		i := &ec2.DescribeSnapshotsInput{
 			Filters: []*ec2.Filter{
@@ -56,8 +56,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(o.Snapshots) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster snapshot id is not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "the tenant cluster snapshot id is not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
@@ -67,7 +67,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		id = *o.Snapshots[0].SnapshotId
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the tenant cluster snapshot id %#q", id))
+		r.logger.Debugf(ctx, "found the tenant cluster snapshot id %#q", id)
 	}
 
 	cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID = id

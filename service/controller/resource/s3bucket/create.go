@@ -2,7 +2,6 @@ package s3bucket
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -34,7 +33,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 
 	for _, bucketInput := range createBucketsState {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating S3 bucket %#q", bucketInput.Name))
+		r.logger.Debugf(ctx, "creating S3 bucket %#q", bucketInput.Name)
 
 		{
 			i := &s3.CreateBucketInput{
@@ -67,7 +66,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketAclInput{
-				Bucket:       aws.String(key.TargetLogBucketName(cr)),
+				Bucket:       aws.String(bucketInput.Name),
 				GrantReadACP: aws.String(LogDeliveryURI),
 				GrantWrite:   aws.String(LogDeliveryURI),
 			}
@@ -80,7 +79,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		if bucketInput.IsLoggingBucket {
 			i := &s3.PutBucketLifecycleConfigurationInput{
-				Bucket: aws.String(key.TargetLogBucketName(cr)),
+				Bucket: aws.String(bucketInput.Name),
 				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 					Rules: []*s3.LifecycleRule{
 						{
@@ -106,7 +105,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				Bucket: aws.String(bucketInput.Name),
 				BucketLoggingStatus: &s3.BucketLoggingStatus{
 					LoggingEnabled: &s3.LoggingEnabled{
-						TargetBucket: aws.String(key.TargetLogBucketName(cr)),
+						TargetBucket: aws.String(key.TargetLogBucketName(&cr, cc.Status.TenantCluster.AWS.AccountID)),
 						TargetPrefix: aws.String(bucketInput.Name + "/"),
 					},
 				},
@@ -138,7 +137,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created S3 bucket %#q", bucketInput.Name))
+		r.logger.Debugf(ctx, "created S3 bucket %#q", bucketInput.Name)
 	}
 
 	return nil
@@ -157,7 +156,10 @@ func (r *Resource) newCreateChange(ctx context.Context, obj, currentState, desir
 	var createState []BucketState
 	for _, bucket := range desiredBuckets {
 		if !containsBucketState(bucket.Name, currentBuckets) {
-			createState = append(createState, bucket)
+			// in case any of the bucket is missing
+			// rerun all code for all buckets to update bucket logging as well
+			createState = desiredBuckets
+			break
 		}
 	}
 

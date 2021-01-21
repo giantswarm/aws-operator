@@ -2,11 +2,10 @@ package tccpf
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
@@ -31,14 +30,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the VPC Peering Connection ID in the controller context")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find the VPC Peering Connection ID in the controller context")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "finding the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCCPF(&cr)),
@@ -46,7 +45,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.ControlPlane.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane finalizer cloud formation stack")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane finalizer cloud formation stack")
 			err = r.createStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
@@ -68,16 +67,16 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusCreateInProgress {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusCreateInProgress)
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if *o.Stacks[0].StackStatus == cloudformation.StackStatusUpdateInProgress {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane finalizer cloud formation stack has stack status %#q", cloudformation.StackStatusUpdateInProgress)
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane finalizer cloud formation stack already exists")
+		r.logger.Debugf(ctx, "found the tenant cluster's control plane finalizer cloud formation stack already exists")
 	}
 
 	{
@@ -105,7 +104,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane finalizer cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -117,11 +116,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
@@ -138,11 +137,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "requested the creation of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waiting for the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "waiting for the creation of the tenant cluster's control plane finalizer cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCCPF(&cr)),
@@ -153,7 +152,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "waited for the creation of the tenant cluster's control plane finalizer cloud formation stack")
+		r.logger.Debugf(ctx, "waited for the creation of the tenant cluster's control plane finalizer cloud formation stack")
 	}
 
 	return nil
@@ -171,13 +170,18 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 		return nil, microerror.Mask(err)
 	}
 
+	external, internal, err := r.hostedZone.Search(ctx, &cr)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var recordSets *template.ParamsMainRecordSets
 	{
 		recordSets = &template.ParamsMainRecordSets{
 			BaseDomain:                       key.ClusterBaseDomain(cr),
 			ClusterID:                        key.ClusterID(&cr),
-			ControlPlaneInternalHostedZoneID: cc.Status.ControlPlane.InternalHostedZone.ID,
-			ControlPlaneHostedZoneID:         cc.Status.ControlPlane.HostedZone.ID,
+			ControlPlaneInternalHostedZoneID: internal,
+			ControlPlaneHostedZoneID:         external,
 			TenantAPIPublicLoadBalancer:      cc.Status.TenantCluster.DNS.APIPublicLoadBalancer,
 			TenantHostedZoneNameServers:      cc.Status.TenantCluster.DNS.HostedZoneNameServers,
 			Route53Enabled:                   r.route53Enabled,

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/crud"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -15,16 +15,16 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if serviceToUpdate != nil && serviceToUpdate.Spec.ClusterIP != "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating services")
+		r.logger.Debugf(ctx, "updating services")
 
 		_, err := r.k8sClient.CoreV1().Services(serviceToUpdate.Namespace).Update(ctx, serviceToUpdate, metav1.UpdateOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated services")
+		r.logger.Debugf(ctx, "updated services")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not update service")
+		r.logger.Debugf(ctx, "did not update service")
 	}
 
 	return nil
@@ -59,7 +59,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 		return nil, microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding out if the service has to be updated")
+	r.logger.Debugf(ctx, "finding out if the service has to be updated")
 
 	if isServiceModified(desiredService, currentService) {
 		// Make a copy and set the resource version so the service can be updated.
@@ -68,12 +68,12 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 			serviceToUpdate.ObjectMeta.ResourceVersion = currentService.ObjectMeta.ResourceVersion
 			serviceToUpdate.Spec.ClusterIP = currentService.Spec.ClusterIP
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", "the service has to be updated")
+		r.logger.Debugf(ctx, "the service has to be updated")
 
 		return serviceToUpdate, nil
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "the service does not have to be updated")
+	r.logger.Debugf(ctx, "the service does not have to be updated")
 
 	return nil, nil
 }

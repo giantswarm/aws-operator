@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -26,8 +26,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptccpniamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
@@ -189,6 +189,18 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var cleanupIAMRolesResource resource.Interface
+	{
+		c := cleanuptccpniamroles.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupIAMRolesResource, err = cleanuptccpniamroles.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encrypterObject encrypter.Interface
 	{
 		c := &kms.EncrypterConfig{
@@ -294,25 +306,11 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
-	var encryptionSearcherResource resource.Interface
-	{
-		c := encryptionsearcher.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		encryptionSearcherResource, err = encryptionsearcher.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
 			CloudConfig: tccpnCloudConfig,
+			Encrypter:   encrypterObject,
 			Logger:      config.Logger,
 		}
 
@@ -398,6 +396,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := tccpn.Config{
 			Detection: tccpnChangeDetection,
+			Encrypter: encrypterObject,
 			Event:     config.Event,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,
@@ -458,7 +457,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		encryptionSearcherResource,
 		tccpOutputsResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
@@ -474,6 +472,10 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// the information given in the controller context.
 		s3ObjectResource,
 		tccpnResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupIAMRolesResource,
 	}
 
 	{

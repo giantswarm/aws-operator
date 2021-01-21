@@ -6,9 +6,9 @@ import (
 	"net"
 	"sync"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v9/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
@@ -56,6 +56,10 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		return nil, microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	ek, err := t.config.Encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -183,7 +187,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			cluster:        cl,
 			clusterCerts:   certFiles,
 			encrypter:      t.config.Encrypter,
-			encryptionKey:  cc.Status.TenantCluster.Encryption.Key,
+			encryptionKey:  ek,
 			externalSNAT:   externalSNAT,
 			registryDomain: t.config.RegistryDomain,
 		}

@@ -9,12 +9,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/resourcecanceledcontext"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/resourcecanceledcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -28,29 +29,25 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 	bn := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
 
-	// During deletion, it might happen that the encryption key got already
-	// deleted. In such a case we do not have to do anything here anymore. The
-	// desired state computation usually requires the encryption key to come up
-	// with the deletion state, but in case it is gone we do not have to do
-	// anything here anymore. The current implementation relies on the bucket
-	// deletion of the s3bucket resource, which deletes all S3 objects and the
-	// bucket itself.
-	if cc.Status.TenantCluster.Encryption.Key == "" {
-		if key.IsDeleted(cr) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "encryption key not available anymore")
-		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "encryption key not available yet")
-		}
-
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
 		resourcecanceledcontext.SetCanceled(ctx)
 		return nil, nil
+
+	} else if kms.IsKeyScheduledForDeletion(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available anymore")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
+	} else if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	paths, err := r.cloudConfig.NewPaths(ctx, obj)
 	if cloudconfig.IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", "control plane CR not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "not computing current state", "reason", "control plane CR not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		resourcecanceledcontext.SetCanceled(ctx)
 		return nil, nil
 
@@ -60,7 +57,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var s3Objects []*s3.PutObjectInput
 	for _, p := range paths {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
+		r.logger.Debugf(ctx, "finding S3 object %#q", fmt.Sprintf("%s/%s", bn, p))
 
 		i := &s3.GetObjectInput{
 			Bucket: aws.String(bn),
@@ -69,13 +66,13 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 		o, err := cc.Client.TenantCluster.AWS.S3.GetObject(i)
 		if IsBucketNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "not computing current state", "reason", fmt.Sprintf("did not find S3 bucket %#q", bn))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "not computing current state", "reason", fmt.Sprintf("did not find S3 bucket %#q", bn))
+			r.logger.Debugf(ctx, "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil, nil
 
 		} else if IsObjectNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
+			r.logger.Debugf(ctx, "did not find S3 object %#q", fmt.Sprintf("%s/%s", bn, p))
 			return nil, nil
 
 		} else if err != nil {
@@ -87,7 +84,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found S3 object %#q", fmt.Sprintf("%s/%s", bn, p)))
+		r.logger.Debugf(ctx, "found S3 object %#q", fmt.Sprintf("%s/%s", bn, p))
 
 		s3Object := &s3.PutObjectInput{
 			Key:           aws.String(p),

@@ -4,10 +4,10 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/reconciliationcanceledcontext"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -62,7 +62,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		numberInstancesEqual := cr.Status.Provider.Worker.SpotInstances == cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances
 
 		if !instanceTypesEqual || !numberInstancesEqual {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "updating cr status")
+			r.logger.Debugf(ctx, "updating cr status")
 
 			cr.Status.Provider.Worker.InstanceTypes = cc.Status.TenantCluster.TCNP.Instances.InstanceTypes
 			cr.Status.Provider.Worker.SpotInstances = cc.Status.TenantCluster.TCNP.Instances.NumberOfSpotInstances
@@ -72,8 +72,8 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "updated cr status")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling reconciliation")
+			r.logger.Debugf(ctx, "updated cr status")
+			r.logger.Debugf(ctx, "canceling reconciliation")
 			reconciliationcanceledcontext.SetCanceled(ctx)
 			return nil
 		}

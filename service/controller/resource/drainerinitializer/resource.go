@@ -2,17 +2,16 @@ package drainerinitializer
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/core/v1alpha1"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/core/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,7 +85,7 @@ func (r *Resource) Name() string {
 }
 
 func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1alpha2.AWSCluster, cr metav1.Object, instanceID, privateDNS string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("creating drainer config for ec2 instance %#q", instanceID))
+	r.logger.Debugf(ctx, "creating drainer config for ec2 instance %#q", instanceID)
 
 	dc := &g8sv1alpha1.DrainerConfig{
 		ObjectMeta: metav1.ObjectMeta{
@@ -119,7 +118,7 @@ func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1a
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("created drainer config for ec2 instance %#q", instanceID))
+	r.logger.Debugf(ctx, "created drainer config for ec2 instance %#q", instanceID)
 
 	return nil
 }
@@ -144,19 +143,19 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	{
 		drainable, err := r.asg.Drainable(ctx, cr)
 		if asg.IsNoASG(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any auto scaling group")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find any auto scaling group")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if asg.IsNoDrainable(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any drainable auto scaling group yet")
+			r.logger.Debugf(ctx, "did not find any drainable auto scaling group yet")
 
 			if key.IsDeleted(cr) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				r.logger.Debugf(ctx, "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if err != nil {
@@ -168,7 +167,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	var instances []*autoscaling.Instance
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
+		r.logger.Debugf(ctx, "finding ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait)
 
 		i := &autoscaling.DescribeAutoScalingGroupsInput{
 			AutoScalingGroupNames: []*string{
@@ -185,7 +184,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		for _, g := range o.AutoScalingGroups {
 			for _, i := range g.Instances {
 				c++
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("checking instance %#q with state %#q", *i.InstanceId, *i.LifecycleState))
+				r.logger.Debugf(ctx, "checking instance %#q with state %#q", *i.InstanceId, *i.LifecycleState)
 
 				if *i.LifecycleState == autoscaling.LifecycleStateTerminatingWait || *i.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 					instances = append(instances, i)
@@ -196,34 +195,34 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		// In case there aren't any EC2 instances in the ASG we assume all draining
 		// and deletion is properly done.
 		if c == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find any ec2 instance")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find any ec2 instance")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(instances) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait))
+			r.logger.Debugf(ctx, "did not find ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait)
 
 			// In case there aren't EC2 instances in Terminating:Wait state, we cancel
 			// and keep finalizers on delete events, so we try again on the next
 			// reconciliation loop.
 			if key.IsDeleted(cr) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				r.logger.Debugf(ctx, "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.Debugf(ctx, "found %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait)
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensuring drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.Debugf(ctx, "ensuring drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait)
 
 		for _, instance := range instances {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding drainer config for ec2 instance %#q", *instance.InstanceId))
+			r.logger.Debugf(ctx, "finding drainer config for ec2 instance %#q", *instance.InstanceId)
 
 			privateDNS, err := r.privateDNSForInstance(ctx, *instance.InstanceId)
 			if err != nil {
@@ -236,8 +235,8 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				// chance to gather the drainer configs here. The operator then did its
 				// job already and we only have to deal with the edge case situation. So
 				// we just stop here and move on with the other instances.
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no private DNS for ec2 instance %#q", *instance.InstanceId))
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not draining ec2 instance %#q", *instance.InstanceId))
+				r.logger.Debugf(ctx, "no private DNS for ec2 instance %#q", *instance.InstanceId)
+				r.logger.Debugf(ctx, "not draining ec2 instance %#q", *instance.InstanceId)
 
 				// Terminated instance that still have lifecycle action in the AWS API.
 				// Lets finish lifecycle hook to get rid of the instance in next loop.
@@ -245,13 +244,13 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				if err != nil {
 					return microerror.Mask(err)
 				}
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed lifecycle hook for terminated ec2 instance %#q", *instance.InstanceId))
+				r.logger.Debugf(ctx, "completed lifecycle hook for terminated ec2 instance %#q", *instance.InstanceId)
 				continue
 			}
 
 			dc, err := r.g8sClient.CoreV1alpha1().DrainerConfigs(cr.GetNamespace()).Get(ctx, privateDNS, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find drainer config for ec2 instance %#q", *instance.InstanceId))
+				r.logger.Debugf(ctx, "did not find drainer config for ec2 instance %#q", *instance.InstanceId)
 				// create drainerConfig for the instance
 				err := r.createDrainerConfig(ctx, cl, cr, *instance.InstanceId, privateDNS)
 				if err != nil {
@@ -267,17 +266,17 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 						return microerror.Mask(err)
 					}
 
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted leftover drainer config for ec2 instance %#q", *instance.InstanceId))
+					r.logger.Debugf(ctx, "deleted leftover drainer config for ec2 instance %#q", *instance.InstanceId)
 					// cancel resource to let deletion happen the drainer config will be
 					// recreated with proper details next loop
-					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+					r.logger.Debugf(ctx, "canceling resource")
 					return nil
 				} else {
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found drainer config for ec2 instance %#q", *instance.InstanceId))
+					r.logger.Debugf(ctx, "found drainer config for ec2 instance %#q", *instance.InstanceId)
 				}
 			}
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait))
+		r.logger.Debugf(ctx, "ensured drainer configs for %d ec2 instances in %#q state", len(instances), autoscaling.LifecycleStateTerminatingWait)
 	}
 
 	return nil
@@ -313,7 +312,7 @@ func (r *Resource) privateDNSForInstance(ctx context.Context, instanceID string)
 }
 
 func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgName string) error {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completing life cycle hook action for tenant cluster node %#q", instanceID))
+	r.logger.Debugf(ctx, "completing life cycle hook action for tenant cluster node %#q", instanceID)
 	i := &autoscaling.CompleteLifecycleActionInput{
 		AutoScalingGroupName:  aws.String(asgName),
 		InstanceId:            aws.String(instanceID),
@@ -328,14 +327,14 @@ func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgNam
 
 	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
 	if IsNoActiveLifeCycleAction(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("not found life cycle hook action for tenant cluster node %#q", instanceID))
+		r.logger.Debugf(ctx, "not found life cycle hook action for tenant cluster node %#q", instanceID)
 	} else if err != nil {
 		return microerror.Mask(err)
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
+		r.logger.Debugf(ctx, "completed life cycle hook action for tenant cluster node %#q", instanceID)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("completed life cycle hook action for tenant cluster node %#q", instanceID))
+	r.logger.Debugf(ctx, "completed life cycle hook action for tenant cluster node %#q", instanceID)
 
 	return nil
 }

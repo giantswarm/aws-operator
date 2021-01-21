@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/project"
@@ -229,10 +229,6 @@ func RouteTableName(cluster infrastructurev1alpha2.AWSCluster, suffix, az string
 
 func StatusClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Status.Provider.Network.CIDR
-}
-
-func TargetLogBucketName(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
 }
 
 func TenantClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {

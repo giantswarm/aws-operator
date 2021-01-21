@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -61,7 +61,7 @@ func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) (
 	g := &errgroup.Group{}
 
 	g.Go(func() error {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from AWSConfig CRs")
+		c.logger.Debugf(ctx, "finding allocated subnets from AWSConfig CRs")
 
 		subnets, err := c.getSubnetsFromAWSConfigs(ctx)
 		if err != nil {
@@ -71,13 +71,13 @@ func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) (
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		c.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from AWSConfig CRs")
+		c.logger.Debugf(ctx, "found allocated subnets from AWSConfig CRs")
 
 		return nil
 	})
 
 	g.Go(func() error {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from Cluster CRs")
+		c.logger.Debugf(ctx, "finding allocated subnets from Cluster CRs")
 
 		subnets, err := c.getSubnetsFromClusters(ctx)
 		if err != nil {
@@ -87,13 +87,13 @@ func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) (
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		c.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from Cluster CRs")
+		c.logger.Debugf(ctx, "found allocated subnets from Cluster CRs")
 
 		return nil
 	})
 
 	g.Go(func() error {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from MachineDeployment CRs")
+		c.logger.Debugf(ctx, "finding allocated subnets from MachineDeployment CRs")
 
 		subnets, err := c.getSubnetsFromMachineDeployments(ctx)
 		if err != nil {
@@ -103,13 +103,13 @@ func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) (
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		c.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from MachineDeployment CRs")
+		c.logger.Debugf(ctx, "found allocated subnets from MachineDeployment CRs")
 
 		return nil
 	})
 
 	g.Go(func() error {
-		c.logger.LogCtx(ctx, "level", "debug", "message", "finding allocated subnets from VPCs")
+		c.logger.Debugf(ctx, "finding allocated subnets from VPCs")
 
 		subnets, err := c.getSubnetsFromVPCs(ctx)
 		if err != nil {
@@ -119,7 +119,7 @@ func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) (
 		reservedSubnets = append(reservedSubnets, subnets...)
 		mutex.Unlock()
 
-		c.logger.LogCtx(ctx, "level", "debug", "message", "found allocated subnets from VPCs")
+		c.logger.Debugf(ctx, "found allocated subnets from VPCs")
 
 		return nil
 	})

@@ -3,10 +3,10 @@ package key
 import (
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
@@ -61,6 +61,10 @@ func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string 
 	return fmt.Sprintf("ControlPlaneNodeLaunchTemplate%d", id)
 }
 
+func ControlPlaneNodeRole(cr infrastructurev1alpha2.AWSControlPlane) string {
+	return fmt.Sprintf("gs-cluster-%s-role-tccpn", ClusterID(&cr))
+}
+
 func ControlPlaneRecordSetsRecordValue(id int) string {
 	return fmt.Sprintf("etcd%d", id)
 }
@@ -86,7 +90,7 @@ func ControlPlaneVolumeResourceName(id int) string {
 }
 
 func ControlPlaneMetadataV2(cr infrastructurev1alpha2.AWSControlPlane) string {
-	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadata]
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadataV2]
 	if !ok {
 		return "optional"
 	}

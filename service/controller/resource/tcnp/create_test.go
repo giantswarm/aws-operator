@@ -9,13 +9,14 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
@@ -63,6 +64,11 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+			}
+
+			var m encrypter.Interface
+			{
+				m = &encrypter.Mock{}
 			}
 
 			var e recorder.Interface
@@ -126,11 +132,13 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			{
 				c := Config{
 					Detection: d,
+					Encrypter: m,
 					Event:     e,
 					Images:    i,
 					K8sClient: k,
 					Logger:    microloggertest.New(),
 
+					AlikeInstances:   `{"m5.2xlarge":[{"InstanceType":"m5.2xlarge","WeightedCapacity":1},{"InstanceType":"m4.2xlarge","WeightedCapacity":1}]}`,
 					InstallationName: "dummy",
 				}
 

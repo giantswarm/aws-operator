@@ -8,17 +8,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `cleanupiamroles` resource for detaching third party policies from our IAM
+  roles.
+
+### Changed
+
+- Include Account ID in the s3bucket for access logs. It is a breaking change, that will put access logs to a new s3 bucket.
+- Change AWS CNI and AWS CNI k8s plugin log verbosity to `INFO`.
+- Change AWS CNI log file to `stdout`.
+- Add retry logic for decrypt units to avoid flapping.
+
+## [9.3.5] - 2020-12-08
+
+### Changed
+
+- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID.
+
+## [9.3.4] - 2020-12-07
+
+### Added
+
+- Add vertical pod autoscaler support.
+- Update `k8scloudconfig` version to `v9.3.0` to include change for cgroup for kubelet.
+
+## [9.3.3] - 2020-12-02
+### Changed
+
+- Update `k8scloudconfig` version to `v9.2.0` to include change for kubelet pull QPS.
+
+## [9.3.2] - 2020-11-26
+
+### Changed
+
+- Make it mandatory to configure alike instances via e.g. the installations repo.
+- Fix naming and logs for `terminate-unhealthy-node` feature.
+
+## [9.3.1] - 2020-11-12
+
+### Changed
+
+- Update dependencies to next major versions.
+
+### Fixed
+
+- During a deletion of a cluster, ignore volumes that are mounted to an instance in a different cluster.
+
+## [9.3.0] - 2020-11-09
+
+### Added
+
+- Annotation `alpha.aws.giantswarm.io/metadata-v2` to enable AWS Metadata API v2
+- Annotation `alpha.aws.giantswarm.io/aws-subnet-size` to customize subnet size of Control Plane and Node Pools
+- Annotation `alpha.aws.giantswarm.io/update-max-batch-size` to configure max batch size in ASG update policy on cluster or machine deployment CR.
+- Annotation `alpha.aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update on cluster or machine deployment CR.
+
 ## [9.2.0] - 2020-11-03
 
 ### Added
 
 - Annotation `alpha.giantswarm.io/aws-metadata-v2` to enable AWS Metadata API v2
-- Annotation `alpha.aws.giantswarm.io/update-max-batch-size` to configure max batch size in ASG update policy on cluster or machine deployment CR.
-- Annotation `alpha.aws.giantswarm.io/update-pause-time` to configure pause between batches in ASG update on cluster or machine deployment CR.
 - Add `terminate-unhealthy-node` feature to automatically terminate bad and
   unhealthy nodes in a Cluster.
-- Add `alpha.giantswarm.io/aws-metadata-v2` annotation to enable AWS Metadata
-  API v2.
 
 ### Fixed
 
@@ -313,7 +365,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...HEAD
+[9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
+[9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
+[9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
+[9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
+[9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
+[9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
 [9.1.3]: https://github.com/giantswarm/aws-operator/compare/v9.1.2...v9.1.3
 [9.1.2]: https://github.com/giantswarm/aws-operator/compare/v9.1.1...v9.1.2

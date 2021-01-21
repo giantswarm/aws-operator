@@ -7,16 +7,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
 const (
@@ -33,48 +34,51 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil
+
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
-		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
-			return nil
-		}
-
 		if !cc.Status.TenantCluster.S3Object.Uploaded {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "s3 object not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "s3 object not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "availability zone information not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "availability zone information not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "security group information not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "vpc peering connection id not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "finding the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCNP(&cr)),
@@ -82,7 +86,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's node pool cloud formation stack")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's node pool cloud formation stack")
 
 			err = r.createStack(ctx, cr)
 			if err != nil {
@@ -105,15 +109,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if key.StackInProgress(*o.Stacks[0].StackStatus) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
+			r.logger.Debugf(ctx, "the tenant cluster's node pool cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus)
 			r.event.Emit(ctx, &cr, "CFInProgress", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if key.StackComplete(*o.Stacks[0].StackStatus) {
 			r.event.Emit(ctx, &cr, "CFCompleted", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool cloud formation stack already exists")
+		r.logger.Debugf(ctx, "found the tenant cluster's node pool cloud formation stack already exists")
 	}
 
 	{
@@ -145,7 +149,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's node pool cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -157,11 +161,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's node pool cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
@@ -178,7 +182,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requested the creation of the tenant cluster's node pool cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFCreateRequested", "requested the creation of the tenant cluster's node pool cloud formation stack")
 	}
 
@@ -200,7 +204,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's node pool cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -212,11 +216,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's node pool cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the update of the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
@@ -230,7 +234,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requested the update of the tenant cluster's node pool cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFUpdateRequested", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
 
@@ -308,7 +312,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 
 	var launchTemplateOverride []template.LaunchTemplateOverride
 	{
-		val, ok := key.MachineDeploymentLaunchTemplateOverrides[key.MachineDeploymentInstanceType(cr)]
+		val, ok := r.alikeInstances[key.MachineDeploymentInstanceType(cr)]
 
 		if cr.Spec.Provider.Worker.UseAlikeInstanceTypes && ok {
 			launchTemplateOverride = val
@@ -319,16 +323,16 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	var minInstancesInService string
 	{
 		// try read the value from cluster CR
-		if val, ok := cl.Annotations[annotation.UpdateMaxBatchSize]; ok {
+		if val, ok := cl.Annotations[annotation.AWSUpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "value of MaxBatchSize for ASG updates set by annotation from AWSCluster CR")
+			r.logger.Debugf(ctx, "value of MaxBatchSize for ASG updates set by annotation from AWSCluster CR")
 		}
 		// override the value with machine deployment value if its set
-		if val, ok := cr.Annotations[annotation.UpdateMaxBatchSize]; ok {
+		if val, ok := cr.Annotations[annotation.AWSUpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "value of MaxBatchSize for ASG updates overridden by annotation from AWSMachineDeployment CR")
+			r.logger.Debugf(ctx, "value of MaxBatchSize for ASG updates overridden by annotation from AWSMachineDeployment CR")
 		}
 		// if nothing is set use the default
 		if maxBatchSize == "" {
@@ -344,19 +348,19 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	var pauseTime string
 	{
 		// try read the value from cluster CR
-		if val, ok := cl.Annotations[annotation.UpdatePauseTime]; ok {
+		if val, ok := cl.Annotations[annotation.AWSUpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "value of PauseTime for ASG updates set by annotation from AWSCLuster CR")
+				r.logger.Debugf(ctx, "value of PauseTime for ASG updates set by annotation from AWSCLuster CR")
 			}
 		}
 		// override the value with machine deployment value if its set
-		if val, ok := cr.Annotations[annotation.UpdatePauseTime]; ok {
+		if val, ok := cr.Annotations[annotation.AWSUpdatePauseTime]; ok {
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "value of PauseTime for ASG updates overridden by annotation from AWSMachineDeployment CR")
+				r.logger.Debugf(ctx, "value of PauseTime for ASG updates overridden by annotation from AWSMachineDeployment CR")
 			}
 		}
 		// if nothing is set use the default
@@ -394,6 +398,15 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 		return nil, microerror.Mask(err)
 	}
 
+	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil, nil
+
+	} else if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
@@ -401,7 +414,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 				ID: key.ClusterID(&cr),
 			},
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
+			KMSKeyARN:        ek,
 			NodePool: template.ParamsMainIAMPoliciesNodePool{
 				ID: key.MachineDeploymentID(&cr),
 			},

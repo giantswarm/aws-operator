@@ -1,13 +1,17 @@
 package tcnp
 
 import (
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"encoding/json"
+
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/images"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 const (
@@ -17,11 +21,13 @@ const (
 
 type Config struct {
 	Detection *changedetection.TCNP
-	Event     event.Interface
+	Encrypter encrypter.Interface
+	Event     recorder.Interface
 	Images    images.Interface
 	K8sClient k8sclient.Interface
 	Logger    micrologger.Logger
 
+	AlikeInstances   string
 	InstallationName string
 }
 
@@ -29,17 +35,22 @@ type Config struct {
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
 	detection *changedetection.TCNP
-	event     event.Interface
+	encrypter encrypter.Interface
+	event     recorder.Interface
 	images    images.Interface
 	k8sClient k8sclient.Interface
 	logger    micrologger.Logger
 
+	alikeInstances   map[string][]template.LaunchTemplateOverride
 	installationName string
 }
 
 func New(config Config) (*Resource, error) {
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
+	if config.Encrypter == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
@@ -54,17 +65,30 @@ func New(config Config) (*Resource, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
+	if config.AlikeInstances == "" {
+		return nil, microerror.Maskf(invalidConfigError, "%T.AlikeInstances must not be empty", config)
+	}
 	if config.InstallationName == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.InstallationName must not be empty", config)
 	}
 
+	var alikeInstances map[string][]template.LaunchTemplateOverride
+	{
+		err := json.Unmarshal([]byte(config.AlikeInstances), &alikeInstances)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	r := &Resource{
 		detection: config.Detection,
+		encrypter: config.Encrypter,
 		event:     config.Event,
 		images:    config.Images,
 		k8sClient: config.K8sClient,
 		logger:    config.Logger,
 
+		alikeInstances:   alikeInstances,
 		installationName: config.InstallationName,
 	}
 

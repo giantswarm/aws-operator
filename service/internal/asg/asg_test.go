@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -315,6 +316,135 @@ func Test_ASG_drainable(t *testing.T) {
 
 			if !cmp.Equal(name, tc.expectedName) {
 				t.Fatalf("\n\n%s\n", cmp.Diff(tc.expectedName, name))
+			}
+		})
+	}
+}
+
+func Test_ASG_namesFromInstances(t *testing.T) {
+	testCases := []struct {
+		name      string
+		instances []*ec2.Instance
+		names     []string
+	}{
+		{
+			name:      "case 0",
+			instances: []*ec2.Instance{},
+			names:     nil,
+		},
+		{
+			name: "case 1",
+			instances: []*ec2.Instance{
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String(""),
+							Value: aws.String(""),
+						},
+					},
+				},
+			},
+			names: nil,
+		},
+		{
+			name: "case 2",
+			instances: []*ec2.Instance{
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("aws:autoscaling:groupName"),
+							Value: aws.String("asg-a"),
+						},
+					},
+				},
+			},
+			names: []string{
+				"asg-a",
+			},
+		},
+		{
+			name: "case 3",
+			instances: []*ec2.Instance{
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("aws:autoscaling:groupName"),
+							Value: aws.String("asg-a"),
+						},
+					},
+				},
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("aws:autoscaling:groupName"),
+							Value: aws.String("asg-b"),
+						},
+					},
+				},
+			},
+			names: []string{
+				"asg-a",
+				"asg-b",
+			},
+		},
+		{
+			name: "case 4",
+			instances: []*ec2.Instance{
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("aws:autoscaling:groupName"),
+							Value: aws.String("asg-a"),
+						},
+					},
+				},
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String(""),
+							Value: aws.String(""),
+						},
+					},
+				},
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("foo"),
+							Value: aws.String("bar"),
+						},
+					},
+				},
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("aws:autoscaling:groupName"),
+							Value: aws.String("asg-b"),
+						},
+					},
+				},
+				{
+					Tags: []*ec2.Tag{
+						{
+							Key:   aws.String("aws:autoscaling:groupName"),
+							Value: aws.String("asg-g"),
+						},
+					},
+				},
+			},
+			names: []string{
+				"asg-a",
+				"asg-b",
+				"asg-g",
+			},
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			names := namesFromInstances(tc.instances)
+
+			if !cmp.Equal(names, tc.names) {
+				t.Fatalf("\n\n%s\n", cmp.Diff(tc.names, names))
 			}
 		})
 	}

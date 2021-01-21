@@ -6,9 +6,9 @@ import (
 	"net"
 	"sync"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v8/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v9/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
@@ -108,6 +108,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	ek, err := t.config.Encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -246,7 +250,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, randKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, ek, randKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -342,7 +346,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			cluster:          cl,
 			clusterCerts:     certFiles,
 			encrypter:        t.config.Encrypter,
-			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
+			encryptionKey:    ek,
 			externalSNAT:     externalSNAT,
 			haMasters:        multiMasterEnabled,
 			masterID:         mapping.ID,

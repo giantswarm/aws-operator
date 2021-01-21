@@ -6,16 +6,16 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/apiextensions/v2/pkg/clientset/versioned"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -30,9 +30,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptcnpiamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -70,6 +70,7 @@ type MachineDeploymentConfig struct {
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
+	AlikeInstances             string
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
@@ -355,6 +356,18 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var cleanupIAMRolesResource resource.Interface
+	{
+		c := cleanuptcnpiamroles.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupIAMRolesResource, err = cleanuptcnpiamroles.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpRouteTablesResource resource.Interface
 	{
 		var routeTableNames []string
@@ -392,21 +405,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
-	var encryptionSearcherResource resource.Interface
-	{
-		c := encryptionsearcher.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		encryptionSearcherResource, err = encryptionsearcher.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var ipamResource resource.Interface
 	{
 		c := ipam.Config{
@@ -433,6 +431,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := s3object.Config{
 			CloudConfig: tcnpCloudConfig,
+			Encrypter:   encrypterObject,
 			Logger:      config.Logger,
 		}
 
@@ -540,11 +539,13 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tcnp.Config{
 			Detection: tcnpChangeDetection,
+			Encrypter: encrypterObject,
 			Event:     config.Event,
 			Images:    config.Images,
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
+			AlikeInstances:   config.AlikeInstances,
 			InstallationName: config.InstallationName,
 		}
 
@@ -638,7 +639,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		encryptionSearcherResource,
 		regionResource,
 		cpRouteTablesResource,
 		cpVPCResource,
@@ -664,6 +664,10 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 
 		// All these resources implement logic to update CR status information.
 		tcnpStatusResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupIAMRolesResource,
 	}
 
 	{

@@ -16,8 +16,8 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if !r.route53Enabled {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "route53 disabled")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "route53 disabled")
+		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	}
 
@@ -32,30 +32,30 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 	var intermediateZoneID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting intermediate zone ID")
+		r.logger.Debugf(ctx, "getting intermediate zone ID")
 
 		intermediateZoneID, err = r.findHostedZoneID(ctx, defaultGuest, intermediateZone)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "intermediate zone not found")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "intermediate zone not found")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got intermediate zone ID")
+		r.logger.Debugf(ctx, "got intermediate zone ID")
 	}
 
 	var finalZoneTTL int64
 	var finalZoneRecords []*route53.ResourceRecord
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "getting final zone delegation name servers and TTL from intermediate zone")
+		r.logger.Debugf(ctx, "getting final zone delegation name servers and TTL from intermediate zone")
 
 		nameServers, ttl, err := r.getNameServersAndTTL(ctx, defaultGuest, intermediateZoneID, finalZone)
 		if IsNotFound(err) {
 			// Delegation may be already deleted. It must be handled.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "final zone delegation not found in intermediate zone")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "final zone delegation not found in intermediate zone")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
@@ -71,11 +71,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			finalZoneRecords = append(finalZoneRecords, v)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "got final zone delegation name servers and TTL from intermediate zone")
+		r.logger.Debugf(ctx, "got final zone delegation name servers and TTL from intermediate zone")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensuring deletion of final zone delegation from intermediate zone")
+		r.logger.Debugf(ctx, "ensuring deletion of final zone delegation from intermediate zone")
 
 		delete := route53.ChangeActionDelete
 		ns := route53.RRTypeNs
@@ -101,7 +101,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "ensured deletion of final zone delegation from intermediate zone")
+		r.logger.Debugf(ctx, "ensured deletion of final zone delegation from intermediate zone")
 	}
 
 	return nil

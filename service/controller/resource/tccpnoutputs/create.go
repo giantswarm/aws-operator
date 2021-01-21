@@ -2,7 +2,6 @@ package tccpnoutputs
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/giantswarm/microerror"
@@ -43,19 +42,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var outputs []cloudformation.Output
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's control plane nodes cloud formation stack outputs")
+		r.logger.Debugf(ctx, "finding the tenant cluster's control plane nodes cloud formation stack outputs")
 
 		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.StackNameTCCPN(&cr))
 		if cloudformation.IsStackNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack outputs")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "the tenant cluster's control plane nodes cloud formation stack does not exist")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane nodes cloud formation stack outputs")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane nodes cloud formation stack does not exist")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if cloudformation.IsOutputsNotAccessible(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes cloud formation stack outputs")
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's control plane nodes cloud formation stack output values are not accessible due to stack status %#q", s))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane nodes cloud formation stack outputs")
+			r.logger.Debugf(ctx, "the tenant cluster's control plane nodes cloud formation stack output values are not accessible due to stack status %#q", s)
+			r.logger.Debugf(ctx, "canceling resource")
 			cc.Status.TenantCluster.TCCPN.IsTransitioning = true
 			return nil
 
@@ -65,7 +64,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		outputs = o
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's control plane nodes cloud formation stack outputs")
+		r.logger.Debugf(ctx, "found the tenant cluster's control plane nodes cloud formation stack outputs")
 	}
 
 	{
@@ -87,7 +86,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		v, err := cloudFormation.GetOutputValue(outputs, ReleaseVersionKey)
 		if cloudformation.IsOutputNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes ReleaseVersion output")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane nodes ReleaseVersion output")
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
@@ -97,7 +96,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		v, err := cloudFormation.GetOutputValue(outputs, MasterReplicasKey)
 		if cloudformation.IsOutputNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's control plane nodes MasterReplicas output")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane nodes MasterReplicas output")
 		} else if err != nil {
 			return microerror.Mask(err)
 		}

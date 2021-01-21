@@ -1,12 +1,13 @@
 package ebs
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -326,10 +327,72 @@ func Test_ListVolumes(t *testing.T) {
 				},
 			},
 		},
+		{
+			description: "case 8: ignore volumes that are mounted to a instance that belongs to different cluster",
+			obj:         customObject,
+			filterFuncs: []func(t *ec2.Tag) bool{
+				NewPersistentVolumeFilter(customObject),
+			},
+			expectedVolumes: []Volume{
+				{
+					Attachments: []VolumeAttachment{
+						{
+							InstanceID: "i-12345",
+							Device:     "/dev/sdh",
+						},
+					},
+					VolumeID: "vol-1234",
+				},
+			},
+			ebsVolumes: []ebsVolumeMock{
+				{
+					volumeID: "vol-1234",
+					attachments: []*ec2.VolumeAttachment{
+						{
+							Device:     aws.String("/dev/sdh"),
+							InstanceId: aws.String("i-12345"),
+							VolumeId:   aws.String("vol-1234"),
+						},
+					},
+					tags: []*ec2.Tag{
+						{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						{
+							Key:   aws.String("kubernetes.io/created-for/pv/name"),
+							Value: aws.String("pvc-1234"),
+						},
+					},
+				},
+				{
+					volumeID: "vol-5678",
+					attachments: []*ec2.VolumeAttachment{
+						{
+							Device:     aws.String("/dev/sdh"),
+							InstanceId: aws.String("i-555555"),
+							VolumeId:   aws.String("vol-5678"),
+						},
+					},
+					tags: []*ec2.Tag{
+						{
+							Key:   aws.String("kubernetes.io/cluster/test-cluster"),
+							Value: aws.String("owned"),
+						},
+						{
+							Key:   aws.String("kubernetes.io/created-for/pv/name"),
+							Value: aws.String("pvc-5678"),
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			ctx := context.TODO()
+
 			c := Config{
 				Client: &EC2ClientMock{
 					customObject: tc.obj,
@@ -342,7 +405,7 @@ func Test_ListVolumes(t *testing.T) {
 				t.Fatal("expected", nil, "got", err)
 			}
 
-			result, err := e.ListVolumes(tc.obj, tc.filterFuncs...)
+			result, err := e.ListVolumes(ctx, tc.obj, tc.filterFuncs...)
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}

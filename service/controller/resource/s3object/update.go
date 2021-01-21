@@ -3,12 +3,11 @@ package s3object
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/crud"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )
@@ -25,17 +24,17 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 
 	if len(s3Objects) != 0 {
 		for _, s3Object := range s3Objects {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updating S3 object %#q", *s3Object.Key))
+			r.logger.Debugf(ctx, "updating S3 object %#q", *s3Object.Key)
 
 			_, err = cc.Client.TenantCluster.AWS.S3.PutObject(s3Object)
 			if err != nil {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("updated S3 object %#q", *s3Object.Key))
+			r.logger.Debugf(ctx, "updated S3 object %#q", *s3Object.Key)
 		}
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not update any S3 object")
+		r.logger.Debugf(ctx, "did not update any S3 object")
 	}
 
 	return nil

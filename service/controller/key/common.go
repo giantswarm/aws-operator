@@ -7,8 +7,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/core/v1alpha1"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/v2/pkg/apis/release/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/core/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/annotation"
@@ -326,6 +326,10 @@ func StackNameTCNP(getter LabelsGetter) string {
 
 func StackNameTCNPF(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func TargetLogBucketName(getter LabelsGetter, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s-access-logs", accountID, ClusterID(getter))
 }
 
 func VPCPeeringRouteName(az string) string {

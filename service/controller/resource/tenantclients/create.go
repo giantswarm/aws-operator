@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/apis/crd/v1alpha1"
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -27,8 +27,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		restConfig, err = r.tenant.NewRestConfig(ctx, key.ClusterID(&cr), key.ClusterAPIEndpoint(cr))
 		if tenantcluster.IsTimeout(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "timeout fetching certificates")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "timeout fetching certificates")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if err != nil {
@@ -59,8 +59,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			// handled before. This is extremely painful after fact in a
 			// immutable infrastructure because it is super hard to fix once it
 			// breaks after it is released.
-			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant API not available yet", "stack", microerror.JSON(err))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "tenant API not available yet", "stack", microerror.JSON(err))
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}

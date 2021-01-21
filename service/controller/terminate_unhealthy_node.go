@@ -3,16 +3,16 @@ package controller
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v2/pkg/controller"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v2/pkg/resource/wrapper/retryresource"
-	"github.com/giantswarm/tenantcluster/v3/pkg/tenantcluster"
+	"github.com/giantswarm/operatorkit/v4/pkg/controller"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -72,7 +72,7 @@ func NewTerminateUnhealthyNode(config TerminateUnhealthyNodeConfig) (*TerminateU
 
 			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
-			Name: project.Name() + "-node-auto-repair-controller",
+			Name: project.Name() + "-terminate-unhealthy-node-controller",
 			Selector: labels.SelectorFromSet(map[string]string{
 				label.OperatorVersion: project.Version(),
 			}),

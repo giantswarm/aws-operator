@@ -3,11 +3,11 @@ package asg
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/k8sclient/v4/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/to"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -20,16 +20,12 @@ import (
 )
 
 type Config struct {
-	K8sClient k8sclient.Interface
-
 	Stack        string
 	TagKey       string
 	TagValueFunc func(cr key.LabelsGetter) string
 }
 
 type ASG struct {
-	k8sClient k8sclient.Interface
-
 	asgsCache      *cache.ASGs
 	instancesCache *cache.Instances
 
@@ -39,10 +35,6 @@ type ASG struct {
 }
 
 func New(config Config) (*ASG, error) {
-	if config.K8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
-	}
-
 	if config.Stack == "" {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Stack must not be empty", config)
 	}
@@ -54,8 +46,6 @@ func New(config Config) (*ASG, error) {
 	}
 
 	a := &ASG{
-		k8sClient: config.K8sClient,
-
 		asgsCache:      cache.NewASGs(),
 		instancesCache: cache.NewInstances(),
 
@@ -87,18 +77,7 @@ func (a *ASG) Drainable(ctx context.Context, obj interface{}) (string, error) {
 	// interested it.
 	var asgs []*autoscaling.Group
 	{
-		var names []string
-		{
-			m := map[string]struct{}{}
-
-			for _, i := range instances {
-				m[asgNameFromInstance(i)] = struct{}{}
-			}
-
-			for k := range m {
-				names = append(names, k)
-			}
-		}
+		names := namesFromInstances(instances)
 
 		asgs, err = a.cachedASGs(ctx, cr, names)
 		if err != nil {
@@ -179,6 +158,10 @@ func (a *ASG) lookupASGs(ctx context.Context, names []string) ([]*autoscaling.Gr
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
+	}
+
+	if len(names) == 0 {
+		return nil, microerror.Mask(noASGError)
 	}
 
 	var asgs []*autoscaling.Group
@@ -275,6 +258,34 @@ func drainable(ctx context.Context, asgs []*autoscaling.Group) (string, error) {
 	}
 
 	return "", microerror.Mask(noDrainableError)
+}
+
+func namesFromInstances(instances []*ec2.Instance) []string {
+	var names []string
+	{
+		m := map[string]struct{}{}
+
+		for _, i := range instances {
+			// While EC2 instances are transitioning due to scale in and scale
+			// out events they may not be associated with any ASG. In these
+			// cases we ignore the instances and move on to the next one.
+			// Eventually we will collect the relevant ASG names.
+			n := asgNameFromInstance(i)
+			if n == "" {
+				continue
+			}
+
+			m[n] = struct{}{}
+		}
+
+		for k := range m {
+			names = append(names, k)
+		}
+	}
+
+	sort.Strings(names)
+
+	return names
 }
 
 func toPtrList(l []string) []*string {

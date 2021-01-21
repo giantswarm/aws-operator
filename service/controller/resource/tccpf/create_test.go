@@ -10,12 +10,13 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v2/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpf/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
@@ -81,12 +82,27 @@ func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 				e = recorder.New(c)
 			}
 
+			var h *cphostedzone.HostedZone
+			{
+				c := cphostedzone.Config{
+					Logger: microloggertest.New(),
+
+					Route53Enabled: false,
+				}
+
+				h, err = cphostedzone.New(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var r *Resource
 			{
 				c := Config{
-					Detection: d,
-					Event:     e,
-					Logger:    microloggertest.New(),
+					Detection:  d,
+					Event:      e,
+					HostedZone: h,
+					Logger:     microloggertest.New(),
 
 					InstallationName: "dummy",
 					Route53Enabled:   tc.route53Enabled,
