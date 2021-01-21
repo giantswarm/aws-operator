@@ -37,7 +37,7 @@ data:
       cluster:
         calico:
           cidr: '{{ .Values.tenant.cni.mask }}'
-          mtu: '{{ .Values.tenant.cni.mtu }}'
+          mtu: {{ .Values.tenant.cni.mtu }}
           subnet: '{{ .Values.tenant.cni.subnet }}'
         docker:
           daemon:
