@@ -13,7 +13,7 @@ aws:
     alike: {}
   loggingBucket:
     delete: true
-  podInfraContainerImage: giantswarm/pause-amd64:3.3
+  podInfraContainerImage: ""
   region: ""
   route53:
     enabled: true
