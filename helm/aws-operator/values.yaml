@@ -9,7 +9,6 @@ aws:
   cni:
     externalSNAT: true
   includeTags: true
-  {{- include "aws-instance-types" | nindent 2 }}
   loggingBucket:
     delete: true
   podInfraContainerImage: giantswarm/pause-amd64:3.3
