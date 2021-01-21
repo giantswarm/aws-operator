@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `cleanupiamroles` resource for detaching third party policies from our IAM
   roles.
+- Update `k8scloudconfig` version to `v10.0.0` to include change for Kubernetes 1.19.
 
 ### Changed
 
