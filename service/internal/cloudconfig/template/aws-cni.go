@@ -193,9 +193,9 @@ spec:
             - name: DISABLE_METRICS
               value: "false"
             - name: WARM_IP_TARGET
-              value: "10"
+              value: "{{ .AWSCNIWarmIPTarget }}"
             - name: MINIMUM_IP_TARGET
-              value: "40"
+              value: "{{ .AWSCNIMinimumIPTarget }}"
             ## Deviation from original manifest - 1
             ## This config value is important - See here https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md#cni-configuration-variables
             - name: AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG

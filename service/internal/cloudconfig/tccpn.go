@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync"
 
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
@@ -309,6 +310,20 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
+	var awsCNIMinimumIPTarget string
+	var awsCNIWarmIPTarget string
+	{
+		awsCNIMinimumIPTarget = key.AWSCNIDefaultMinimumIPTarget
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
+			awsCNIMinimumIPTarget = v
+		}
+
+		awsCNIWarmIPTarget = key.AWSCNIDefaultWarmIPTarget
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
+			awsCNIWarmIPTarget = v
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.Params{}
@@ -340,18 +355,20 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
 		}
 		params.Extension = &TCCPNExtension{
-			awsCNIVersion:    awsCNIVersion,
-			baseDomain:       key.TenantClusterBaseDomain(cl),
-			cc:               cc,
-			cluster:          cl,
-			clusterCerts:     certFiles,
-			encrypter:        t.config.Encrypter,
-			encryptionKey:    ek,
-			externalSNAT:     externalSNAT,
-			haMasters:        multiMasterEnabled,
-			masterID:         mapping.ID,
-			randomKeyTmplSet: randomKeyTmplSet,
-			registryDomain:   t.config.RegistryDomain,
+			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
+			awsCNIVersion:         awsCNIVersion,
+			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
+			baseDomain:            key.TenantClusterBaseDomain(cl),
+			cc:                    cc,
+			cluster:               cl,
+			clusterCerts:          certFiles,
+			encrypter:             t.config.Encrypter,
+			encryptionKey:         ek,
+			externalSNAT:          externalSNAT,
+			haMasters:             multiMasterEnabled,
+			masterID:              mapping.ID,
+			randomKeyTmplSet:      randomKeyTmplSet,
+			registryDomain:        t.config.RegistryDomain,
 		}
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
