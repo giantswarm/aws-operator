@@ -9,6 +9,8 @@ aws:
   cni:
     externalSNAT: true
   includeTags: true
+  instance:
+    alike: {}
   loggingBucket:
     delete: true
   podInfraContainerImage: giantswarm/pause-amd64:3.3
