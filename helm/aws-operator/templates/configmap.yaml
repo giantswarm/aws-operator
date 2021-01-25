@@ -52,7 +52,7 @@ data:
           clusterDomain: '{{ .Values.tenant.kubernetes.clusterDomain }}'
           networkSetup:
             docker:
-              image: '{{ .Values.tenant.kubernetes.networkSetup.docker.image }}'
+              image: '{{ .Values.registry.domain }}/{{ .Values.tenant.kubernetes.networkSetup.docker.image }}'
           ssh:
             userList: '{{ .Values.tenant.ssh.userList }}'
       guest:
