@@ -22,7 +22,11 @@ data:
         includeTags: '{{ .Values.aws.includeTags }}'
         loggingBucket:
           delete: '{{ .Values.aws.loggingBucket.delete }}'
+        {{- if .Values.aws.podInfraContainerImage }}
         podInfraContainerImage: '{{ .Values.registry.domain }}/{{ .Values.aws.podInfraContainerImage }}'
+        {{- else }}
+        podInfraContainerImage: ''
+        {{- end }}
         region: '{{ .Values.aws.region }}'
         role:
           arn: '{{ .Values.aws.role.arn }}'
