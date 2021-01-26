@@ -16,7 +16,9 @@ import (
 )
 
 const (
-	AWSCNIComponentName = "aws-cni"
+	AWSCNIComponentName          = "aws-cni"
+	AWSCNIDefaultMinimumIPTarget = "40"
+	AWSCNIDefaultWarmIPTarget    = "10"
 
 	ELBInstanceStateInService = "InService"
 
