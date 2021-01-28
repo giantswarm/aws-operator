@@ -22,7 +22,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 
 	if endpointsToCreate != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "creating endpoint")
+		r.logger.Debugf(ctx, "creating endpoint")
 
 		namespace := key.ClusterNamespace(cr)
 		_, err = r.k8sClient.CoreV1().Endpoints(namespace).Create(ctx, endpointsToCreate, metav1.CreateOptions{})
@@ -32,9 +32,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "created endpoint")
+		r.logger.Debugf(ctx, "created endpoint")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not create endpoint")
+		r.logger.Debugf(ctx, "did not create endpoint")
 	}
 
 	return nil

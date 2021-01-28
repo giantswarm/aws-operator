@@ -61,6 +61,10 @@ func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string 
 	return fmt.Sprintf("ControlPlaneNodeLaunchTemplate%d", id)
 }
 
+func ControlPlaneNodeRole(cr infrastructurev1alpha2.AWSControlPlane) string {
+	return fmt.Sprintf("gs-cluster-%s-role-tccpn", ClusterID(&cr))
+}
+
 func ControlPlaneRecordSetsRecordValue(id int) string {
 	return fmt.Sprintf("etcd%d", id)
 }

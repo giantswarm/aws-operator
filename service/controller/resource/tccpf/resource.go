@@ -5,6 +5,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
@@ -14,9 +15,10 @@ const (
 )
 
 type Config struct {
-	Detection *changedetection.TCCPF
-	Event     recorder.Interface
-	Logger    micrologger.Logger
+	Detection  *changedetection.TCCPF
+	Event      recorder.Interface
+	HostedZone *cphostedzone.HostedZone
+	Logger     micrologger.Logger
 
 	InstallationName string
 	Route53Enabled   bool
@@ -26,9 +28,10 @@ type Config struct {
 // Control Plane Finalizer. This was formerly known as the host main stack. We
 // manage a dedicated CF stack for the record sets and routing tables setup.
 type Resource struct {
-	detection *changedetection.TCCPF
-	event     recorder.Interface
-	logger    micrologger.Logger
+	detection  *changedetection.TCCPF
+	event      recorder.Interface
+	hostedZone *cphostedzone.HostedZone
+	logger     micrologger.Logger
 
 	installationName string
 	route53Enabled   bool
@@ -41,14 +44,18 @@ func New(config Config) (*Resource, error) {
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
+	if config.HostedZone == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.HostedZone must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		detection: config.Detection,
-		event:     config.Event,
-		logger:    config.Logger,
+		detection:  config.Detection,
+		event:      config.Event,
+		hostedZone: config.HostedZone,
+		logger:     config.Logger,
 
 		installationName: config.InstallationName,
 		route53Enabled:   config.Route53Enabled,

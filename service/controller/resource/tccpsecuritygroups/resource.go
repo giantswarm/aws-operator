@@ -55,7 +55,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 	var groups []*ec2.SecurityGroup
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "finding security groups for tenant cluster %#q", key.ClusterID(&cr))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -88,13 +88,13 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		}
 
 		if len(groups) < 3 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find security groups for tenant cluster %#q yet", key.ClusterID(&cr)))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find security groups for tenant cluster %#q yet", key.ClusterID(&cr))
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "found security groups for tenant cluster %#q", key.ClusterID(&cr))
 	}
 
 	{

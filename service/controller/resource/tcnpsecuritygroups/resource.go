@@ -51,7 +51,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 
 	var desired []string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding desired node pool security groups for machine deployment %#q", key.MachineDeploymentID(&cr)))
+		r.logger.Debugf(ctx, "finding desired node pool security groups for machine deployment %#q", key.MachineDeploymentID(&cr))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -128,7 +128,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d desired node pool security groups for machine deployment %#q", len(desired), key.MachineDeploymentID(&cr)))
+		r.logger.Debugf(ctx, "found %d desired node pool security groups for machine deployment %#q", len(desired), key.MachineDeploymentID(&cr))
 	}
 
 	{
@@ -138,7 +138,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 	var current []string
 	{
 		var sg *ec2.SecurityGroup
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding current node pool security groups for machine deployment %#q", key.MachineDeploymentID(&cr)))
+		r.logger.Debugf(ctx, "finding current node pool security groups for machine deployment %#q", key.MachineDeploymentID(&cr))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -172,8 +172,8 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 		}
 
 		if len(o.SecurityGroups) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find current node pool security group for machine deployment %#q yet", key.MachineDeploymentID(&cr)))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find current node pool security group for machine deployment %#q yet", key.MachineDeploymentID(&cr))
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 		}
@@ -197,7 +197,7 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.A
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d current node pool security groups for machine deployment %#q", len(current), key.MachineDeploymentID(&cr)))
+		r.logger.Debugf(ctx, "found %d current node pool security groups for machine deployment %#q", len(current), key.MachineDeploymentID(&cr))
 	}
 
 	{

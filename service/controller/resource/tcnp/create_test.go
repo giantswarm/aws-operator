@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
@@ -77,6 +78,11 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+			}
+
+			var m encrypter.Interface
+			{
+				m = &encrypter.Mock{}
 			}
 
 			var e recorder.Interface
@@ -142,6 +148,7 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				c := Config{
 					CloudTags: ct,
 					Detection: d,
+					Encrypter: m,
 					Event:     e,
 					Images:    i,
 					K8sClient: k,

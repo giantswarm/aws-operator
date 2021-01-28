@@ -15,18 +15,18 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding control plane peer role arn")
+		r.logger.Debugf(ctx, "finding control plane peer role arn")
 
 		err = r.addPeerRoleARNToContext(ctx, cr)
 		if IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find control plane peer role arn")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find control plane peer role arn")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found control plane peer role arn")
+		r.logger.Debugf(ctx, "found control plane peer role arn")
 	}
 
 	return nil

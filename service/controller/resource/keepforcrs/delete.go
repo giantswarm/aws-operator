@@ -2,7 +2,6 @@ package keepforcrs
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/finalizerskeptcontext"
@@ -36,7 +35,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding objects of type %T for tenant cluster %#q", r.newObjFunc(), key.ClusterID(cr)))
+		r.logger.Debugf(ctx, "finding objects of type %T for tenant cluster %#q", r.newObjFunc(), key.ClusterID(cr))
 
 		err = r.k8sClient.CtrlClient().List(
 			ctx,
@@ -48,11 +47,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d object(s) of type %T for tenant cluster %#q", len(list.Items), r.newObjFunc(), key.ClusterID(cr)))
+		r.logger.Debugf(ctx, "found %d object(s) of type %T for tenant cluster %#q", len(list.Items), r.newObjFunc(), key.ClusterID(cr))
 	}
 
 	if len(list.Items) != 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+		r.logger.Debugf(ctx, "keeping finalizers")
 		finalizerskeptcontext.SetKept(ctx)
 	}
 
