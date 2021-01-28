@@ -491,6 +491,13 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: 10.0.0.0/24
+
+      -
+        Description: "Allow traffic from Tenant Cluster CNI CIDR."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 
       -
         Description: "Custom Private API Whitelist CIDR."
         IpProtocol: tcp
