@@ -476,6 +476,7 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
 			ControlPlaneVPCCIDR:             cc.Status.ControlPlane.VPC.CIDR,
 			TenantClusterVPCCIDR:            key.StatusClusterNetworkCIDR(cr),
+			TenantClusterCNICIDR:            key.PodsCIDRBlock(cr),
 		}
 	}
 
@@ -578,8 +579,8 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 
 	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 	podSubnet := r.cidrBlockAWSCNI
-	if cr.Spec.Provider.Pods.CIDRBlock != "" {
-		podSubnet = cr.Spec.Provider.Pods.CIDRBlock
+	if key.PodsCIDRBlock(cr) != "" {
+		podSubnet = key.PodsCIDRBlock(cr)
 	}
 
 	var vpc *template.ParamsMainVPC

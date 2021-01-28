@@ -8,11 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Added CNI CIDR to internal ELB Security Group.
+
 ## [9.3.5] - 2020-12-08
 
 ### Changed
 
-- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID. 
+- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID.
 
 ## [9.3.4] - 2020-12-07
 
