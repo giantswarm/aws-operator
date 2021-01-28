@@ -459,6 +459,11 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 		return nil, microerror.Mask(err)
 	}
 
+	podSubnet := r.cidrBlockAWSCNI
+	if key.PodsCIDRBlock(cr) != "" {
+		podSubnet = key.PodsCIDRBlock(cr)
+	}
+
 	var securityGroups *template.ParamsMainSecurityGroups
 	{
 		securityGroups = &template.ParamsMainSecurityGroups{
@@ -476,7 +481,7 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 			ControlPlaneNATGatewayAddresses: cc.Status.ControlPlane.NATGateway.Addresses,
 			ControlPlaneVPCCIDR:             cc.Status.ControlPlane.VPC.CIDR,
 			TenantClusterVPCCIDR:            key.StatusClusterNetworkCIDR(cr),
-			TenantClusterCNICIDR:            key.PodsCIDRBlock(cr),
+			TenantClusterCNICIDR:            podSubnet,
 		}
 	}
 
