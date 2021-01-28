@@ -169,8 +169,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 		podSubnet := r.cidrBlockAWSCNI
-		if cl.Spec.Provider.Pods.CIDRBlock != "" {
-			podSubnet = cl.Spec.Provider.Pods.CIDRBlock
+		if key.PodsCIDRBlock(cl) != "" {
+			podSubnet = key.PodsCIDRBlock(cl)
 		}
 
 		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)

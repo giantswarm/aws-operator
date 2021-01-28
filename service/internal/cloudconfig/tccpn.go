@@ -330,8 +330,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
-		if cl.Spec.Provider.Pods.CIDRBlock != "" {
-			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+		if key.PodsCIDRBlock(cl) != "" {
+			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(cl))
 			if err != nil {
 				return "", microerror.Mask(err)
 			}
