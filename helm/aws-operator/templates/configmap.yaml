@@ -15,88 +15,83 @@ data:
         address: 'http://0.0.0.0:8000'
     service:
       aws:
-        accessLogsExpiration: '{{ .Values.Installation.V1.Provider.AWS.S3AccessLogsExpiration }}'
-        alikeInstances: '{{ .Values.Installation.V1.Provider.AWS.EC2.Instance.Alike | toJson }}'
-        advancedMonitoringEC2: '{{ .Values.Installation.V1.Provider.AWS.AdvancedMonitoringEC2 }}'
-        availabilityZones: '{{ range $i, $e := .Values.Installation.V1.Provider.AWS.AvailabilityZones }}{{ if $i }},{{end}}{{ $e }}{{end}}'
-        includeTags: '{{ .Values.Installation.V1.Provider.AWS.IncludeTags }}'
+        accessLogsExpiration: '{{ .Values.aws.s3AccessLogsExpiration }}'
+        alikeInstances: '{{ toJson .Values.aws.instance.alike }}'
+        advancedMonitoringEC2: '{{ .Values.aws.advancedMonitoringEC2 }}'
+        availabilityZones: '{{ range $i, $e := .Values.aws.availabilityZones }}{{ if $i }},{{end}}{{ $e }}{{end}}'
+        includeTags: '{{ .Values.aws.includeTags }}'
         loggingBucket:
-          delete: '{{ .Values.Installation.V1.Provider.AWS.DeleteLoggingBucket }}'
-        podInfraContainerImage: '{{ .Values.Installation.V1.Provider.AWS.PodInfraContainerImage }}'
-        region: '{{ .Values.Installation.V1.Provider.AWS.Region }}'
+          delete: '{{ .Values.aws.loggingBucket.delete }}'
+        {{- if .Values.aws.podInfraContainerImage }}
+        podInfraContainerImage: '{{ .Values.registry.domain }}/{{ .Values.aws.podInfraContainerImage }}'
+        {{- else }}
+        podInfraContainerImage: ''
+        {{- end }}
+        region: '{{ .Values.aws.region }}'
         role:
-          arn: '{{ .Values.Installation.V1.Provider.AWS.Role.ARN }}'
+          arn: '{{ .Values.aws.role.arn }}'
         route53:
-          enabled: '{{ .Values.Installation.V1.Provider.AWS.Route53.Enabled }}'
-        routeTables: '{{ .Values.Installation.V1.Provider.AWS.RouteTableNames }}'
+          enabled: '{{ .Values.aws.route53.enabled }}'
+        routeTables: '{{ .Values.aws.routeTables }}'
         trustedAdvisor:
-          enabled: '{{ .Values.Installation.V1.Provider.AWS.TrustedAdvisor.Enabled }}'
-        vaultAddress: '{{ .Values.Installation.V1.Auth.Vault.Address }}'
+          enabled: '{{ .Values.aws.trustedAdvisor.enabled }}'
+        vaultAddress: '{{ .Values.aws.vault.address }}'
         cni:
-          externalSNAT: '{{ .Values.Installation.V1.Provider.AWS.CNI.ExternalSNAT }}'
+          externalSNAT: '{{ .Values.aws.cni.externalSNAT }}'
       cluster:
         calico:
-          cidr: '{{ .Values.Installation.V1.Guest.Calico.CIDR }}'
-          mtu: 1430
-          subnet: '{{ .Values.Installation.V1.Guest.Calico.Subnet }}'
+          cidr: '{{ .Values.tenant.cni.mask }}'
+          mtu: {{ .Values.tenant.cni.mtu }}
+          subnet: '{{ .Values.tenant.cni.subnet }}'
         docker:
           daemon:
-            cidr: '{{ .Values.Installation.V1.Guest.Docker.CIDR }}'
+            cidr: '{{ .Values.tenant.docker.daemon.cidr }}'
         kubernetes:
           api:
-            clusterIPRange: '{{ .Values.Installation.V1.Guest.Kubernetes.API.ClusterIPRange }}'
-          clusterDomain: '{{ .Values.Installation.V1.Guest.Kubernetes.ClusterDomain }}'
+            clusterIPRange: '{{ .Values.tenant.kubernetes.api.serviceIPRange }}'
+          clusterDomain: '{{ .Values.tenant.kubernetes.clusterDomain }}'
           networkSetup:
             docker:
-              {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
-              image: '{{ .Values.Installation.V1.Registry.Domain }}/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
-              {{ else }}
-              image: 'docker.io/giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9'
-              {{- end }}
+              image: '{{ .Values.registry.domain }}/{{ .Values.tenant.kubernetes.networkSetup.docker.image }}'
           ssh:
-            userList: '{{ .Values.Installation.V1.Guest.SSH.UserList }}'
+            userList: '{{ .Values.tenant.ssh.userList }}'
       guest:
         ssh:
-          ssoPublicKey: '{{ .Values.Installation.V1.Guest.SSH.SSOPublicKey }}'
+          ssoPublicKey: '{{ .Values.tenant.ssh.ssoPublicKey }}'
 
       registry:
-      {{- if hasPrefix "cn-" .Values.Installation.V1.Provider.AWS.Region }}
-        domain: '{{ .Values.Installation.V1.Registry.Domain }}'
-        mirrors: '{{ range $i, $e := .Values.Installation.V1.Registry.Mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
-      {{ else }}
-        domain: 'docker.io'
-        mirrors: 'giantswarm.azurecr.io'
-      {{- end }}
+        domain: '{{ .Values.registry.domain }}'
+        mirrors: '{{ range $i, $e := .Values.registry.mirrors }}{{ if $i }},{{end}}{{ $e }}{{end}}'
       installation:
-        name: '{{ .Values.Installation.V1.Name }}'
-        {{- if .Values.Installation.V1.Guest }}
+        name: '{{ .Values.installation.name }}'
+        {{- if .Values.tenant }}
         guest:
           ipam:
             network:
-              CIDR: '{{ .Values.Installation.V1.Guest.IPAM.NetworkCIDR }}'
-              subnetMaskBits: '{{ .Values.Installation.V1.Guest.IPAM.CIDRMask }}'
-              privateSubnetMaskBits: '{{ .Values.Installation.V1.Guest.IPAM.PrivateSubnetMask }}'
-              publicSubnetMaskBits: '{{ .Values.Installation.V1.Guest.IPAM.PublicSubnetMask }}'
+              cidr: '{{ .Values.tenant.ipam.network.cidr }}'
+              subnetMaskBits: '{{ .Values.tenant.ipam.network.subnetMaskBits }}'
+              privateSubnetMaskBits: '{{ .Values.tenant.ipam.network.privateSubnetMaskBits }}'
+              publicSubnetMaskBits: '{{ .Values.tenant.ipam.network.publicSubnetMaskBits }}'
           kubernetes:
             api:
               auth:
                 provider:
                   oidc:
-                    clientID: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.ClientID }}'
-                    issuerURL: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.IssuerURL }}'
-                    usernameClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.UsernameClaim }}'
-                    groupsClaim: '{{ .Values.Installation.V1.Guest.Kubernetes.API.Auth.Provider.OIDC.GroupsClaim }}'
+                    clientID: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.clientID }}'
+                    issuerURL: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.issuerURL }}'
+                    usernameClaim: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.usernameClaim }}'
+                    groupsClaim: '{{ .Values.tenant.kubernetes.api.auth.provider.oidc.groupsClaim }}'
               security:
                 whitelist:
                   public:
-                    enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Public }}
-                    {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Public }}
-                    subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer.Public }}"
+                    enabled: {{ .Values.tenant.kubernetes.api.security.whitelist.public.enabled }}
+                    {{- if .Values.tenant.kubernetes.api.security.whitelist.public.enabled }}
+                    subnetList: "{{ .Values.tenant.kubernetes.api.security.whitelist.public.subnetList }}"
                     {{- end }}
                   private:
-                    enabled: {{ .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Private }}
-                    {{- if .Values.Installation.V1.Security.RestrictAccess.GuestAPI.Private }}
-                    subnetList: "{{ .Values.Installation.V1.Security.Subnet.VPN }},{{ .Values.Installation.V1.Security.Subnet.Customer.Private }}"
+                    enabled: {{ .Values.tenant.kubernetes.api.security.whitelist.private.enabled }}
+                    {{- if .Values.tenant.kubernetes.api.security.whitelist.private.enabled }}
+                    subnetList: "{{ .Values.tenant.kubernetes.api.security.whitelist.private.subnetList }}"
                     {{- end }}
         {{- end }}
       kubernetes:
