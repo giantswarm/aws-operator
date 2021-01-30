@@ -41,7 +41,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -52,7 +51,6 @@ import (
 
 type ControlPlaneConfig struct {
 	CertsSearcher      certs.Interface
-	CloudTags          cloudtags.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
@@ -258,11 +256,10 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnChangeDetection *changedetection.TCCPN
 	{
 		c := changedetection.TCCPNConfig{
-			CloudTags: config.CloudTags,
-			HAMaster:  config.HAMaster,
-			Logger:    config.Logger,
-			Event:     config.Event,
-			Releases:  rel,
+			HAMaster: config.HAMaster,
+			Logger:   config.Logger,
+			Event:    config.Event,
+			Releases: rel,
 		}
 
 		tccpnChangeDetection, err = changedetection.NewTCCPN(c)
@@ -400,7 +397,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
-			CloudTags: config.CloudTags,
 			Detection: tccpnChangeDetection,
 			Event:     config.Event,
 			HAMaster:  config.HAMaster,

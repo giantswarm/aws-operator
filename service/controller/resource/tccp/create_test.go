@@ -18,7 +18,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
@@ -91,18 +90,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				ctx := unittest.DefaultContextControlPlane()
 				k := unittest.FakeK8sClient()
 
-				var ct cloudtags.Interface
-				{
-					c := cloudtags.Config{
-						K8sClient: k,
-						Logger:    microloggertest.New(),
-					}
-
-					ct, err = cloudtags.New(c)
-					if err != nil {
-						t.Fatal(err)
-					}
-				}
 				var e recorder.Interface
 				{
 					c := recorder.Config{
@@ -117,9 +104,8 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				var d *changedetection.TCCP
 				{
 					c := changedetection.TCCPConfig{
-						CloudTags: ct,
-						Event:     e,
-						Logger:    microloggertest.New(),
+						Event:  e,
+						Logger: microloggertest.New(),
 					}
 
 					d, err = changedetection.NewTCCP(c)
@@ -170,7 +156,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				}
 
 				c := Config{
-					CloudTags: ct,
 					Event:     e,
 					G8sClient: fake.NewSimpleClientset(),
 					HAMaster:  h,

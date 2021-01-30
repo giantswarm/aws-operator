@@ -12,34 +12,28 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCCPNConfig struct {
-	CloudTags cloudtags.Interface
-	Event     recorder.Interface
-	HAMaster  hamaster.Interface
-	Logger    micrologger.Logger
-	Releases  releases.Interface
+	Event    recorder.Interface
+	HAMaster hamaster.Interface
+	Logger   micrologger.Logger
+	Releases releases.Interface
 }
 
 // TCCPN is a detection service implementation deciding if the TCCPN stack
 // should be updated.
 type TCCPN struct {
-	cloudTags cloudtags.Interface
-	event     recorder.Interface
-	haMaster  hamaster.Interface
-	logger    micrologger.Logger
-	releases  releases.Interface
+	event    recorder.Interface
+	haMaster hamaster.Interface
+	logger   micrologger.Logger
+	releases releases.Interface
 }
 
 func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
-	if config.CloudTags == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
-	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
@@ -54,11 +48,10 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 	}
 
 	t := &TCCPN{
-		cloudTags: config.CloudTags,
-		event:     config.Event,
-		haMaster:  config.HAMaster,
-		logger:    config.Logger,
-		releases:  config.Releases,
+		event:    config.Event,
+		haMaster: config.HAMaster,
+		logger:   config.Logger,
+		releases: config.Releases,
 	}
 
 	return t, nil
@@ -108,11 +101,6 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 	masterReplicasEqual := cc.Status.TenantCluster.TCCPN.MasterReplicas == rep
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 
-	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, &cr.ObjectMeta, key.StackTCCPN)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
-
 	if !componentVersionsEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",
@@ -149,14 +137,6 @@ func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSC
 			"reason", fmt.Sprintf("operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)),
 		)
 		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCCPN stack should update: operator version changed from %#q to %#q", cc.Status.TenantCluster.OperatorVersion, key.OperatorVersion(&cr)))
-		return true, nil
-	}
-	if cloudTagsNotEqual {
-		t.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "detected TCCPN stack should update",
-			"reason", "cloud tags are not synced",
-		)
 		return true, nil
 	}
 

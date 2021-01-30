@@ -10,28 +10,22 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 )
 
 type TCCPConfig struct {
-	CloudTags cloudtags.Interface
-	Event     recorder.Interface
-	Logger    micrologger.Logger
+	Event  recorder.Interface
+	Logger micrologger.Logger
 }
 
 // TCCP is a detection service implementation deciding if the TCCP stack should
 // be updated.
 type TCCP struct {
-	cloudTags cloudtags.Interface
-	event     recorder.Interface
-	logger    micrologger.Logger
+	event  recorder.Interface
+	logger micrologger.Logger
 }
 
 func NewTCCP(config TCCPConfig) (*TCCP, error) {
-	if config.CloudTags == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
-	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
@@ -40,9 +34,8 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 	}
 
 	t := &TCCP{
-		cloudTags: config.CloudTags,
-		event:     config.Event,
-		logger:    config.Logger,
+		event:  config.Event,
+		logger: config.Logger,
 	}
 
 	return t, nil

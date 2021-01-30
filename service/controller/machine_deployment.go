@@ -51,7 +51,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -63,7 +62,6 @@ import (
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
-	CloudTags          cloudtags.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
@@ -240,10 +238,9 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
-			CloudTags: config.CloudTags,
-			Logger:    config.Logger,
-			Event:     config.Event,
-			Releases:  rel,
+			Logger:   config.Logger,
+			Event:    config.Event,
+			Releases: rel,
 		}
 
 		tcnpChangeDetection, err = changedetection.NewTCNP(c)
@@ -543,7 +540,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
-			CloudTags: config.CloudTags,
 			Detection: tcnpChangeDetection,
 			Event:     config.Event,
 			Images:    config.Images,

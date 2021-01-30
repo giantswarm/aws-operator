@@ -14,31 +14,25 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
 )
 
 type TCNPConfig struct {
-	CloudTags cloudtags.Interface
-	Event     recorder.Interface
-	Logger    micrologger.Logger
-	Releases  releases.Interface
+	Event    recorder.Interface
+	Logger   micrologger.Logger
+	Releases releases.Interface
 }
 
 // TCNP is a detection service implementation deciding if the TCNP stack should
 // be updated.
 type TCNP struct {
-	cloudTags cloudtags.Interface
-	event     recorder.Interface
-	logger    micrologger.Logger
-	releases  releases.Interface
+	event    recorder.Interface
+	logger   micrologger.Logger
+	releases releases.Interface
 }
 
 func NewTCNP(config TCNPConfig) (*TCNP, error) {
-	if config.CloudTags == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
-	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
@@ -50,10 +44,9 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	}
 
 	t := &TCNP{
-		cloudTags: config.CloudTags,
-		logger:    config.Logger,
-		event:     config.Event,
-		releases:  config.Releases,
+		logger:   config.Logger,
+		event:    config.Event,
+		releases: config.Releases,
 	}
 
 	return t, nil
@@ -132,10 +125,6 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
-	cloudTagsNotEqual, err := t.cloudTags.CloudTagsNotInSync(ctx, &cr.ObjectMeta, key.StackTCNP)
-	if err != nil {
-		return false, microerror.Mask(err)
-	}
 
 	if !componentVersionsEqual {
 		t.logger.LogCtx(ctx,
@@ -180,14 +169,6 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 			"reason", "security groups changed",
 		)
 		t.event.Emit(ctx, &cr, "CFUpdateRequested", "detected TCNP stack should update: security groups changed")
-		return true, nil
-	}
-	if cloudTagsNotEqual {
-		t.logger.LogCtx(ctx,
-			"level", "debug",
-			"message", "detected TCPN stack should update",
-			"reason", "cloud tags are not synced",
-		)
 		return true, nil
 	}
 

@@ -27,7 +27,6 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/project"
 	"github.com/giantswarm/aws-operator/service/controller"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/locker"
@@ -133,19 +132,6 @@ func New(config Config) (*Service, error) {
 		}
 	}
 
-	var ct cloudtags.Interface
-	{
-		c := cloudtags.Config{
-			K8sClient: k8sClient,
-			Logger:    config.Logger,
-		}
-
-		ct, err = cloudtags.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var event recorder.Interface
 	{
 		c := recorder.Config{
@@ -221,7 +207,6 @@ func New(config Config) (*Service, error) {
 	var clusterController *controller.Cluster
 	{
 		c := controller.ClusterConfig{
-			CloudTags: ct,
 			Event:     event,
 			K8sClient: k8sClient,
 			HAMaster:  ha,
@@ -264,7 +249,6 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.ControlPlaneConfig{
 			CertsSearcher:      certsSearcher,
-			CloudTags:          ct,
 			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
@@ -320,7 +304,6 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.MachineDeploymentConfig{
 			CertsSearcher:      certsSearcher,
-			CloudTags:          ct,
 			Event:              event,
 			HAMaster:           ha,
 			Images:             im,
