@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys/v2"
 
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
@@ -15,6 +16,7 @@ import (
 
 type Config struct {
 	CertsSearcher      certs.Interface
+	CloudTags          cloudtags.Interface
 	Encrypter          encrypter.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface

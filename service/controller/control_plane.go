@@ -41,6 +41,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -51,6 +52,7 @@ import (
 
 type ControlPlaneConfig struct {
 	CertsSearcher      certs.Interface
+	CloudTags          cloudtags.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
@@ -196,6 +198,19 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 
 		cleanupIAMRolesResource, err = cleanuptccpniamroles.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cloudtagObject cloudtags.Interface
+	{
+		c := cloudtags.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		cloudtagObject, err = cloudtags.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -395,6 +410,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
+			CloudTags: cloudtagObject,
 			Detection: tccpnChangeDetection,
 			Encrypter: encrypterObject,
 			Event:     config.Event,
