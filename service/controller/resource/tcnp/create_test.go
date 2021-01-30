@@ -131,7 +131,6 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			var r *Resource
 			{
 				c := Config{
-					CloudTags: ct,
 					Detection: d,
 					Encrypter: m,
 					Event:     e,
