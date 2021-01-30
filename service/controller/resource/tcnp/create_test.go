@@ -16,7 +16,6 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
