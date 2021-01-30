@@ -15,8 +15,6 @@ import (
 )
 
 const keyCloudPrefix = "aws-tag/"
-const keyGiantswarmPrefix = "giantswarm.io/"
-const keyKubernetesPrefix = "kubernetes.io/"
 
 type Config struct {
 	K8sClient k8sclient.Interface
