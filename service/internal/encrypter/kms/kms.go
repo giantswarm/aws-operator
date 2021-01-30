@@ -14,16 +14,18 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-type Encrypter struct {
-	logger micrologger.Logger
-
-	installationName string
-}
-
 type EncrypterConfig struct {
 	Logger micrologger.Logger
 
 	InstallationName string
+}
+
+type Encrypter struct {
+	logger micrologger.Logger
+
+	cache *Cache
+
+	installationName string
 }
 
 func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
@@ -37,6 +39,8 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 
 	kms := &Encrypter{
 		logger: c.Logger,
+
+		cache: NewCache(),
 
 		installationName: c.InstallationName,
 	}
@@ -52,23 +56,23 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 
 	var oldKeyScheduledForDeletion bool
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "finding encryption key")
+		e.logger.Debugf(ctx, "finding encryption key")
 
-		_, err := e.describeKey(ctx, cr)
+		_, err := e.cachedKey(ctx, key.ClusterID(&cr))
 		if IsKeyNotFound(err) {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
+			e.logger.Debugf(ctx, "did not find encryption key")
 
 		} else if IsKeyScheduledForDeletion(err) {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "current encryption key is scheduled for deletion and will be recreated")
+			e.logger.Debugf(ctx, "found encryption key")
+			e.logger.Debugf(ctx, "current encryption key is scheduled for deletion and will be recreated")
 			oldKeyScheduledForDeletion = true
 
 		} else if err != nil {
 			return microerror.Mask(err)
 
 		} else {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			e.logger.Debugf(ctx, "found encryption key")
+			e.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}
@@ -77,10 +81,10 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 		// In such case we just delete the alias so we can alias newly
 		// created key.
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting old encryption key alias")
+		e.logger.Debugf(ctx, "deleting old encryption key alias")
 
 		in := &kms.DeleteAliasInput{
-			AliasName: aws.String(keyAlias(cr)),
+			AliasName: aws.String(keyAlias(key.ClusterID(&cr))),
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.KMS.DeleteAlias(in)
@@ -88,12 +92,12 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted old encryption key alias")
+		e.logger.Debugf(ctx, "deleted old encryption key alias")
 	}
 
 	var keyID *string
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
+		e.logger.Debugf(ctx, "creating encryption key")
 
 		tags := key.AWSTags(&cr, e.installationName)
 
@@ -114,7 +118,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 
 		keyID = out.KeyMetadata.KeyId
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key")
+		e.logger.Debugf(ctx, "created encryption key")
 	}
 
 	// NOTE: Key roation must be enabled before creation alias. Otherwise
@@ -122,7 +126,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 	// enable rotation before aliasing the key. So it is enough reconcile
 	// aliasing properly to make sure rotation is enabled.
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "enabling encryption key rotation")
+		e.logger.Debugf(ctx, "enabling encryption key rotation")
 
 		in := &kms.EnableKeyRotationInput{
 			KeyId: keyID,
@@ -133,14 +137,14 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "enabled encryption key rotation")
+		e.logger.Debugf(ctx, "enabled encryption key rotation")
 	}
 
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key alias")
+		e.logger.Debugf(ctx, "creating encryption key alias")
 
 		in := &kms.CreateAliasInput{
-			AliasName:   aws.String(keyAlias(cr)),
+			AliasName:   aws.String(keyAlias(key.ClusterID(&cr))),
 			TargetKeyId: keyID,
 		}
 
@@ -149,7 +153,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key alias")
+		e.logger.Debugf(ctx, "created encryption key alias")
 	}
 
 	return nil
@@ -163,26 +167,30 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastru
 
 	var keyID *string
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "finding encryption key")
+		e.logger.Debugf(ctx, "finding encryption key")
 
-		// TODO we should search by tags here in case alias failed to create and cluster was deleted early. Issue: https://github.com/giantswarm/giantswarm/issues/4262.
-		out, err := e.describeKey(ctx, cr)
+		// TODO we should search by tags here in case alias failed to create and
+		// cluster was deleted early.
+		//
+		//     https://github.com/giantswarm/giantswarm/issues/4262.
+		//
+		out, err := e.cachedKey(ctx, key.ClusterID(&cr))
 		if IsKeyNotFound(err) || IsKeyScheduledForDeletion(err) {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			e.logger.Debugf(ctx, "did not find encryption key")
+			e.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if err != nil {
 			return microerror.Mask(err)
 
 		} else if out.KeyMetadata.DeletionDate != nil {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "encryption key is scheduled for deletion")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			e.logger.Debugf(ctx, "encryption key is scheduled for deletion")
+			e.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else {
 
-			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
+			e.logger.Debugf(ctx, "found encryption key")
 			keyID = out.KeyMetadata.KeyId
 		}
 	}
@@ -214,8 +222,8 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastru
 	return nil
 }
 
-func (k *Encrypter) EncryptionKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (string, error) {
-	out, err := k.describeKey(ctx, cr)
+func (e *Encrypter) EncryptionKey(ctx context.Context, id string) (string, error) {
+	out, err := e.cachedKey(ctx, id)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -228,7 +236,7 @@ func (k *Encrypter) EncryptionKey(ctx context.Context, cr infrastructurev1alpha2
 	return *out.KeyMetadata.Arn, nil
 }
 
-func (k *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
+func (e *Encrypter) Encrypt(ctx context.Context, key, plaintext string) (string, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -251,14 +259,43 @@ func (e *Encrypter) IsKeyNotFound(err error) bool {
 	return IsKeyNotFound(err) || IsKeyScheduledForDeletion(err)
 }
 
-func (k *Encrypter) describeKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*kms.DescribeKeyOutput, error) {
+func (e *Encrypter) cachedKey(ctx context.Context, id string) (*kms.DescribeKeyOutput, error) {
+	var err error
+	var ok bool
+
+	var keyOutput *kms.DescribeKeyOutput
+	{
+		ck := e.cache.Key(ctx, id)
+
+		if ck == "" {
+			keyOutput, err = e.lookupKey(ctx, id)
+			if err != nil {
+				return nil, microerror.Mask(err)
+			}
+		} else {
+			keyOutput, ok = e.cache.Get(ctx, ck)
+			if !ok {
+				keyOutput, err = e.lookupKey(ctx, id)
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
+
+				e.cache.Set(ctx, ck, keyOutput)
+			}
+		}
+	}
+
+	return keyOutput, nil
+}
+
+func (e *Encrypter) lookupKey(ctx context.Context, id string) (*kms.DescribeKeyOutput, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
 	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(keyAlias(cr)),
+		KeyId: aws.String(keyAlias(id)),
 	}
 
 	out, err := cc.Client.TenantCluster.AWS.KMS.DescribeKey(input)

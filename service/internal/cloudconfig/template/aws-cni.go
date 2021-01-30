@@ -177,13 +177,13 @@ spec:
             - name: ADDITIONAL_ENI_TAGS
               value: "{}"
             - name: AWS_VPC_K8S_CNI_LOGLEVEL
-              value: DEBUG
+              value: INFO
             - name: AWS_VPC_K8S_PLUGIN_LOG_LEVEL
-              value: DEBUG
+              value: INFO
             - name: AWS_VPC_K8S_CNI_LOG_FILE
-              value: /host/var/log/aws-routed-eni/ipamd.log
+              value: stdout
             - name: AWS_VPC_K8S_PLUGIN_LOG_FILE
-              value: /var/log/aws-routed-eni/plugin.log
+              value: /host/var/log/aws-routed-eni/plugin.log
             - name: AWS_VPC_ENI_MTU
               value: "9001"
             - name: AWS_VPC_K8S_CNI_CONFIGURE_RPFILTER
@@ -193,9 +193,9 @@ spec:
             - name: DISABLE_METRICS
               value: "false"
             - name: WARM_IP_TARGET
-              value: "10"
+              value: "{{ .AWSCNIWarmIPTarget }}"
             - name: MINIMUM_IP_TARGET
-              value: "40"
+              value: "{{ .AWSCNIMinimumIPTarget }}"
             ## Deviation from original manifest - 1
             ## This config value is important - See here https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md#cni-configuration-variables
             - name: AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG

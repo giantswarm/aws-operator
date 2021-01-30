@@ -85,21 +85,21 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 	o, err := cc.Client.TenantCluster.AWS.EC2.DescribeInstances(i)
 	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "worker asg not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	} else if err != nil {
 		return microerror.Mask(err)
 	}
 
 	if len(o.Reservations) == 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "worker asg not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	}
 	if len(o.Reservations[0].Instances) == 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "worker asg not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "worker asg not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	}
 

@@ -231,10 +231,6 @@ func StatusClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string 
 	return cluster.Status.Provider.Network.CIDR
 }
 
-func TargetLogBucketName(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
-}
-
 func TenantClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
 	return fmt.Sprintf("%s.k8s.%s", ClusterID(&cluster), ClusterBaseDomain(cluster))
 }

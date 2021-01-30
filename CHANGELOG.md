@@ -8,6 +8,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.0] - 2021-01-22
+
+### Added
+
+- Add `cleanupiamroles` resource for detaching third party policies from our IAM
+  roles.
+- Update `k8scloudconfig` version to `v10.0.0` to include change for Kubernetes 1.19.
+- Allow configuration of `MINIMUM_IP_TARGET` and `WARM_IP_TARGET` for AWS CNI via annotations on `AWSCluster`
+
+### Changed
+
+- Include Account ID in the s3bucket for access logs. It is a breaking change, that will put access logs to a new s3 bucket.
+- Change AWS CNI and AWS CNI k8s plugin log verbosity to `INFO`.
+- Change AWS CNI log file to `stdout`.
+- Add retry logic for decrypt units to avoid flapping.
+
+## [9.3.5] - 2020-12-08
+
+### Changed
+
+- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID.
+
+## [9.3.4] - 2020-12-07
+
+### Added
+
+- Add vertical pod autoscaler support.
+- Update `k8scloudconfig` version to `v9.3.0` to include change for cgroup for kubelet.
+
+## [9.3.3] - 2020-12-02
+### Changed
+
+- Update `k8scloudconfig` version to `v9.2.0` to include change for kubelet pull QPS.
+
+## [9.3.2] - 2020-11-26
+
 ### Changed
 
 - Make it mandatory to configure alike instances via e.g. the installations repo.
@@ -333,7 +369,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.0.0...HEAD
+[10.0.0]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v10.0.0
+[9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
+[9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
+[9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
+[9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
 [9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
 [9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0

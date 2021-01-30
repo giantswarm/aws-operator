@@ -7,6 +7,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
@@ -20,6 +21,7 @@ const (
 type Config struct {
 	CloudTags cloudtags.Interface
 	Detection *changedetection.TCCPN
+	Encrypter encrypter.Interface
 	Event     event.Interface
 	HAMaster  hamaster.Interface
 	Images    images.Interface
@@ -36,6 +38,7 @@ type Config struct {
 type Resource struct {
 	cloudTags cloudtags.Interface
 	detection *changedetection.TCCPN
+	encrypter encrypter.Interface
 	event     event.Interface
 	haMaster  hamaster.Interface
 	images    images.Interface
@@ -52,6 +55,9 @@ func New(config Config) (*Resource, error) {
 	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
+	if config.Encrypter == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
@@ -77,6 +83,7 @@ func New(config Config) (*Resource, error) {
 		cloudTags: config.CloudTags,
 		k8sClient: config.K8sClient,
 		detection: config.Detection,
+		encrypter: config.Encrypter,
 		event:     config.Event,
 		haMaster:  config.HAMaster,
 		images:    config.Images,
