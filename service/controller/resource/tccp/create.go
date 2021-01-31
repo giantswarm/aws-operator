@@ -121,11 +121,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			if err != nil {
 				return microerror.Mask(err)
 			}
-		} else if key.IsAlreadyCreatedCluster(cr) {
-			err = r.updateStack(ctx, cr)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 		}
 	}
 
