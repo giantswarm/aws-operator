@@ -321,6 +321,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		c := tenantclients.Config{
 			Logger: config.Logger,
 			Tenant: tenantCluster,
+
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
 		}
 
 		tenantClientsResource, err = tenantclients.New(c)
