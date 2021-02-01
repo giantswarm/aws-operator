@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for tagging AWS resources, managed by the operator, based on the custom resource labels.
+
 ## [10.0.0] - 2021-01-22
 
 ### Added
@@ -16,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   roles.
 - Update `k8scloudconfig` version to `v10.0.0` to include change for Kubernetes 1.19.
 - Allow configuration of `MINIMUM_IP_TARGET` and `WARM_IP_TARGET` for AWS CNI via annotations on `AWSCluster`
-- Add support for tagging AWS resources, managed by the operator, based on the custom resource labels.
 
 ### Changed
 
