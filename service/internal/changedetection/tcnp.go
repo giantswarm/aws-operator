@@ -44,8 +44,8 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 	}
 
 	t := &TCNP{
-		logger:   config.Logger,
 		event:    config.Event,
+		logger:   config.Logger,
 		releases: config.Releases,
 	}
 
