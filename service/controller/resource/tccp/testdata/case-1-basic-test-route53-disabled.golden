@@ -51,7 +51,7 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
-
+  
   ApiInternalLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     DependsOn:
@@ -66,12 +66,12 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
-
+      
       - InstancePort: 443
         InstanceProtocol: TCP
         LoadBalancerPort: 443
         Protocol: TCP
-
+      
       LoadBalancerName: 8y5ck-api-internal
       Scheme: internal
       SecurityGroups:
@@ -94,12 +94,12 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
-
+      
       - InstancePort: 443
         InstanceProtocol: TCP
         LoadBalancerPort: 443
         Protocol: TCP
-
+      
       LoadBalancerName: 8y5ck-api
       Scheme: internet-facing
       SecurityGroups:
@@ -121,12 +121,12 @@ Resources:
         Timeout: 3
         UnhealthyThreshold: 2
       Listeners:
-
+      
       - InstancePort: 2379
         InstanceProtocol: TCP
         LoadBalancerPort: 2379
         Protocol: TCP
-
+      
       LoadBalancerName: 8y5ck-etcd
       Scheme: internal
       SecurityGroups:
@@ -135,7 +135,7 @@ Resources:
         - !Ref PrivateSubnetEuCentral1a
         - !Ref PrivateSubnetEuCentral1b
         - !Ref PrivateSubnetEuCentral1c
-
+  
   NATGatewayEuCentral1a:
     Type: AWS::EC2::NatGateway
     DependsOn:
@@ -235,8 +235,8 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1c
-
-
+  
+  
   AWSCNIRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -551,7 +551,7 @@ Resources:
       GroupId: !GetAtt VPC.DefaultSecurityGroup
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
-
+  
   AWSCNISubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     DependsOn:
@@ -720,7 +720,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
       SubnetId: !Ref PrivateSubnetEuCentral1c
-
+  
   VPC:
     Type: AWS::EC2::VPC
     Properties:
