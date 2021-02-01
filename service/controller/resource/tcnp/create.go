@@ -143,7 +143,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			// only allow tcnp CF stack update when a tccpn CF stack has finished updating
 			tccpnUpdated, err := isTCCPNUpdated(ctx, cr)
 			if IsTccpnNotUpdated(err) {
-				r.logger.LogCtx(ctx, "waiting for tccpn stack to finish an update before executing an tcnp update")
+				r.logger.Debugf(ctx, "waiting for tccpn stack to finish an update before executing an tcnp update")
 
 				return nil
 			} else if err != nil {
