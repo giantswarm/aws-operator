@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	"net"
 	"strings"
 
@@ -295,6 +297,33 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 
 		machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantCluster tenantcluster.Interface
+	{
+		c := tenantcluster.Config{
+			CertsSearcher: certsSearcher,
+			Logger:        config.Logger,
+			CertID:        certs.AWSOperatorAPICert,
+		}
+
+		tenantCluster, err = tenantcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: tenantCluster,
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -638,6 +667,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		tenantClientsResource,
 		accountIDResource,
 		regionResource,
 		cpRouteTablesResource,
