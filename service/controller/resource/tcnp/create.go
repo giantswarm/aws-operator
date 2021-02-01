@@ -3,8 +3,6 @@ package tcnp
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
-	corev1 "k8s.io/api/core/v1"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -12,12 +10,14 @@ import (
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
