@@ -3,6 +3,8 @@ package tcnp
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -130,10 +132,27 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		if scale || update {
+		if scale {
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
+			}
+		}
+
+		if update {
+			// only allow tcnp CF stack update when a tccpn CF stack has finished updating
+			tccpnUpdated, err := isTCCPNUpdated(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			if tccpnUpdated {
+				err = r.updateStack(ctx, cr)
+				if IsTccpnNotUpdated(err) {
+					r.logger.LogCtx(ctx, "waiting for tccpn stack to finish an update before executing an tcnp update")
+				} else if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 		}
 	}
@@ -715,4 +734,84 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	}
 
 	return ""
+}
+
+func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	// check if TCCPN CF stack is updated
+	{
+		i := &cloudformation.DescribeStacksInput{
+			StackName: aws.String(key.StackNameTCCPN(&cr)),
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+
+		if len(o.Stacks) != 1 {
+			return false, microerror.Maskf(executionFailedError, "expected 1 CF stack but got %d", len(o.Stacks))
+		}
+
+		if *o.Stacks[0].StackStatus != cloudformation.StackStatusUpdateComplete {
+			// when TCCPN stack is updated, only  good status that we want to see is `StackStatusUpdateComplete`
+			// anything else indicate either CF stack not updated, update in progress or an error
+			return false, microerror.Mask(tccpnNotUpdatedError)
+		}
+
+		v, err := getCFOutputValue(o.Stacks[0].Outputs, tccpnoutputs.OperatorVersionKey)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+
+		if v != key.OperatorVersion(&cr) {
+			// CF output value for Operator version do not match with operator version on CR
+			// CF is not yet updated
+			return false, microerror.Mask(tccpnNotUpdatedError)
+		}
+	}
+
+	// check if master nodes in tc k8s api are on the latest operator version
+	// the value is stored in node labels
+	{
+		nodes := &corev1.NodeList{}
+
+		err = cc.Client.TenantCluster.K8s.CtrlClient().List(
+			ctx,
+			nodes,
+			client.MatchingLabels{key.NodeRoleLabel: key.MasterNodeRoleLabel},
+		)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+
+		// check if all master nodes have proper operator version
+		for _, n := range nodes.Items {
+			if v, ok := n.GetLabels()[label.OperatorVersion]; ok {
+				if v != key.OperatorVersion(&cr) {
+					// operator version mismatch, CP is not updated yet
+					return false, microerror.Mask(tccpnNotUpdatedError)
+				}
+			} else {
+				// node dont have proper node label, its probably in a update phase
+				return false, microerror.Mask(tccpnNotUpdatedError)
+			}
+		}
+	}
+	// tccpn CF stack is updated and all master nodes have new operator version
+	return true, nil
+}
+
+func getCFOutputValue(outputs []*cloudformation.Output, key string) (string, error) {
+	for _, o := range outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+
+	return "", microerror.Maskf(outputNotFoundError, "stack output value for key '%s'", key)
 }
