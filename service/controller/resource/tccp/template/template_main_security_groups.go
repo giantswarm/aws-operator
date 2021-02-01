@@ -190,13 +190,13 @@ const TemplateMainSecurityGroups = `
         ToPort: 443
         CidrIp: "192.168.0.0/16"
       -
-        Description: "Allow all traffic to the master instance from non RFC-1918."
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
         CidrIp: "100.64.0.0/10"
       -
-        Description: "Allow all traffic to the master instance from non RFC-1918."
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
