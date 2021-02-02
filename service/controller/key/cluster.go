@@ -123,6 +123,10 @@ func ExternalSNAT(cluster infrastructurev1alpha2.AWSCluster) *bool {
 	return cluster.Spec.Provider.Pods.ExternalSNAT
 }
 
+func PodsCIDRBlock(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.Pods.CIDRBlock
+}
+
 func IsChinaRegion(awsRegion string) bool {
 	return strings.HasPrefix(awsRegion, "cn-")
 }

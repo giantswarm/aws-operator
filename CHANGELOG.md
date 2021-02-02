@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change AWS CNI log file to `stdout`.
 - Add retry logic for decrypt units to avoid flapping.
 
+### Fixed
+
+- Added CNI CIDR to internal ELB Security Group.
+
 ## [9.3.5] - 2020-12-08
 
 ### Changed
