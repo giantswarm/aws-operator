@@ -23,7 +23,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	}
 
 	if endpointsToDelete != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleting endpoint")
+		r.logger.Debugf(ctx, "deleting endpoint")
 
 		namespace := key.ClusterNamespace(cr)
 		err := r.k8sClient.CoreV1().Endpoints(namespace).Delete(ctx, endpointsToDelete.Name, metav1.DeleteOptions{})
@@ -33,9 +33,9 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "deleted endpoint")
+		r.logger.Debugf(ctx, "deleted endpoint")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not delete endpoint")
+		r.logger.Debugf(ctx, "did not delete endpoint")
 	}
 
 	return nil

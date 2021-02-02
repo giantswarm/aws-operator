@@ -15,8 +15,8 @@ import (
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := r.toClusterFunc(ctx, obj)
 	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "cluster cr not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	} else if err != nil {
@@ -29,7 +29,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var natgateways []*ec2.NatGateway
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding natgateways")
+		r.logger.Debugf(ctx, "finding natgateways")
 
 		i := &ec2.DescribeNatGatewaysInput{
 			Filter: []*ec2.Filter{
@@ -45,6 +45,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 						aws.String(key.StackTCCP),
 					},
 				},
+				// ignore NAT gateway in state 'deleting' or 'deleted'
+				{
+					Name: aws.String("state"),
+					Values: []*string{
+						aws.String("available"),
+						aws.String("pending"),
+					},
+				},
 			},
 		}
 		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeNatGateways(i)
@@ -54,18 +62,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		natgateways = o.NatGateways
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found natgateways")
+		r.logger.Debugf(ctx, "found natgateways")
 	}
 
 	{
 		if len(natgateways) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find natgateways for tenant cluster %#q", key.ClusterID(&cr)))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find natgateways for tenant cluster %#q", key.ClusterID(&cr))
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d natgateways for tenant cluster %#q", len(natgateways), key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "found %d natgateways for tenant cluster %#q", len(natgateways), key.ClusterID(&cr))
 
 		cc.Status.TenantCluster.TCCP.NATGateways = natgateways
 	}

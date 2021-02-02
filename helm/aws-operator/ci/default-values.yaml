@@ -31,16 +31,19 @@ Installation:
         UserList: ""
     Provider:
       AWS:
+        CNI:
+          ExternalSNAT: false
+        EC2:
+          Instance:
+            Alike: ""
+        Region: ""
+        Role:
+          ARN: ""
         Route53:
           Enabled: false
         S3AccessLogsExpiration: 0
         TrustedAdvisor:
           Enabled: false
-        CNI:
-          ExternalSNAT: false
-        Region: ""
-        Role:
-          ARN: ""
       Kind: ""
     Registry:
       Domain: ""

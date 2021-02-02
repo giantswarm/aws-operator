@@ -2,7 +2,6 @@ package s3bucket
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -32,7 +31,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var currentBucketState []BucketState
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the S3 buckets")
+		r.logger.Debugf(ctx, "finding the S3 buckets")
 
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
@@ -61,7 +60,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 					return nil
 				}
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding the S3 bucket %#q", bucketName))
+				r.logger.Debugf(ctx, "finding the S3 bucket %#q", bucketName)
 
 				lc, err := r.getLoggingConfiguration(ctx, bucketName)
 				if err != nil {
@@ -74,7 +73,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 				currentBucketState = append(currentBucketState, inputBucket)
 				m.Unlock()
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the S3 bucket %#q", bucketName))
+				r.logger.Debugf(ctx, "found the S3 bucket %#q", bucketName)
 
 				return nil
 			})
@@ -85,7 +84,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the S3 buckets")
+		r.logger.Debugf(ctx, "found the S3 buckets")
 	}
 
 	return currentBucketState, nil

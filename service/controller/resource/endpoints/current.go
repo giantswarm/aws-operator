@@ -19,15 +19,15 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 
 	var endpoints *corev1.Endpoints
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding endpoint")
+		r.logger.Debugf(ctx, "finding endpoint")
 
 		manifest, err := r.k8sClient.CoreV1().Endpoints(key.ClusterNamespace(cr)).Get(ctx, masterEndpointsName, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find endpoint")
+			r.logger.Debugf(ctx, "did not find endpoint")
 		} else if err != nil {
 			return nil, microerror.Mask(err)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "found endpoint")
+			r.logger.Debugf(ctx, "found endpoint")
 			endpoints = manifest
 		}
 	}

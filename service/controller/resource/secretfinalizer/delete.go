@@ -2,7 +2,6 @@ package secretfinalizer
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/finalizerskeptcontext"
@@ -25,32 +24,32 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	// implementations may still require secrets to be available during their own
 	// deletion logic execution in upcoming reconciliation loops.
 	if finalizerskeptcontext.IsKept(ctx) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not removing secret finalizers")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finalizers requested to be kept")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "not removing secret finalizers")
+		r.logger.Debugf(ctx, "finalizers requested to be kept")
+		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	}
 
 	for _, s := range newSecretAccessors(ctx, cr) {
 		var secret *corev1.Secret
 		{
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding secret %#q in namespace %#q", s.Name, s.Namespace))
+			r.logger.Debugf(ctx, "finding secret %#q in namespace %#q", s.Name, s.Namespace)
 
 			secret, err = r.k8sClient.CoreV1().Secrets(s.Namespace).Get(ctx, s.Name, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find secret %#q in namespace %#q", s.Name, s.Namespace))
-				r.logger.LogCtx(ctx, "level", "debug", "message", "continuing with next secret")
+				r.logger.Debugf(ctx, "did not find secret %#q in namespace %#q", s.Name, s.Namespace)
+				r.logger.Debugf(ctx, "continuing with next secret")
 				continue
 
 			} else if err != nil {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found secret %#q in namespace %#q", s.Name, s.Namespace))
+			r.logger.Debugf(ctx, "found secret %#q in namespace %#q", s.Name, s.Namespace)
 		}
 
 		if containsString(secret.Finalizers, secretFinalizer) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removing finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
+			r.logger.Debugf(ctx, "removing finalizer for secret %#q in namespace %#q", s.Name, s.Namespace)
 
 			secret.Finalizers = filterString(secret.Finalizers, secretFinalizer)
 
@@ -59,9 +58,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("removed finalizer for secret %#q in namespace %#q", s.Name, s.Namespace))
+			r.logger.Debugf(ctx, "removed finalizer for secret %#q in namespace %#q", s.Name, s.Namespace)
 		} else {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finalizer already removed for secret %#q in namespace %#q", s.Name, s.Namespace))
+			r.logger.Debugf(ctx, "finalizer already removed for secret %#q in namespace %#q", s.Name, s.Namespace)
 		}
 	}
 

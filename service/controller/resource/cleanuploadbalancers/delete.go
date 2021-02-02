@@ -2,7 +2,6 @@ package cleanuploadbalancers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
@@ -26,7 +25,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	}
 
 	if lbState != nil && len(lbState.LoadBalancerNames) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d load balancers", len(lbState.LoadBalancerNames)))
+		r.logger.Debugf(ctx, "deleting %d load balancers", len(lbState.LoadBalancerNames))
 
 		cc, err := controllercontext.FromContext(ctx)
 		if err != nil {
@@ -42,9 +41,9 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d load balancers", len(lbState.LoadBalancerNames)))
+		r.logger.Debugf(ctx, "deleted %d load balancers", len(lbState.LoadBalancerNames))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "not deleting load balancers because there aren't any")
+		r.logger.Debugf(ctx, "not deleting load balancers because there aren't any")
 	}
 
 	return nil

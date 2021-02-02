@@ -10,6 +10,7 @@ import (
 )
 
 type AWS struct {
+	AlikeInstances         string
 	AdvancedMonitoringEC2  string
 	AvailabilityZones      string
 	HostAccessKey          hostaccesskey.HostAccessKey
