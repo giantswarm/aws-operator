@@ -368,7 +368,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
-[9.3.7]: https://github.com/giantswarm/aws-operator/compare/v9.3.6...v9.3.7
+[9.3.7]: https://github.com/giantswarm/aws-operator/compare/v9.3.6...HEAD
 [9.3.6]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v9.3.6
 [9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
 [9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
