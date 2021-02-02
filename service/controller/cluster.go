@@ -59,6 +59,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
@@ -68,6 +69,7 @@ import (
 )
 
 type ClusterConfig struct {
+	CloudTags cloudtags.Interface
 	Event     event.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
@@ -541,6 +543,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
+			CloudTags: config.CloudTags,
 			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,

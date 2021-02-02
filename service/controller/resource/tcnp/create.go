@@ -34,6 +34,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// Ensure some preconditions are met so we have all necessary information
 	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
 	if kms.IsKeyNotFound(err) {
 		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
@@ -167,13 +168,18 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's node pool cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(true),
 			StackName:                   aws.String(key.StackNameTCNP(&cr)),
-			Tags:                        r.getCloudFormationTags(cr),
+			Tags:                        tags,
 			TemplateBody:                aws.String(templateBody),
 		}
 
@@ -189,11 +195,20 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSMachineDeployment) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) ([]*cloudformation.Tag, error) {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCNP
 	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
-	return awstags.NewCloudFormation(tags)
+
+	cloudtags, err := r.cloudtags.GetTagsByCluster(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	for k, v := range cloudtags {
+		tags[k] = v
+	}
+
+	return awstags.NewCloudFormation(tags), nil
 }
 
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
@@ -222,11 +237,17 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.Debugf(ctx, "requesting the update of the tenant cluster's node pool cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			StackName:    aws.String(key.StackNameTCNP(&cr)),
+			Tags:         tags,
 			TemplateBody: aws.String(templateBody),
 		}
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
