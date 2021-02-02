@@ -39,6 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Make it mandatory to configure alike instances via e.g. the installations repo.
 - Fix naming and logs for `terminate-unhealthy-node` feature.
 
+## [9.3.1-fix] - 2020-12-24
+
+### Changed
+
+- Remove explicit registry pull limits defaulting to less restrictive upstream settings.
+
 ## [9.3.1] - 2020-11-12
 
 ### Changed
@@ -359,12 +365,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.6...HEAD
 [9.3.6]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v9.3.6
 [9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
 [9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
 [9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
 [9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
+[9.3.1-fix]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.1-fix
 [9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
 [9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0
 [9.2.0]: https://github.com/giantswarm/aws-operator/compare/v9.1.3...v9.2.0
