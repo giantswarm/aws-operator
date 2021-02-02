@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Added new Flatcar AMI identifiers.
+
 ## [9.3.6] - 2021-02-02
 
 ### Fixed
@@ -362,7 +366,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - First release.
-
 
 
 [9.3.6]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v9.3.6
