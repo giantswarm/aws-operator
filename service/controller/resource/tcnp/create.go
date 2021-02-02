@@ -19,6 +19,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+	cloudformationutils "github.com/giantswarm/aws-operator/service/internal/cloudformation"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
@@ -746,26 +747,33 @@ func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 
 	// check if TCCPN CF stack is updated
 	{
-		i := &cloudformation.DescribeStacksInput{
-			StackName: aws.String(key.StackNameTCCPN(&cr)),
+		var cloudFormation *cloudformationutils.CloudFormation
+		{
+			c := cloudformationutils.Config{
+				Client: cc.Client.TenantCluster.AWS.CloudFormation,
+			}
+
+			cloudFormation, err = cloudformationutils.New(c)
+			if err != nil {
+				return false, microerror.Mask(err)
+			}
 		}
 
-		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
-		if err != nil {
+		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.StackNameTCCPN(&cr))
+		if cloudformationutils.IsOutputsNotAccessible(err) {
+			// outputsNotAccessible can occur when is CF in updating status
+			return false, microerror.Mask(tccpnNotUpdatedError)
+		} else if err != nil {
 			return false, microerror.Mask(err)
 		}
 
-		if len(o.Stacks) != 1 {
-			return false, microerror.Maskf(executionFailedError, "expected 1 CF stack but got %d", len(o.Stacks))
-		}
-
-		if *o.Stacks[0].StackStatus != cloudformation.StackStatusUpdateComplete {
+		if s != cloudformation.StackStatusUpdateComplete {
 			// when TCCPN stack is updated, only  good status that we want to see is `StackStatusUpdateComplete`
 			// anything else indicate either CF stack not updated, update in progress or an error
 			return false, microerror.Mask(tccpnNotUpdatedError)
 		}
 
-		v, err := getCFOutputValue(o.Stacks[0].Outputs, tccpnoutputs.OperatorVersionKey)
+		v, err := cloudFormation.GetOutputValue(o, tccpnoutputs.OperatorVersionKey)
 		if err != nil {
 			return false, microerror.Mask(err)
 		}
@@ -806,14 +814,4 @@ func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDep
 	}
 	// tccpn CF stack is updated and all master nodes have new operator version
 	return true, nil
-}
-
-func getCFOutputValue(outputs []*cloudformation.Output, key string) (string, error) {
-	for _, o := range outputs {
-		if *o.OutputKey == key {
-			return *o.OutputValue, nil
-		}
-	}
-
-	return "", microerror.Maskf(outputNotFoundError, "stack output value for key '%s'", key)
 }
