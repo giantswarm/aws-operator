@@ -32,8 +32,8 @@ func Test_CloudTags_GetTagsByCluster(t *testing.T) {
 			name:      "case 1",
 			clusterID: "pepe2",
 			labels: map[string]string{
-				"giantswarm.io/cluster": "pepe2",
-				"aws-tag/office":        "my-office",
+				"giantswarm.io/cluster":             "pepe2",
+				"tag.provider.giantswarm.io/office": "my-office",
 			},
 			ctx: context.Background(),
 			expectedTags: map[string]string{

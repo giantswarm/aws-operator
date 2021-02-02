@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-const keyCloudPrefix = "aws-tag/"
+const keyCloudPrefix = "tag.provider.giantswarm.io/"
 
 type Config struct {
 	K8sClient k8sclient.Interface
