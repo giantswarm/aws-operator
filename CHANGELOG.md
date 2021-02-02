@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.6] - 2021-02-02
+
 ### Fixed
 
 - Added CNI CIDR to internal ELB Security Group.
@@ -357,7 +359,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.6...HEAD
+[9.3.6]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v9.3.6
 [9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
 [9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
 [9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
