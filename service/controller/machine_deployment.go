@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v2"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -49,6 +50,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
@@ -310,6 +312,35 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 
 		machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantCluster tenantcluster.Interface
+	{
+		c := tenantcluster.Config{
+			CertsSearcher: certsSearcher,
+			Logger:        config.Logger,
+			CertID:        certs.AWSOperatorAPICert,
+		}
+
+		tenantCluster, err = tenantcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: tenantCluster,
+
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -654,6 +685,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		tenantClientsResource,
 		accountIDResource,
 		regionResource,
 		cpRouteTablesResource,

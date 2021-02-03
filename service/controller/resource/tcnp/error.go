@@ -136,3 +136,21 @@ func IsUpdateInProgress(err error) bool {
 
 	return false
 }
+
+var outputNotFoundError = &microerror.Error{
+	Kind: "outputNotFoundError",
+}
+
+// IsOutputNotFound asserts outputNotFoundError.
+func IsOutputNotFound(err error) bool {
+	return microerror.Cause(err) == outputNotFoundError
+}
+
+var tccpnNotUpdatedError = &microerror.Error{
+	Kind: "tccpnNotUpdatedError",
+}
+
+// IsTccpnNotUpdated asserts timeoutError.
+func IsTccpnNotUpdated(err error) bool {
+	return microerror.Cause(err) == tccpnNotUpdatedError
+}
