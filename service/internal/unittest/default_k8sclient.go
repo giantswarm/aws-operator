@@ -12,6 +12,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
+	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -28,6 +29,10 @@ func FakeK8sClient() k8sclient.Interface {
 	{
 		scheme := runtime.NewScheme()
 		err = infrastructurev1alpha2.AddToScheme(scheme)
+		if err != nil {
+			panic(err)
+		}
+		err = apiv1alpha2.AddToScheme(scheme)
 		if err != nil {
 			panic(err)
 		}

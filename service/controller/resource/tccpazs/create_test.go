@@ -235,8 +235,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				for _, md := range tc.machineDeployments {
-					err := r.k8sClient.CtrlClient().Create(ctx, &md)
+				for i := range tc.machineDeployments {
+					err := r.k8sClient.CtrlClient().Create(ctx, &tc.machineDeployments[i])
 					if err != nil {
 						t.Fatal(err)
 					}

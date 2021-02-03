@@ -53,6 +53,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -64,6 +65,7 @@ import (
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
+	CloudTags          cloudtags.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
@@ -170,6 +172,19 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var cloudtagObject cloudtags.Interface
+	{
+		c := cloudtags.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		cloudtagObject, err = cloudtags.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
@@ -240,8 +255,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
-			Event:    config.Event,
 			Logger:   config.Logger,
+			Event:    config.Event,
 			Releases: rel,
 		}
 
@@ -569,6 +584,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
+			CloudTags: cloudtagObject,
 			Detection: tcnpChangeDetection,
 			Encrypter: encrypterObject,
 			Event:     config.Event,

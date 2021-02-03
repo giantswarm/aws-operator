@@ -6,6 +6,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
@@ -18,6 +19,7 @@ const (
 )
 
 type Config struct {
+	CloudTags cloudtags.Interface
 	Detection *changedetection.TCCPN
 	Encrypter encrypter.Interface
 	Event     event.Interface
@@ -34,6 +36,7 @@ type Config struct {
 // Control Plane Node. We manage a dedicated Cloud Formation stack for each node
 // pool.
 type Resource struct {
+	cloudTags cloudtags.Interface
 	detection *changedetection.TCCPN
 	encrypter encrypter.Interface
 	event     event.Interface
@@ -47,6 +50,9 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -74,6 +80,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		cloudTags: config.CloudTags,
 		detection: config.Detection,
 		encrypter: config.Encrypter,
 		event:     config.Event,

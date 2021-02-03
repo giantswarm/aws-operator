@@ -9,6 +9,7 @@ import (
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	"github.com/giantswarm/aws-operator/service/internal/recorder"
@@ -20,6 +21,7 @@ const (
 )
 
 type Config struct {
+	CloudTags cloudtags.Interface
 	Detection *changedetection.TCNP
 	Encrypter encrypter.Interface
 	Event     recorder.Interface
@@ -34,6 +36,7 @@ type Config struct {
 // Resource implements the TCNP resource, which stands for Tenant Cluster Data
 // Plane. We manage a dedicated Cloud Formation stack for each node pool.
 type Resource struct {
+	cloudtags cloudtags.Interface
 	detection *changedetection.TCNP
 	encrypter encrypter.Interface
 	event     recorder.Interface
@@ -46,6 +49,9 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -81,6 +87,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		cloudtags: config.CloudTags,
 		detection: config.Detection,
 		encrypter: config.Encrypter,
 		event:     config.Event,

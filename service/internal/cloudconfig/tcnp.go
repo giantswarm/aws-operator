@@ -168,8 +168,8 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
 
-		if cl.Spec.Provider.Pods.CIDRBlock != "" {
-			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+		if key.PodsCIDRBlock(cl) != "" {
+			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(cl))
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
