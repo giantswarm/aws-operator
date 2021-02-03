@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.1.0] - 2021-02-03
+
 ### Added
 
 - Add support for tagging AWS resources, managed by the operator, based on the custom resource labels.
@@ -383,7 +385,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.1.0...HEAD
+[10.1.0]: https://github.com/giantswarm/aws-operator/compare/v10.0.0...v10.1.0
 [10.0.0]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v10.0.0
 [9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
 [9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
