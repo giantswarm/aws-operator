@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Allow incoming NFS traffic on node pools for EFS.
+
 ## [10.1.0] - 2021-02-03
 
 ### Added
