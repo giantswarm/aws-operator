@@ -14,11 +14,11 @@ const TemplateMainSecurityGroups = `
         ToPort: 22
         CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
       -
-        Description: Allow traffic from control plane CIDR to 2049 for NFS access.
+        Description: Allow traffic from tenant cluster CIDR to 2049 for NFS access.
         IpProtocol: tcp
         FromPort: 2049
         ToPort: 2049
-        CidrIp: {{ .SecurityGroups.ControlPlane.VPC.CIDR }}
+        CidrIp: {{ .SecurityGroups.TenantCluster.VPC.CIDR }}
       -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
