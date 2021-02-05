@@ -45,5 +45,6 @@ type ParamsMainSecurityGroupsTenantClusterNodePool struct {
 }
 
 type ParamsMainSecurityGroupsTenantClusterVPC struct {
-	ID string
+	ID   string
+	CIDR string
 }

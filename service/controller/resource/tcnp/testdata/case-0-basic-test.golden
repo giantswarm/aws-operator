@@ -292,6 +292,12 @@ Resources:
         ToPort: 22
         CidrIp: 10.1.0.0/16
       -
+        Description: Allow traffic from tenant cluster CIDR to 2049 for NFS access.
+        IpProtocol: tcp
+        FromPort: 2049
+        ToPort: 2049
+        CidrIp: 10.0.0.0/24
+      -
         Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
         IpProtocol: tcp
         FromPort: 4194

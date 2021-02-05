@@ -581,6 +581,35 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 		return nil, microerror.Mask(err)
 	}
 
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		cl = list.Items[0]
+	}
+
+	var networkCIDR string
+	{
+		if cl.Status.Provider.Network.CIDR == "" {
+			r.logger.Debugf(ctx, "canceling resource", "reason", "tenant cluster network cidr not set")
+			return nil, nil
+		}
+		networkCIDR = cl.Status.Provider.Network.CIDR
+	}
+
 	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
 	for _, ID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
 		np := template.ParamsMainSecurityGroupsTenantClusterNodePool{
@@ -610,7 +639,8 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 			},
 			NodePools: nodePools,
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
-				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+				ID:   cc.Status.TenantCluster.TCCP.VPC.ID,
+				CIDR: networkCIDR,
 			},
 		},
 	}
