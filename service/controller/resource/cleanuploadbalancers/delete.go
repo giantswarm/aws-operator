@@ -74,7 +74,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 				}
 			}
 
-			r.logger.Debugf(ctx, "deleted %d load balancers", len(lbState.LoadBalancerArns))
+			r.logger.Debugf(ctx, "deleted %d load balancers v2", len(lbState.LoadBalancerArns))
 		} else {
 			r.logger.Debugf(ctx, "not deleting load balancers because there aren't any")
 		}
