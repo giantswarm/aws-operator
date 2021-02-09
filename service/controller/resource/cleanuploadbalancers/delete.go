@@ -58,7 +58,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 
 		if lbState != nil && len(lbState.LoadBalancerArns) > 0 {
-			r.logger.Debugf(ctx, "deleting %d load balancers", len(lbState.LoadBalancerArns))
+			r.logger.Debugf(ctx, "deleting %d load balancers v2 ", len(lbState.LoadBalancerArns))
 
 			cc, err := controllercontext.FromContext(ctx)
 			if err != nil {
