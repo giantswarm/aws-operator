@@ -20,6 +20,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	// delete classic load-balancers
 	{
 		lbState, err := r.clusterClassicLoadBalancers(ctx, cr)
@@ -29,11 +34,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		if lbState != nil && len(lbState.LoadBalancerNames) > 0 {
 			r.logger.Debugf(ctx, "deleting %d load balancers", len(lbState.LoadBalancerNames))
-
-			cc, err := controllercontext.FromContext(ctx)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 
 			for _, lbName := range lbState.LoadBalancerNames {
 				_, err := cc.Client.TenantCluster.AWS.ELB.DeleteLoadBalancer(&elb.DeleteLoadBalancerInput{
@@ -59,11 +59,6 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		if lbState != nil && len(lbState.LoadBalancerArns) > 0 {
 			r.logger.Debugf(ctx, "deleting %d load balancers v2 ", len(lbState.LoadBalancerArns))
-
-			cc, err := controllercontext.FromContext(ctx)
-			if err != nil {
-				return microerror.Mask(err)
-			}
 
 			for _, lbArn := range lbState.LoadBalancerArns {
 				_, err := cc.Client.TenantCluster.AWS.ELBv2.DeleteLoadBalancer(&elbv2.DeleteLoadBalancerInput{
