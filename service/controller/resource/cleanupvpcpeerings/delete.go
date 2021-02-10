@@ -8,10 +8,16 @@ import (
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	cl, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -28,7 +34,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 					{
 						Name: aws.String("requester-vpc-info.vpc-id"),
 						Values: []*string{
-							aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+							aws.String(cl.Status.Provider.Network.VPCID),
 						},
 					},
 				},
@@ -50,7 +56,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 					{
 						Name: aws.String("accepter-vpc-info.vpc-id"),
 						Values: []*string{
-							aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+							aws.String(cl.Status.Provider.Network.VPCID),
 						},
 					},
 				},
@@ -66,7 +72,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 		}
 
-		r.logger.Debugf(ctx, "found %d vpc peering connections for vpc %s", len(vpcPeeringConnectionIDs), cc.Status.TenantCluster.TCCP.VPC.ID)
+		r.logger.Debugf(ctx, "found %d vpc peering connections for vpc %s", len(vpcPeeringConnectionIDs), cl.Status.Provider.Network.VPCID)
 	}
 
 	for _, id := range vpcPeeringConnectionIDs {
