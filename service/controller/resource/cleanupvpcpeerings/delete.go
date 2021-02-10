@@ -21,24 +21,49 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 	{
 		r.logger.Debugf(ctx, "finding all vpc peering connections")
 
-		i := &ec2.DescribeVpcPeeringConnectionsInput{
-			Filters: []*ec2.Filter{
-				{
-					Name: aws.String("vpc-id"),
-					Values: []*string{
-						aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+		// fetch all vpc peering connection via requester vpc filter
+		{
+			i := &ec2.DescribeVpcPeeringConnectionsInput{
+				Filters: []*ec2.Filter{
+					{
+						Name: aws.String("requester-vpc-info.vpc-id"),
+						Values: []*string{
+							aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+						},
 					},
 				},
-			},
-		}
+			}
 
-		o, err := cc.Client.TenantCluster.AWS.EC2.DescribeVpcPeeringConnections(i)
-		if err != nil {
-			return microerror.Mask(err)
-		}
+			o, err := cc.Client.TenantCluster.AWS.EC2.DescribeVpcPeeringConnections(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
-		for _, s := range o.VpcPeeringConnections {
-			vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
+			for _, s := range o.VpcPeeringConnections {
+				vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
+			}
+		}
+		// fetch all vpc peering connection via accepter vpc filter
+		{
+			i := &ec2.DescribeVpcPeeringConnectionsInput{
+				Filters: []*ec2.Filter{
+					{
+						Name: aws.String("accepter-vpc-info.vpc-id"),
+						Values: []*string{
+							aws.String(cc.Status.TenantCluster.TCCP.VPC.ID),
+						},
+					},
+				},
+			}
+
+			o, err := cc.Client.TenantCluster.AWS.EC2.DescribeVpcPeeringConnections(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			for _, s := range o.VpcPeeringConnections {
+				vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
+			}
 		}
 
 		r.logger.Debugf(ctx, "found %d vpc peering connections for vpc %s", len(vpcPeeringConnectionIDs), cc.Status.TenantCluster.TCCP.VPC.ID)
