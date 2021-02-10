@@ -10,6 +10,12 @@ const (
 	Name = "cleanuploadbalancers"
 )
 
+const (
+	cloudProviderClusterTagValue = "owned"
+	cloudProviderServiceTagKey   = "kubernetes.io/service-name"
+	loadBalancerTagChunkSize     = 20
+)
+
 // Config represents the configuration used to create a new loadbalancer resource.
 type Config struct {
 	// Dependencies.
@@ -39,4 +45,20 @@ func New(config Config) (*Resource, error) {
 
 func (r *Resource) Name() string {
 	return Name
+}
+
+func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string {
+	chunks := make([][]*string, 0)
+
+	for i := 0; i < len(loadBalancerNames); i += chunkSize {
+		endPos := i + chunkSize
+
+		if endPos > len(loadBalancerNames) {
+			endPos = len(loadBalancerNames)
+		}
+
+		chunks = append(chunks, loadBalancerNames[i:endPos])
+	}
+
+	return chunks
 }

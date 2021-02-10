@@ -11,6 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/elb/elbiface"
+	"github.com/aws/aws-sdk-go/service/elbv2"
+	"github.com/aws/aws-sdk-go/service/elbv2/elbv2iface"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -46,6 +48,7 @@ type Clients struct {
 	CloudFormation *cloudformation.CloudFormation
 	EC2            ec2iface.EC2API
 	ELB            elbiface.ELBAPI
+	ELBv2          elbv2iface.ELBV2API
 	IAM            iamiface.IAMAPI
 	KMS            kmsiface.KMSAPI
 	Route53        *route53.Route53
@@ -99,6 +102,7 @@ func newClients(session *session.Session, roleARN string) Clients {
 		CloudFormation: cloudformation.New(session, credentialsConfig),
 		EC2:            ec2.New(session, credentialsConfig),
 		ELB:            elb.New(session, credentialsConfig),
+		ELBv2:          elbv2.New(session, credentialsConfig),
 		IAM:            iam.New(session, credentialsConfig),
 		KMS:            kms.New(session, credentialsConfig),
 		Route53:        route53.New(session, credentialsConfig),

@@ -11,13 +11,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-const (
-	cloudProviderClusterTagValue = "owned"
-	cloudProviderServiceTagKey   = "kubernetes.io/service-name"
-	loadBalancerTagChunkSize     = 20
-)
-
-func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (*LoadBalancerState, error) {
+func (r *Resource) clusterClassicLoadBalancers(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (*LoadBalancerState, error) {
 	lbState := &LoadBalancerState{}
 	clusterLBNames := []string{}
 
@@ -60,22 +54,6 @@ func (r *Resource) clusterLoadBalancers(ctx context.Context, customObject infras
 	lbState.LoadBalancerNames = clusterLBNames
 
 	return lbState, nil
-}
-
-func splitLoadBalancers(loadBalancerNames []*string, chunkSize int) [][]*string {
-	chunks := make([][]*string, 0)
-
-	for i := 0; i < len(loadBalancerNames); i += chunkSize {
-		endPos := i + chunkSize
-
-		if endPos > len(loadBalancerNames) {
-			endPos = len(loadBalancerNames)
-		}
-
-		chunks = append(chunks, loadBalancerNames[i:endPos])
-	}
-
-	return chunks
 }
 
 func containsClusterTag(tags []*elb.Tag, customObject infrastructurev1alpha2.AWSCluster) bool {
