@@ -59,7 +59,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		// delete lb v2
 		if lbState != nil && len(lbState.LoadBalancerArns) > 0 {
-			r.logger.Debugf(ctx, "deleting %d load balancers v2 ", len(lbState.LoadBalancerArns))
+			r.logger.Debugf(ctx, "deleting %d load balancers v2", len(lbState.LoadBalancerArns))
 
 			for _, lbArn := range lbState.LoadBalancerArns {
 				_, err := cc.Client.TenantCluster.AWS.ELBv2.DeleteLoadBalancer(&elbv2.DeleteLoadBalancerInput{
@@ -77,7 +77,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		// delete target groups
 		if lbState != nil && len(lbState.TargetGroupsArns) > 0 {
-			r.logger.Debugf(ctx, "deleting %d target groups for load balancers v2 ", len(lbState.TargetGroupsArns))
+			r.logger.Debugf(ctx, "deleting %d target groups for load balancers v2", len(lbState.TargetGroupsArns))
 
 			for _, targetGroupArn := range lbState.TargetGroupsArns {
 				_, err := cc.Client.TenantCluster.AWS.ELBv2.DeleteTargetGroup(&elbv2.DeleteTargetGroupInput{
