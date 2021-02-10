@@ -50,13 +50,14 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		}
 	}
 
-	// delete load-balancers V2
+	// delete load-balancers V2 and their target groups
 	{
 		lbState, err := r.clusterLoadBalancersV2(ctx, cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
+		// delete lb v2
 		if lbState != nil && len(lbState.LoadBalancerArns) > 0 {
 			r.logger.Debugf(ctx, "deleting %d load balancers v2 ", len(lbState.LoadBalancerArns))
 
@@ -73,6 +74,25 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		} else {
 			r.logger.Debugf(ctx, "not deleting load balancers v2 because there aren't any")
 		}
+
+		// delete target groups
+		if lbState != nil && len(lbState.TargetGroupsArns) > 0 {
+			r.logger.Debugf(ctx, "deleting %d target groups for load balancers v2 ", len(lbState.TargetGroupsArns))
+
+			for _, targetGroupArn := range lbState.TargetGroupsArns {
+				_, err := cc.Client.TenantCluster.AWS.ELBv2.DeleteTargetGroup(&elbv2.DeleteTargetGroupInput{
+					TargetGroupArn: aws.String(targetGroupArn),
+				})
+				if err != nil {
+					return microerror.Mask(err)
+				}
+			}
+
+			r.logger.Debugf(ctx, "deleted %d target groups for load balancers v2", len(lbState.TargetGroupsArns))
+		} else {
+			r.logger.Debugf(ctx, "not deleting target groups load balancers v2 because there aren't any")
+		}
+
 	}
 
 	return nil

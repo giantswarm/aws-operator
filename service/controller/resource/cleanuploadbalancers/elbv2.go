@@ -2,6 +2,7 @@ package cleanuploadbalancers
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/aws/aws-sdk-go/service/elbv2"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
@@ -52,6 +53,25 @@ func (r *Resource) clusterLoadBalancersV2(ctx context.Context, cl infrastructure
 	}
 
 	lbState.LoadBalancerArns = clusterLBArns
+
+	targetGroupsArns := []string{}
+
+	// fetch all related target groups which needs to be deleted as well
+	for _, lbArn := range lbState.LoadBalancerArns {
+		i := &elbv2.DescribeTargetGroupsInput{
+			LoadBalancerArn: aws.String(lbArn),
+		}
+
+		o, err := cc.Client.TenantCluster.AWS.ELBv2.DescribeTargetGroups(i)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		for _, targetGroupArn := range o.TargetGroups {
+			targetGroupsArns = append(targetGroupsArns, *targetGroupArn.TargetGroupArn)
+		}
+
+	}
+	lbState.LoadBalancerArns = targetGroupsArns
 
 	return lbState, nil
 }

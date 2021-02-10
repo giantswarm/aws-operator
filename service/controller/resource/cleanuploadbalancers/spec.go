@@ -32,4 +32,5 @@ type LoadBalancerState struct {
 
 type LoadBalancerStateV2 struct {
 	LoadBalancerArns []string
+	TargetGroupsArns []string
 }
