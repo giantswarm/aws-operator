@@ -66,12 +66,12 @@ func (r *Resource) clusterLoadBalancersV2(ctx context.Context, cl infrastructure
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		for _, targetGroupArn := range o.TargetGroups {
-			targetGroupsArns = append(targetGroupsArns, *targetGroupArn.TargetGroupArn)
+		for _, targetGroup := range o.TargetGroups {
+			targetGroupsArns = append(targetGroupsArns, *targetGroup.TargetGroupArn)
 		}
 
 	}
-	lbState.LoadBalancerArns = targetGroupsArns
+	lbState.TargetGroupsArns = targetGroupsArns
 
 	return lbState, nil
 }
