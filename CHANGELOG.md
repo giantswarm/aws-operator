@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Clean up vpc peerings from a vpc cluster when is cluster deleted.
+
 ## [10.2.0] - 2021-02-08
 
 ### Added
