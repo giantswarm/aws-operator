@@ -51,6 +51,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 					// it will be deleted by the CF
 					continue
 				}
+				if *s.Status.Code == vpcStatusDeleting || *s.Status.Code == vpcStatusDeleted {
+					// ignore vpc peering connections that are already deleting or deleted
+					continue
+				}
+
 				vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
 			}
 		}
@@ -78,11 +83,16 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 					// it will be deleted by the CF
 					continue
 				}
+				if *s.Status.Code == vpcStatusDeleting || *s.Status.Code == vpcStatusDeleted {
+					// ignore vpc peering connections that are already deleting or deleted
+					continue
+				}
+
 				vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
 			}
 		}
 
-		r.logger.Debugf(ctx, "found %d vpc peering connections for vpc %s", len(vpcPeeringConnectionIDs), cl.Status.Provider.Network.VPCID)
+		r.logger.Debugf(ctx, "found %d vpc peering connections for %s", len(vpcPeeringConnectionIDs), cl.Status.Provider.Network.VPCID)
 	}
 
 	for _, id := range vpcPeeringConnectionIDs {

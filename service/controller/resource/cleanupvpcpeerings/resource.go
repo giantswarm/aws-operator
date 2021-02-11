@@ -9,6 +9,11 @@ const (
 	Name = "cleanupvpcpeerings"
 )
 
+const (
+	vpcStatusDeleting = "deleting"
+	vpcStatusDeleted  = "deleted"
+)
+
 type Config struct {
 	Logger micrologger.Logger
 }
