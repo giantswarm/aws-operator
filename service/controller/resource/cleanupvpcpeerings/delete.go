@@ -46,6 +46,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 
 			for _, s := range o.VpcPeeringConnections {
+				if isTCCPVPCPeering(s.Tags) {
+					// skip deleting vpc peering connection from tccp CF stack
+					// it will be deleted by the CF
+					continue
+				}
 				vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
 			}
 		}
@@ -68,6 +73,11 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			}
 
 			for _, s := range o.VpcPeeringConnections {
+				if isTCCPVPCPeering(s.Tags) {
+					// skip deleting vpc peering connection from tccp CF stack
+					// it will be deleted by the CF
+					continue
+				}
 				vpcPeeringConnectionIDs = append(vpcPeeringConnectionIDs, s.VpcPeeringConnectionId)
 			}
 		}
@@ -90,4 +100,14 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "deleted vpc peering connection %#q", *id)
 	}
 	return nil
+}
+
+func isTCCPVPCPeering(tags []*ec2.Tag) bool {
+	for _, tag := range tags {
+		if *tag.Key == key.TagStack && *tag.Value == key.StackTCCP {
+			return true
+		}
+	}
+
+	return false
 }
