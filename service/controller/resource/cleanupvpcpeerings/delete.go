@@ -52,7 +52,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 					continue
 				}
 				if *s.Status.Code == vpcStatusDeleting || *s.Status.Code == vpcStatusDeleted {
-					// ignore vpc peering connections that are already deleting or deleted
+					// ignore vpc peering connections that have status deleting or deleted
 					continue
 				}
 
@@ -84,7 +84,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 					continue
 				}
 				if *s.Status.Code == vpcStatusDeleting || *s.Status.Code == vpcStatusDeleted {
-					// ignore vpc peering connections that are already deleting or deleted
+					// ignore vpc peering connections that have status deleting or deleted
 					continue
 				}
 
