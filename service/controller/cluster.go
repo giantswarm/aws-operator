@@ -35,6 +35,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupvpcpeerings"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
@@ -527,6 +528,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var cleanupVPCPeerings resource.Interface
+	{
+		c := cleanupvpcpeerings.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupVPCPeerings, err = cleanupvpcpeerings.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var regionResource resource.Interface
 	{
 		c := region.Config{
@@ -832,6 +845,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupRecordSets,
 		cleanupSecurityGroups,
 		cleanupENIs,
+		cleanupVPCPeerings,
 		keepForAWSControlPlaneCRsResource,
 		keepForAWSMachineDeploymentCRsResource,
 	}

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Clean up VPC peerings from a cluster VPC when is cluster deleted.
 - Clean up Application and Network loadbalancers created by Kubernetes when cluster is deleted.
 
 ## [10.2.0] - 2021-02-08
