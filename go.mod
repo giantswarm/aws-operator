@@ -3,7 +3,7 @@ module github.com/giantswarm/aws-operator
 go 1.15
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.7.8
+	github.com/aws/amazon-vpc-cni-k8s v1.7.9
 	github.com/aws/aws-sdk-go v1.37.15
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
