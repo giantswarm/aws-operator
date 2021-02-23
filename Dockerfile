@@ -1,11 +1,11 @@
-FROM golang:1.15.8 AS builder
+FROM golang:1.16.0 AS builder
 ENV GO111MODULE=on
 COPY go.mod /etc/go.mod
 RUN cat /etc/go.mod | grep k8scloudconfig | awk '{print $1"/...@"$2}' | xargs -I{} go get {}
 # This is needed to extract the versioned catalog name, e.g. v6@6.0.1
 RUN ln -s /go/pkg/mod/$(cat /etc/go.mod | grep k8scloudconfig | awk '{print $1"@"$2}') /opt/k8scloudconfig
 
-FROM alpine:3.13.1
+FROM alpine:3.13.2
 
 RUN apk add --no-cache ca-certificates
 
