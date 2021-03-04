@@ -238,8 +238,8 @@ spec:
               name: log-dir
             - mountPath: /var/run/aws-node
               name: run-dir
-            - mountPath: /var/run/dockershim.sock
-              name: dockershim
+            - mountPath: /var/run/cri.sock
+              name: cri
             - mountPath: /run/xtables.lock
               name: xtables-lock
       volumes:
@@ -249,9 +249,9 @@ spec:
         - name: cni-net-dir
           hostPath:
             path: /etc/cni/net.d
-        - name: dockershim
+        - name: cri
           hostPath:
-            path: /var/run/dockershim.sock
+            path: /var/run/containerd/containerd.sock
         - hostPath:
             path: /run/xtables.lock
           name: xtables-lock
