@@ -334,6 +334,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `k8scloudconfig` to version `v10.5.0` to support kubernetes `v1.20`.
 - Use `networkctl reload` for managing networking to avoid bug in `systemd`.
 
+### Changed
+
+- Mount containerd socket instead of dockershim one to `aws-node` pods.
+
 ## [10.2.0] - 2021-02-08
 
 ### Added
