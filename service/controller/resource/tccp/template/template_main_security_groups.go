@@ -273,6 +273,15 @@ const TemplateMainSecurityGroups = `
       FromPort: 2379
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
+  MasterAllowEtcdPeerIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: MasterSecurityGroup
+    Properties:
+      GroupId: !Ref MasterSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: 2390
+      ToPort: 2390
+      CidrIp: {{ $v.TenantClusterVPCCIDR }}
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
