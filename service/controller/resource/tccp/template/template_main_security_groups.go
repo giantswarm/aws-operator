@@ -3,6 +3,20 @@ package template
 const TemplateMainSecurityGroups = `
 {{- define "security_groups" -}}
 {{- $v := .SecurityGroups -}}
+  EtcdPeerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: {{ $v.ClusterID }}-etcd-peer
+      VpcId: !Ref VPC
+      Tags:
+      - Key: giantswarm.io/security-group-type
+        Value: etcd-peer
+      SecurityGroupIngress:
+      - Description: "Allow traffic for ETCD peers."
+        IpProtocol: tcp
+        FromPort: 2380
+        ToPort: 2380
+        CidrIp: {{ $v.TenantClusterVPCCIDR }}
   MasterSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -273,15 +287,6 @@ const TemplateMainSecurityGroups = `
       FromPort: 2379
       ToPort: 2379
       SourceSecurityGroupId: !Ref EtcdELBSecurityGroup
-  MasterAllowEtcdPeerIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: MasterSecurityGroup
-    Properties:
-      GroupId: !Ref MasterSecurityGroup
-      IpProtocol: "tcp"
-      FromPort: 2390
-      ToPort: 2390
-      CidrIp: {{ $v.TenantClusterVPCCIDR }}
   VPCDefaultSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
