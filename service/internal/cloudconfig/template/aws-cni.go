@@ -252,6 +252,8 @@ spec:
               name: log-dir
             - mountPath: /var/run/aws-node
               name: run-dir
+            - mountPath: /var/run/dockershim.sock
+              name: dockershim
             - mountPath: /var/run/cri.sock
               name: cri
             - mountPath: /run/xtables.lock
@@ -266,6 +268,9 @@ spec:
         - name: cri
           hostPath:
             path: /var/run/containerd/containerd.sock
+        - name: dockershim
+          hostPath:
+            path: /var/run/dockershim.sock
         - hostPath:
             path: /run/xtables.lock
             type: FileOrCreate
