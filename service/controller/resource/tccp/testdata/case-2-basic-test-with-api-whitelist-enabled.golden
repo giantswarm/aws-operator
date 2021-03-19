@@ -137,11 +137,6 @@ Resources:
         LoadBalancerPort: 2379
         Protocol: TCP
       
-      - InstancePort: 443
-        InstanceProtocol: TCP
-        LoadBalancerPort: 6443
-        Protocol: TCP
-      
       LoadBalancerName: 8y5ck-etcd
       Scheme: internal
       SecurityGroups:
