@@ -90,7 +90,7 @@ const (
 )
 
 func ClusterAPIEndpoint(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("api.%s:%d", TenantClusterBaseDomain(cluster), KubernetesSpecialSecurePort)
+	return fmt.Sprintf("api.%s", TenantClusterBaseDomain(cluster))
 }
 
 func ClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {
