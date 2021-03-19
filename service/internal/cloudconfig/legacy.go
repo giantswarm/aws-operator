@@ -31,7 +31,7 @@ func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l str
 				API: g8sv1alpha1.ClusterKubernetesAPI{
 					ClusterIPRange: c.ClusterIPRange,
 					Domain:         key.ClusterAPIEndpoint(cr),
-					SecurePort:     key.KubernetesSpecialSecurePort,
+					SecurePort:     key.KubernetesSecurePort,
 				},
 				CloudProvider: key.CloudProvider,
 				DNS: g8sv1alpha1.ClusterKubernetesDNS{
