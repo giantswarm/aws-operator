@@ -338,7 +338,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
 		}
-		params.APILBPortListen = key.KubernetesSpecialSecurePort
+		params.APILBPortListen = key.KubernetesSecondarySecurePort
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster

@@ -177,7 +177,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
 		}
 
-		params.APILBPortListen = key.KubernetesSpecialSecurePort
+		params.APILBPortListen = key.KubernetesSecondarySecurePort
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
 		params.DockerhubToken = t.config.DockerhubToken
