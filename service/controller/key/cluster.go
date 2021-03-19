@@ -27,9 +27,11 @@ const (
 )
 
 const (
-	EtcdPort                     = 2379
-	EtcdPrefix                   = "giantswarm.io"
-	KubernetesSecurePort         = 443
+	EtcdPort                    = 2379
+	EtcdPrefix                  = "giantswarm.io"
+	KubernetesSecurePort        = 443
+	KubernetesSpecialSecurePort = 6443
+
 	KubernetesApiHealthCheckPort = 8089
 )
 

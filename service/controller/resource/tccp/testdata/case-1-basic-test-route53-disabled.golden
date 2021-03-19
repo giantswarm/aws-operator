@@ -72,6 +72,11 @@ Resources:
         LoadBalancerPort: 443
         Protocol: TCP
       
+      - InstancePort: 443
+        InstanceProtocol: TCP
+        LoadBalancerPort: 6443
+        Protocol: TCP
+      
       LoadBalancerName: 8y5ck-api-internal
       Scheme: internal
       SecurityGroups:
@@ -100,6 +105,11 @@ Resources:
         LoadBalancerPort: 443
         Protocol: TCP
       
+      - InstancePort: 443
+        InstanceProtocol: TCP
+        LoadBalancerPort: 6443
+        Protocol: TCP
+      
       LoadBalancerName: 8y5ck-api
       Scheme: internet-facing
       SecurityGroups:
@@ -125,6 +135,11 @@ Resources:
       - InstancePort: 2379
         InstanceProtocol: TCP
         LoadBalancerPort: 2379
+        Protocol: TCP
+      
+      - InstancePort: 443
+        InstanceProtocol: TCP
+        LoadBalancerPort: 6443
         Protocol: TCP
       
       LoadBalancerName: 8y5ck-etcd
@@ -372,6 +387,12 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: 0.0.0.0/0
+      -
+        Description: "Allow all traffic to the master instance."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: 0.0.0.0/0
 
       -
         Description: "Allow traffic from Control Plane CIDR to 4194 for cadvisor scraping."
@@ -472,6 +493,36 @@ Resources:
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
+        CidrIp: "198.19.0.0/16"
+      -
+        Description: "Allow all traffic to the master instance from A class network."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "10.0.0.0/8"
+      -
+        Description: "Allow all traffic to the master instance from B class network."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "172.16.0.0/12"
+      -
+        Description: "Allow all traffic to the master instance from C class network."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "192.168.0.0/16"
+      -
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "100.64.0.0/10"
+      -
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
         CidrIp: "198.19.0.0/16"
 
       Tags:

@@ -26,6 +26,18 @@ const TemplateMainSecurityGroups = `
         FromPort: 443
         ToPort: 443
         CidrIp: {{ $v.TenantClusterVPCCIDR }}
+      -
+        Description: "Allow traffic from Control Plane CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Allow traffic from Tenant Cluster CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: {{ $v.TenantClusterVPCCIDR }}
 
       {{- range $subnet := $v.APIWhitelist.Public.SubnetList }}
       -
@@ -33,6 +45,12 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
+        CidrIp: {{ $subnet }}
+      -
+        Description: "Custom Public API Whitelist CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
         CidrIp: {{ $subnet }}
       {{- end }}
 
@@ -43,6 +61,12 @@ const TemplateMainSecurityGroups = `
         FromPort: 443
         ToPort: 443
         CidrIp: {{ .PublicIp }}/32
+      -
+        Description: "Allow traffic from NAT Gateways."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: {{ .PublicIp }}/32
       {{- end }}
 
       {{- range .NATGateway.Gateways }}
@@ -51,6 +75,12 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
+        CidrIp: !Join [ "/", [ !Ref {{ .NATEIPName }}, "32" ] ]
+      -
+        Description: "Allow NAT gateway IP."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
         CidrIp: !Join [ "/", [ !Ref {{ .NATEIPName }}, "32" ] ]
       {{- end }}
 
@@ -63,6 +93,12 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
+        CidrIp: 0.0.0.0/0
+      -
+        Description: "Allow all traffic to the master instance."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
         CidrIp: 0.0.0.0/0
       {{- end }}
 
@@ -157,6 +193,25 @@ const TemplateMainSecurityGroups = `
         FromPort: 443
         ToPort: 443
         CidrIp: {{ $v.TenantClusterCNICIDR }}
+      -
+        Description: "Allow traffic from Control Plane CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: {{ $v.ControlPlaneVPCCIDR }}
+      -
+        Description: "Allow traffic from Tenant Cluster CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: {{ $v.TenantClusterVPCCIDR }}
+
+      -
+        Description: "Allow traffic from Tenant Cluster CNI CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: {{ $v.TenantClusterCNICIDR }}
 
       {{- range $subnet := $v.APIWhitelist.Private.SubnetList }}
       -
@@ -164,6 +219,12 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
+        CidrIp: {{ $subnet }}
+      -
+        Description: "Custom Private API Whitelist CIDR."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
         CidrIp: {{ $subnet }}
       {{- end }}
 
@@ -200,6 +261,36 @@ const TemplateMainSecurityGroups = `
         IpProtocol: tcp
         FromPort: 443
         ToPort: 443
+        CidrIp: "198.19.0.0/16"
+      -
+        Description: "Allow all traffic to the master instance from A class network."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "10.0.0.0/8"
+      -
+        Description: "Allow all traffic to the master instance from B class network."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "172.16.0.0/12"
+      -
+        Description: "Allow all traffic to the master instance from C class network."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "192.168.0.0/16"
+      -
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
+        CidrIp: "100.64.0.0/10"
+      -
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
+        IpProtocol: tcp
+        FromPort: 6443
+        ToPort: 6443
         CidrIp: "198.19.0.0/16"
       {{- end }}
 
