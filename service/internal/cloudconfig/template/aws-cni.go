@@ -240,6 +240,8 @@ spec:
               name: run-dir
             - mountPath: /var/run/dockershim.sock
               name: dockershim
+            - mountPath: /var/run/cri.sock
+              name: cri
             - mountPath: /run/xtables.lock
               name: xtables-lock
       volumes:
@@ -249,6 +251,9 @@ spec:
         - name: cni-net-dir
           hostPath:
             path: /etc/cni/net.d
+        - name: cri
+          hostPath:
+            path: /var/run/containerd/containerd.sock
         - name: dockershim
           hostPath:
             path: /var/run/dockershim.sock

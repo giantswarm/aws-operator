@@ -311,6 +311,10 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 					PortELB:      key.KubernetesSecurePort,
 					PortInstance: key.KubernetesSecurePort,
 				},
+				{
+					PortELB:      key.KubernetesSecondarySecurePort,
+					PortInstance: key.KubernetesSecurePort,
+				},
 			},
 			EtcdElbHealthCheckTarget: key.HealthCheckTCPTarget(key.EtcdPort),
 			EtcdElbName:              key.ELBNameEtcd(&cr),
