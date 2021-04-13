@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated OperatorKit to v4.3.1 for Kubernetes 1.20 support.
 - Cancel update loop if source or target release is not found.
+
 ### Added
 
 - Clean up VPC peerings from a cluster VPC when is cluster deleted.
