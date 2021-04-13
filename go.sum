@@ -71,8 +71,8 @@ github.com/aws/amazon-vpc-cni-k8s v1.7.10/go.mod h1:DvKcToLCSKRXnnoIE5u1Bphq97bd
 github.com/aws/aws-lambda-go v1.13.3/go.mod h1:4UKl9IzQMoD+QF79YdCuzCwp8VbmG4VAQwij/eHl5CU=
 github.com/aws/aws-sdk-go v1.27.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.37.23/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
-github.com/aws/aws-sdk-go v1.38.17 h1:1OfcfEtNrphUZYa+J0U35/1hxePbb3ASSQWdFS7L0Hs=
-github.com/aws/aws-sdk-go v1.38.17/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
+github.com/aws/aws-sdk-go v1.38.18 h1:Y5W5siOHoiZbCHQcoEiih267L21sbw1FW+2Vdlq9dlU=
+github.com/aws/aws-sdk-go v1.38.18/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -228,8 +228,8 @@ github.com/giantswarm/micrologger v0.5.0 h1:/f2knkyf4bZw3L5F48R7VENiEKPb3Sjnzrg4
 github.com/giantswarm/micrologger v0.5.0/go.mod h1:J/jbt7A8eixqE40yq4JY8Hdbs/qeboe2FjHlq05UWjA=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
-github.com/giantswarm/operatorkit/v4 v4.3.0 h1:TRqMWRWvDFwklLXMvvIBOlGAlCFAr9b+TC9aWUoGwrg=
-github.com/giantswarm/operatorkit/v4 v4.3.0/go.mod h1:e9XafHbBUQnsgMAdfhnAk6oOtvvOY/voLM+cdejwiMI=
+github.com/giantswarm/operatorkit/v4 v4.3.1 h1:YOF1R4LnbDWe2cC6jhPUX5UXjucoo5RdlYwtKIjVctQ=
+github.com/giantswarm/operatorkit/v4 v4.3.1/go.mod h1:3qAcrnajddL8y8SnIPPVXI3wnn3ImQTF8z097Mccy4Y=
 github.com/giantswarm/randomkeys/v2 v2.0.0 h1:WSdM/aAX65v6Ft44NZPNmolhfxtfG9ZfsZJodq+hxEU=
 github.com/giantswarm/randomkeys/v2 v2.0.0/go.mod h1:0jAWR4s12tY4BMX6BhsGKdSonFplJZnzwH7jP25T8bo=
 github.com/giantswarm/tenantcluster/v4 v4.0.0 h1:7QX1892Gx5Eza9UBwdCVhkEvMCoX23h9WAXjn2ILueA=

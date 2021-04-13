@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.7.10
-	github.com/aws/aws-sdk-go v1.38.17
+	github.com/aws/aws-sdk-go v1.38.18
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions/v3 v3.22.0
@@ -19,7 +19,7 @@ require (
 	github.com/giantswarm/microerror v0.3.0
 	github.com/giantswarm/microkit v0.2.2
 	github.com/giantswarm/micrologger v0.5.0
-	github.com/giantswarm/operatorkit/v4 v4.3.0
+	github.com/giantswarm/operatorkit/v4 v4.3.1
 	github.com/giantswarm/randomkeys/v2 v2.0.0
 	github.com/giantswarm/tenantcluster/v4 v4.0.0
 	github.com/giantswarm/to v0.3.0
