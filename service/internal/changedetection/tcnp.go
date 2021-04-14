@@ -103,9 +103,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	var currentRelease releasev1alpha1.Release
 	{
 		currentRelease, err = t.releases.Release(ctx, cc.Status.TenantCluster.ReleaseVersion)
-		if releases.IsNotFound(err) {
-			// fall through
-		} else if err != nil {
+		if err != nil {
 			return false, microerror.Mask(err)
 		}
 	}
@@ -113,9 +111,7 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMa
 	var targetRelease releasev1alpha1.Release
 	{
 		targetRelease, err = t.releases.Release(ctx, key.ReleaseVersion(&cr))
-		if releases.IsNotFound(err) {
-			// fall through
-		} else if err != nil {
+		if err != nil {
 			return false, microerror.Mask(err)
 		}
 	}
