@@ -17,6 +17,7 @@ import (
 	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v2"
+	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,9 +31,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgname"
 	"github.com/giantswarm/aws-operator/service/controller/resource/asgstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptcnpiamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
@@ -49,8 +50,10 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpsecuritygroups"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpstatus"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -62,6 +65,7 @@ import (
 
 type MachineDeploymentConfig struct {
 	CertsSearcher      certs.Interface
+	CloudTags          cloudtags.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
@@ -168,6 +172,19 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var cloudtagObject cloudtags.Interface
+	{
+		c := cloudtags.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		cloudtagObject, err = cloudtags.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var randomKeysSearcher randomkeys.Interface
 	{
 		c := randomkeys.Config{
@@ -238,8 +255,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpChangeDetection *changedetection.TCNP
 	{
 		c := changedetection.TCNPConfig{
-			Event:    config.Event,
 			Logger:   config.Logger,
+			Event:    config.Event,
 			Releases: rel,
 		}
 
@@ -295,6 +312,35 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 
 		machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantCluster tenantcluster.Interface
+	{
+		c := tenantcluster.Config{
+			CertsSearcher: certsSearcher,
+			Logger:        config.Logger,
+			CertID:        certs.AWSOperatorAPICert,
+		}
+
+		tenantCluster, err = tenantcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: tenantCluster,
+
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -356,6 +402,18 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
+	var cleanupIAMRolesResource resource.Interface
+	{
+		c := cleanuptcnpiamroles.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupIAMRolesResource, err = cleanuptcnpiamroles.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cpRouteTablesResource resource.Interface
 	{
 		var routeTableNames []string
@@ -393,21 +451,6 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		}
 	}
 
-	var encryptionSearcherResource resource.Interface
-	{
-		c := encryptionsearcher.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		encryptionSearcherResource, err = encryptionsearcher.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var ipamResource resource.Interface
 	{
 		c := ipam.Config{
@@ -434,6 +477,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := s3object.Config{
 			CloudConfig: tcnpCloudConfig,
+			Encrypter:   encrypterObject,
 			Logger:      config.Logger,
 		}
 
@@ -540,7 +584,9 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpResource resource.Interface
 	{
 		c := tcnp.Config{
+			CloudTags: cloudtagObject,
 			Detection: tcnpChangeDetection,
+			Encrypter: encrypterObject,
 			Event:     config.Event,
 			Images:    config.Images,
 			K8sClient: config.K8sClient,
@@ -639,8 +685,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		tenantClientsResource,
 		accountIDResource,
-		encryptionSearcherResource,
 		regionResource,
 		cpRouteTablesResource,
 		cpVPCResource,
@@ -666,6 +712,10 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 
 		// All these resources implement logic to update CR status information.
 		tcnpStatusResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupIAMRolesResource,
 	}
 
 	{

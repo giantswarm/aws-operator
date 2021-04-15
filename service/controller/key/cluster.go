@@ -123,6 +123,10 @@ func ExternalSNAT(cluster infrastructurev1alpha2.AWSCluster) *bool {
 	return cluster.Spec.Provider.Pods.ExternalSNAT
 }
 
+func PodsCIDRBlock(cluster infrastructurev1alpha2.AWSCluster) string {
+	return cluster.Spec.Provider.Pods.CIDRBlock
+}
+
 func IsChinaRegion(awsRegion string) bool {
 	return strings.HasPrefix(awsRegion, "cn-")
 }
@@ -229,10 +233,6 @@ func RouteTableName(cluster infrastructurev1alpha2.AWSCluster, suffix, az string
 
 func StatusClusterNetworkCIDR(cluster infrastructurev1alpha2.AWSCluster) string {
 	return cluster.Status.Provider.Network.CIDR
-}
-
-func TargetLogBucketName(cluster infrastructurev1alpha2.AWSCluster) string {
-	return fmt.Sprintf("%s-g8s-access-logs", ClusterID(&cluster))
 }
 
 func TenantClusterBaseDomain(cluster infrastructurev1alpha2.AWSCluster) string {

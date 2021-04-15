@@ -12,21 +12,11 @@ type ContextStatus struct {
 }
 
 type ContextStatusControlPlane struct {
-	AWSAccountID       string
-	HostedZone         ContextStatusControlPlaneHostedZone
-	InternalHostedZone ContextStatusControlPlaneInternalHostedZone
-	NATGateway         ContextStatusControlPlaneNATGateway
-	RouteTables        []*ec2.RouteTable
-	PeerRole           ContextStatusControlPlanePeerRole
-	VPC                ContextStatusControlPlaneVPC
-}
-
-type ContextStatusControlPlaneHostedZone struct {
-	ID string
-}
-
-type ContextStatusControlPlaneInternalHostedZone struct {
-	ID string
+	AWSAccountID string
+	NATGateway   ContextStatusControlPlaneNATGateway
+	RouteTables  []*ec2.RouteTable
+	PeerRole     ContextStatusControlPlanePeerRole
+	VPC          ContextStatusControlPlaneVPC
 }
 
 type ContextStatusControlPlaneNATGateway struct {
@@ -46,7 +36,6 @@ type ContextStatusTenantCluster struct {
 	ASG             ContextStatusTenantClusterASG
 	AWS             ContextStatusTenantClusterAWS
 	DNS             ContextStatusTenantClusterDNS
-	Encryption      ContextStatusTenantClusterEncryption
 	MasterInstance  ContextStatusTenantClusterMasterInstance
 	S3Object        ContextStatusTenantClusterS3Object
 	TCCP            ContextStatusTenantClusterTCCP
@@ -76,10 +65,6 @@ type ContextStatusTenantClusterDNS struct {
 	InternalHostedZoneID      string
 }
 
-type ContextStatusTenantClusterEncryption struct {
-	Key string
-}
-
 type ContextStatusTenantClusterMasterInstance struct {
 	EtcdVolumeSnapshotID string
 	Type                 string
@@ -100,9 +85,8 @@ type ContextStatusTenantClusterTCCP struct {
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZone struct {
-	Name       string
-	Subnet     ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
-	RouteTable ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable
+	Name   string
+	Subnet ContextStatusTenantClusterTCCPAvailabilityZoneSubnet
 }
 
 type ContextStatusTenantClusterTCCPAvailabilityZoneSubnet struct {
@@ -126,24 +110,15 @@ type ContextStatusTenantClusterTCCPAvailabilityZoneSubnetPublic struct {
 	ID   string
 }
 
-type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTable struct {
-	Public ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic
-}
-
-type ContextStatusTenantClusterTCCPAvailabilityZoneRouteTablePublic struct {
-	ID string
-}
-
 type ContextStatusTenantClusterTCCPVPC struct {
 	ID                  string
 	PeeringConnectionID string
 }
 
 type ContextStatusTenantClusterTCCPN struct {
-	EtcdVolumeSnapshotID string
-	IsTransitioning      bool
-	InstanceType         string
-	MasterReplicas       int
+	IsTransitioning bool
+	InstanceType    string
+	MasterReplicas  int
 }
 
 type ContextStatusTenantClusterTCNP struct {

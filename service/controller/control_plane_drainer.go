@@ -95,8 +95,6 @@ func newControlPlaneDrainerResources(config ControlPlaneDrainerConfig) ([]resour
 	var newASG asg.Interface
 	{
 		c := asg.Config{
-			K8sClient: config.K8sClient,
-
 			Stack:        key.StackTCCPN,
 			TagKey:       key.TagControlPlane,
 			TagValueFunc: key.ControlPlaneID,

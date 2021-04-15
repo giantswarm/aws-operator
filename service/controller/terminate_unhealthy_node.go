@@ -167,6 +167,8 @@ func newTerminateUnhealthyNodeResources(config TerminateUnhealthyNodeConfig) ([]
 		c := tenantclients.Config{
 			Logger: config.Logger,
 			Tenant: tenantCluster,
+
+			ToClusterFunc: key.ToCluster,
 		}
 
 		tenantClientsResource, err = tenantclients.New(c)

@@ -35,7 +35,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupmachinedeployments"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuprecordsets"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupsecuritygroups"
-	"github.com/giantswarm/aws-operator/service/controller/resource/cphostedzone"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanupvpcpeerings"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cproutetables"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionensurer"
@@ -60,6 +60,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcidstatus"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/service/internal/cphostedzone"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -68,6 +70,7 @@ import (
 )
 
 type ClusterConfig struct {
+	CloudTags cloudtags.Interface
 	Event     event.Interface
 	K8sClient k8sclient.Interface
 	HAMaster  hamaster.Interface
@@ -254,6 +257,20 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		clusterPersister, err = ipam.NewClusterPersister(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var hostedZone *cphostedzone.HostedZone
+	{
+		c := cphostedzone.Config{
+			Logger: config.Logger,
+
+			Route53Enabled: config.Route53Enabled,
+		}
+
+		hostedZone, err = cphostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -511,6 +528,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var cleanupVPCPeerings resource.Interface
+	{
+		c := cleanupvpcpeerings.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupVPCPeerings, err = cleanupvpcpeerings.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var regionResource resource.Interface
 	{
 		c := region.Config{
@@ -527,6 +556,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
+			CloudTags: config.CloudTags,
 			Event:     config.Event,
 			G8sClient: config.K8sClient.G8sClient(),
 			HAMaster:  config.HAMaster,
@@ -578,9 +608,10 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpfResource resource.Interface
 	{
 		c := tccpf.Config{
-			Detection: tccpfChangeDetection,
-			Event:     config.Event,
-			Logger:    config.Logger,
+			Detection:  tccpfChangeDetection,
+			Event:      config.Event,
+			HostedZone: hostedZone,
+			Logger:     config.Logger,
 
 			InstallationName: config.InstallationName,
 			Route53Enabled:   config.Route53Enabled,
@@ -654,20 +685,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		peerRoleARNResource, err = peerrolearn.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var cpHostedZoneResource resource.Interface
-	{
-		c := cphostedzone.Config{
-			Logger: config.Logger,
-
-			Route53Enabled: config.Route53Enabled,
-		}
-
-		cpHostedZoneResource, err = cphostedzone.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -775,6 +792,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := tenantclients.Config{
 			Logger: config.Logger,
 			Tenant: tenantCluster,
+
+			ToClusterFunc: key.ToCluster,
 		}
 
 		tenantClientsResource, err = tenantclients.New(c)
@@ -790,7 +809,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		accountIDResource,
 		natGatewayAddressesResource,
 		peerRoleARNResource,
-		cpHostedZoneResource,
 		cpRouteTablesResource,
 		cpVPCResource,
 		tccpVPCIDResource,
@@ -827,6 +845,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		cleanupRecordSets,
 		cleanupSecurityGroups,
 		cleanupENIs,
+		cleanupVPCPeerings,
 		keepForAWSControlPlaneCRsResource,
 		keepForAWSMachineDeploymentCRsResource,
 	}

@@ -6,6 +6,8 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
@@ -17,7 +19,9 @@ const (
 )
 
 type Config struct {
+	CloudTags cloudtags.Interface
 	Detection *changedetection.TCCPN
+	Encrypter encrypter.Interface
 	Event     event.Interface
 	HAMaster  hamaster.Interface
 	Images    images.Interface
@@ -32,7 +36,9 @@ type Config struct {
 // Control Plane Node. We manage a dedicated Cloud Formation stack for each node
 // pool.
 type Resource struct {
+	cloudTags cloudtags.Interface
 	detection *changedetection.TCCPN
+	encrypter encrypter.Interface
 	event     event.Interface
 	haMaster  hamaster.Interface
 	images    images.Interface
@@ -44,8 +50,14 @@ type Resource struct {
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
+	}
+	if config.Encrypter == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Encrypter must not be empty", config)
 	}
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
@@ -68,7 +80,9 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		cloudTags: config.CloudTags,
 		detection: config.Detection,
+		encrypter: config.Encrypter,
 		event:     config.Event,
 		haMaster:  config.HAMaster,
 		images:    config.Images,

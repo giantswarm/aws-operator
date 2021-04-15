@@ -8,6 +8,7 @@ type ParamsMainSecurityGroups struct {
 	ControlPlaneNATGatewayAddresses []*ec2.Address
 	ControlPlaneVPCCIDR             string
 	TenantClusterVPCCIDR            string
+	TenantClusterCNICIDR            string
 }
 
 type ParamsMainSecurityGroupsAPIWhitelist struct {

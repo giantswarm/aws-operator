@@ -26,8 +26,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/service/controller/resource/cleanuptccpniamroles"
 	"github.com/giantswarm/aws-operator/service/controller/resource/cpvpc"
-	"github.com/giantswarm/aws-operator/service/controller/resource/encryptionsearcher"
 	"github.com/giantswarm/aws-operator/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/service/controller/resource/snapshotid"
@@ -41,6 +41,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpvpcpcx"
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
@@ -51,6 +52,7 @@ import (
 
 type ControlPlaneConfig struct {
 	CertsSearcher      certs.Interface
+	CloudTags          cloudtags.Interface
 	Event              event.Interface
 	HAMaster           hamaster.Interface
 	Images             images.Interface
@@ -189,6 +191,31 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var cleanupIAMRolesResource resource.Interface
+	{
+		c := cleanuptccpniamroles.Config{
+			Logger: config.Logger,
+		}
+
+		cleanupIAMRolesResource, err = cleanuptccpniamroles.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cloudtagObject cloudtags.Interface
+	{
+		c := cloudtags.Config{
+			K8sClient: config.K8sClient,
+			Logger:    config.Logger,
+		}
+
+		cloudtagObject, err = cloudtags.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var encrypterObject encrypter.Interface
 	{
 		c := &kms.EncrypterConfig{
@@ -294,25 +321,11 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
-	var encryptionSearcherResource resource.Interface
-	{
-		c := encryptionsearcher.Config{
-			G8sClient:     config.K8sClient.G8sClient(),
-			Encrypter:     encrypterObject,
-			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
-		}
-
-		encryptionSearcherResource, err = encryptionsearcher.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var s3ObjectResource resource.Interface
 	{
 		c := s3object.Config{
 			CloudConfig: tccpnCloudConfig,
+			Encrypter:   encrypterObject,
 			Logger:      config.Logger,
 		}
 
@@ -397,7 +410,9 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
+			CloudTags: cloudtagObject,
 			Detection: tccpnChangeDetection,
+			Encrypter: encrypterObject,
 			Event:     config.Event,
 			HAMaster:  config.HAMaster,
 			Images:    config.Images,
@@ -458,7 +473,6 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// into the controller context.
 		awsClientResource,
 		accountIDResource,
-		encryptionSearcherResource,
 		tccpOutputsResource,
 		tccpnOutputsResource,
 		snapshotIDResource,
@@ -474,6 +488,10 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// the information given in the controller context.
 		s3ObjectResource,
 		tccpnResource,
+
+		// All these resources implement cleanup functionality only being executed
+		// on delete events.
+		cleanupIAMRolesResource,
 	}
 
 	{

@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/micrologger"
 
 	"github.com/giantswarm/aws-operator/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 )
@@ -26,6 +27,7 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
+	CloudTags cloudtags.Interface
 	Event     event.Interface
 	G8sClient versioned.Interface
 	HAMaster  hamaster.Interface
@@ -43,6 +45,7 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
+	cloudtags cloudtags.Interface
 	event     event.Interface
 	g8sClient versioned.Interface
 	haMaster  hamaster.Interface
@@ -60,6 +63,9 @@ type Resource struct {
 
 // New creates a new configured cloudformation resource.
 func New(config Config) (*Resource, error) {
+	if config.CloudTags == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CloudTags must not be empty", config)
+	}
 	if config.Detection == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Detection must not be empty", config)
 	}
@@ -90,6 +96,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		cloudtags: config.CloudTags,
 		event:     config.Event,
 		g8sClient: config.G8sClient,
 		haMaster:  config.HAMaster,

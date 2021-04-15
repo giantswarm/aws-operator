@@ -151,6 +151,13 @@ const TemplateMainSecurityGroups = `
         ToPort: 443
         CidrIp: {{ $v.TenantClusterVPCCIDR }}
 
+      -
+        Description: "Allow traffic from Tenant Cluster CNI CIDR."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: {{ $v.TenantClusterCNICIDR }}
+
       {{- range $subnet := $v.APIWhitelist.Private.SubnetList }}
       -
         Description: "Custom Private API Whitelist CIDR."
@@ -182,6 +189,18 @@ const TemplateMainSecurityGroups = `
         FromPort: 443
         ToPort: 443
         CidrIp: "192.168.0.0/16"
+      -
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: "100.64.0.0/10"
+      -
+        Description: "Allow all traffic to the master instance from CNI (non RFC-1918)."
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: "198.19.0.0/16"
       {{- end }}
 
       Tags:

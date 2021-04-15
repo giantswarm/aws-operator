@@ -16,13 +16,18 @@ import (
 )
 
 const (
-	AWSCNIComponentName = "aws-cni"
+	AWSCNIComponentName          = "aws-cni"
+	AWSCNIDefaultMinimumIPTarget = "40"
+	AWSCNIDefaultWarmIPTarget    = "10"
 
 	ELBInstanceStateInService = "InService"
 
 	DrainerResyncPeriod = time.Minute * 2
 
 	DefaultPauseTimeBetweenUpdates = "PT15M"
+
+	NodeRoleLabel       = "kubernetes.io/role"
+	MasterNodeRoleLabel = "master"
 )
 
 const (
@@ -326,6 +331,10 @@ func StackNameTCNP(getter LabelsGetter) string {
 
 func StackNameTCNPF(getter LabelsGetter) string {
 	return fmt.Sprintf("cluster-%s-tcnpf-%s", ClusterID(getter), MachineDeploymentID(getter))
+}
+
+func TargetLogBucketName(getter LabelsGetter, accountID string) string {
+	return fmt.Sprintf("%s-g8s-%s-access-logs", accountID, ClusterID(getter))
 }
 
 func VPCPeeringRouteName(az string) string {

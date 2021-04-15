@@ -10,13 +10,17 @@ import (
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/microerror"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+	cloudformationutils "github.com/giantswarm/aws-operator/service/internal/cloudformation"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
 const (
@@ -33,15 +37,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// Ensure some preconditions are met so we have all necessary information
+	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil
+
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
 	// Ensure some preconditions are met so we have all neccessary information
 	// available to manage the TCNP CF stack.
 	{
-		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.Debugf(ctx, "encryption key not available yet")
-			r.logger.Debugf(ctx, "canceling resource")
-			return nil
-		}
-
 		if !cc.Status.TenantCluster.S3Object.Uploaded {
 			r.logger.Debugf(ctx, "s3 object not available yet")
 			r.logger.Debugf(ctx, "canceling resource")
@@ -126,10 +134,29 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		if scale || update {
+		if scale {
 			err = r.updateStack(ctx, cr)
 			if err != nil {
 				return microerror.Mask(err)
+			}
+		}
+
+		if update {
+			// only allow tcnp CF stack update when a tccpn CF stack has finished updating
+			tccpnUpdated, err := isTCCPNUpdated(ctx, cr)
+			if IsTccpnNotUpdated(err) {
+				r.logger.Debugf(ctx, "waiting for tccpn stack to finish an update before executing an tcnp update")
+
+				return nil
+			} else if err != nil {
+				return microerror.Mask(err)
+			}
+
+			if tccpnUpdated {
+				err = r.updateStack(ctx, cr)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 			}
 		}
 	}
@@ -163,13 +190,18 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's node pool cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(true),
 			StackName:                   aws.String(key.StackNameTCNP(&cr)),
-			Tags:                        r.getCloudFormationTags(cr),
+			Tags:                        tags,
 			TemplateBody:                aws.String(templateBody),
 		}
 
@@ -185,11 +217,20 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSMachineDeployment) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) ([]*cloudformation.Tag, error) {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCNP
 	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
-	return awstags.NewCloudFormation(tags)
+
+	cloudtags, err := r.cloudtags.GetTagsByCluster(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	for k, v := range cloudtags {
+		tags[k] = v
+	}
+
+	return awstags.NewCloudFormation(tags), nil
 }
 
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
@@ -218,11 +259,17 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.Debugf(ctx, "requesting the update of the tenant cluster's node pool cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			StackName:    aws.String(key.StackNameTCNP(&cr)),
+			Tags:         tags,
 			TemplateBody: aws.String(templateBody),
 		}
 		_, err = cc.Client.TenantCluster.AWS.CloudFormation.UpdateStack(i)
@@ -394,6 +441,15 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 		return nil, microerror.Mask(err)
 	}
 
+	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil, nil
+
+	} else if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
@@ -401,7 +457,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 				ID: key.ClusterID(&cr),
 			},
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			KMSKeyARN:        cc.Status.TenantCluster.Encryption.Key,
+			KMSKeyARN:        ek,
 			NodePool: template.ParamsMainIAMPoliciesNodePool{
 				ID: key.MachineDeploymentID(&cr),
 			},
@@ -525,6 +581,35 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 		return nil, microerror.Mask(err)
 	}
 
+	var cl infrastructurev1alpha2.AWSCluster
+	{
+		var list infrastructurev1alpha2.AWSClusterList
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		cl = list.Items[0]
+	}
+
+	var networkCIDR string
+	{
+		if cl.Status.Provider.Network.CIDR == "" {
+			r.logger.Debugf(ctx, "canceling resource", "reason", "tenant cluster network cidr not set")
+			return nil, nil
+		}
+		networkCIDR = cl.Status.Provider.Network.CIDR
+	}
+
 	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
 	for _, ID := range cc.Spec.TenantCluster.TCNP.SecurityGroupIDs {
 		np := template.ParamsMainSecurityGroupsTenantClusterNodePool{
@@ -554,7 +639,8 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 			},
 			NodePools: nodePools,
 			VPC: template.ParamsMainSecurityGroupsTenantClusterVPC{
-				ID: cc.Status.TenantCluster.TCCP.VPC.ID,
+				ID:   cc.Status.TenantCluster.TCCP.VPC.ID,
+				CIDR: networkCIDR,
 			},
 		},
 	}
@@ -702,4 +788,81 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	}
 
 	return ""
+}
+
+func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	// check if TCCPN CF stack is updated
+	{
+		var cloudFormation *cloudformationutils.CloudFormation
+		{
+			c := cloudformationutils.Config{
+				Client: cc.Client.TenantCluster.AWS.CloudFormation,
+			}
+
+			cloudFormation, err = cloudformationutils.New(c)
+			if err != nil {
+				return false, microerror.Mask(err)
+			}
+		}
+
+		o, s, err := cloudFormation.DescribeOutputsAndStatus(key.StackNameTCCPN(&cr))
+		if cloudformationutils.IsOutputsNotAccessible(err) {
+			// outputsNotAccessible can occur when is CF in updating status
+			return false, microerror.Mask(tccpnNotUpdatedError)
+		} else if err != nil {
+			return false, microerror.Mask(err)
+		}
+
+		if s != cloudformation.StackStatusUpdateComplete {
+			// when TCCPN stack is updated, only  good status that we want to see is `StackStatusUpdateComplete`
+			// anything else indicate either CF stack not updated, update in progress or an error
+			return false, microerror.Mask(tccpnNotUpdatedError)
+		}
+
+		v, err := cloudFormation.GetOutputValue(o, tccpnoutputs.OperatorVersionKey)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+
+		if v != key.OperatorVersion(&cr) {
+			// CF output value for Operator version do not match with operator version on CR
+			// CF is not yet updated
+			return false, microerror.Mask(tccpnNotUpdatedError)
+		}
+	}
+
+	// check if master nodes in tc k8s api are on the latest operator version
+	// the value is stored in node labels
+	{
+		nodes := &corev1.NodeList{}
+
+		err = cc.Client.TenantCluster.K8s.CtrlClient().List(
+			ctx,
+			nodes,
+			client.MatchingLabels{key.NodeRoleLabel: key.MasterNodeRoleLabel},
+		)
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+
+		// check if all master nodes have proper operator version
+		for _, n := range nodes.Items {
+			if v, ok := n.GetLabels()[label.OperatorVersion]; ok {
+				if v != key.OperatorVersion(&cr) {
+					// operator version mismatch, CP is not updated yet
+					return false, microerror.Mask(tccpnNotUpdatedError)
+				}
+			} else {
+				// node dont have proper node label, its probably in a update phase
+				return false, microerror.Mask(tccpnNotUpdatedError)
+			}
+		}
+	}
+	// tccpn CF stack is updated and all master nodes have new operator version
+	return true, nil
 }

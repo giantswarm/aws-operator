@@ -16,6 +16,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
@@ -34,15 +35,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
+		return nil
+
+	} else if err != nil {
+		return microerror.Mask(err)
+	}
+
 	{
 		if !cc.Status.TenantCluster.S3Object.Uploaded {
 			r.logger.Debugf(ctx, "s3 object not available yet")
-			r.logger.Debugf(ctx, "canceling resource")
-			return nil
-		}
-
-		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.Debugf(ctx, "encryption key not available yet")
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
@@ -187,13 +191,18 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's control plane nodes cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			EnableTerminationProtection: aws.Bool(true),
 			StackName:                   aws.String(key.StackNameTCCPN(&cr)),
-			Tags:                        r.getCloudFormationTags(cr),
+			Tags:                        tags,
 			TemplateBody:                aws.String(templateBody),
 		}
 
@@ -209,11 +218,20 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSControlPlane) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) ([]*cloudformation.Tag, error) {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagControlPlane] = key.ControlPlaneID(&cr)
 	tags[key.TagStack] = key.StackTCCPN
-	return awstags.NewCloudFormation(tags)
+
+	cloudtags, err := r.cloudTags.GetTagsByCluster(ctx, key.ClusterID(&cr))
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	for k, v := range cloudtags {
+		tags[k] = v
+	}
+
+	return awstags.NewCloudFormation(tags), nil
 }
 
 func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) error {
@@ -242,11 +260,17 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	{
 		r.logger.Debugf(ctx, "requesting the update of the tenant cluster's control plane nodes cloud formation stack")
 
+		tags, err := r.getCloudFormationTags(ctx, cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
 				aws.String(capabilityNamesIAM),
 			},
 			StackName:    aws.String(key.StackNameTCCPN(&cr)),
+			Tags:         tags,
 			TemplateBody: aws.String(templateBody),
 		}
 
@@ -380,6 +404,15 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 		return nil, microerror.Mask(err)
 	}
 
+	ek, err := r.encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not found")
+		return nil, nil
+
+	} else if err != nil {
+		return nil, microerror.Mask(err)
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
@@ -387,7 +420,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
 			InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
-			KMSKeyARN:            cc.Status.TenantCluster.Encryption.Key,
+			KMSKeyARN:            ek,
 			RegionARN:            key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:             key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 			Route53Enabled:       r.route53Enabled,

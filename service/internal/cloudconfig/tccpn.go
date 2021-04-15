@@ -6,9 +6,10 @@ import (
 	"net"
 	"sync"
 
+	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v9/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
@@ -108,6 +109,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+	ek, err := t.config.Encrypter.EncryptionKey(ctx, key.ClusterID(&cr))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -246,7 +251,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, cc.Status.TenantCluster.Encryption.Key, randKeys)
+	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, ek, randKeys)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -305,14 +310,28 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
+	var awsCNIMinimumIPTarget string
+	var awsCNIWarmIPTarget string
+	{
+		awsCNIMinimumIPTarget = key.AWSCNIDefaultMinimumIPTarget
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
+			awsCNIMinimumIPTarget = v
+		}
+
+		awsCNIWarmIPTarget = key.AWSCNIDefaultWarmIPTarget
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
+			awsCNIWarmIPTarget = v
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.Params{}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
-		if cl.Spec.Provider.Pods.CIDRBlock != "" {
-			_, ipnet, err := net.ParseCIDR(cl.Spec.Provider.Pods.CIDRBlock)
+		if key.PodsCIDRBlock(cl) != "" {
+			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(cl))
 			if err != nil {
 				return "", microerror.Mask(err)
 			}
@@ -335,19 +354,25 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			HighAvailability:    multiMasterEnabled,
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
 		}
+		// we need to explicitly set InitialCluster for single master, since k8scc qhas different config logic which does nto work for AWS
+		if !multiMasterEnabled {
+			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
+		}
 		params.Extension = &TCCPNExtension{
-			awsCNIVersion:    awsCNIVersion,
-			baseDomain:       key.TenantClusterBaseDomain(cl),
-			cc:               cc,
-			cluster:          cl,
-			clusterCerts:     certFiles,
-			encrypter:        t.config.Encrypter,
-			encryptionKey:    cc.Status.TenantCluster.Encryption.Key,
-			externalSNAT:     externalSNAT,
-			haMasters:        multiMasterEnabled,
-			masterID:         mapping.ID,
-			randomKeyTmplSet: randomKeyTmplSet,
-			registryDomain:   t.config.RegistryDomain,
+			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
+			awsCNIVersion:         awsCNIVersion,
+			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
+			baseDomain:            key.TenantClusterBaseDomain(cl),
+			cc:                    cc,
+			cluster:               cl,
+			clusterCerts:          certFiles,
+			encrypter:             t.config.Encrypter,
+			encryptionKey:         ek,
+			externalSNAT:          externalSNAT,
+			haMasters:             multiMasterEnabled,
+			masterID:              mapping.ID,
+			randomKeyTmplSet:      randomKeyTmplSet,
+			registryDomain:        t.config.RegistryDomain,
 		}
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs

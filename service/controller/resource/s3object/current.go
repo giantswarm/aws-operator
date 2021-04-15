@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {
@@ -28,23 +29,19 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 	}
 	bn := key.BucketName(cr, cc.Status.TenantCluster.AWS.AccountID)
 
-	// During deletion, it might happen that the encryption key got already
-	// deleted. In such a case we do not have to do anything here anymore. The
-	// desired state computation usually requires the encryption key to come up
-	// with the deletion state, but in case it is gone we do not have to do
-	// anything here anymore. The current implementation relies on the bucket
-	// deletion of the s3bucket resource, which deletes all S3 objects and the
-	// bucket itself.
-	if cc.Status.TenantCluster.Encryption.Key == "" {
-		if key.IsDeleted(cr) {
-			r.logger.Debugf(ctx, "not computing current state", "reason", "encryption key not available anymore")
-		} else {
-			r.logger.Debugf(ctx, "not computing current state", "reason", "encryption key not available yet")
-		}
-
-		r.logger.Debugf(ctx, "canceling resource")
+	_, err = r.encrypter.EncryptionKey(ctx, key.ClusterID(cr))
+	if kms.IsKeyNotFound(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available yet")
 		resourcecanceledcontext.SetCanceled(ctx)
 		return nil, nil
+
+	} else if kms.IsKeyScheduledForDeletion(err) {
+		r.logger.Debugf(ctx, "canceling resource", "reason", "encryption key not available anymore")
+		resourcecanceledcontext.SetCanceled(ctx)
+		return nil, nil
+
+	} else if err != nil {
+		return nil, microerror.Mask(err)
 	}
 
 	paths, err := r.cloudConfig.NewPaths(ctx, obj)

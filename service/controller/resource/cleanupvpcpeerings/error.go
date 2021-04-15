@@ -1,4 +1,4 @@
-package encryptionsearcher
+package cleanupvpcpeerings
 
 import (
 	"github.com/giantswarm/microerror"

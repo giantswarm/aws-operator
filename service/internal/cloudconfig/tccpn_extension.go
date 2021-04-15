@@ -6,7 +6,7 @@ import (
 
 	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v9/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -20,18 +20,20 @@ type TCCPNExtension struct {
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
-	awsCNIVersion    string
-	baseDomain       string
-	cc               *controllercontext.Context
-	cluster          infrastructurev1alpha2.AWSCluster
-	clusterCerts     []certs.File
-	encrypter        encrypter.Interface
-	encryptionKey    string
-	externalSNAT     bool
-	haMasters        bool
-	masterID         int
-	randomKeyTmplSet RandomKeyTmplSet
-	registryDomain   string
+	awsCNIMinimumIPTarget string
+	awsCNIVersion         string
+	awsCNIWarmIPTarget    string
+	baseDomain            string
+	cc                    *controllercontext.Context
+	cluster               infrastructurev1alpha2.AWSCluster
+	clusterCerts          []certs.File
+	encrypter             encrypter.Interface
+	encryptionKey         string
+	externalSNAT          bool
+	haMasters             bool
+	masterID              int
+	randomKeyTmplSet      RandomKeyTmplSet
+	registryDomain        string
 }
 
 func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -269,14 +271,16 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var fileAssets []k8scloudconfig.FileAsset
 
 	data := TemplateData{
-		AWSCNIVersion:        e.awsCNIVersion,
-		AWSRegion:            key.Region(e.cluster),
-		BaseDomain:           e.baseDomain,
-		ExternalSNAT:         e.externalSNAT,
-		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
-		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
-		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
-		RegistryDomain:       e.registryDomain,
+		AWSCNIMinimumIPTarget: e.awsCNIMinimumIPTarget,
+		AWSCNIVersion:         e.awsCNIVersion,
+		AWSCNIWarmIPTarget:    e.awsCNIWarmIPTarget,
+		AWSRegion:             key.Region(e.cluster),
+		BaseDomain:            e.baseDomain,
+		ExternalSNAT:          e.externalSNAT,
+		IsChinaRegion:         key.IsChinaRegion(key.Region(e.cluster)),
+		MasterENIName:         key.ControlPlaneENIName(&e.cluster, e.masterID),
+		MasterEtcdVolumeName:  key.ControlPlaneVolumeName(&e.cluster, e.masterID),
+		RegistryDomain:        e.registryDomain,
 	}
 
 	for _, fm := range filesMeta {

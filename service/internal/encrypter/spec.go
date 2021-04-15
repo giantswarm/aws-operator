@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	KMSBackend   = "kms"
-	VaultBackend = "vault"
+	KMSBackend = "kms"
 )
 
 type Interface interface {
@@ -17,7 +16,9 @@ type Interface interface {
 }
 
 type Encrypter interface {
-	EncryptionKey(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster) (string, error)
+	// EncryptionKey fetches the KMS encryption key for the Tenant Cluster
+	// defined by id.
+	EncryptionKey(ctx context.Context, id string) (string, error)
 	Encrypt(ctx context.Context, key, plaintext string) (string, error)
 	IsKeyNotFound(error) bool
 }
