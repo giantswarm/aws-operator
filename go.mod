@@ -39,6 +39,8 @@ require (
 
 replace (
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
+	// Check https://github.com/datawire/ambassador/issues/3122
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible => github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
 	sigs.k8s.io/cluster-api v0.3.11 => github.com/giantswarm/cluster-api v0.3.10-gs
 )
