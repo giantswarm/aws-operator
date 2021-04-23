@@ -101,6 +101,7 @@ func mainE(ctx context.Context) error {
 
 	daemonCommand := newCommand.DaemonCommand().CobraCommand()
 
+	daemonCommand.PersistentFlags().String(f.Service.AWS.AlikeInstances, "", "Overrides for the ASG's mixed instance policy.")
 	daemonCommand.PersistentFlags().StringSlice(f.Service.AWS.AvailabilityZones, []string{}, "Availability zones as a slice.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.ID, "", "AWS access key ID for the user authorized to assume Control Plane role.")
 	daemonCommand.PersistentFlags().String(f.Service.AWS.HostAccessKey.Secret, "", "AWS access key secret for the user authorized to assume Control Plane role.")

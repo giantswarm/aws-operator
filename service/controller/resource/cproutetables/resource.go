@@ -70,16 +70,16 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "finding cached route tables")
+	r.logger.Debugf(ctx, "finding cached route tables")
 	if len(r.routeTables) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found cached route tables")
+		r.logger.Debugf(ctx, "found cached route tables")
 		cc.Status.ControlPlane.RouteTables = r.routeTables
 
 		return nil
 	}
-	r.logger.LogCtx(ctx, "level", "debug", "message", "did not find cached route tables")
+	r.logger.Debugf(ctx, "did not find cached route tables")
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", "caching route tables")
+	r.logger.Debugf(ctx, "caching route tables")
 	if len(r.names) == 0 {
 		// We do not have the cached route tables, so we look them up using tags.
 		tables, err := r.lookupByTag(ctx, cc.Client.ControlPlane.AWS.EC2, r.installation)
@@ -100,7 +100,7 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 			r.routeTables = append(r.routeTables, rt)
 		}
 	}
-	r.logger.LogCtx(ctx, "level", "debug", "message", "cached route tables")
+	r.logger.Debugf(ctx, "cached route tables")
 
 	cc.Status.ControlPlane.RouteTables = r.routeTables
 
@@ -108,7 +108,7 @@ func (r *Resource) addRouteTablesToContext(ctx context.Context) error {
 }
 
 func (r *Resource) lookupByName(ctx context.Context, client EC2, name string) (*ec2.RouteTable, error) {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route table ID for %#q", name))
+	r.logger.Debugf(ctx, "finding route table ID for %#q", name)
 
 	i := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
@@ -131,13 +131,13 @@ func (r *Resource) lookupByName(ctx context.Context, client EC2, name string) (*
 
 	rt := o.RouteTables[0]
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found route table for %#q", name))
+	r.logger.Debugf(ctx, "found route table for %#q", name)
 
 	return rt, nil
 }
 
 func (r *Resource) lookupByTag(ctx context.Context, client EC2, installation string) ([]*ec2.RouteTable, error) {
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding route tables for installation %#q", installation))
+	r.logger.Debugf(ctx, "finding route tables for installation %#q", installation)
 
 	i := &ec2.DescribeRouteTablesInput{
 		Filters: []*ec2.Filter{
@@ -164,7 +164,7 @@ func (r *Resource) lookupByTag(ctx context.Context, client EC2, installation str
 		return nil, microerror.Maskf(executionFailedError, "expected at least one route table, got 0")
 	}
 
-	r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found %d route tables for installation %#q", len(o.RouteTables), installation))
+	r.logger.Debugf(ctx, "found %d route tables for installation %#q", len(o.RouteTables), installation)
 
 	return o.RouteTables, nil
 }

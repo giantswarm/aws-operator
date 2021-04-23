@@ -15,8 +15,8 @@ import (
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cr, err := r.toClusterFunc(ctx, obj)
 	if IsNotFound(err) {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "cluster cr not available yet")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	} else if err != nil {
@@ -29,8 +29,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		if cc.Status.TenantCluster.TCCP.VPC.ID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "tenant cluster vpc id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "tenant cluster vpc id not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 		}
@@ -38,7 +38,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	var vpcPCXs []*ec2.VpcPeeringConnection
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding vpc peering connections")
+		r.logger.Debugf(ctx, "finding vpc peering connections")
 
 		i := &ec2.DescribeVpcPeeringConnectionsInput{
 			Filters: []*ec2.Filter{
@@ -69,24 +69,24 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		vpcPCXs = o.VpcPeeringConnections
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found vpc peering connections")
+		r.logger.Debugf(ctx, "found vpc peering connections")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc peering connection id for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "finding vpc peering connection id for tenant cluster %#q", key.ClusterID(&cr))
 
 		if len(vpcPCXs) > 1 {
 			return microerror.Maskf(executionFailedError, "expected one vpc peering connection, got %d", len(vpcPCXs))
 		}
 
 		if len(vpcPCXs) < 1 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find vpc peering connection id for tenant cluster %#q", key.ClusterID(&cr)))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not find vpc peering connection id for tenant cluster %#q", key.ClusterID(&cr))
+			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc peering connection id %#q for tenant cluster %#q", *vpcPCXs[0].VpcPeeringConnectionId, key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "found vpc peering connection id %#q for tenant cluster %#q", *vpcPCXs[0].VpcPeeringConnectionId, key.ClusterID(&cr))
 
 		cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID = *vpcPCXs[0].VpcPeeringConnectionId
 	}

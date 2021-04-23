@@ -24,7 +24,7 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 	}
 
 	if endpointsToUpdate != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updating endpoint")
+		r.logger.Debugf(ctx, "updating endpoint")
 
 		namespace := key.ClusterNamespace(cr)
 		_, err := r.k8sClient.CoreV1().Endpoints(namespace).Update(ctx, endpointsToUpdate, metav1.UpdateOptions{})
@@ -32,10 +32,10 @@ func (r *Resource) ApplyUpdateChange(ctx context.Context, obj, updateChange inte
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "updated endpoint")
+		r.logger.Debugf(ctx, "updated endpoint")
 
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not update endpoint")
+		r.logger.Debugf(ctx, "did not update endpoint")
 	}
 
 	return nil

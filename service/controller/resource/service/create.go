@@ -23,25 +23,25 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 	}
 
 	if serviceToCreate != nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "creating service")
+		r.logger.Debugf(ctx, "creating service")
 
 		namespace := key.ClusterNamespace(cr)
 		_, err = r.k8sClient.CoreV1().Services(namespace).Create(ctx, serviceToCreate, metav1.CreateOptions{})
 		if apierrors.IsAlreadyExists(err) {
 			// fall through
 		} else if apierrors.IsNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not create service")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "namespace not found yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "did not create service")
+			r.logger.Debugf(ctx, "namespace not found yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			resourcecanceledcontext.SetCanceled(ctx)
 			return nil
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "created service")
+		r.logger.Debugf(ctx, "created service")
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "did not create service")
+		r.logger.Debugf(ctx, "did not create service")
 	}
 
 	return nil

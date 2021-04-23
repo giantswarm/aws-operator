@@ -8,6 +8,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.9] - 2021-02-23
+
+### Fixed
+
+- Added China Flatcar AMI identifiers.
+
+## [9.3.7] - 2021-02-02
+
+### Fixed
+
+- Added new Flatcar AMI identifiers.
+
+## [9.3.6] - 2021-02-02
+
+### Fixed
+
+- Added CNI CIDR to internal ELB Security Group.
+
+## [9.3.5] - 2020-12-08
+
+### Changed
+
+- Do not return NAT gateways in state `deleting` and `deleted` to avoid problems with recreating clusters with same ID.
+
+## [9.3.4] - 2020-12-07
+
+### Added
+
+- Add vertical pod autoscaler support.
+- Update `k8scloudconfig` version to `v9.3.0` to include change for cgroup for kubelet.
+
+## [9.3.3] - 2020-12-02
+### Changed
+
+- Update `k8scloudconfig` version to `v9.2.0` to include change for kubelet pull QPS.
+
+## [9.3.2] - 2020-11-26
+
+### Changed
+
+- Make it mandatory to configure alike instances via e.g. the installations repo.
+- Fix naming and logs for `terminate-unhealthy-node` feature.
+
 ## [9.3.1-fix] - 2020-12-24
 
 ### Changed
@@ -333,8 +376,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
-
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1-fix...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.9...HEAD
+[9.3.9]: https://github.com/giantswarm/aws-operator/compare/v9.3.7...v9.3.9
+[9.3.7]: https://github.com/giantswarm/aws-operator/compare/v9.3.6...v9.3.7
+[9.3.6]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v9.3.6
+[9.3.5]: https://github.com/giantswarm/aws-operator/compare/v9.3.4...v9.3.5
+[9.3.4]: https://github.com/giantswarm/aws-operator/compare/v9.3.3...v9.3.4
+[9.3.3]: https://github.com/giantswarm/aws-operator/compare/v9.3.2...v9.3.3
+[9.3.2]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.2
 [9.3.1-fix]: https://github.com/giantswarm/aws-operator/compare/v9.3.1...v9.3.1-fix
 [9.3.1]: https://github.com/giantswarm/aws-operator/compare/v9.3.0...v9.3.1
 [9.3.0]: https://github.com/giantswarm/aws-operator/compare/v9.2.0...v9.3.0

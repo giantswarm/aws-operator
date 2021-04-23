@@ -72,7 +72,7 @@ func NewTerminateUnhealthyNode(config TerminateUnhealthyNodeConfig) (*TerminateU
 
 			// Name is used to compute finalizer names. This results in something
 			// like operatorkit.giantswarm.io/aws-operator-cluster-controller.
-			Name: project.Name() + "-node-auto-repair-controller",
+			Name: project.Name() + "-terminate-unhealthy-node-controller",
 			Selector: labels.SelectorFromSet(map[string]string{
 				label.OperatorVersion: project.Version(),
 			}),

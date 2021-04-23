@@ -2,7 +2,6 @@ package tccpazs
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"reflect"
 	"sort"
@@ -51,8 +50,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(list.Items) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "cluster cr not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "cluster cr not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 		if len(list.Items) > 1 {
@@ -77,8 +76,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(list.Items) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "control plane cr not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "control plane cr not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 		if len(list.Items) > 1 {
@@ -109,8 +108,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// yet allocate a subnet for the tenant cluster. Note that the Tenant
 	// Cluster subnet allocation is performed by the IPAM handler.
 	if key.StatusClusterNetworkCIDR(cl) == "" {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "cluster subnet not yet allocated")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "cluster subnet not yet allocated")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	}
@@ -170,8 +169,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 		podSubnet := r.cidrBlockAWSCNI
-		if cl.Spec.Provider.Pods.CIDRBlock != "" {
-			podSubnet = cl.Spec.Provider.Pods.CIDRBlock
+		if key.PodsCIDRBlock(cl) != "" {
+			podSubnet = key.PodsCIDRBlock(cl)
 		}
 
 		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
@@ -259,7 +258,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 			// functional AZ).
 			parent := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q has parent subnet %#q already allocated", az, parent.String()))
+			r.logger.Debugf(ctx, "availability zone %#q has parent subnet %#q already allocated", az, parent.String())
 
 			// Filter out already allocated AZ subnet from available AZ size networks.
 			clusterAZSubnets = ipam.Filter(clusterAZSubnets, func(n net.IPNet) bool {
@@ -271,7 +270,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 		// We only have at max 4 and not 8. This means we do not have to filter out
 		// the parents, but the subnets being taken already themselves.
 		if !mapping.AWSCNISubnetEmpty() {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q has aws-cni subnet %#q already allocated", az, mapping.AWSCNI.Subnet.CIDR.String()))
+			r.logger.Debugf(ctx, "availability zone %#q has aws-cni subnet %#q already allocated", az, mapping.AWSCNI.Subnet.CIDR.String())
 
 			// Filter out already allocated AZ subnet from available AZ size networks.
 			awsCNISubnets = ipam.Filter(awsCNISubnets, func(n net.IPNet) bool {
@@ -286,7 +285,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 		if mapping.PublicSubnetEmpty() && mapping.PrivateSubnetEmpty() {
 			if len(clusterAZSubnets) > 0 {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does not have public and private subnet allocated", az))
+				r.logger.Debugf(ctx, "availability zone %#q does not have public and private subnet allocated", az)
 
 				// Pick first available AZ subnet and split it to public and private.
 				clusterAZSubnet, err := ipam.Split(clusterAZSubnets[0], 2)
@@ -310,7 +309,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 		// Fix for legacy mess prior to release 11.3.3 where we only created
 		// private subnets for the running single master nodes.
 		if !mapping.PublicSubnetEmpty() && mapping.PrivateSubnetEmpty() {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does not have private subnet allocated", az))
+			r.logger.Debugf(ctx, "availability zone %#q does not have private subnet allocated", az)
 
 			// Get the parent /26 from the public /27 subnet.
 			parent := ipam.CalculateParent(mapping.Public.Subnet.CIDR)
@@ -329,12 +328,12 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 			azMapping[az] = mapping
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("recovering private subnet %#q for availability zone %#q", mapping.Private.Subnet.CIDR.String(), az))
+			r.logger.Debugf(ctx, "recovering private subnet %#q for availability zone %#q", mapping.Private.Subnet.CIDR.String(), az)
 		}
 
 		if mapping.AWSCNISubnetEmpty() {
 			if len(awsCNISubnets) > 0 {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("availability zone %#q does not have aws-cni subnet allocated", az))
+				r.logger.Debugf(ctx, "availability zone %#q does not have aws-cni subnet allocated", az)
 
 				// The AWS CNI CIDRs are not divided into public/private per AZ. We only
 				// split by the IPAM limit. So here we simply take the first free CIDR

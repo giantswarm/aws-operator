@@ -25,7 +25,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 	var groups []*ec2.SecurityGroup
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "finding security groups for tenant cluster %#q", key.ClusterID(&cr))
 
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
@@ -50,15 +50,15 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 		groups = o.SecurityGroups
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found security groups for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "found security groups for tenant cluster %#q", key.ClusterID(&cr))
 	}
 
 	if len(groups) > 0 {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d security groups for tenant cluster %#q", len(groups), key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "deleting %d security groups for tenant cluster %#q", len(groups), key.ClusterID(&cr))
 
 		var deleted int
 		for _, g := range groups {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
+			r.logger.Debugf(ctx, "deleting security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr))
 
 			i := &ec2.DeleteSecurityGroupInput{
 				GroupId: g.GroupId,
@@ -66,10 +66,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 			_, err := cc.Client.TenantCluster.AWS.EC2.DeleteSecurityGroup(i)
 			if IsDependencyViolation(err) {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("security group %#q for tenant cluster %#q still has dependency", *g.GroupId, key.ClusterID(&cr)))
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("skipping security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
+				r.logger.Debugf(ctx, "security group %#q for tenant cluster %#q still has dependency", *g.GroupId, key.ClusterID(&cr))
+				r.logger.Debugf(ctx, "skipping security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr))
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				r.logger.Debugf(ctx, "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
 
 				continue
@@ -80,12 +80,12 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 
 			deleted++
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr)))
+			r.logger.Debugf(ctx, "deleted security group %#q for tenant cluster %#q", *g.GroupId, key.ClusterID(&cr))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d security groups for tenant cluster %#q", deleted, key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "deleted %d security groups for tenant cluster %#q", deleted, key.ClusterID(&cr))
 	} else {
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("no security groups to be deleted for tenant cluster %#q", key.ClusterID(&cr)))
+		r.logger.Debugf(ctx, "no security groups to be deleted for tenant cluster %#q", key.ClusterID(&cr))
 	}
 
 	return nil

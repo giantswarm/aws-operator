@@ -37,44 +37,44 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// available to manage the TCNP CF stack.
 	{
 		if cc.Status.TenantCluster.Encryption.Key == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "encryption key not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if !cc.Status.TenantCluster.S3Object.Uploaded {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "s3 object not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "s3 object not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Spec.TenantCluster.TCNP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "availability zone information not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.AvailabilityZones) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "availability zone information not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "availability zone information not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if len(cc.Status.TenantCluster.TCCP.SecurityGroups) == 0 {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "security group information not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "security group information not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 
 		if cc.Status.TenantCluster.TCCP.VPC.PeeringConnectionID == "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "vpc peering connection id not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "vpc peering connection id not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "finding the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.DescribeStacksInput{
 			StackName: aws.String(key.StackNameTCNP(&cr)),
@@ -82,7 +82,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		o, err := cc.Client.TenantCluster.AWS.CloudFormation.DescribeStacks(i)
 		if IsNotExists(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "did not find the tenant cluster's node pool cloud formation stack")
+			r.logger.Debugf(ctx, "did not find the tenant cluster's node pool cloud formation stack")
 
 			err = r.createStack(ctx, cr)
 			if err != nil {
@@ -105,15 +105,15 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(eventCFUpdateRollbackError, "expected successful status, got %#q", *o.Stacks[0].StackStatus)
 
 		} else if key.StackInProgress(*o.Stacks[0].StackStatus) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
+			r.logger.Debugf(ctx, "the tenant cluster's node pool cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus)
 			r.event.Emit(ctx, &cr, "CFInProgress", fmt.Sprintf("the tenant cluster's node pool cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		} else if key.StackComplete(*o.Stacks[0].StackStatus) {
 			r.event.Emit(ctx, &cr, "CFCompleted", fmt.Sprintf("the tenant cluster's control plane cloud formation stack has stack status %#q", *o.Stacks[0].StackStatus))
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "found the tenant cluster's node pool cloud formation stack already exists")
+		r.logger.Debugf(ctx, "found the tenant cluster's node pool cloud formation stack already exists")
 	}
 
 	{
@@ -145,7 +145,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's node pool cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -157,11 +157,11 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's node pool cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the creation of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the creation of the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.CreateStackInput{
 			Capabilities: []*string{
@@ -178,7 +178,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the creation of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requested the creation of the tenant cluster's node pool cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFCreateRequested", "requested the creation of the tenant cluster's node pool cloud formation stack")
 	}
 
@@ -200,7 +200,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 
 	var templateBody string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computing the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computing the template of the tenant cluster's node pool cloud formation stack")
 
 		params, err := r.newTemplateParams(ctx, cr)
 		if err != nil {
@@ -212,11 +212,11 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "computed the template of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "computed the template of the tenant cluster's node pool cloud formation stack")
 	}
 
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requesting the update of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requesting the update of the tenant cluster's node pool cloud formation stack")
 
 		i := &cloudformation.UpdateStackInput{
 			Capabilities: []*string{
@@ -230,7 +230,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "requested the update of the tenant cluster's node pool cloud formation stack")
+		r.logger.Debugf(ctx, "requested the update of the tenant cluster's node pool cloud formation stack")
 		r.event.Emit(ctx, &cr, "CFUpdateRequested", "requested the update of the tenant cluster's node pool cloud formation stack")
 	}
 
@@ -308,7 +308,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 
 	var launchTemplateOverride []template.LaunchTemplateOverride
 	{
-		val, ok := key.MachineDeploymentLaunchTemplateOverrides[key.MachineDeploymentInstanceType(cr)]
+		val, ok := r.alikeInstances[key.MachineDeploymentInstanceType(cr)]
 
 		if cr.Spec.Provider.Worker.UseAlikeInstanceTypes && ok {
 			launchTemplateOverride = val
@@ -322,13 +322,13 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		if val, ok := cl.Annotations[annotation.AWSUpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "value of MaxBatchSize for ASG updates set by annotation from AWSCluster CR")
+			r.logger.Debugf(ctx, "value of MaxBatchSize for ASG updates set by annotation from AWSCluster CR")
 		}
 		// override the value with machine deployment value if its set
 		if val, ok := cr.Annotations[annotation.AWSUpdateMaxBatchSize]; ok {
 			maxBatchSize = key.MachineDeploymentParseMaxBatchSize(val, minDesiredNodes)
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", "value of MaxBatchSize for ASG updates overridden by annotation from AWSMachineDeployment CR")
+			r.logger.Debugf(ctx, "value of MaxBatchSize for ASG updates overridden by annotation from AWSMachineDeployment CR")
 		}
 		// if nothing is set use the default
 		if maxBatchSize == "" {
@@ -348,7 +348,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "value of PauseTime for ASG updates set by annotation from AWSCLuster CR")
+				r.logger.Debugf(ctx, "value of PauseTime for ASG updates set by annotation from AWSCLuster CR")
 			}
 		}
 		// override the value with machine deployment value if its set
@@ -356,7 +356,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 			if key.MachineDeploymentPauseTimeIsValid(val) {
 				pauseTime = val
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "value of PauseTime for ASG updates overridden by annotation from AWSMachineDeployment CR")
+				r.logger.Debugf(ctx, "value of PauseTime for ASG updates overridden by annotation from AWSMachineDeployment CR")
 			}
 		}
 		// if nothing is set use the default

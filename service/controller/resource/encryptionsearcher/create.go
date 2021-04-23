@@ -38,8 +38,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		err := backoff.Retry(o, b)
 		if r.encrypter.IsKeyNotFound(err) {
-			r.logger.LogCtx(ctx, "level", "debug", "message", "encryption key not available yet")
-			r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			r.logger.Debugf(ctx, "encryption key not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if err != nil {
