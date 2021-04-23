@@ -13,7 +13,7 @@ import (
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake" // nolint: gosec
 )
 
 type fakeK8sClient struct {
