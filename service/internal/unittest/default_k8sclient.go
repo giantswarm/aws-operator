@@ -13,7 +13,8 @@ import (
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	// nolint: gosec
+
+	//nolint:staticcheck // v0.6.4 has a deprecation on pkg/client/fake that was removed in later versions
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
