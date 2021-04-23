@@ -52,23 +52,23 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 
 	var oldKeyScheduledForDeletion bool
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "finding encryption key")
+		e.logger.Debugf(ctx, "finding encryption key")
 
 		_, err := e.describeKey(ctx, cr)
 		if IsKeyNotFound(err) {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
+			e.logger.Debugf(ctx, "did not find encryption key")
 
 		} else if IsKeyScheduledForDeletion(err) {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "current encryption key is scheduled for deletion and will be recreated")
+			e.logger.Debugf(ctx, "found encryption key")
+			e.logger.Debugf(ctx, "current encryption key is scheduled for deletion and will be recreated")
 			oldKeyScheduledForDeletion = true
 
 		} else if err != nil {
 			return microerror.Mask(err)
 
 		} else {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			e.logger.Debugf(ctx, "found encryption key")
+			e.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
 	}
@@ -77,7 +77,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 		// In such case we just delete the alias so we can alias newly
 		// created key.
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "deleting old encryption key alias")
+		e.logger.Debugf(ctx, "deleting old encryption key alias")
 
 		in := &kms.DeleteAliasInput{
 			AliasName: aws.String(keyAlias(cr)),
@@ -88,12 +88,12 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "deleted old encryption key alias")
+		e.logger.Debugf(ctx, "deleted old encryption key alias")
 	}
 
 	var keyID *string
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key")
+		e.logger.Debugf(ctx, "creating encryption key")
 
 		tags := key.AWSTags(&cr, e.installationName)
 
@@ -114,7 +114,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 
 		keyID = out.KeyMetadata.KeyId
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key")
+		e.logger.Debugf(ctx, "created encryption key")
 	}
 
 	// NOTE: Key roation must be enabled before creation alias. Otherwise
@@ -122,7 +122,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 	// enable rotation before aliasing the key. So it is enough reconcile
 	// aliasing properly to make sure rotation is enabled.
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "enabling encryption key rotation")
+		e.logger.Debugf(ctx, "enabling encryption key rotation")
 
 		in := &kms.EnableKeyRotationInput{
 			KeyId: keyID,
@@ -133,11 +133,11 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "enabled encryption key rotation")
+		e.logger.Debugf(ctx, "enabled encryption key rotation")
 	}
 
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "creating encryption key alias")
+		e.logger.Debugf(ctx, "creating encryption key alias")
 
 		in := &kms.CreateAliasInput{
 			AliasName:   aws.String(keyAlias(cr)),
@@ -149,7 +149,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", "created encryption key alias")
+		e.logger.Debugf(ctx, "created encryption key alias")
 	}
 
 	return nil
@@ -163,26 +163,26 @@ func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastru
 
 	var keyID *string
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", "finding encryption key")
+		e.logger.Debugf(ctx, "finding encryption key")
 
 		// TODO we should search by tags here in case alias failed to create and cluster was deleted early. Issue: https://github.com/giantswarm/giantswarm/issues/4262.
 		out, err := e.describeKey(ctx, cr)
 		if IsKeyNotFound(err) || IsKeyScheduledForDeletion(err) {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "did not find encryption key")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			e.logger.Debugf(ctx, "did not find encryption key")
+			e.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else if err != nil {
 			return microerror.Mask(err)
 
 		} else if out.KeyMetadata.DeletionDate != nil {
-			e.logger.LogCtx(ctx, "level", "debug", "message", "encryption key is scheduled for deletion")
-			e.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+			e.logger.Debugf(ctx, "encryption key is scheduled for deletion")
+			e.logger.Debugf(ctx, "canceling resource")
 			return nil
 
 		} else {
 
-			e.logger.LogCtx(ctx, "level", "debug", "message", "found encryption key")
+			e.logger.Debugf(ctx, "found encryption key")
 			keyID = out.KeyMetadata.KeyId
 		}
 	}

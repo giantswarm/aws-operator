@@ -2,7 +2,6 @@ package s3bucket
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -41,7 +40,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 		bucketName := b.Name
 
 		g.Go(func() error {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting S3 bucket %#q", bucketName))
+			r.logger.Debugf(ctx, "deleting S3 bucket %#q", bucketName)
 
 			var bucketEmpty bool
 			var count int
@@ -68,7 +67,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 
 				{
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting %d objects", len(objects)))
+					r.logger.Debugf(ctx, "deleting %d objects", len(objects))
 
 					i := &s3.DeleteObjectsInput{
 						Bucket: aws.String(bucketName),
@@ -82,25 +81,25 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 						return microerror.Mask(err)
 					}
 
-					r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted %d objects", len(objects)))
+					r.logger.Debugf(ctx, "deleted %d objects", len(objects))
 				}
 
 				count++
 				if count >= loopLimit {
-					r.logger.LogCtx(ctx, "level", "debug", "message", "loop limit reached for S3 bucket deletion")
+					r.logger.Debugf(ctx, "loop limit reached for S3 bucket deletion")
 
-					r.logger.LogCtx(ctx, "level", "debug", "message", "canceling S3 bucket deletion")
+					r.logger.Debugf(ctx, "canceling S3 bucket deletion")
 					break
 				}
 			}
 
 			if !bucketEmpty {
-				r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("bucket %#q not empty", bucketName))
+				r.logger.Debugf(ctx, "bucket %#q not empty", bucketName)
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "keeping finalizers")
+				r.logger.Debugf(ctx, "keeping finalizers")
 				finalizerskeptcontext.SetKept(ctx)
 
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "canceling resource")
 				resourcecanceledcontext.SetCanceled(ctx)
 
 				return nil
@@ -116,7 +115,7 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 				}
 			}
 
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted S3 bucket %#q", bucketName))
+			r.logger.Debugf(ctx, "deleted S3 bucket %#q", bucketName)
 
 			return nil
 		})

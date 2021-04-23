@@ -85,14 +85,14 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 
 	// We check if we have all VPC info cached for the requested installation.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding cached vpc info for %#q", installationName))
+		r.logger.Debugf(ctx, "finding cached vpc info for %#q", installationName)
 
 		if r.cachedCidr != "" && r.cachedID != "" {
-			r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found cached vpc info %#q for %#q", r.cachedCidr, installationName))
+			r.logger.Debugf(ctx, "found cached vpc info %#q for %#q", r.cachedCidr, installationName)
 			return r.cachedCidr, r.cachedID, nil
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("did not find cached vpc info for %#q", installationName))
+		r.logger.Debugf(ctx, "did not find cached vpc info for %#q", installationName)
 	}
 
 	// We do not have a cached VPC Info for the requested installation. So we look it
@@ -100,7 +100,7 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 	var vpcCIDR string
 	var vpcID string
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("finding vpc info for %#q", installationName))
+		r.logger.Debugf(ctx, "finding vpc info for %#q", installationName)
 
 		i := &ec2.DescribeVpcsInput{
 			Filters: []*ec2.Filter{
@@ -130,15 +130,15 @@ func (r *Resource) lookup(ctx context.Context, client EC2, installationName stri
 		vpcCIDR = *o.Vpcs[0].CidrBlock
 		vpcID = *o.Vpcs[0].VpcId
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found vpc cidr %#q and vpc id %#q for %#q", vpcCIDR, vpcID, installationName))
+		r.logger.Debugf(ctx, "found vpc cidr %#q and vpc id %#q for %#q", vpcCIDR, vpcID, installationName)
 	}
 
 	// At this point we found a VPC info and we cache it.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("caching vpc info for %#q", installationName))
+		r.logger.Debugf(ctx, "caching vpc info for %#q", installationName)
 		r.cachedCidr = vpcCIDR
 		r.cachedID = vpcID
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("cached vpc info for %#q", installationName))
+		r.logger.Debugf(ctx, "cached vpc info for %#q", installationName)
 	}
 
 	return vpcCIDR, vpcID, nil

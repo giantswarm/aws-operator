@@ -48,7 +48,7 @@ func New(config Config) (*EBS, error) {
 
 // DeleteVolume deletes an EBS volume with retry logic.
 func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleting EBS volume %#q", volumeID))
+	e.logger.Debugf(ctx, "deleting EBS volume %#q", volumeID)
 
 	o := func() error {
 		i := &ec2.DeleteVolumeInput{
@@ -73,7 +73,7 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 		return microerror.Mask(err)
 	}
 
-	e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("deleted EBS volume %#q", volumeID))
+	e.logger.Debugf(ctx, "deleted EBS volume %#q", volumeID)
 
 	return nil
 }
@@ -85,7 +85,7 @@ func (e *EBS) DeleteVolume(ctx context.Context, volumeID string) error {
 // volumes.
 func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment VolumeAttachment, force bool, shutdown bool, wait bool) error {
 	if shutdown {
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting to stop instance %#q", attachment.InstanceID))
+		e.logger.Debugf(ctx, "requesting to stop instance %#q", attachment.InstanceID)
 
 		i := &ec2.StopInstancesInput{
 			InstanceIds: []*string{
@@ -98,11 +98,11 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested to stop instance %#q", attachment.InstanceID))
+		e.logger.Debugf(ctx, "requested to stop instance %#q", attachment.InstanceID)
 	}
 
 	if shutdown && wait {
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waiting for instance %#q to be stopped", attachment.InstanceID))
+		e.logger.Debugf(ctx, "waiting for instance %#q to be stopped", attachment.InstanceID)
 
 		i := &ec2.DescribeInstancesInput{
 			InstanceIds: []*string{
@@ -115,11 +115,11 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("waited for instance %#q to be stopped", attachment.InstanceID))
+		e.logger.Debugf(ctx, "waited for instance %#q to be stopped", attachment.InstanceID)
 	}
 
 	{
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requesting EBS volume %#q to be detached from instance %#q", volumeID, attachment.InstanceID))
+		e.logger.Debugf(ctx, "requesting EBS volume %#q to be detached from instance %#q", volumeID, attachment.InstanceID)
 
 		i := &ec2.DetachVolumeInput{
 			Device:     aws.String(attachment.Device),
@@ -133,7 +133,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 			return microerror.Mask(err)
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("requested EBS volume %#q to be detached from instance %#q", volumeID, attachment.InstanceID))
+		e.logger.Debugf(ctx, "requested EBS volume %#q to be detached from instance %#q", volumeID, attachment.InstanceID)
 	}
 
 	{
@@ -160,7 +160,7 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 		d := v.Volumes[0]
 		if len(d.Attachments) > 1 {
 			// Shouldn't happen; log so we know if it is
-			e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found multiple attachment for volume %#q", volumeID))
+			e.logger.Debugf(ctx, "found multiple attachment for volume %#q", volumeID)
 		}
 
 		for _, a := range d.Attachments {
@@ -171,11 +171,11 @@ func (e *EBS) DetachVolume(ctx context.Context, volumeID string, attachment Volu
 				}
 			} else {
 				// Shouldn't happen; log so we know if it is
-				e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("nil attachment state for volume %#q", volumeID))
+				e.logger.Debugf(ctx, "nil attachment state for volume %#q", volumeID)
 			}
 		}
 
-		e.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("detached EBS volume %#q from instance %#q", volumeID, attachment.InstanceID))
+		e.logger.Debugf(ctx, "detached EBS volume %#q from instance %#q", volumeID, attachment.InstanceID)
 	}
 
 	return nil

@@ -51,8 +51,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 		for _, ep := range cluster.Status.APIEndpoints {
 			if ep.Host == apiEndpoint.Host && ep.Port == apiEndpoint.Port {
-				r.logger.LogCtx(ctx, "level", "debug", "message", "API endpoint already set")
-				r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+				r.logger.Debugf(ctx, "API endpoint already set")
+				r.logger.Debugf(ctx, "canceling resource")
 				return nil
 			}
 		}
@@ -66,7 +66,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(err)
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", "API endpoint set")
+		r.logger.Debugf(ctx, "API endpoint set")
 	}
 
 	return nil

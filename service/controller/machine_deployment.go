@@ -70,6 +70,7 @@ type MachineDeploymentConfig struct {
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
+	AlikeInstances             string
 	CalicoCIDR                 int
 	CalicoMTU                  int
 	CalicoSubnet               string
@@ -545,6 +546,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 
+			AlikeInstances:   config.AlikeInstances,
 			InstallationName: config.InstallationName,
 		}
 

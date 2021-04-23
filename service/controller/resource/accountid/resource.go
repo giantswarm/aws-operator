@@ -2,7 +2,6 @@ package accountid
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -48,7 +47,7 @@ func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 	// Here we take the STS client scoped to the control plane AWS account to
 	// lookup its ID. The ID is then set to the controller context.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the control plane's AWS account ID")
+		r.logger.Debugf(ctx, "finding the control plane's AWS account ID")
 
 		var accountIDService *accountid.AccountID
 		{
@@ -70,13 +69,13 @@ func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 
 		cc.Status.ControlPlane.AWSAccountID = accountID
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the control plane's AWS account ID %#q", accountID))
+		r.logger.Debugf(ctx, "found the control plane's AWS account ID %#q", accountID)
 	}
 
 	// Here we take the STS client scoped to the tenant cluster AWS account to
 	// lookup its ID. The ID is then set to the controller context.
 	{
-		r.logger.LogCtx(ctx, "level", "debug", "message", "finding the tenant cluster's AWS account ID")
+		r.logger.Debugf(ctx, "finding the tenant cluster's AWS account ID")
 
 		var accountIDService *accountid.AccountID
 		{
@@ -98,7 +97,7 @@ func (r *Resource) addAccountIDToContext(ctx context.Context) error {
 
 		cc.Status.TenantCluster.AWS.AccountID = accountID
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("found the tenant cluster's AWS account ID %#q", accountID))
+		r.logger.Debugf(ctx, "found the tenant cluster's AWS account ID %#q", accountID)
 	}
 
 	return nil

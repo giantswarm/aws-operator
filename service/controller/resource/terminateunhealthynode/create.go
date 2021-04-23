@@ -33,13 +33,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	// check for annotation enabling the node auto repair feature
 	if _, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; !ok {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "node auto repair is not enabled for this cluster, cancelling")
+		r.logger.Debugf(ctx, "terminate unhealthy node feature is not enabled for this cluster, cancelling")
 		return nil
 	}
 
 	if cc.Client.TenantCluster.K8s == nil {
-		r.logger.LogCtx(ctx, "level", "debug", "message", "kubernetes clients are not available in controller context yet")
-		r.logger.LogCtx(ctx, "level", "debug", "message", "canceling resource")
+		r.logger.Debugf(ctx, "kubernetes clients are not available in controller context yet")
+		r.logger.Debugf(ctx, "canceling resource")
 
 		return nil
 	}
@@ -77,7 +77,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", "resetting tick node counters on all nodes in tenant cluster")
+		r.logger.Debugf(ctx, "resetting tick node counters on all nodes in tenant cluster")
 	}
 
 	return nil
@@ -100,13 +100,13 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node, clusterI
 			ShouldDecrementDesiredCapacity: aws.Bool(false),
 		}
 
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminating not healthy node %s with instanceID %s", node.Name, instanceID))
+		r.logger.Debugf(ctx, "terminating not healthy node %s with instanceID %s", node.Name, instanceID)
 
 		_, err := cc.Client.TenantCluster.AWS.AutoScaling.TerminateInstanceInAutoScalingGroup(i)
 		if err != nil {
 			return microerror.Mask(err)
 		}
-		r.logger.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf("terminated not healthy node %s with instanceID %s", node.Name, instanceID))
+		r.logger.Debugf(ctx, "terminated not healthy node %s with instanceID %s", node.Name, instanceID)
 	}
 	// expose metric about node termination
 	reportNodeTermination(clusterID, node.Name, instanceID)
