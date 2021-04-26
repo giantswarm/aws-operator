@@ -74,12 +74,6 @@ func New(config Config) (*Resource, error) {
 	if reflect.DeepEqual(config.NetworkRange, net.IPNet{}) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.NetworkRange must not be empty", config)
 	}
-	if config.PrivateSubnetMaskBits <= config.AllocatedSubnetMaskBits {
-		return nil, microerror.Maskf(invalidConfigError, "%T.PrivateSubnetMaskBits (%d) must not be smaller or equal than %T.AllocatedSubnetMaskBits (%d)", config, config.PrivateSubnetMaskBits, config, config.AllocatedSubnetMaskBits)
-	}
-	if config.PublicSubnetMaskBits <= config.AllocatedSubnetMaskBits {
-		return nil, microerror.Maskf(invalidConfigError, "%T.PublicSubnetMaskBits (%d) must not be smaller or equal than %T.AllocatedSubnetMaskBits (%d)", config, config.PublicSubnetMaskBits, config, config.AllocatedSubnetMaskBits)
-	}
 
 	r := &Resource{
 		checker:   config.Checker,
