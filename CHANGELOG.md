@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.1-ipam] - 2021-04-26
+
 ### Fixed
 
 - Fix issue with IPAM allocation.
@@ -380,7 +382,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.9...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v9.3.1-ipam...HEAD
+[9.3.1-ipam]: https://github.com/giantswarm/aws-operator/compare/v9.3.9...v9.3.1-ipam
 [9.3.9]: https://github.com/giantswarm/aws-operator/compare/v9.3.7...v9.3.9
 [9.3.7]: https://github.com/giantswarm/aws-operator/compare/v9.3.6...v9.3.7
 [9.3.6]: https://github.com/giantswarm/aws-operator/compare/v9.3.5...v9.3.6
