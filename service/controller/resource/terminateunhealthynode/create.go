@@ -31,10 +31,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// check for annotation enabling the node auto repair feature
-	if _, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; !ok {
-		r.logger.Debugf(ctx, "terminate unhealthy node feature is not enabled for this cluster, cancelling")
-		return nil
+	// check for annotation that would disable the node terminate unhealthy feature
+	if featureEnabled, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; ok {
+		if featureEnabled == "false" {
+			r.logger.Debugf(ctx, "terminate unhealthy node feature is disabled for this cluster, cancelling")
+			return nil
+		}
 	}
 
 	if cc.Client.TenantCluster.K8s == nil {
