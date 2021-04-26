@@ -28,7 +28,7 @@ require (
 	github.com/prometheus/client_golang v1.8.0
 	github.com/spf13/afero v1.3.1 // indirect
 	github.com/spf13/viper v1.7.1
-	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	k8s.io/api v0.18.9
 	k8s.io/apiextensions-apiserver v0.18.9
 	k8s.io/apimachinery v0.18.9
@@ -42,5 +42,5 @@ replace (
 	// Check https://github.com/datawire/ambassador/issues/3122
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible => github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
-	sigs.k8s.io/cluster-api v0.3.11 => github.com/giantswarm/cluster-api v0.3.10-gs
+	sigs.k8s.io/cluster-api v0.3.10 => github.com/giantswarm/cluster-api v0.3.10-gs
 )
