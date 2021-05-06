@@ -89,6 +89,32 @@ func Test_SubnetAllocator(t *testing.T) {
 			publicSubnetMaskBits:    25,
 			networkPool:             mustParseCIDR("10.100.0.0/16"),
 		},
+		{
+			name: "case 3 allocate with multiple subnet sizes",
+
+			checker: NewTestChecker(true),
+			collector: NewTestCollector([]net.IPNet{
+				mustParseCIDR("10.163.0.0/19"),
+				mustParseCIDR("10.163.30.0/23"),
+				mustParseCIDR("10.163.30.128/24"),
+				mustParseCIDR("10.163.31.0/24"),
+				mustParseCIDR("10.163.32.0/21"),
+				mustParseCIDR("10.163.32.0/24"),
+				mustParseCIDR("10.163.33.0/24"),
+				mustParseCIDR("10.163.34.0/24"),
+				mustParseCIDR("10.163.35.0/24"),
+				mustParseCIDR("10.163.36.0/24"),
+				mustParseCIDR("10.163.37.0/24"),
+				mustParseCIDR("10.163.40.0/24"),
+			}),
+			persister: NewTestPersister(mustParseCIDR("10.163.42.0/23")),
+
+			allocatedSubnetMaskBits: 23,
+			networkRange:            mustParseCIDR("10.161.0.0/16"), // dummy we ignore in the test
+			privateSubnetMaskBits:   24,
+			publicSubnetMaskBits:    24,
+			networkPool:             mustParseCIDR("10.163.0.0/16"),
+		},
 	}
 
 	for i, tc := range testCases {
