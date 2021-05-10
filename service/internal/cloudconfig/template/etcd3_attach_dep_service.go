@@ -28,6 +28,7 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-tag-key=Name \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
 ExecStartPost=/usr/bin/systemctl daemon-reload
+ExecStartPost=/usr/bin/ip set link eth1 down
 ExecStartPost=/usr/bin/systemctl restart systemd-networkd
 
 [Install]
