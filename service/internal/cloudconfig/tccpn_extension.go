@@ -351,7 +351,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: template.Etcd3AttachDepService,
 			Name:         "etcd3-attach-dependencies.service",
-			Enabled:      true,
+			Enabled:      false,
 		},
 		// Automount etcd EBS volume.
 		{
