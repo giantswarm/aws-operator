@@ -28,10 +28,8 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-tag-key=Name \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
 ExecStartPost=/usr/bin/systemctl daemon-reload
-ExecStartPost=/usr/bin/ip link set eth1 down
 ExecStartPost=/usr/bin/systemctl restart systemd-networkd
-ExecStartPost=/usr/bin/ip link set eth1 down
-ExecStartPost=/usr/bin/systemctl restart systemd-networkd
+ExecStartPost=/bin/bash -c "sleep 10s && /usr/bin/ip link set eth1 down && /usr/bin/systemctl reset-failed systemd-networkd && /usr/bin/systemctl restart systemd-networkd"
 
 [Install]
 WantedBy=multi-user.target
