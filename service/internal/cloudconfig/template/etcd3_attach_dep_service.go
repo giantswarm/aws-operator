@@ -30,6 +30,8 @@ ExecStart=/bin/bash -c "docker run --rm -i \
 ExecStartPost=/usr/bin/systemctl daemon-reload
 ExecStartPost=/usr/bin/ip link set eth1 down
 ExecStartPost=/usr/bin/systemctl restart systemd-networkd
+ExecStartPost=/usr/bin/ip link set eth1 down
+ExecStartPost=/usr/bin/systemctl restart systemd-networkd
 
 [Install]
 WantedBy=multi-user.target
