@@ -27,7 +27,7 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-device-label=etcd \
       --volume-tag-key=Name \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
-# use 'networkctl reload'' instead restarting systemd-networkd to avoid bug in systemd 
+# use 'networkctl reload' instead of restarting systemd-networkd to avoid bug in systemd 
 # https://github.com/systemd/systemd/issues/18108
 ExecStartPost=/usr/bin/networkctl reload
 
