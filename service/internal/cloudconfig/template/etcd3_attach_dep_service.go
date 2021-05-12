@@ -27,10 +27,9 @@ ExecStart=/bin/bash -c "docker run --rm -i \
       --volume-device-label=etcd \
       --volume-tag-key=Name \
       --volume-tag-value={{ .MasterEtcdVolumeName }}"
+# use 'networkctl reload'' instead restarting systemd-networkd to avoid bug in systemd 
+# https://github.com/systemd/systemd/issues/18108
 ExecStartPost=/usr/bin/networkctl reload
-#ExecStartPost=/usr/bin/systemctl daemon-reload
-#ExecStartPost=/usr/bin/systemctl restart systemd-networkd
-#ExecStartPost=/bin/bash -c "sleep 10s && /usr/bin/ip link set eth1 down && /usr/bin/systemctl reset-failed systemd-networkd && /usr/bin/systemctl restart systemd-networkd"
 
 [Install]
 WantedBy=multi-user.target
