@@ -32,8 +32,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	// check for annotation that would disable the node terminate unhealthy feature
-	if featureEnabled, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; ok {
-		if featureEnabled == "false" {
+	if annotationValue, ok := cr.Annotations[annotation.NodeTerminateUnhealthy]; ok {
+		if annotationValue == "false" {
 			r.logger.Debugf(ctx, "terminate unhealthy node feature is disabled for this cluster, cancelling")
 			return nil
 		}
