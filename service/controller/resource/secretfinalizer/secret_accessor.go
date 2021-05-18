@@ -20,7 +20,7 @@ func newSecretAccessors(ctx context.Context, cr infrastructurev1alpha2.AWSCluste
 		// certificate.
 		{
 			Name:      fmt.Sprintf("%s-api", key.ClusterID(&cr)),
-			Namespace: "default",
+			Namespace: cr.GetNamespace(),
 		},
 		// The secret accessors below are associated to the tenant's BYOC
 		// credential.

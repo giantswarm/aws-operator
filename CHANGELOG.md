@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Look up cloud tags in all namespaces
+- Find certs in all namespaces
+
 ## [10.3.0] - 2021-05-13
 
 ### Fixed
