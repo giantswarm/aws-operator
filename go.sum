@@ -187,8 +187,8 @@ github.com/giantswarm/apiextensions/v3 v3.4.0/go.mod h1:MMLkRJta4mbTbrikP9LewADi
 github.com/giantswarm/apiextensions/v3 v3.17.0/go.mod h1:N4SS083wjVR3GEL/pqWycva4yUtYrlU5lUKhRtZJ7EY=
 github.com/giantswarm/apiextensions/v3 v3.18.1/go.mod h1:N4SS083wjVR3GEL/pqWycva4yUtYrlU5lUKhRtZJ7EY=
 github.com/giantswarm/apiextensions/v3 v3.22.0/go.mod h1:6KBexBTOZJ+amkorxw722t2HS57f+rf/8LeSSFfQNmo=
-github.com/giantswarm/apiextensions/v3 v3.23.0 h1:kbzkkB+xpw6l0wGp7pRtAg3e33DZVnykDgz8i7EbM+A=
-github.com/giantswarm/apiextensions/v3 v3.23.0/go.mod h1:JpgKjjHgdrrgj3QhwJdyCYbO5fqfsRWIul6A6UaiyFk=
+github.com/giantswarm/apiextensions/v3 v3.24.1-0.20210518092727-5fa0e9d7fdf8 h1:eeMa/jXPzn2tgfuSceFVd5ij8wo33CcmZ7CLbC2/P60=
+github.com/giantswarm/apiextensions/v3 v3.24.1-0.20210518092727-5fa0e9d7fdf8/go.mod h1:JpgKjjHgdrrgj3QhwJdyCYbO5fqfsRWIul6A6UaiyFk=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/badnodedetector v1.0.1 h1:5rKD7SOErceMStnCkiop2nVj1PPiWVnuWE8v/6mE2tA=
