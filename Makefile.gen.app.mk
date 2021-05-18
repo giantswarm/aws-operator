@@ -1,12 +1,13 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@4.4.0
+#    devctl@4.5.1
 #
 
+##@ App
+
 .PHONY: lint-chart
-## lint-chart: runs ct against the default chart
 lint-chart: IMAGE := giantswarm/helm-chart-testing:v3.0.0-rc.1
-lint-chart:
+lint-chart: ## Runs ct against the default chart.
 	@echo "====> $@"
 	rm -rf /tmp/$(APPLICATION)-test
 	mkdir -p /tmp/$(APPLICATION)-test/helm
