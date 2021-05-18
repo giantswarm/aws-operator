@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Look up cloud tags in all namespaces
 - Find certs in all namespaces
 - Enable `terminate unhealthy node` feature by default.
+- Add node termination counter per cluster metric.
 
 ## [10.3.0] - 2021-05-13
 
