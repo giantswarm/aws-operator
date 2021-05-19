@@ -9,24 +9,34 @@ const (
 )
 
 var (
-	nodeAutoRepairTermination = prometheus.NewGaugeVec(
+	nodeUnhealthyNodeTermination = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "aws_operator_unhealthy_node_termination",
 			Help: "Gauge representing node termination due to terminate unhealthy node feature.",
 		},
 		[]string{"cluster_id", "terminated_node", "terminated_instance_id"},
 	)
+
+	nodeUnhealthyNodeTerminationCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "aws_operator_unhealthy_node_termination_count",
+			Help: "Counter representing node termination count for each cluster.",
+		},
+		[]string{"cluster_id"},
+	)
 )
 
 func init() {
-	prometheus.MustRegister(nodeAutoRepairTermination)
-
+	prometheus.MustRegister(nodeUnhealthyNodeTermination)
+	prometheus.MustRegister(nodeUnhealthyNodeTerminationCounter)
 }
 
 // reportNodeTermination is a utility function for updating metrics related to
 // node auto repair node termination.
 func reportNodeTermination(clusterID string, nodeName string, instanceID string) {
-	nodeAutoRepairTermination.WithLabelValues(
+	nodeUnhealthyNodeTermination.WithLabelValues(
 		clusterID, nodeName, instanceID,
 	).Set(gaugeValue)
+
+	nodeUnhealthyNodeTerminationCounter.WithLabelValues(clusterID).Inc()
 }
