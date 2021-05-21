@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Avoid TCCPN stack failure by checking if a control-plane tag exists before adding it.
 - Look up cloud tags in all namespaces
 - Find certs in all namespaces
 - Enable `terminate unhealthy node` feature by default.
