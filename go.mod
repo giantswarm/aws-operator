@@ -32,10 +32,10 @@ require (
 	github.com/spf13/viper v1.7.1
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/sys v0.0.0-20210507014357-30e306a8bba5 // indirect
-	k8s.io/api v0.18.18
+	k8s.io/api v0.18.19
 	k8s.io/apiextensions-apiserver v0.18.9
-	k8s.io/apimachinery v0.18.18
-	k8s.io/client-go v0.18.9
+	k8s.io/apimachinery v0.18.19
+	k8s.io/client-go v0.18.19
 	sigs.k8s.io/cluster-api v0.3.16
 	sigs.k8s.io/controller-runtime v0.6.4
 )
