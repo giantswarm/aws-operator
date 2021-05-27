@@ -8,9 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Enabled EBS CSI migration.
+
+### Removed
+
+- Removed default storage-class annotation, EBS CSI driver is taking over.
+
 ## [10.4.0] - 2021-05-25
 
 ### Changed
+
 - Avoid TCCPN stack failure by checking if a control-plane tag exists before adding it.
 - Look up cloud tags in all namespaces
 - Find certs in all namespaces

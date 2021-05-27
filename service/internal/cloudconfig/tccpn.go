@@ -348,6 +348,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.DisableIngressControllerService = true
 		params.DockerhubToken = t.config.DockerhubToken
 		params.EnableAWSCNI = true
+		params.EnableCSIMigrationAWS = true
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort,
 			InitialClusterState: etcdInitialClusterState,
