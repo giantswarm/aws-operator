@@ -7,7 +7,6 @@ import (
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -62,7 +61,6 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 	err := ct.k8sClient.CtrlClient().List(
 		ctx,
 		&list,
-		client.InNamespace(metav1.NamespaceDefault),
 		client.MatchingLabels{label.Cluster: clusterID},
 	)
 	if err != nil {
