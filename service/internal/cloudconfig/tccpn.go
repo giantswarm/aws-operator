@@ -355,6 +355,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			HighAvailability:    multiMasterEnabled,
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
 		}
+		// we need to explicitly set InitialCluster for single master, since k8scc qhas different config logic which does nto work for AWS
+		if !multiMasterEnabled {
+			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
+		}
 		params.Extension = &TCCPNExtension{
 			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
 			awsCNIVersion:         awsCNIVersion,
