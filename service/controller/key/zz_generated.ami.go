@@ -529,6 +529,8 @@ var amiJSON = []byte(`{
     "ap-southeast-1": "ami-08959a8939d1cb5a2",
     "ap-southeast-2": "ami-044295df63a278d0e",
     "ca-central-1": "ami-04bea8a9e8ddf35c1",
+    "cn-north-1": "ami-051e3a69ffd349b50",
+    "cn-northwest-1": "ami-0d9485d008b887bda",
     "eu-central-1": "ami-0b37b7aabd02e1586",
     "eu-north-1": "ami-0477be1fda3907a95",
     "eu-west-1": "ami-0dff9f0375c3cdbc4",
