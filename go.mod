@@ -23,13 +23,11 @@ require (
 	github.com/giantswarm/randomkeys/v2 v2.1.0
 	github.com/giantswarm/tenantcluster/v4 v4.1.0
 	github.com/giantswarm/to v0.3.0
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.11.0
-	github.com/spf13/afero v1.3.1 // indirect
-	github.com/spf13/viper v1.7.1
-	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	github.com/spf13/viper v1.8.0
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	k8s.io/api v0.18.19
 	k8s.io/apiextensions-apiserver v0.18.19
 	k8s.io/apimachinery v0.18.19
