@@ -1,10 +1,10 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@4.5.2
+#    devctl@4.6.1
 #
 name: gitleaks
 
-on: [push,pull_request]
+on: [pull_request]
 
 jobs:
   gitleaks:
