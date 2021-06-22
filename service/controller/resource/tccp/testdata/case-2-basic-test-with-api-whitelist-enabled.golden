@@ -797,6 +797,9 @@ Resources:
         - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
         - !Ref PrivateRouteTableEuCentral1c
+        - !Ref AWSCNIRouteTableEuCentral1a
+        - !Ref AWSCNIRouteTableEuCentral1b
+        - !Ref AWSCNIRouteTableEuCentral1c
       ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"
