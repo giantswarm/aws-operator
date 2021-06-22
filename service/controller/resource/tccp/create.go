@@ -601,7 +601,7 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 		}
 		routeTableNames = append(routeTableNames, rtName)
 	}
-	
+
 	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 	podSubnet := r.cidrBlockAWSCNI
 	if key.PodsCIDRBlock(cr) != "" {
