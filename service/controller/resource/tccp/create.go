@@ -595,6 +595,12 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 		}
 		routeTableNames = append(routeTableNames, rtName)
 	}
+	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+		rtName := template.ParamsMainVPCRouteTableName{
+			ResourceName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+		}
+		routeTableNames = append(routeTableNames, rtName)
+	}
 
 	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 	podSubnet := r.cidrBlockAWSCNI
