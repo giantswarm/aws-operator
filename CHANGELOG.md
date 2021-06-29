@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- S3 vpc endpoint to AWS CNI subnet.
+
 ### Changed
 
 - Update Flatcar AMI's to the latest stable releases.
