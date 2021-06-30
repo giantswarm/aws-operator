@@ -48,7 +48,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 		ec := &v1alpha1.ENIConfig{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				APIVersion: v1alpha1.SchemeBuilder.GroupVersion.String(),
 				Kind:       "ENIConfig",
 			},
 			ObjectMeta: metav1.ObjectMeta{
