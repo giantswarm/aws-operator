@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- Upgrade `k8scloudconfig` to v10.8.1 which includes change to better detect nodememory pressure.
+
 ## [10.6.0] - 2021-06-29
 
 ### Added
