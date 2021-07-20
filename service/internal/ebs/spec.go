@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 )
 
 // Interface describes the methods provided by the helm client.
@@ -18,7 +18,7 @@ type Interface interface {
 	// the Etcd volume for the master instance will be returned. If
 	// persistentVolume is true then any Persistent Volumes associated with the
 	// cluster will be returned.
-	ListVolumes(ctx context.Context, customObject infrastructurev1alpha2.AWSCluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error)
+	ListVolumes(ctx context.Context, customObject infrastructurev1alpha3.AWSCluster, filterFuncs ...func(t *ec2.Tag) bool) ([]Volume, error)
 }
 
 // EC2Client describes the methods required to be implemented by an EC2 AWS client.

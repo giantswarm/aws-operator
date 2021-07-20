@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
+	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -18,9 +18,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cluster apiv1alpha2.Cluster
+	var cluster apiv1alpha3.Cluster
 	{
-		var clusters apiv1alpha2.ClusterList
+		var clusters apiv1alpha3.ClusterList
 
 		var labelSelector client.MatchingLabels
 		{
@@ -44,20 +44,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		apiEndpoint := apiv1alpha2.APIEndpoint{
+		apiEndpoint := apiv1alpha3.APIEndpoint{
 			Host: key.ClusterAPIEndpoint(cr),
 			Port: 443,
 		}
 
-		for _, ep := range cluster.Status.APIEndpoints {
-			if ep.Host == apiEndpoint.Host && ep.Port == apiEndpoint.Port {
-				r.logger.Debugf(ctx, "API endpoint already set")
-				r.logger.Debugf(ctx, "canceling resource")
-				return nil
-			}
+		if cluster.Spec.ControlPlaneEndpoint.Host == apiEndpoint.Host && cluster.Spec.ControlPlaneEndpoint.Port == apiEndpoint.Port {
+			r.logger.Debugf(ctx, "API endpoint already set")
+			r.logger.Debugf(ctx, "canceling resource")
+			return nil
 		}
 
-		cluster.Status.APIEndpoints = append(cluster.Status.APIEndpoints, apiEndpoint)
+		cluster.Spec.ControlPlaneEndpoint.Host = apiEndpoint.Host
+		cluster.Spec.ControlPlaneEndpoint.Port = apiEndpoint.Port
+
 	}
 
 	{

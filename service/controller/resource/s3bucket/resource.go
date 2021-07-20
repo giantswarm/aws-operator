@@ -2,7 +2,7 @@ package s3bucket
 
 import (
 	"github.com/aws/aws-sdk-go/service/s3"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -97,7 +97,7 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 	return false
 }
 
-func (r *Resource) getS3BucketTags(customObject infrastructurev1alpha2.AWSCluster) []*s3.Tag {
+func (r *Resource) getS3BucketTags(customObject infrastructurev1alpha3.AWSCluster) []*s3.Tag {
 	tags := key.AWSTags(&customObject, r.installationName)
 	return awstags.NewS3(tags)
 }

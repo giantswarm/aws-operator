@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/cachekeycontext"
 	"github.com/google/go-cmp/cmp"
 
@@ -47,12 +47,12 @@ func Test_HAMaster_Caching(t *testing.T) {
 				}
 			}
 
-			var aws infrastructurev1alpha2.AWSControlPlane
+			var aws infrastructurev1alpha3.AWSControlPlane
 			{
 				aws = unittest.DefaultAWSControlPlane()
 			}
 
-			var g8s infrastructurev1alpha2.G8sControlPlane
+			var g8s infrastructurev1alpha3.G8sControlPlane
 			{
 				g8s = unittest.DefaultG8sControlPlane()
 			}
@@ -219,12 +219,12 @@ func Test_HAMaster_Reconcile(t *testing.T) {
 				}
 			}
 
-			var aws infrastructurev1alpha2.AWSControlPlane
+			var aws infrastructurev1alpha3.AWSControlPlane
 			{
 				aws = unittest.DefaultAWSControlPlane()
 			}
 
-			var g8s infrastructurev1alpha2.G8sControlPlane
+			var g8s infrastructurev1alpha3.G8sControlPlane
 			{
 				g8s = unittest.DefaultG8sControlPlane()
 			}

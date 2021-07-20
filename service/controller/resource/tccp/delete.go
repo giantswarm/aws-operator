@@ -38,7 +38,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(l.MatchLabels).String(),
 		}
 
-		list, err := r.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, o)
+		list, err := r.g8sClient.InfrastructureV1alpha3().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, o)
 		if err != nil {
 			return microerror.Mask(err)
 		}

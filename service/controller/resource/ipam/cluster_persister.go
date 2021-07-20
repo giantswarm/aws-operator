@@ -37,14 +37,14 @@ func NewClusterPersister(config ClusterPersisterConfig) (*ClusterPersister, erro
 }
 
 func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	cr, err := p.g8sClient.InfrastructureV1alpha2().AWSClusters(namespace).Get(ctx, name, metav1.GetOptions{})
+	cr, err := p.g8sClient.InfrastructureV1alpha3().AWSClusters(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}
 
 	cr.Status.Provider.Network.CIDR = subnet.String()
 
-	_, err = p.g8sClient.InfrastructureV1alpha2().AWSClusters(namespace).UpdateStatus(ctx, cr, metav1.UpdateOptions{})
+	_, err = p.g8sClient.InfrastructureV1alpha3().AWSClusters(namespace).UpdateStatus(ctx, cr, metav1.UpdateOptions{})
 	if err != nil {
 		return microerror.Mask(err)
 	}

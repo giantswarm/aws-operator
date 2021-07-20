@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -48,7 +48,7 @@ func NewEncrypter(c *EncrypterConfig) (*Encrypter, error) {
 	return kms, nil
 }
 
-func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -159,7 +159,7 @@ func (e *Encrypter) EnsureCreatedEncryptionKey(ctx context.Context, cr infrastru
 	return nil
 }
 
-func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (e *Encrypter) EnsureDeletedEncryptionKey(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
 
-func ControlPlaneAvailabilityZones(cr infrastructurev1alpha2.AWSControlPlane) []string {
+func ControlPlaneAvailabilityZones(cr infrastructurev1alpha3.AWSControlPlane) []string {
 	return cr.Spec.AvailabilityZones
 }
 
@@ -42,7 +42,7 @@ func ControlPlaneID(getter LabelsGetter) string {
 	return getter.GetLabels()[label.ControlPlane]
 }
 
-func ControlPlaneInstanceType(cr infrastructurev1alpha2.AWSControlPlane) string {
+func ControlPlaneInstanceType(cr infrastructurev1alpha3.AWSControlPlane) string {
 	return cr.Spec.InstanceType
 }
 
@@ -58,7 +58,7 @@ func ControlPlaneLaunchTemplateResourceName(getter LabelsGetter, id int) string 
 	return fmt.Sprintf("ControlPlaneNodeLaunchTemplate%d", id)
 }
 
-func ControlPlaneNodeRole(cr infrastructurev1alpha2.AWSControlPlane) string {
+func ControlPlaneNodeRole(cr infrastructurev1alpha3.AWSControlPlane) string {
 	return fmt.Sprintf("gs-cluster-%s-role-tccpn", ClusterID(&cr))
 }
 
@@ -86,7 +86,7 @@ func ControlPlaneVolumeResourceName(id int) string {
 	return fmt.Sprintf("EtcdVolume%d", id)
 }
 
-func ControlPlaneMetadataV2(cr infrastructurev1alpha2.AWSControlPlane) string {
+func ControlPlaneMetadataV2(cr infrastructurev1alpha3.AWSControlPlane) string {
 	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadataV2]
 	if !ok {
 		return "optional"
@@ -108,14 +108,14 @@ func ControlPlaneVolumeSnapshotID(snapshot string, master int) string {
 	return ""
 }
 
-func ToControlPlane(v interface{}) (infrastructurev1alpha2.AWSControlPlane, error) {
+func ToControlPlane(v interface{}) (infrastructurev1alpha3.AWSControlPlane, error) {
 	if v == nil {
-		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSControlPlane{}, v)
+		return infrastructurev1alpha3.AWSControlPlane{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha3.AWSControlPlane{}, v)
 	}
 
-	p, ok := v.(*infrastructurev1alpha2.AWSControlPlane)
+	p, ok := v.(*infrastructurev1alpha3.AWSControlPlane)
 	if !ok {
-		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSControlPlane{}, v)
+		return infrastructurev1alpha3.AWSControlPlane{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha3.AWSControlPlane{}, v)
 	}
 
 	c := p.DeepCopy()
