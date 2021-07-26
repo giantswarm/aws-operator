@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		err = r.ctrlClient.Status().Update(ctx, &cluster)
+		err = r.ctrlClient.Update(ctx, &cluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}
