@@ -3,11 +3,11 @@ module github.com/giantswarm/aws-operator
 go 1.15
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.8.0
-	github.com/aws/aws-sdk-go v1.38.68
+	github.com/aws/amazon-vpc-cni-k8s v1.9.0
+	github.com/aws/aws-sdk-go v1.40.12
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions/v3 v3.29.0
+	github.com/giantswarm/apiextensions/v3 v3.30.0
 	github.com/giantswarm/backoff v0.2.0
 	github.com/giantswarm/badnodedetector v1.0.1
 	github.com/giantswarm/certs/v3 v3.1.1
