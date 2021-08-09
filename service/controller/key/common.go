@@ -35,6 +35,28 @@ const (
 	TerminateUnhealthyNodeResyncPeriod = time.Minute * 3
 )
 
+const sslOnlyBucketPolicyTemplate = `{
+  "Id": "GiantswarmSecureBucketPolicy",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowSSLRequestsOnly",
+      "Action": "s3:*",
+      "Effect": "Deny",
+      "Resource": [
+        "arn:aws:s3:::%s",
+        "arn:aws:s3:::%s/*"
+      ],
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": "false"
+        }
+      },
+      "Principal": "*"
+    }
+  ]
+}`
+
 // AMI returns the EC2 AMI for the configured region and given version.
 func AMI(region string, release releasev1alpha1.Release) (string, error) {
 	osVersion, err := OSVersion(release)
@@ -299,6 +321,10 @@ func SanitizeCFResourceName(l ...string) string {
 
 func SecurityGroupName(getter LabelsGetter, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(getter), groupName)
+}
+
+func SSLOnlyBucketPolicy(bucketName string) string {
+	return fmt.Sprintf(sslOnlyBucketPolicyTemplate, bucketName, bucketName)
 }
 
 func StackComplete(status string) bool {

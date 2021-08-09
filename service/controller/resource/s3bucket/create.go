@@ -137,6 +137,38 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 		}
 
+		// add bucket policy to deny http access (allow only https)
+		{
+			i := &s3.PutBucketPolicyInput{
+				Bucket: aws.String(bucketInput.Name),
+				Policy: aws.String(key.SSLOnlyBucketPolicy(bucketInput.Name)),
+			}
+			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketPolicy(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
+		// block all public access (read and write)
+		{
+			blockBool := true
+
+			i := &s3.PutPublicAccessBlockInput{
+				Bucket: aws.String(bucketInput.Name),
+				PublicAccessBlockConfiguration: &s3.PublicAccessBlockConfiguration{
+					BlockPublicAcls:       &blockBool,
+					BlockPublicPolicy:     &blockBool,
+					IgnorePublicAcls:      &blockBool,
+					RestrictPublicBuckets: &blockBool,
+				},
+			}
+
+			_, err = cc.Client.TenantCluster.AWS.S3.PutPublicAccessBlock(i)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+		}
+
 		r.logger.Debugf(ctx, "created S3 bucket %#q", bucketInput.Name)
 	}
 
