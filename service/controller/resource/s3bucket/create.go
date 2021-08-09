@@ -144,7 +144,10 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 				Policy: aws.String(key.SSLOnlyBucketPolicy(bucketInput.Name)),
 			}
 			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketPolicy(i)
-			if err != nil {
+			if IsAccessDenied(err) {
+				// fall thru if the aws operator do not have permission to create the policy
+				r.logger.Log(ctx, "failed to put S3 bucket policy to allow only SSL connection for bucket  %#q", bucketInput.Name)
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 		}
@@ -164,7 +167,10 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 			}
 
 			_, err = cc.Client.TenantCluster.AWS.S3.PutPublicAccessBlock(i)
-			if err != nil {
+			if IsAccessDenied(err) {
+				// fall thru if the aws operator do not have permission to create the policy
+				r.logger.Log(ctx, "failed to block public access to  S3 bucket %#q", bucketInput.Name)
+			} else if err != nil {
 				return microerror.Mask(err)
 			}
 		}

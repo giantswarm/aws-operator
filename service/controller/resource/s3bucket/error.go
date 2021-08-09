@@ -1,6 +1,8 @@
 package s3bucket
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/giantswarm/microerror"
@@ -74,6 +76,14 @@ func IsBucketAlreadyOwnedByYou(err error) bool {
 		return true
 	}
 
+	return false
+}
+
+// IsAccessDenied asserts access denied error on s3 bucket operation.
+func IsAccessDenied(err error) bool {
+	if strings.Contains(err.Error(), "AccessDenied") {
+		return true
+	}
 	return false
 }
 
