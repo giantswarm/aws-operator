@@ -81,7 +81,11 @@ func IsBucketAlreadyOwnedByYou(err error) bool {
 
 // IsAccessDenied asserts access denied error on s3 bucket operation.
 func IsAccessDenied(err error) bool {
-	return strings.Contains(err.Error(), "AccessDenied")
+	if err != nil {
+		return strings.Contains(err.Error(), "AccessDenied")
+	}
+	return false
+
 }
 
 var bucketNotEmptyError = &microerror.Error{
