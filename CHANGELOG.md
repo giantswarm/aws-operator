@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Upgrade `k8scloudconfig` which is required for k8s 1.21
+
 ## [10.7.0] - 2021-08-11
 
 ### Added
