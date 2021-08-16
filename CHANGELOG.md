@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Update Flatcar AMI's to the latest stable releases.
+
+## Changed
+
 - Upgrade `k8scloudconfig` which is required for k8s 1.21
 
 ## [10.7.0] - 2021-08-11
