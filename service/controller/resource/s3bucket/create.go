@@ -141,7 +141,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		{
 			i := &s3.PutBucketPolicyInput{
 				Bucket: aws.String(bucketInput.Name),
-				Policy: aws.String(key.SSLOnlyBucketPolicy(bucketInput.Name)),
+				Policy: aws.String(key.SSLOnlyBucketPolicy(bucketInput.Name, cr.Spec.Provider.Region)),
 			}
 			_, err = cc.Client.TenantCluster.AWS.S3.PutBucketPolicy(i)
 			if IsAccessDenied(err) {
