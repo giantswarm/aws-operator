@@ -44,8 +44,8 @@ const sslOnlyBucketPolicyTemplate = `{
       "Action": "s3:*",
       "Effect": "Deny",
       "Resource": [
-        "arn:aws:s3:::%s",
-        "arn:aws:s3:::%s/*"
+        "arn:%s:s3:::%s",
+        "arn:%s:s3:::%s/*"
       ],
       "Condition": {
         "Bool": {
@@ -323,8 +323,9 @@ func SecurityGroupName(getter LabelsGetter, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(getter), groupName)
 }
 
-func SSLOnlyBucketPolicy(bucketName string) string {
-	return fmt.Sprintf(sslOnlyBucketPolicyTemplate, bucketName, bucketName)
+func SSLOnlyBucketPolicy(bucketName string, region string) string {
+	arn := RegionARN(region)
+	return fmt.Sprintf(sslOnlyBucketPolicyTemplate, arn, bucketName, arn, bucketName)
 }
 
 func StackComplete(status string) bool {
