@@ -20,6 +20,7 @@ type TCCPNExtension struct {
 	//
 	//     https://github.com/giantswarm/giantswarm/issues/4329.
 	//
+	awsCNIAdditionalTags  string
 	awsCNIMinimumIPTarget string
 	awsCNIVersion         string
 	awsCNIWarmIPTarget    string
@@ -271,6 +272,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var fileAssets []k8scloudconfig.FileAsset
 
 	data := TemplateData{
+		AWSCNIAdditionalTags:  e.awsCNIAdditionalTags,
 		AWSCNIMinimumIPTarget: e.awsCNIMinimumIPTarget,
 		AWSCNIVersion:         e.awsCNIVersion,
 		AWSCNIWarmIPTarget:    e.awsCNIWarmIPTarget,

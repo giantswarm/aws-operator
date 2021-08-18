@@ -2,8 +2,10 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"strings"
 	"sync"
 
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
@@ -20,6 +22,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
+
+const keyCloudPrefix = "tag.provider.giantswarm.io/"
 
 type TCCPNConfig struct {
 	Config Config
@@ -323,6 +327,13 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			awsCNIWarmIPTarget = v
 		}
 	}
+	var awsCNIAdditionalTags string
+	{
+		awsCNIAdditionalTags, err = getCloudTags(cl.GetLabels())
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
 
 	var params k8scloudconfig.Params
 	{
@@ -360,6 +371,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
 		}
 		params.Extension = &TCCPNExtension{
+			awsCNIAdditionalTags:  awsCNIAdditionalTags,
 			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
 			awsCNIVersion:         awsCNIVersion,
 			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
@@ -411,4 +423,30 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	return templateBody, nil
+}
+
+func getCloudTags(labels map[string]string) (string, error) {
+	tags := map[string]string{}
+	for k, v := range labels {
+		if isCloudTagKey(k) {
+			tags[trimCloudTagKey(k)] = v
+		}
+	}
+
+	t, err := json.Marshal(tags)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return string(t), nil
+}
+
+// IsCloudTagKey check is a tag with proper prefix
+func isCloudTagKey(tagKey string) bool {
+	return strings.HasPrefix(tagKey, keyCloudPrefix)
+}
+
+// TrimCloudTagKey check is a tag with proper prefix
+func trimCloudTagKey(tagKey string) string {
+	return strings.TrimPrefix(tagKey, keyCloudPrefix)
 }
