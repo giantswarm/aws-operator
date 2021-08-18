@@ -26,6 +26,14 @@
     }
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
-  "ignoreDeps": ["zricethezav/gitleaks-action"],
+  "dependencyDashboard": true,
+  "ignorePaths": [
+    ".github/workflows/zz_generated.*",
+    ".github/workflows/codeql-analysis.yml"
+  ],
+  "ignoreDeps": [
+    "architect",
+    "zricethezav/gitleaks-action"
+  ],
   "schedule": [ "after 9am on thursday" ]
 }
