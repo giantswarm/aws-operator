@@ -240,8 +240,8 @@ github.com/giantswarm/k8sclient/v5 v5.10.0/go.mod h1:HHSHvERGfLhNqTsqKBUQSQ5VXGh
 github.com/giantswarm/k8sclient/v5 v5.11.0/go.mod h1:3if9oaz3gwTKMuVNxU8vJfrzADyTuExOj+uu8N0+LsM=
 github.com/giantswarm/k8sclient/v5 v5.12.0 h1:oG5k7LLqMT+OaR/jMqOAQMTCpv5OdwjcJhFYGdIPThQ=
 github.com/giantswarm/k8sclient/v5 v5.12.0/go.mod h1:KXRSG1t+XBDsXx089Jp9agMjQ4xEIWywJUchAZ2OQ6c=
-github.com/giantswarm/k8scloudconfig/v10 v10.9.0 h1:CZT4XD4Gais6GWYr1pillJvK1Uq4ks389YZV+DtOFEA=
-github.com/giantswarm/k8scloudconfig/v10 v10.9.0/go.mod h1:5mw0w9Ay7lXC19/i2zrC9Dlfv01TnTk/0lAVgvSzW3A=
+github.com/giantswarm/k8scloudconfig/v10 v10.10.1-0.20210827070213-1f09b5776710 h1:xiSZejh5atYeDwPc5EUUyasQ+wn7+Uj6CJfSMH9AzsY=
+github.com/giantswarm/k8scloudconfig/v10 v10.10.1-0.20210827070213-1f09b5776710/go.mod h1:5mw0w9Ay7lXC19/i2zrC9Dlfv01TnTk/0lAVgvSzW3A=
 github.com/giantswarm/kubelock/v2 v2.0.0 h1:s5mJc32HD0cX7hRS3sZ+d0J7d7g9CZtz9uxyDv+24II=
 github.com/giantswarm/kubelock/v2 v2.0.0/go.mod h1:x0bQ6poerC12lXz2j0k01kjV8xx9qg6OVfbGe6dFjcM=
 github.com/giantswarm/microendpoint v0.2.0 h1:xCAqAVRjTw/4ifEuBeNavALdbQsLk6+k/ukzdy0GWZE=
