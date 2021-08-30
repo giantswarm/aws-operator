@@ -446,8 +446,10 @@ func getCloudTags(labels map[string]string) (string, error) {
 			tags[trimCloudTagKey(k)] = v
 		}
 	}
+	fmt.Printf("map: %#v\n", tags)
 
 	t, err := json.Marshal(tags)
+	fmt.Printf("marshaled: %s\n", string(t))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
