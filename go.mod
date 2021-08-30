@@ -14,12 +14,12 @@ require (
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v5 v5.12.0
 	github.com/giantswarm/k8scloudconfig/v10 v10.8.1
-	github.com/giantswarm/kubelock/v2 v2.0.0
+	github.com/giantswarm/kubelock/v3 v3.0.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.3.0
 	github.com/giantswarm/microkit v0.2.2
 	github.com/giantswarm/micrologger v0.5.0
-	github.com/giantswarm/operatorkit/v4 v4.3.1
+	github.com/giantswarm/operatorkit/v5 v5.0.0
 	github.com/giantswarm/randomkeys/v2 v2.1.0
 	github.com/giantswarm/tenantcluster/v4 v4.1.0
 	github.com/giantswarm/to v0.3.0
