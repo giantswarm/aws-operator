@@ -38,7 +38,7 @@ func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*Machin
 }
 
 func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	cr, err := c.g8sClient.InfrastructureV1alpha2().AWSMachineDeployments(namespace).Get(ctx, name, metav1.GetOptions{})
+	cr, err := c.g8sClient.InfrastructureV1alpha3().AWSMachineDeployments(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

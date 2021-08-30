@@ -6,16 +6,16 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v4/pkg/controller"
-	"github.com/giantswarm/operatorkit/v4/pkg/resource"
-	"github.com/giantswarm/operatorkit/v4/pkg/resource/crud"
-	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v4/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v5/pkg/controller"
+	"github.com/giantswarm/operatorkit/v5/pkg/resource"
+	"github.com/giantswarm/operatorkit/v5/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -122,7 +122,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSCluster)
+				return new(infrastructurev1alpha3.AWSCluster)
 			},
 			Resources: resources,
 
@@ -324,7 +324,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 			Logger:    config.Logger,
 
 			NewObjFunc: func() runtime.Object {
-				return &infrastructurev1alpha2.AWSControlPlane{}
+				return &infrastructurev1alpha3.AWSControlPlane{}
 			},
 		}
 
@@ -341,7 +341,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 			Logger:    config.Logger,
 
 			NewObjFunc: func() runtime.Object {
-				return &infrastructurev1alpha2.AWSMachineDeployment{}
+				return &infrastructurev1alpha3.AWSMachineDeployment{}
 			},
 		}
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
-	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/cachekeycontext"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -24,13 +24,13 @@ func NewG8s() *G8s {
 	return r
 }
 
-func (r *G8s) Get(ctx context.Context, key string) (infrastructurev1alpha2.G8sControlPlane, bool) {
+func (r *G8s) Get(ctx context.Context, key string) (infrastructurev1alpha3.G8sControlPlane, bool) {
 	val, ok := r.cache.Get(key)
 	if ok {
-		return val.(infrastructurev1alpha2.G8sControlPlane), true
+		return val.(infrastructurev1alpha3.G8sControlPlane), true
 	}
 
-	return infrastructurev1alpha2.G8sControlPlane{}, false
+	return infrastructurev1alpha3.G8sControlPlane{}, false
 }
 
 func (r *G8s) Key(ctx context.Context, obj metav1.Object) string {
@@ -42,6 +42,6 @@ func (r *G8s) Key(ctx context.Context, obj metav1.Object) string {
 	return ""
 }
 
-func (r *G8s) Set(ctx context.Context, key string, val infrastructurev1alpha2.G8sControlPlane) {
+func (r *G8s) Set(ctx context.Context, key string, val infrastructurev1alpha3.G8sControlPlane) {
 	r.cache.SetDefault(key, val)
 }

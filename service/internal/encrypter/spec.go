@@ -3,7 +3,7 @@ package encrypter
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 )
 
 const (
@@ -24,11 +24,11 @@ type Encrypter interface {
 }
 
 type Resource interface {
-	EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error
-	EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error
+	EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha3.AWSCluster) error
+	EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha3.AWSCluster) error
 }
 
 type RoleManager interface {
-	EnsureCreatedAuthorizedIAMRoles(context.Context, infrastructurev1alpha2.AWSCluster) error
-	EnsureDeletedAuthorizedIAMRoles(context.Context, infrastructurev1alpha2.AWSCluster) error
+	EnsureCreatedAuthorizedIAMRoles(context.Context, infrastructurev1alpha3.AWSCluster) error
+	EnsureDeletedAuthorizedIAMRoles(context.Context, infrastructurev1alpha3.AWSCluster) error
 }

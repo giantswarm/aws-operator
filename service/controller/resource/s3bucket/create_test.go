@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -22,7 +22,7 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 	}{
 		{
 			description: "current and desired state empty, expected empty",
-			obj: &infrastructurev1alpha2.AWSCluster{
+			obj: &infrastructurev1alpha3.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",
@@ -35,7 +35,7 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 		},
 		{
 			description: "current state empty, desired state not empty, expected desired state",
-			obj: &infrastructurev1alpha2.AWSCluster{
+			obj: &infrastructurev1alpha3.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",
@@ -56,7 +56,7 @@ func Test_Resource_S3Bucket_newCreate(t *testing.T) {
 		},
 		{
 			description: "current state not empty, desired state not empty but different, expected desired state",
-			obj: &infrastructurev1alpha2.AWSCluster{
+			obj: &infrastructurev1alpha3.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",

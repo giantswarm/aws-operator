@@ -5,14 +5,14 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elbv2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-func (r *Resource) clusterLoadBalancersV2(ctx context.Context, cl infrastructurev1alpha2.AWSCluster) (*LoadBalancerStateV2, error) {
+func (r *Resource) clusterLoadBalancersV2(ctx context.Context, cl infrastructurev1alpha3.AWSCluster) (*LoadBalancerStateV2, error) {
 	lbState := &LoadBalancerStateV2{}
 	clusterLBArns := []string{}
 
@@ -76,7 +76,7 @@ func (r *Resource) clusterLoadBalancersV2(ctx context.Context, cl infrastructure
 	return lbState, nil
 }
 
-func containsClusterTagV2(tags []*elbv2.Tag, customObject infrastructurev1alpha2.AWSCluster) bool {
+func containsClusterTagV2(tags []*elbv2.Tag, customObject infrastructurev1alpha3.AWSCluster) bool {
 	tagKey := key.ClusterCloudProviderTag(&customObject)
 
 	for _, tag := range tags {

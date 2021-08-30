@@ -6,25 +6,25 @@ import (
 
 	"github.com/dylanmei/iso8601"
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
 )
 
-func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha2.AWSMachineDeployment) []string {
+func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha3.AWSMachineDeployment) []string {
 	return cr.Spec.Provider.AvailabilityZones
 }
 
-func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return strconv.Itoa(cr.Spec.NodePool.Machine.DockerVolumeSizeGB)
 }
 
-func MachineDeploymentInstanceType(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentInstanceType(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return cr.Spec.Provider.Worker.InstanceType
 }
 
-func MachineDeploymentMetadataV2(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentMetadataV2(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	result, ok := cr.ObjectMeta.Annotations[annotation.AWSMetadataV2]
 	if !ok {
 		return "optional"
@@ -32,11 +32,11 @@ func MachineDeploymentMetadataV2(cr infrastructurev1alpha2.AWSMachineDeployment)
 	return result
 }
 
-func MachineDeploymentLaunchTemplateName(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentLaunchTemplateName(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return fmt.Sprintf("%s-%s-LaunchTemplate", ClusterID(&cr), MachineDeploymentID(&cr))
 }
 
-func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return strconv.Itoa(cr.Spec.NodePool.Machine.KubeletVolumeSizeGB)
 }
 
@@ -108,11 +108,11 @@ func MachineDeploymentPauseTimeIsValid(val string) bool {
 	return true
 }
 
-func MachineDeploymentScalingMax(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+func MachineDeploymentScalingMax(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	return cr.Spec.NodePool.Scaling.Max
 }
 
-func MachineDeploymentScalingMin(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+func MachineDeploymentScalingMin(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	return cr.Spec.NodePool.Scaling.Min
 }
 
@@ -129,15 +129,15 @@ func MachineDeploymentSpotInstancePools(overrides []template.LaunchTemplateOverr
 	return pools
 }
 
-func MachineDeploymentSubnet(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentSubnet(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return cr.Annotations[annotation.MachineDeploymentSubnet]
 }
 
-func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+func MachineDeploymentOnDemandBaseCapacity(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	return cr.Spec.Provider.InstanceDistribution.OnDemandBaseCapacity
 }
 
-func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha2.AWSMachineDeployment) int {
+func MachineDeploymentOnDemandPercentageAboveBaseCapacity(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	return *cr.Spec.Provider.InstanceDistribution.OnDemandPercentageAboveBaseCapacity
 }
 
@@ -152,18 +152,18 @@ func MachineDeploymentWorkerCountRatio(workers int, ratio float32) string {
 	return strconv.Itoa(rounded)
 }
 
-func MachineDeploymentNodeRole(cr infrastructurev1alpha2.AWSMachineDeployment) string {
+func MachineDeploymentNodeRole(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return fmt.Sprintf("gs-cluster-%s-role-%s", ClusterID(&cr), MachineDeploymentID(&cr))
 }
 
-func ToMachineDeployment(v interface{}) (infrastructurev1alpha2.AWSMachineDeployment, error) {
+func ToMachineDeployment(v interface{}) (infrastructurev1alpha3.AWSMachineDeployment, error) {
 	if v == nil {
-		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
+		return infrastructurev1alpha3.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha3.AWSMachineDeployment{}, v)
 	}
 
-	p, ok := v.(*infrastructurev1alpha2.AWSMachineDeployment)
+	p, ok := v.(*infrastructurev1alpha3.AWSMachineDeployment)
 	if !ok {
-		return infrastructurev1alpha2.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha2.AWSMachineDeployment{}, v)
+		return infrastructurev1alpha3.AWSMachineDeployment{}, microerror.Maskf(wrongTypeError, "expected '%T', got '%T'", &infrastructurev1alpha3.AWSMachineDeployment{}, v)
 	}
 
 	c := p.DeepCopy()
