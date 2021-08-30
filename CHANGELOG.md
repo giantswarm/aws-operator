@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Introducing `v1alpha3` CR's.
+- Update Flatcar AMI's to the latest stable releases.
+
+## [10.7.1] - 2021-08-17
+
+## [10.7.0] - 2021-08-11
+
+### Added
+
+- Add security settings to S3 bucket to comply with aws policies `s3-bucket-public-read-prohibited,s3-bucket-ssl-requests-only,s3-bucket-public-write-prohibited,s3-bucket-server-side-encryption-enabled,s3-bucket-logging-enabled`, `aws-operator` will need additonal permissions `s3:PutBucketPublicAccessBlock` and `s3:PutBucketPolicy`.
 
 ## [10.6.1] - 2021-07-01
 
@@ -451,7 +460,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.6.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.7.1...HEAD
+[10.7.1]: https://github.com/giantswarm/aws-operator/compare/v10.7.0...v10.7.1
+[10.7.0]: https://github.com/giantswarm/aws-operator/compare/v10.6.1...v10.7.0
 [10.6.1]: https://github.com/giantswarm/aws-operator/compare/v10.6.0...v10.6.1
 [10.6.0]: https://github.com/giantswarm/aws-operator/compare/v10.5.0...v10.6.0
 [10.5.0]: https://github.com/giantswarm/aws-operator/compare/v10.4.0...v10.5.0

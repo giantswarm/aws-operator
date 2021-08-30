@@ -7,7 +7,7 @@ import (
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/cachekeycontext"
+	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/cachekeycontext"
 
 	"github.com/giantswarm/aws-operator/service/internal/unittest"
 )
