@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v4/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v5/pkg/resource/crud"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 )

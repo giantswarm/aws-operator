@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/operatorkit/v4/pkg/controller/context/cachekeycontext"
+	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

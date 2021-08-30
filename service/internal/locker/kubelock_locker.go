@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/giantswarm/kubelock/v2"
+	"github.com/giantswarm/kubelock/v3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	"k8s.io/apimachinery/pkg/runtime/schema"
