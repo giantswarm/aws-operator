@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
+	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -329,7 +330,20 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 	var awsCNIAdditionalTags string
 	{
-		awsCNIAdditionalTags, err = getCloudTags(cl.GetLabels())
+		var list apiv1alpha3.ClusterList
+		err := t.config.K8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+		if len(list.Items) != 1 {
+			return "", microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		awsCNIAdditionalTags, err = getCloudTags(list.Items[0].GetLabels())
 		if err != nil {
 			return "", microerror.Mask(err)
 		}
