@@ -17,8 +17,8 @@ type Config struct {
 	// NewObjFunc is to return an instance of a pointer for the CR type that
 	// should be considered for keeping finalizers.
 	//
-	//     &infrastructurev1alpha2.AWSControlPlane{}
-	//     &infrastructurev1alpha2.AWSMachineDeployment{}
+	//     &infrastructurev1alpha3.AWSControlPlane{}
+	//     &infrastructurev1alpha3.AWSMachineDeployment{}
 	//
 	NewObjFunc func() runtime.Object
 }

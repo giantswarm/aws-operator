@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -62,7 +62,7 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 //     The master node's instance type changes.
 //     The operator's version changes.
 //
-func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (bool, error) {
+func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)

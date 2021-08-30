@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -20,12 +20,12 @@ const (
 
 type Config struct {
 	Logger        micrologger.Logger
-	ToClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 type Resource struct {
 	logger        micrologger.Logger
-	toClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {
@@ -47,7 +47,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

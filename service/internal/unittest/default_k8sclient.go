@@ -1,7 +1,7 @@
 package unittest
 
 import (
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
@@ -12,7 +12,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/rest"
-	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
+	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake" //nolint:staticcheck // v0.6.4 has a deprecation on pkg/client/fake that was removed in later versions
 )
@@ -28,11 +28,11 @@ func FakeK8sClient() k8sclient.Interface {
 	var k8sClient k8sclient.Interface
 	{
 		scheme := runtime.NewScheme()
-		err = infrastructurev1alpha2.AddToScheme(scheme)
+		err = infrastructurev1alpha3.AddToScheme(scheme)
 		if err != nil {
 			panic(err)
 		}
-		err = apiv1alpha2.AddToScheme(scheme)
+		err = apiv1alpha3.AddToScheme(scheme)
 		if err != nil {
 			panic(err)
 		}

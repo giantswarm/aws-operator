@@ -1,7 +1,7 @@
 package unittest
 
 import (
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/to"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -13,8 +13,8 @@ const (
 	DefaultMachineDeploymentID = "al9qy"
 )
 
-func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
-	cr := infrastructurev1alpha2.AWSMachineDeployment{
+func DefaultMachineDeployment() infrastructurev1alpha3.AWSMachineDeployment {
+	cr := infrastructurev1alpha3.AWSMachineDeployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
 				annotation.MachineDeploymentSubnet: "10.100.8.0/24",
@@ -28,25 +28,25 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 			Name:      DefaultMachineDeploymentID,
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: infrastructurev1alpha2.AWSMachineDeploymentSpec{
-			NodePool: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePool{
+		Spec: infrastructurev1alpha3.AWSMachineDeploymentSpec{
+			NodePool: infrastructurev1alpha3.AWSMachineDeploymentSpecNodePool{
 				Description: "Test node pool for cluster in template rendering unit test.",
-				Machine: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePoolMachine{
+				Machine: infrastructurev1alpha3.AWSMachineDeploymentSpecNodePoolMachine{
 					DockerVolumeSizeGB:  100,
 					KubeletVolumeSizeGB: 100,
 				},
-				Scaling: infrastructurev1alpha2.AWSMachineDeploymentSpecNodePoolScaling{
+				Scaling: infrastructurev1alpha3.AWSMachineDeploymentSpecNodePoolScaling{
 					Max: 5,
 					Min: 3,
 				},
 			},
-			Provider: infrastructurev1alpha2.AWSMachineDeploymentSpecProvider{
+			Provider: infrastructurev1alpha3.AWSMachineDeploymentSpecProvider{
 				AvailabilityZones: []string{"eu-central-1a", "eu-central-1c"},
-				InstanceDistribution: infrastructurev1alpha2.AWSMachineDeploymentSpecInstanceDistribution{
+				InstanceDistribution: infrastructurev1alpha3.AWSMachineDeploymentSpecInstanceDistribution{
 					OnDemandBaseCapacity:                0,
 					OnDemandPercentageAboveBaseCapacity: to.IntP(100),
 				},
-				Worker: infrastructurev1alpha2.AWSMachineDeploymentSpecProviderWorker{
+				Worker: infrastructurev1alpha3.AWSMachineDeploymentSpecProviderWorker{
 					InstanceType:          "m5.2xlarge",
 					UseAlikeInstanceTypes: true,
 				},
@@ -57,7 +57,7 @@ func DefaultMachineDeployment() infrastructurev1alpha2.AWSMachineDeployment {
 	return cr
 }
 
-func MachineDeploymentWithAZs(machineDeployment infrastructurev1alpha2.AWSMachineDeployment, azs []string) infrastructurev1alpha2.AWSMachineDeployment {
+func MachineDeploymentWithAZs(machineDeployment infrastructurev1alpha3.AWSMachineDeployment, azs []string) infrastructurev1alpha3.AWSMachineDeployment {
 	machineDeployment.Spec.Provider.AvailabilityZones = azs
 
 	return machineDeployment

@@ -3,7 +3,7 @@ package images
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
@@ -137,25 +137,25 @@ func (i *Images) Versions(ctx context.Context, obj interface{}) (k8scloudconfig.
 	return v, nil
 }
 
-func (i *Images) cachedCluster(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSCluster, error) {
+func (i *Images) cachedCluster(ctx context.Context, cr metav1.Object) (infrastructurev1alpha3.AWSCluster, error) {
 	var err error
 	var ok bool
 
-	var cluster infrastructurev1alpha2.AWSCluster
+	var cluster infrastructurev1alpha3.AWSCluster
 	{
 		ck := i.clusterCache.Key(ctx, cr)
 
 		if ck == "" {
 			cluster, err = i.lookupCluster(ctx, cr)
 			if err != nil {
-				return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+				return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 			}
 		} else {
 			cluster, ok = i.clusterCache.Get(ctx, ck)
 			if !ok {
 				cluster, err = i.lookupCluster(ctx, cr)
 				if err != nil {
-					return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+					return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 				}
 
 				i.clusterCache.Set(ctx, ck, cluster)
@@ -195,8 +195,8 @@ func (i *Images) cachedRelease(ctx context.Context, cr metav1.Object) (releasev1
 	return re, nil
 }
 
-func (i *Images) lookupCluster(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSCluster, error) {
-	var list infrastructurev1alpha2.AWSClusterList
+func (i *Images) lookupCluster(ctx context.Context, cr metav1.Object) (infrastructurev1alpha3.AWSCluster, error) {
+	var list infrastructurev1alpha3.AWSClusterList
 
 	err := i.k8sClient.CtrlClient().List(
 		ctx,
@@ -205,14 +205,14 @@ func (i *Images) lookupCluster(ctx context.Context, cr metav1.Object) (infrastru
 		client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 	)
 	if err != nil {
-		return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+		return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 	}
 
 	if len(list.Items) == 0 {
-		return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(notFoundError)
+		return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(notFoundError)
 	}
 	if len(list.Items) > 1 {
-		return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(tooManyCRsError)
+		return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(tooManyCRsError)
 	}
 
 	return list.Items[0], nil

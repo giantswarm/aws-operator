@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -21,7 +21,7 @@ func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {
 	}{
 		{
 			description: "Get bucket name from custom object.",
-			obj: &infrastructurev1alpha2.AWSCluster{
+			obj: &infrastructurev1alpha3.AWSCluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						label.Cluster: "5xchu",

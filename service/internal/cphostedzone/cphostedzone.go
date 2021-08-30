@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/service/route53"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -73,7 +73,7 @@ func (h *HostedZone) Search(ctx context.Context, obj interface{}) (string, strin
 	return cpHostedZoneID, cpInternalHostedZoneID, nil
 }
 
-func (h *HostedZone) lookup(ctx context.Context, client Route53, cr infrastructurev1alpha2.AWSCluster) (cpHostedZoneID, cpInternalHostedZoneID string, err error) {
+func (h *HostedZone) lookup(ctx context.Context, client Route53, cr infrastructurev1alpha3.AWSCluster) (cpHostedZoneID, cpInternalHostedZoneID string, err error) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 

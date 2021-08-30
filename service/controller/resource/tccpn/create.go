@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -165,7 +165,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) error {
+func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -218,7 +218,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) ([]*cloudformation.Tag, error) {
+func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) ([]*cloudformation.Tag, error) {
 	tags := key.AWSTags(&cr, r.installationName)
 	if cp := key.ControlPlaneID(&cr); cp != "" {
 		tags[key.TagControlPlane] = cp
@@ -236,7 +236,7 @@ func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev
 	return awstags.NewCloudFormation(tags), nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -288,7 +288,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -341,7 +341,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	return autoScalingGroup, nil
 }
 
-func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainENI, error) {
+func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainENI, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -371,7 +371,7 @@ func (r *Resource) newENI(ctx context.Context, cr infrastructurev1alpha2.AWSCont
 	return enis, nil
 }
 
-func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
+func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainEtcdVolume, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -400,7 +400,7 @@ func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha2.
 	return etcdVolumes, nil
 }
 
-func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -432,7 +432,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 	return iamPolicies, nil
 }
 
-func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
+func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -497,7 +497,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 	return launchTemplate, nil
 }
 
-func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainOutputs, error) {
 	var err error
 
 	// The reconcliation acts upon the AWSControlPlane CR, but the replicas are
@@ -521,7 +521,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWS
 	return outputs, nil
 }
 
-func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMainRecordSets, error) {
+func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainRecordSets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -537,9 +537,9 @@ func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.
 
 	// We need to fetch the cluster CR for once because it holds the base domain
 	// which we need to get the record sets right.
-	var cl infrastructurev1alpha2.AWSCluster
+	var cl infrastructurev1alpha3.AWSCluster
 	{
-		var list infrastructurev1alpha2.AWSClusterList
+		var list infrastructurev1alpha3.AWSClusterList
 
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
@@ -585,7 +585,7 @@ func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha2.
 	return recordSets, nil
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSControlPlane) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)

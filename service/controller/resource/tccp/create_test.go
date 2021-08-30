@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned/fake"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
@@ -38,7 +38,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name           string
-		cr             infrastructurev1alpha2.AWSCluster
+		cr             infrastructurev1alpha3.AWSCluster
 		ctx            context.Context
 		cpAzs          []string
 		cpReplicas     int
@@ -140,7 +140,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 					}
 				}
 
-				var aws infrastructurev1alpha2.AWSControlPlane
+				var aws infrastructurev1alpha3.AWSControlPlane
 				{
 					cl := unittest.DefaultCluster()
 					err = k.CtrlClient().Create(ctx, &cl)

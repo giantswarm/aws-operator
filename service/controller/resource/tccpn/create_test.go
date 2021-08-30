@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -151,7 +151,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
-			var aws infrastructurev1alpha2.AWSControlPlane
+			var aws infrastructurev1alpha3.AWSControlPlane
 			{
 				cl := unittest.DefaultCluster()
 				err = k.CtrlClient().Create(ctx, &cl)

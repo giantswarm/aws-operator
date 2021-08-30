@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -36,7 +36,7 @@ func Test_Controller_Resource_TCCPF_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name           string
 		ctx            context.Context
-		cr             infrastructurev1alpha2.AWSCluster
+		cr             infrastructurev1alpha3.AWSCluster
 		route53Enabled bool
 	}{
 		{

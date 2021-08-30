@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
@@ -65,7 +65,7 @@ func NewTerminateUnhealthyNode(config TerminateUnhealthyNodeConfig) (*TerminateU
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSCluster)
+				return new(infrastructurev1alpha3.AWSCluster)
 			},
 			Resources:    resources,
 			ResyncPeriod: key.TerminateUnhealthyNodeResyncPeriod,

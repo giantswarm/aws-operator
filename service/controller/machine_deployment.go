@@ -6,7 +6,7 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
@@ -131,7 +131,7 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSMachineDeployment)
+				return new(infrastructurev1alpha3.AWSMachineDeployment)
 			},
 			Resources: resources,
 
@@ -741,16 +741,16 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	return resources, nil
 }
 
-func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
-	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha2.AWSCluster, error) {
+func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
+	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
-			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha2().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
+		m, err := g8sClient.InfrastructureV1alpha3().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
 		if err != nil {
-			return infrastructurev1alpha2.AWSCluster{}, microerror.Mask(err)
+			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}
 
 		return *m, nil

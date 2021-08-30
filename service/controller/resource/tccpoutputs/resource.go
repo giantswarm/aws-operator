@@ -3,7 +3,7 @@ package tccpoutputs
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 )
@@ -16,7 +16,7 @@ type Config struct {
 	Logger micrologger.Logger
 
 	Route53Enabled bool
-	ToClusterFunc  func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc  func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 // Resource implements an operatorkit resource and provides a mechanism to fetch
@@ -30,7 +30,7 @@ type Resource struct {
 	logger micrologger.Logger
 
 	route53Enabled bool
-	toClusterFunc  func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc  func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 func New(config Config) (*Resource, error) {

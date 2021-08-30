@@ -3,7 +3,7 @@ package unittest
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -17,8 +17,8 @@ func DefaultContextControlPlane() context.Context {
 	return cc
 }
 
-func DefaultAWSControlPlane() infrastructurev1alpha2.AWSControlPlane {
-	cr := infrastructurev1alpha2.AWSControlPlane{
+func DefaultAWSControlPlane() infrastructurev1alpha3.AWSControlPlane {
+	cr := infrastructurev1alpha3.AWSControlPlane{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "a2wax",
 			Labels: map[string]string{
@@ -29,7 +29,7 @@ func DefaultAWSControlPlane() infrastructurev1alpha2.AWSControlPlane {
 			},
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: infrastructurev1alpha2.AWSControlPlaneSpec{
+		Spec: infrastructurev1alpha3.AWSControlPlaneSpec{
 			AvailabilityZones: []string{"eu-central-1b"},
 			InstanceType:      "m5.xlarge",
 		},
@@ -38,14 +38,14 @@ func DefaultAWSControlPlane() infrastructurev1alpha2.AWSControlPlane {
 	return cr
 }
 
-func DefaultAWSControlPlaneWithAZs(azs ...string) infrastructurev1alpha2.AWSControlPlane {
+func DefaultAWSControlPlaneWithAZs(azs ...string) infrastructurev1alpha3.AWSControlPlane {
 	cp := DefaultAWSControlPlane()
 	cp.Spec.AvailabilityZones = azs
 	return cp
 }
 
-func DefaultG8sControlPlane() infrastructurev1alpha2.G8sControlPlane {
-	cr := infrastructurev1alpha2.G8sControlPlane{
+func DefaultG8sControlPlane() infrastructurev1alpha3.G8sControlPlane {
+	cr := infrastructurev1alpha3.G8sControlPlane{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "a2wax",
 			Labels: map[string]string{
@@ -56,7 +56,7 @@ func DefaultG8sControlPlane() infrastructurev1alpha2.G8sControlPlane {
 			},
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: infrastructurev1alpha2.G8sControlPlaneSpec{
+		Spec: infrastructurev1alpha3.G8sControlPlaneSpec{
 			Replicas: 1,
 		},
 	}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
@@ -21,9 +21,9 @@ import (
 func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	testCases := []struct {
 		name               string
-		cluster            infrastructurev1alpha2.AWSCluster
-		controlPlane       infrastructurev1alpha2.AWSControlPlane
-		machineDeployments []infrastructurev1alpha2.AWSMachineDeployment
+		cluster            infrastructurev1alpha3.AWSCluster
+		controlPlane       infrastructurev1alpha3.AWSControlPlane
+		machineDeployments []infrastructurev1alpha3.AWSMachineDeployment
 		ctxStatusSubnets   []*ec2.Subnet
 		expectedAZs        []controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone
 		errorMatcher       func(error) bool
@@ -32,7 +32,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			name:               "case 0: keep control plane, 0 node pools",
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
 			controlPlane:       unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
-			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
+			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				{
 					AvailabilityZone: aws.String("eu-central-1a"),
@@ -65,7 +65,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			name:         "case 1: control plane and 1 node pool on same AZ",
 			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
 			controlPlane: unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
-			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
+			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{
@@ -104,7 +104,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			name:         "case 2: create control plane and 1 node pool on different AZ",
 			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
 			controlPlane: unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
-			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{
+			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1b"}),
 			},
 			ctxStatusSubnets: []*ec2.Subnet{},
@@ -144,7 +144,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			name:               "case 3: keep control plane and delete 1 node pool from different AZ",
 			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
 			controlPlane:       unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
-			machineDeployments: []infrastructurev1alpha2.AWSMachineDeployment{},
+			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
 				{
 					AvailabilityZone: aws.String("eu-central-1a"),

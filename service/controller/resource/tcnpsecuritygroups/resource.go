@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -43,7 +43,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

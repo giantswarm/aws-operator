@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
@@ -96,7 +96,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -158,13 +158,13 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha2.AWSCluster) []*cloudformation.Tag {
+func (r *Resource) getCloudFormationTags(cr infrastructurev1alpha3.AWSCluster) []*cloudformation.Tag {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCCPF
 	return awstags.NewCloudFormation(tags)
 }
 
-func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainRecordSets, error) {
+func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainRecordSets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -191,7 +191,7 @@ func (r *Resource) newRecordSetsParams(ctx context.Context, cr infrastructurev1a
 	return recordSets, nil
 }
 
-func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainRouteTables, error) {
+func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainRouteTables, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -235,7 +235,7 @@ func (r *Resource) newRouteTablesParams(ctx context.Context, cr infrastructurev1
 	return routeTables, nil
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		recordSets, err := r.newRecordSetsParams(ctx, cr)
@@ -268,7 +268,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 // connectivity to the Control Plane for about 60 seconds under normal
 // circumstances. This affects SSH access to EC2 instances and Prometheus
 // scraping.
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)

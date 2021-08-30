@@ -3,7 +3,7 @@ package hamaster
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -140,25 +140,25 @@ func (h *HAMaster) Replicas(ctx context.Context, obj interface{}) (int, error) {
 	return key.G8sControlPlaneReplicas(g8s), nil
 }
 
-func (h *HAMaster) cachedAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {
+func (h *HAMaster) cachedAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha3.AWSControlPlane, error) {
 	var err error
 	var ok bool
 
-	var cluster infrastructurev1alpha2.AWSControlPlane
+	var cluster infrastructurev1alpha3.AWSControlPlane
 	{
 		ck := h.awsCache.Key(ctx, cr)
 
 		if ck == "" {
 			cluster, err = h.lookupAWS(ctx, cr)
 			if err != nil {
-				return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(err)
+				return infrastructurev1alpha3.AWSControlPlane{}, microerror.Mask(err)
 			}
 		} else {
 			cluster, ok = h.awsCache.Get(ctx, ck)
 			if !ok {
 				cluster, err = h.lookupAWS(ctx, cr)
 				if err != nil {
-					return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(err)
+					return infrastructurev1alpha3.AWSControlPlane{}, microerror.Mask(err)
 				}
 
 				h.awsCache.Set(ctx, ck, cluster)
@@ -169,25 +169,25 @@ func (h *HAMaster) cachedAWS(ctx context.Context, cr metav1.Object) (infrastruct
 	return cluster, nil
 }
 
-func (h *HAMaster) cachedG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.G8sControlPlane, error) {
+func (h *HAMaster) cachedG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha3.G8sControlPlane, error) {
 	var err error
 	var ok bool
 
-	var cluster infrastructurev1alpha2.G8sControlPlane
+	var cluster infrastructurev1alpha3.G8sControlPlane
 	{
 		ck := h.g8sCache.Key(ctx, cr)
 
 		if ck == "" {
 			cluster, err = h.lookupG8s(ctx, cr)
 			if err != nil {
-				return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(err)
+				return infrastructurev1alpha3.G8sControlPlane{}, microerror.Mask(err)
 			}
 		} else {
 			cluster, ok = h.g8sCache.Get(ctx, ck)
 			if !ok {
 				cluster, err = h.lookupG8s(ctx, cr)
 				if err != nil {
-					return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(err)
+					return infrastructurev1alpha3.G8sControlPlane{}, microerror.Mask(err)
 				}
 
 				h.g8sCache.Set(ctx, ck, cluster)
@@ -198,8 +198,8 @@ func (h *HAMaster) cachedG8s(ctx context.Context, cr metav1.Object) (infrastruct
 	return cluster, nil
 }
 
-func (h *HAMaster) lookupAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.AWSControlPlane, error) {
-	var list infrastructurev1alpha2.AWSControlPlaneList
+func (h *HAMaster) lookupAWS(ctx context.Context, cr metav1.Object) (infrastructurev1alpha3.AWSControlPlane, error) {
+	var list infrastructurev1alpha3.AWSControlPlaneList
 
 	err := h.k8sClient.CtrlClient().List(
 		ctx,
@@ -208,21 +208,21 @@ func (h *HAMaster) lookupAWS(ctx context.Context, cr metav1.Object) (infrastruct
 		client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 	)
 	if err != nil {
-		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(err)
+		return infrastructurev1alpha3.AWSControlPlane{}, microerror.Mask(err)
 	}
 
 	if len(list.Items) == 0 {
-		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(notFoundError)
+		return infrastructurev1alpha3.AWSControlPlane{}, microerror.Mask(notFoundError)
 	}
 	if len(list.Items) > 1 {
-		return infrastructurev1alpha2.AWSControlPlane{}, microerror.Mask(tooManyCRsError)
+		return infrastructurev1alpha3.AWSControlPlane{}, microerror.Mask(tooManyCRsError)
 	}
 
 	return list.Items[0], nil
 }
 
-func (h *HAMaster) lookupG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha2.G8sControlPlane, error) {
-	var list infrastructurev1alpha2.G8sControlPlaneList
+func (h *HAMaster) lookupG8s(ctx context.Context, cr metav1.Object) (infrastructurev1alpha3.G8sControlPlane, error) {
+	var list infrastructurev1alpha3.G8sControlPlaneList
 
 	err := h.k8sClient.CtrlClient().List(
 		ctx,
@@ -231,14 +231,14 @@ func (h *HAMaster) lookupG8s(ctx context.Context, cr metav1.Object) (infrastruct
 		client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
 	)
 	if err != nil {
-		return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(err)
+		return infrastructurev1alpha3.G8sControlPlane{}, microerror.Mask(err)
 	}
 
 	if len(list.Items) == 0 {
-		return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(notFoundError)
+		return infrastructurev1alpha3.G8sControlPlane{}, microerror.Mask(notFoundError)
 	}
 	if len(list.Items) > 1 {
-		return infrastructurev1alpha2.G8sControlPlane{}, microerror.Mask(tooManyCRsError)
+		return infrastructurev1alpha3.G8sControlPlane{}, microerror.Mask(tooManyCRsError)
 	}
 
 	return list.Items[0], nil

@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -117,7 +117,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func newIAMRolesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMainIAMRoles, error) {
+func newIAMRolesParams(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainIAMRoles, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -137,7 +137,7 @@ func newIAMRolesParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster
 	return iamRoles, nil
 }
 
-func newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) (*template.ParamsMain, error) {
+func newTemplateParams(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		iamRoles, err := newIAMRolesParams(ctx, cr)
