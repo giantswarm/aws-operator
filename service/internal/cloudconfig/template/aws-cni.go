@@ -175,7 +175,7 @@ spec:
             initialDelaySeconds: 35
           env:
             - name: ADDITIONAL_ENI_TAGS
-              value: "{}"
+              value: '{{ .AWSCNIAdditionalTags }}'
             - name: AWS_VPC_K8S_CNI_LOGLEVEL
               value: INFO
             - name: AWS_VPC_K8S_PLUGIN_LOG_LEVEL
