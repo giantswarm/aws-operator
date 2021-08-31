@@ -453,7 +453,7 @@ func getCloudTags(labels map[string]string) (string, error) {
 	return string(t), nil
 }
 
-// IsCloudTagKey check is a tag with proper prefix
+// IsCloudTagKey checks if a tag has proper prefix
 func isCloudTagKey(tagKey string) bool {
 	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
 }
