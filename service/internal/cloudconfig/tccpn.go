@@ -24,8 +24,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
-const keyCloudPrefix = "tag.provider.giantswarm.io/"
-
 type TCCPNConfig struct {
 	Config Config
 }
@@ -446,10 +444,8 @@ func getCloudTags(labels map[string]string) (string, error) {
 			tags[trimCloudTagKey(k)] = v
 		}
 	}
-	fmt.Printf("map: %#v\n", tags)
 
 	t, err := json.Marshal(tags)
-	fmt.Printf("marshaled: %s\n", string(t))
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -459,10 +455,10 @@ func getCloudTags(labels map[string]string) (string, error) {
 
 // IsCloudTagKey check is a tag with proper prefix
 func isCloudTagKey(tagKey string) bool {
-	return strings.HasPrefix(tagKey, keyCloudPrefix)
+	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
 }
 
 // TrimCloudTagKey check is a tag with proper prefix
 func trimCloudTagKey(tagKey string) string {
-	return strings.TrimPrefix(tagKey, keyCloudPrefix)
+	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }

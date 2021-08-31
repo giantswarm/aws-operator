@@ -11,9 +11,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
-
-const keyCloudPrefix = "tag.provider.giantswarm.io/"
 
 type Config struct {
 	K8sClient k8sclient.Interface
@@ -86,10 +85,10 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 
 // IsCloudTagKey check is a tag with proper prefix
 func isCloudTagKey(tagKey string) bool {
-	return strings.HasPrefix(tagKey, keyCloudPrefix)
+	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
 }
 
 // TrimCloudTagKey check is a tag with proper prefix
 func trimCloudTagKey(tagKey string) string {
-	return strings.TrimPrefix(tagKey, keyCloudPrefix)
+	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }
