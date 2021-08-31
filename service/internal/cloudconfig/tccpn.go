@@ -458,7 +458,7 @@ func isCloudTagKey(tagKey string) bool {
 	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
 }
 
-// TrimCloudTagKey check is a tag with proper prefix
+// TrimCloudTagKey trims key cloud prefix from a tag
 func trimCloudTagKey(tagKey string) string {
 	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }
