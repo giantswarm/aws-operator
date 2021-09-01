@@ -240,8 +240,6 @@ spec:
               name: run-dir
             - mountPath: /var/run/dockershim.sock
               name: dockershim
-            - mountPath: /var/run/cri.sock
-              name: cri
             - mountPath: /run/xtables.lock
               name: xtables-lock
       volumes:
@@ -254,9 +252,6 @@ spec:
         - name: dockershim
           hostPath:
             path: /var/run/dockershim.sock
-        - name: cri
-          hostPath:
-            path: /var/run/containerd/containerd.sock
         - hostPath:
             path: /run/xtables.lock
           name: xtables-lock
