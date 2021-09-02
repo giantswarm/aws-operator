@@ -6,4 +6,4 @@ version: [[ .Version ]]
 appVersion: [[ .AppVersion ]]
 annotations:
   application.giantswarm.io/team: "firecracker"
-  config.giantswarm.io/version: 1.x.x
+  config.giantswarm.io/version: "ssopublickey"
