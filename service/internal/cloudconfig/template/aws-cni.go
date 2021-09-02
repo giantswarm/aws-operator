@@ -177,9 +177,9 @@ spec:
             - name: ADDITIONAL_ENI_TAGS
               value: "{}"
             - name: AWS_VPC_K8S_CNI_LOGLEVEL
-              value: INFO
+              value: DEBUG
             - name: AWS_VPC_K8S_PLUGIN_LOG_LEVEL
-              value: INFO
+              value: DEBUG
             - name: AWS_VPC_K8S_CNI_LOG_FILE
               value: stdout
             - name: AWS_VPC_K8S_PLUGIN_LOG_FILE
