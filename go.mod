@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.9.0
-	github.com/aws/aws-sdk-go v1.40.32
+	github.com/aws/aws-sdk-go v1.40.39
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions/v3 v3.32.0
@@ -13,7 +13,7 @@ require (
 	github.com/giantswarm/certs/v3 v3.1.1
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v5 v5.12.0
-	github.com/giantswarm/k8scloudconfig/v10 v10.11.1-0.20210908182259-3ebe7ea7400b
+	github.com/giantswarm/k8scloudconfig/v10 v10.11.1-0.20210908185621-5f0a5a272959
 	github.com/giantswarm/kubelock/v3 v3.0.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.3.0
@@ -28,12 +28,12 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/spf13/viper v1.8.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	k8s.io/api v0.18.19
-	k8s.io/apiextensions-apiserver v0.18.19
-	k8s.io/apimachinery v0.18.19
-	k8s.io/client-go v0.18.19
-	sigs.k8s.io/cluster-api v0.4.1
-	sigs.k8s.io/controller-runtime v0.6.4
+	k8s.io/api v0.22.1
+	k8s.io/apiextensions-apiserver v0.22.1
+	k8s.io/apimachinery v0.22.1
+	k8s.io/client-go v0.22.1
+	sigs.k8s.io/cluster-api v0.4.2
+	sigs.k8s.io/controller-runtime v0.10.0
 )
 
 replace (
