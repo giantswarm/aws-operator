@@ -40,6 +40,19 @@ workflows:
             tags:
               only: /^v.*/
 
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-to-docker
+          image: "docker.io/giantswarm/aws-operator"
+          username_envar: "DOCKER_USERNAME"
+          password_envar: "DOCKER_PASSWORD"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
+
       # Ensure that for every commit to master, and for every new release tag,
       # an image gets pushed to the Aliyun registry.
       - architect/push-to-docker:
@@ -91,6 +104,7 @@ workflows:
           requires:
             - push-to-aliyun
             - push-to-quay
+            - push-to-docker
           filters:
             branches:
               only: master
@@ -108,6 +122,7 @@ workflows:
           chart: "aws-operator"
           requires:
             - push-to-quay
+            - push-to-docker
           filters:
             branches:
               ignore: master
