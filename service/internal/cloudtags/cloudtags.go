@@ -7,13 +7,12 @@ import (
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	apiv1alpha2 "sigs.k8s.io/cluster-api/api/v1alpha2"
+	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/service/controller/key"
 )
-
-const keyCloudPrefix = "tag.provider.giantswarm.io/"
 
 type Config struct {
 	K8sClient k8sclient.Interface
@@ -55,7 +54,7 @@ func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (ma
 }
 
 func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map[string]string, error) {
-	var list apiv1alpha2.ClusterList
+	var list apiv1alpha3.ClusterList
 	tags := map[string]string{}
 
 	err := ct.k8sClient.CtrlClient().List(
@@ -86,10 +85,10 @@ func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map
 
 // IsCloudTagKey check is a tag with proper prefix
 func isCloudTagKey(tagKey string) bool {
-	return strings.HasPrefix(tagKey, keyCloudPrefix)
+	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
 }
 
 // TrimCloudTagKey check is a tag with proper prefix
 func trimCloudTagKey(tagKey string) string {
-	return strings.TrimPrefix(tagKey, keyCloudPrefix)
+	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }

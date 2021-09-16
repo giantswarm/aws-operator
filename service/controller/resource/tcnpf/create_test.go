@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/service/controller/resource/tcnpf/template"
@@ -31,7 +31,7 @@ func Test_Controller_Resource_TCNPF_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
 		ctx  context.Context
-		cr   infrastructurev1alpha2.AWSMachineDeployment
+		cr   infrastructurev1alpha3.AWSMachineDeployment
 	}{
 		{
 			name: "case 0: basic test",

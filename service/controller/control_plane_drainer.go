@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -63,7 +63,7 @@ func NewControlPlaneDrainer(config ControlPlaneDrainerConfig) (*ControlPlaneDrai
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
 			NewRuntimeObjectFunc: func() runtime.Object {
-				return new(infrastructurev1alpha2.AWSControlPlane)
+				return new(infrastructurev1alpha3.AWSControlPlane)
 			},
 			Resources:    resources,
 			ResyncPeriod: key.DrainerResyncPeriod,

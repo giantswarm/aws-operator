@@ -32,6 +32,7 @@ rules:
     verbs:
       - get
       - list
+      - update
   - apiGroups:
       - cluster.x-k8s.io
     resources:

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,13 +24,13 @@ func NewCluster() *Cluster {
 	return r
 }
 
-func (r *Cluster) Get(ctx context.Context, key string) (infrastructurev1alpha2.AWSCluster, bool) {
+func (r *Cluster) Get(ctx context.Context, key string) (infrastructurev1alpha3.AWSCluster, bool) {
 	val, ok := r.cache.Get(key)
 	if ok {
-		return val.(infrastructurev1alpha2.AWSCluster), true
+		return val.(infrastructurev1alpha3.AWSCluster), true
 	}
 
-	return infrastructurev1alpha2.AWSCluster{}, false
+	return infrastructurev1alpha3.AWSCluster{}, false
 }
 
 func (r *Cluster) Key(ctx context.Context, obj metav1.Object) string {
@@ -42,6 +42,6 @@ func (r *Cluster) Key(ctx context.Context, obj metav1.Object) string {
 	return ""
 }
 
-func (r *Cluster) Set(ctx context.Context, key string, val infrastructurev1alpha2.AWSCluster) {
+func (r *Cluster) Set(ctx context.Context, key string, val infrastructurev1alpha3.AWSCluster) {
 	r.cache.SetDefault(key, val)
 }

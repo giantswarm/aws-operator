@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/core/v1alpha1"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -33,7 +33,7 @@ type ResourceConfig struct {
 
 	LabelMapFunc      func(cr metav1.Object) map[string]string
 	LifeCycleHookName string
-	ToClusterFunc     func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	ToClusterFunc     func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 type Resource struct {
@@ -43,7 +43,7 @@ type Resource struct {
 
 	labelMapFunc      func(cr metav1.Object) map[string]string
 	lifeCycleHookName string
-	toClusterFunc     func(ctx context.Context, v interface{}) (infrastructurev1alpha2.AWSCluster, error)
+	toClusterFunc     func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 func NewResource(config ResourceConfig) (*Resource, error) {
@@ -84,7 +84,7 @@ func (r *Resource) Name() string {
 	return Name
 }
 
-func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1alpha2.AWSCluster, cr metav1.Object, instanceID, privateDNS string) error {
+func (r *Resource) createDrainerConfig(ctx context.Context, cl infrastructurev1alpha3.AWSCluster, cr metav1.Object, instanceID, privateDNS string) error {
 	r.logger.Debugf(ctx, "creating drainer config for ec2 instance %#q", instanceID)
 
 	dc := &g8sv1alpha1.DrainerConfig{

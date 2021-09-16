@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,13 +24,13 @@ func NewAWS() *AWS {
 	return r
 }
 
-func (r *AWS) Get(ctx context.Context, key string) (infrastructurev1alpha2.AWSControlPlane, bool) {
+func (r *AWS) Get(ctx context.Context, key string) (infrastructurev1alpha3.AWSControlPlane, bool) {
 	val, ok := r.cache.Get(key)
 	if ok {
-		return val.(infrastructurev1alpha2.AWSControlPlane), true
+		return val.(infrastructurev1alpha3.AWSControlPlane), true
 	}
 
-	return infrastructurev1alpha2.AWSControlPlane{}, false
+	return infrastructurev1alpha3.AWSControlPlane{}, false
 }
 
 func (r *AWS) Key(ctx context.Context, obj metav1.Object) string {
@@ -42,6 +42,6 @@ func (r *AWS) Key(ctx context.Context, obj metav1.Object) string {
 	return ""
 }
 
-func (r *AWS) Set(ctx context.Context, key string, val infrastructurev1alpha2.AWSControlPlane) {
+func (r *AWS) Set(ctx context.Context, key string, val infrastructurev1alpha3.AWSControlPlane) {
 	r.cache.SetDefault(key, val)
 }

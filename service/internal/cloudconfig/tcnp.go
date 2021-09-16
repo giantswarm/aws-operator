@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
 	"github.com/giantswarm/microerror"
@@ -72,9 +72,9 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		return nil, microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha2.AWSCluster
+	var cl infrastructurev1alpha3.AWSCluster
 	{
-		var list infrastructurev1alpha2.AWSClusterList
+		var list infrastructurev1alpha3.AWSClusterList
 		err := t.config.K8sClient.CtrlClient().List(
 			ctx,
 			&list,

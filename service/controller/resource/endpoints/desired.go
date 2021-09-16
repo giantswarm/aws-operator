@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/resourcecanceledcontext"
 	corev1 "k8s.io/api/core/v1"
@@ -80,7 +80,7 @@ func (r *Resource) GetDesiredState(ctx context.Context, obj interface{}) (interf
 	return endpoints, nil
 }
 
-func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1alpha2.AWSCluster) ([]*ec2.Instance, error) {
+func (r Resource) searchMasterInstances(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) ([]*ec2.Instance, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)

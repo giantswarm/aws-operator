@@ -3,7 +3,7 @@ package encrypter
 import (
 	"context"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 )
 
 type Mock struct {
@@ -20,11 +20,11 @@ func (m *Mock) EncryptionKey(ctx context.Context, id string) (string, error) {
 	return "", nil
 }
 
-func (m *Mock) EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error {
+func (m *Mock) EnsureCreatedEncryptionKey(context.Context, infrastructurev1alpha3.AWSCluster) error {
 	return nil
 }
 
-func (m *Mock) EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha2.AWSCluster) error {
+func (m *Mock) EnsureDeletedEncryptionKey(context.Context, infrastructurev1alpha3.AWSCluster) error {
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package cloudconfig
 
 type TemplateData struct {
+	AWSCNIAdditionalTags  string
 	AWSCNIMinimumIPTarget string
 	AWSCNIVersion         string
 	AWSCNIWarmIPTarget    string

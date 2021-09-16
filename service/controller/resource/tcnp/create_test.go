@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
@@ -38,7 +38,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
-		cr   infrastructurev1alpha2.AWSMachineDeployment
+		cr   infrastructurev1alpha3.AWSMachineDeployment
 		re   releasev1alpha1.Release
 	}{
 		{

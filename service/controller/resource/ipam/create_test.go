@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 
 	"github.com/giantswarm/aws-operator/service/internal/locker"
@@ -136,7 +136,7 @@ func Test_SubnetAllocator(t *testing.T) {
 				}
 			}
 
-			var cr infrastructurev1alpha2.AWSCluster
+			var cr infrastructurev1alpha3.AWSCluster
 			{
 				cr = unittest.DefaultCluster()
 

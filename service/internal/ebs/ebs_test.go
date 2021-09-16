@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -17,7 +17,7 @@ import (
 func Test_ListVolumes(t *testing.T) {
 	t.Parallel()
 
-	customObject := infrastructurev1alpha2.AWSCluster{
+	customObject := infrastructurev1alpha3.AWSCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
 				label.Cluster: "test-cluster",
@@ -27,7 +27,7 @@ func Test_ListVolumes(t *testing.T) {
 
 	testCases := []struct {
 		description     string
-		obj             infrastructurev1alpha2.AWSCluster
+		obj             infrastructurev1alpha3.AWSCluster
 		filterFuncs     []func(t *ec2.Tag) bool
 		expectedVolumes []Volume
 		ebsVolumes      []ebsVolumeMock

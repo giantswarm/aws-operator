@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/provider/v1alpha1"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
@@ -23,7 +23,7 @@ type TCNPExtension struct {
 	// See https://github.com/giantswarm/giantswarm/issues/4329.
 	//
 	cc             *controllercontext.Context
-	cluster        infrastructurev1alpha2.AWSCluster
+	cluster        infrastructurev1alpha3.AWSCluster
 	clusterCerts   []certs.File
 	encrypter      encrypter.Interface
 	encryptionKey  string

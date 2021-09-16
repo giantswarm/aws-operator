@@ -4,13 +4,13 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/provider/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
 )
 
-func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha2.AWSCluster, l string) g8sv1alpha1.AWSConfigSpec {
+func cmaClusterToG8sConfig(c Config, cr infrastructurev1alpha3.AWSCluster, l string) g8sv1alpha1.AWSConfigSpec {
 	return g8sv1alpha1.AWSConfigSpec{
 		Cluster: g8sv1alpha1.Cluster{
 			Calico: g8sv1alpha1.ClusterCalico{

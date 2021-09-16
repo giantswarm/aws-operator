@@ -8,9 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Changed
+### Added
 
-- Upgrade `k8scloudconfig` which is required for k8s 1.21
+- Add provider tags to the AWS CNI ENIs.
+
+### Changed
+
+- Upgrade `k8scloudconfig` which is required for k8s 1.21.
+
+## [10.8.0] - 2021-08-30
+
+### Changed
+
+- Introducing `v1alpha3` CR's.
 - Update Flatcar AMI's to the latest stable releases.
 
 ## [10.7.1] - 2021-08-17
@@ -460,7 +470,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.8.0...HEAD
+[10.8.0]: https://github.com/giantswarm/aws-operator/compare/v10.7.1...v10.8.0
 [10.7.1]: https://github.com/giantswarm/aws-operator/compare/v10.7.0...v10.7.1
 [10.7.0]: https://github.com/giantswarm/aws-operator/compare/v10.6.1...v10.7.0
 [10.6.1]: https://github.com/giantswarm/aws-operator/compare/v10.6.0...v10.6.1

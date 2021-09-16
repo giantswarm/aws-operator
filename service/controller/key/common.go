@@ -35,6 +35,8 @@ const (
 	TerminateUnhealthyNodeResyncPeriod = time.Minute * 3
 )
 
+const KeyCloudPrefix = "tag.provider.giantswarm.io/"
+
 const sslOnlyBucketPolicyTemplate = `{
   "Id": "GiantswarmSecureBucketPolicy",
   "Version": "2012-10-17",

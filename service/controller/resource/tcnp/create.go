@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -164,7 +164,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -217,7 +217,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha2.AW
 	return nil
 }
 
-func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) ([]*cloudformation.Tag, error) {
+func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) ([]*cloudformation.Tag, error) {
 	tags := key.AWSTags(&cr, r.installationName)
 	tags[key.TagStack] = key.StackTCNP
 	tags[key.TagMachineDeployment] = key.MachineDeploymentID(&cr)
@@ -233,7 +233,7 @@ func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev
 	return awstags.NewCloudFormation(tags), nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) error {
+func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -321,14 +321,14 @@ func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	return minWorkers
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-	var cl infrastructurev1alpha2.AWSCluster
+	var cl infrastructurev1alpha3.AWSCluster
 	{
-		var list infrastructurev1alpha2.AWSClusterList
+		var list infrastructurev1alpha3.AWSClusterList
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
 			&list,
@@ -435,7 +435,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 	return autoScalingGroup, nil
 }
 
-func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainIAMPolicies, error) {
+func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainIAMPolicies, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -469,7 +469,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha2
 	return iamPolicies, nil
 }
 
-func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainLaunchTemplate, error) {
+func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainLaunchTemplate, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -519,7 +519,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 	return launchTemplate, nil
 }
 
-func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
+func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainOutputs, error) {
 	var err error
 
 	var ami string
@@ -543,7 +543,7 @@ func (r *Resource) newOutputs(ctx context.Context, cr infrastructurev1alpha2.AWS
 	return outputs, nil
 }
 
-func (r *Resource) newRouteTables(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainRouteTables, error) {
+func (r *Resource) newRouteTables(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainRouteTables, error) {
 	var routeTables template.ParamsMainRouteTables
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -575,15 +575,15 @@ func (r *Resource) newRouteTables(ctx context.Context, cr infrastructurev1alpha2
 	return &routeTables, nil
 }
 
-func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainSecurityGroups, error) {
+func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainSecurityGroups, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha2.AWSCluster
+	var cl infrastructurev1alpha3.AWSCluster
 	{
-		var list infrastructurev1alpha2.AWSClusterList
+		var list infrastructurev1alpha3.AWSClusterList
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
 			&list,
@@ -648,7 +648,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 	return securityGroups, nil
 }
 
-func (r *Resource) newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newSubnets(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainSubnets, error) {
 	var subnets template.ParamsMainSubnets
 
 	cc, err := controllercontext.FromContext(ctx)
@@ -680,7 +680,7 @@ func (r *Resource) newSubnets(ctx context.Context, cr infrastructurev1alpha2.AWS
 	return &subnets, nil
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)
@@ -731,7 +731,7 @@ func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alp
 	return params, nil
 }
 
-func (r *Resource) newVPC(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (*template.ParamsMainVPC, error) {
+func (r *Resource) newVPC(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (*template.ParamsMainVPC, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -790,7 +790,7 @@ func idFromGroups(groups []*ec2.SecurityGroup, name string) string {
 	return ""
 }
 
-func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
+func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)

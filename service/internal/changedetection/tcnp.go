@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -57,7 +57,7 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 //     The node pool's scaling max changes.
 //     The node pool's scaling min changes.
 //
-func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
+func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)
@@ -94,7 +94,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha2.AWSMac
 //     The operator's version changes.
 //     The composition of security groups changes.
 //
-func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha2.AWSMachineDeployment) (bool, error) {
+func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return false, microerror.Mask(err)

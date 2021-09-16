@@ -7,7 +7,7 @@ import (
 	"sort"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	infrastructurev1alpha2 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -35,9 +35,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha2.AWSCluster
+	var cl infrastructurev1alpha3.AWSCluster
 	{
-		var list infrastructurev1alpha2.AWSClusterList
+		var list infrastructurev1alpha3.AWSClusterList
 
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
@@ -61,9 +61,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cl = list.Items[0]
 	}
 
-	var cp infrastructurev1alpha2.AWSControlPlane
+	var cp infrastructurev1alpha3.AWSControlPlane
 	{
-		var list infrastructurev1alpha2.AWSControlPlaneList
+		var list infrastructurev1alpha3.AWSControlPlaneList
 
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
@@ -87,9 +87,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cp = list.Items[0]
 	}
 
-	var mds []infrastructurev1alpha2.AWSMachineDeployment
+	var mds []infrastructurev1alpha3.AWSMachineDeployment
 	{
-		var list infrastructurev1alpha2.AWSMachineDeploymentList
+		var list infrastructurev1alpha3.AWSMachineDeploymentList
 
 		err := r.k8sClient.CtrlClient().List(
 			ctx,

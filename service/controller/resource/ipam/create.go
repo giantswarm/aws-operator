@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
-	"github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha2"
+	"github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -72,7 +72,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var networkRange net.IPNet
 	{
 
-		var cr v1alpha2.AWSCluster
+		var cr v1alpha3.AWSCluster
 		err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: key.ClusterID(m), Namespace: m.GetNamespace()}, &cr)
 		if err != nil {
 			return microerror.Mask(err)
@@ -81,7 +81,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if cr.Spec.Provider.Nodes.NetworkPool == "" {
 			networkRange = r.networkRange
 		} else {
-			var np v1alpha2.NetworkPool
+			var np v1alpha3.NetworkPool
 			err = r.k8sClient.CtrlClient().Get(ctx, types.NamespacedName{Name: cr.Spec.Provider.Nodes.NetworkPool, Namespace: cr.GetNamespace()}, &np)
 			if err != nil {
 				return microerror.Mask(err)
