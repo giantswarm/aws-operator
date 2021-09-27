@@ -183,7 +183,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			// on master NIC eth0 and eth1 are used for machine and all other eth interfaces are for aws cni
 			// add configuration for systemd-network to ignore aws cni interfaces
 			AssetContent: fmt.Sprintf(template.NetworkdIgnoreAWSCNiInterfaces, "eth0 eth1"),
-			Path:         "/etc/systemd/networkd/00-ignore-aws-cni-interfaces.network",
+			Path:         "/etc/systemd/network/00-ignore-aws-cni-interfaces.network",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
