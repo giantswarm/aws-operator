@@ -2,7 +2,7 @@ package template
 
 const NetworkdIgnoreAWSCNiInterfaces = `
 [Match]
-Name=!%s
+Name=%s
 
 [Link]
 Unamanaged=yes
