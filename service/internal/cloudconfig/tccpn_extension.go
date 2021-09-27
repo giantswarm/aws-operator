@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
@@ -168,6 +169,21 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			AssetContent: template.AwsCNIManifest,
 			Path:         "/srv/aws-cni.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
+			// on master NIC eth0 and eth1 are used for machine and all other eth interfaces are for aws cni
+			// add configuration for systemd-network to ignore aws cni interfaces
+			AssetContent: fmt.Sprintf(template.NetworkdIgnoreAWSCNiInterfaces, "eth0 eth1"),
+			Path:         "/etc/systemd/networkd/00-ignore-aws-cni-interfaces.network",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
 					Name: FileOwnerGroupName,
