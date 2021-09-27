@@ -5,5 +5,5 @@ const NetworkdIgnoreAWSCNiInterfaces = `
 Name=%s
 
 [Link]
-Unamanaged=yes
+Unmanaged=yes
 `
