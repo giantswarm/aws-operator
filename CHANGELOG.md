@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.9.0] - 2021-09-28
+
 ### Added
 
 - Add provider tags to the AWS CNI ENIs.
 - Add configuration for `systemd-networkd` to ignore network interfaces used for AWS CNI.
+- Add changes to run properly on Flatcar 2905 and newer.
 
 ### Changed
 
@@ -471,7 +474,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.8.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.9.0...HEAD
+[10.9.0]: https://github.com/giantswarm/aws-operator/compare/v10.8.0...v10.9.0
 [10.8.0]: https://github.com/giantswarm/aws-operator/compare/v10.7.1...v10.8.0
 [10.7.1]: https://github.com/giantswarm/aws-operator/compare/v10.7.0...v10.7.1
 [10.7.0]: https://github.com/giantswarm/aws-operator/compare/v10.6.1...v10.7.0
