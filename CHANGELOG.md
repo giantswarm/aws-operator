@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Add provider tags to the AWS CNI ENIs.
+- Add configuration for `systemd-networkd` to ignore network interfaces used for AWS CNI.
+
+### Changed
+
+- Upgrade `k8scloudconfig` which is required for k8s 1.21.
 
 ## [10.8.0] - 2021-08-30
 
