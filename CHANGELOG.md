@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add provider tags to the AWS CNI ENIs.
 - Add configuration for `systemd-networkd` to ignore network interfaces used for AWS CNI.
+- Add changes to run properly on Flatcar 2905 and newer.
 
 ### Changed
 
