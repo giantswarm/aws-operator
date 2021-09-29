@@ -52,9 +52,6 @@ type Resource struct {
 // New creates a new configured s3bucket resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
-	if config.CtrlClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
-	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
