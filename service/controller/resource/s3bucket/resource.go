@@ -1,10 +1,15 @@
 package s3bucket
 
 import (
+	"context"
 	"github.com/aws/aws-sdk-go/service/s3"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strings"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -20,7 +25,8 @@ const (
 // Config represents the configuration used to create a new s3bucket resource.
 type Config struct {
 	// Dependencies.
-	Logger micrologger.Logger
+	Logger     micrologger.Logger
+	CtrlClient client.Client
 
 	// Settings.
 	AccessLogsExpiration int
@@ -32,7 +38,8 @@ type Config struct {
 // Resource implements the s3bucket resource.
 type Resource struct {
 	// Dependencies.
-	logger micrologger.Logger
+	ctrlClient client.Client
+	logger     micrologger.Logger
 
 	// Settings.
 	accessLogsExpiration int
@@ -44,6 +51,9 @@ type Resource struct {
 // New creates a new configured s3bucket resource.
 func New(config Config) (*Resource, error) {
 	// Dependencies.
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -58,7 +68,8 @@ func New(config Config) (*Resource, error) {
 
 	r := &Resource{
 		// Dependencies.
-		logger: config.Logger,
+		ctrlClient: config.CtrlClient,
+		logger:     config.Logger,
 
 		// Settings.
 		accessLogsExpiration: config.AccessLogsExpiration,
@@ -97,11 +108,48 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 	return false
 }
 
-func (r *Resource) getS3BucketTags(customObject infrastructurev1alpha3.AWSCluster) []*s3.Tag {
+func (r *Resource) getS3BucketTags(ctx context.Context, customObject infrastructurev1alpha3.AWSCluster) ([]*s3.Tag, error) {
 	tags := key.AWSTags(&customObject, r.installationName)
-	return awstags.NewS3(tags)
+
+	var list apiv1alpha3.ClusterList
+	err := r.ctrlClient.List(
+		ctx,
+		&list,
+		client.MatchingLabels{label.Cluster: key.ClusterID(&customObject)},
+	)
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
+	if len(list.Items) != 1 {
+		return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+	}
+
+	allTags := addCloudTags(tags, list.Items[0].GetLabels())
+
+	return awstags.NewS3(allTags), nil
 }
 
 func (r *Resource) canBeDeleted(bucket BucketState) bool {
 	return !bucket.IsLoggingBucket || bucket.IsLoggingBucket && r.deleteLoggingBucket
+}
+
+// add cloud tags from `labels` to `tags` map
+func addCloudTags(tags map[string]string, labels map[string]string) map[string]string {
+	for k, v := range labels {
+		if isCloudTagKey(k) {
+			tags[trimCloudTagKey(k)] = v
+		}
+	}
+
+	return tags
+}
+
+// IsCloudTagKey checks if a tag has proper prefix
+func isCloudTagKey(tagKey string) bool {
+	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
+}
+
+// TrimCloudTagKey trims key cloud prefix from a tag
+func trimCloudTagKey(tagKey string) string {
+	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }

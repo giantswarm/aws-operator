@@ -433,7 +433,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var s3BucketResource resource.Interface
 	{
 		c := s3bucket.Config{
-			Logger: config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 
 			AccessLogsExpiration: config.AccessLogsExpiration,
 			DeleteLoggingBucket:  config.DeleteLoggingBucket,

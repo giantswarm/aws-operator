@@ -51,10 +51,15 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		}
 
 		if r.includeTags {
+			tagSet, err := r.getS3BucketTags(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
 			i := &s3.PutBucketTaggingInput{
 				Bucket: aws.String(bucketInput.Name),
 				Tagging: &s3.Tagging{
-					TagSet: r.getS3BucketTags(cr),
+					TagSet: tagSet,
 				},
 			}
 
