@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add cloud tags propagation to S3 buckets.
+
 ### Changed
 
 -  Update `aws-attach-etcd-dep` image version to `0.2.0` to include bugfixes.
