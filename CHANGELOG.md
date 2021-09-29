@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+-  Update `aws-attach-etcd-dep` image version to `0.2.0` to include bugfixes.
+
 ## [10.9.0] - 2021-09-28
 
 ### Added
