@@ -6,7 +6,4 @@ Name=%s
 
 [Link]
 Unmanaged=yes
-
-[Network]
-KeepConfiguration=yes
 `
