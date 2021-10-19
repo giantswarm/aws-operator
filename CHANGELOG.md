@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix routing policies for pods are deleted by systemd-networkd.
+
 ## [10.9.1] - 2021-09-29
 
 ### Added
