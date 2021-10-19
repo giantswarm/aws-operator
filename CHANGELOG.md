@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.9.2] - 2021-10-19
+
 ### Fixed
 
 - Fix routing policies for pods are deleted by systemd-networkd.
@@ -488,7 +490,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.9.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.9.2...HEAD
+[10.9.2]: https://github.com/giantswarm/aws-operator/compare/v10.9.1...v10.9.2
 [10.9.1]: https://github.com/giantswarm/aws-operator/compare/v10.9.0...v10.9.1
 [10.9.0]: https://github.com/giantswarm/aws-operator/compare/v10.8.0...v10.9.0
 [10.8.0]: https://github.com/giantswarm/aws-operator/compare/v10.7.1...v10.8.0
