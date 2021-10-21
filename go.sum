@@ -231,8 +231,8 @@ github.com/giantswarm/apiextensions/v3 v3.18.1/go.mod h1:N4SS083wjVR3GEL/pqWycva
 github.com/giantswarm/apiextensions/v3 v3.22.0/go.mod h1:6KBexBTOZJ+amkorxw722t2HS57f+rf/8LeSSFfQNmo=
 github.com/giantswarm/apiextensions/v3 v3.30.0/go.mod h1:PcU7LAi0E8lOXoPp2wD7AY/AOtp6sN03cnQuBZGAksg=
 github.com/giantswarm/apiextensions/v3 v3.33.0/go.mod h1:T0/d4PKlGUPFIMqdStzj0JVuOk51rZNQVRnZHXdYVug=
-github.com/giantswarm/apiextensions/v3 v3.34.0 h1:gbI4i0OTctMgmi/L2sh3lQj9vucQQVuRe0UCND+hAE8=
-github.com/giantswarm/apiextensions/v3 v3.34.0/go.mod h1:Z+5NLfuP1tghDLLKxXl2zUnhtr/9OeAfFD2JYNEPkxE=
+github.com/giantswarm/apiextensions/v3 v3.35.0 h1:qD6snPvoj/8ri/fP+6NDi5SckKBobL/2LemBAt8wMV4=
+github.com/giantswarm/apiextensions/v3 v3.35.0/go.mod h1:uV8pzwVdUlzvrC9WZGb6z0koSNSampo3nLFSDW3mukA=
 github.com/giantswarm/backoff v0.2.0 h1:kdfAf83pZ/l8X0KiA2dJ2Wq19nS9hISijVn7ZRdFhfU=
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/badnodedetector v1.0.1 h1:5rKD7SOErceMStnCkiop2nVj1PPiWVnuWE8v/6mE2tA=
@@ -419,7 +419,7 @@ github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-github v17.0.0+incompatible/go.mod h1:zLgOLi98H3fifZn+44m+umXrS52loVEgC2AApnigrVQ=
 github.com/google/go-github/v35 v35.2.0/go.mod h1:s0515YVTI+IMrDoy9Y4pHt9ShGpzHvHO8rZ7L7acgvs=
 github.com/google/go-github/v35 v35.3.0/go.mod h1:yWB7uCcVWaUbUP74Aq3whuMySRMatyRmq5U9FTNlbio=
-github.com/google/go-github/v39 v39.1.0/go.mod h1:C1s8C5aCC9L+JXIYpJM5GYytdX52vC1bLvHEF1IhBrE=
+github.com/google/go-github/v39 v39.2.0/go.mod h1:C1s8C5aCC9L+JXIYpJM5GYytdX52vC1bLvHEF1IhBrE=
 github.com/google/go-jsonnet v0.16.0/go.mod h1:sOcuej3UW1vpPTZOr8L7RQimqai1a57bt5j22LzGZCw=
 github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
 github.com/google/go-querystring v1.1.0/go.mod h1:Kcdr2DB4koayq7X8pmAG4sNG59So17icRSOU623lUBU=
