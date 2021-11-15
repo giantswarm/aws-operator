@@ -14,6 +14,7 @@ require (
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v5 v5.12.0
 	github.com/giantswarm/k8scloudconfig/v10 v10.14.0
+	github.com/giantswarm/k8smetadata v0.5.1-0.20211115134642-99b2d3649cb9
 	github.com/giantswarm/kubelock/v3 v3.0.0
 	github.com/giantswarm/microendpoint v0.2.0
 	github.com/giantswarm/microerror v0.3.0

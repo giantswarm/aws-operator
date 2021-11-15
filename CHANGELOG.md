@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Introduct AWS CNI Prefix delegation.
 
+### Changed
+
+- Use k8smetadata for annotations.
+
 ## [10.9.1] - 2021-09-29
 
 ### Added
