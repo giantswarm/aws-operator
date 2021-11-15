@@ -171,7 +171,7 @@ spec:
             initialDelaySeconds: 35
           livenessProbe:
             exec:
-              command: ["/app/grpc-health-probe", "-addr=:50051"]
+              command: ["/app/grpc-health-probe", "-addr=:50051", "-connect-timeout=2s", "-rpc-timeout=2s" ]
             initialDelaySeconds: 35
           env:
             - name: ADDITIONAL_ENI_TAGS
@@ -222,6 +222,15 @@ spec:
             ## Explicit interface naming
             - name: AWS_VPC_K8S_CNI_VETHPREFIX
               value: eni
+            {{- if eq .AWSCNIPrefix true }}
+            ## Deviation from original manifest - 6
+            ## If CNI prefix validation is enabled it will improve the speed of allocating IPs on a nitro based node (e.g. m5.2xlarge) 
+            ## By setting a annotation on the Cluster CR it can be enabled or disabled.
+            - name: ENABLE_PREFIX_DELEGATION
+              value: "true"
+            - name: "WARM_PREFIX_TARGET"
+              value: "1"
+            {{- end }}
           resources:
             requests:
               cpu: 30m

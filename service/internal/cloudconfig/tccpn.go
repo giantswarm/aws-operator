@@ -326,6 +326,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			awsCNIWarmIPTarget = v
 		}
 	}
+	var awsCNIPrefix bool
+	{
+		if _, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok {
+			awsCNIPrefix = true
+		}
+	}
 	var awsCNIAdditionalTags string
 	{
 		var list apiv1alpha3.ClusterList
@@ -385,6 +391,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Extension = &TCCPNExtension{
 			awsCNIAdditionalTags:  awsCNIAdditionalTags,
 			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
+			awsCNIPrefix:          awsCNIPrefix,
 			awsCNIVersion:         awsCNIVersion,
 			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
 			baseDomain:            key.TenantClusterBaseDomain(cl),

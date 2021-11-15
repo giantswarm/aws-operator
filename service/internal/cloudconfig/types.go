@@ -3,8 +3,9 @@ package cloudconfig
 type TemplateData struct {
 	AWSCNIAdditionalTags  string
 	AWSCNIMinimumIPTarget string
-	AWSCNIVersion         string
+	AWSCNIPrefix          bool
 	AWSCNIWarmIPTarget    string
+	AWSCNIVersion         string
 	AWSRegion             string
 	BaseDomain            string
 	ExternalSNAT          bool
