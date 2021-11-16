@@ -328,7 +328,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 	var awsCNIPrefix bool
 	{
-		if _, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok {
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
 			awsCNIPrefix = true
 		}
 	}
