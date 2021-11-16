@@ -192,10 +192,13 @@ spec:
               value: "false"
             - name: DISABLE_METRICS
               value: "false"
+            ## If CNI prefix validation is enabled we remove WARM_IP_TARGET and MINIMUM_IP_TARGET because it will take precedence over WARM_PREFIX_TARGET.
+            {{- if eq .AWSCNIPrefix false }}
             - name: WARM_IP_TARGET
               value: "{{ .AWSCNIWarmIPTarget }}"
             - name: MINIMUM_IP_TARGET
               value: "{{ .AWSCNIMinimumIPTarget }}"
+            {{- end }}
             ## Deviation from original manifest - 1
             ## This config value is important - See here https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md#cni-configuration-variables
             - name: AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG
