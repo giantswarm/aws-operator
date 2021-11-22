@@ -23,6 +23,7 @@ type TCCPNExtension struct {
 	//
 	awsCNIAdditionalTags  string
 	awsCNIMinimumIPTarget string
+	awsCNIPrefix          bool
 	awsCNIVersion         string
 	awsCNIWarmIPTarget    string
 	baseDomain            string
@@ -290,6 +291,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	data := TemplateData{
 		AWSCNIAdditionalTags:  e.awsCNIAdditionalTags,
 		AWSCNIMinimumIPTarget: e.awsCNIMinimumIPTarget,
+		AWSCNIPrefix:          e.awsCNIPrefix,
 		AWSCNIVersion:         e.awsCNIVersion,
 		AWSCNIWarmIPTarget:    e.awsCNIWarmIPTarget,
 		AWSRegion:             key.Region(e.cluster),

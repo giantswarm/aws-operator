@@ -167,11 +167,11 @@ spec:
           name: aws-node
           readinessProbe:
             exec:
-              command: ["/app/grpc-health-probe", "-addr=:50051"]
+              command: ["/app/grpc-health-probe", "-addr=:50051", "-connect-timeout=2s", "-rpc-timeout=2s" ]
             initialDelaySeconds: 35
           livenessProbe:
             exec:
-              command: ["/app/grpc-health-probe", "-addr=:50051"]
+              command: ["/app/grpc-health-probe", "-addr=:50051", "-connect-timeout=2s", "-rpc-timeout=2s" ]
             initialDelaySeconds: 35
           env:
             - name: ADDITIONAL_ENI_TAGS
@@ -192,10 +192,13 @@ spec:
               value: "false"
             - name: DISABLE_METRICS
               value: "false"
+            ## If CNI prefix validation is enabled we remove WARM_IP_TARGET and MINIMUM_IP_TARGET because it will take precedence over WARM_PREFIX_TARGET.
+            {{- if eq .AWSCNIPrefix false }}
             - name: WARM_IP_TARGET
               value: "{{ .AWSCNIWarmIPTarget }}"
             - name: MINIMUM_IP_TARGET
               value: "{{ .AWSCNIMinimumIPTarget }}"
+            {{- end }}
             ## Deviation from original manifest - 1
             ## This config value is important - See here https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md#cni-configuration-variables
             - name: AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG
@@ -222,6 +225,15 @@ spec:
             ## Explicit interface naming
             - name: AWS_VPC_K8S_CNI_VETHPREFIX
               value: eni
+            {{- if eq .AWSCNIPrefix true }}
+            ## Deviation from original manifest - 6
+            ## If CNI prefix validation is enabled it will improve the speed of allocating IPs on a nitro based node (e.g. m5.2xlarge) 
+            ## By setting a annotation on the Cluster CR it can be enabled or disabled.
+            - name: ENABLE_PREFIX_DELEGATION
+              value: "true"
+            - name: "WARM_PREFIX_TARGET"
+              value: "1"
+            {{- end }}
           resources:
             requests:
               cpu: 30m

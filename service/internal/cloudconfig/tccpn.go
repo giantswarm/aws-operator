@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/giantswarm/apiextensions/v3/pkg/annotation"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
@@ -326,6 +326,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			awsCNIWarmIPTarget = v
 		}
 	}
+	var awsCNIPrefix bool
+	{
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
+			awsCNIPrefix = true
+		}
+	}
 	var awsCNIAdditionalTags string
 	{
 		var list apiv1alpha3.ClusterList
@@ -385,6 +391,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Extension = &TCCPNExtension{
 			awsCNIAdditionalTags:  awsCNIAdditionalTags,
 			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
+			awsCNIPrefix:          awsCNIPrefix,
 			awsCNIVersion:         awsCNIVersion,
 			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
 			baseDomain:            key.TenantClusterBaseDomain(cl),
