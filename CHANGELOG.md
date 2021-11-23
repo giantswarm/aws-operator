@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Adding latest flatcar images.
 - Introduce AWS CNI Prefix delegation.
 
 ### Changed
