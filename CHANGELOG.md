@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Setting `kubernetes.io/replace/internal-elb` tag on private subnet TCNP stack.
+
 ## [10.10.0] - 2021-11-23
 
 ### Added
