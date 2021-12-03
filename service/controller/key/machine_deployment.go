@@ -59,7 +59,7 @@ func MachineDeploymentParseMaxBatchSize(val string, workers int) string {
 		}
 	}
 	// try parse float
-	ratio, err := strconv.ParseFloat(val, 10)
+	ratio, err := strconv.ParseFloat(val, 32)
 	if err != nil {
 		// not integer or float which means invalid value
 		return ""
