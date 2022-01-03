@@ -610,6 +610,7 @@ var amiJSON = []byte(`{
     "us-west-2": "ami-019657181ea76e880"
   },
   "2905.2.0": {
+    "af-south-1": "ami-0fba2ea8fb0b70e87",
     "ap-east-1": "ami-0ea76d2db0219a7cd",
     "ap-northeast-1": "ami-05bcd0fbf12fcb033",
     "ap-northeast-2": "ami-05ee37031c2748c06",
@@ -632,6 +633,7 @@ var amiJSON = []byte(`{
     "us-west-2": "ami-08b0dbd7ab8eee76a"
   },
   "2905.2.1": {
+    "af-south-1": "ami-0f85ca907f583f750",
     "ap-east-1": "ami-0a9dcd7d0ec2a01d3",
     "ap-northeast-1": "ami-046935c916fafd3bf",
     "ap-northeast-2": "ami-0315db16dc51878ac",
@@ -698,6 +700,7 @@ var amiJSON = []byte(`{
     "us-west-2": "ami-00ab35df371f04b39"
   },
   "2905.2.6": {
+    "af-south-1": "ami-09fb66dbd98cdf731",
     "ap-east-1": "ami-0f41787d8b62ba403",
     "ap-northeast-1": "ami-03f8275fe0dec6ad6",
     "ap-northeast-2": "ami-007ea8b4f6ed4f6f8",
