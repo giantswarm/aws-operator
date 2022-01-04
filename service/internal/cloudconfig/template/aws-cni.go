@@ -56,6 +56,10 @@ rules:
   resources:
   - '*'
   verbs: ["list", "watch"]
+- apiGroups: ["policy"]
+  resources: ["podsecuritypolicies"]
+  resourceNames: ["aws-cni"]
+  verbs: ["use", "get", "create"]
 ---
 apiVersion: v1
 kind: ServiceAccount
