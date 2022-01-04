@@ -31,12 +31,6 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:DetachVolume"
             Resource: "*"
-          - Effect: "Allow"
-            Action: "ec2:CreateSnapshot"
-            Resource: "*"
-          - Effect: "Allow"
-            Action: "ec2:ModifyVolume"
-            Resource: "*"
           {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action: "kms:Decrypt"
