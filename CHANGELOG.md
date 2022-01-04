@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add AMI for `af-south-1` region.
+- IAM permission for EBS snapshots.
 
 ### Fixed
 
