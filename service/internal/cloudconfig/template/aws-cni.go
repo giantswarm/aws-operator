@@ -39,39 +39,23 @@ rules:
   - crd.k8s.amazonaws.com
   resources:
   - eniconfigs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
+  verbs: ["list", "watch", "get"]
+- apiGroups: [""]
+  resources:
+  - namespaces
+  verbs: ["list", "watch", "get"]
+- apiGroups: [""]
   resources:
   - pods
-  - namespaces
-  verbs:
-  - list
-  - watch
-  - get
-- apiGroups:
-  - ""
+  verbs: ["list", "watch", "get"]        
+- apiGroups: [""]
   resources:
   - nodes
-  verbs:
-  - list
-  - watch
-  - get
-  - update
-- apiGroups:
-  - extensions
+  verbs: ["list", "watch", "get", "update"]
+- apiGroups: ["extensions"]
   resources:
-  - "*"
-  verbs:
-  - list
-  - watch
-- apiGroups: ["policy"]
-  resources: ["podsecuritypolicies"]
-  resourceNames: ["aws-cni"]
-  verbs: ["use", "get", "create"]
+  - '*'
+  verbs: ["list", "watch"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -119,41 +103,35 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: "beta.kubernetes.io/os"
-                    operator: In
-                    values:
-                      - linux
-                  - key: "beta.kubernetes.io/arch"
-                    operator: In
-                    values:
-                      - amd64
-                      - arm64
-                  - key: eks.amazonaws.com/compute-type
-                    operator: NotIn
-                    values:
-                      - fargate
-              - matchExpressions:
-                  - key: "kubernetes.io/os"
-                    operator: In
-                    values:
-                      - linux
-                  - key: "kubernetes.io/arch"
-                    operator: In
-                    values:
-                      - amd64
-                      - arm64
-                  - key: eks.amazonaws.com/compute-type
-                    operator: NotIn
-                    values:
-                      - fargate
+                - key: "kubernetes.io/os"
+                  operator: In
+                  values:
+                    - linux
+                - key: "kubernetes.io/arch"
+                  operator: In
+                  values:
+                    - amd64
+                    - arm64
+                - key: eks.amazonaws.com/compute-type
+                  operator: NotIn
+                  values:
+                    - fargate
       serviceAccountName: aws-node
       hostNetwork: true
+      terminationGracePeriodSeconds: 10
       tolerations:
         - operator: Exists
       initContainers:
         - image: {{.RegistryDomain}}/giantswarm/aws-cni-init:v{{.AWSCNIVersion}}
           imagePullPolicy: Always
           name: aws-vpc-cni-init
+          env:
+            - name: DISABLE_TCP_EARLY_DEMUX
+              value: "false"
+            - name: ENABLE_IPv4
+              value: "true"
+            - name: ENABLE_IPv6
+              value: "false"
           securityContext:
             privileged: true
           volumeMounts:
@@ -165,14 +143,24 @@ spec:
             - containerPort: 61678
               name: metrics
           name: aws-node
-          readinessProbe:
-            exec:
-              command: ["/app/grpc-health-probe", "-addr=:50051", "-connect-timeout=2s", "-rpc-timeout=2s" ]
-            initialDelaySeconds: 35
           livenessProbe:
             exec:
-              command: ["/app/grpc-health-probe", "-addr=:50051", "-connect-timeout=2s", "-rpc-timeout=2s" ]
-            initialDelaySeconds: 35
+              command:
+              - /app/grpc-health-probe
+              - -addr=:50051
+              - -connect-timeout=5s
+              - -rpc-timeout=5s
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+              - /app/grpc-health-probe
+              - -addr=:50051
+              - -connect-timeout=5s
+              - -rpc-timeout=5s
+            initialDelaySeconds: 1
+            timeoutSeconds: 10
           env:
             - name: ADDITIONAL_ENI_TAGS
               value: '{{ .AWSCNIAdditionalTags }}'
@@ -191,6 +179,10 @@ spec:
             - name: DISABLE_INTROSPECTION
               value: "false"
             - name: DISABLE_METRICS
+              value: "false"
+            - name: ENABLE_IPv4
+              value: "true"
+            - name: ENABLE_IPv6
               value: "false"
             ## If CNI prefix validation is enabled we remove WARM_IP_TARGET and MINIMUM_IP_TARGET because it will take precedence over WARM_PREFIX_TARGET.
             {{- if eq .AWSCNIPrefix false }}
@@ -276,17 +268,22 @@ spec:
             type: DirectoryOrCreate
           name: run-dir
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: eniconfigs.crd.k8s.amazonaws.com
 spec:
   scope: Cluster
   group: crd.k8s.amazonaws.com
+  preserveUnknownFields: false
   versions:
     - name: v1alpha1
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
   names:
     plural: eniconfigs
     singular: eniconfig
