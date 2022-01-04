@@ -152,6 +152,39 @@ Resources:
             Resource:
               - arn:aws:ec2:*:*:network-interface/*
 
+          # Following rules are required for EBS snapshots.
+          - Effect: Allow
+            Action:
+            - ec2:CreateSnapshot
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - ec2:CreateTags
+            Resource:
+            - arn:aws:ec2:*:*:snapshot/*
+            Condition:
+              StringEquals:
+                ec2:CreateAction:
+                - CreateSnapshot
+          - Effect: Allow
+            Action:
+            - ec2:DeleteTags
+            Resource:
+            - arn:aws:ec2:*:*:snapshot/*
+          - Effect: Allow
+            Action:
+            - ec2:DeleteSnapshot
+            Resource: "*"
+            Condition:
+              StringLike:
+                ec2:ResourceTag/CSIVolumeSnapshotName: "*"
+          - Effect: Allow
+            Action:
+            - ec2:DeleteSnapshot
+            Resource: "*"
+            Condition:
+              StringLike:
+                ec2:ResourceTag/ebs.csi.aws.com/cluster: 'true'
   NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
