@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add AMI for `af-south-1` region.
 
+### Fixed
+
+- Adjusted aws-cni manifests to support version 1.10.1.
+
 ## [10.10.1] - 2021-11-29
 
 ### Fixed
