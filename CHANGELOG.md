@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.11.0] - 2022-01-05
+
 ### Added
 
 - Add AMI for `af-south-1` region.
@@ -510,7 +512,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.10.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.11.0...HEAD
+[10.11.0]: https://github.com/giantswarm/aws-operator/compare/v10.10.1...v10.11.0
 [10.10.1]: https://github.com/giantswarm/aws-operator/compare/v10.10.0...v10.10.1
 [10.10.0]: https://github.com/giantswarm/aws-operator/compare/v10.9.1...v10.10.0
 [10.9.1]: https://github.com/giantswarm/aws-operator/compare/v10.9.0...v10.9.1
