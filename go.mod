@@ -25,7 +25,6 @@ require (
 	github.com/giantswarm/tenantcluster/v4 v4.1.0
 	github.com/giantswarm/to v0.4.0
 	github.com/google/go-cmp v0.5.6
-	github.com/google/go-github/v35 v35.3.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.11.0
 	github.com/spf13/viper v1.9.0
