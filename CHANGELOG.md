@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Max pods setting per for new EC2 instances.
 - Bump `etcd-cluster-migrator` version to `v1.1.0`.
+- Bump `k8scloudconfig` to latest release to support Calico 3.21.
 
 ## [10.11.0] - 2022-01-05
 
