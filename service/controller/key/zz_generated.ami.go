@@ -700,6 +700,7 @@ var amiJSON = []byte(`{
     "us-west-2": "ami-00ab35df371f04b39"
   },
   "3033.2.0": {
+    "af-south-1": "ami-0067a27b8a2313757",
     "ap-east-1": "ami-09a727bd86aaf81e7",
     "ap-northeast-1": "ami-00eda317c829fa0ee",
     "ap-northeast-2": "ami-079e8ce5bcfdd8ce2",
@@ -707,6 +708,8 @@ var amiJSON = []byte(`{
     "ap-southeast-1": "ami-066fae5e145bc8c46",
     "ap-southeast-2": "ami-08a3357be43aaca70",
     "ca-central-1": "ami-08ad93a2a5e3b231c",
+    "cn-northwest-1": "ami-088ebf3fdbe7e1fb8",
+    "cn-north-1": "ami-0f463b499a1c141b9",
     "eu-central-1": "ami-08726a91c83c64aa4",
     "eu-north-1": "ami-0ac8544baf999dd55",
     "eu-west-1": "ami-0f69fcfa67a7f8109",
