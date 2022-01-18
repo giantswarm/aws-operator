@@ -11,9 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Max pods setting per for new EC2 instances.
-
-### Updated
-
 - Bump `etcd-cluster-migrator` version to `v1.1.0`.
 
 ## [10.11.0] - 2022-01-05
