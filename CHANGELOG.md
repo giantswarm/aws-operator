@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Max pods setting per for new EC2 instances.
+
 ### Updated
 
 - Bump `etcd-cluster-migrator` version to `v1.1.0`.
