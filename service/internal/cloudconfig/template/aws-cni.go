@@ -262,6 +262,7 @@ spec:
             path: /var/run/dockershim.sock
         - hostPath:
             path: /run/xtables.lock
+            type: FileOrCreate
           name: xtables-lock
         - hostPath:
             path: /var/log/aws-routed-eni

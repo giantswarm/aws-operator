@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump `k8scloudconfig` to latest release to support Calico 3.21.
+
 ## [10.12.0] - 2022-01-18
 
 ### Changed
