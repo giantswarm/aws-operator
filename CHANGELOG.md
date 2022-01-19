@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.13.0] - 2022-01-19
+
 ### Changed
 
 - Bump `k8scloudconfig` to latest release to support Calico 3.21.
@@ -523,7 +525,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.12.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.13.0...HEAD
+[10.13.0]: https://github.com/giantswarm/aws-operator/compare/v10.12.0...v10.13.0
 [10.12.0]: https://github.com/giantswarm/aws-operator/compare/v10.11.0...v10.12.0
 [10.11.0]: https://github.com/giantswarm/aws-operator/compare/v10.10.1...v10.11.0
 [10.10.1]: https://github.com/giantswarm/aws-operator/compare/v10.10.0...v10.10.1
