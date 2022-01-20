@@ -28,6 +28,8 @@ const (
 
 	NodeRoleLabel       = "kubernetes.io/role"
 	MasterNodeRoleLabel = "master"
+
+	EncryptionProviderConfig = "encryption"
 )
 
 const (
@@ -143,6 +145,10 @@ func ELBNameAPI(getter LabelsGetter) string {
 
 func ELBNameEtcd(getter LabelsGetter) string {
 	return fmt.Sprintf("%s-etcd", ClusterID(getter))
+}
+
+func EncryptionConfigSecretName(clusterName string) string {
+	return fmt.Sprintf("%s-encryption-provider-config", clusterName)
 }
 
 func HealthCheckTCPTarget(port int) string {

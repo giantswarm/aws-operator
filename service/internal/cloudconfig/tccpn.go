@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	v1 "k8s.io/api/core/v1"
 	"net"
 	"strings"
 	"sync"
@@ -153,7 +154,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var certFiles []certs.File
-	var randKeys randomkeys.Cluster
+	var encryptionConfig string
 	{
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
@@ -235,11 +236,17 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		})
 
 		g.Go(func() error {
-			k, err := t.config.RandomKeysSearcher.SearchCluster(ctx, key.ClusterID(&cr))
+			var secret v1.Secret
+			err := t.config.K8sClient.CtrlClient().Get(
+				ctx, client.ObjectKey{
+					Name:      key.EncryptionConfigSecretName(key.ClusterID(&cr)),
+					Namespace: cr.Namespace,
+				},
+				&secret)
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			randKeys = k
+			encryptionConfig = string(secret.Data[key.EncryptionProviderConfig])
 
 			return nil
 		})
@@ -254,7 +261,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
-	randomKeyTmplSet, err := renderRandomKeyTmplSet(ctx, t.config.Encrypter, ek, randKeys)
+	encryptedEncryptionConfig, err := t.config.Encrypter.Encrypt(ctx, ek, encryptionConfig)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -403,7 +410,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			externalSNAT:          externalSNAT,
 			haMasters:             multiMasterEnabled,
 			masterID:              mapping.ID,
-			randomKeyTmplSet:      randomKeyTmplSet,
+			encryptionConfig:      encryptedEncryptionConfig,
 			registryDomain:        t.config.RegistryDomain,
 		}
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs

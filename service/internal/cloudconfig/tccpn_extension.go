@@ -35,7 +35,7 @@ type TCCPNExtension struct {
 	externalSNAT          bool
 	haMasters             bool
 	masterID              int
-	randomKeyTmplSet      RandomKeyTmplSet
+	encryptionConfig      string
 	registryDomain        string
 }
 
@@ -242,7 +242,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			// Add to certsMeta slice so the encrypted encryption config file isn't passed through
 			// k8scloudconfig.RenderFileAssetContent like other files in filesMeta.
 			meta := k8scloudconfig.FileMetadata{
-				AssetContent: e.randomKeyTmplSet.APIServerEncryptionKey,
+				AssetContent: e.encryptionConfig,
 				Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 				Owner: k8scloudconfig.Owner{
 					Group: k8scloudconfig.Group{
