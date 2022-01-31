@@ -177,6 +177,8 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
 		}
 
+		params.ForceCGroupsV1 = true
+
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
 		params.DockerhubToken = t.config.DockerhubToken
