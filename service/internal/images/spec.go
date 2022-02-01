@@ -3,7 +3,7 @@ package images
 import (
 	"context"
 
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v11/pkg/template"
 )
 
 type Interface interface {
