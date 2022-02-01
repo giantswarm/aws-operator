@@ -289,10 +289,10 @@ github.com/giantswarm/k8sclient/v5 v5.0.0/go.mod h1:OhlknCs1Wgc0ErjWBgeZDGe4Y6aT
 github.com/giantswarm/k8sclient/v5 v5.11.0/go.mod h1:3if9oaz3gwTKMuVNxU8vJfrzADyTuExOj+uu8N0+LsM=
 github.com/giantswarm/k8sclient/v5 v5.12.0 h1:oG5k7LLqMT+OaR/jMqOAQMTCpv5OdwjcJhFYGdIPThQ=
 github.com/giantswarm/k8sclient/v5 v5.12.0/go.mod h1:KXRSG1t+XBDsXx089Jp9agMjQ4xEIWywJUchAZ2OQ6c=
-github.com/giantswarm/k8scloudconfig/v10 v10.16.1-0.20220131130230-71475c2972e9 h1:rOS4QZ2swsc7W5PYF3S4vVmsjx7UCh2/JV1pRGOzj7w=
-github.com/giantswarm/k8scloudconfig/v10 v10.16.1-0.20220131130230-71475c2972e9/go.mod h1:D3zhODcKiWRFW2xNwj/QwpltmSydj9JQTPylLaV7g/E=
-github.com/giantswarm/k8smetadata v0.8.0 h1:GQT6UKl7TBasZOoyydzAHfmwuHKp9Us4lJ+koF0q6V0=
-github.com/giantswarm/k8smetadata v0.8.0/go.mod h1:k3DYCMdspxhk7efLkQdX1b8UZ71ijOCG3ZoIU8+5xgw=
+github.com/giantswarm/k8scloudconfig/v11 v11.0.1 h1:Kxes/8rNeh1zqsokNggsPh6IZp3LlLhBaaHnZ4CP8zU=
+github.com/giantswarm/k8scloudconfig/v11 v11.0.1/go.mod h1:j4+GTvBQ/io0Z3O46FEK2RsvcZzwQ/wR/7UyHAmTgjE=
+github.com/giantswarm/k8smetadata v0.9.2 h1:10lbS5DRJNES4iytNxc/5+3lsZfx+t+RvP1qZF2ymvc=
+github.com/giantswarm/k8smetadata v0.9.2/go.mod h1:k3DYCMdspxhk7efLkQdX1b8UZ71ijOCG3ZoIU8+5xgw=
 github.com/giantswarm/kubelock/v3 v3.0.0 h1:d7WZzRC/vol8pkVySCZxfAaHZBy0+If1GOMfDvOWBvk=
 github.com/giantswarm/kubelock/v3 v3.0.0/go.mod h1:Qgh3vlNbsA8P2jg4K4BUs08VFrULOtZfKo8PbiQdMb8=
 github.com/giantswarm/microendpoint v0.2.0/go.mod h1:SSkSp4Q4iSW7vwkil+/E3IXy9Q8To8vXmT5VCg24RDg=

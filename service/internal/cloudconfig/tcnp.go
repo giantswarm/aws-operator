@@ -3,16 +3,18 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"net"
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v10/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v11/pkg/template"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/apimachinery/pkg/api/meta"
+	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -90,6 +92,36 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		}
 
 		cl = list.Items[0]
+	}
+
+	var md apiv1alpha3.MachineDeployment
+	{
+		var list apiv1alpha3.MachineDeploymentList
+		err := t.config.K8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+			client.MatchingLabels{label.MachineDeployment: cr.Name},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		md = list.Items[0]
+	}
+
+	var forceCGroupsV1 bool
+	{
+		if _, ok := md.Annotations[annotation.NodeForceCGroupsV1]; ok {
+			forceCGroupsV1 = true
+		} else {
+			forceCGroupsV1 = false
+		}
 	}
 
 	var certFiles []certs.File
@@ -177,8 +209,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
 		}
 
-		params.ForceCGroupsV1 = true
-
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
 		params.DockerhubToken = t.config.DockerhubToken
@@ -194,6 +224,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			externalSNAT:   externalSNAT,
 			registryDomain: t.config.RegistryDomain,
 		}
+		params.ForceCGroupsV1 = forceCGroupsV1
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryMirrors = t.config.RegistryMirrors
