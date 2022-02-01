@@ -115,14 +115,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		md = list.Items[0]
 	}
 
-	var forceCGroupsV1 bool
-	{
-		if _, ok := md.Annotations[annotation.NodeForceCGroupsV1]; ok {
-			forceCGroupsV1 = true
-		} else {
-			forceCGroupsV1 = false
-		}
-	}
+	_, forceCGroupsV1 := md.Annotations[annotation.NodeForceCGroupsV1]
 
 	var certFiles []certs.File
 	{
