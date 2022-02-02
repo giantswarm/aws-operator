@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Autoselect region ARN for ebs snapshots.
+
 ## [10.14.0] - 2022-01-27
 
 ### Changed
