@@ -89,7 +89,7 @@ const TemplateMainIAMPolicies = `
             Action:
             - ec2:CreateTags
             Resource:
-            - arn:aws:ec2:*:*:snapshot/*
+            - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:snapshot/*
             Condition:
               StringEquals:
                 ec2:CreateAction:
@@ -98,7 +98,7 @@ const TemplateMainIAMPolicies = `
             Action:
             - ec2:DeleteTags
             Resource:
-            - arn:aws:ec2:*:*:snapshot/*
+            - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:snapshot/*
           - Effect: Allow
             Action:
             - ec2:DeleteSnapshot
