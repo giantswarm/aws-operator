@@ -8,13 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Fixed
 
-- Add support for feature that enables forcing cgroups v1 for Flatcar version `3033.2.0` and above.
-
-### Changed
-
-- Bump `k8scloudconfig` version to `v11.0.1`.
+- Autoselect region ARN for ebs snapshots.
 
 ## [10.14.0] - 2022-01-27
 
