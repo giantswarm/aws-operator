@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.15.1] - 2022-02-02
+
 ### Fixed
 
 - Autoselect region ARN for ebs snapshots.
@@ -545,7 +547,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.15.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.15.1...HEAD
+[10.15.1]: https://github.com/giantswarm/aws-operator/compare/v10.15.0...v10.15.1
 [10.15.0]: https://github.com/giantswarm/aws-operator/compare/v10.14.0...v10.15.0
 [10.14.0]: https://github.com/giantswarm/aws-operator/compare/v10.13.0...v10.14.0
 [10.13.0]: https://github.com/giantswarm/aws-operator/compare/v10.12.0...v10.13.0
