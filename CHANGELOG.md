@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped `k8scloudconfig` to disable `rpc-statd` service.
+
 ## [10.16.0] - 2022-02-14
 
 ### Added
