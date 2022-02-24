@@ -36,6 +36,8 @@ type TCCPNExtension struct {
 	haMasters             bool
 	masterID              int
 	encryptionConfig      string
+	serviceAccountV2Pub   string
+	serviceAccountv2Priv  string
 	registryDomain        string
 }
 
@@ -241,7 +243,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			// Add to certsMeta slice so the encrypted encryption config file isn't passed through
 			// k8scloudconfig.RenderFileAssetContent like other files in filesMeta.
-			meta := k8scloudconfig.FileMetadata{
+			encryptionConfig := k8scloudconfig.FileMetadata{
 				AssetContent: e.encryptionConfig,
 				Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 				Owner: k8scloudconfig.Owner{
@@ -255,7 +257,35 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				Permissions: 0644,
 			}
 
-			certsMeta = append(certsMeta, meta)
+			serviceAccountV2Pub := k8scloudconfig.FileMetadata{
+				AssetContent: e.serviceAccountV2Pub,
+				Path:         "/etc/kubernetes/ssl/service-account-v2.pub.enc",
+				Owner: k8scloudconfig.Owner{
+					Group: k8scloudconfig.Group{
+						Name: FileOwnerGroupName,
+					},
+					User: k8scloudconfig.User{
+						Name: FileOwnerUserName,
+					},
+				},
+				Permissions: 0644,
+			}
+
+			serviceAccountV2Priv := k8scloudconfig.FileMetadata{
+				AssetContent: e.serviceAccountv2Priv,
+				Path:         "/etc/kubernetes/encryption/service-account-v2.key.enc",
+				Owner: k8scloudconfig.Owner{
+					Group: k8scloudconfig.Group{
+						Name: FileOwnerGroupName,
+					},
+					User: k8scloudconfig.User{
+						Name: FileOwnerUserName,
+					},
+				},
+				Permissions: 0644,
+			}
+
+			certsMeta = append(certsMeta, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv)
 		}
 
 		for _, f := range e.clusterCerts {
