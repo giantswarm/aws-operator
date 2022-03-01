@@ -259,7 +259,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 			serviceAccountV2Pub := k8scloudconfig.FileMetadata{
 				AssetContent: e.serviceAccountV2Pub,
-				Path:         "/etc/kubernetes/ssl/service-account-v2.pub.enc",
+				Path:         "/etc/kubernetes/ssl/service-account-v2-pub.pem.enc",
 				Owner: k8scloudconfig.Owner{
 					Group: k8scloudconfig.Group{
 						Name: FileOwnerGroupName,
@@ -273,7 +273,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 
 			serviceAccountV2Priv := k8scloudconfig.FileMetadata{
 				AssetContent: e.serviceAccountv2Priv,
-				Path:         "/etc/kubernetes/encryption/service-account-v2.key.enc",
+				Path:         "/etc/kubernetes/ssl/service-account-v2-priv.pem.enc",
 				Owner: k8scloudconfig.Owner{
 					Group: k8scloudconfig.Group{
 						Name: FileOwnerGroupName,

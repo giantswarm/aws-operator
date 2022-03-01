@@ -284,8 +284,15 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			if err != nil {
 				return microerror.Mask(err)
 			}
-			serviceAccountV2Pub = string(secret.Data[key.ServiceAccountV2Pub])
-			serviceAccountV2Priv = string(secret.Data[key.ServiceAccountV2Priv])
+
+			serviceAccountV2Pub, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Pub]))
+			if err != nil {
+				return microerror.Mask(err)
+			}
+			serviceAccountV2Priv, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Priv]))
+			if err != nil {
+				return microerror.Mask(err)
+			}
 
 			return nil
 		})
@@ -322,8 +329,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 		// enable IRSA on the api
 		if _, ok := cluster.Annotations[IRSAAnnotation]; ok {
-			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-key-v2.pub")
-			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-key-v2.pem")
+			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-key-v2-pub.pem")
+			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-key-v2-priv.pem")
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-%s-oidc-pod-identity", key.Region(awsCluster), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			apiExtraArgs = append(apiExtraArgs, "--api-audiences=sts.amazonaws.com")
 		}
