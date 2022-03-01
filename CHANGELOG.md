@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.17.0] - 2022-02-16
+
+### Changed
+
+- Bumped `k8scloudconfig` to disable `rpc-statd` service.
+
+## [10.16.0] - 2022-02-14
+
+### Added
+
+- New flatcar releases.
+
+## [10.15.1] - 2022-02-02
+
+### Fixed
+
+- Autoselect region ARN for ebs snapshots.
+
 ## [10.15.0] - 2022-02-01
 
 ### Added
@@ -541,7 +559,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.15.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.17.0...HEAD
+[10.17.0]: https://github.com/giantswarm/aws-operator/compare/v10.16.0...v10.17.0
+[10.16.0]: https://github.com/giantswarm/aws-operator/compare/v10.15.1...v10.16.0
+[10.15.1]: https://github.com/giantswarm/aws-operator/compare/v10.15.0...v10.15.1
 [10.15.0]: https://github.com/giantswarm/aws-operator/compare/v10.14.0...v10.15.0
 [10.14.0]: https://github.com/giantswarm/aws-operator/compare/v10.13.0...v10.14.0
 [10.13.0]: https://github.com/giantswarm/aws-operator/compare/v10.12.0...v10.13.0

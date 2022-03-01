@@ -3,26 +3,37 @@
     "config:base",
     ":reviewer(team:team-phoenix)"
   ],
+  "labels": ["dependencies"],
   "packageRules": [
     {
       "matchPackagePatterns": [".*giantswarm.*"],
       "groupName": "giantswarm modules"
     },
     {
-      "matchPackagePatterns": ["^k8s.io", "^sigs.k8s.io"],
-      "groupName": "k8s modules"
+      "matchPackagePatterns": ["^k8s.io"],
+      "groupName": "k8s modules",
+      "allowedVersions": "< 0.21.0"
+    },
+    {
+      "matchPackagePatterns": ["^sigs.k8s.io"],
+      "groupName": "sig k8s modules"
     },
     {
       "excludePackagePatterns": [".*giantswarm.*" ,"^k8s.io", "^sigs.k8s.io"],
       "groupName": "etc modules"
     },
     {
-      "matchPackagePatterns": ["^k8s.io"],
-      "allowedVersions": "< 0.21.0"
+      "matchPackagePatterns": ["^sigs.k8s.io/cluster*"],
+      "groupName": "capi modules",
+      "enabled": false
     },
     {
       "matchPackageNames": ["sigs.k8s.io/controller-runtime"],
       "allowedVersions": "< 0.7.0"
+    },
+    {
+      "matchPackagePatterns": ["^github.com/giantswarm/apiextensions*"],
+      "allowedVersions": ">= 4.0.0"
     }
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
@@ -33,7 +44,8 @@
   ],
   "ignoreDeps": [
     "architect",
-    "zricethezav/gitleaks-action"
+    "zricethezav/gitleaks-action",
+    "actions/setup-go"
   ],
-  "schedule": [ "after 9am on thursday" ]
+  "schedule": [ "after 6am on thursday" ]
 }
