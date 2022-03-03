@@ -331,7 +331,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		if _, ok := cluster.Annotations[IRSAAnnotation]; ok {
 			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
 			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-%s-oidc-pod-identity", key.Region(awsCluster), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(awsCluster), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			apiExtraArgs = append(apiExtraArgs, "--api-audiences=sts.amazonaws.com")
 		}
 

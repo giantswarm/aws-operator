@@ -31,8 +31,8 @@ const (
 
 	EncryptionProviderConfig = "encryption"
 
-	ServiceAccountV2Pub  = "service-account-v2.pub"
-	ServiceAccountV2Priv = "service-account-v2.key"
+	ServiceAccountV2Pub  = "pub"
+	ServiceAccountV2Priv = "key"
 )
 
 const (
