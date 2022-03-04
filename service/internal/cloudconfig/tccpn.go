@@ -25,8 +25,6 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 )
 
-const IRSAAnnotation = "alpha.aws.giantswarm.io/iam-roles-for-service-accounts"
-
 type TCCPNConfig struct {
 	Config Config
 }
@@ -253,7 +251,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			return nil
 		})
 
-		if _, ok := cl.Annotations[IRSAAnnotation]; ok {
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
 			// fetch IRSA certs
 			g.Go(func() error {
 				var secret v1.Secret
@@ -310,7 +308,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 
 		// enable IRSA on the api
-		if _, ok := cl.Annotations[IRSAAnnotation]; ok {
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
 			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
 			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(cl), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
