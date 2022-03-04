@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.18.0] - 2022-03-04
+
 ### Added
 
 - Add support for IAM Roles for Service Accounts feature.
@@ -563,7 +565,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.17.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.18.0...HEAD
+[10.18.0]: https://github.com/giantswarm/aws-operator/compare/v10.17.0...v10.18.0
 [10.17.0]: https://github.com/giantswarm/aws-operator/compare/v10.16.0...v10.17.0
 [10.16.0]: https://github.com/giantswarm/aws-operator/compare/v10.15.1...v10.16.0
 [10.15.1]: https://github.com/giantswarm/aws-operator/compare/v10.15.0...v10.15.1
