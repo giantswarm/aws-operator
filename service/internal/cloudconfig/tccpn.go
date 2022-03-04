@@ -135,7 +135,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 
-	var awsCluster infrastructurev1alpha3.AWSCluster
+	var cl infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
 		err := t.config.K8sClient.CtrlClient().List(
@@ -152,27 +152,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			return "", microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
 		}
 
-		awsCluster = list.Items[0]
-	}
-
-	var cluster apiv1alpha3.Cluster
-	{
-		var list apiv1alpha3.ClusterList
-		err := t.config.K8sClient.CtrlClient().List(
-			ctx,
-			&list,
-			client.InNamespace(cr.Namespace),
-			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
-		)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-
-		if len(list.Items) != 1 {
-			return "", microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
-		}
-
-		cluster = list.Items[0]
+		cl = list.Items[0]
 	}
 
 	var certFiles []certs.File
@@ -273,29 +253,31 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			return nil
 		})
 
-		g.Go(func() error {
-			var secret v1.Secret
-			err := t.config.K8sClient.CtrlClient().Get(
-				ctx, client.ObjectKey{
-					Name:      key.ServiceAccountV2SecretName(key.ClusterID(&cr)),
-					Namespace: cr.Namespace,
-				},
-				&secret)
-			if err != nil {
-				return microerror.Mask(err)
-			}
+		if _, ok := cl.Annotations[IRSAAnnotation]; ok {
+			// fetch IRSA certs
+			g.Go(func() error {
+				var secret v1.Secret
+				err := t.config.K8sClient.CtrlClient().Get(
+					ctx, client.ObjectKey{
+						Name:      key.ServiceAccountV2SecretName(key.ClusterID(&cr)),
+						Namespace: cr.Namespace,
+					},
+					&secret)
+				if err != nil {
+					return microerror.Mask(err)
+				}
 
-			serviceAccountV2Pub, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Pub]))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-			serviceAccountV2Priv, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Priv]))
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
-			return nil
-		})
+				serviceAccountV2Pub, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Pub]))
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				serviceAccountV2Priv, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Priv]))
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				return nil
+			})
+		}
 
 		err := g.Wait()
 		if certs.IsTimeout(err) {
@@ -314,24 +296,24 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	var apiExtraArgs []string
 	{
-		if key.OIDCClientID(awsCluster) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(awsCluster)))
+		if key.OIDCClientID(cl) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cl)))
 		}
-		if key.OIDCIssuerURL(awsCluster) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(awsCluster)))
+		if key.OIDCIssuerURL(cl) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-issuer-url=%s", key.OIDCIssuerURL(cl)))
 		}
-		if key.OIDCUsernameClaim(awsCluster) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(awsCluster)))
+		if key.OIDCUsernameClaim(cl) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-username-claim=%s", key.OIDCUsernameClaim(cl)))
 		}
-		if key.OIDCGroupsClaim(awsCluster) != "" {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(awsCluster)))
+		if key.OIDCGroupsClaim(cl) != "" {
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(cl)))
 		}
 
 		// enable IRSA on the api
-		if _, ok := cluster.Annotations[IRSAAnnotation]; ok {
+		if _, ok := cl.Annotations[IRSAAnnotation]; ok {
 			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
 			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(awsCluster), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(cl), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			apiExtraArgs = append(apiExtraArgs, "--api-audiences=sts.amazonaws.com")
 		}
 
@@ -349,15 +331,15 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	// Allow the actual externalSNAT to be set by the CR.
 	var externalSNAT bool
-	if key.ExternalSNAT(awsCluster) == nil {
+	if key.ExternalSNAT(cl) == nil {
 		externalSNAT = t.config.ExternalSNAT
 	} else {
-		externalSNAT = *key.ExternalSNAT(awsCluster)
+		externalSNAT = *key.ExternalSNAT(cl)
 	}
 
 	var etcdInitialClusterState string
 	{
-		if !key.IsAlreadyCreatedCluster(awsCluster) {
+		if !key.IsAlreadyCreatedCluster(cl) {
 			etcdInitialClusterState = k8scloudconfig.InitialClusterStateNew
 		} else {
 			etcdInitialClusterState = k8scloudconfig.InitialClusterStateExisting
@@ -378,18 +360,18 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	var awsCNIWarmIPTarget string
 	{
 		awsCNIMinimumIPTarget = key.AWSCNIDefaultMinimumIPTarget
-		if v, ok := awsCluster.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
 			awsCNIMinimumIPTarget = v
 		}
 
 		awsCNIWarmIPTarget = key.AWSCNIDefaultWarmIPTarget
-		if v, ok := awsCluster.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
 			awsCNIWarmIPTarget = v
 		}
 	}
 	var awsCNIPrefix bool
 	{
-		if v, ok := awsCluster.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
+		if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
 			awsCNIPrefix = true
 		}
 	}
@@ -418,10 +400,10 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	{
 		params = k8scloudconfig.Params{}
 
-		g8sConfig := cmaClusterToG8sConfig(t.config, awsCluster, key.KubeletLabelsTCCPN(&cr, mapping.ID))
+		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
-		if key.PodsCIDRBlock(awsCluster) != "" {
-			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(awsCluster))
+		if key.PodsCIDRBlock(cl) != "" {
+			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(cl))
 			if err != nil {
 				return "", microerror.Mask(err)
 			}
@@ -429,7 +411,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
 		}
 
-		params.BaseDomain = key.TenantClusterBaseDomain(awsCluster)
+		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.CalicoPolicyOnly = true
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
@@ -447,7 +429,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 		// we need to explicitly set InitialCluster for single master, since k8scc qhas different config logic which does nto work for AWS
 		if !multiMasterEnabled {
-			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(awsCluster))
+			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
 		}
 		params.Extension = &TCCPNExtension{
 			awsCNIAdditionalTags:  awsCNIAdditionalTags,
@@ -455,9 +437,9 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			awsCNIPrefix:          awsCNIPrefix,
 			awsCNIVersion:         awsCNIVersion,
 			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
-			baseDomain:            key.TenantClusterBaseDomain(awsCluster),
+			baseDomain:            key.TenantClusterBaseDomain(cl),
 			cc:                    cc,
-			cluster:               awsCluster,
+			cluster:               cl,
 			clusterCerts:          certFiles,
 			encrypter:             t.config.Encrypter,
 			encryptionKey:         ek,

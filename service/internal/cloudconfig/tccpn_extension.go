@@ -256,36 +256,39 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				},
 				Permissions: 0644,
 			}
+			if _, ok := e.cluster.Annotations[IRSAAnnotation]; ok {
+				// add IRSA keys to the machines
+				serviceAccountV2Pub := k8scloudconfig.FileMetadata{
+					AssetContent: e.serviceAccountV2Pub,
+					Path:         "/etc/kubernetes/ssl/service-account-v2-pub.pem.enc",
+					Owner: k8scloudconfig.Owner{
+						Group: k8scloudconfig.Group{
+							Name: FileOwnerGroupName,
+						},
+						User: k8scloudconfig.User{
+							Name: FileOwnerUserName,
+						},
+					},
+					Permissions: 0644,
+				}
 
-			serviceAccountV2Pub := k8scloudconfig.FileMetadata{
-				AssetContent: e.serviceAccountV2Pub,
-				Path:         "/etc/kubernetes/ssl/service-account-v2-pub.pem.enc",
-				Owner: k8scloudconfig.Owner{
-					Group: k8scloudconfig.Group{
-						Name: FileOwnerGroupName,
+				serviceAccountV2Priv := k8scloudconfig.FileMetadata{
+					AssetContent: e.serviceAccountv2Priv,
+					Path:         "/etc/kubernetes/ssl/service-account-v2-priv.pem.enc",
+					Owner: k8scloudconfig.Owner{
+						Group: k8scloudconfig.Group{
+							Name: FileOwnerGroupName,
+						},
+						User: k8scloudconfig.User{
+							Name: FileOwnerUserName,
+						},
 					},
-					User: k8scloudconfig.User{
-						Name: FileOwnerUserName,
-					},
-				},
-				Permissions: 0644,
+					Permissions: 0644,
+				}
+				certsMeta = append(certsMeta, serviceAccountV2Pub, serviceAccountV2Priv)
 			}
 
-			serviceAccountV2Priv := k8scloudconfig.FileMetadata{
-				AssetContent: e.serviceAccountv2Priv,
-				Path:         "/etc/kubernetes/ssl/service-account-v2-priv.pem.enc",
-				Owner: k8scloudconfig.Owner{
-					Group: k8scloudconfig.Group{
-						Name: FileOwnerGroupName,
-					},
-					User: k8scloudconfig.User{
-						Name: FileOwnerUserName,
-					},
-				},
-				Permissions: 0644,
-			}
-
-			certsMeta = append(certsMeta, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv)
+			certsMeta = append(certsMeta, encryptionConfig)
 		}
 
 		for _, f := range e.clusterCerts {
