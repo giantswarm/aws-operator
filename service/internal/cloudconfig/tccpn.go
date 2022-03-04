@@ -154,7 +154,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var certFiles []certs.File
-	var encryptionConfig string
+	var encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
 	{
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
@@ -251,6 +251,32 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			return nil
 		})
 
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+			// fetch IRSA certs
+			g.Go(func() error {
+				var secret v1.Secret
+				err := t.config.K8sClient.CtrlClient().Get(
+					ctx, client.ObjectKey{
+						Name:      key.ServiceAccountV2SecretName(key.ClusterID(&cr)),
+						Namespace: cr.Namespace,
+					},
+					&secret)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				serviceAccountV2Pub, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Pub]))
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				serviceAccountV2Priv, err = t.config.Encrypter.Encrypt(ctx, ek, string(secret.Data[key.ServiceAccountV2Priv]))
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				return nil
+			})
+		}
+
 		err := g.Wait()
 		if certs.IsTimeout(err) {
 			return "", microerror.Maskf(timeoutError, "waited too long for certificates")
@@ -279,6 +305,14 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 		if key.OIDCGroupsClaim(cl) != "" {
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-groups-claim=%s", key.OIDCGroupsClaim(cl)))
+		}
+
+		// enable IRSA on the api
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
+			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(cl), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			apiExtraArgs = append(apiExtraArgs, "--api-audiences=sts.amazonaws.com")
 		}
 
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
@@ -412,6 +446,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			masterID:              mapping.ID,
 			encryptionConfig:      encryptedEncryptionConfig,
 			registryDomain:        t.config.RegistryDomain,
+			serviceAccountv2Priv:  serviceAccountV2Priv,
+			serviceAccountV2Pub:   serviceAccountV2Pub,
 		}
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs

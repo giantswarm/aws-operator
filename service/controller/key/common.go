@@ -30,6 +30,9 @@ const (
 	MasterNodeRoleLabel = "master"
 
 	EncryptionProviderConfig = "encryption"
+
+	ServiceAccountV2Pub  = "pub"
+	ServiceAccountV2Priv = "key"
 )
 
 const (
@@ -329,6 +332,10 @@ func SanitizeCFResourceName(l ...string) string {
 
 func SecurityGroupName(getter LabelsGetter, groupName string) string {
 	return fmt.Sprintf("%s-%s", ClusterID(getter), groupName)
+}
+
+func ServiceAccountV2SecretName(clusterName string) string {
+	return fmt.Sprintf("%s-service-account-v2", clusterName)
 }
 
 func SSLOnlyBucketPolicy(bucketName string, region string) string {

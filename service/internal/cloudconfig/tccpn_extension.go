@@ -8,6 +8,7 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v11/pkg/template"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -36,6 +37,8 @@ type TCCPNExtension struct {
 	haMasters             bool
 	masterID              int
 	encryptionConfig      string
+	serviceAccountV2Pub   string
+	serviceAccountv2Priv  string
 	registryDomain        string
 }
 
@@ -241,7 +244,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		{
 			// Add to certsMeta slice so the encrypted encryption config file isn't passed through
 			// k8scloudconfig.RenderFileAssetContent like other files in filesMeta.
-			meta := k8scloudconfig.FileMetadata{
+			encryptionConfig := k8scloudconfig.FileMetadata{
 				AssetContent: e.encryptionConfig,
 				Path:         "/etc/kubernetes/encryption/k8s-encryption-config.yaml.enc",
 				Owner: k8scloudconfig.Owner{
@@ -254,8 +257,39 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				},
 				Permissions: 0644,
 			}
+			if _, ok := e.cluster.Annotations[annotation.AWSIRSA]; ok {
+				// add IRSA keys to the machines
+				serviceAccountV2Pub := k8scloudconfig.FileMetadata{
+					AssetContent: e.serviceAccountV2Pub,
+					Path:         "/etc/kubernetes/ssl/service-account-v2-pub.pem.enc",
+					Owner: k8scloudconfig.Owner{
+						Group: k8scloudconfig.Group{
+							Name: FileOwnerGroupName,
+						},
+						User: k8scloudconfig.User{
+							Name: FileOwnerUserName,
+						},
+					},
+					Permissions: 0644,
+				}
 
-			certsMeta = append(certsMeta, meta)
+				serviceAccountV2Priv := k8scloudconfig.FileMetadata{
+					AssetContent: e.serviceAccountv2Priv,
+					Path:         "/etc/kubernetes/ssl/service-account-v2-priv.pem.enc",
+					Owner: k8scloudconfig.Owner{
+						Group: k8scloudconfig.Group{
+							Name: FileOwnerGroupName,
+						},
+						User: k8scloudconfig.User{
+							Name: FileOwnerUserName,
+						},
+					},
+					Permissions: 0644,
+				}
+				certsMeta = append(certsMeta, serviceAccountV2Pub, serviceAccountV2Priv)
+			}
+
+			certsMeta = append(certsMeta, encryptionConfig)
 		}
 
 		for _, f := range e.clusterCerts {
