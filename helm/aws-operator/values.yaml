@@ -103,3 +103,11 @@ ports:
 project:
   branch: "[[ .Branch ]]"
   commit: "[[ .SHA ]]"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 250Mi
+  requests:
+    cpu: 250m
+    memory: 250Mi
