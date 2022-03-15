@@ -202,19 +202,19 @@ Resources:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref NodePoolInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb

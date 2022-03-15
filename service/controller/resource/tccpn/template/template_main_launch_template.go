@@ -14,19 +14,19 @@ const TemplateMainLaunchTemplate = `
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: {{ .BlockDeviceMapping.Docker.Volume.Size }}
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: {{ .BlockDeviceMapping.Kubelet.Volume.Size }}
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: {{ .BlockDeviceMapping.Logging.Volume.Size }}
-            VolumeType: gp2
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: {{ .Instance.Image }}

@@ -15,7 +15,7 @@ const TemplateMainEtcdVolume = `
       Tags:
       - Key: Name
         Value: {{ .Name }}
-      VolumeType: gp2
+      VolumeType: gp3
 {{- end -}}
 {{- end -}}
 `

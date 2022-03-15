@@ -14,7 +14,7 @@ volumes:
 - /root/.cache/go-build/
 persistentVolume:
   enabled: true
-  storageClass: gp2
+  storageClass: gp3
 resources:
   limits:
     cpu: "2"
