@@ -3,6 +3,7 @@ package tccpn
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -41,6 +43,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		azs            []string
 		replicas       int
 		route53Enabled bool
+		annotations    map[string]string
 	}{
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
@@ -59,6 +62,13 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			azs:            []string{"eu-central-1a", "eu-central-1b", "eu-central-1c"},
 			replicas:       3,
 			route53Enabled: true,
+		},
+		{
+			name:           "case 3: basic test with ebs volume iops and throughput set",
+			azs:            []string{"eu-central-1b"},
+			replicas:       1,
+			route53Enabled: true,
+			annotations:    map[string]string{annotation.AWSEBSVolumeIops: "16000", annotation.AWSEBSVolumeThroughput: "1000"},
 		},
 	}
 
@@ -161,6 +171,11 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 
 				aws = unittest.DefaultAWSControlPlane()
 				aws.Spec.AvailabilityZones = tc.azs
+				for k, v := range tc.annotations {
+					fmt.Println(k)
+					fmt.Println(v)
+					aws.Annotations[k] = v
+				}
 				err = k.CtrlClient().Create(ctx, &aws)
 				if err != nil {
 					t.Fatal(err)
