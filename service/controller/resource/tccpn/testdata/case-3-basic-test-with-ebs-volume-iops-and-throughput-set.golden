@@ -79,6 +79,8 @@ Resources:
       - Key: Name
         Value: 8y5ck-master0-etcd
       VolumeType: gp3
+      Iops: 16000
+      Throughput: 1000
   ControlPlaneNodesRole:
     Type: AWS::IAM::Role
     Properties:

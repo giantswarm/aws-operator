@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+	"strconv"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
@@ -106,6 +107,34 @@ func ControlPlaneVolumeSnapshotID(snapshot string, master int) string {
 	}
 
 	return ""
+}
+
+func ControlPlaneVolumeIops(cr infrastructurev1alpha3.AWSControlPlane) int {
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSEBSVolumeIops]
+	if !ok {
+		// IOPS will be defaulted if annotaton is not set
+		return 0
+	}
+	o, err := strconv.Atoi(result)
+	if err != nil {
+		// IOPS will be defaulted when unable to convert properly
+		return 0
+	}
+	return o
+}
+
+func ControlPlaneVolumeThroughput(cr infrastructurev1alpha3.AWSControlPlane) int {
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSEBSVolumeThroughput]
+	if !ok {
+		// Throughput will be defaulted if annotation is not set
+		return 0
+	}
+	o, err := strconv.Atoi(result)
+	if err != nil {
+		// Throughput will be defaulted when unable to convert to int
+		return 0
+	}
+	return o
 }
 
 func ToControlPlane(v interface{}) (infrastructurev1alpha3.AWSControlPlane, error) {

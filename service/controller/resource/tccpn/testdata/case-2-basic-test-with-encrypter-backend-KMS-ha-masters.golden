@@ -232,7 +232,7 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-master1-etcd
-      VolumeType: gp2
+      VolumeType: gp3
   EtcdVolume2:
     Type: AWS::EC2::Volume
     Properties:
@@ -242,7 +242,7 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-master2-etcd
-      VolumeType: gp2
+      VolumeType: gp3
   EtcdVolume3:
     Type: AWS::EC2::Volume
     Properties:
@@ -252,7 +252,7 @@ Resources:
       Tags:
       - Key: Name
         Value: 8y5ck-master3-etcd
-      VolumeType: gp2
+      VolumeType: gp3
   ControlPlaneNodesRole:
     Type: AWS::IAM::Role
     Properties:
@@ -407,19 +407,19 @@ Resources:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
@@ -494,19 +494,19 @@ Resources:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
@@ -581,19 +581,19 @@ Resources:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
-            VolumeType: gp2
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb

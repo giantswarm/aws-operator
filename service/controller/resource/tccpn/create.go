@@ -389,9 +389,11 @@ func (r *Resource) newEtcdVolume(ctx context.Context, cr infrastructurev1alpha3.
 	for _, m := range mappings {
 		item := template.ParamsMainEtcdVolumeItem{
 			AvailabilityZone: m.AZ,
+			Iops:             key.ControlPlaneVolumeIops(cr),
 			Name:             key.ControlPlaneVolumeName(&cr, m.ID),
 			Resource:         key.ControlPlaneVolumeResourceName(m.ID),
 			SnapshotID:       key.ControlPlaneVolumeSnapshotID(cc.Status.TenantCluster.MasterInstance.EtcdVolumeSnapshotID, m.ID),
+			Throughput:       key.ControlPlaneVolumeThroughput(cr),
 		}
 
 		etcdVolumes.List = append(etcdVolumes.List, item)

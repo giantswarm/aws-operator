@@ -6,7 +6,9 @@ type ParamsMainEtcdVolume struct {
 
 type ParamsMainEtcdVolumeItem struct {
 	AvailabilityZone string
+	Iops             int
 	Name             string
 	Resource         string
 	SnapshotID       string
+	Throughput       int
 }

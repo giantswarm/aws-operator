@@ -15,7 +15,13 @@ const TemplateMainEtcdVolume = `
       Tags:
       - Key: Name
         Value: {{ .Name }}
-      VolumeType: gp2
+      VolumeType: gp3
+      {{- if and (ge .Iops 3000) (le .Iops 16000) }}
+      Iops: {{ .Iops }}
+      {{- end }}
+      {{- if and (ge .Throughput 125) (le .Throughput 1000) }}
+      Throughput: {{ .Throughput}}
+      {{- end }}
 {{- end -}}
 {{- end -}}
 `
