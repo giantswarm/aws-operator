@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.19.0] - 2022-03-21
+
 ### Changed
 
 - Allow resource limits/requests to be passed as values.
@@ -571,7 +573,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.18.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.19.0...HEAD
+[10.19.0]: https://github.com/giantswarm/aws-operator/compare/v10.18.0...v10.19.0
 [10.18.0]: https://github.com/giantswarm/aws-operator/compare/v10.17.0...v10.18.0
 [10.17.0]: https://github.com/giantswarm/aws-operator/compare/v10.16.0...v10.17.0
 [10.16.0]: https://github.com/giantswarm/aws-operator/compare/v10.15.1...v10.16.0
