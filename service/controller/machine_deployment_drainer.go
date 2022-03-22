@@ -3,17 +3,17 @@ package controller
 import (
 	"context"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/retryresource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -62,7 +62,7 @@ func NewMachineDeploymentDrainer(config MachineDeploymentDrainerConfig) (*Machin
 			},
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
-			NewRuntimeObjectFunc: func() runtime.Object {
+			NewRuntimeObjectFunc: func() ctrlClient.Object {
 				return new(infrastructurev1alpha3.AWSMachineDeployment)
 			},
 			Resources:    resources,
@@ -113,7 +113,7 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 			Logger:    config.Logger,
 
 			CPAWSConfig:   config.HostAWSConfig,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		awsClientResource, err = awsclient.New(c)
@@ -125,13 +125,13 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	var drainerInitializerResource resource.Interface
 	{
 		c := drainerinitializer.ResourceConfig{
-			ASG:       newASG,
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			ASG:        newASG,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 
 			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,
 			LifeCycleHookName: key.LifeCycleHookNodePool,
-			ToClusterFunc:     newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc:     newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		drainerInitializerResource, err = drainerinitializer.NewResource(c)
@@ -143,9 +143,9 @@ func newMachineDeploymentDrainerResources(config MachineDeploymentDrainerConfig)
 	var drainerFinalizerResource resource.Interface
 	{
 		c := drainerfinalizer.ResourceConfig{
-			ASG:       newASG,
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			ASG:        newASG,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 
 			LabelMapFunc:      machineDeploymentDrainerLabelMapFunc,
 			LifeCycleHookName: key.LifeCycleHookNodePool,

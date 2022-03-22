@@ -11,8 +11,7 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned/fake"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
@@ -172,7 +171,6 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				c := Config{
 					CloudTags: ct,
 					Event:     e,
-					G8sClient: fake.NewSimpleClientset(),
 					HAMaster:  h,
 					Detection: d,
 					K8sClient: k,

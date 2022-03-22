@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/cachekeycontext"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 )
 

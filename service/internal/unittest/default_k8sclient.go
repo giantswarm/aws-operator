@@ -1,11 +1,10 @@
 package unittest
 
 import (
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
-	releasev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/release/v1alpha1"
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8scrdclient"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8scrdclient"
+	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
@@ -63,10 +62,6 @@ func (f *fakeK8sClient) DynClient() dynamic.Interface {
 }
 
 func (f *fakeK8sClient) ExtClient() apiextensionsclient.Interface {
-	return nil
-}
-
-func (f *fakeK8sClient) G8sClient() versioned.Interface {
 	return nil
 }
 

@@ -5,11 +5,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	corev1alpha1 "github.com/giantswarm/apiextensions/v3/pkg/apis/core/v1alpha1"
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
+	corev1alpha1 "github.com/giantswarm/apiextensions/v5/pkg/apis/core/v1alpha1"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -18,6 +17,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/service/controller/key"
 	"github.com/giantswarm/aws-operator/service/internal/asg"
+
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -25,18 +26,18 @@ const (
 )
 
 type ResourceConfig struct {
-	ASG       asg.Interface
-	G8sClient versioned.Interface
-	Logger    micrologger.Logger
+	ASG        asg.Interface
+	CtrlClient ctrlClient.Client
+	Logger     micrologger.Logger
 
 	LabelMapFunc      func(cr metav1.Object) map[string]string
 	LifeCycleHookName string
 }
 
 type Resource struct {
-	asg       asg.Interface
-	g8sClient versioned.Interface
-	logger    micrologger.Logger
+	asg        asg.Interface
+	ctrlClient ctrlClient.Client
+	logger     micrologger.Logger
 
 	labelMapFunc      func(cr metav1.Object) map[string]string
 	lifeCycleHookName string
@@ -46,8 +47,8 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	if config.ASG == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ASG must not be empty", config)
 	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
@@ -61,9 +62,9 @@ func NewResource(config ResourceConfig) (*Resource, error) {
 	}
 
 	r := &Resource{
-		asg:       config.ASG,
-		g8sClient: config.G8sClient,
-		logger:    config.Logger,
+		asg:        config.ASG,
+		ctrlClient: config.CtrlClient,
+		logger:     config.Logger,
 
 		labelMapFunc:      config.LabelMapFunc,
 		lifeCycleHookName: config.LifeCycleHookName,
@@ -106,11 +107,9 @@ func (r *Resource) completeLifeCycleHook(ctx context.Context, instanceID, asgNam
 func (r *Resource) deleteDrainerConfig(ctx context.Context, dc corev1alpha1.DrainerConfig) error {
 	r.logger.Debugf(ctx, "deleting drainer config for tenant cluster node %#q", dc.Name)
 
-	n := dc.GetNamespace()
-	i := dc.GetName()
 	o := &metav1.DeleteOptions{}
 
-	err := r.g8sClient.CoreV1alpha1().DrainerConfigs(n).Delete(ctx, i, *o)
+	err := r.ctrlClient.Delete(ctx, &dc, &ctrlClient.DeleteOptions{Raw: o})
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -162,7 +161,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(r.labelMapFunc(cr)).String(),
 		}
 
-		drainerConfigs, err = r.g8sClient.CoreV1alpha1().DrainerConfigs(n).List(ctx, o)
+		err := r.ctrlClient.List(ctx, drainerConfigs, &ctrlClient.ListOptions{Raw: &o, Namespace: n})
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -3,42 +3,51 @@ package ipam
 import (
 	"context"
 
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/service/controller/key"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type MachineDeploymentCheckerConfig struct {
-	G8sClient versioned.Interface
-	Logger    micrologger.Logger
+	CtrlClient ctrlClient.Client
+	Logger     micrologger.Logger
 }
 
 type MachineDeploymentChecker struct {
-	g8sClient versioned.Interface
-	logger    micrologger.Logger
+	ctrlClient ctrlClient.Client
+	logger     micrologger.Logger
 }
 
 func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*MachineDeploymentChecker, error) {
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	a := &MachineDeploymentChecker{
-		g8sClient: config.G8sClient,
-		logger:    config.Logger,
+		ctrlClient: config.CtrlClient,
+		logger:     config.Logger,
 	}
 
 	return a, nil
 }
 
 func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	cr, err := c.g8sClient.InfrastructureV1alpha3().AWSMachineDeployments(namespace).Get(ctx, name, metav1.GetOptions{})
+	var cr *infrastructurev1alpha3.AWSMachineDeployment
+
+	objectKey := client.ObjectKey{
+		Namespace: namespace,
+		Name:      name,
+	}
+
+	err := c.ctrlClient.Get(ctx, objectKey, cr)
 	if err != nil {
 		return false, microerror.Mask(err)
 	}

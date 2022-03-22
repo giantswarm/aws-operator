@@ -1,8 +1,7 @@
 package tccp
 
 import (
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
@@ -10,6 +9,8 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/hamaster"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -27,12 +28,12 @@ const (
 // Config represents the configuration used to create a new cloudformation
 // resource.
 type Config struct {
-	CloudTags cloudtags.Interface
-	Event     event.Interface
-	G8sClient versioned.Interface
-	HAMaster  hamaster.Interface
-	K8sClient k8sclient.Interface
-	Logger    micrologger.Logger
+	CloudTags  cloudtags.Interface
+	Event      event.Interface
+	CtrlClient ctrlClient.Client
+	HAMaster   hamaster.Interface
+	K8sClient  k8sclient.Interface
+	Logger     micrologger.Logger
 
 	APIWhitelist       ConfigAPIWhitelist
 	CIDRBlockAWSCNI    string
@@ -45,12 +46,12 @@ type Config struct {
 
 // Resource implements the cloudformation resource.
 type Resource struct {
-	cloudtags cloudtags.Interface
-	event     event.Interface
-	g8sClient versioned.Interface
-	haMaster  hamaster.Interface
-	k8sClient k8sclient.Interface
-	logger    micrologger.Logger
+	cloudtags  cloudtags.Interface
+	event      event.Interface
+	ctrlClient ctrlClient.Client
+	haMaster   hamaster.Interface
+	k8sClient  k8sclient.Interface
+	logger     micrologger.Logger
 
 	apiWhitelist       ConfigAPIWhitelist
 	cidrBlockAWSCNI    string
@@ -72,8 +73,8 @@ func New(config Config) (*Resource, error) {
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
 	}
 	if config.HAMaster == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.HAMaster must not be empty", config)
@@ -96,13 +97,13 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
-		cloudtags: config.CloudTags,
-		event:     config.Event,
-		g8sClient: config.G8sClient,
-		haMaster:  config.HAMaster,
-		detection: config.Detection,
-		k8sClient: config.K8sClient,
-		logger:    config.Logger,
+		cloudtags:  config.CloudTags,
+		event:      config.Event,
+		ctrlClient: config.CtrlClient,
+		haMaster:   config.HAMaster,
+		detection:  config.Detection,
+		k8sClient:  config.K8sClient,
+		logger:     config.Logger,
 
 		apiWhitelist:       config.APIWhitelist,
 		cidrBlockAWSCNI:    config.CIDRBlockAWSCNI,
