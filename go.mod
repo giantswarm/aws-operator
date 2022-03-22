@@ -12,6 +12,7 @@ require (
 	github.com/giantswarm/badnodedetector v1.0.1
 	github.com/giantswarm/certs/v3 v3.1.1
 	github.com/giantswarm/ipam v0.3.0
+	github.com/giantswarm/k8sclient/v5 v5.11.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
 	github.com/giantswarm/k8scloudconfig/v12 v12.1.0
 	github.com/giantswarm/k8smetadata v0.10.1
@@ -20,6 +21,7 @@ require (
 	github.com/giantswarm/microerror v0.4.0
 	github.com/giantswarm/microkit v1.0.0
 	github.com/giantswarm/micrologger v0.6.0
+	github.com/giantswarm/operatorkit/v5 v5.0.0
 	github.com/giantswarm/operatorkit/v7 v7.0.1
 	github.com/giantswarm/randomkeys/v2 v2.1.0
 	github.com/giantswarm/release-operator/v3 v3.2.0
@@ -107,11 +109,6 @@ require (
 	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
-)
-
-require (
-	github.com/giantswarm/k8sclient/v5 v5.11.0
-	github.com/giantswarm/operatorkit/v5 v5.0.0
 )
 
 replace (
