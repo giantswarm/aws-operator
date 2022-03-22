@@ -21,7 +21,7 @@ func Test_Images_Cache(t *testing.T) {
 		{
 			name:          "case 0",
 			ctx:           cachekeycontext.NewContext(context.Background(), "1"),
-			expectCaching: true,
+			expectCaching: false,
 		},
 		{
 			name:          "case 1",
@@ -84,6 +84,7 @@ func Test_Images_Cache(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+				t.Log(ami1)
 			}
 
 			{

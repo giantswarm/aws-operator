@@ -21,7 +21,7 @@ type fakeK8sClient struct {
 	k8sClient  *fakek8s.Clientset
 }
 
-func FakeK8sClient() k8sclient.Interface {
+func FakeK8sClient(objects ...runtime.Object) k8sclient.Interface {
 	var err error
 
 	var k8sClient k8sclient.Interface

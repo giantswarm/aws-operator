@@ -169,12 +169,13 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 				}
 
 				c := Config{
-					CloudTags: ct,
-					Event:     e,
-					HAMaster:  h,
-					Detection: d,
-					K8sClient: k,
-					Logger:    microloggertest.New(),
+					CloudTags:  ct,
+					CtrlClient: k.CtrlClient(),
+					Event:      e,
+					HAMaster:   h,
+					Detection:  d,
+					K8sClient:  k,
+					Logger:     microloggertest.New(),
 
 					APIWhitelist: ConfigAPIWhitelist{
 						Private: ConfigAPIWhitelistSecurityGroup{
