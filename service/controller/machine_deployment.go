@@ -748,7 +748,7 @@ func newMachineDeploymentToClusterFunc(ctrlClient ctrlClient.Client) func(ctx co
 		}
 
 		var m *infrastructurev1alpha3.AWSCluster
-		err = ctrlClient.Get(ctx, client.ObjectKey{Name: cr.Name, Namespace: cr.Namespace}, m)
+		err = ctrlClient.Get(ctx, client.ObjectKey{Name: key.ClusterID(&cr), Namespace: cr.Namespace}, m)
 		if err != nil {
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}

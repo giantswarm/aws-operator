@@ -44,10 +44,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		finalizerskeptcontext.SetKept(ctx)
 	}
 
-	for _, md := range mdList.Items {
+	for i, md := range mdList.Items {
 		r.logger.Debugf(ctx, "deleting aws machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr))
 
-		err = r.ctrlClient.Delete(ctx, &md, &client.DeleteOptions{})
+		err = r.ctrlClient.Delete(ctx, &mdList.Items[i], &client.DeleteOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}
