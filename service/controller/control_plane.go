@@ -524,7 +524,7 @@ func newControlPlaneToClusterFunc(ctrlClient ctrlClient.Client) func(ctx context
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}
 
-		var m *infrastructurev1alpha3.AWSCluster
+		m := &infrastructurev1alpha3.AWSCluster{}
 		err = ctrlClient.Get(ctx, client.ObjectKey{Name: key.ClusterID(&cr), Namespace: cr.Namespace}, m)
 		if err != nil {
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)

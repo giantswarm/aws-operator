@@ -152,7 +152,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		asgName = drainable
 	}
 
-	var drainerConfigs *corev1alpha1.DrainerConfigList
+	drainerConfigs := &corev1alpha1.DrainerConfigList{}
 	{
 		r.logger.Debugf(ctx, "finding drained drainer configs for tenant cluster")
 

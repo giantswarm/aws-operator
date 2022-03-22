@@ -18,7 +18,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cluster apiv1alpha3.Cluster
+	cluster := &apiv1alpha3.Cluster{}
 	{
 		var clusters apiv1alpha3.ClusterList
 
@@ -40,7 +40,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(tooManyResultsError, "got %d, expected 1 %s with label %s=%s", len(clusters.Items), objName, label.Cluster, key.ClusterID(&cr))
 		}
 
-		clusters.Items[0].DeepCopyInto(&cluster)
+		clusters.Items[0].DeepCopyInto(cluster)
 	}
 
 	{
@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		err = r.ctrlClient.Update(ctx, &cluster)
+		err = r.ctrlClient.Update(ctx, cluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}

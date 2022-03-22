@@ -109,10 +109,10 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 func (r *Resource) getS3BucketTags(ctx context.Context, customObject infrastructurev1alpha3.AWSCluster) ([]*s3.Tag, error) {
 	tags := key.AWSTags(&customObject, r.installationName)
 
-	var list apiv1alpha3.ClusterList
+	list := &apiv1alpha3.ClusterList{}
 	err := r.ctrlClient.List(
 		ctx,
-		&list,
+		list,
 		client.MatchingLabels{label.Cluster: key.ClusterID(&customObject)},
 	)
 	if err != nil {

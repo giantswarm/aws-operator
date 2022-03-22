@@ -132,7 +132,7 @@ func (c *SubnetCollector) Collect(ctx context.Context, networkRange net.IPNet) (
 }
 
 func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPNet, error) {
-	var clusterList *infrastructurev1alpha3.AWSClusterList
+	clusterList := &infrastructurev1alpha3.AWSClusterList{}
 	err := c.ctrlClient.List(ctx, clusterList, &ctrlClient.ListOptions{Raw: &metav1.ListOptions{}})
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -157,7 +157,7 @@ func (c *SubnetCollector) getSubnetsFromClusters(ctx context.Context) ([]net.IPN
 }
 
 func (c *SubnetCollector) getSubnetsFromMachineDeployments(ctx context.Context) ([]net.IPNet, error) {
-	var machineDeploymentList *infrastructurev1alpha3.AWSMachineDeploymentList
+	machineDeploymentList := &infrastructurev1alpha3.AWSMachineDeploymentList{}
 	err := c.ctrlClient.List(ctx, machineDeploymentList, &ctrlClient.ListOptions{Raw: &metav1.ListOptions{}})
 	if err != nil {
 		return nil, microerror.Mask(err)

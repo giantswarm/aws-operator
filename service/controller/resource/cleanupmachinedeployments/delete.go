@@ -20,7 +20,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var mdList *infrastructurev1alpha3.AWSMachineDeploymentList
+	mdList := &infrastructurev1alpha3.AWSMachineDeploymentList{}
 	{
 		r.logger.Debugf(ctx, "finding AWSMachineDeployments for tenant cluster")
 

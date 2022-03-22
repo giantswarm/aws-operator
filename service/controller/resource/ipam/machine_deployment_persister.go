@@ -40,7 +40,7 @@ func NewMachineDeploymentPersister(config MachineDeploymentPersisterConfig) (*Ma
 }
 
 func (p *MachineDeploymentPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	var cr *infrastructurev1alpha3.AWSMachineDeployment
+	cr := &infrastructurev1alpha3.AWSMachineDeployment{}
 	err := p.ctrlClient.Get(ctx, ctrlClient.ObjectKey{Name: name, Namespace: namespace}, cr)
 	if err != nil {
 		return microerror.Mask(err)

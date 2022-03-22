@@ -251,7 +251,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				continue
 			}
 
-			var dc *g8sv1alpha1.DrainerConfig
+			dc := &g8sv1alpha1.DrainerConfig{}
 			err = r.ctrlClient.Get(ctx, client.ObjectKey{Name: privateDNS, Namespace: cr.GetNamespace()}, dc)
 			if errors.IsNotFound(err) {
 				r.logger.Debugf(ctx, "did not find drainer config for ec2 instance %#q", *instance.InstanceId)

@@ -40,7 +40,7 @@ func NewClusterChecker(config ClusterCheckerConfig) (*ClusterChecker, error) {
 }
 
 func (c *ClusterChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	var cr *infrastructurev1alpha3.AWSCluster
+	cr := &infrastructurev1alpha3.AWSCluster{}
 	err := c.ctrlClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, cr)
 	if err != nil {
 		return false, microerror.Mask(err)

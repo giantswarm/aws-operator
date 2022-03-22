@@ -40,7 +40,7 @@ func NewClusterPersister(config ClusterPersisterConfig) (*ClusterPersister, erro
 }
 
 func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namespace string, name string) error {
-	var cr *infrastructurev1alpha3.AWSCluster
+	cr := &infrastructurev1alpha3.AWSCluster{}
 	err := p.ctrlClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, cr)
 	if err != nil {
 		return microerror.Mask(err)
