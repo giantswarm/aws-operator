@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/cachekeycontext"
 	"github.com/google/go-cmp/cmp"
 

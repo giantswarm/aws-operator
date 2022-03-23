@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v12/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"

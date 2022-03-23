@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 	"github.com/google/go-cmp/cmp"

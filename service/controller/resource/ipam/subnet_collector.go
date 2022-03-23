@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sync"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"

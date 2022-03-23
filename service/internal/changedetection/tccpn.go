@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"

@@ -7,7 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	g8sv1alpha1 "github.com/giantswarm/apiextensions/v5/pkg/apis/core/v1alpha1"
+	g8sv1alpha1 "github.com/giantswarm/apiextensions/v6/pkg/apis/core/v1alpha1"
 	"github.com/giantswarm/microerror"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 
