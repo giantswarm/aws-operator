@@ -40,13 +40,13 @@ func NewMachineDeploymentChecker(config MachineDeploymentCheckerConfig) (*Machin
 }
 
 func (c *MachineDeploymentChecker) Check(ctx context.Context, namespace string, name string) (bool, error) {
-	var cr *infrastructurev1alpha3.AWSMachineDeployment
 
 	objectKey := client.ObjectKey{
 		Namespace: namespace,
 		Name:      name,
 	}
 
+	cr := &infrastructurev1alpha3.AWSMachineDeployment{}
 	err := c.ctrlClient.Get(ctx, objectKey, cr)
 	if err != nil {
 		return false, microerror.Mask(err)
