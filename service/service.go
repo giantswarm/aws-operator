@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	corev1alpha1 "github.com/giantswarm/apiextensions/v5/pkg/apis/core/v1alpha1"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v5/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
 	"github.com/giantswarm/k8sclient/v5/pkg/k8srestconfig"
@@ -99,6 +100,7 @@ func New(config Config) (*Service, error) {
 				apiv1alpha3.AddToScheme,
 				infrastructurev1alpha3.AddToScheme,
 				releasev1alpha1.AddToScheme,
+				corev1alpha1.AddToScheme,
 			},
 			Logger:     config.Logger,
 			RestConfig: restConfig,
