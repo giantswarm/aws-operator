@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [10.19.0] - 2022-03-21
 
+### Addded
+
+- Add latest flatcar AMIs.
+
 ### Changed
 
 - Allow resource limits/requests to be passed as values.
