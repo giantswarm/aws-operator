@@ -12,9 +12,8 @@ require (
 	github.com/giantswarm/badnodedetector v1.0.1
 	github.com/giantswarm/certs/v3 v3.1.1
 	github.com/giantswarm/ipam v0.3.0
-	github.com/giantswarm/k8sclient/v5 v5.11.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
-	github.com/giantswarm/k8scloudconfig/v12 v12.1.0
+	github.com/giantswarm/k8scloudconfig/v13 v13.0.0
 	github.com/giantswarm/k8smetadata v0.10.1
 	github.com/giantswarm/kubelock/v3 v3.0.0
 	github.com/giantswarm/microendpoint v1.0.0
@@ -51,8 +50,8 @@ require (
 	github.com/evanphx/json-patch v4.11.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
-	github.com/giantswarm/apiextensions/v5 v5.0.1 // indirect
 	github.com/giantswarm/exporterkit v1.0.0 // indirect
+	github.com/giantswarm/k8sclient/v5 v5.11.0 // indirect
 	github.com/giantswarm/microstorage v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v1.0.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
