@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/apimachinery/pkg/api/meta"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -94,9 +94,9 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		cl = list.Items[0]
 	}
 
-	var md apiv1alpha3.MachineDeployment
+	var md apiv1beta1.MachineDeployment
 	{
-		var list apiv1alpha3.MachineDeploymentList
+		var list apiv1beta1.MachineDeploymentList
 		err := t.config.K8sClient.CtrlClient().List(
 			ctx,
 			&list,

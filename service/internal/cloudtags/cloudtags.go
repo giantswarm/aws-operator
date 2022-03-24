@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -54,7 +54,7 @@ func (ct *CloudTags) GetTagsByCluster(ctx context.Context, clusterID string) (ma
 }
 
 func (ct *CloudTags) lookupCloudTags(ctx context.Context, clusterID string) (map[string]string, error) {
-	var list apiv1alpha3.ClusterList
+	var list apiv1beta1.ClusterList
 	tags := map[string]string{}
 
 	err := ct.k8sClient.CtrlClient().List(

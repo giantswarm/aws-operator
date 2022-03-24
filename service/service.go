@@ -21,7 +21,7 @@ import (
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/flag"
@@ -97,7 +97,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := k8sclient.ClientsConfig{
 			SchemeBuilder: k8sclient.SchemeBuilder{
-				apiv1alpha3.AddToScheme,
+				apiv1beta1.AddToScheme,
 				infrastructurev1alpha3.AddToScheme,
 				releasev1alpha1.AddToScheme,
 				corev1alpha1.AddToScheme,
