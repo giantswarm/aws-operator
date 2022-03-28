@@ -1,6 +1,6 @@
 module github.com/giantswarm/aws-operator
 
-go 1.15
+go 1.16
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.10.2
