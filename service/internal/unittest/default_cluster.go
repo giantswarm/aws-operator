@@ -3,9 +3,9 @@ package unittest
 import (
 	"net"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 )
@@ -98,15 +98,15 @@ func DefaultCluster() infrastructurev1alpha3.AWSCluster {
 	return cr
 }
 
-func DefaultCAPIClusterWithLabels(clusterID string, labels map[string]string) apiv1alpha3.Cluster {
+func DefaultCAPIClusterWithLabels(clusterID string, labels map[string]string) apiv1beta1.Cluster {
 	labels[label.Cluster] = clusterID
-	cr := apiv1alpha3.Cluster{
+	cr := apiv1beta1.Cluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    labels,
 			Name:      clusterID,
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: apiv1alpha3.ClusterSpec{},
+		Spec: apiv1beta1.ClusterSpec{},
 	}
 
 	return cr

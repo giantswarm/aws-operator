@@ -6,10 +6,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/finalizerskeptcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
@@ -26,6 +28,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	mdList := &infrastructurev1alpha3.AWSMachineDeploymentList{}
 	{
 		r.logger.Debugf(ctx, "finding machine deployments for the tenant cluster")
 
@@ -38,13 +41,13 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			LabelSelector: labels.Set(l.MatchLabels).String(),
 		}
 
-		list, err := r.g8sClient.InfrastructureV1alpha3().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, o)
+		err = r.ctrlClient.List(ctx, mdList, &client.ListOptions{Raw: &o})
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		if len(list.Items) != 0 {
-			r.logger.Debugf(ctx, "found %d machine deployments for the tenant cluster", len(list.Items))
+		if len(mdList.Items) != 0 {
+			r.logger.Debugf(ctx, "found %d machine deployments for the tenant cluster", len(mdList.Items))
 			r.logger.Debugf(ctx, "not deleting the tenant cluster's control plane cloud formation stack")
 
 			r.logger.Debugf(ctx, "keeping finalizers")

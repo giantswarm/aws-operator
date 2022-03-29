@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/microerror"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -18,9 +18,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cluster apiv1alpha3.Cluster
+	cluster := &apiv1beta1.Cluster{}
 	{
-		var clusters apiv1alpha3.ClusterList
+		var clusters apiv1beta1.ClusterList
 
 		var labelSelector client.MatchingLabels
 		{
@@ -40,11 +40,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Maskf(tooManyResultsError, "got %d, expected 1 %s with label %s=%s", len(clusters.Items), objName, label.Cluster, key.ClusterID(&cr))
 		}
 
-		clusters.Items[0].DeepCopyInto(&cluster)
+		clusters.Items[0].DeepCopyInto(cluster)
 	}
 
 	{
-		apiEndpoint := apiv1alpha3.APIEndpoint{
+		apiEndpoint := apiv1beta1.APIEndpoint{
 			Host: key.ClusterAPIEndpoint(cr),
 			Port: 443,
 		}
@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		err = r.ctrlClient.Update(ctx, &cluster)
+		err = r.ctrlClient.Update(ctx, cluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}

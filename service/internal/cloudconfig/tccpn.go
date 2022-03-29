@@ -8,15 +8,15 @@ import (
 	"strings"
 	"sync"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v11/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v13/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v2"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -375,7 +375,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 	var awsCNIAdditionalTags string
 	{
-		var list apiv1alpha3.ClusterList
+		var list apiv1beta1.ClusterList
 		err := t.config.K8sClient.CtrlClient().List(
 			ctx,
 			&list,

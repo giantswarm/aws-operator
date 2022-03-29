@@ -6,21 +6,20 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v2"
 	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -130,7 +129,7 @@ func NewMachineDeployment(config MachineDeploymentConfig) (*MachineDeployment, e
 			},
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
-			NewRuntimeObjectFunc: func() runtime.Object {
+			NewRuntimeObjectFunc: func() ctrlClient.Object {
 				return new(infrastructurev1alpha3.AWSMachineDeployment)
 			},
 			Resources: resources,
@@ -215,8 +214,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var machineDeploymentChecker *ipam.MachineDeploymentChecker
 	{
 		c := ipam.MachineDeploymentCheckerConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		machineDeploymentChecker, err = ipam.NewMachineDeploymentChecker(c)
@@ -228,8 +227,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 
 			NetworkRange: config.IPAMNetworkRange,
 		}
@@ -307,8 +306,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var machineDeploymentPersister *ipam.MachineDeploymentPersister
 	{
 		c := ipam.MachineDeploymentPersisterConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		machineDeploymentPersister, err = ipam.NewMachineDeploymentPersister(c)
@@ -337,7 +336,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 			Logger: config.Logger,
 			Tenant: tenantCluster,
 
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tenantClientsResource, err = tenantclients.New(c)
@@ -363,7 +362,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -495,8 +494,8 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tcnpAZsResource resource.Interface
 	{
 		c := tcnpazs.Config{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		tcnpAZsResource, err = tcnpazs.New(c)
@@ -509,7 +508,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tccpnatgateways.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpNATGatewaysResource, err = tccpnatgateways.New(c)
@@ -522,7 +521,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := region.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		regionResource, err = region.New(c)
@@ -535,7 +534,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tccpvpcpcx.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
@@ -548,7 +547,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tccpsecuritygroups.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
@@ -660,7 +659,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpVPCIDResource, err = tccpvpcid.New(c)
@@ -741,14 +740,15 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	return resources, nil
 }
 
-func newMachineDeploymentToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
+func newMachineDeploymentToClusterFunc(ctrlClient ctrlClient.Client) func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
 	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
 		cr, err := key.ToMachineDeployment(obj)
 		if err != nil {
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha3().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
+		m := &infrastructurev1alpha3.AWSCluster{}
+		err = ctrlClient.Get(ctx, client.ObjectKey{Name: key.ClusterID(&cr), Namespace: cr.Namespace}, m)
 		if err != nil {
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}

@@ -1,11 +1,12 @@
 package cleanupmachinedeployments
 
 import (
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -13,32 +14,32 @@ const (
 )
 
 type Config struct {
-	Event     event.Interface
-	G8sClient versioned.Interface
-	Logger    micrologger.Logger
+	Event      event.Interface
+	CtrlClient ctrlClient.Client
+	Logger     micrologger.Logger
 }
 
 type Resource struct {
-	event     event.Interface
-	g8sClient versioned.Interface
-	logger    micrologger.Logger
+	event      event.Interface
+	ctrlClient ctrlClient.Client
+	logger     micrologger.Logger
 }
 
 func New(config Config) (*Resource, error) {
 	if config.Event == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
 	}
-	if config.G8sClient == nil {
-		return nil, microerror.Maskf(invalidConfigError, "%T.G8sClient must not be empty", config)
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
 	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
 
 	r := &Resource{
-		event:     config.Event,
-		g8sClient: config.G8sClient,
-		logger:    config.Logger,
+		event:      config.Event,
+		ctrlClient: config.CtrlClient,
+		logger:     config.Logger,
 	}
 
 	return r, nil

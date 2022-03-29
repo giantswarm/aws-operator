@@ -6,19 +6,20 @@ import (
 	"net"
 	"strings"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/crud"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/crud"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -121,7 +122,7 @@ func NewCluster(config ClusterConfig) (*Cluster, error) {
 			},
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
-			NewRuntimeObjectFunc: func() runtime.Object {
+			NewRuntimeObjectFunc: func() ctrlClient.Object {
 				return new(infrastructurev1alpha3.AWSCluster)
 			},
 			Resources: resources,
@@ -224,8 +225,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var clusterChecker *ipam.ClusterChecker
 	{
 		c := ipam.ClusterCheckerConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		clusterChecker, err = ipam.NewClusterChecker(c)
@@ -237,8 +238,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var subnetCollector *ipam.SubnetCollector
 	{
 		c := ipam.SubnetCollectorConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 
 			NetworkRange: config.IPAMNetworkRange,
 		}
@@ -252,8 +253,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var clusterPersister *ipam.ClusterPersister
 	{
 		c := ipam.ClusterPersisterConfig{
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		clusterPersister, err = ipam.NewClusterPersister(c)
@@ -492,9 +493,9 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var cleanupMachineDeploymentsResource resource.Interface
 	{
 		c := cleanupmachinedeployments.Config{
-			Event:     config.Event,
-			G8sClient: config.K8sClient.G8sClient(),
-			Logger:    config.Logger,
+			Event:      config.Event,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		cleanupMachineDeploymentsResource, err = cleanupmachinedeployments.New(c)
@@ -557,12 +558,12 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var tccpResource resource.Interface
 	{
 		c := tccp.Config{
-			CloudTags: config.CloudTags,
-			Event:     config.Event,
-			G8sClient: config.K8sClient.G8sClient(),
-			HAMaster:  config.HAMaster,
-			K8sClient: config.K8sClient,
-			Logger:    config.Logger,
+			CloudTags:  config.CloudTags,
+			Event:      config.Event,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			HAMaster:   config.HAMaster,
+			K8sClient:  config.K8sClient,
+			Logger:     config.Logger,
 
 			APIWhitelist:       config.APIWhitelist,
 			CIDRBlockAWSCNI:    fmt.Sprintf("%s/%d", config.CalicoSubnet, config.CalicoCIDR),

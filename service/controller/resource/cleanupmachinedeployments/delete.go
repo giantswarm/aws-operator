@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/finalizerskeptcontext"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/label"
 	"github.com/giantswarm/aws-operator/service/controller/key"
@@ -19,7 +20,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var mdList *infrastructurev1alpha3.AWSMachineDeploymentList
+	mdList := &infrastructurev1alpha3.AWSMachineDeploymentList{}
 	{
 		r.logger.Debugf(ctx, "finding AWSMachineDeployments for tenant cluster")
 
@@ -27,7 +28,7 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 			LabelSelector: fmt.Sprintf("%s=%s", label.Cluster, key.ClusterID(&cr)),
 		}
 
-		mdList, err = r.g8sClient.InfrastructureV1alpha3().AWSMachineDeployments(metav1.NamespaceAll).List(ctx, o)
+		err = r.ctrlClient.List(ctx, mdList, &client.ListOptions{Raw: &o})
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -43,10 +44,10 @@ func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {
 		finalizerskeptcontext.SetKept(ctx)
 	}
 
-	for _, md := range mdList.Items {
+	for i, md := range mdList.Items {
 		r.logger.Debugf(ctx, "deleting aws machine deployment %#q for tenant cluster %#q", md.Namespace+"/"+md.Name, key.ClusterID(&cr))
 
-		err = r.g8sClient.InfrastructureV1alpha3().AWSMachineDeployments(md.Namespace).Delete(ctx, md.Name, metav1.DeleteOptions{})
+		err = r.ctrlClient.Delete(ctx, &mdList.Items[i], &client.DeleteOptions{})
 		if err != nil {
 			return microerror.Mask(err)
 		}

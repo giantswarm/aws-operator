@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/s3"
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	apiv1alpha3 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/pkg/awstags"
@@ -109,10 +109,10 @@ func containsBucketState(bucketStateName string, bucketStateList []BucketState) 
 func (r *Resource) getS3BucketTags(ctx context.Context, customObject infrastructurev1alpha3.AWSCluster) ([]*s3.Tag, error) {
 	tags := key.AWSTags(&customObject, r.installationName)
 
-	var list apiv1alpha3.ClusterList
+	list := &apiv1beta1.ClusterList{}
 	err := r.ctrlClient.List(
 		ctx,
-		&list,
+		list,
 		client.MatchingLabels{label.Cluster: key.ClusterID(&customObject)},
 	)
 	if err != nil {

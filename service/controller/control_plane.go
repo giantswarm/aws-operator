@@ -4,20 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v3/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/apiextensions/v3/pkg/clientset/versioned"
+	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v3/pkg/certs"
-	"github.com/giantswarm/k8sclient/v5/pkg/k8sclient"
+	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v5/pkg/controller"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/metricsresource"
-	"github.com/giantswarm/operatorkit/v5/pkg/resource/wrapper/retryresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/controller"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/metricsresource"
+	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/giantswarm/aws-operator/client/aws"
 	"github.com/giantswarm/aws-operator/pkg/label"
@@ -48,6 +45,9 @@ import (
 	"github.com/giantswarm/aws-operator/service/internal/images"
 	event "github.com/giantswarm/aws-operator/service/internal/recorder"
 	"github.com/giantswarm/aws-operator/service/internal/releases"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ControlPlaneConfig struct {
@@ -108,7 +108,7 @@ func NewControlPlane(config ControlPlaneConfig) (*ControlPlane, error) {
 			},
 			K8sClient: config.K8sClient,
 			Logger:    config.Logger,
-			NewRuntimeObjectFunc: func() runtime.Object {
+			NewRuntimeObjectFunc: func() ctrlClient.Object {
 				return new(infrastructurev1alpha3.AWSControlPlane)
 			},
 			Resources: resources,
@@ -168,7 +168,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		c := awsclient.Config{
 			K8sClient:     config.K8sClient.K8sClient(),
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 
 			CPAWSConfig: config.HostAWSConfig,
 		}
@@ -299,7 +299,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := region.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		regionResource, err = region.New(c)
@@ -312,7 +312,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := tccpvpcpcx.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpVPCPCXResource, err = tccpvpcpcx.New(c)
@@ -373,7 +373,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 			Logger: config.Logger,
 
 			Route53Enabled: config.Route53Enabled,
-			ToClusterFunc:  newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc:  newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpOutputsResource, err = tccpoutputs.New(c)
@@ -386,7 +386,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := tccpsecuritygroups.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)
@@ -459,7 +459,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	{
 		c := tccpvpcid.Config{
 			Logger:        config.Logger,
-			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.G8sClient()),
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 		}
 
 		tccpVPCIDResource, err = tccpvpcid.New(c)
@@ -517,14 +517,15 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	return resources, nil
 }
 
-func newControlPlaneToClusterFunc(g8sClient versioned.Interface) func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
+func newControlPlaneToClusterFunc(ctrlClient ctrlClient.Client) func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
 	return func(ctx context.Context, obj interface{}) (infrastructurev1alpha3.AWSCluster, error) {
 		cr, err := key.ToControlPlane(obj)
 		if err != nil {
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}
 
-		m, err := g8sClient.InfrastructureV1alpha3().AWSClusters(cr.Namespace).Get(ctx, key.ClusterID(&cr), metav1.GetOptions{})
+		m := &infrastructurev1alpha3.AWSCluster{}
+		err = ctrlClient.Get(ctx, client.ObjectKey{Name: key.ClusterID(&cr), Namespace: cr.Namespace}, m)
 		if err != nil {
 			return infrastructurev1alpha3.AWSCluster{}, microerror.Mask(err)
 		}
