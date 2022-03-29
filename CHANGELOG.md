@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.0.0] - 2022-03-29
+
 ### Changed
 
 - Update CAPI dependencies.
@@ -581,7 +583,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.19.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.0.0...HEAD
+[11.0.0]: https://github.com/giantswarm/aws-operator/compare/v10.19.0...v11.0.0
 [10.19.0]: https://github.com/giantswarm/aws-operator/compare/v10.18.0...v10.19.0
 [10.18.0]: https://github.com/giantswarm/aws-operator/compare/v10.17.0...v10.18.0
 [10.17.0]: https://github.com/giantswarm/aws-operator/compare/v10.16.0...v10.17.0
