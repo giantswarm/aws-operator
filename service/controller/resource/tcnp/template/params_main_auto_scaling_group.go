@@ -9,6 +9,7 @@ type ParamsMainAutoScalingGroup struct {
 	MaxSize               int
 	MinInstancesInService string
 	MinSize               int
+	NodePool              ParamsMainIAMPoliciesNodePool
 	Subnets               []string
 	// OnDemandPercentageAboveBaseCapacity controls the percentages of On-Demand
 	// Instances and Spot Instances for your additional capacity beyond

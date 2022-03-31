@@ -66,6 +66,9 @@ Resources:
         - Key: k8s.io/cluster-autoscaler/8y5ck
           Value: true
           PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/node-template/label/giantswarm.io/machine-deployment
+          Value: al9qy
+          PropagateAtLaunch: false
     UpdatePolicy:
       AutoScalingRollingUpdate:
 
