@@ -60,6 +60,9 @@ const TemplateMainAutoScalingGroup = `
         - Key: k8s.io/cluster-autoscaler/{{ .AutoScalingGroup.Cluster.ID }}
           Value: true
           PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/node-template/label/giantswarm.io/machine-deployment
+          Value: {{ .AutoScalingGroup.NodePool.ID }}
+          PropagateAtLaunch: false
     UpdatePolicy:
       AutoScalingRollingUpdate:
 

@@ -51,6 +51,7 @@ const TemplateMainIAMPolicies = `
               - "autoscaling:DescribeTags"
               - "autoscaling:DescribeLaunchConfigurations"
               - "ec2:DescribeLaunchTemplateVersions"
+              - "ec2:DescribeInstanceTypes"
             Resource: "*"
           - Effect: "Allow"
             Action:

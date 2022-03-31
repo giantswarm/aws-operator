@@ -417,6 +417,9 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		Cluster: template.ParamsMainAutoScalingGroupCluster{
 			ID: key.ClusterID(&cr),
 		},
+		NodePool: template.ParamsMainIAMPoliciesNodePool{
+			ID: key.MachineDeploymentID(&cr),
+		},
 		DesiredCapacity:                     minDesiredNodes,
 		MaxBatchSize:                        maxBatchSize,
 		MaxSize:                             key.MachineDeploymentScalingMax(cr),
