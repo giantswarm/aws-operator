@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped k8scc to 13.2.0 to enable VPA for kube-proxy.
+
 ## [11.1.0] - 2022-03-31
 
 ### Added
