@@ -498,8 +498,8 @@ github.com/giantswarm/k8sclient/v6 v6.0.0/go.mod h1:mF0FgQHqCrAhk5EGiyN7RfgMMsz7
 github.com/giantswarm/k8sclient/v6 v6.1.0/go.mod h1:mF0FgQHqCrAhk5EGiyN7RfgMMsz7CP3GoaFsfZ5KHps=
 github.com/giantswarm/k8sclient/v7 v7.0.1 h1:UmRwgsw5Uda27tpIblPo7nWjp/nq5qwqxEPHWcvzsHk=
 github.com/giantswarm/k8sclient/v7 v7.0.1/go.mod h1:zJTXammjLHSiukMIO4+a6eUDgzj/lJxEXFZ22mC0WXc=
-github.com/giantswarm/k8scloudconfig/v13 v13.2.0 h1:Qlc5Wh06vzAUhTRrCDMMPaqojqmOnAGnz8yUvq4z+p4=
-github.com/giantswarm/k8scloudconfig/v13 v13.2.0/go.mod h1:DrdAwbdaCkDgRym8ijQs2NlB2xU03Amd6DY4748AHLM=
+github.com/giantswarm/k8scloudconfig/v13 v13.3.0 h1:j8GMKowY++SuGOeb/ry8p76JDIZ6faofluYPP3aPcvU=
+github.com/giantswarm/k8scloudconfig/v13 v13.3.0/go.mod h1:DrdAwbdaCkDgRym8ijQs2NlB2xU03Amd6DY4748AHLM=
 github.com/giantswarm/k8smetadata v0.6.0/go.mod h1:k3DYCMdspxhk7efLkQdX1b8UZ71ijOCG3ZoIU8+5xgw=
 github.com/giantswarm/k8smetadata v0.10.1 h1:JHTgTavRtcnmzq0j8TC9EXtGG4+trCkBwuwJPAH+EWE=
 github.com/giantswarm/k8smetadata v0.10.1/go.mod h1:k3DYCMdspxhk7efLkQdX1b8UZ71ijOCG3ZoIU8+5xgw=
