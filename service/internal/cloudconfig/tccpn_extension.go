@@ -198,6 +198,20 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0644,
 		},
+		{
+			// VPA config for kube-proxy
+			AssetContent: template.KubeProxyVPAYAML,
+			Path:         "/srv/kube-proxy-vpa.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
 	}
 
 	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app
@@ -423,6 +437,12 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: template.EphemeralVarLogMount,
 			Name:         "var-log.mount",
+			Enabled:      true,
+		},
+		// Enable VPA for kube-proxy
+		{
+			AssetContent: template.KubeProxyVPAService,
+			Name:         "ensure-kube-proxy-vpa.service",
 			Enabled:      true,
 		},
 	}
