@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove tag `kubernetes.io/role/internal-elb` from machine deployment subnets.
 
+## [11.4.0] - 2022-04-04
+
+### Changed
+
+- Bumped k8scc to 13.4.0 to enable VPA for kube-proxy.
+
 ## [11.3.0] - 2022-04-01
 
 ### Changed
@@ -605,7 +611,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.3.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.4.0...HEAD
+[11.4.0]: https://github.com/giantswarm/aws-operator/compare/v11.3.0...v11.4.0
 [11.3.0]: https://github.com/giantswarm/aws-operator/compare/v11.2.0...v11.3.0
 [11.2.0]: https://github.com/giantswarm/aws-operator/compare/v11.1.0...v11.2.0
 [11.1.0]: https://github.com/giantswarm/aws-operator/compare/v11.0.0...v11.1.0
