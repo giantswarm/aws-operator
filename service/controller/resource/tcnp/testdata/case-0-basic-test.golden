@@ -446,8 +446,6 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnetEuCentral1a
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
@@ -464,8 +462,6 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnetEuCentral1c
-      - Key: kubernetes.io/role/internal-elb
-        Value: 1
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1c:
