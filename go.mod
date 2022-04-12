@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.11.0
-	github.com/aws/aws-sdk-go v1.43.29
+	github.com/aws/aws-sdk-go v1.43.37
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions/v6 v6.0.0
