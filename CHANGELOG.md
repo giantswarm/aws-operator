@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.3] - 2022-04-12
+
 ### Changed
 
 - Ignore S3 bucket deletion for audit logs.
@@ -617,7 +619,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.5.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v1.10.3...HEAD
+[1.10.3]: https://github.com/giantswarm/aws-operator/compare/v11.5.0...v1.10.3
 [11.5.0]: https://github.com/giantswarm/aws-operator/compare/v11.4.0...v11.5.0
 [11.4.0]: https://github.com/giantswarm/aws-operator/compare/v11.3.0...v11.4.0
 [11.3.0]: https://github.com/giantswarm/aws-operator/compare/v11.2.0...v11.3.0
