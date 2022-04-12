@@ -39,6 +39,10 @@ func (r *Resource) ApplyDeleteChange(ctx context.Context, obj, deleteChange inte
 	for _, b := range bucketsInput {
 		bucketName := b.Name
 
+		if b.IsLoggingBucket {
+			continue
+		}
+
 		g.Go(func() error {
 			r.logger.Debugf(ctx, "deleting S3 bucket %#q", bucketName)
 
