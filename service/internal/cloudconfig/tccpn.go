@@ -292,7 +292,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 
-	var apiExtraArgs []string
+	var apiExtraArgs, irsaSAKeyArgs []string
 	{
 		if key.OIDCClientID(cl) != "" {
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cl)))
@@ -309,10 +309,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 		// enable IRSA on the api
 		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
-			apiExtraArgs = append(apiExtraArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
-			apiExtraArgs = append(apiExtraArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(cl), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			apiExtraArgs = append(apiExtraArgs, "--api-audiences=sts.amazonaws.com")
+
+			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
+			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
+
 		}
 
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
@@ -449,6 +451,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			serviceAccountv2Priv:  serviceAccountV2Priv,
 			serviceAccountV2Pub:   serviceAccountV2Pub,
 		}
+		params.IrsaSAKeyArgs = irsaSAKeyArgs
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
