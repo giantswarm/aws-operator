@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.8.0] - 2022-04-19
+
 ### Added
 
 - Added separate service account flag for IRSA.
@@ -629,7 +631,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.7.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.8.0...HEAD
+[11.8.0]: https://github.com/giantswarm/aws-operator/compare/v11.7.0...v11.8.0
 [11.7.0]: https://github.com/giantswarm/aws-operator/compare/v11.6.0...v11.7.0
 [11.6.0]: https://github.com/giantswarm/aws-operator/compare/v11.5.0...v11.6.0
 [11.5.0]: https://github.com/giantswarm/aws-operator/compare/v11.4.0...v11.5.0
