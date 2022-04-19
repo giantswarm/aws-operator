@@ -188,6 +188,8 @@ spec:
               value: "true"
             - name: ENABLE_IPv6
               value: "false"
+            - name: POD_SECURITY_GROUP_ENFORCING_MODE
+              value: standard
             ## If CNI prefix validation is enabled we remove WARM_IP_TARGET and MINIMUM_IP_TARGET because it will take precedence over WARM_PREFIX_TARGET.
             {{- if eq .AWSCNIPrefix false }}
             - name: WARM_IP_TARGET
