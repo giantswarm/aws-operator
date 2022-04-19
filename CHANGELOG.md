@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added separate service account flag for IRSA.
+
 ## [11.7.0] - 2022-04-12
 
 ### Added
