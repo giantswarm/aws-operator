@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.9.2] - 2022-04-20
+
 ### Fixed
 
 - Issuer S3 endpoint for IRSA.
@@ -647,7 +649,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.9.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.9.2...HEAD
+[11.9.2]: https://github.com/giantswarm/aws-operator/compare/v11.9.1...v11.9.2
 [11.9.1]: https://github.com/giantswarm/aws-operator/compare/v11.9.0...v11.9.1
 [11.9.0]: https://github.com/giantswarm/aws-operator/compare/v11.8.0...v11.9.0
 [11.8.0]: https://github.com/giantswarm/aws-operator/compare/v11.7.0...v11.8.0
