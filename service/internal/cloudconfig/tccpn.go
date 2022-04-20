@@ -309,8 +309,13 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 		// enable IRSA on the api
 		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.amazonaws.com/%s-g8s-%s-oidc-pod-identity", key.Region(cl), cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
-			apiExtraArgs = append(apiExtraArgs, "--api-audiences=sts.amazonaws.com")
+			awsEndpoint := "amazonaws.com"
+			if key.IsChinaRegion(key.Region(cl)) {
+				awsEndpoint = "amazonaws.com.cn"
+			}
+
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.%s/%s-g8s-%s-oidc-pod-identity", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
