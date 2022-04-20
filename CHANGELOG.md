@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Issuer S3 endpoint for IRSA.
+
 ## [11.9.1] - 2022-04-20
 
 ### Fixed
