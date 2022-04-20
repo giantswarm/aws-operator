@@ -314,7 +314,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				awsEndpoint = "amazonaws.com.cn"
 			}
 
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3-%s.%s/%s-g8s-%s-oidc-pod-identity", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3.%s.%s/%s-g8s-%s-oidc-pod-identity", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
