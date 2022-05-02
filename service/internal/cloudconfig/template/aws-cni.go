@@ -218,6 +218,9 @@ spec:
             ## If we left this enabled, cross subnet communication doesn't work. Only affects ExternalSNAT=false.
             - name: AWS_VPC_K8S_CNI_RANDOMIZESNAT
               value: "none"
+            {{- else }}
+            - name: AWS_VPC_K8S_CNI_RANDOMIZESNAT
+            value: prng
             {{- end }}
             ## Deviation from original manifest - 5
             ## Explicit interface naming
