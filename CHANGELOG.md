@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.9.3] - 2022-05-02
+
 ### Fixed
 
 - Set `AWS_VPC_K8S_CNI_RANDOMIZESNAT` to `prng` when SNAT is enabled.
@@ -653,7 +655,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.9.2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.9.3...HEAD
+[11.9.3]: https://github.com/giantswarm/aws-operator/compare/v11.9.2...v11.9.3
 [11.9.2]: https://github.com/giantswarm/aws-operator/compare/v11.9.1...v11.9.2
 [11.9.1]: https://github.com/giantswarm/aws-operator/compare/v11.9.0...v11.9.1
 [11.9.0]: https://github.com/giantswarm/aws-operator/compare/v11.8.0...v11.9.0
