@@ -219,8 +219,9 @@ spec:
             - name: AWS_VPC_K8S_CNI_RANDOMIZESNAT
               value: "none"
             {{- else }}
+            ## When enabling ExternalSNAT, we need to set this to prng (default).
             - name: AWS_VPC_K8S_CNI_RANDOMIZESNAT
-            value: prng
+              value: prng
             {{- end }}
             ## Deviation from original manifest - 5
             ## Explicit interface naming
