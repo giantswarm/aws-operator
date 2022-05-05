@@ -10,6 +10,7 @@ type ParamsMainSubnetsListItem struct {
 	Name                  string
 	RouteTable            ParamsMainSubnetsListItemRouteTable
 	RouteTableAssociation ParamsMainSubnetsListItemRouteTableAssociation
+	TagInternalELB        bool
 	TCCP                  ParamsMainSubnetsListItemTCCP
 }
 
