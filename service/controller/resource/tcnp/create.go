@@ -659,6 +659,15 @@ func (r *Resource) newSubnets(ctx context.Context, cr infrastructurev1alpha3.AWS
 		return nil, microerror.Mask(err)
 	}
 
+	var tagInternalELB bool
+	{
+		if _, ok := cr.Annotations[annotation.AWSInternalELB]; ok {
+			tagInternalELB = true
+
+			r.logger.Debugf(ctx, "internal ELB tag for subnet is set by annotation from AWSCLuster CR")
+		}
+	}
+
 	for _, a := range cc.Spec.TenantCluster.TCNP.AvailabilityZones {
 		s := template.ParamsMainSubnetsListItem{
 			AvailabilityZone: a.Name,
@@ -670,6 +679,7 @@ func (r *Resource) newSubnets(ctx context.Context, cr infrastructurev1alpha3.AWS
 			RouteTableAssociation: template.ParamsMainSubnetsListItemRouteTableAssociation{
 				Name: key.SanitizeCFResourceName(key.PrivateSubnetRouteTableAssociationName(a.Name)),
 			},
+			TagInternalELB: tagInternalELB,
 			TCCP: template.ParamsMainSubnetsListItemTCCP{
 				VPC: template.ParamsMainSubnetsListItemTCCPVPC{
 					ID: cc.Status.TenantCluster.TCCP.VPC.ID,
