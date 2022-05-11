@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.10.0] - 2022-05-11
+
 ### Added
 
 - Set optionally the `kubernetes.io/role/internal-elb` tag to machine deployment subnets.
@@ -659,7 +661,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.9.3...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.10.0...HEAD
+[11.10.0]: https://github.com/giantswarm/aws-operator/compare/v11.9.3...v11.10.0
 [11.9.3]: https://github.com/giantswarm/aws-operator/compare/v11.9.2...v11.9.3
 [11.9.2]: https://github.com/giantswarm/aws-operator/compare/v11.9.1...v11.9.2
 [11.9.1]: https://github.com/giantswarm/aws-operator/compare/v11.9.0...v11.9.1
