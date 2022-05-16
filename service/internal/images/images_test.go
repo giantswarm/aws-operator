@@ -21,7 +21,7 @@ func Test_Images_Cache(t *testing.T) {
 		{
 			name:          "case 0",
 			ctx:           cachekeycontext.NewContext(context.Background(), "1"),
-			expectCaching: false,
+			expectCaching: true,
 		},
 		{
 			name:          "case 1",
