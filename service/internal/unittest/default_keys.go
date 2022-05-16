@@ -1,6 +1,6 @@
 package unittest
 
-import "github.com/giantswarm/randomkeys/v2"
+import "github.com/giantswarm/randomkeys/v3"
 
 func DefaultKeys() randomkeys.Cluster {
 	return randomkeys.Cluster{
