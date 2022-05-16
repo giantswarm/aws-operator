@@ -9,11 +9,11 @@ import (
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/certs/v4/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v13/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/randomkeys/v2"
+	"github.com/giantswarm/randomkeys/v3"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"

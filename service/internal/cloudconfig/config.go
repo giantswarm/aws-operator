@@ -1,11 +1,11 @@
 package cloudconfig
 
 import (
-	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/certs/v4/pkg/certs"
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/randomkeys/v2"
+	"github.com/giantswarm/randomkeys/v3"
 
 	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
 	"github.com/giantswarm/aws-operator/service/internal/encrypter"

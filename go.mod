@@ -3,28 +3,27 @@ module github.com/giantswarm/aws-operator
 go 1.17
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.10.2
-	github.com/aws/aws-sdk-go v1.43.1
+	github.com/aws/amazon-vpc-cni-k8s v1.11.0
+	github.com/aws/aws-sdk-go v1.43.29
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/giantswarm/apiextensions/v6 v6.0.0
 	github.com/giantswarm/backoff v1.0.0
-	github.com/giantswarm/badnodedetector v1.0.1
-	github.com/giantswarm/certs/v3 v3.1.1
+	github.com/giantswarm/badnodedetector/v2 v2.0.0
+	github.com/giantswarm/certs/v4 v4.0.0
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
 	github.com/giantswarm/k8scloudconfig/v13 v13.5.0
 	github.com/giantswarm/k8smetadata v0.11.0
-	github.com/giantswarm/kubelock/v3 v3.0.0
+	github.com/giantswarm/kubelock/v4 v4.0.0
 	github.com/giantswarm/microendpoint v1.0.0
 	github.com/giantswarm/microerror v0.4.0
 	github.com/giantswarm/microkit v1.0.0
 	github.com/giantswarm/micrologger v0.6.0
-	github.com/giantswarm/operatorkit/v5 v5.0.0
 	github.com/giantswarm/operatorkit/v7 v7.0.1
-	github.com/giantswarm/randomkeys/v2 v2.1.0
+	github.com/giantswarm/randomkeys/v3 v3.0.0
 	github.com/giantswarm/release-operator/v3 v3.2.0
-	github.com/giantswarm/tenantcluster/v4 v4.1.0
+	github.com/giantswarm/tenantcluster/v6 v6.0.0
 	github.com/giantswarm/to v0.4.0
 	github.com/google/go-cmp v0.5.7
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -51,7 +50,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/giantswarm/exporterkit v1.0.0 // indirect
-	github.com/giantswarm/k8sclient/v5 v5.11.0 // indirect
 	github.com/giantswarm/microstorage v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v1.0.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
@@ -88,10 +86,10 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
-	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
