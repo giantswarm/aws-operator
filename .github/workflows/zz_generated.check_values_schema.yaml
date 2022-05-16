@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@4.24.1
+#    devctl@5.3.0
 #
 name: 'Check if values schema file has been updated'
 on: pull_request
@@ -19,12 +19,9 @@ jobs:
           VALUES_FILE_CHANGED="false"
           SCHEMA_FILE_CHANGED="false"
 
-          base_ref=${GITHUB_BASE_REF##*/}
-          head_ref=${GITHUB_HEAD_REF##*/}
+          echo "Comparing ${GITHUB_BASE_REF}...${GITHUB_HEAD_REF}"
 
-          echo "Comparing ${base_ref}...${head_ref}"
-
-          changed_files=$(gh api repos/{owner}/{repo}/compare/${base_ref}...${head_ref} --jq ".files[] | .filename")
+          changed_files=$(gh api "repos/{owner}/{repo}/compare/${GITHUB_BASE_REF}...${GITHUB_HEAD_REF}" --jq ".files[] | .filename")
 
           if grep -q "values.schema.json" <<< $(git ls-tree -r --name-only ${GITHUB_SHA}); then
 
