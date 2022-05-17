@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/certs/v3/pkg/certs"
+	"github.com/giantswarm/certs/v4/pkg/certs"
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
@@ -13,7 +13,7 @@ import (
 	"github.com/giantswarm/operatorkit/v7/pkg/resource"
 	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/retryresource"
-	"github.com/giantswarm/randomkeys/v2"
+	"github.com/giantswarm/randomkeys/v3"
 	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/giantswarm/aws-operator/client/aws"

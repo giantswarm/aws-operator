@@ -6,7 +6,7 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/tenantcluster/v4/pkg/tenantcluster"
+	"github.com/giantswarm/tenantcluster/v6/pkg/tenantcluster"
 )
 
 const (
