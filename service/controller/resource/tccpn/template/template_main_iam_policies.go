@@ -129,10 +129,16 @@ const TemplateMainIAMPolicies = `
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          Effect: "Allow"
-          Principal:
-            AWS: !GetAtt IAMManagerRole.Arn
-          Action: "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              AWS: !GetAtt IAMManagerRole.Arn
+            Action: "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.{{ .IAMPolicies.AWSBaseDomain }}/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-provider-identity"
+            Condition:
+              StringEquals:
+                "s3.{{ .IAMPolicies.Region }}.{{ .IAMPolicies.AWSBaseDomain }}/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity:sub": "system:serviceaccount:kube-system:external-dns"
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
