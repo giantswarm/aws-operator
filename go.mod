@@ -19,7 +19,7 @@ require (
 	github.com/giantswarm/microendpoint v1.0.0
 	github.com/giantswarm/microerror v0.4.0
 	github.com/giantswarm/microkit v1.0.0
-	github.com/giantswarm/micrologger v1.0.0
+	github.com/giantswarm/micrologger v0.6.0
 	github.com/giantswarm/operatorkit/v7 v7.0.1
 	github.com/giantswarm/randomkeys/v3 v3.0.0
 	github.com/giantswarm/release-operator/v3 v3.2.0
@@ -55,7 +55,7 @@ require (
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
-	github.com/go-logr/logr v1.2.2 // indirect
+	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -114,5 +114,6 @@ replace (
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.13.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
+	github.com/hashicorp/consul => github.com/hashicorp/consul v1.10.10
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
