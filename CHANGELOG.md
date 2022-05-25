@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.12.0] - 2022-05-25
+
 ### Added
 
 - Extend permission policy of IAM role `Route53Manager-Role` for IRSA.
@@ -676,7 +678,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.11.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.12.0...HEAD
+[11.12.0]: https://github.com/giantswarm/aws-operator/compare/v11.11.0...v11.12.0
 [11.11.0]: https://github.com/giantswarm/aws-operator/compare/v11.10.0...v11.11.0
 [11.10.0]: https://github.com/giantswarm/aws-operator/compare/v11.9.3...v11.10.0
 [11.9.3]: https://github.com/giantswarm/aws-operator/compare/v11.9.2...v11.9.3
