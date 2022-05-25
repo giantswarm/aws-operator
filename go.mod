@@ -91,7 +91,7 @@ require (
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
@@ -109,8 +109,16 @@ require (
 )
 
 replace (
+	github.com/containernetworking/cni => github.com/containernetworking/cni v0.8.1
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
+	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.13.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
+	github.com/hashicorp/consul => github.com/hashicorp/consul v1.10.10
+	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.18
+	github.com/nats-io/jwt => github.com/nats-io/jwt/v2 v2.2.0
+	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.8.3
+	github.com/pkg/sftp => github.com/pkg/sftp v1.13.4
+	github.com/valyala/fasthttp => github.com/valyala/fasthttp v1.29.0
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
