@@ -420,11 +420,14 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
+			AccountID:            cc.Status.TenantCluster.AWS.AccountID,
+			AWSBaseDomain:        key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
 			ClusterID:            key.ClusterID(&cr),
 			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
 			InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
 			KMSKeyARN:            ek,
+			Region:               cc.Status.TenantCluster.AWS.Region,
 			RegionARN:            key.RegionARN(cc.Status.TenantCluster.AWS.Region),
 			S3Bucket:             key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
 			Route53Enabled:       r.route53Enabled,

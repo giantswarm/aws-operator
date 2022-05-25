@@ -202,10 +202,17 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          Effect: "Allow"
-          Principal:
-            AWS: !GetAtt IAMManagerRole.Arn
-          Action: "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              AWS: !GetAtt IAMManagerRole.Arn
+            Action: "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Federated: "arn:aws:iam::tenant-account:oidc-provider/s3.eu-central-1.amazonaws.com/tenant-account-g8s-8y5ck-oidc-provider-identity"
+            Action: "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals:
+                "s3.eu-central-1.amazonaws.com/tenant-account-g8s-8y5ck-oidc-pod-identity:sub": "system:serviceaccount:kube-system:external-dns"
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:

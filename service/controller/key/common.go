@@ -84,6 +84,16 @@ func AMI(region string, release releasev1alpha1.Release) (string, error) {
 	return regionAMI, nil
 }
 
+func AWSBaseDomain(region string) string {
+	baseDomain := "amazonaws.com"
+
+	if isChinaRegion(region) {
+		baseDomain += ".cn"
+	}
+
+	return baseDomain
+}
+
 func AWSCNINATRouteName(az string) string {
 	return fmt.Sprintf("AWSCNINATRoute-%s", az)
 }
