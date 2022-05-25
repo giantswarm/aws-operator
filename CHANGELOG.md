@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Extend permission policy of IAM role `Route53Manager-Role` for IRSA.
 
+### Changed
+
+- Bump `k8scc` to use `systemd` cgroup driver on masters and cgroups v2 worker nodes.
+- Bump `aws-attach-etcd-dep` to 0.4.0.
+
 ## [11.11.0] - 2022-05-16
 
 ### Changed
