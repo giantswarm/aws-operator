@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped k8scc to latest version to fix localhost node name problem.
+
 ## [11.12.0] - 2022-05-25
 
 ### Added
