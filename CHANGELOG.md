@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.13.0] - 2022-06-09
+
 ### Changed
 
 - Bumped k8scc to latest version to fix localhost node name problem.
@@ -682,7 +684,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.12.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.13.0...HEAD
+[11.13.0]: https://github.com/giantswarm/aws-operator/compare/v11.12.0...v11.13.0
 [11.12.0]: https://github.com/giantswarm/aws-operator/compare/v11.11.0...v11.12.0
 [11.11.0]: https://github.com/giantswarm/aws-operator/compare/v11.10.0...v11.11.0
 [11.10.0]: https://github.com/giantswarm/aws-operator/compare/v11.9.3...v11.10.0
