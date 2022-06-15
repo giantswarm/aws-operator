@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Remove `imagePullSecrets`
+- Set default upgrade batch to 10% from 33%
+- Set default pause time to 10 minutes
 
 ## [11.14.0] - 2022-06-14
 
