@@ -79,8 +79,6 @@ registry:
   domain: docker.io
   mirrors:
   - giantswarm.azurecr.io
-  pullSecret:
-    dockerConfigJSON: ""
 
   dockerhub:
     token: token
