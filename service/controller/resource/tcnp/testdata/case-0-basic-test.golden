@@ -81,7 +81,7 @@ Resources:
 
         # After creating a new instance, pause the rolling update on the ASG for
         # specified time.
-        PauseTime: PT15M
+        PauseTime: PT10M
   NodePoolRole:
     Type: AWS::IAM::Role
     Properties:
