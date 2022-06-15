@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [11.14.1] - 2022-06-15
 
+### Fixed
+
+- Fix principal ARN for Route53 trusted entity.
+
 ### Changed
 
 - Remove `imagePullSecrets`
