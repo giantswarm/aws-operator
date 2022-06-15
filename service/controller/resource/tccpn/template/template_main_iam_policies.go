@@ -135,7 +135,7 @@ const TemplateMainIAMPolicies = `
             Action: "sts:AssumeRole"
           - Effect: "Allow"
             Principal:
-              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.{{ .IAMPolicies.AWSBaseDomain }}/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-provider-identity"
+              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.{{ .IAMPolicies.AWSBaseDomain }}/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringEquals:
