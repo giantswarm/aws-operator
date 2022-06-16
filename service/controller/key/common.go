@@ -24,7 +24,7 @@ const (
 
 	DrainerResyncPeriod = time.Minute * 2
 
-	DefaultPauseTimeBetweenUpdates = "PT15M"
+	DefaultPauseTimeBetweenUpdates = "PT10M"
 
 	NodeRoleLabel       = "kubernetes.io/role"
 	MasterNodeRoleLabel = "master"

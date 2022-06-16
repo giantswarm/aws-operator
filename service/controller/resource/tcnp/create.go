@@ -379,7 +379,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		}
 		// if nothing is set use the default
 		if maxBatchSize == "" {
-			maxBatchSize = key.MachineDeploymentWorkerCountRatio(minDesiredNodes, 0.3)
+			maxBatchSize = key.MachineDeploymentWorkerCountRatio(minDesiredNodes, 0.1)
 		}
 		// set minInstancesInService based on the maxBatchSize value
 		minInstancesInService, err = key.MachineDeploymentMinInstanceInServiceFromMaxBatchSize(maxBatchSize, minDesiredNodes)
