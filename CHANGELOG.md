@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.14.1] - 2022-06-15
+
 ### Fixed
 
 - Fix principal ARN for Route53 trusted entity.
@@ -700,7 +702,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.14.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.14.1...HEAD
+[11.14.1]: https://github.com/giantswarm/aws-operator/compare/v11.14.0...v11.14.1
 [11.14.0]: https://github.com/giantswarm/aws-operator/compare/v11.13.0...v11.14.0
 [11.13.0]: https://github.com/giantswarm/aws-operator/compare/v11.12.0...v11.13.0
 [11.12.0]: https://github.com/giantswarm/aws-operator/compare/v11.11.0...v11.12.0
