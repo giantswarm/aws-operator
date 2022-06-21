@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.15.0] - 2022-06-21
+
 ### Changed
 
 - Set default upgrade batch to 10% from 33%
@@ -705,7 +707,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.14.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.15.0...HEAD
+[11.15.0]: https://github.com/giantswarm/aws-operator/compare/v11.14.1...v11.15.0
 [11.14.1]: https://github.com/giantswarm/aws-operator/compare/v11.14.0...v11.14.1
 [11.14.0]: https://github.com/giantswarm/aws-operator/compare/v11.13.0...v11.14.0
 [11.13.0]: https://github.com/giantswarm/aws-operator/compare/v11.12.0...v11.13.0
