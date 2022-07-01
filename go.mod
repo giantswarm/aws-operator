@@ -120,7 +120,6 @@ replace (
 	github.com/nats-io/jwt => github.com/nats-io/jwt/v2 v2.2.0
 	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.8.3
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.4
-	github.com/urfave/negroni v1.0.0 => github.com/urfave/negroni/v2 v2.0.2
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
