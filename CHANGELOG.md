@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added new flatcar 3139.2.3 image release.
+
 ### Changed
 
 - Tighten pod and container security contexts for PSS restricted policies.
