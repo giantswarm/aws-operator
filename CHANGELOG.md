@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.16.0] - 2022-07-04
+
 ### Added
 
 - Added new flatcar 3139.2.3 image release.
@@ -715,7 +717,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.15.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.16.0...HEAD
+[11.16.0]: https://github.com/giantswarm/aws-operator/compare/v11.15.0...v11.16.0
 [11.15.0]: https://github.com/giantswarm/aws-operator/compare/v11.14.1...v11.15.0
 [11.14.1]: https://github.com/giantswarm/aws-operator/compare/v11.14.0...v11.14.1
 [11.14.0]: https://github.com/giantswarm/aws-operator/compare/v11.13.0...v11.14.0
