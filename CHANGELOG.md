@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Mount containerd socket instead of dockershim one to `aws-node` pods.
+
+
 ## [11.16.0] - 2022-07-04
 
 ### Added
@@ -333,10 +338,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix issues with etcd initial cluster resolving into ELB and causing errors.
 - Update `k8scloudconfig` to version `v10.5.0` to support kubernetes `v1.20`.
 - Use `networkctl reload` for managing networking to avoid bug in `systemd`.
-
-### Changed
-
-- Mount containerd socket instead of dockershim one to `aws-node` pods.
 
 ## [10.2.0] - 2021-02-08
 
