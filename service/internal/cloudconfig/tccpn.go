@@ -456,7 +456,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			serviceAccountv2Priv:  serviceAccountV2Priv,
 			serviceAccountV2Pub:   serviceAccountV2Pub,
 		}
-		params.ExtraManifests = []string{"aws-cloud-controller-manager.yaml"}
 		params.IrsaSAKeyArgs = irsaSAKeyArgs
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
