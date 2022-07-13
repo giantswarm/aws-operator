@@ -184,6 +184,19 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0644,
 		},
 		{
+			AssetContent: template.AwsCloudControllerManagerManifest,
+			Path:         "/srv/aws-cloud-controller-manager.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		},
+		{
 			// on master NIC eth0 and eth1 are used for machine and all other eth interfaces are for aws cni
 			// add configuration for systemd-network to ignore aws cni interfaces
 			AssetContent: fmt.Sprintf(template.NetworkdIgnoreAWSCNiInterfaces, "eth[2-9]"),
