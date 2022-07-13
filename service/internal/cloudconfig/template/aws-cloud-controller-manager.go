@@ -183,7 +183,7 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-	  k8s-app: aws-cloud-controller-manager
+      k8s-app: aws-cloud-controller-manager
   template:
     metadata:
       labels:
