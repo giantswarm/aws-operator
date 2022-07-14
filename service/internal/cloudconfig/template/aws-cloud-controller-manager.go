@@ -201,7 +201,7 @@ spec:
         node-role.kubernetes.io/master: ""
       containers:
       - name: aws-cloud-controller-manager
-        image: "{{.RegistryDomain}}/giantswarm/aws-cloud-controller-manager:{{.AWSCCMVersion}}"
+        image: "{{.RegistryDomain}}/giantswarm/aws-cloud-controller-manager:v{{.AWSCCMVersion}}"
         resources:
           limits:
             cpu: 200m
