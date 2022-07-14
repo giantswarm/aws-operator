@@ -5,7 +5,7 @@ import (
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v13/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v14/pkg/template"
 	"github.com/giantswarm/microerror"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -76,6 +76,26 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 	}
 
 	return ami, nil
+}
+
+func (i *Images) AWSCloudControllerManager(ctx context.Context, obj interface{}) (string, error) {
+	cr, err := meta.Accessor(obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	re, err := i.cachedRelease(ctx, cr)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	for _, c := range re.Spec.Components {
+		if c.Name == key.AWSCloudControllerManager {
+			return c.Version, nil
+		}
+	}
+
+	return "", microerror.Maskf(notFoundError, "aws cni version not found in the release")
 }
 
 func (i *Images) AWSCNI(ctx context.Context, obj interface{}) (string, error) {

@@ -10,7 +10,7 @@ import (
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v4/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v13/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v14/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v3"
@@ -129,6 +129,11 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 	awsCNIVersion, err := t.config.Images.AWSCNI(ctx, obj)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	awsCCMVersion, err := t.config.Images.AWSCloudControllerManager(ctx, obj)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -437,6 +442,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
 		}
 		params.Extension = &TCCPNExtension{
+			awsCCMVersion:         awsCCMVersion,
 			awsCNIAdditionalTags:  awsCNIAdditionalTags,
 			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
 			awsCNIPrefix:          awsCNIPrefix,
