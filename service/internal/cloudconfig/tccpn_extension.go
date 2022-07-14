@@ -11,10 +11,10 @@ import (
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/v2/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v2/service/controller/key"
-	"github.com/giantswarm/aws-operator/v2/service/internal/cloudconfig/template"
-	"github.com/giantswarm/aws-operator/v2/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/service/controller/key"
+	"github.com/giantswarm/aws-operator/v12/service/internal/cloudconfig/template"
+	"github.com/giantswarm/aws-operator/v12/service/internal/encrypter"
 )
 
 type TCCPNExtension struct {

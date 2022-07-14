@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v2/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v12/service/internal/unittest"
 )
 
 func Test_CloudTags_GetTagsByCluster(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/v2/pkg/label"
-	"github.com/giantswarm/aws-operator/v2/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/pkg/label"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
 )
 
 func Test_Resource_S3Bucket_GetDesiredState(t *testing.T) {

@@ -11,10 +11,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/giantswarm/aws-operator/v2/pkg/annotation"
-	"github.com/giantswarm/aws-operator/v2/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v2/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v2/service/controller/key"
+	"github.com/giantswarm/aws-operator/v12/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v12/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

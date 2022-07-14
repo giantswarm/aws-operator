@@ -9,9 +9,9 @@ import (
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/v2/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v2/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v2/service/controller/key"
+	"github.com/giantswarm/aws-operator/v12/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/service/controller/key"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

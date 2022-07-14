@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v2/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v12/pkg/annotation"
 )
 
 type MachineDeploymentPersisterConfig struct {

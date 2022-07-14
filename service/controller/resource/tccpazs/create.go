@@ -13,10 +13,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v2/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v2/pkg/label"
-	"github.com/giantswarm/aws-operator/v2/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v2/service/controller/key"
+	"github.com/giantswarm/aws-operator/v12/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v12/pkg/label"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/service/controller/key"
 )
 
 // MaxAZs is the maximum number of availability zones allowed for a tenant

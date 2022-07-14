@@ -1,7 +1,7 @@
 package installation
 
 import (
-	"github.com/giantswarm/aws-operator/v2/flag/service/installation/guest"
+	"github.com/giantswarm/aws-operator/v12/flag/service/installation/guest"
 )
 
 type Installation struct {
