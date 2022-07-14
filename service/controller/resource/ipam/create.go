@@ -12,8 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/internal/locker"
+	"github.com/giantswarm/aws-operator/v12/service/controller/key"
+	"github.com/giantswarm/aws-operator/v12/service/internal/locker"
 )
 
 // EnsureCreated allocates tenant cluster network segments. It gathers existing

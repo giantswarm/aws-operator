@@ -13,14 +13,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpnoutputs"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
-	cloudformationutils "github.com/giantswarm/aws-operator/service/internal/cloudformation"
-	"github.com/giantswarm/aws-operator/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/v12/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v12/pkg/label"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/service/controller/key"
+	"github.com/giantswarm/aws-operator/v12/service/controller/resource/tccpnoutputs"
+	"github.com/giantswarm/aws-operator/v12/service/controller/resource/tcnp/template"
+	cloudformationutils "github.com/giantswarm/aws-operator/v12/service/internal/cloudformation"
+	"github.com/giantswarm/aws-operator/v12/service/internal/encrypter/kms"
 )
 
 const (

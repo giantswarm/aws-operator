@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/cachekeycontext"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v12/service/internal/unittest"
 )
 
 func Test_HAMaster_Caching(t *testing.T) {

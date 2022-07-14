@@ -14,14 +14,14 @@ import (
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
-	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/service/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/internal/images"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/service/internal/releases"
-	"github.com/giantswarm/aws-operator/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v12/service/controller/resource/tcnp/template"
+	"github.com/giantswarm/aws-operator/v12/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v12/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v12/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v12/service/internal/images"
+	"github.com/giantswarm/aws-operator/v12/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v12/service/internal/releases"
+	"github.com/giantswarm/aws-operator/v12/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")

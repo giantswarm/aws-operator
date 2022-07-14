@@ -23,16 +23,16 @@ import (
 	"k8s.io/client-go/rest"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	"github.com/giantswarm/aws-operator/client/aws"
-	"github.com/giantswarm/aws-operator/flag"
-	"github.com/giantswarm/aws-operator/pkg/project"
-	"github.com/giantswarm/aws-operator/service/controller"
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccp"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/service/internal/images"
-	"github.com/giantswarm/aws-operator/service/internal/locker"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v12/client/aws"
+	"github.com/giantswarm/aws-operator/v12/flag"
+	"github.com/giantswarm/aws-operator/v12/pkg/project"
+	"github.com/giantswarm/aws-operator/v12/service/controller"
+	"github.com/giantswarm/aws-operator/v12/service/controller/resource/tccp"
+	"github.com/giantswarm/aws-operator/v12/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v12/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v12/service/internal/images"
+	"github.com/giantswarm/aws-operator/v12/service/internal/locker"
+	"github.com/giantswarm/aws-operator/v12/service/internal/recorder"
 )
 
 // Config represents the configuration used to create a new service.

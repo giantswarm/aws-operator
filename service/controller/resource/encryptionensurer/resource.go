@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v12/service/internal/encrypter"
 )
 
 const (

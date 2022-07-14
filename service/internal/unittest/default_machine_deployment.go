@@ -5,8 +5,8 @@ import (
 	"github.com/giantswarm/to"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/v12/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v12/pkg/label"
 )
 
 const (

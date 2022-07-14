@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/operatorkit/v7/pkg/resource/crud"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
 )
 
 const (

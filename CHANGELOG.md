@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.0.0] - 2022-07-14
+
 ### Added
 
 - Use external cloud controller manager for AWS.
@@ -725,7 +727,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v11.16.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v12.0.0...HEAD
+[12.0.0]: https://github.com/giantswarm/aws-operator/compare/v11.16.0...v12.0.0
 [11.16.0]: https://github.com/giantswarm/aws-operator/compare/v11.15.0...v11.16.0
 [11.15.0]: https://github.com/giantswarm/aws-operator/compare/v11.14.1...v11.15.0
 [11.14.1]: https://github.com/giantswarm/aws-operator/compare/v11.14.0...v11.14.1
