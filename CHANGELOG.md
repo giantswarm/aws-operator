@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Use external cloud controller manager for AWS.
+
 ### Changed
 
 - Mount containerd socket instead of dockershim one to `aws-node` pods.
