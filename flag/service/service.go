@@ -3,11 +3,11 @@ package service
 import (
 	"github.com/giantswarm/operatorkit/v7/pkg/flag/service/kubernetes"
 
-	"github.com/giantswarm/aws-operator/flag/service/aws"
-	"github.com/giantswarm/aws-operator/flag/service/cluster"
-	"github.com/giantswarm/aws-operator/flag/service/guest"
-	"github.com/giantswarm/aws-operator/flag/service/installation"
-	"github.com/giantswarm/aws-operator/flag/service/registry"
+	"github.com/giantswarm/aws-operator/v2/flag/service/aws"
+	"github.com/giantswarm/aws-operator/v2/flag/service/cluster"
+	"github.com/giantswarm/aws-operator/v2/flag/service/guest"
+	"github.com/giantswarm/aws-operator/v2/flag/service/installation"
+	"github.com/giantswarm/aws-operator/v2/flag/service/registry"
 )
 
 type Service struct {

@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/service/controller/resource/tcnp/template"
+	"github.com/giantswarm/aws-operator/v2/service/controller/resource/tcnp/template"
 )
 
 func MachineDeploymentAvailabilityZones(cr infrastructurev1alpha3.AWSMachineDeployment) []string {

@@ -7,11 +7,11 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/giantswarm/randomkeys/v3"
 
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/service/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/service/internal/images"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v2/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v2/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v2/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v2/service/internal/images"
+	event "github.com/giantswarm/aws-operator/v2/service/internal/recorder"
 )
 
 type Config struct {

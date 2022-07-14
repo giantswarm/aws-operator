@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/microerror"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/pkg/annotation"
-	"github.com/giantswarm/aws-operator/pkg/label"
+	"github.com/giantswarm/aws-operator/v2/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v2/pkg/label"
 )
 
 const (

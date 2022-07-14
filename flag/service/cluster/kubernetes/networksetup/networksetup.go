@@ -1,7 +1,7 @@
 package networksetup
 
 import (
-	"github.com/giantswarm/aws-operator/flag/service/cluster/kubernetes/networksetup/docker"
+	"github.com/giantswarm/aws-operator/v2/flag/service/cluster/kubernetes/networksetup/docker"
 )
 
 type NetworkSetup struct {

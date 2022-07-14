@@ -15,15 +15,15 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/service/controller/resource/tccpn/template"
-	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/service/internal/encrypter"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/service/internal/images"
-	"github.com/giantswarm/aws-operator/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/service/internal/releases"
-	"github.com/giantswarm/aws-operator/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v2/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/v2/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v2/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v2/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v2/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v2/service/internal/images"
+	"github.com/giantswarm/aws-operator/v2/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v2/service/internal/releases"
+	"github.com/giantswarm/aws-operator/v2/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")

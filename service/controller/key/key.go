@@ -1,8 +1,8 @@
 package key
 
 import (
-	"github.com/giantswarm/aws-operator/pkg/label"
-	"github.com/giantswarm/aws-operator/pkg/project"
+	"github.com/giantswarm/aws-operator/v2/pkg/label"
+	"github.com/giantswarm/aws-operator/v2/pkg/project"
 )
 
 func VersionLabelSelector(enabled bool, overridenVersion string) string {

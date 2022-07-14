@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/cachekeycontext"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v2/service/internal/unittest"
 )
 
 func Test_Images_Cache(t *testing.T) {

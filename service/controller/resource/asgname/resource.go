@@ -10,9 +10,9 @@ import (
 	"github.com/giantswarm/micrologger"
 	"k8s.io/apimachinery/pkg/api/meta"
 
-	"github.com/giantswarm/aws-operator/pkg/awstags"
-	"github.com/giantswarm/aws-operator/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/service/controller/key"
+	"github.com/giantswarm/aws-operator/v2/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v2/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v2/service/controller/key"
 )
 
 const (

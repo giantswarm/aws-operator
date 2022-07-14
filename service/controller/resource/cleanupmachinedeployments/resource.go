@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	event "github.com/giantswarm/aws-operator/v2/service/internal/recorder"
 
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )

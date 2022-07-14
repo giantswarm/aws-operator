@@ -5,10 +5,10 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/service/internal/hamaster"
-	event "github.com/giantswarm/aws-operator/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v2/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v2/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v2/service/internal/hamaster"
+	event "github.com/giantswarm/aws-operator/v2/service/internal/recorder"
 
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
