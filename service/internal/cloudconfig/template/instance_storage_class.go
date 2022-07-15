@@ -3,7 +3,7 @@ package template
 const InstanceStorageClassContent = `apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: gp3
+  name: gp2
   labels:
     kubernetes.io/cluster-service: "true"
     addonmanager.kubernetes.io/mode: EnsureExists
@@ -11,7 +11,7 @@ provisioner: kubernetes.io/aws-ebs
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 parameters:
-  type: gp3
+  type: gp2
 `
 const InstanceStorageClassEncryptedContent = InstanceStorageClassContent + `
   encrypted: "true"
