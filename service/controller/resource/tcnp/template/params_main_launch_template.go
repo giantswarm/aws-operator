@@ -10,9 +10,10 @@ type ParamsMainLaunchTemplate struct {
 }
 
 type ParamsMainLaunchTemplateBlockDeviceMapping struct {
-	Docker  ParamsMainLaunchTemplateBlockDeviceMappingDocker
-	Kubelet ParamsMainLaunchTemplateBlockDeviceMappingKubelet
-	Logging ParamsMainLaunchTemplateBlockDeviceMappingLogging
+	Containerd ParamsMainLaunchTemplateBlockDeviceMappingContainerd
+	Docker     ParamsMainLaunchTemplateBlockDeviceMappingDocker
+	Kubelet    ParamsMainLaunchTemplateBlockDeviceMappingKubelet
+	Logging    ParamsMainLaunchTemplateBlockDeviceMappingLogging
 }
 
 type ParamsMainLaunchTemplateInstance struct {
@@ -23,6 +24,14 @@ type ParamsMainLaunchTemplateInstance struct {
 
 type ParamsMainLaunchTemplateMetadata struct {
 	HttpTokens string
+}
+
+type ParamsMainLaunchTemplateBlockDeviceMappingContainerd struct {
+	Volume ParamsMainLaunchTemplateBlockDeviceMappingContainerdVolume
+}
+
+type ParamsMainLaunchTemplateBlockDeviceMappingContainerdVolume struct {
+	Size string
 }
 
 type ParamsMainLaunchTemplateBlockDeviceMappingDocker struct {

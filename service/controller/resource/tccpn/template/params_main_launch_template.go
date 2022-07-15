@@ -16,9 +16,10 @@ type ParamsMainLaunchTemplateItem struct {
 }
 
 type ParamsMainLaunchTemplateItemBlockDeviceMapping struct {
-	Docker  ParamsMainLaunchTemplateItemBlockDeviceMappingDocker
-	Kubelet ParamsMainLaunchTemplateItemBlockDeviceMappingKubelet
-	Logging ParamsMainLaunchTemplateItemBlockDeviceMappingLogging
+	Containerd ParamsMainLaunchTemplateItemBlockDeviceMappingContainerd
+	Docker     ParamsMainLaunchTemplateItemBlockDeviceMappingDocker
+	Kubelet    ParamsMainLaunchTemplateItemBlockDeviceMappingKubelet
+	Logging    ParamsMainLaunchTemplateItemBlockDeviceMappingLogging
 }
 
 type ParamsMainLaunchTemplateItemInstance struct {
@@ -29,6 +30,14 @@ type ParamsMainLaunchTemplateItemInstance struct {
 
 type ParamsMainLaunchTemplateMetadata struct {
 	HttpTokens string
+}
+
+type ParamsMainLaunchTemplateItemBlockDeviceMappingContainerd struct {
+	Volume ParamsMainLaunchTemplateItemBlockDeviceMappingContainerdVolume
+}
+
+type ParamsMainLaunchTemplateItemBlockDeviceMappingContainerdVolume struct {
+	Size int
 }
 
 type ParamsMainLaunchTemplateItemBlockDeviceMappingDocker struct {

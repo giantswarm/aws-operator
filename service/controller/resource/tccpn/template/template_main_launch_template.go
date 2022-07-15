@@ -27,6 +27,12 @@ const TemplateMainLaunchTemplate = `
             Encrypted: true
             VolumeSize: {{ .BlockDeviceMapping.Logging.Volume.Size }}
             VolumeType: gp3
+        - DeviceName: /dev/xvdi
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: {{ .BlockDeviceMapping.Containerd.Volume.Size }}
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: {{ .Instance.Image }}
@@ -84,6 +90,15 @@ const TemplateMainLaunchTemplate = `
                       "device": "/dev/xvdf",
                       "wipeFilesystem": true,
                       "label": "log",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "containerd",
+                    "mount": {
+                      "device": "/dev/xvdi",
+                      "wipeFilesystem": true,
+                      "label": "containerd",
                       "format": "xfs"
                     }
                   }
