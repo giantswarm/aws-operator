@@ -1,9 +1,9 @@
-FROM golang:1.18.3 AS builder
+FROM golang:1.18.4 AS builder
 ENV GO111MODULE=on
 COPY go.mod /etc/go.mod
 RUN git clone --depth 1 --branch $(cat /etc/go.mod | grep k8scloudconfig | awk '{print $2}') https://github.com/giantswarm/k8scloudconfig.git && cp -r k8scloudconfig /opt/k8scloudconfig
 
-FROM alpine:3.15.4
+FROM alpine:3.16.0
 
 RUN apk add --no-cache ca-certificates
 
