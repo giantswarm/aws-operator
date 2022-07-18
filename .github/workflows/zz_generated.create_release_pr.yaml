@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.7.0
+#    devctl@5.8.0
 #
 name: Create Release PR
 on:
@@ -188,12 +188,14 @@ jobs:
             go install github.com/marwan-at-work/mod/cmd/mod@v0.4.2
             mod upgrade
           fi
+      - name: Set up git identity
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
       - name: Create release commit
         env:
           version: "${{ needs.gather_facts.outputs.version }}"
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "github-actions"
           git add -A
           git commit -m "Release v${{ env.version }}"
       - name: Push changes
