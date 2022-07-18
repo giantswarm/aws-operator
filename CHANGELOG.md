@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.1.0] - 2022-07-18
+
 ### Added
 
 - Containerd EBS Volume.
@@ -735,7 +737,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v12.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v12.1.0...HEAD
+[12.1.0]: https://github.com/giantswarm/aws-operator/compare/v12.0.0...v12.1.0
 [12.0.0]: https://github.com/giantswarm/aws-operator/compare/v11.16.0...v12.0.0
 [11.16.0]: https://github.com/giantswarm/aws-operator/compare/v11.15.0...v11.16.0
 [11.15.0]: https://github.com/giantswarm/aws-operator/compare/v11.14.1...v11.15.0
