@@ -428,6 +428,12 @@ Resources:
             Encrypted: true
             VolumeSize: 100
             VolumeType: gp3
+        - DeviceName: /dev/xvdi
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref ControlPlaneNodesInstanceProfile
         ImageId: ami-0a9a5d2b65cce04eb
@@ -487,6 +493,15 @@ Resources:
                       "label": "log",
                       "format": "xfs"
                     }
+                  },
+                  {
+                    "name": "containerd",
+                    "mount": {
+                      "device": "/dev/xvdi",
+                      "wipeFilesystem": true,
+                      "label": "containerd",
+                      "format": "xfs"
+                    }
                   }
                 ]
               }
@@ -510,6 +525,12 @@ Resources:
             VolumeSize: 100
             VolumeType: gp3
         - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp3
+        - DeviceName: /dev/xvdi
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
@@ -574,6 +595,15 @@ Resources:
                       "label": "log",
                       "format": "xfs"
                     }
+                  },
+                  {
+                    "name": "containerd",
+                    "mount": {
+                      "device": "/dev/xvdi",
+                      "wipeFilesystem": true,
+                      "label": "containerd",
+                      "format": "xfs"
+                    }
                   }
                 ]
               }
@@ -597,6 +627,12 @@ Resources:
             VolumeSize: 100
             VolumeType: gp3
         - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 100
+            VolumeType: gp3
+        - DeviceName: /dev/xvdi
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
@@ -659,6 +695,15 @@ Resources:
                       "device": "/dev/xvdf",
                       "wipeFilesystem": true,
                       "label": "log",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "containerd",
+                    "mount": {
+                      "device": "/dev/xvdi",
+                      "wipeFilesystem": true,
+                      "label": "containerd",
                       "format": "xfs"
                     }
                   }

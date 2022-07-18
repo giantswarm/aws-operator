@@ -159,6 +159,11 @@ func (e *TCNPExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
+		{
+			AssetContent: template.PersistentVarLibContainerdMount,
+			Name:         "var-lib-containerd.mount",
+			Enabled:      true,
+		},
 		// Set bigger timeouts for NVME driver.
 		// Workaround for https://github.com/coreos/bugs/issues/2484
 		// TODO issue: https://github.com/giantswarm/giantswarm/issues/4255

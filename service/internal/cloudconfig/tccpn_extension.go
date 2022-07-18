@@ -416,6 +416,11 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-docker.mount",
 			Enabled:      true,
 		},
+		{
+			AssetContent: template.EphemeralVarLibContainerdMount,
+			Name:         "var-lib-containerd.mount",
+			Enabled:      true,
+		},
 		// Attach etcd3 dependencies (EBS and ENI).
 		{
 			AssetContent: template.Etcd3AttachDepService,

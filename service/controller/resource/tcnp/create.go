@@ -488,6 +488,11 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 
 	launchTemplate := &template.ParamsMainLaunchTemplate{
 		BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
+			Containerd: template.ParamsMainLaunchTemplateBlockDeviceMappingContainerd{
+				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingContainerdVolume{
+					Size: key.MachineDeploymentDockerVolumeSizeGB(cr),
+				},
+			},
 			Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
 				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingDockerVolume{
 					Size: key.MachineDeploymentDockerVolumeSizeGB(cr),

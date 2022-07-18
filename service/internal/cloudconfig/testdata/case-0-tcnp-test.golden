@@ -348,6 +348,11 @@
         "name": "var-lib-docker.mount"
       },
       {
+        "contents": "\n[Unit]\nDescription=Mount persistent volume on /var/lib/containerd\n[Mount]\nWhat=/dev/disk/by-label/containerd\nWhere=/var/lib/containerd\nType=xfs\n[Install]\nRequiredBy=local-fs.target\n",
+        "enabled": true,
+        "name": "var-lib-containerd.mount"
+      },
+      {
         "contents": "[Unit]\nDescription=Set NVME timeouts\n[Service]\nType=oneshot\nExecStart=/bin/sh -c \"\\\n  [ -d /sys/module/nvme_core/parameters ] \u0026\u0026 \\\n  echo 10 \u003e /sys/module/nvme_core/parameters/max_retries \u0026\u0026 \\\n  echo 255 \u003e /sys/module/nvme_core/parameters/io_timeout || echo 'No NVMe present.'\"\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "nvme-set-timeouts.service"
