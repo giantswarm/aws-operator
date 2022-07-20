@@ -133,11 +133,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 
-	awsCCMVersion, err := t.config.Images.AWSCloudControllerManager(ctx, obj)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
 	var cl infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
@@ -442,7 +437,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
 		}
 		params.Extension = &TCCPNExtension{
-			awsCCMVersion:         awsCCMVersion,
 			awsCNIAdditionalTags:  awsCNIAdditionalTags,
 			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
 			awsCNIPrefix:          awsCNIPrefix,
