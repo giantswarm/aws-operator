@@ -1,7 +1,6 @@
 package cloudconfig
 
 type TemplateData struct {
-	AWSCCMVersion         string
 	AWSCNIAdditionalTags  string
 	AWSCNIMinimumIPTarget string
 	AWSCNIPrefix          bool

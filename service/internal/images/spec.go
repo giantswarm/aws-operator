@@ -12,10 +12,6 @@ type Interface interface {
 	// metav1.Object and contain the Giant Swarm specific cluster ID label and
 	// release version label.
 	AMI(ctx context.Context, obj interface{}) (string, error)
-	// AWSCloudControllerManager looks up aws-cloud-controller-manager.yaml version to compute the relevant Cloud Config
-	// images for the given object's release version. Paramter obj must be a
-	// metav1.Object and contain the Giant Swarm specific release version label.
-	AWSCloudControllerManager(ctx context.Context, obj interface{}) (string, error)
 	// AWSCNI looks up aws-cni version to compute the relevant Cloud Config
 	// images for the given object's release version. Paramter obj must be a
 	// metav1.Object and contain the Giant Swarm specific release version label.
