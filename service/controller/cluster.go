@@ -28,6 +28,7 @@ import (
 	"github.com/giantswarm/aws-operator/v12/service/controller/key"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/apiendpoint"
+	"github.com/giantswarm/aws-operator/v12/service/controller/resource/appsconfig"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/cleanupebsvolumes"
@@ -41,7 +42,6 @@ import (
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/cpvpc"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/encryptionensurer"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/endpoints"
-	"github.com/giantswarm/aws-operator/v12/service/controller/resource/eniconfigcrs"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/ipam"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/v12/service/controller/resource/natgatewayaddresses"
@@ -763,18 +763,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var eniConfigCRsResource resource.Interface
-	{
-		c := eniconfigcrs.Config{
-			Logger: config.Logger,
-		}
-
-		eniConfigCRsResource, err = eniconfigcrs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var cpVPCResource resource.Interface
 	{
 		c := cpvpc.Config{
@@ -799,6 +787,19 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		tenantClientsResource, err = tenantclients.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var appsConfigResource resource.Interface
+	{
+		c := appsconfig.Config{
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
+		}
+
+		appsConfigResource, err = appsconfig.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -833,8 +834,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		tccpfResource,
 		serviceResource,
 		endpointsResource,
-		eniConfigCRsResource,
 		secretFinalizerResource,
+		appsConfigResource,
 
 		// All these resources implement logic to update CR status information.
 		tccpVPCIDStatusResource,

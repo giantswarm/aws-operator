@@ -6,7 +6,7 @@ import (
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 )
 
-var components = []string{"kubernetes", "etcd", "aws-cni", "calico", "containerlinux"}
+var components = []string{"kubernetes", "etcd", "calico", "containerlinux"}
 
 func releaseComponentsEqual(currentRelease releasev1alpha1.Release, targetRelease releasev1alpha1.Release) bool {
 	if len(currentRelease.Spec.Components) == 0 {

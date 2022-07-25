@@ -132,6 +132,16 @@ rules:
       - create
       - patch
       - update
+
+  # The aws-operator needs read write access to configmaps in all namespaces to create default apps' config.
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - create
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

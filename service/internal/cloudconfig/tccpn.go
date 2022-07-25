@@ -2,10 +2,8 @@ package cloudconfig
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
-	"strings"
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
@@ -16,7 +14,6 @@ import (
 	"github.com/giantswarm/randomkeys/v3"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v12/pkg/label"
@@ -125,10 +122,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 	v, err := t.config.Images.Versions(ctx, obj)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-	awsCNIVersion, err := t.config.Images.AWSCNI(ctx, obj)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
@@ -334,6 +327,18 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	// Pod CIDR should never be nil.
+	if key.PodsCIDRBlock(cl) == "" {
+		return "", microerror.Maskf(executionFailedError, "Pod CIDR cannot be nil in AWSCluster")
+	}
+
+	var controllerManagerExtraArgs []string
+	{
+		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--allocate-node-cidrs=true")
+		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+key.PodsCIDRBlock(cl))
+		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--node-cidr-mask-size=25")
+	}
+
 	// Allow the actual externalSNAT to be set by the CR.
 	var externalSNAT bool
 	if key.ExternalSNAT(cl) == nil {
@@ -361,46 +366,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
-	var awsCNIMinimumIPTarget string
-	var awsCNIWarmIPTarget string
-	{
-		awsCNIMinimumIPTarget = key.AWSCNIDefaultMinimumIPTarget
-		if v, ok := cl.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
-			awsCNIMinimumIPTarget = v
-		}
-
-		awsCNIWarmIPTarget = key.AWSCNIDefaultWarmIPTarget
-		if v, ok := cl.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
-			awsCNIWarmIPTarget = v
-		}
-	}
-	var awsCNIPrefix bool
-	{
-		if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
-			awsCNIPrefix = true
-		}
-	}
-	var awsCNIAdditionalTags string
-	{
-		var list apiv1beta1.ClusterList
-		err := t.config.K8sClient.CtrlClient().List(
-			ctx,
-			&list,
-			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
-		)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-		if len(list.Items) != 1 {
-			return "", microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
-		}
-
-		awsCNIAdditionalTags, err = getCloudTags(list.Items[0].GetLabels())
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-	}
-
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.Params{}
@@ -417,14 +382,15 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
-		params.CalicoPolicyOnly = true
+		params.DisableCalico = true
+		params.DisableKubeProxy = false
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.DockerhubToken = t.config.DockerhubToken
-		params.EnableAWSCNI = true
+		params.EnableAWSCNI = false
 		params.EnableCSIMigrationAWS = true
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort,
@@ -437,28 +403,24 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
 		}
 		params.Extension = &TCCPNExtension{
-			awsCNIAdditionalTags:  awsCNIAdditionalTags,
-			awsCNIMinimumIPTarget: awsCNIMinimumIPTarget,
-			awsCNIPrefix:          awsCNIPrefix,
-			awsCNIVersion:         awsCNIVersion,
-			awsCNIWarmIPTarget:    awsCNIWarmIPTarget,
-			baseDomain:            key.TenantClusterBaseDomain(cl),
-			cc:                    cc,
-			cluster:               cl,
-			clusterCerts:          certFiles,
-			encrypter:             t.config.Encrypter,
-			encryptionKey:         ek,
-			externalSNAT:          externalSNAT,
-			haMasters:             multiMasterEnabled,
-			masterID:              mapping.ID,
-			encryptionConfig:      encryptedEncryptionConfig,
-			registryDomain:        t.config.RegistryDomain,
-			serviceAccountv2Priv:  serviceAccountV2Priv,
-			serviceAccountV2Pub:   serviceAccountV2Pub,
+			baseDomain:           key.TenantClusterBaseDomain(cl),
+			cc:                   cc,
+			cluster:              cl,
+			clusterCerts:         certFiles,
+			encrypter:            t.config.Encrypter,
+			encryptionKey:        ek,
+			externalSNAT:         externalSNAT,
+			haMasters:            multiMasterEnabled,
+			masterID:             mapping.ID,
+			encryptionConfig:     encryptedEncryptionConfig,
+			registryDomain:       t.config.RegistryDomain,
+			serviceAccountv2Priv: serviceAccountV2Priv,
+			serviceAccountV2Pub:  serviceAccountV2Pub,
 		}
 		params.IrsaSAKeyArgs = irsaSAKeyArgs
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
+		params.Kubernetes.ControllerManager.CommandExtraArgs = controllerManagerExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryMirrors = t.config.RegistryMirrors
 		params.SSOPublicKey = t.config.SSOPublicKey
@@ -493,30 +455,4 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	return templateBody, nil
-}
-
-func getCloudTags(labels map[string]string) (string, error) {
-	tags := map[string]string{}
-	for k, v := range labels {
-		if isCloudTagKey(k) {
-			tags[trimCloudTagKey(k)] = v
-		}
-	}
-
-	t, err := json.Marshal(tags)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	return string(t), nil
-}
-
-// IsCloudTagKey checks if a tag has proper prefix
-func isCloudTagKey(tagKey string) bool {
-	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
-}
-
-// TrimCloudTagKey trims key cloud prefix from a tag
-func trimCloudTagKey(tagKey string) string {
-	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }

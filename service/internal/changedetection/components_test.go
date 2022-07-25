@@ -32,13 +32,6 @@ func TestReleaseComponentsEqual(t *testing.T) {
 						},
 						{
 							Catalog:               "",
-							Name:                  "aws-cni",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.6.0",
-						},
-						{
-							Catalog:               "",
 							Name:                  "aws-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
@@ -106,13 +99,6 @@ func TestReleaseComponentsEqual(t *testing.T) {
 						},
 						{
 							Catalog:               "",
-							Name:                  "aws-cni",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.6.0",
-						},
-						{
-							Catalog:               "",
 							Name:                  "aws-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
@@ -172,13 +158,6 @@ func TestReleaseComponentsEqual(t *testing.T) {
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
 							Version:               "1.0.0",
-						},
-						{
-							Catalog:               "",
-							Name:                  "aws-cni",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.6.0",
 						},
 						{
 							Catalog:               "",
@@ -249,13 +228,6 @@ func TestReleaseComponentsEqual(t *testing.T) {
 						},
 						{
 							Catalog:               "",
-							Name:                  "aws-cni",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.6.0",
-						},
-						{
-							Catalog:               "",
 							Name:                  "aws-operator",
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
@@ -315,13 +287,6 @@ func TestReleaseComponentsEqual(t *testing.T) {
 							Reference:             "",
 							ReleaseOperatorDeploy: false,
 							Version:               "1.0.0",
-						},
-						{
-							Catalog:               "",
-							Name:                  "aws-cni",
-							Reference:             "",
-							ReleaseOperatorDeploy: false,
-							Version:               "1.6.0",
 						},
 						{
 							Catalog:               "",
