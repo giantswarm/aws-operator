@@ -1,4 +1,4 @@
-package eniconfigcrs
+package appsconfig
 
 import (
 	"context"

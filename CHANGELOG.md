@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Revert applying external cloud controller manager as a static pod.
+- Disable calico and aws-cni.
+- Create configmap to configure cilium app.
+- Enable controller-manager's allocate-cidrs flag.
 
 ## [12.1.0] - 2022-07-18
 

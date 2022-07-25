@@ -78,26 +78,6 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 	return ami, nil
 }
 
-func (i *Images) AWSCNI(ctx context.Context, obj interface{}) (string, error) {
-	cr, err := meta.Accessor(obj)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	re, err := i.cachedRelease(ctx, cr)
-	if err != nil {
-		return "", microerror.Mask(err)
-	}
-
-	for _, c := range re.Spec.Components {
-		if c.Name == key.AWSCNIComponentName {
-			return c.Version, nil
-		}
-	}
-
-	return "", microerror.Maskf(notFoundError, "aws cni version not found in the release")
-}
-
 func (i *Images) CC(ctx context.Context, obj interface{}) (k8scloudconfig.Images, error) {
 	var im k8scloudconfig.Images
 	{

@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	AWSCNIComponentName          = "aws-cni"
 	AWSCNIDefaultMinimumIPTarget = "40"
 	AWSCNIDefaultWarmIPTarget    = "10"
 
