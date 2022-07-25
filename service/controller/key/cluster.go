@@ -11,7 +11,7 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/v12/pkg/project"
+	"github.com/giantswarm/aws-operator/v13/pkg/project"
 )
 
 const (

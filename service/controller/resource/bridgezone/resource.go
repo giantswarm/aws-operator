@@ -11,9 +11,9 @@ import (
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
 
-	clientaws "github.com/giantswarm/aws-operator/v12/client/aws"
-	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v12/service/internal/credential"
+	clientaws "github.com/giantswarm/aws-operator/v13/client/aws"
+	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/internal/credential"
 )
 
 const (

@@ -1,10 +1,10 @@
 package kubernetes
 
 import (
-	"github.com/giantswarm/aws-operator/v12/flag/service/cluster/kubernetes/api"
-	"github.com/giantswarm/aws-operator/v12/flag/service/cluster/kubernetes/kubelet"
-	"github.com/giantswarm/aws-operator/v12/flag/service/cluster/kubernetes/networksetup"
-	"github.com/giantswarm/aws-operator/v12/flag/service/cluster/kubernetes/ssh"
+	"github.com/giantswarm/aws-operator/v13/flag/service/cluster/kubernetes/api"
+	"github.com/giantswarm/aws-operator/v13/flag/service/cluster/kubernetes/kubelet"
+	"github.com/giantswarm/aws-operator/v13/flag/service/cluster/kubernetes/networksetup"
+	"github.com/giantswarm/aws-operator/v13/flag/service/cluster/kubernetes/ssh"
 )
 
 type Kubernetes struct {

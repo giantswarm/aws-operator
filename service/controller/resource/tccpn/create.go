@@ -11,13 +11,13 @@ import (
 	"github.com/giantswarm/microerror"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v12/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v12/pkg/label"
-	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v12/service/controller/key"
-	"github.com/giantswarm/aws-operator/v12/service/controller/resource/tccpn/template"
-	"github.com/giantswarm/aws-operator/v12/service/internal/encrypter/kms"
-	"github.com/giantswarm/aws-operator/v12/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v13/pkg/label"
+	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/v13/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/v13/service/internal/hamaster"
 )
 
 const (

@@ -16,10 +16,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v12/pkg/label"
-	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v12/service/controller/key"
-	"github.com/giantswarm/aws-operator/v12/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v13/pkg/label"
+	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v13/service/internal/hamaster"
 )
 
 type TCCPNConfig struct {

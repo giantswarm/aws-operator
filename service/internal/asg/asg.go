@@ -13,10 +13,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/v12/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v12/service/controller/key"
-	"github.com/giantswarm/aws-operator/v12/service/internal/asg/internal/cache"
+	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v13/service/internal/asg/internal/cache"
 )
 
 type Config struct {
