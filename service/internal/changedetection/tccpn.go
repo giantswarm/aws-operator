@@ -10,11 +10,11 @@ import (
 	"github.com/giantswarm/micrologger"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/v12/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v12/service/controller/key"
-	"github.com/giantswarm/aws-operator/v12/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/v12/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/v12/service/internal/releases"
+	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v13/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v13/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v13/service/internal/releases"
 )
 
 type TCCPNConfig struct {

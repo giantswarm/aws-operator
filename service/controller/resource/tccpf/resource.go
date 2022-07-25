@@ -4,9 +4,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v12/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/v12/service/internal/cphostedzone"
-	"github.com/giantswarm/aws-operator/v12/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v13/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v13/service/internal/cphostedzone"
+	"github.com/giantswarm/aws-operator/v13/service/internal/recorder"
 )
 
 const (

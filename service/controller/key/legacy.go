@@ -3,7 +3,7 @@ package key
 import (
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/v6/pkg/apis/provider/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/v12/service/internal/templates/cloudconfig"
+	"github.com/giantswarm/aws-operator/v13/service/internal/templates/cloudconfig"
 )
 
 // NOTE that code below is deprecated and needs refactoring.
