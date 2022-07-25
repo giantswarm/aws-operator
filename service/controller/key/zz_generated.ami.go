@@ -1,6 +1,6 @@
 // DO NOT EDIT. Generated with:
 //
-//    devctl@5.7.0
+//    devctl@5.9.0
 //
 
 package key
@@ -916,6 +916,31 @@ var amiJSON = []byte(`{
     "us-east-2": "ami-0badfc5c068e0d180",
     "us-west-1": "ami-0d5e40aef127c6db6",
     "us-west-2": "ami-03967149a3e8ae59d"
+  },
+  "3227.2.0": {
+    "af-south-1": "ami-028a39413edcdbbb0",
+    "ap-east-1": "ami-02e04a1770ce0d596",
+    "ap-northeast-1": "ami-055e07238281a2713",
+    "ap-northeast-2": "ami-03ba902e03707e2df",
+    "ap-south-1": "ami-0b08d60450aa258e3",
+    "ap-southeast-1": "ami-0abf18e552a6ac7b3",
+    "ap-southeast-2": "ami-0734aa44dad1e8e4d",
+    "ap-southeast-3": "ami-0c6a14b4b2a10607e",
+    "ca-central-1": "ami-091b1d7f91f15619a",
+    "cn-northwest-1": "ami-063db7801c56770ef",
+    "cn-north-1": "ami-00c447eb61fc54231",
+    "eu-central-1": "ami-054fe938d9db80435",
+    "eu-north-1": "ami-0fa04c02f7c4a9e64",
+    "eu-south-1": "ami-00a83de1954a12743",
+    "eu-west-1": "ami-0eff061d755da617c",
+    "eu-west-2": "ami-0e7faa2ce46fbe1d7",
+    "eu-west-3": "ami-02c0f141db2de23bb",
+    "me-south-1": "ami-0adec7e54c1675569",
+    "sa-east-1": "ami-0977b8e216adbee20",
+    "us-east-1": "ami-0707e240996d28589",
+    "us-east-2": "ami-086f4df3b8ee85cad",
+    "us-west-1": "ami-0833ae354901bae49",
+    "us-west-2": "ami-064456a4766ecb425"
   }
 }`)
 
