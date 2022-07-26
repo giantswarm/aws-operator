@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump k8scc to fix apiserver's flags and metrics-server.
+
 ## [13.0.0-alpha1] - 2022-07-25
 
 ### Added
