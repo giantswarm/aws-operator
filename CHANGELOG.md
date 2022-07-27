@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.0.0-alpha2] - 2022-07-27
+
 ### Changed
 
 - Bump k8scc to fix apiserver's flags and make metrics-server to work.
@@ -754,7 +756,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.0.0-alpha1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.0.0-alpha2...HEAD
+[13.0.0-alpha2]: https://github.com/giantswarm/aws-operator/compare/v13.0.0-alpha1...v13.0.0-alpha2
 [13.0.0-alpha1]: https://github.com/giantswarm/aws-operator/compare/v12.1.0...v13.0.0-alpha1
 [12.1.0]: https://github.com/giantswarm/aws-operator/compare/v12.0.0...v12.1.0
 [12.0.0]: https://github.com/giantswarm/aws-operator/compare/v11.16.0...v12.0.0
