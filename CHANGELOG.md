@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump k8scc to fix apiserver's flags and metrics-server.
+- Bump k8scc to fix apiserver's flags and make metrics-server to work.
 
 ## [13.0.0-alpha1] - 2022-07-25
 
