@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/tenantcluster/v6/pkg/tenantcluster"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
@@ -47,6 +48,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				// the Tenant Cluster in order to properly configure the AWS CNI.
 				// Therefore it is important to add its specific scheme builders.
 				v1alpha1.AddToScheme,
+				// The Tenant Clients are used to delete the ENIConfig CRD after the migration to Cilium.
+				apiextensionsv1.AddToScheme,
 			},
 		}
 

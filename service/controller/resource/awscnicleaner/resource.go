@@ -39,6 +39,9 @@ func New(config Config) (*Resource, error) {
 	objectsToBeDeleted := []objectToBeDeleted{
 		func() client.Object {
 			return &v1beta1.PodSecurityPolicy{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "PodSecurityPolicy",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "aws-cni",
 				},
@@ -46,6 +49,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &rbacv1.ClusterRole{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ClusterRole",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "aws-node",
 				},
@@ -53,6 +59,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &corev1.ServiceAccount{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ServiceAccount",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-node",
 					Namespace: "kube-system",
@@ -61,6 +70,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &rbacv1.ClusterRoleBinding{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ClusterRoleBinding",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "aws-node",
 				},
@@ -68,6 +80,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &appsv1.DaemonSet{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "DaemonSet",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-node",
 					Namespace: "kube-system",
@@ -76,6 +91,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &apiextensionsv1.CustomResourceDefinition{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "CustomResourceDefinition",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "eniconfigs.crd.k8s.amazonaws.com",
 				},
@@ -83,6 +101,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &corev1.ServiceAccount{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ServiceAccount",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-cni-restarter",
 					Namespace: "kube-system",
@@ -91,6 +112,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &rbacv1.Role{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "Role",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-cni-restarter",
 					Namespace: "kube-system",
@@ -99,6 +123,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &rbacv1.RoleBinding{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "RoleBinding",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-cni-restarter-binding",
 					Namespace: "kube-system",
@@ -107,6 +134,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &v1beta1.PodSecurityPolicy{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "PodSecurityPolicy",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "aws-cni-restarter",
 				},
@@ -114,6 +144,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &networkingv1.NetworkPolicy{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "NetworkPolicy",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-cni-restarter",
 					Namespace: "kube-system",
@@ -122,6 +155,9 @@ func New(config Config) (*Resource, error) {
 		},
 		func() client.Object {
 			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "CronJob",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "aws-cni-restarter",
 					Namespace: "kube-system",
