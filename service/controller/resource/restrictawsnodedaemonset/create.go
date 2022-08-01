@@ -49,7 +49,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// Check if the deamonset already has the node affinity entry we need.
+	// Check if the daemonset already has the node affinity entry we need.
 	aff := ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution
 	for _, expression := range aff.NodeSelectorTerms[0].MatchExpressions {
 		if expression.Key == label.OperatorVersion &&
