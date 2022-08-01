@@ -41,9 +41,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "Daemonset %q was not found in namespace %q", dsName, dsNamespace)
 	} else if err != nil {
 		return microerror.Mask(err)
-	}
-
-	if ds != nil {
+	} else {
 		if ds.Status.DesiredNumberScheduled > 0 {
 			r.logger.Debugf(ctx, "Daemonset %q/%q still has %d replicas", dsNamespace, dsName, ds.Status.DesiredNumberScheduled)
 			r.logger.Debugf(ctx, "canceling resource")
