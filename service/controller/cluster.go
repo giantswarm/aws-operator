@@ -47,6 +47,7 @@ import (
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/region"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/restrictawsnodedaemonset"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/service"
@@ -362,6 +363,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var restrictAwsNodeDaemonsetResource resource.Interface
+	{
+		c := restrictawsnodedaemonset.Config{
+			Logger: config.Logger,
+		}
+
+		restrictAwsNodeDaemonsetResource, err = restrictawsnodedaemonset.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -823,6 +836,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		encryptionEnsurerResource,
+		restrictAwsNodeDaemonsetResource,
 		apiEndpointResource,
 		ipamResource,
 		bridgeZoneResource,

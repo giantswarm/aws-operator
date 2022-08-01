@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Ensure `aws-node` daemonset does not schedule on upgraded nodes.
+
 ## [13.0.0-alpha2] - 2022-07-27
 
 ### Changed
