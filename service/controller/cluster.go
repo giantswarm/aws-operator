@@ -47,7 +47,7 @@ import (
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/region"
-	restrictawsnodedaemonset "github.com/giantswarm/aws-operator/v13/service/controller/resource/restrictawsnodedeamonset"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/restrictawsnodedeamonset"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/service"
