@@ -80,7 +80,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	r.logger.Debugf(ctx, "Daemonset needs patched successfully")
+	r.logger.Debugf(ctx, "Daemonset patched successfully")
 
 	return nil
 }
