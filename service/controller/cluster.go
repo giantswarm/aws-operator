@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/apiendpoint"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/appsconfig"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/awscnicleaner"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/cleanupebsvolumes"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/cleanupenis"
@@ -818,6 +819,18 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var awsCniCleanerResource resource.Interface
+	{
+		c := awscnicleaner.Config{
+			Logger: config.Logger,
+		}
+
+		awsCniCleanerResource, err = awscnicleaner.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -850,6 +863,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		endpointsResource,
 		secretFinalizerResource,
 		appsConfigResource,
+		awsCniCleanerResource,
 
 		// All these resources implement logic to update CR status information.
 		tccpVPCIDStatusResource,

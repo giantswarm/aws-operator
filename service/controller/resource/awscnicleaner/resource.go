@@ -1,0 +1,143 @@
+package awscnicleaner
+
+import (
+	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/micrologger"
+	appsv1 "k8s.io/api/apps/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/api/policy/v1beta1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	Name = "awscnicleaner"
+)
+
+type Config struct {
+	Logger micrologger.Logger
+}
+
+type objectToBeDeleted func() client.Object
+
+// Resource that ensures the `aws-node` resources are deleted from the cluster after migration to cilium is successful
+type Resource struct {
+	logger micrologger.Logger
+
+	objectsToBeDeleted []objectToBeDeleted
+}
+
+func New(config Config) (*Resource, error) {
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
+	}
+
+	objectsToBeDeleted := []objectToBeDeleted{
+		func() client.Object {
+			return &v1beta1.PodSecurityPolicy{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "aws-cni",
+				},
+			}
+		},
+		func() client.Object {
+			return &rbacv1.ClusterRole{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "aws-node",
+				},
+			}
+		},
+		func() client.Object {
+			return &corev1.ServiceAccount{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-node",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &rbacv1.ClusterRoleBinding{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "aws-node",
+				},
+			}
+		},
+		func() client.Object {
+			return &appsv1.DaemonSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-node",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &apiextensionsv1.CustomResourceDefinition{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "eniconfigs.crd.k8s.amazonaws.com",
+				},
+			}
+		},
+		func() client.Object {
+			return &corev1.ServiceAccount{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-cni-restarter",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &rbacv1.Role{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-cni-restarter",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &rbacv1.RoleBinding{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-cni-restarter-binding",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &v1beta1.PodSecurityPolicy{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "aws-cni-restarter",
+				},
+			}
+		},
+		func() client.Object {
+			return &networkingv1.NetworkPolicy{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-cni-restarter",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "aws-cni-restarter",
+					Namespace: "kube-system",
+				},
+			}
+		},
+	}
+
+	r := &Resource{
+		logger:             config.Logger,
+		objectsToBeDeleted: objectsToBeDeleted,
+	}
+
+	return r, nil
+}
+
+func (r *Resource) Name() string {
+	return Name
+}
