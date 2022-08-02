@@ -336,7 +336,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	// Pod CIDR should never be nil.
 	if podCidr == "" {
-		return "", microerror.Maskf(executionFailedError, "Cilium Pod CIDR annotation cannot be nil in AWSCluster")
+		return "", microerror.Maskf(executionFailedError, "Pod CIDR cannot be nil in AWSCluster")
 	}
 
 	var controllerManagerExtraArgs []string
