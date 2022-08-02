@@ -326,16 +326,23 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	// Pod CIDR precedence:
+	// 1) cilium-specific annotation (used during upgrades from v17 to v18+)
+	// 2) awscluster podcidr field (used for new clusters where overlap with VPC is not important).
+	podCidr := key.AWSCNIPodsCIDRBlock(cl)
+	if key.CiliumPodsCIDRBlock(cl) != "" {
+		podCidr = key.CiliumPodsCIDRBlock(cl)
+	}
+
 	// Pod CIDR should never be nil.
-	if key.PodsCIDRBlock(cl) == "" {
-		return "", microerror.Maskf(executionFailedError, "Pod CIDR cannot be nil in AWSCluster")
+	if podCidr == "" {
+		return "", microerror.Maskf(executionFailedError, "Cilium Pod CIDR annotation cannot be nil in AWSCluster")
 	}
 
 	var controllerManagerExtraArgs []string
 	{
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--allocate-node-cidrs=true")
-		//controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+key.PodsCIDRBlock(cl))
-		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr=192.168.0.0/16")
+		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+podCidr)
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--node-cidr-mask-size=25")
 	}
 

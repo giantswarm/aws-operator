@@ -87,6 +87,10 @@ const (
 	ComponentOS = "containerlinux"
 )
 
+const (
+	ciliumPodCidrAnnotation = "cilium.giantswarm.io/pod-cidr"
+)
+
 func ClusterAPIEndpoint(cluster infrastructurev1alpha3.AWSCluster) string {
 	return fmt.Sprintf("api.%s", TenantClusterBaseDomain(cluster))
 }
@@ -123,8 +127,12 @@ func ExternalSNAT(cluster infrastructurev1alpha3.AWSCluster) *bool {
 	return cluster.Spec.Provider.Pods.ExternalSNAT
 }
 
-func PodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+func AWSCNIPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
 	return cluster.Spec.Provider.Pods.CIDRBlock
+}
+
+func CiliumPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+	return cluster.Annotations[ciliumPodCidrAnnotation]
 }
 
 func IsChinaRegion(awsRegion string) bool {
