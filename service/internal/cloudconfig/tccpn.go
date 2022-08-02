@@ -335,7 +335,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	var controllerManagerExtraArgs []string
 	{
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--allocate-node-cidrs=true")
-		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+key.PodsCIDRBlock(cl))
+		//controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+key.PodsCIDRBlock(cl))
+		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr=192.168.0.0/16")
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--node-cidr-mask-size=25")
 	}
 
