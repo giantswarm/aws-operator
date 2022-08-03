@@ -3,7 +3,6 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
@@ -327,15 +326,23 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		kubeletExtraArgs = append(kubeletExtraArgs, t.config.KubeletExtraArgs...)
 	}
 
+	// Pod CIDR precedence:
+	// 1) cilium-specific annotation (used during upgrades from v17 to v18+)
+	// 2) awscluster podcidr field (used for new clusters where overlap with VPC is not important).
+	podCidr := key.AWSCNIPodsCIDRBlock(cl)
+	if key.CiliumPodsCIDRBlock(cl) != "" {
+		podCidr = key.CiliumPodsCIDRBlock(cl)
+	}
+
 	// Pod CIDR should never be nil.
-	if key.PodsCIDRBlock(cl) == "" {
+	if podCidr == "" {
 		return "", microerror.Maskf(executionFailedError, "Pod CIDR cannot be nil in AWSCluster")
 	}
 
 	var controllerManagerExtraArgs []string
 	{
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--allocate-node-cidrs=true")
-		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+key.PodsCIDRBlock(cl))
+		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+podCidr)
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--node-cidr-mask-size=25")
 	}
 
@@ -371,15 +378,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params = k8scloudconfig.Params{}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
-
-		if key.PodsCIDRBlock(cl) != "" {
-			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(cl))
-			if err != nil {
-				return "", microerror.Mask(err)
-			}
-			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
-			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
-		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
 		params.DisableCalico = true

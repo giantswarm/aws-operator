@@ -474,8 +474,8 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 	}
 
 	podSubnet := r.cidrBlockAWSCNI
-	if key.PodsCIDRBlock(cr) != "" {
-		podSubnet = key.PodsCIDRBlock(cr)
+	if key.AWSCNIPodsCIDRBlock(cr) != "" {
+		podSubnet = key.AWSCNIPodsCIDRBlock(cr)
 	}
 
 	var securityGroups *template.ParamsMainSecurityGroups
@@ -604,8 +604,8 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 
 	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 	podSubnet := r.cidrBlockAWSCNI
-	if key.PodsCIDRBlock(cr) != "" {
-		podSubnet = key.PodsCIDRBlock(cr)
+	if key.AWSCNIPodsCIDRBlock(cr) != "" {
+		podSubnet = key.AWSCNIPodsCIDRBlock(cr)
 	}
 
 	var vpc *template.ParamsMainVPC

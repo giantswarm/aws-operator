@@ -9,6 +9,7 @@ import (
 	"time"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/project"
@@ -123,8 +124,12 @@ func ExternalSNAT(cluster infrastructurev1alpha3.AWSCluster) *bool {
 	return cluster.Spec.Provider.Pods.ExternalSNAT
 }
 
-func PodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+func AWSCNIPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
 	return cluster.Spec.Provider.Pods.CIDRBlock
+}
+
+func CiliumPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+	return cluster.Annotations[annotation.CiliumPodCidr]
 }
 
 func IsChinaRegion(awsRegion string) bool {

@@ -3,7 +3,6 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
@@ -192,15 +191,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params = k8scloudconfig.Params{}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
-
-		if key.PodsCIDRBlock(cl) != "" {
-			_, ipnet, err := net.ParseCIDR(key.PodsCIDRBlock(cl))
-			if err != nil {
-				return nil, microerror.Mask(err)
-			}
-			g8sConfig.Cluster.Calico.Subnet = ipnet.IP.String()
-			_, g8sConfig.Cluster.Calico.CIDR = ipnet.Mask.Size()
-		}
 
 		params.DisableCalico = true
 		params.DisableKubeProxy = false
