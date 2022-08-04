@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.67
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions/v6 v6.3.1
+	github.com/giantswarm/apiextensions/v6 v6.4.0
 	github.com/giantswarm/backoff v1.0.0
 	github.com/giantswarm/badnodedetector/v2 v2.0.0
 	github.com/giantswarm/certs/v4 v4.0.0
