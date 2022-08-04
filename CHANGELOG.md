@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Use Cloudfront Domain for IRSA.
 - Ensure `aws-node` daemonset does not schedule on upgraded nodes.
 - Ensure `aws-node` daemonset has `AWS_VPC_K8S_CNI_EXCLUDE_SNAT_CIDRS` env var set to the cilium cidr during migration to cilium.
 - Cleanup `aws-node` resources after a successful migration.

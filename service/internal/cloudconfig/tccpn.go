@@ -154,7 +154,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var certFiles []certs.File
-	var encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
+	var cloudfrontDomain, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
 	{
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
@@ -275,6 +275,21 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				}
 				return nil
 			})
+			g.Go(func() error {
+				var cm v1.ConfigMap
+				err := t.config.K8sClient.CtrlClient().Get(
+					ctx, client.ObjectKey{
+						Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+						Namespace: cr.Namespace,
+					},
+					&cm)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				cloudfrontDomain = cm.Data["domain"]
+
+				return nil
+			})
 		}
 
 		err := g.Wait()
@@ -314,7 +329,11 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				awsEndpoint = "amazonaws.com.cn"
 			}
 
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3.%s.%s/%s-g8s-%s-oidc-pod-identity", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			if cloudfrontDomain == "" {
+				return "", microerror.Maskf(executionFailedError, "Cloudfront Domain for service account issuer cannot be nil")
+			}
+
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontDomain))
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")

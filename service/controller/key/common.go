@@ -347,6 +347,10 @@ func ServiceAccountV2SecretName(clusterName string) string {
 	return fmt.Sprintf("%s-service-account-v2", clusterName)
 }
 
+func IRSACloudfrontConfigMap(clusterName string) string {
+	return fmt.Sprintf("%s-irsa-cloudfront", clusterName)
+}
+
 func SSLOnlyBucketPolicy(bucketName string, region string) string {
 	arn := RegionARN(region)
 	return fmt.Sprintf(sslOnlyBucketPolicyTemplate, arn, bucketName, arn, bucketName)
