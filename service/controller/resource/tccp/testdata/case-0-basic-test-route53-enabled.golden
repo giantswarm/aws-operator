@@ -511,6 +511,14 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-internal-api
+  AWSCNISecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "AWS CNI Security Group configured to the ENIConfig CRD."
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: 8y5ck-aws-cni
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
