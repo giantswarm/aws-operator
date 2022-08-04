@@ -79,10 +79,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if key.CiliumPodsCIDRBlock(cr) != "" {
 		r.logger.Debugf(ctx, "Migrating cilium pod cidr from %q annotation to AWSCluster.Spec.Provider.Pods.CIDRBlock", annotation.CiliumPodCidr)
 
+		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cr)
+
 		annotations := cr.Annotations
 		delete(annotations, annotation.CiliumPodCidr)
-
-		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cr)
 		cr.Annotations = annotations
 
 		err = r.ctrlClient.Update(ctx, &cr)
