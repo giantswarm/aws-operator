@@ -206,7 +206,6 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-internal-api
-  {{- if .EnableAWSCNI }}
   AWSCNISecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -215,6 +214,7 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-aws-cni
+  {{- if .EnableAWSCNI }}
   PodsIngressRuleFromMAsters:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: AWSCNISecurityGroup
