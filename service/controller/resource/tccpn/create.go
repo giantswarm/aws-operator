@@ -432,8 +432,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 
 		cloudfrontDomain = cm.Data["domain"]
 		if cloudfrontDomain == "" {
-			r.logger.Debugf(ctx, "canceling resource", "reason", "cloudfront domain cannot be empty")
-			return nil, nil
+			return nil, microerror.Maskf(emptyDataError, "irsa cloudfront configmap for cluster must not be empty")
 		}
 
 	}
