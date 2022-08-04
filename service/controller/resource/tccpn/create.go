@@ -432,7 +432,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 
 		cloudfrontDomain = cm.Data["domain"]
 		if cloudfrontDomain == "" {
-			return nil, microerror.Maskf(emptyDataError, "irsa cloudfront configmap for cluster must not be empty")
+			return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
 		}
 
 	}
