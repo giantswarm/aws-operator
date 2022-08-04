@@ -453,6 +453,26 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		return nil, microerror.Mask(err)
 	}
 
+	var cl infrastructurev1alpha3.AWSCluster
+	{
+		var list infrastructurev1alpha3.AWSClusterList
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		cl = list.Items[0]
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
@@ -460,6 +480,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 				ID: key.ClusterID(&cr),
 			},
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			EnableAWSCNI:     key.IsAWSCNINeeded(cl),
 			KMSKeyARN:        ek,
 			NodePool: template.ParamsMainIAMPoliciesNodePool{
 				ID: key.MachineDeploymentID(&cr),
@@ -635,6 +656,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,
 			},
 		},
+		EnableAWSCNI: key.IsAWSCNINeeded(cl),
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
 			InternalAPI: template.ParamsMainSecurityGroupsTenantClusterInternalAPI{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "internal-api")),

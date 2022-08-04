@@ -168,6 +168,12 @@ func IsAlreadyCreatedCluster(cluster infrastructurev1alpha3.AWSCluster) bool {
 	return cluster.Status.Cluster.HasCreatedCondition()
 }
 
+func IsAWSCNINeeded(cluster infrastructurev1alpha3.AWSCluster) bool {
+	_, needed := cluster.Annotations[annotation.CiliumPodCidr]
+
+	return needed
+}
+
 func MasterAvailabilityZone(cluster infrastructurev1alpha3.AWSCluster) string {
 	return cluster.Spec.Provider.Master.AvailabilityZone
 }

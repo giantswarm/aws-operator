@@ -3,6 +3,7 @@ package template
 const TemplateMainRouteTables = `
 {{- define "route_tables" -}}
 {{- $v := .RouteTables -}}
+  {{- if .EnableAWSCNI }}
   {{- range $v.AWSCNIRouteTableNames }}
   {{ .ResourceName }}:
     Type: AWS::EC2::RouteTable
@@ -15,6 +16,7 @@ const TemplateMainRouteTables = `
         Value: {{ .AvailabilityZone }}
       - Key: giantswarm.io/route-table-type
         Value: aws-cni
+  {{- end }}
   {{- end }}
   {{- range $v.PublicRouteTableNames }}
   {{ .ResourceName }}:

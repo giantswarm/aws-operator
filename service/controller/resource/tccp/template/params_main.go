@@ -1,6 +1,7 @@
 package template
 
 type ParamsMain struct {
+	EnableAWSCNI    bool
 	InternetGateway *ParamsMainInternetGateway
 	LoadBalancers   *ParamsMainLoadBalancers
 	NATGateway      *ParamsMainNATGateway
