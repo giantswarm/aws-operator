@@ -53,19 +53,26 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.A
 		return microerror.Mask(err)
 	}
 
+	enableAWSCNI := key.IsAWSCNINeeded(cr)
+
 	var groups []*ec2.SecurityGroup
 	{
 		r.logger.Debugf(ctx, "finding security groups for tenant cluster %#q", key.ClusterID(&cr))
 
+		filterValues := []*string{
+			aws.String(key.SecurityGroupName(&cr, "internal-api")),
+			aws.String(key.SecurityGroupName(&cr, "master")),
+		}
+
+		if enableAWSCNI {
+			filterValues = append(filterValues, aws.String(key.SecurityGroupName(&cr, "aws-cni")))
+		}
+
 		i := &ec2.DescribeSecurityGroupsInput{
 			Filters: []*ec2.Filter{
 				{
-					Name: aws.String("tag:Name"),
-					Values: []*string{
-						aws.String(key.SecurityGroupName(&cr, "aws-cni")),
-						aws.String(key.SecurityGroupName(&cr, "internal-api")),
-						aws.String(key.SecurityGroupName(&cr, "master")),
-					},
+					Name:   aws.String("tag:Name"),
+					Values: filterValues,
 				},
 				{
 					Name: aws.String(fmt.Sprintf("tag:%s", key.TagStack)),
@@ -83,12 +90,17 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.A
 
 		groups = o.SecurityGroups
 
-		if len(groups) > 3 {
-			return microerror.Maskf(executionFailedError, "expected three security groups, got %d", len(groups))
+		expectedLength := 2
+		if enableAWSCNI {
+			expectedLength = 3
 		}
 
-		if len(groups) < 3 {
-			r.logger.Debugf(ctx, "did not find security groups for tenant cluster %#q yet", key.ClusterID(&cr))
+		if len(groups) > expectedLength {
+			return microerror.Maskf(executionFailedError, "expected %d security groups, got %d", expectedLength, len(groups))
+		}
+
+		if len(groups) < expectedLength {
+			r.logger.Debugf(ctx, "found %d out of expected %d security groups for tenant cluster %#q yet", len(groups), expectedLength, key.ClusterID(&cr))
 			r.logger.Debugf(ctx, "canceling resource")
 
 			return nil

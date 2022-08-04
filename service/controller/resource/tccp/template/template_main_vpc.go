@@ -12,6 +12,7 @@ const TemplateMainVPC = `
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}
+  {{- if .EnableAWSCNI }}
   VPCCIDRBlockAWSCNI:
     Type: AWS::EC2::VPCCidrBlock
     DependsOn:
@@ -20,6 +21,7 @@ const TemplateMainVPC = `
     Properties:
       CidrBlock: {{ $v.CIDRBlockAWSCNI }}
       VpcId: !Ref VPC
+  {{- end }}
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:

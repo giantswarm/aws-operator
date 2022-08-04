@@ -19,19 +19,24 @@ const (
 )
 
 type Config struct {
-	Logger micrologger.Logger
+	CtrlClient client.Client
+	Logger     micrologger.Logger
 }
 
 type objectToBeDeleted func() client.Object
 
 // Resource that ensures the `aws-node` resources are deleted from the cluster after migration to cilium is successful
 type Resource struct {
-	logger micrologger.Logger
+	ctrlClient client.Client
+	logger     micrologger.Logger
 
 	objectsToBeDeleted []objectToBeDeleted
 }
 
 func New(config Config) (*Resource, error) {
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
+	}
 	if config.Logger == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Logger must not be empty", config)
 	}
@@ -167,6 +172,7 @@ func New(config Config) (*Resource, error) {
 	}
 
 	r := &Resource{
+		ctrlClient:         config.CtrlClient,
 		logger:             config.Logger,
 		objectsToBeDeleted: objectsToBeDeleted,
 	}

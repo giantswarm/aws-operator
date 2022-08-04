@@ -3,6 +3,7 @@ package template
 type ParamsMainSecurityGroups struct {
 	ClusterID     string
 	ControlPlane  ParamsMainSecurityGroupsControlPlane
+	EnableAWSCNI  bool
 	TenantCluster ParamsMainSecurityGroupsTenantCluster
 }
 

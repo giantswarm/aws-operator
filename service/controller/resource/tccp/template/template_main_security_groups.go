@@ -214,6 +214,7 @@ const TemplateMainSecurityGroups = `
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}-aws-cni
+  {{- if .EnableAWSCNI }}
   PodsIngressRuleFromMAsters:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: AWSCNISecurityGroup
@@ -234,6 +235,7 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref AWSCNISecurityGroup
+{{- end }}
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -254,6 +256,7 @@ const TemplateMainSecurityGroups = `
       FromPort: 8089
       ToPort: 8089
       SourceSecurityGroupId: !Ref APIInternalELBSecurityGroup
+  {{- if .EnableAWSCNI }}
   MasterAllowPodsCNIIngressRule:
       Type: AWS::EC2::SecurityGroupIngress
       DependsOn: MasterSecurityGroup
@@ -264,6 +267,7 @@ const TemplateMainSecurityGroups = `
         FromPort: -1
         ToPort: -1
         SourceSecurityGroupId: !Ref AWSCNISecurityGroup
+  {{- end }}
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup

@@ -208,13 +208,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1a
-  AWSCNINATRouteEuCentral1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1a
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: NATGatewayEuCentral1a
   NATRouteEuCentral1b:
     Type: AWS::EC2::Route
     Properties:
@@ -222,24 +215,10 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1b
-  AWSCNINATRouteEuCentral1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1b
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: NATGatewayEuCentral1b
   NATRouteEuCentral1c:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableEuCentral1c
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: NATGatewayEuCentral1c
-  AWSCNINATRouteEuCentral1c:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1c
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
         Ref: NATGatewayEuCentral1c
@@ -325,39 +304,6 @@ Resources:
       ResourceRecords:
         - 'ingress.8y5ck.k8s.gauss.eu-central-1.aws.gigantic.io.'
   
-  AWSCNIRouteTableEuCentral1a:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-aws-cni-1a
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1a
-      - Key: giantswarm.io/route-table-type
-        Value: aws-cni
-  AWSCNIRouteTableEuCentral1b:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-aws-cni-1b
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1b
-      - Key: giantswarm.io/route-table-type
-        Value: aws-cni
-  AWSCNIRouteTableEuCentral1c:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-      - Key: Name
-        Value: 8y5ck-aws-cni-1c
-      - Key: giantswarm.io/availability-zone
-        Value: eu-central-1c
-      - Key: giantswarm.io/route-table-type
-        Value: aws-cni
   PublicRouteTableEuCentral1a:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -573,26 +519,6 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck-aws-cni
-  PodsIngressRuleFromMAsters:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: AWSCNISecurityGroup
-    Properties:
-      Description: Allow traffic from masters to pods.
-      GroupId: !Ref AWSCNISecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref MasterSecurityGroup
-  PodsAllowPodsCNIIngressRule:
-    Type: AWS::EC2::SecurityGroupIngress
-    DependsOn: AWSCNISecurityGroup
-    Properties:
-      Description: Allow traffic from pod to pod.
-      GroupId: !Ref AWSCNISecurityGroup
-      IpProtocol: -1
-      FromPort: -1
-      ToPort: -1
-      SourceSecurityGroupId: !Ref AWSCNISecurityGroup
   MasterAllowCalicoIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -613,16 +539,6 @@ Resources:
       FromPort: 8089
       ToPort: 8089
       SourceSecurityGroupId: !Ref APIInternalELBSecurityGroup
-  MasterAllowPodsCNIIngressRule:
-      Type: AWS::EC2::SecurityGroupIngress
-      DependsOn: MasterSecurityGroup
-      Properties:
-        Description: Allow traffic from pod to master.
-        GroupId: !Ref MasterSecurityGroup
-        IpProtocol: -1
-        FromPort: -1
-        ToPort: -1
-        SourceSecurityGroupId: !Ref AWSCNISecurityGroup
   MasterAllowEtcdIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: MasterSecurityGroup
@@ -640,60 +556,6 @@ Resources:
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
   
-  AWSCNISubnetEuCentral1a:
-    Type: AWS::EC2::Subnet
-    DependsOn:
-    - VPCCIDRBlockAWSCNI
-    Properties:
-      AvailabilityZone: eu-central-1a
-      CidrBlock: <nil>
-      Tags:
-      - Key: Name
-        Value: AWSCNISubnetEuCentral1a
-      - Key: giantswarm.io/subnet-type
-        Value: aws-cni
-      VpcId: !Ref VPC
-  AWSCNISubnetRouteTableAssociationEuCentral1a:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1a
-      SubnetId: !Ref AWSCNISubnetEuCentral1a
-  AWSCNISubnetEuCentral1b:
-    Type: AWS::EC2::Subnet
-    DependsOn:
-    - VPCCIDRBlockAWSCNI
-    Properties:
-      AvailabilityZone: eu-central-1b
-      CidrBlock: <nil>
-      Tags:
-      - Key: Name
-        Value: AWSCNISubnetEuCentral1b
-      - Key: giantswarm.io/subnet-type
-        Value: aws-cni
-      VpcId: !Ref VPC
-  AWSCNISubnetRouteTableAssociationEuCentral1b:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1b
-      SubnetId: !Ref AWSCNISubnetEuCentral1b
-  AWSCNISubnetEuCentral1c:
-    Type: AWS::EC2::Subnet
-    DependsOn:
-    - VPCCIDRBlockAWSCNI
-    Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: <nil>
-      Tags:
-      - Key: Name
-        Value: AWSCNISubnetEuCentral1c
-      - Key: giantswarm.io/subnet-type
-        Value: aws-cni
-      VpcId: !Ref VPC
-  AWSCNISubnetRouteTableAssociationEuCentral1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1c
-      SubnetId: !Ref AWSCNISubnetEuCentral1c
   PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:
@@ -818,14 +680,6 @@ Resources:
       Tags:
         - Key: Name
           Value: 8y5ck
-  VPCCIDRBlockAWSCNI:
-    Type: AWS::EC2::VPCCidrBlock
-    DependsOn:
-      - VPC
-      - VPCPeeringConnection
-    Properties:
-      CidrBlock: 172.17.0.1/16
-      VpcId: !Ref VPC
   VPCPeeringConnection:
     Type: 'AWS::EC2::VPCPeeringConnection'
     Properties:
@@ -848,9 +702,6 @@ Resources:
         - !Ref PrivateRouteTableEuCentral1a
         - !Ref PrivateRouteTableEuCentral1b
         - !Ref PrivateRouteTableEuCentral1c
-        - !Ref AWSCNIRouteTableEuCentral1a
-        - !Ref AWSCNIRouteTableEuCentral1b
-        - !Ref AWSCNIRouteTableEuCentral1c
       ServiceName: com.amazonaws.eu-central-1.s3
       PolicyDocument:
         Version: "2012-10-17"

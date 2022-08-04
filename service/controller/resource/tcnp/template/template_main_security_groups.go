@@ -67,6 +67,7 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  {{- if .SecurityGroups.EnableAWSCNI }}
   PodsIngressRuleFromWorkers:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup
@@ -87,6 +88,7 @@ const TemplateMainSecurityGroups = `
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: {{ .SecurityGroups.TenantCluster.AWSCNI.ID }}
+  {{- end }}
   InternalIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

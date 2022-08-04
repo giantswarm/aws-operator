@@ -58,6 +58,7 @@ const TemplateMainIAMPolicies = `
               - "ecr:BatchGetImage"
             Resource: "*"
 
+          {{- if .IAMPolicies.EnableAWSCNI }}
           # Following rules are required to make the AWS CNI work. See also
           # https://github.com/aws/amazon-vpc-cni-k8s#setup.
           - Effect: Allow
@@ -79,6 +80,7 @@ const TemplateMainIAMPolicies = `
               - ec2:CreateTags
             Resource:
               - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:network-interface/*
+          {{- end }}
 
           # Following rules are required for EBS snapshots.
           - Effect: Allow

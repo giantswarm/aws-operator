@@ -236,6 +236,7 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha3.
 		}
 
 		params = &template.ParamsMain{
+			EnableAWSCNI:    key.IsAWSCNINeeded(cr),
 			InternetGateway: internetGateway,
 			LoadBalancers:   loadBalancers,
 			NATGateway:      natGateway,
@@ -330,6 +331,8 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 }
 
 func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainNATGateway, error) {
+	enableAWSCNI := key.IsAWSCNINeeded(cr)
+
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -359,7 +362,7 @@ func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructur
 			natRoutes = append(natRoutes, nr)
 		}
 
-		{
+		if enableAWSCNI {
 			nr := template.ParamsMainNATGatewayNATRoute{
 				NATGWName:      key.SanitizeCFResourceName(key.NATGatewayName(az.Name)),
 				NATRouteName:   key.SanitizeCFResourceName(key.AWSCNINATRouteName(az.Name)),
@@ -577,6 +580,8 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 }
 
 func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainVPC, error) {
+	enableAWSCNI := key.IsAWSCNINeeded(cr)
+
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -595,11 +600,13 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 		}
 		routeTableNames = append(routeTableNames, rtName)
 	}
-	for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
-		rtName := template.ParamsMainVPCRouteTableName{
-			ResourceName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+	if enableAWSCNI {
+		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
+			rtName := template.ParamsMainVPCRouteTableName{
+				ResourceName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+			}
+			routeTableNames = append(routeTableNames, rtName)
 		}
-		routeTableNames = append(routeTableNames, rtName)
 	}
 
 	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.

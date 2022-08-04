@@ -822,7 +822,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var awsCniCleanerResource resource.Interface
 	{
 		c := awscnicleaner.Config{
-			Logger: config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		awsCniCleanerResource, err = awscnicleaner.New(c)

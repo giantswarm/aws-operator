@@ -3,6 +3,7 @@ package template
 type ParamsMainIAMPolicies struct {
 	Cluster          ParamsMainIAMPoliciesCluster
 	EC2ServiceDomain string
+	EnableAWSCNI     bool
 	KMSKeyARN        string
 	NodePool         ParamsMainIAMPoliciesNodePool
 	RegionARN        string
