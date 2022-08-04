@@ -38,11 +38,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return nil
 	}
 
-	ctrlClient := cc.Client.TenantCluster.K8s.CtrlClient()
+	wcCtrlClient := cc.Client.TenantCluster.K8s.CtrlClient()
 
 	// Ensure aws-node daemonset has zero pods.
 	ds := &v1.DaemonSet{}
-	err = ctrlClient.Get(ctx, client.ObjectKey{Name: dsName, Namespace: dsNamespace}, ds)
+	err = wcCtrlClient.Get(ctx, client.ObjectKey{Name: dsName, Namespace: dsNamespace}, ds)
 	if apierrors.IsNotFound(err) {
 		// All good.
 		r.logger.Debugf(ctx, "Daemonset %q was not found in namespace %q", dsName, dsNamespace)
@@ -61,7 +61,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	for _, objToBeDel := range r.objectsToBeDeleted {
 		obj := objToBeDel()
-		err = ctrlClient.Delete(ctx, obj)
+		err = wcCtrlClient.Delete(ctx, obj)
 		if apierrors.IsNotFound(err) {
 			// All good that's what we want.
 			continue
@@ -85,7 +85,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cr)
 		cr.Annotations = annotations
 
-		err = ctrlClient.Update(ctx, &cr)
+		err = r.ctrlClient.Update(ctx, &cr)
 		if err != nil {
 			return microerror.Mask(err)
 		}
