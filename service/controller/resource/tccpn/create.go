@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
+	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
@@ -417,11 +418,32 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		return nil, microerror.Mask(err)
 	}
 
+	var cloudfrontDomain string
+	var cm v1.ConfigMap
+	{
+		o := client.ObjectKey{
+			Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+			Namespace: cr.Namespace,
+		}
+		err := r.k8sClient.CtrlClient().Get(ctx, o, &cm)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		cloudfrontDomain = cm.Data["domain"]
+		if cloudfrontDomain == "" {
+			r.logger.Debugf(ctx, "canceling resource", "reason", "cloudfront domain cannot be empty")
+			return nil, nil
+		}
+
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			AccountID:            cc.Status.TenantCluster.AWS.AccountID,
 			AWSBaseDomain:        key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
+			Cloudfront:           cloudfrontDomain,
 			ClusterID:            key.ClusterID(&cr),
 			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,

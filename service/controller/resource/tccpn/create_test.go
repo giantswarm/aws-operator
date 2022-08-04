@@ -3,7 +3,6 @@ package tccpn
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
@@ -161,6 +160,14 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
+			{
+				cm := unittest.DefaultIRSACloudfrontConfigMap()
+				err = k.CtrlClient().Create(ctx, &cm)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			var aws infrastructurev1alpha3.AWSControlPlane
 			{
 				cl := unittest.DefaultCluster()
@@ -172,8 +179,6 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				aws = unittest.DefaultAWSControlPlane()
 				aws.Spec.AvailabilityZones = tc.azs
 				for k, v := range tc.annotations {
-					fmt.Println(k)
-					fmt.Println(v)
 					aws.Annotations[k] = v
 				}
 				err = k.CtrlClient().Create(ctx, &aws)
