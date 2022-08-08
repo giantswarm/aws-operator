@@ -148,7 +148,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	// Get Cluster CR
 	cluster := apiv1beta1.Cluster{}
-	err = t.config.K8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
+	err = t.config.K8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: key.ClusterID(&cr)}, &cluster)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
