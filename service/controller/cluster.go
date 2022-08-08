@@ -28,7 +28,6 @@ import (
 	"github.com/giantswarm/aws-operator/v13/service/controller/key"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/apiendpoint"
-	"github.com/giantswarm/aws-operator/v13/service/controller/resource/appsconfig"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/awscnicleaner"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/bridgezone"
@@ -807,19 +806,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var appsConfigResource resource.Interface
-	{
-		c := appsconfig.Config{
-			CtrlClient: config.K8sClient.CtrlClient(),
-			Logger:     config.Logger,
-		}
-
-		appsConfigResource, err = appsconfig.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	var awsCniCleanerResource resource.Interface
 	{
 		c := awscnicleaner.Config{
@@ -864,7 +850,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		serviceResource,
 		endpointsResource,
 		secretFinalizerResource,
-		appsConfigResource,
 		awsCniCleanerResource,
 
 		// All these resources implement logic to update CR status information.
