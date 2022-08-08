@@ -87,13 +87,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
 		r.logger.Debugf(ctx, "Migrating cilium pod cidr from %q annotation to AWSCluster.Spec.Provider.Pods.CIDRBlock", annotation.CiliumPodCidr)
 
+		// Update pod cidr on AWSCluster CR
 		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cluster)
-
-		annotations := cr.Annotations
-		delete(annotations, annotation.CiliumPodCidr)
-		cr.Annotations = annotations
-
 		err = r.ctrlClient.Update(ctx, &cr)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		// Delete cilium pod cidr annotation from Cluster CR.
+		annotations := cluster.Annotations
+		delete(annotations, annotation.CiliumPodCidr)
+		cluster.Annotations = annotations
+		err = r.ctrlClient.Update(ctx, &cluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}
