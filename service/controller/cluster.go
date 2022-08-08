@@ -399,6 +399,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		c := tccpsecuritygroups.Config{
 			ToClusterFunc: key.ToCluster,
 			Logger:        config.Logger,
+			CtrlClient:    config.K8sClient.CtrlClient(),
 		}
 
 		tccpSecurityGroupsResource, err = tccpsecuritygroups.New(c)

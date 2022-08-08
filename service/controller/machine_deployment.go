@@ -546,6 +546,7 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
+			CtrlClient:    config.K8sClient.CtrlClient(),
 			Logger:        config.Logger,
 			ToClusterFunc: newMachineDeploymentToClusterFunc(config.K8sClient.CtrlClient()),
 		}

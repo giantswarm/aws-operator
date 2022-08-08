@@ -385,6 +385,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 	var tccpSecurityGroupsResource resource.Interface
 	{
 		c := tccpsecuritygroups.Config{
+			CtrlClient:    config.K8sClient.CtrlClient(),
 			Logger:        config.Logger,
 			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
 		}
