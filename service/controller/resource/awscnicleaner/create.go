@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
@@ -76,10 +77,17 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "Deleted %s %s", obj.GetObjectKind().GroupVersionKind().Kind, name)
 	}
 
-	if key.CiliumPodsCIDRBlock(cr) != "" {
+	// Get Cluster CR
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if key.CiliumPodsCIDRBlock(cluster) != "" {
 		r.logger.Debugf(ctx, "Migrating cilium pod cidr from %q annotation to AWSCluster.Spec.Provider.Pods.CIDRBlock", annotation.CiliumPodCidr)
 
-		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cr)
+		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cluster)
 
 		annotations := cr.Annotations
 		delete(annotations, annotation.CiliumPodCidr)

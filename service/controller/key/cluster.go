@@ -11,6 +11,7 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/project"
 )
@@ -128,7 +129,7 @@ func AWSCNIPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
 	return cluster.Spec.Provider.Pods.CIDRBlock
 }
 
-func CiliumPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+func CiliumPodsCIDRBlock(cluster apiv1beta1.Cluster) string {
 	return cluster.Annotations[annotation.CiliumPodCidr]
 }
 
