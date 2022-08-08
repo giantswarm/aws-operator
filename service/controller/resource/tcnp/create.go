@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
@@ -453,7 +454,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		return nil, microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha3.AWSCluster
+	var awsCluster infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
 		err := r.k8sClient.CtrlClient().List(
@@ -470,7 +471,15 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
 		}
 
-		cl = list.Items[0]
+		awsCluster = list.Items[0]
+	}
+
+	var cluster apiv1beta1.Cluster
+	{
+		err = r.k8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: awsCluster.Namespace, Name: awsCluster.Name}, &cluster)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var iamPolicies *template.ParamsMainIAMPolicies
@@ -480,7 +489,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 				ID: key.ClusterID(&cr),
 			},
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			EnableAWSCNI:     key.IsAWSCNINeeded(cl),
+			EnableAWSCNI:     key.IsAWSCNINeeded(cluster),
 			KMSKeyARN:        ek,
 			NodePool: template.ParamsMainIAMPoliciesNodePool{
 				ID: key.MachineDeploymentID(&cr),
@@ -610,7 +619,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 		return nil, microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha3.AWSCluster
+	var awsCluster infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
 		err := r.k8sClient.CtrlClient().List(
@@ -627,16 +636,24 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
 		}
 
-		cl = list.Items[0]
+		awsCluster = list.Items[0]
+	}
+
+	var cluster apiv1beta1.Cluster
+	{
+		err = r.k8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: awsCluster.Namespace, Name: awsCluster.Name}, &cluster)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var networkCIDR string
 	{
-		if cl.Status.Provider.Network.CIDR == "" {
+		if awsCluster.Status.Provider.Network.CIDR == "" {
 			r.logger.Debugf(ctx, "canceling resource", "reason", "tenant cluster network cidr not set")
 			return nil, nil
 		}
-		networkCIDR = cl.Status.Provider.Network.CIDR
+		networkCIDR = awsCluster.Status.Provider.Network.CIDR
 	}
 
 	var nodePools []template.ParamsMainSecurityGroupsTenantClusterNodePool
@@ -656,7 +673,7 @@ func (r *Resource) newSecurityGroups(ctx context.Context, cr infrastructurev1alp
 				CIDR: cc.Status.ControlPlane.VPC.CIDR,
 			},
 		},
-		EnableAWSCNI: key.IsAWSCNINeeded(cl),
+		EnableAWSCNI: key.IsAWSCNINeeded(cluster),
 		TenantCluster: template.ParamsMainSecurityGroupsTenantCluster{
 			InternalAPI: template.ParamsMainSecurityGroupsTenantClusterInternalAPI{
 				ID: idFromGroups(cc.Status.TenantCluster.TCCP.SecurityGroups, key.SecurityGroupName(&cr, "internal-api")),

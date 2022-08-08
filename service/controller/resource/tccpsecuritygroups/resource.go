@@ -53,8 +53,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.A
 		return microerror.Mask(err)
 	}
 
-	enableAWSCNI := key.IsAWSCNINeeded(cr)
-
 	var groups []*ec2.SecurityGroup
 	{
 		r.logger.Debugf(ctx, "finding security groups for tenant cluster %#q", key.ClusterID(&cr))
@@ -62,10 +60,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.A
 		filterValues := []*string{
 			aws.String(key.SecurityGroupName(&cr, "internal-api")),
 			aws.String(key.SecurityGroupName(&cr, "master")),
-		}
-
-		if enableAWSCNI {
-			filterValues = append(filterValues, aws.String(key.SecurityGroupName(&cr, "aws-cni")))
 		}
 
 		i := &ec2.DescribeSecurityGroupsInput{
@@ -91,9 +85,6 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.A
 		groups = o.SecurityGroups
 
 		expectedLength := 2
-		if enableAWSCNI {
-			expectedLength = 3
-		}
 
 		if len(groups) > expectedLength {
 			return microerror.Maskf(executionFailedError, "expected %d security groups, got %d", expectedLength, len(groups))

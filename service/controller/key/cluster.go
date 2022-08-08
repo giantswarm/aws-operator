@@ -169,7 +169,7 @@ func IsAlreadyCreatedCluster(cluster infrastructurev1alpha3.AWSCluster) bool {
 	return cluster.Status.Cluster.HasCreatedCondition()
 }
 
-func IsAWSCNINeeded(cluster infrastructurev1alpha3.AWSCluster) bool {
+func IsAWSCNINeeded(cluster apiv1beta1.Cluster) bool {
 	_, needed := cluster.Annotations[annotation.CiliumPodCidr]
 
 	return needed

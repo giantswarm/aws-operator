@@ -10,6 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
 	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
@@ -23,6 +25,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -78,7 +85,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if IsNotExists(err) {
 			r.logger.Debugf(ctx, "did not find the tenant cluster's control plane cloud formation stack")
 
-			err = r.createStack(ctx, cr)
+			err = r.createStack(ctx, cluster, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -117,7 +124,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if update {
-			err = r.updateStack(ctx, cr)
+			err = r.updateStack(ctx, cluster, cr)
 			if err != nil {
 				return microerror.Mask(err)
 			}
@@ -127,7 +134,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
-func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
+func (r *Resource) createStack(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -137,7 +144,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha3.AW
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newParamsMain(ctx, cr, time.Now())
+		params, err := r.newParamsMain(ctx, cl, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -195,7 +202,7 @@ func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev
 	return awstags.NewCloudFormation(tags), nil
 }
 
-func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha3.AWSCluster, t time.Time) (*template.ParamsMain, error) {
+func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, t time.Time) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		internetGateway, err := r.newParamsMainInternetGateway(ctx, cr)
@@ -206,7 +213,7 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha3.
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		natGateway, err := r.newParamsMainNATGateway(ctx, cr)
+		natGateway, err := r.newParamsMainNATGateway(ctx, cl, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -230,13 +237,13 @@ func (r *Resource) newParamsMain(ctx context.Context, cr infrastructurev1alpha3.
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		vpc, err := r.newParamsMainVPC(ctx, cr)
+		vpc, err := r.newParamsMainVPC(ctx, cl, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 
 		params = &template.ParamsMain{
-			EnableAWSCNI:    key.IsAWSCNINeeded(cr),
+			EnableAWSCNI:    key.IsAWSCNINeeded(cl),
 			InternetGateway: internetGateway,
 			LoadBalancers:   loadBalancers,
 			NATGateway:      natGateway,
@@ -330,8 +337,8 @@ func (r *Resource) newParamsMainLoadBalancers(ctx context.Context, cr infrastruc
 	return loadBalancers, nil
 }
 
-func (r *Resource) newParamsMainNATGateway(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainNATGateway, error) {
-	enableAWSCNI := key.IsAWSCNINeeded(cr)
+func (r *Resource) newParamsMainNATGateway(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainNATGateway, error) {
+	enableAWSCNI := key.IsAWSCNINeeded(cl)
 
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -579,8 +586,8 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 	return subnets, nil
 }
 
-func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainVPC, error) {
-	enableAWSCNI := key.IsAWSCNINeeded(cr)
+func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainVPC, error) {
+	enableAWSCNI := key.IsAWSCNINeeded(cl)
 
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -634,7 +641,7 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cr infrastructurev1alph
 	return vpc, nil
 }
 
-func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) error {
+func (r *Resource) updateStack(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
@@ -644,7 +651,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AW
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newParamsMain(ctx, cr, time.Now())
+		params, err := r.newParamsMain(ctx, cl, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
