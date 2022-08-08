@@ -125,7 +125,13 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			}
 
 			{
-				cl := unittest.DefaultCluster()
+				awsCl := unittest.DefaultCluster()
+				err = k.CtrlClient().Create(ctx, &awsCl)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				cl := unittest.DefaultCAPIClusterWithLabels(awsCl.Name, map[string]string{})
 				err = k.CtrlClient().Create(ctx, &cl)
 				if err != nil {
 					t.Fatal(err)
