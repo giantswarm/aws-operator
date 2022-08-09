@@ -208,6 +208,7 @@ Resources:
         InstanceType: m5.2xlarge
         MetadataOptions:
           HttpTokens: optional
+          HttpPutResponseHopLimit: 2
         Monitoring:
           Enabled: true
         NetworkInterfaces:

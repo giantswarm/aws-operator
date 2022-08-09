@@ -39,6 +39,7 @@ const TemplateMainLaunchTemplate = `
         InstanceType: {{ .Instance.Type }}
         MetadataOptions:
           HttpTokens: {{ .Metadata.HttpTokens }}
+          HttpPutResponseHopLimit: 2
         Monitoring:
           Enabled: {{ .Instance.Monitoring }}
         NetworkInterfaces:
