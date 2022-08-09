@@ -229,6 +229,7 @@ Resources:
         InstanceType: m5.xlarge
         MetadataOptions:
           HttpTokens: optional
+          HttpPutResponseHopLimit: 2
         Monitoring:
           Enabled: false
         NetworkInterfaces:
