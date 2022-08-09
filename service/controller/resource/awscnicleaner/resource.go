@@ -171,7 +171,7 @@ func New(config Config) (*Resource, error) {
 		},
 		// Calico
 		func() client.Object {
-			return &batchv1beta1.CronJob{
+			return &corev1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "ConfigMap",
 				},
@@ -182,7 +182,7 @@ func New(config Config) (*Resource, error) {
 			}
 		},
 		func() client.Object {
-			return &batchv1beta1.CronJob{
+			return &corev1.Service{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "Service",
 				},
@@ -193,7 +193,7 @@ func New(config Config) (*Resource, error) {
 			}
 		},
 		func() client.Object {
-			return &batchv1beta1.CronJob{
+			return &appsv1.DaemonSet{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "DaemonSet",
 				},
@@ -204,7 +204,7 @@ func New(config Config) (*Resource, error) {
 			}
 		},
 		func() client.Object {
-			return &batchv1beta1.CronJob{
+			return &corev1.ServiceAccount{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "ServiceAccount",
 				},
@@ -215,7 +215,7 @@ func New(config Config) (*Resource, error) {
 			}
 		},
 		func() client.Object {
-			return &batchv1beta1.CronJob{
+			return &rbacv1.ClusterRole{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "ClusterRole",
 				},
@@ -225,7 +225,7 @@ func New(config Config) (*Resource, error) {
 			}
 		},
 		func() client.Object {
-			return &batchv1beta1.CronJob{
+			return &rbacv1.ClusterRoleBinding{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "ClusterRoleBinding",
 				},
