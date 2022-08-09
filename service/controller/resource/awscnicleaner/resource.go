@@ -169,6 +169,71 @@ func New(config Config) (*Resource, error) {
 				},
 			}
 		},
+		// Calico
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ConfigMap",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "calico-config",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "Service",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "calico-typha",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "DaemonSet",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "calico-node",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ServiceAccount",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "calico-node",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ClusterRole",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "calico-node",
+				},
+			}
+		},
+		func() client.Object {
+			return &batchv1beta1.CronJob{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ClusterRoleBinding",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "calico-node",
+				},
+			}
+		},
 	}
 
 	r := &Resource{

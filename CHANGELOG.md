@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Ensure `aws-node` daemonset does not schedule on upgraded nodes.
 - Cleanup `aws-node` resources after a successful migration.
+- Cleanup `calico` resources after a successful migration.
 - Use `cilium.giantswarm.io/pod-cidr` annotation as Cilium Pod CIDR.
 - Add Flatcar `3227.2.1` AMI.
 - Bump `k8scloudconfig` to support newer flatcar.
