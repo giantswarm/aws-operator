@@ -13,6 +13,7 @@ import (
 	"github.com/giantswarm/randomkeys/v3"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/label"
@@ -143,6 +144,13 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 
 		cl = list.Items[0]
+	}
+
+	// Get Cluster CR
+	cluster := apiv1beta1.Cluster{}
+	err = t.config.K8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: key.ClusterID(&cr)}, &cluster)
+	if err != nil {
+		return "", microerror.Mask(err)
 	}
 
 	var certFiles []certs.File
@@ -330,8 +338,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	// 1) cilium-specific annotation (used during upgrades from v17 to v18+)
 	// 2) awscluster podcidr field (used for new clusters where overlap with VPC is not important).
 	podCidr := key.AWSCNIPodsCIDRBlock(cl)
-	if key.CiliumPodsCIDRBlock(cl) != "" {
-		podCidr = key.CiliumPodsCIDRBlock(cl)
+	if key.CiliumPodsCIDRBlock(cluster) != "" {
+		podCidr = key.CiliumPodsCIDRBlock(cluster)
 	}
 
 	// Pod CIDR should never be nil.

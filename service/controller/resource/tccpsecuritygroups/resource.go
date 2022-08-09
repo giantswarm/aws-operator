@@ -9,6 +9,8 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v13/service/controller/key"
@@ -19,11 +21,13 @@ const (
 )
 
 type Config struct {
+	CtrlClient    client.Client
 	Logger        micrologger.Logger
 	ToClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
 
 type Resource struct {
+	ctrlClient    client.Client
 	logger        micrologger.Logger
 	toClusterFunc func(ctx context.Context, v interface{}) (infrastructurev1alpha3.AWSCluster, error)
 }
@@ -35,7 +39,11 @@ func New(config Config) (*Resource, error) {
 	if config.ToClusterFunc == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.ToClusterFunc must not be empty", config)
 	}
+	if config.CtrlClient == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.CtrlClient must not be empty", config)
+	}
 	r := &Resource{
+		ctrlClient:    config.CtrlClient,
 		logger:        config.Logger,
 		toClusterFunc: config.ToClusterFunc,
 	}
@@ -53,7 +61,13 @@ func (r *Resource) addInfoToCtx(ctx context.Context, cr infrastructurev1alpha3.A
 		return microerror.Mask(err)
 	}
 
-	enableAWSCNI := key.IsAWSCNINeeded(cr)
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	enableAWSCNI := key.IsAWSCNINeeded(cluster)
 
 	var groups []*ec2.SecurityGroup
 	{

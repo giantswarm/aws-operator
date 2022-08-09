@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `cilium.giantswarm.io/pod-cidr` annotation as Cilium Pod CIDR.
 - Add Flatcar `3227.2.1` AMI.
 
+### Removed
+
+- Remove creation of cilium app config.
+
 ## [13.0.0-alpha2] - 2022-07-27
 
 ### Changed
