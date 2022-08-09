@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cleanup `aws-node` resources after a successful migration.
 - Use `cilium.giantswarm.io/pod-cidr` annotation as Cilium Pod CIDR.
 - Add Flatcar `3227.2.1` AMI.
+- Bump `k8scloudconfig` to support newer flatcar.
 
 ### Removed
 
