@@ -24,7 +24,7 @@ const (
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var err error
-	cr, err := key.ToCluster(ctx, obj)
+	cr, err := key.ToControlPlane(obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -43,7 +43,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	// Only run this if the Cluster CR has the cilium pod annotation
 	cluster := apiv1beta1.Cluster{}
-	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: key.ClusterID(&cr)}, &cluster)
 	if err != nil {
 		return microerror.Mask(err)
 	}
