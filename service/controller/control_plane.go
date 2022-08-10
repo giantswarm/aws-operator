@@ -25,6 +25,7 @@ import (
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/awsclient"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/cleanuptccpniamroles"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/cpvpc"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/prepareawscniformigration"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/s3object"
 	"github.com/giantswarm/aws-operator/v13/service/controller/resource/snapshotid"
@@ -469,6 +470,19 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var prepareAwsCniForMigrationResource resource.Interface
+	{
+		c := prepareawscniformigration.Config{
+			Logger:     config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+		}
+
+		prepareAwsCniForMigrationResource, err = prepareawscniformigration.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -488,6 +502,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		s3ObjectResource,
+		prepareAwsCniForMigrationResource,
 		tccpnResource,
 
 		// All these resources implement cleanup functionality only being executed
