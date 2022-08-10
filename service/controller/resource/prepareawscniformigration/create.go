@@ -50,6 +50,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	if key.CiliumPodsCIDRBlock(cluster) == "" {
 		r.logger.Debugf(ctx, "Cluster CR has no %q annotation, nothing to do", annotation.CiliumPodCidr)
+		return nil
 	}
 
 	wcCtrlClient := cc.Client.TenantCluster.K8s.CtrlClient()
@@ -58,7 +59,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	err = wcCtrlClient.Get(ctx, client.ObjectKey{Name: dsName, Namespace: dsNamespace}, ds)
 	if apierrors.IsNotFound(err) {
 		// All good.
-		r.logger.Debugf(ctx, "Daemonset %q was not found in namespace %q", dsName, dsNamespace)
+		r.logger.Debugf(ctx, "Daemonset %q was not found in namespace %q, nothing to do", dsName, dsNamespace)
 		return nil
 	} else if err != nil {
 		return microerror.Mask(err)
