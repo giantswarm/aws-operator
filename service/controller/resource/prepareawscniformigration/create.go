@@ -24,7 +24,7 @@ const (
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var err error
-	cr, err := key.ToControlPlane(obj)
+	cr, err := key.ToCluster(ctx, obj)
 	if err != nil {
 		return microerror.Mask(err)
 	}
