@@ -5,7 +5,6 @@ import (
 
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/reconciliationcanceledcontext"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -71,12 +70,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if env.Name == envVarName {
 			if env.Value == key.CiliumPodsCIDRBlock(cluster) {
 				// Env var found and correct. Check if daemonset is updated.
-
-				if ds.Status.DesiredNumberScheduled != ds.Status.CurrentNumberScheduled {
-					r.logger.Debugf(ctx, "Daemonset %q has needed env var %q but not all replicas are healthy. Canceling reconciliation", dsName)
-					reconciliationcanceledcontext.SetCanceled(ctx)
-				}
-
 				return nil
 			} else {
 				env.Value = key.CiliumPodsCIDRBlock(cluster)
@@ -102,8 +95,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	// Wait for next reconciliation loop.
-	r.logger.Debugf(ctx, "Daemonset %q was updated, canceling reconciliation", dsName)
-	reconciliationcanceledcontext.SetCanceled(ctx)
+	r.logger.Debugf(ctx, "Daemonset %q was updated", dsName)
 
 	return nil
 }
