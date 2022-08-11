@@ -419,22 +419,27 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 	}
 
 	var cloudfrontDomain string
-	var cm v1.ConfigMap
 	{
-		o := client.ObjectKey{
-			Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
-			Namespace: cr.Namespace,
-		}
-		err := r.k8sClient.CtrlClient().Get(ctx, o, &cm)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
+		// ignore China, Cloudfront does not work.
+		if r.route53Enabled {
+			var cm v1.ConfigMap
+			{
+				o := client.ObjectKey{
+					Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+					Namespace: cr.Namespace,
+				}
+				err := r.k8sClient.CtrlClient().Get(ctx, o, &cm)
+				if err != nil {
+					return nil, microerror.Mask(err)
+				}
 
-		cloudfrontDomain = cm.Data["domain"]
-		if cloudfrontDomain == "" {
-			return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
-		}
+				cloudfrontDomain = cm.Data["domain"]
+				if cloudfrontDomain == "" {
+					return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+				}
 
+			}
+		}
 	}
 
 	var iamPolicies *template.ParamsMainIAMPolicies
