@@ -331,7 +331,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				awsEndpoint = "amazonaws.com.cn"
 			}
 
-			if cloudfrontDomain == "" {
+			if cloudfrontDomain == "" && !key.IsChinaRegion(key.Region(cl)) {
 				return "", microerror.Maskf(executionFailedError, "Cloudfront domain for service account issuer cannot be empty")
 			}
 
