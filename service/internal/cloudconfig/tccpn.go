@@ -275,21 +275,23 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				}
 				return nil
 			})
-			g.Go(func() error {
-				var cm v1.ConfigMap
-				err := t.config.K8sClient.CtrlClient().Get(
-					ctx, client.ObjectKey{
-						Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
-						Namespace: cr.Namespace,
-					},
-					&cm)
-				if err != nil {
-					return microerror.Mask(err)
-				}
-				cloudfrontDomain = cm.Data["domain"]
+			if !key.IsChinaRegion(key.Region(cl)) {
+				g.Go(func() error {
+					var cm v1.ConfigMap
+					err := t.config.K8sClient.CtrlClient().Get(
+						ctx, client.ObjectKey{
+							Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+							Namespace: cr.Namespace,
+						},
+						&cm)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+					cloudfrontDomain = cm.Data["domain"]
 
-				return nil
-			})
+					return nil
+				})
+			}
 		}
 
 		err := g.Wait()
@@ -330,10 +332,14 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			}
 
 			if cloudfrontDomain == "" {
-				return "", microerror.Maskf(executionFailedError, "Cloudfront Domain for service account issuer cannot be nil")
+				return "", microerror.Maskf(executionFailedError, "Cloudfront domain for service account issuer cannot be empty")
 			}
 
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontDomain))
+			if key.IsChinaRegion(key.Region(cl)) {
+				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3.%s.%s/%s-g8s-%s-oidc-pod-identity", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
+			} else {
+				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontDomain))
+			}
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
