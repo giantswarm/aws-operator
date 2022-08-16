@@ -8,7 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
@@ -417,11 +420,53 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		return nil, microerror.Mask(err)
 	}
 
+	var cl infrastructurev1alpha3.AWSCluster
+	{
+		err := r.k8sClient.CtrlClient().Get(
+			ctx,
+			types.NamespacedName{Name: key.ClusterID(&cr), Namespace: cr.Namespace},
+			&cl,
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var cloudfrontDomain string
+	var cloudfrontEnabled bool
+	{
+		if r.route53Enabled {
+			if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+				// ignore China, Cloudfront does not work.
+				var cm v1.ConfigMap
+				{
+					o := client.ObjectKey{
+						Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+						Namespace: cr.Namespace,
+					}
+					err := r.k8sClient.CtrlClient().Get(ctx, o, &cm)
+					if err != nil {
+						return nil, microerror.Mask(err)
+					}
+
+					cloudfrontDomain = cm.Data["domain"]
+					if cloudfrontDomain == "" {
+						return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+					}
+
+				}
+				cloudfrontEnabled = true
+			}
+		}
+	}
+
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			AccountID:            cc.Status.TenantCluster.AWS.AccountID,
 			AWSBaseDomain:        key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
+			CloudfrontEnabled:    cloudfrontEnabled,
+			CloudfrontDomain:     cloudfrontDomain,
 			ClusterID:            key.ClusterID(&cr),
 			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
