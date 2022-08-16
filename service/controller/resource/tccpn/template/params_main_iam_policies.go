@@ -3,7 +3,8 @@ package template
 type ParamsMainIAMPolicies struct {
 	AccountID            string
 	AWSBaseDomain        string
-	Cloudfront           string
+	CloudfrontEnabled    bool
+	CloudfrontDomain     string
 	ClusterID            string
 	EC2ServiceDomain     string
 	HostedZoneID         string

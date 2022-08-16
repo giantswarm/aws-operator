@@ -133,15 +133,15 @@ const TemplateMainIAMPolicies = `
             Principal:
               AWS: !GetAtt IAMManagerRole.Arn
             Action: "sts:AssumeRole"
-{{- if .IAMPolicies.Cloudfront }}
+          {{- if .IAMPolicies.CloudfrontEnabled }}
           - Effect: "Allow"
             Principal:
-              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/{{ .IAMPolicies.Cloudfront }}"
+              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/{{ .IAMPolicies.CloudfrontDomain }}"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringEquals:
-                "{{ .IAMPolicies.Cloudfront }}:sub": "system:serviceaccount:kube-system:external-dns"
-{{- end -}}
+                "{{ .IAMPolicies.CloudfrontDomain }}:sub": "system:serviceaccount:kube-system:external-dns"
+          {{- end }}
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:

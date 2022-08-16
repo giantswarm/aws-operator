@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
@@ -421,33 +422,22 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 
 	var cl infrastructurev1alpha3.AWSCluster
 	{
-		var list infrastructurev1alpha3.AWSClusterList
-
-		err := r.k8sClient.CtrlClient().List(
+		err := r.k8sClient.CtrlClient().Get(
 			ctx,
-			&list,
-			client.InNamespace(cr.GetNamespace()),
-			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+			types.NamespacedName{Name: key.ClusterID(&cr), Namespace: cr.Namespace},
+			&cl,
 		)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-
-		if len(list.Items) == 0 {
-			return nil, microerror.Mask(notFoundError)
-		}
-		if len(list.Items) > 1 {
-			return nil, microerror.Mask(tooManyCRsError)
-		}
-
-		cl = list.Items[0]
 	}
 
 	var cloudfrontDomain string
+	var cloudfrontEnabled bool
 	{
-		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
-			// ignore China, Cloudfront does not work.
-			if r.route53Enabled {
+		if r.route53Enabled {
+			if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+				// ignore China, Cloudfront does not work.
 				var cm v1.ConfigMap
 				{
 					o := client.ObjectKey{
@@ -465,6 +455,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 					}
 
 				}
+				cloudfrontEnabled = true
 			}
 		}
 	}
@@ -474,7 +465,8 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			AccountID:            cc.Status.TenantCluster.AWS.AccountID,
 			AWSBaseDomain:        key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
-			Cloudfront:           cloudfrontDomain,
+			CloudfrontEnabled:    cloudfrontEnabled,
+			CloudfrontDomain:     cloudfrontDomain,
 			ClusterID:            key.ClusterID(&cr),
 			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
