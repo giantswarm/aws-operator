@@ -275,22 +275,24 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				}
 				return nil
 			})
-			if !key.IsChinaRegion(key.Region(cl)) {
-				g.Go(func() error {
-					var cm v1.ConfigMap
-					err := t.config.K8sClient.CtrlClient().Get(
-						ctx, client.ObjectKey{
-							Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
-							Namespace: cr.Namespace,
-						},
-						&cm)
-					if err != nil {
-						return microerror.Mask(err)
-					}
-					cloudfrontDomain = cm.Data["domain"]
+			if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+				if !key.IsChinaRegion(key.Region(cl)) {
+					g.Go(func() error {
+						var cm v1.ConfigMap
+						err := t.config.K8sClient.CtrlClient().Get(
+							ctx, client.ObjectKey{
+								Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+								Namespace: cr.Namespace,
+							},
+							&cm)
+						if err != nil {
+							return microerror.Mask(err)
+						}
+						cloudfrontDomain = cm.Data["domain"]
 
-					return nil
-				})
+						return nil
+					})
+				}
 			}
 		}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
+	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -418,26 +419,52 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		return nil, microerror.Mask(err)
 	}
 
+	var cl infrastructurev1alpha3.AWSCluster
+	{
+		var list infrastructurev1alpha3.AWSClusterList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			return nil, microerror.Mask(notFoundError)
+		}
+		if len(list.Items) > 1 {
+			return nil, microerror.Mask(tooManyCRsError)
+		}
+
+		cl = list.Items[0]
+	}
+
 	var cloudfrontDomain string
 	{
-		// ignore China, Cloudfront does not work.
-		if r.route53Enabled {
-			var cm v1.ConfigMap
-			{
-				o := client.ObjectKey{
-					Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
-					Namespace: cr.Namespace,
-				}
-				err := r.k8sClient.CtrlClient().Get(ctx, o, &cm)
-				if err != nil {
-					return nil, microerror.Mask(err)
-				}
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+			// ignore China, Cloudfront does not work.
+			if r.route53Enabled {
+				var cm v1.ConfigMap
+				{
+					o := client.ObjectKey{
+						Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+						Namespace: cr.Namespace,
+					}
+					err := r.k8sClient.CtrlClient().Get(ctx, o, &cm)
+					if err != nil {
+						return nil, microerror.Mask(err)
+					}
 
-				cloudfrontDomain = cm.Data["domain"]
-				if cloudfrontDomain == "" {
-					return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
-				}
+					cloudfrontDomain = cm.Data["domain"]
+					if cloudfrontDomain == "" {
+						return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+					}
 
+				}
 			}
 		}
 	}
