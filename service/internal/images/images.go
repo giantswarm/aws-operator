@@ -5,7 +5,7 @@ import (
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v13/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v14/pkg/template"
 	"github.com/giantswarm/microerror"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/meta"
