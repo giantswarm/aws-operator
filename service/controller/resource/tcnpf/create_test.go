@@ -12,8 +12,8 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/v13/service/controller/resource/tcnpf/template"
-	"github.com/giantswarm/aws-operator/v13/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tcnpf/template"
+	"github.com/giantswarm/aws-operator/v14/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")

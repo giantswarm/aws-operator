@@ -13,9 +13,9 @@ import (
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v13/service/controller/key"
-	"github.com/giantswarm/aws-operator/v13/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v14/service/controller/key"
+	"github.com/giantswarm/aws-operator/v14/service/internal/unittest"
 )
 
 func Test_EnsureCreated_AZ_Spec(t *testing.T) {
