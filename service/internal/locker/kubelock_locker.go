@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 
-	"github.com/giantswarm/aws-operator/v14/pkg/project"
+	"github.com/giantswarm/aws-operator/v13/pkg/project"
 )
 
 const (

@@ -1,8 +1,8 @@
 package guest
 
 import (
-	"github.com/giantswarm/aws-operator/v14/flag/service/installation/guest/ipam"
-	"github.com/giantswarm/aws-operator/v14/flag/service/installation/guest/kubernetes"
+	"github.com/giantswarm/aws-operator/v13/flag/service/installation/guest/ipam"
+	"github.com/giantswarm/aws-operator/v13/flag/service/installation/guest/kubernetes"
 )
 
 type Guest struct {

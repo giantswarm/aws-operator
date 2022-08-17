@@ -14,14 +14,14 @@ import (
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v14/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v14/pkg/label"
-	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v14/service/controller/key"
-	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpnoutputs"
-	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tcnp/template"
-	cloudformationutils "github.com/giantswarm/aws-operator/v14/service/internal/cloudformation"
-	"github.com/giantswarm/aws-operator/v14/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/v13/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v13/pkg/label"
+	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/tccpnoutputs"
+	"github.com/giantswarm/aws-operator/v13/service/controller/resource/tcnp/template"
+	cloudformationutils "github.com/giantswarm/aws-operator/v13/service/internal/cloudformation"
+	"github.com/giantswarm/aws-operator/v13/service/internal/encrypter/kms"
 )
 
 const (

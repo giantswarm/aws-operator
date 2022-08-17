@@ -3,7 +3,7 @@ package template
 import (
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/v14/pkg/template"
+	"github.com/giantswarm/aws-operator/v13/pkg/template"
 )
 
 func Render(v interface{}) (string, error) {

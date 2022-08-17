@@ -9,8 +9,8 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
 
-	"github.com/giantswarm/aws-operator/v14/service/internal/locker"
-	"github.com/giantswarm/aws-operator/v14/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v13/service/internal/locker"
+	"github.com/giantswarm/aws-operator/v13/service/internal/unittest"
 )
 
 func Test_SubnetAllocator(t *testing.T) {

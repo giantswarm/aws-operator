@@ -1,4 +1,4 @@
-module github.com/giantswarm/aws-operator/v14
+module github.com/giantswarm/aws-operator/v13
 
 go 1.18
 
