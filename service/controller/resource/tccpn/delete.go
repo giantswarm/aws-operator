@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/finalizerskeptcontext"
 
-	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v14/service/controller/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {

@@ -10,8 +10,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
-	"github.com/giantswarm/aws-operator/v13/pkg/label"
-	"github.com/giantswarm/aws-operator/v13/service/controller/key"
+	"github.com/giantswarm/aws-operator/v14/pkg/label"
+	"github.com/giantswarm/aws-operator/v14/service/controller/key"
 )
 
 func (r *Resource) EnsureDeleted(ctx context.Context, obj interface{}) error {

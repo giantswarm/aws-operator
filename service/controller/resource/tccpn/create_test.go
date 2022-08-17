@@ -14,15 +14,15 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/v13/service/controller/resource/tccpn/template"
-	"github.com/giantswarm/aws-operator/v13/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/v13/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/v13/service/internal/encrypter"
-	"github.com/giantswarm/aws-operator/v13/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/v13/service/internal/images"
-	"github.com/giantswarm/aws-operator/v13/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/v13/service/internal/releases"
-	"github.com/giantswarm/aws-operator/v13/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/v14/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v14/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v14/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v14/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v14/service/internal/images"
+	"github.com/giantswarm/aws-operator/v14/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v14/service/internal/releases"
+	"github.com/giantswarm/aws-operator/v14/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")

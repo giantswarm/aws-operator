@@ -8,9 +8,9 @@ import (
 	"github.com/giantswarm/micrologger"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/giantswarm/aws-operator/v13/client/aws"
-	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v13/service/internal/credential"
+	"github.com/giantswarm/aws-operator/v14/client/aws"
+	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v14/service/internal/credential"
 )
 
 const (

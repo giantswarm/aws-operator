@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v13/service"
+	"github.com/giantswarm/aws-operator/v14/service"
 )
 
 type Config struct {

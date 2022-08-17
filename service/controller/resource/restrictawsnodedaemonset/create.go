@@ -9,9 +9,9 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v13/pkg/label"
-	"github.com/giantswarm/aws-operator/v13/pkg/project"
-	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v14/pkg/label"
+	"github.com/giantswarm/aws-operator/v14/pkg/project"
+	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 )
 
 const (
