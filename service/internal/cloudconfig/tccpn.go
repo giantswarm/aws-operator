@@ -420,9 +420,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
 		if hasCilium {
-			params.DisableCalico = true
 			params.EnableAWSCNI = false
+			params.DisableCalico = true
+			params.CalicoPolicyOnly = false
 		} else {
+			params.EnableAWSCNI = true
+			params.DisableCalico = false
 			params.CalicoPolicyOnly = true
 		}
 
