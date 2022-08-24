@@ -197,9 +197,12 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			return nil, microerror.Mask(err)
 		}
 		if hasCilium {
-			params.DisableCalico = true
 			params.EnableAWSCNI = false
+			params.DisableCalico = true
+			params.CalicoPolicyOnly = false
 		} else {
+			params.EnableAWSCNI = true
+			params.DisableCalico = false
 			params.CalicoPolicyOnly = true
 		}
 
