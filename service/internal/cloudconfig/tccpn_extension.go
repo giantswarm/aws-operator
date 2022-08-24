@@ -206,7 +206,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller)
 	}
 
-	if e.hasCilium {
+	if !e.hasCilium {
 		filesMeta = append(filesMeta, k8scloudconfig.FileMetadata{
 			AssetContent: template.AwsCNIManifest,
 			Path:         "/srv/aws-cni.yaml",
