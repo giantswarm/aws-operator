@@ -422,6 +422,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		if hasCilium {
 			params.DisableCalico = true
 			params.EnableAWSCNI = false
+		} else {
+			params.CalicoPolicyOnly = true
 		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)

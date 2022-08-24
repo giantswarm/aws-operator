@@ -199,6 +199,8 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		if hasCilium {
 			params.DisableCalico = true
 			params.EnableAWSCNI = false
+		} else {
+			params.CalicoPolicyOnly = true
 		}
 
 		params.DisableKubeProxy = false
