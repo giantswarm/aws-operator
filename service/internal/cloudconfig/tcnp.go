@@ -192,7 +192,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
 
-		hasCilium, err := key.HasCilium(cl)
+		hasCilium, err := key.HasCilium(&cl)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

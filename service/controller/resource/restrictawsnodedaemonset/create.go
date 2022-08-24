@@ -28,7 +28,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	hasCilium, err := key.HasCilium(cr)
+	hasCilium, err := key.HasCilium(&cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}

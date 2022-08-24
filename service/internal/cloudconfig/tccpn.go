@@ -146,7 +146,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		cl = list.Items[0]
 	}
 
-	hasCilium, err := key.HasCilium(cl)
+	hasCilium, err := key.HasCilium(&cl)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

@@ -136,7 +136,7 @@ func CiliumPodsCIDRBlock(cluster apiv1beta1.Cluster) string {
 }
 
 // HasCilium returns true if the release uses cilium as CNI. Cilium will be added in v19, so any release >= v19.0.0
-func HasCilium(cluster infrastructurev1alpha3.AWSCluster) (bool, error) {
+func HasCilium(cluster LabelsGetter) (bool, error) {
 	release := cluster.GetLabels()[label.Release]
 
 	version, err := semver.Parse(release)
@@ -188,6 +188,11 @@ func IsAlreadyCreatedCluster(cluster infrastructurev1alpha3.AWSCluster) bool {
 }
 
 func IsAWSCNINeeded(cluster apiv1beta1.Cluster) bool {
+	hasCilium, _ := HasCilium(&cluster)
+	if !hasCilium {
+		return true
+	}
+
 	_, needed := cluster.Annotations[annotation.CiliumPodCidr]
 
 	return needed
