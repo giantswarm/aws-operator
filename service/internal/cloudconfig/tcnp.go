@@ -192,11 +192,18 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
 
-		params.DisableCalico = true
+		hasCilium, err := key.HasCilium(cl)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+		if hasCilium {
+			params.DisableCalico = true
+			params.EnableAWSCNI = false
+		}
+
 		params.DisableKubeProxy = false
 		params.Cluster = g8sConfig.Cluster
 		params.DockerhubToken = t.config.DockerhubToken
-		params.EnableAWSCNI = false
 		params.EnableCSIMigrationAWS = true
 		params.Extension = &TCNPExtension{
 			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),

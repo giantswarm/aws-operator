@@ -8,11 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
+	"github.com/giantswarm/aws-operator/v13/pkg/label"
 	"github.com/giantswarm/aws-operator/v13/pkg/project"
 )
 
@@ -131,6 +133,22 @@ func AWSCNIPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
 
 func CiliumPodsCIDRBlock(cluster apiv1beta1.Cluster) string {
 	return cluster.Annotations[annotation.CiliumPodCidr]
+}
+
+// HasCilium returns true if the release uses cilium as CNI. Cilium will be added in v19, so any release >= v19.0.0
+func HasCilium(cluster infrastructurev1alpha3.AWSCluster) (bool, error) {
+	release := cluster.GetLabels()[label.Release]
+
+	version, err := semver.Parse(release)
+	if err != nil {
+		return false, microerror.Mask(err)
+	}
+
+	if version.Major >= 19 {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func IsChinaRegion(awsRegion string) bool {

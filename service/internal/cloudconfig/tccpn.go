@@ -146,6 +146,11 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		cl = list.Items[0]
 	}
 
+	hasCilium, err := key.HasCilium(cl)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
 	// Get Cluster CR
 	cluster := apiv1beta1.Cluster{}
 	err = t.config.K8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: key.ClusterID(&cr)}, &cluster)
@@ -375,7 +380,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var controllerManagerExtraArgs []string
-	{
+	if hasCilium {
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--allocate-node-cidrs=true")
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+podCidr)
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--node-cidr-mask-size=25")
@@ -414,8 +419,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCCPN(&cr, mapping.ID))
 
+		if hasCilium {
+			params.DisableCalico = true
+			params.EnableAWSCNI = false
+		}
+
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
-		params.DisableCalico = true
 		params.DisableKubeProxy = false
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
@@ -423,7 +432,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.DockerhubToken = t.config.DockerhubToken
-		params.EnableAWSCNI = false
 		params.EnableCSIMigrationAWS = true
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort,
