@@ -2,7 +2,9 @@ package cloudconfig
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
@@ -413,6 +415,56 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 	}
 
+	var awsCNIVersion string
+	var awsCNIMinimumIPTarget string
+	var awsCNIWarmIPTarget string
+	var awsCNIPrefix bool
+	var awsCNIAdditionalTags string
+	if !hasCilium {
+		awsCNIVersion, err = t.config.Images.AWSCNI(ctx, obj)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+
+		{
+			awsCNIMinimumIPTarget = key.AWSCNIDefaultMinimumIPTarget
+			if v, ok := cl.GetAnnotations()[annotation.AWSCNIMinimumIPTarget]; ok {
+				awsCNIMinimumIPTarget = v
+			}
+
+			awsCNIWarmIPTarget = key.AWSCNIDefaultWarmIPTarget
+			if v, ok := cl.GetAnnotations()[annotation.AWSCNIWarmIPTarget]; ok {
+				awsCNIWarmIPTarget = v
+			}
+		}
+
+		{
+			if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
+				awsCNIPrefix = true
+			}
+		}
+
+		{
+			var list apiv1beta1.ClusterList
+			err := t.config.K8sClient.CtrlClient().List(
+				ctx,
+				&list,
+				client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+			)
+			if err != nil {
+				return "", microerror.Mask(err)
+			}
+			if len(list.Items) != 1 {
+				return "", microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+			}
+
+			awsCNIAdditionalTags, err = getCloudTags(list.Items[0].GetLabels())
+			if err != nil {
+				return "", microerror.Mask(err)
+			}
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		params = k8scloudconfig.Params{}
@@ -448,7 +500,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		if !multiMasterEnabled {
 			params.Etcd.InitialCluster = fmt.Sprintf("%s=https://%s.%s:2380", key.ControlPlaneEtcdNodeName(mapping.ID), key.ControlPlaneEtcdNodeName(mapping.ID), key.TenantClusterBaseDomain(cl))
 		}
-		params.Extension = &TCCPNExtension{
+		ext := TCCPNExtension{
 			baseDomain:           key.TenantClusterBaseDomain(cl),
 			cc:                   cc,
 			cluster:              cl,
@@ -460,10 +512,19 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			hasCilium:            hasCilium,
 			masterID:             mapping.ID,
 			encryptionConfig:     encryptedEncryptionConfig,
-			registryDomain:       t.config.RegistryDomain,
-			serviceAccountv2Priv: serviceAccountV2Priv,
 			serviceAccountV2Pub:  serviceAccountV2Pub,
+			serviceAccountv2Priv: serviceAccountV2Priv,
+			registryDomain:       t.config.RegistryDomain,
 		}
+		if !hasCilium {
+			ext.awsCNIAdditionalTags = awsCNIAdditionalTags
+			ext.awsCNIMinimumIPTarget = awsCNIMinimumIPTarget
+			ext.awsCNIPrefix = awsCNIPrefix
+			ext.awsCNIVersion = awsCNIVersion
+			ext.awsCNIWarmIPTarget = awsCNIWarmIPTarget
+		}
+		params.Extension = &ext
+
 		params.IrsaSAKeyArgs = irsaSAKeyArgs
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
@@ -502,4 +563,30 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	return templateBody, nil
+}
+
+func getCloudTags(labels map[string]string) (string, error) {
+	tags := map[string]string{}
+	for k, v := range labels {
+		if isCloudTagKey(k) {
+			tags[trimCloudTagKey(k)] = v
+		}
+	}
+
+	t, err := json.Marshal(tags)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	return string(t), nil
+}
+
+// IsCloudTagKey checks if a tag has proper prefix
+func isCloudTagKey(tagKey string) bool {
+	return strings.HasPrefix(tagKey, key.KeyCloudPrefix)
+}
+
+// TrimCloudTagKey trims key cloud prefix from a tag
+func trimCloudTagKey(tagKey string) string {
+	return strings.TrimPrefix(tagKey, key.KeyCloudPrefix)
 }
