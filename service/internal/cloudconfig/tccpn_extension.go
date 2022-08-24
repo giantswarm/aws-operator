@@ -29,6 +29,7 @@ type TCCPNExtension struct {
 	encryptionKey        string
 	externalSNAT         bool
 	haMasters            bool
+	hasCilium            bool
 	masterID             int
 	encryptionConfig     string
 	serviceAccountV2Pub  string
@@ -203,6 +204,22 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0644,
 		}
 		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller)
+	}
+
+	if e.hasCilium {
+		filesMeta = append(filesMeta, k8scloudconfig.FileMetadata{
+			AssetContent: template.AwsCNIManifest,
+			Path:         "/srv/aws-cni.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		})
 	}
 
 	certsMeta := []k8scloudconfig.FileMetadata{}

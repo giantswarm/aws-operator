@@ -457,6 +457,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			encryptionKey:        ek,
 			externalSNAT:         externalSNAT,
 			haMasters:            multiMasterEnabled,
+			hasCilium:            hasCilium,
 			masterID:             mapping.ID,
 			encryptionConfig:     encryptedEncryptionConfig,
 			registryDomain:       t.config.RegistryDomain,
