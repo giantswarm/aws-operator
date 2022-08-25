@@ -220,6 +220,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			externalSNAT:   externalSNAT,
 			registryDomain: t.config.RegistryDomain,
 		}
+		params.ExternalCloudControllerManager = false
 		params.ForceCGroupsV1 = forceCGroupsV1
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
