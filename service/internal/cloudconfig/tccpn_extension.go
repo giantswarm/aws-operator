@@ -17,23 +17,25 @@ import (
 )
 
 type TCCPNExtension struct {
-	// TODO Pass context to k8scloudconfig rendering fucntions
-	//
-	//     https://github.com/giantswarm/giantswarm/issues/4329.
-	//
-	baseDomain           string
-	cc                   *controllercontext.Context
-	cluster              infrastructurev1alpha3.AWSCluster
-	clusterCerts         []certs.File
-	encrypter            encrypter.Interface
-	encryptionKey        string
-	externalSNAT         bool
-	haMasters            bool
-	masterID             int
-	encryptionConfig     string
-	serviceAccountV2Pub  string
-	serviceAccountv2Priv string
-	registryDomain       string
+	awsCNIAdditionalTags  string
+	awsCNIMinimumIPTarget string
+	awsCNIPrefix          bool
+	awsCNIVersion         string
+	awsCNIWarmIPTarget    string
+	baseDomain            string
+	cc                    *controllercontext.Context
+	cluster               infrastructurev1alpha3.AWSCluster
+	clusterCerts          []certs.File
+	encrypter             encrypter.Interface
+	encryptionKey         string
+	externalSNAT          bool
+	haMasters             bool
+	hasCilium             bool
+	masterID              int
+	encryptionConfig      string
+	serviceAccountV2Pub   string
+	serviceAccountv2Priv  string
+	registryDomain        string
 }
 
 func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
@@ -205,6 +207,22 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller)
 	}
 
+	if !e.hasCilium {
+		filesMeta = append(filesMeta, k8scloudconfig.FileMetadata{
+			AssetContent: template.AwsCNIManifest,
+			Path:         "/srv/aws-cni.yaml",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0644,
+		})
+	}
+
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
 		{
@@ -289,13 +307,18 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 	var fileAssets []k8scloudconfig.FileAsset
 
 	data := TemplateData{
-		AWSRegion:            key.Region(e.cluster),
-		BaseDomain:           e.baseDomain,
-		ExternalSNAT:         e.externalSNAT,
-		IsChinaRegion:        key.IsChinaRegion(key.Region(e.cluster)),
-		MasterENIName:        key.ControlPlaneENIName(&e.cluster, e.masterID),
-		MasterEtcdVolumeName: key.ControlPlaneVolumeName(&e.cluster, e.masterID),
-		RegistryDomain:       e.registryDomain,
+		AWSCNIAdditionalTags:  e.awsCNIAdditionalTags,
+		AWSCNIMinimumIPTarget: e.awsCNIMinimumIPTarget,
+		AWSCNIPrefix:          e.awsCNIPrefix,
+		AWSCNIVersion:         e.awsCNIVersion,
+		AWSCNIWarmIPTarget:    e.awsCNIWarmIPTarget,
+		AWSRegion:             key.Region(e.cluster),
+		BaseDomain:            e.baseDomain,
+		ExternalSNAT:          e.externalSNAT,
+		IsChinaRegion:         key.IsChinaRegion(key.Region(e.cluster)),
+		MasterENIName:         key.ControlPlaneENIName(&e.cluster, e.masterID),
+		MasterEtcdVolumeName:  key.ControlPlaneVolumeName(&e.cluster, e.masterID),
+		RegistryDomain:        e.registryDomain,
 	}
 
 	for _, fm := range filesMeta {
