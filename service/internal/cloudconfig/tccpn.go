@@ -524,6 +524,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			ext.awsCNIWarmIPTarget = awsCNIWarmIPTarget
 		}
 		params.Extension = &ext
+		params.ExternalCloudControllerManager = false
 
 		params.IrsaSAKeyArgs = irsaSAKeyArgs
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
