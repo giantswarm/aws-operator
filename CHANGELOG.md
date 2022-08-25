@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Enable Cilium or AWS-CNI conditionally based on the release number.
+
 ## [13.0.0] - 2022-08-17
 
 ### Changed

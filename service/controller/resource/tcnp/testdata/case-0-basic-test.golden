@@ -132,6 +132,27 @@ Resources:
               - "ecr:ListImages"
               - "ecr:BatchGetImage"
             Resource: "*"
+          # Following rules are required to make the AWS CNI work. See also
+          # https://github.com/aws/amazon-vpc-cni-k8s#setup.
+          - Effect: Allow
+            Action:
+              - ec2:AssignPrivateIpAddresses
+              - ec2:AttachNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceTypes
+              - ec2:DescribeTags
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DetachNetworkInterface
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:UnassignPrivateIpAddresses
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource:
+              - arn:aws:ec2:*:*:network-interface/*
 
           # Following rules are required for EBS snapshots.
           - Effect: Allow
@@ -375,6 +396,26 @@ Resources:
       FromPort: -1
       ToPort: -1
       SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  PodsIngressRuleFromWorkers:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from workers to pods.
+      GroupId: awscni-security-group-id
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  PodsIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from pods to the worker nodes.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: awscni-security-group-id
   InternalIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: GeneralSecurityGroup

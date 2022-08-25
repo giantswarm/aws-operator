@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/aws-operator/v13/pkg/label"
 	"github.com/giantswarm/aws-operator/v13/pkg/project"
 	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v13/service/controller/key"
 )
 
 const (
@@ -21,6 +22,24 @@ const (
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	var err error
+
+	cr, err := key.ToCluster(ctx, obj)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	hasCilium, err := key.HasCilium(&cr)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if !hasCilium {
+		r.logger.Debugf(ctx, "This cluster has no Cilium.")
+		r.logger.Debugf(ctx, "canceling resource")
+
+		return nil
+	}
+
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
