@@ -9,3 +9,5 @@ CVE-2021-23772 until=2022-08-25
 # Affects github.com/urfave/negroni. v2.0.2 is availabe but still affected.
 # Issue is an open redirect (user can manipulate a link served to other users).
 sonatype-2021-1485 until=2023-06-25
+
+CVE-2021-23772
