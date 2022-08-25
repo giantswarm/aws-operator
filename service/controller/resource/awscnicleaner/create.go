@@ -27,6 +27,18 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	hasCilium, err := key.HasCilium(&cr)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if !hasCilium {
+		r.logger.Debugf(ctx, "This cluster has no Cilium.")
+		r.logger.Debugf(ctx, "canceling resource")
+
+		return nil
+	}
+
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
