@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enable Cilium or AWS-CNI conditionally based on the release number.
 - Disable external cloud controller manager because of upstream bug affecting 1.23 release.
+- Bump `k8scc` to enable authn and authz on `scheduler` and `controller-manager`.- 
 
 ## [13.0.0] - 2022-08-17
 
