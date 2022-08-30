@@ -74,7 +74,8 @@ func AMI(region string, release releasev1alpha1.Release, instanceType string) (s
 	var regionAMIs map[string]string
 	var ok bool
 
-	if strings.HasPrefix(instanceType, "a1.") {
+	if strings.HasPrefix(instanceType, "a1.") || strings.HasPrefix(instanceType, "c7g") || strings.HasPrefix(instanceType, "m6g") {
+		fmt.Printf("looking for ARM AMI\n")
 		regionAMIs, ok = amiInfo_arm[osVersion]
 		if !ok {
 			return "", microerror.Maskf(notFoundError, "no arm image id for version '%s'", osVersion)
