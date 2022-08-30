@@ -70,7 +70,14 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	ami, err := key.AMI(key.Region(cl), re)
+	arch := "amd64"
+
+	val, ok := cl.Annotations["arch.giantswarm.io"]
+	if ok && val == "arm" {
+		arch = "arm"
+	}
+
+	ami, err := key.AMI(key.Region(cl), re, arch)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}

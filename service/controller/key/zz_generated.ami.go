@@ -8,6 +8,7 @@ package key
 import "encoding/json"
 
 var amiInfo = map[string]map[string]string{}
+var amiInfo_arm = map[string]map[string]string{}
 
 var amiJSON = []byte(`{
   "2191.5.0": {
@@ -969,9 +970,35 @@ var amiJSON = []byte(`{
   }
 }`)
 
+var amiJSON_arm = []byte(`{
+  "3227.2.1": {
+    "ap-northeast-1": "ami-0abb8a024e2fca994",
+    "ap-northeast-2": "ami-0da2d607f218e6330",
+    "ap-south-1": "ami-08c1d433d7d880e2f",
+    "ap-southeast-1": "ami-0ffc161cc11dae512",
+    "ap-southeast-2": "ami-0e3812401bf255743",
+    "ca-central-1": "ami-01a8fbed8281b5333",
+    "eu-central-1": "ami-0f607d2a5a0fd8041",
+    "eu-west-1": "ami-01db1cf7c149a4c91",
+    "eu-west-2": "ami-0d21ee9c177f2562f",
+    "eu-west-3": "ami-0a41df11d9c5b1fd8",
+    "sa-east-1": "ami-0e2883834330d8b09",
+    "us-east-1": "ami-0fba790bd1eea1719",
+    "us-east-2": "ami-024b150f9a8d93151",
+    "us-west-1": "ami-0871570295b52c558",
+    "us-west-2": "ami-03617eef53cfa7a84"
+  }
+}`)
+
 func init() {
 	err := json.Unmarshal(amiJSON, &amiInfo)
 	if err != nil {
 		panic(err)
 	}
+
+	err = json.Unmarshal(amiJSON_arm, &amiInfo_arm)
+	if err != nil {
+		panic(err)
+	}
+
 }
