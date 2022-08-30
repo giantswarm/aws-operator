@@ -54,7 +54,7 @@ func New(c Config) (*Images, error) {
 	return i, nil
 }
 
-func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
+func (i *Images) AMI(ctx context.Context, obj interface{}, instanceType string) (string, error) {
 	cr, err := meta.Accessor(obj)
 	if err != nil {
 		return "", microerror.Mask(err)
@@ -70,14 +70,7 @@ func (i *Images) AMI(ctx context.Context, obj interface{}) (string, error) {
 		return "", microerror.Mask(err)
 	}
 
-	arch := "amd64"
-
-	val, ok := cl.Annotations["arch.giantswarm.io"]
-	if ok && val == "arm" {
-		arch = "arm"
-	}
-
-	ami, err := key.AMI(key.Region(cl), re, arch)
+	ami, err := key.AMI(key.Region(cl), re, instanceType)
 	if err != nil {
 		return "", microerror.Mask(err)
 	}
