@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bump k8scc to support cgroups v1 on containerd.
+
 ## [13.2.0] - 2022-08-29
 
 ## [13.1.0] - 2022-08-25
