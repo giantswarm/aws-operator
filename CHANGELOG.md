@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.2.1] - 2022-08-31
+
 ### Fixed
 
 - Bump k8scc to support cgroups v1 on containerd.
@@ -788,7 +790,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.2.1...HEAD
+[13.2.1]: https://github.com/giantswarm/aws-operator/compare/v13.2.0...v13.2.1
 [13.2.0]: https://github.com/giantswarm/aws-operator/compare/v13.1.0...v13.2.0
 [13.1.0]: https://github.com/giantswarm/aws-operator/compare/v13.0.0...v13.1.0
 [13.0.0]: https://github.com/giantswarm/aws-operator/compare/v13.0.0-alpha2...v13.0.0
