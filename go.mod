@@ -123,6 +123,7 @@ replace (
 	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.13.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.10.10
+	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.9.0
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.18
 	github.com/nats-io/jwt => github.com/nats-io/jwt/v2 v2.2.0
 	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.8.3
