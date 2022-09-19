@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add AMI reference for flatcar 3227.2.2.
+
 ### Changed
 
 - Disable kube-proxy on release v19 and newer.
