@@ -200,10 +200,12 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			params.EnableAWSCNI = false
 			params.DisableCalico = true
 			params.CalicoPolicyOnly = false
+			params.DisableKubeProxy = true
 		} else {
 			params.EnableAWSCNI = true
 			params.DisableCalico = false
 			params.CalicoPolicyOnly = true
+			params.DisableKubeProxy = false
 		}
 
 		params.DisableKubeProxy = false

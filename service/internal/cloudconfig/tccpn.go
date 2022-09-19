@@ -475,10 +475,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.EnableAWSCNI = false
 			params.DisableCalico = true
 			params.CalicoPolicyOnly = false
+			params.DisableKubeProxy = true
 		} else {
 			params.EnableAWSCNI = true
 			params.DisableCalico = false
 			params.CalicoPolicyOnly = true
+			params.DisableKubeProxy = false
 		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)

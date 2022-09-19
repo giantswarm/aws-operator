@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Disable kube-proxy on release v19 and newer.
+
 ## [13.2.1] - 2022-08-31
 
 ### Fixed
