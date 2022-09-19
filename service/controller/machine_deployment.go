@@ -86,7 +86,6 @@ type MachineDeploymentConfig struct {
 	GuestSubnetMaskBits        int
 	HostAWSConfig              aws.Config
 	IgnitionPath               string
-	ImagePullProgressDeadline  string
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
 	ClusterDomain              string
@@ -278,22 +277,21 @@ func newMachineDeploymentResources(config MachineDeploymentConfig) ([]resource.I
 				Logger:             config.Logger,
 				RandomKeysSearcher: randomKeysSearcher,
 
-				CalicoCIDR:                config.CalicoCIDR,
-				CalicoMTU:                 config.CalicoMTU,
-				CalicoSubnet:              config.CalicoSubnet,
-				ClusterIPRange:            config.ClusterIPRange,
-				DockerDaemonCIDR:          config.DockerDaemonCIDR,
-				DockerhubToken:            config.DockerhubToken,
-				ExternalSNAT:              config.ExternalSNAT,
-				IgnitionPath:              config.IgnitionPath,
-				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
-				ClusterDomain:             config.ClusterDomain,
-				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
-				PodInfraContainerImage:    config.PodInfraContainerImage,
-				RegistryDomain:            config.RegistryDomain,
-				RegistryMirrors:           config.RegistryMirrors,
-				SSHUserList:               config.SSHUserList,
-				SSOPublicKey:              config.SSOPublicKey,
+				CalicoCIDR:              config.CalicoCIDR,
+				CalicoMTU:               config.CalicoMTU,
+				CalicoSubnet:            config.CalicoSubnet,
+				ClusterIPRange:          config.ClusterIPRange,
+				DockerDaemonCIDR:        config.DockerDaemonCIDR,
+				DockerhubToken:          config.DockerhubToken,
+				ExternalSNAT:            config.ExternalSNAT,
+				IgnitionPath:            config.IgnitionPath,
+				ClusterDomain:           config.ClusterDomain,
+				NetworkSetupDockerImage: config.NetworkSetupDockerImage,
+				PodInfraContainerImage:  config.PodInfraContainerImage,
+				RegistryDomain:          config.RegistryDomain,
+				RegistryMirrors:         config.RegistryMirrors,
+				SSHUserList:             config.SSHUserList,
+				SSOPublicKey:            config.SSOPublicKey,
 			},
 		}
 

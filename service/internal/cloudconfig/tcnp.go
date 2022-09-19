@@ -225,7 +225,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params.ExternalCloudControllerManager = false
 		params.ForceCGroupsV1 = forceCGroupsV1
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
-		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryMirrors = t.config.RegistryMirrors
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey

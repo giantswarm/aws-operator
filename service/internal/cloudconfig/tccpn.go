@@ -532,7 +532,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.Kubernetes.ControllerManager.CommandExtraArgs = controllerManagerExtraArgs
-		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryMirrors = t.config.RegistryMirrors
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = im
