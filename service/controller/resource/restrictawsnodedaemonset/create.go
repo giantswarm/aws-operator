@@ -63,13 +63,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}, &ds)
 		if apierrors.IsNotFound(err) {
 			r.logger.Debugf(ctx, "Daemonset %q was not found in namespace %q", dsName, dsNamespace)
-			r.logger.Debugf(ctx, "canceling resource")
 
-			return nil
+			continue
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
-
 		// Check if the daemonset already has the node affinity entry we need.
 		aff := ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution
 		for _, expression := range aff.NodeSelectorTerms[0].MatchExpressions {
@@ -79,9 +77,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 				// Node affinity entry found, nothing to do.
 				r.logger.Debugf(ctx, "Daemonset is already restricted")
-				r.logger.Debugf(ctx, "canceling resource")
 
-				return nil
+				continue
 			}
 		}
 
