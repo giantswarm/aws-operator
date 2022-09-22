@@ -73,6 +73,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			ds.Spec.Template.Spec.Affinity.NodeAffinity != nil &&
 			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil {
 
+			found := false
 			aff := ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution
 			for _, expression := range aff.NodeSelectorTerms[0].MatchExpressions {
 				if expression.Key == label.OperatorVersion &&
@@ -82,8 +83,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					// Node affinity entry found, nothing to do.
 					r.logger.Debugf(ctx, "Daemonset %q is already restricted", dsName)
 
-					continue
+					found = true
+					break
 				}
+			}
+
+			if found {
+				continue
 			}
 		}
 
