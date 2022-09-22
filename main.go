@@ -125,7 +125,6 @@ func mainE(ctx context.Context) error {
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Docker.Daemon.CIDR, "", "CIDR of the Docker daemon bridge configured in guest clusters.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.API.ClusterIPRange, "", "Service IP range within guest clusters.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.ClusterDomain, "", "Internal Kubernetes domain.")
-	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.Kubelet.ImagePullProgressDeadline, "1m", "If no progress is made before this deadline image pulling is cancelled.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.NetworkSetup.Docker.Image, "", "Full docker image of networksetup.")
 	daemonCommand.PersistentFlags().String(f.Service.Cluster.Kubernetes.SSH.UserList, "", "Comma separated list of ssh users and their public key in format `username:publickey`, being installed in the guest cluster nodes.")
 

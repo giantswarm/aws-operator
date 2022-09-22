@@ -9,7 +9,7 @@ import (
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v4/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v14/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v15/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v3"
@@ -475,10 +475,12 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.EnableAWSCNI = false
 			params.DisableCalico = true
 			params.CalicoPolicyOnly = false
+			params.DisableKubeProxy = true
 		} else {
 			params.EnableAWSCNI = true
 			params.DisableCalico = false
 			params.CalicoPolicyOnly = true
+			params.DisableKubeProxy = false
 		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
@@ -530,7 +532,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.Kubernetes.ControllerManager.CommandExtraArgs = controllerManagerExtraArgs
-		params.ImagePullProgressDeadline = t.config.ImagePullProgressDeadline
 		params.RegistryMirrors = t.config.RegistryMirrors
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = im

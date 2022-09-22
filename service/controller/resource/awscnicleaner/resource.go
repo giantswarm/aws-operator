@@ -234,6 +234,40 @@ func New(config Config) (*Resource, error) {
 				},
 			}
 		},
+		// Kube proxy
+		func() client.Object {
+			return &appsv1.DaemonSet{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "DaemonSet",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "kube-proxy",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &corev1.ServiceAccount{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ServiceAccount",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "kube-proxy",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "ConfigMap",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "kube-proxy",
+					Namespace: "kube-system",
+				},
+			}
+		},
 	}
 
 	r := &Resource{

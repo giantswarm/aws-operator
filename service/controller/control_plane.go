@@ -60,25 +60,24 @@ type ControlPlaneConfig struct {
 	Logger             micrologger.Logger
 	RandomKeysSearcher randomkeys.Interface
 
-	CalicoCIDR                int
-	CalicoMTU                 int
-	CalicoSubnet              string
-	ClusterDomain             string
-	ClusterIPRange            string
-	DockerDaemonCIDR          string
-	DockerhubToken            string
-	ExternalSNAT              bool
-	HostAWSConfig             aws.Config
-	IgnitionPath              string
-	ImagePullProgressDeadline string
-	InstallationName          string
-	NetworkSetupDockerImage   string
-	PodInfraContainerImage    string
-	RegistryDomain            string
-	RegistryMirrors           []string
-	Route53Enabled            bool
-	SSHUserList               string
-	SSOPublicKey              string
+	CalicoCIDR              int
+	CalicoMTU               int
+	CalicoSubnet            string
+	ClusterDomain           string
+	ClusterIPRange          string
+	DockerDaemonCIDR        string
+	DockerhubToken          string
+	ExternalSNAT            bool
+	HostAWSConfig           aws.Config
+	IgnitionPath            string
+	InstallationName        string
+	NetworkSetupDockerImage string
+	PodInfraContainerImage  string
+	RegistryDomain          string
+	RegistryMirrors         []string
+	Route53Enabled          bool
+	SSHUserList             string
+	SSOPublicKey            string
 }
 
 type ControlPlane struct {
@@ -243,22 +242,21 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 				Logger:             config.Logger,
 				RandomKeysSearcher: randomKeysSearcher,
 
-				CalicoCIDR:                config.CalicoCIDR,
-				CalicoMTU:                 config.CalicoMTU,
-				CalicoSubnet:              config.CalicoSubnet,
-				ClusterDomain:             config.ClusterDomain,
-				ClusterIPRange:            config.ClusterIPRange,
-				DockerDaemonCIDR:          config.DockerDaemonCIDR,
-				DockerhubToken:            config.DockerhubToken,
-				ExternalSNAT:              config.ExternalSNAT,
-				IgnitionPath:              config.IgnitionPath,
-				ImagePullProgressDeadline: config.ImagePullProgressDeadline,
-				NetworkSetupDockerImage:   config.NetworkSetupDockerImage,
-				PodInfraContainerImage:    config.PodInfraContainerImage,
-				RegistryDomain:            config.RegistryDomain,
-				RegistryMirrors:           config.RegistryMirrors,
-				SSHUserList:               config.SSHUserList,
-				SSOPublicKey:              config.SSOPublicKey,
+				CalicoCIDR:              config.CalicoCIDR,
+				CalicoMTU:               config.CalicoMTU,
+				CalicoSubnet:            config.CalicoSubnet,
+				ClusterDomain:           config.ClusterDomain,
+				ClusterIPRange:          config.ClusterIPRange,
+				DockerDaemonCIDR:        config.DockerDaemonCIDR,
+				DockerhubToken:          config.DockerhubToken,
+				ExternalSNAT:            config.ExternalSNAT,
+				IgnitionPath:            config.IgnitionPath,
+				NetworkSetupDockerImage: config.NetworkSetupDockerImage,
+				PodInfraContainerImage:  config.PodInfraContainerImage,
+				RegistryDomain:          config.RegistryDomain,
+				RegistryMirrors:         config.RegistryMirrors,
+				SSHUserList:             config.SSHUserList,
+				SSOPublicKey:            config.SSOPublicKey,
 			},
 		}
 
