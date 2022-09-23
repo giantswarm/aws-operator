@@ -6,6 +6,7 @@ const TemplateMainLaunchTemplate = `
   {{ .Resource }}:
     Type: AWS::EC2::LaunchTemplate
     Properties:
+      HealthCheckType: ELB
       LaunchTemplateName: {{ .Name }}
       LaunchTemplateData:
         BlockDeviceMappings:
