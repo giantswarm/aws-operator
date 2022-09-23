@@ -44,7 +44,7 @@ const TemplateMainAutoScalingGroup = `
       {{- end }}
       # 60 seconds after a new node comes into service, the ASG checks the new
       # instance's health.
-      HealthCheckGracePeriod: 60
+      HealthCheckGracePeriod: 300
       HealthCheckType: ELB
 
       MetricsCollection:
