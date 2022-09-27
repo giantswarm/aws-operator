@@ -50,6 +50,7 @@ const TemplateMainIAMPolicies = `
               - "autoscaling:DescribeAutoScalingInstances"
               - "autoscaling:DescribeTags"
               - "autoscaling:DescribeLaunchConfigurations"
+              - "autoscaling:SetInstanceHealth"
               - "ec2:DescribeLaunchTemplateVersions"
               - "ec2:DescribeInstanceTypes"
             Resource: "*"

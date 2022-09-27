@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump k8scc to 15.0.0.
 - Disable kube-proxy on release v19 and newer.
+- Allow master node to change the autoscaling healthcheck.
 
 ## [13.2.1] - 2022-08-31
 
