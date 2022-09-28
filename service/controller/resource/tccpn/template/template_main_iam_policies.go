@@ -46,6 +46,7 @@ const TemplateMainIAMPolicies = `
             Resource: "*"
           - Effect: "Allow"
             Action:
+              - "autoscaling:CompleteLifecycleAction"
               - "autoscaling:DescribeAutoScalingGroups"
               - "autoscaling:DescribeAutoScalingInstances"
               - "autoscaling:DescribeTags"
