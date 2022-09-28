@@ -218,7 +218,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			Permissions: 0744,
 		}
 		lifeCycleCompletion := k8scloudconfig.FileMetadata{
-			AssetContent: template.MasterInstanceLifeCycleLaunching,
+			AssetContent: template.MasterInstanceLifeCycle,
 			Path:         "/opt/bin/master-instance-lifecycle-completion",
 			Owner: k8scloudconfig.Owner{
 				Group: k8scloudconfig.Group{
@@ -470,7 +470,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		lifeCycleService := k8scloudconfig.UnitMetadata{
 			AssetContent: template.MasterInstanceLifeCycleCompletionService,
 			Name:         "master-instance-lifecycle-completion.service",
-			Enabled:      false,
+			Enabled:      true,
 		}
 		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer, lifeCycleService)
 	}
