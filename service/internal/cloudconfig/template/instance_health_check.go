@@ -6,7 +6,7 @@ Description=master-instance-lifecyle-completion job
 After=docker.service etcd3.service k8s-kubelet.service k8s-setup-network-env.service
 Requires=docker.service etcd3.service k8s-kubelet.service k8s-setup-network-env.service
 [Service]
-ExecStartPre=/bin/bash -c "while [ ! -f /opt/bin/master-instance-healthcheck ]; do /opt/bin/master-instance-healtcheck && sleep 1; done"
+ExecStartPre=/bin/bash -c "while ! /opt/bin/master-instance-healthcheck ; do sleep 1; done"
 ExecStart=/opt/bin/master-instance-lifecycle-completion
 [Install]
 WantedBy=multi-user.target
