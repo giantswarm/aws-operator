@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add AMI reference for flatcar 3227.2.2.
-- Lifcycle hook for launching master instances in HA mode.
+- Lifecycle hook for launching master instances in HA mode.
 
 ### Changed
 
