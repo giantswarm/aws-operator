@@ -75,7 +75,7 @@ function retry() {
   if [[ $exitCode != 0 ]]
   then
     echo "Mark EC2 instance ${Yellow}$INSTANCEID${NoColor} as ${Red}UNHEALTHY${NoColor}"
-    docker run --rm -it amazon/aws-cli autoscaling set-instance-health --instance-id $INSTANCEID --health-status Unhealthy
+    docker run --rm -i amazon/aws-cli autoscaling set-instance-health --instance-id $INSTANCEID --health-status Unhealthy
     exit $exitCode
   fi
 
@@ -136,5 +136,5 @@ export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 
 # AWS Autoscaling Group Name
 export AUTOSCALINGGROUP=$(docker run --rm amazon/aws-cli autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
 
-docker run --rm amazon/aws-cli autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
+docker run --rm -i amazon/aws-cli autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
 `
