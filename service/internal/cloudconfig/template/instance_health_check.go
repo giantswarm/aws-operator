@@ -39,7 +39,9 @@ set -o pipefail
 
 # AWS Metadata
 export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
-export LOCALIP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4 2> /dev/null)
+
+# Additional ENVs
+. /etc/network-environment
 
 # Color
 export Red=$'\033[1;31m'
@@ -49,8 +51,8 @@ export NoColor=$'\033[0m'
 
 
 function retry() {
-  local max_attempts=${ATTEMPTS-5}
-  local timeout=${TIMEOUT-5}
+  local max_attempts=${ATTEMPTS-3}
+  local timeout=${TIMEOUT-15}
   local attempt=0
   local exitCode=0
 
@@ -100,7 +102,7 @@ function etcd_status {
 function kubelet_status {
   local statuscode
 
-  statuscode=$(curl -k -LI https://$LOCALIP:10250/metrics -o /dev/null -w '%{http_code}\n' -s)
+  statuscode=$(curl -k -LI https://$DEFAULT_IPV4:10250/metrics -o /dev/null -w '%{http_code}\n' -s)
 
   if [ $statuscode -eq 200 ]; then
      return 0
@@ -111,7 +113,7 @@ function kubelet_status {
 function apiserver_status {
   local statuscode
 
-  statuscode=$(curl -k -LI https://$LOCALIP/healthz -o /dev/null -w '%{http_code}\n' -s)
+  statuscode=$(curl -k https://127.0.0.1/healthz -o /dev/null -w '%{http_code}\n' -s)
 
   if [ $statuscode -eq 200 ]; then
     return 0
@@ -132,7 +134,7 @@ set -o pipefail
 # AWS Metadata
 export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
 # AWS Autoscaling Group Name
-export AUTOSCALINGGROUP=$(docker run --rm -it amazon/aws-cli autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
+export AUTOSCALINGGROUP=$(docker run --rm amazon/aws-cli autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
 
-docker run --rm -it amazon/aws-cli autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
+docker run --rm amazon/aws-cli autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
 `
