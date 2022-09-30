@@ -75,7 +75,7 @@ function retry() {
   if [[ $exitCode != 0 ]]
   then
     echo "Mark EC2 instance ${Yellow}$INSTANCEID${NoColor} as ${Red}UNHEALTHY${NoColor}"
-    docker run --rm -i amazon/aws-cli autoscaling set-instance-health --instance-id $INSTANCEID --health-status Unhealthy
+    docker run --rm -i {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling set-instance-health --instance-id $INSTANCEID --health-status Unhealthy
     exit $exitCode
   fi
 
@@ -134,7 +134,7 @@ set -o pipefail
 # AWS Metadata
 export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
 # AWS Autoscaling Group Name
-export AUTOSCALINGGROUP=$(docker run --rm amazon/aws-cli autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
+export AUTOSCALINGGROUP=$(docker run --rm {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
 
-docker run --rm -i amazon/aws-cli autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
+docker run --rm -i {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
 `
