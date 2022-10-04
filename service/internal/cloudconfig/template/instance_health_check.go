@@ -1,16 +1,5 @@
 package template
 
-const MasterInstanceLifeCycleCompletionService = `
-[Unit]
-Description=master-instance-lifecyle-completion job
-After=k8s-kubelet.service k8s-setup-network-env.service
-Requires=k8s-kubelet.service k8s-setup-network-env.service
-[Service]
-ExecStartPre=/bin/bash -c "while ! /opt/bin/master-instance-healthcheck ; do sleep 1; done"
-ExecStart=/opt/bin/master-instance-lifecycle-completion
-[Install]
-WantedBy=multi-user.target
-`
 const MasterInstanceHealtCheckService = `
 [Unit]
 Description=master-instance-healthcheck job
@@ -36,6 +25,12 @@ const MasterInstanceHealthCheck = `#!/bin/bash
 set -o errexit
 set -o nounset
 set -o pipefail
+
+# Wait for 15 minutes uptime until we check
+if test $(cut -d '.' -f1 /proc/uptime) -lt 900; then
+  echo "Uptime is less than 15 minutes ago, skipping..."
+  exit 0
+fi
 
 # AWS Metadata
 export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
@@ -124,28 +119,4 @@ function apiserver_status {
 retry etcd_status "ETCD" || true
 retry kubelet_status "KUBELET" || true
 retry apiserver_status "APISERVER" || true
-`
-
-const MasterInstanceLifeCycle = `#!/bin/bash
-set -o errexit
-set -o nounset
-set -o pipefail
-
-# AWS Metadata
-export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
-# AWS Autoscaling Group Name
-export AUTOSCALINGGROUP=$(docker run --rm {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
-
-output=$(docker run --rm -i {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE)
-if [ $? -eq 0 ]; then
-    exit 0
-fi
-
-if [[ $output == *"No active Lifecycle Action found"* ]];
-    echo "Successfully completed lifecycle action. Master instance is ready receiving traffic."
-    exit 0
-else
-    echo "Failed to complete lifecycle action. Got error: $output"
-    exit 1
-fi
 `

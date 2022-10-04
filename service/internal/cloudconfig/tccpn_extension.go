@@ -217,20 +217,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0744,
 		}
-		lifeCycleCompletion := k8scloudconfig.FileMetadata{
-			AssetContent: template.MasterInstanceLifeCycle,
-			Path:         "/opt/bin/master-instance-lifecycle-completion",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: 0744,
-		}
-		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker, lifeCycleCompletion)
+		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker)
 	}
 
 	if !e.hasCilium {
@@ -467,12 +454,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "master-instance-healthcheck.timer",
 			Enabled:      true,
 		}
-		lifeCycleService := k8scloudconfig.UnitMetadata{
-			AssetContent: template.MasterInstanceLifeCycleCompletionService,
-			Name:         "master-instance-lifecycle-completion.service",
-			Enabled:      true,
-		}
-		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer, lifeCycleService)
+		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer)
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
