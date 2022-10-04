@@ -136,5 +136,16 @@ export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 
 # AWS Autoscaling Group Name
 export AUTOSCALINGGROUP=$(docker run --rm {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
 
-docker run --rm -i {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE
+output=$(docker run --rm -i {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE)
+if [ $? -eq 0 ]; then
+    exit 0
+fi
+
+if [[ $output == *"No active Lifecycle Action found"* ]];
+    echo "Successfully completed lifecycle action. Master instance is ready receiving traffic."
+    exit 0
+else
+    echo "Failed to complete lifecycle action. Got error: $output"
+    exit 1
+fi
 `
