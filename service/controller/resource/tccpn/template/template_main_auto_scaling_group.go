@@ -38,7 +38,7 @@ const TemplateMainAutoScalingGroup = `
       # reliably managing customer workloads.
       LifecycleHookSpecificationList:
         - DefaultResult: CONTINUE
-          HeartbeatTimeout: 600
+          HeartbeatTimeout: 300
           LifecycleHookName: ControlPlaneLaunching
           LifecycleTransition: autoscaling:EC2_INSTANCE_LAUNCHING
         - DefaultResult: CONTINUE
