@@ -204,7 +204,20 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0644,
 		}
-		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller)
+		healthChecker := k8scloudconfig.FileMetadata{
+			AssetContent: template.MasterInstanceHealthCheck,
+			Path:         "/opt/bin/master-instance-healthcheck",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0744,
+		}
+		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker)
 	}
 
 	if !e.hasCilium {
@@ -431,7 +444,17 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "install-etcd-cluster-migrator.service",
 			Enabled:      true,
 		}
-		unitsMeta = append(unitsMeta, etcdClusterMigratorService)
+		healthCheckService := k8scloudconfig.UnitMetadata{
+			AssetContent: template.MasterInstanceHealtCheckService,
+			Name:         "master-instance-healthcheck.service",
+			Enabled:      false,
+		}
+		healthCheckTimer := k8scloudconfig.UnitMetadata{
+			AssetContent: template.MasterInstanceHealtCheckTimer,
+			Name:         "master-instance-healthcheck.timer",
+			Enabled:      true,
+		}
+		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer)
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
