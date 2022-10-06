@@ -82,13 +82,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// Ensure the cilium app has kube proxy enabled.
 	if key.ForceDisableCiliumKubeProxyReplacement(cluster) {
 		// Remove annotation
-		delete(cluster.Annotations, key.CiliumForceDisableKubeProxyAnnotation)
+		delete(cluster.Annotations, annotation.CiliumForceDisableKubeProxyAnnotation)
 		err = r.ctrlClient.Update(ctx, &cluster)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		r.logger.Debugf(ctx, "Removed %s annotation from Cluster CR %s", key.CiliumForceDisableKubeProxyAnnotation, cluster.Name)
+		r.logger.Debugf(ctx, "Removed %s annotation from Cluster CR %s", annotation.CiliumForceDisableKubeProxyAnnotation, cluster.Name)
 		r.logger.Debugf(ctx, "canceling resource")
 		return nil
 	}
