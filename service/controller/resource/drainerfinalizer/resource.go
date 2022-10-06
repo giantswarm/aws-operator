@@ -212,8 +212,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 			if dc.Status.HasDrainedCondition() {
 				err = r.completeLifeCycleHook(ctx, instanceID, asgName)
-				// We check only for errors for drained status
-				// In case of timeout status there can be errors in case machine does not exist anymore
 				if err != nil {
 					return microerror.Mask(err)
 				}
