@@ -72,6 +72,27 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "Daemonset %q/%q has no replicas, deleting all resources", dsNamespace, dsName)
 	}
 
+	// Get Cluster CR
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	// Ensure the cilium app has kube proxy enabled.
+	if key.ForceDisableCiliumKubeProxyReplacement(cluster) {
+		// Remove annotation
+		delete(cluster.Annotations, key.CiliumForceDisableKubeProxyAnnotation)
+		err = r.ctrlClient.Update(ctx, &cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.Debugf(ctx, "Removed %s annotation from Cluster CR %s", key.CiliumForceDisableKubeProxyAnnotation, cluster.Name)
+		r.logger.Debugf(ctx, "canceling resource")
+		return nil
+	}
+
 	for _, objToBeDel := range r.objectsToBeDeleted {
 		obj := objToBeDel()
 		err = wcCtrlClient.Delete(ctx, obj)
@@ -87,13 +108,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			name = fmt.Sprintf("%s/%s", obj.GetNamespace(), name)
 		}
 		r.logger.Debugf(ctx, "Deleted %s %s", obj.GetObjectKind().GroupVersionKind().Kind, name)
-	}
-
-	// Get Cluster CR
-	cluster := apiv1beta1.Cluster{}
-	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
-	if err != nil {
-		return microerror.Mask(err)
 	}
 
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
