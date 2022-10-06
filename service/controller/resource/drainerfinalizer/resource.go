@@ -201,16 +201,16 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "ensuring finished draining for drained nodes")
 
 		for _, dc := range drainerConfigs.Items {
-			// This is a special thing for AWS. We use annotations to transport EC2
-			// instance IDs. Otherwise the lookups of all necessary information
-			// again would be quite a ball ache. Se we take the shortcut leveraging
-			// the k8s API.
-			instanceID, err := instanceIDFromAnnotations(dc.GetAnnotations())
-			if err != nil {
-				return microerror.Mask(err)
-			}
-
 			if dc.Status.HasDrainedCondition() || dc.Status.HasTimeoutCondition() {
+				// This is a special thing for AWS. We use annotations to transport EC2
+				// instance IDs. Otherwise the lookups of all necessary information
+				// again would be quite a ball ache. Se we take the shortcut leveraging
+				// the k8s API.
+				instanceID, err := instanceIDFromAnnotations(dc.GetAnnotations())
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
 				err = r.completeLifeCycleHook(ctx, instanceID, asgName)
 				if err != nil {
 					return microerror.Mask(err)
