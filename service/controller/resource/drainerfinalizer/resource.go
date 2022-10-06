@@ -210,7 +210,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 				return microerror.Mask(err)
 			}
 
-			if dc.Status.HasDrainedCondition() {
+			if dc.Status.HasDrainedCondition() || dc.Status.HasTimeoutCondition() {
 				err = r.completeLifeCycleHook(ctx, instanceID, asgName)
 				if err != nil {
 					return microerror.Mask(err)
