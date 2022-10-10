@@ -108,9 +108,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	if len(ds.Spec.Template.Spec.Containers) == 1 {
 		r.logger.Debugf(ctx, "Daemonset %q doesn't have routes-fixer container", dsName)
 		ds.Spec.Template.Spec.Containers = append(ds.Spec.Template.Spec.Containers, corev1.Container{
-			Name: "routes-fixer",
-			// TODO consider china
-			Image:   "docker.io/giantswarm/aws-cni:v1.11.2-nftables",
+			Name:    "routes-fixer",
+			Image:   ds.Spec.Template.Spec.Containers[0].Image,
 			Command: []string{"/usr/bin/bash"},
 			Args: []string{
 				"-c",
