@@ -79,20 +79,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	// Ensure the cilium app has kube proxy enabled.
-	if key.ForceDisableCiliumKubeProxyReplacement(cluster) {
-		// Remove annotation
-		delete(cluster.Annotations, annotation.CiliumForceDisableKubeProxyAnnotation)
-		err = r.ctrlClient.Update(ctx, &cluster)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		r.logger.Debugf(ctx, "Removed %s annotation from Cluster CR %s", annotation.CiliumForceDisableKubeProxyAnnotation, cluster.Name)
-		r.logger.Debugf(ctx, "canceling resource")
-		return nil
-	}
-
 	for _, objToBeDel := range r.objectsToBeDeleted {
 		obj := objToBeDel()
 		err = wcCtrlClient.Delete(ctx, obj)
@@ -108,6 +94,20 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			name = fmt.Sprintf("%s/%s", obj.GetNamespace(), name)
 		}
 		r.logger.Debugf(ctx, "Deleted %s %s", obj.GetObjectKind().GroupVersionKind().Kind, name)
+	}
+
+	// Ensure the cilium app has kube proxy enabled.
+	if key.ForceDisableCiliumKubeProxyReplacement(cluster) {
+		// Remove annotation
+		delete(cluster.Annotations, annotation.CiliumForceDisableKubeProxyAnnotation)
+		err = r.ctrlClient.Update(ctx, &cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.Debugf(ctx, "Removed %s annotation from Cluster CR %s", annotation.CiliumForceDisableKubeProxyAnnotation, cluster.Name)
+		r.logger.Debugf(ctx, "canceling resource")
+		return nil
 	}
 
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
