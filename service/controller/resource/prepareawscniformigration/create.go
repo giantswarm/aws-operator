@@ -109,12 +109,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		ds.Spec.Template.Spec.Containers = append(ds.Spec.Template.Spec.Containers, corev1.Container{
 			Name: "routes-fixer",
 			// TODO consider china
-			Image:   "quay.io/giantswarm/bash:5.2.2",
-			Command: []string{"/bin/bash"},
+			Image:   "docker.io/giantswarm/aws-cni:v1.11.2-nftables",
+			Command: []string{"/usr/bin/bash"},
 			Args: []string{
 				"-c",
-				// TODO unhardcode CIDR
-				getScript("192.168.0.0./16"),
+				getScript(key.CiliumPodsCIDRBlock(cluster)),
 			},
 		})
 
