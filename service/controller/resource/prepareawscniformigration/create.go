@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/to"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -114,6 +115,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			Args: []string{
 				"-c",
 				getScript(key.CiliumPodsCIDRBlock(cluster)),
+			},
+			SecurityContext: &corev1.SecurityContext{
+				Privileged: to.BoolP(true),
 			},
 		})
 
