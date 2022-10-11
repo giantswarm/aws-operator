@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.0.0] - 2022-10-11
+
 ### Added
 
 - Add AMI reference for flatcar 3227.2.2.
@@ -805,7 +807,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.2.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.0.0...HEAD
+[14.0.0]: https://github.com/giantswarm/aws-operator/compare/v13.2.1...v14.0.0
 [13.2.1]: https://github.com/giantswarm/aws-operator/compare/v13.2.0...v13.2.1
 [13.2.0]: https://github.com/giantswarm/aws-operator/compare/v13.1.0...v13.2.0
 [13.1.0]: https://github.com/giantswarm/aws-operator/compare/v13.0.0...v13.1.0

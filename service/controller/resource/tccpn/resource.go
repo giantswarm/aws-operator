@@ -5,12 +5,12 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v13/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/v13/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/v13/service/internal/encrypter"
-	"github.com/giantswarm/aws-operator/v13/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/v13/service/internal/images"
-	event "github.com/giantswarm/aws-operator/v13/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v14/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v14/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v14/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v14/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v14/service/internal/images"
+	event "github.com/giantswarm/aws-operator/v14/service/internal/recorder"
 )
 
 const (

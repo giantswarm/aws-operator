@@ -15,10 +15,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/v13/pkg/annotation"
-	"github.com/giantswarm/aws-operator/v13/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v13/service/controller/key"
-	"github.com/giantswarm/aws-operator/v13/service/internal/asg"
+	"github.com/giantswarm/aws-operator/v14/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v14/service/controller/key"
+	"github.com/giantswarm/aws-operator/v14/service/internal/asg"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
