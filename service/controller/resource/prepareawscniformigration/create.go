@@ -5,6 +5,7 @@ import (
 
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
+	"github.com/giantswarm/to"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -77,37 +78,60 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	// Ensure aws-node daemonset has needed env var.
-	found := false
-	for _, env := range ds.Spec.Template.Spec.Containers[0].Env {
-		if env.Name == envVarName {
-			if env.Value == key.CiliumPodsCIDRBlock(cluster) {
-				// Env var found and correct. Check if daemonset is updated.
-				return nil
-			} else {
-				env.Value = key.CiliumPodsCIDRBlock(cluster)
-				r.logger.Debugf(ctx, "Daemonset %q has needed env var %q but value is wrong", dsName, envVarName)
-				found = true
+	needsUpdate := false
+	{
+		envFound := false
+		for _, env := range ds.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == envVarName {
+				if env.Value != key.CiliumPodsCIDRBlock(cluster) {
+					env.Value = key.CiliumPodsCIDRBlock(cluster)
+					r.logger.Debugf(ctx, "Daemonset %q has needed env var %q but value is wrong", dsName, envVarName)
+					needsUpdate = true
+				}
+				envFound = true
 				break
 			}
 		}
+
+		if !envFound {
+			// Add env var.
+			r.logger.Debugf(ctx, "Daemonset %q doesn't have needed env var %q", dsName, envVarName)
+			ds.Spec.Template.Spec.Containers[0].Env = append(ds.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+				Name:  envVarName,
+				Value: key.CiliumPodsCIDRBlock(cluster),
+			})
+			needsUpdate = true
+		}
 	}
 
-	if !found {
-		// Add env var.
-		r.logger.Debugf(ctx, "Daemonset %q doesn't have needed env var %q", dsName, envVarName)
-		ds.Spec.Template.Spec.Containers[0].Env = append(ds.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
-			Name:  envVarName,
-			Value: key.CiliumPodsCIDRBlock(cluster),
+	// Ensure aws-node has needed route fixer container
+	if len(ds.Spec.Template.Spec.Containers) == 1 {
+		r.logger.Debugf(ctx, "Daemonset %q doesn't have routes-fixer container", dsName)
+		ds.Spec.Template.Spec.Containers = append(ds.Spec.Template.Spec.Containers, corev1.Container{
+			Name:    "routes-fixer",
+			Image:   ds.Spec.Template.Spec.Containers[0].Image,
+			Command: []string{"/usr/bin/bash"},
+			Args: []string{
+				"-c",
+				getScript(key.CiliumPodsCIDRBlock(cluster)),
+			},
+			SecurityContext: &corev1.SecurityContext{
+				Privileged: to.BoolP(true),
+			},
 		})
+
+		needsUpdate = true
 	}
 
-	err = wcCtrlClient.Update(ctx, ds)
-	if err != nil {
-		return microerror.Mask(err)
-	}
+	if needsUpdate {
+		err = wcCtrlClient.Update(ctx, ds)
+		if err != nil {
+			return microerror.Mask(err)
+		}
 
-	// Wait for next reconciliation loop.
-	r.logger.Debugf(ctx, "Daemonset %q was updated", dsName)
+		// Wait for next reconciliation loop.
+		r.logger.Debugf(ctx, "Daemonset %q was updated", dsName)
+	}
 
 	return nil
 }

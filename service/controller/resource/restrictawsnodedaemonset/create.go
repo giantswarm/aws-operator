@@ -55,7 +55,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	ctrlClient := cc.Client.TenantCluster.K8s.CtrlClient()
 
-	for _, dsName := range []string{awsNodeDsName, KubeProxyDsName} {
+	for _, dsName := range []string{awsNodeDsName} {
 		ds := appsv1.DaemonSet{}
 		err = ctrlClient.Get(ctx, client.ObjectKey{
 			Namespace: dsNamespace,

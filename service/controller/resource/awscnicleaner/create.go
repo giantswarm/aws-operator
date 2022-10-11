@@ -3,10 +3,13 @@ package awscnicleaner
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -72,6 +75,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "Daemonset %q/%q has no replicas, deleting all resources", dsNamespace, dsName)
 	}
 
+	// Get Cluster CR
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	for _, objToBeDel := range r.objectsToBeDeleted {
 		obj := objToBeDel()
 		err = wcCtrlClient.Delete(ctx, obj)
@@ -89,11 +99,49 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "Deleted %s %s", obj.GetObjectKind().GroupVersionKind().Kind, name)
 	}
 
-	// Get Cluster CR
-	cluster := apiv1beta1.Cluster{}
-	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: cr.Name}, &cluster)
-	if err != nil {
-		return microerror.Mask(err)
+	// Ensure the cilium app has kube proxy enabled.
+	if key.ForceDisableCiliumKubeProxyReplacement(cluster) {
+		// Ensure no kube-proxy pods are still running.
+		{
+			r.logger.Debugf(ctx, "Ensuring no kube-proxy pods are still running")
+
+			o := func() error {
+				pods := corev1.PodList{}
+				err = wcCtrlClient.List(ctx, &pods, client.MatchingLabels{"k8s-app": "kube-proxy"}, client.InNamespace("kube-system"))
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
+				for _, pod := range pods.Items {
+					if pod.DeletionTimestamp == nil {
+						return microerror.Maskf(kubeProxyStillRunningError, "Kube-proxy pod %s is still running", pod.Name)
+					}
+				}
+
+				return nil
+			}
+
+			b := backoff.NewExponential(30*time.Second, 5*time.Second)
+			n := backoff.NewNotifier(r.logger, context.Background())
+
+			err := backoff.RetryNotify(o, b, n)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			r.logger.Debugf(ctx, "Ensured no kube-proxy pods are still running")
+		}
+
+		// Remove annotation
+		delete(cluster.Annotations, annotation.CiliumForceDisableKubeProxyAnnotation)
+		err = r.ctrlClient.Update(ctx, &cluster)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		r.logger.Debugf(ctx, "Removed %s annotation from Cluster CR %s", annotation.CiliumForceDisableKubeProxyAnnotation, cluster.Name)
+		r.logger.Debugf(ctx, "canceling resource")
+		return nil
 	}
 
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
