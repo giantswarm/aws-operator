@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Allow rolling nodes when there is a change in the AWSMachineDeployment even when CF stack was never updated before.
+- Quickly delete DrainerConfigs during cluster or machine deployment deletion to speedup cluster deletion process.
 
 ## [14.0.0] - 2022-10-11
 
