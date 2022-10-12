@@ -127,7 +127,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	var asgName string
-	if !key.IsDeleted(cr) {
+	{
 		drainable, err := r.asg.Drainable(ctx, cr)
 		if asg.IsNoASG(err) {
 			r.logger.Debugf(ctx, "did not find any auto scaling group")
