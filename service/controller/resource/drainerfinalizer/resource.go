@@ -137,6 +137,11 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		} else if asg.IsNoDrainable(err) {
 			r.logger.Debugf(ctx, "did not find any drainable auto scaling group yet")
 
+			if key.IsDeleted(cr) {
+				r.logger.Debugf(ctx, "keeping finalizers")
+				finalizerskeptcontext.SetKept(ctx)
+			}
+
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 
