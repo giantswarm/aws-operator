@@ -10,7 +10,6 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/finalizerskeptcontext"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -142,6 +141,12 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	if key.IsDeleted(cr) {
+		r.logger.Debugf(ctx, "CR being deleted")
+		r.logger.Debugf(ctx, "canceling resource")
+		return nil
+	}
+
 	var asgName string
 	{
 		drainable, err := r.asg.Drainable(ctx, cr)
@@ -152,11 +157,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		} else if asg.IsNoDrainable(err) {
 			r.logger.Debugf(ctx, "did not find any drainable auto scaling group yet")
-
-			if key.IsDeleted(cr) {
-				r.logger.Debugf(ctx, "keeping finalizers")
-				finalizerskeptcontext.SetKept(ctx)
-			}
 
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
@@ -205,14 +205,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		if len(instances) == 0 {
 			r.logger.Debugf(ctx, "did not find ec2 instances in %#q state", autoscaling.LifecycleStateTerminatingWait)
-
-			// In case there aren't EC2 instances in Terminating:Wait state, we cancel
-			// and keep finalizers on delete events, so we try again on the next
-			// reconciliation loop.
-			if key.IsDeleted(cr) {
-				r.logger.Debugf(ctx, "keeping finalizers")
-				finalizerskeptcontext.SetKept(ctx)
-			}
 
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
