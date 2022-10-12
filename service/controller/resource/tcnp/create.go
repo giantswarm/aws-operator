@@ -875,8 +875,8 @@ func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDep
 		}
 
 		if s != cloudformation.StackStatusUpdateComplete && s != cloudformation.StackStatusCreateComplete {
-			// when TCCPN stack is updated, only  good status that we want to see is `StackStatusUpdateComplete`
-			// anything else indicate either CF stack not updated, update in progress or an error
+			// Any status but `StackStatusUpdateComplete` or `StackStatusCreateComplete`
+			// is considered as invalid for upgrade purposes.
 			return false, microerror.Mask(tccpnNotUpdatedError)
 		}
 
