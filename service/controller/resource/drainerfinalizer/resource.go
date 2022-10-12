@@ -127,7 +127,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 	}
 
 	var asgName string
-	{
+	if !key.IsDeleted(cr) {
 		drainable, err := r.asg.Drainable(ctx, cr)
 		if asg.IsNoASG(err) {
 			r.logger.Debugf(ctx, "did not find any auto scaling group")
@@ -136,11 +136,6 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 
 		} else if asg.IsNoDrainable(err) {
 			r.logger.Debugf(ctx, "did not find any drainable auto scaling group yet")
-
-			if key.IsDeleted(cr) {
-				r.logger.Debugf(ctx, "keeping finalizers")
-				finalizerskeptcontext.SetKept(ctx)
-			}
 
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
@@ -201,7 +196,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "ensuring finished draining for drained nodes")
 
 		for _, dc := range drainerConfigs.Items {
-			if dc.Status.HasDrainedCondition() || dc.Status.HasTimeoutCondition() {
+			if dc.Status.HasDrainedCondition() || dc.Status.HasTimeoutCondition() || key.IsDeleted(cr) {
 				// This is a special thing for AWS. We use annotations to transport EC2
 				// instance IDs. Otherwise the lookups of all necessary information
 				// again would be quite a ball ache. Se we take the shortcut leveraging
@@ -211,9 +206,11 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 					return microerror.Mask(err)
 				}
 
-				err = r.completeLifeCycleHook(ctx, instanceID, asgName)
-				if err != nil {
-					return microerror.Mask(err)
+				if asgName != "" {
+					err = r.completeLifeCycleHook(ctx, instanceID, asgName)
+					if err != nil {
+						return microerror.Mask(err)
+					}
 				}
 
 				err = r.deleteDrainerConfig(ctx, dc)
