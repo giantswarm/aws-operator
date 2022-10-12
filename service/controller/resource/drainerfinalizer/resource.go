@@ -206,11 +206,9 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 					return microerror.Mask(err)
 				}
 
-				if asgName != "" {
-					err = r.completeLifeCycleHook(ctx, instanceID, asgName)
-					if err != nil {
-						return microerror.Mask(err)
-					}
+				err = r.completeLifeCycleHook(ctx, instanceID, asgName)
+				if err != nil {
+					return microerror.Mask(err)
 				}
 
 				err = r.deleteDrainerConfig(ctx, dc)
