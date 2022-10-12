@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
@@ -126,6 +127,13 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	// Get Cluster CR: if Cluster is deleted we can delete the nodes without draining them.
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, ctrlClient.ObjectKey{Name: key.ClusterID(cr), Namespace: cr.GetNamespace()}, &cluster)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
 	var asgName string
 	{
 		drainable, err := r.asg.Drainable(ctx, cr)
@@ -201,7 +209,7 @@ func (r *Resource) ensure(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "ensuring finished draining for drained nodes")
 
 		for _, dc := range drainerConfigs.Items {
-			if dc.Status.HasDrainedCondition() || dc.Status.HasTimeoutCondition() || key.IsDeleted(cr) {
+			if dc.Status.HasDrainedCondition() || dc.Status.HasTimeoutCondition() || key.IsDeleted(&cluster) {
 				// This is a special thing for AWS. We use annotations to transport EC2
 				// instance IDs. Otherwise the lookups of all necessary information
 				// again would be quite a ball ache. Se we take the shortcut leveraging
