@@ -185,7 +185,7 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 
 func IsV19Release(releaseVersion *semver.Version) bool {
 	v19, _ := semver.New(V19AlphaRelease)
-	return releaseVersion.GE(*v19)
+	return releaseVersion.Major >= v19.Major
 }
 
 func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {
