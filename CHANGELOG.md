@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Enable IRSA by default in release v19.0.0.
+
 ### Fixed
 
 - Allow rolling nodes when there is a change in the AWSMachineDeployment even when CF stack was never updated before.

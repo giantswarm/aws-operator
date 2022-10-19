@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v4/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v15/pkg/template"
@@ -160,6 +161,14 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		return "", microerror.Mask(err)
 	}
 
+	var releaseVersion *semver.Version
+	{
+		releaseVersion, err = semver.New(key.ReleaseVersion(&cl))
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	}
+
 	var certFiles []certs.File
 	var cloudfrontDomain, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
 	{
@@ -258,7 +267,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			return nil
 		})
 
-		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok || key.IsV19Release(releaseVersion) {
 			// fetch IRSA certs
 			g.Go(func() error {
 				var secret v1.Secret
@@ -280,27 +289,22 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				if err != nil {
 					return microerror.Mask(err)
 				}
+				if !key.IsChinaRegion(key.Region(cl)) {
+					var cm v1.ConfigMap
+					err := t.config.K8sClient.CtrlClient().Get(
+						ctx, client.ObjectKey{
+							Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
+							Namespace: cr.Namespace,
+						},
+						&cm)
+					if err != nil {
+						return microerror.Mask(err)
+					}
+					cloudfrontDomain = cm.Data["domain"]
+
+				}
 				return nil
 			})
-			if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
-				if !key.IsChinaRegion(key.Region(cl)) {
-					g.Go(func() error {
-						var cm v1.ConfigMap
-						err := t.config.K8sClient.CtrlClient().Get(
-							ctx, client.ObjectKey{
-								Name:      key.IRSACloudfrontConfigMap(key.ClusterID(&cr)),
-								Namespace: cr.Namespace,
-							},
-							&cm)
-						if err != nil {
-							return microerror.Mask(err)
-						}
-						cloudfrontDomain = cm.Data["domain"]
-
-						return nil
-					})
-				}
-			}
 		}
 
 		err := g.Wait()
@@ -334,7 +338,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 
 		// enable IRSA on the api
-		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
+		if _, ok := cl.Annotations[annotation.AWSIRSA]; ok || key.IsV19Release(releaseVersion) {
 			awsEndpoint := "amazonaws.com"
 			if key.IsChinaRegion(key.Region(cl)) {
 				awsEndpoint = "amazonaws.com.cn"

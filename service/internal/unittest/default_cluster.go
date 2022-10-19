@@ -4,7 +4,6 @@ import (
 	"net"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
@@ -60,9 +59,6 @@ func ChinaCluster() infrastructurev1alpha3.AWSCluster {
 func DefaultCluster() infrastructurev1alpha3.AWSCluster {
 	cr := infrastructurev1alpha3.AWSCluster{
 		ObjectMeta: metav1.ObjectMeta{
-			Annotations: map[string]string{
-				annotation.AWSIRSA: "",
-			},
 			Labels: map[string]string{
 				label.Cluster:         DefaultClusterID,
 				label.OperatorVersion: "7.3.0",

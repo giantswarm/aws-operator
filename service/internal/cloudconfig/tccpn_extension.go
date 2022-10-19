@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 
+	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v4/pkg/certs"
 	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v15/pkg/template"
@@ -236,6 +237,15 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 		})
 	}
 
+	var releaseVersion *semver.Version
+	var err error
+	{
+		releaseVersion, err = semver.New(key.ReleaseVersion(&e.cluster))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	certsMeta := []k8scloudconfig.FileMetadata{}
 	{
 		{
@@ -254,7 +264,7 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 				},
 				Permissions: 0644,
 			}
-			if _, ok := e.cluster.Annotations[annotation.AWSIRSA]; ok {
+			if _, ok := e.cluster.Annotations[annotation.AWSIRSA]; ok || key.IsV19Release(releaseVersion) {
 				// add IRSA keys to the machines
 				serviceAccountV2Pub := k8scloudconfig.FileMetadata{
 					AssetContent: e.serviceAccountV2Pub,
