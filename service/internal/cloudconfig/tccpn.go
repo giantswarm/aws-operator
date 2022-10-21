@@ -350,7 +350,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontDomain))
 			}
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
-			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=%s", key.ClusterAPIEndpoint(cl)))
+			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=https://%s", key.ClusterAPIEndpoint(cl)))
 
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-key-file=/etc/kubernetes/ssl/service-account-v2-pub.pem")
 			irsaSAKeyArgs = append(irsaSAKeyArgs, "--service-account-signing-key-file=/etc/kubernetes/ssl/service-account-v2-priv.pem")
