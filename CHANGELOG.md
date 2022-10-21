@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.2.2] - 2022-10-21
+
 ### Fixed
 
 - Allow rolling nodes when there is a change in the AWSMachineDeployment even when CF stack was never updated before.
@@ -812,7 +814,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.2.2...HEAD
+[13.2.2]: https://github.com/giantswarm/aws-operator/compare/v14.0.0...v13.2.2
 [14.0.0]: https://github.com/giantswarm/aws-operator/compare/v13.2.1...v14.0.0
 [13.2.1]: https://github.com/giantswarm/aws-operator/compare/v13.2.0...v13.2.1
 [13.2.0]: https://github.com/giantswarm/aws-operator/compare/v13.1.0...v13.2.0
