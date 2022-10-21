@@ -7,6 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/blang/semver"
 	g8sv1alpha1 "github.com/giantswarm/apiextensions/v6/pkg/apis/core/v1alpha1"
 	"github.com/giantswarm/microerror"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
@@ -33,6 +34,8 @@ const (
 
 	ServiceAccountV2Pub  = "pub"
 	ServiceAccountV2Priv = "key"
+
+	V19AlphaRelease = "19.0.0-alpha1"
 )
 
 const (
@@ -178,6 +181,11 @@ func InternalELBNameAPI(getter LabelsGetter) string {
 
 func IsDeleted(getter DeletionTimestampGetter) bool {
 	return getter.GetDeletionTimestamp() != nil
+}
+
+func IsV19Release(releaseVersion *semver.Version) bool {
+	v19, _ := semver.New(V19AlphaRelease)
+	return releaseVersion.Major >= v19.Major
 }
 
 func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {

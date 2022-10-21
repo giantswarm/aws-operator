@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/giantswarm/aws-operator/v14/pkg/label"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpn/template"
 	"github.com/giantswarm/aws-operator/v14/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/v14/service/internal/cloudtags"
@@ -34,25 +35,29 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 // It uses golden file as reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
-//  go test ./service/controller/resource/tccpn -run Test_Controller_Resource_TCCPN_Template_Render -update
-//
+//	go test ./service/controller/resource/tccpn -run Test_Controller_Resource_TCCPN_Template_Render -update
 func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name           string
 		azs            []string
+		irsaAnnotation bool
 		replicas       int
+		releaseVersion string
 		route53Enabled bool
 		annotations    map[string]string
 	}{
 		{
 			name:           "case 0: basic test with encrypter backend KMS, route53 enabled",
 			azs:            []string{"eu-central-1b"},
+			irsaAnnotation: true,
+			releaseVersion: "18.0.0",
 			replicas:       1,
 			route53Enabled: true,
 		},
 		{
 			name:           "case 1: basic test with encrypter backend KMS, route53 disabled",
 			azs:            []string{"eu-central-1b"},
+			releaseVersion: "18.0.0",
 			replicas:       1,
 			route53Enabled: false,
 		},
@@ -65,6 +70,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 		{
 			name:           "case 3: basic test with ebs volume iops and throughput set",
 			azs:            []string{"eu-central-1b"},
+			releaseVersion: "19.0.0",
 			replicas:       1,
 			route53Enabled: true,
 			annotations:    map[string]string{annotation.AWSEBSVolumeIops: "16000", annotation.AWSEBSVolumeThroughput: "1000"},
@@ -171,6 +177,12 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 			var aws infrastructurev1alpha3.AWSControlPlane
 			{
 				cl := unittest.DefaultCluster()
+				if tc.irsaAnnotation {
+					cl.Annotations = map[string]string{annotation.AWSIRSA: ""}
+				}
+				if tc.releaseVersion != "" {
+					cl.Labels[label.Release] = tc.releaseVersion
+				}
 				err = k.CtrlClient().Create(ctx, &cl)
 				if err != nil {
 					t.Fatal(err)

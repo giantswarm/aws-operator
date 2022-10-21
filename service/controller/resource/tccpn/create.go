@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
@@ -432,12 +433,20 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		}
 	}
 
+	var releaseVersion *semver.Version
+	{
+		releaseVersion, err = semver.New(key.ReleaseVersion(&cl))
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var cloudfrontDomain string
 	var cloudfrontEnabled bool
 	{
+		// ignore China, Cloudfront does not work.
 		if r.route53Enabled {
-			if _, ok := cl.Annotations[annotation.AWSIRSA]; ok {
-				// ignore China, Cloudfront does not work.
+			if _, ok := cl.Annotations[annotation.AWSIRSA]; ok || key.IsV19Release(releaseVersion) {
 				var cm v1.ConfigMap
 				{
 					o := client.ObjectKey{
