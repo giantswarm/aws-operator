@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.2.2] - 2022-10-21
+
 ### Fixed
 
 - Add cluster API endpoint as sts audience.
