@@ -320,6 +320,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 	var apiExtraArgs []string
 	var serviceAccountSigningKeyFilePath string
+	var serviceAccountKeyFilePath string
 	{
 		if key.OIDCClientID(cl) != "" {
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--oidc-client-id=%s", key.OIDCClientID(cl)))
@@ -353,7 +354,8 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=https://%s", key.ClusterAPIEndpoint(cl)))
 
-			serviceAccountSigningKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-pub.pem"
+			serviceAccountKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-pub.pem"
+			serviceAccountSigningKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-priv.pem"
 		}
 
 		apiExtraArgs = append(apiExtraArgs, t.config.APIExtraArgs...)
@@ -527,6 +529,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.ExternalCloudControllerManager = false
 
 		params.Kubernetes.Apiserver.CommandExtraArgs = apiExtraArgs
+		params.Kubernetes.Apiserver.ServiceAccountKeyFilePath = serviceAccountKeyFilePath
 		params.Kubernetes.Apiserver.ServiceAccountSigningKeyFilePath = serviceAccountSigningKeyFilePath
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.Kubernetes.ControllerManager.CommandExtraArgs = controllerManagerExtraArgs
