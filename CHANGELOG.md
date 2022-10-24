@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.2.3] - 2022-10-24
+
 ### Changed
 
 - Avoid duplicate `--service-account-signing-key-file` flag being set for API server.
@@ -800,7 +802,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.2.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v13.2.3...HEAD
+[13.2.3]: https://github.com/giantswarm/aws-operator/compare/v13.2.2...v13.2.3
+[13.2.2]: https://github.com/giantswarm/aws-operator/compare/v13.2.1...v13.2.2
 [13.2.1]: https://github.com/giantswarm/aws-operator/compare/v13.2.0...v13.2.1
 [13.2.0]: https://github.com/giantswarm/aws-operator/compare/v13.1.0...v13.2.0
 [13.1.0]: https://github.com/giantswarm/aws-operator/compare/v13.0.0...v13.1.0
