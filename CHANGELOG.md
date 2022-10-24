@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Avoid duplicate `--service-account-signing-key-file` flag being set for API server.
+
 ## [13.2.2] - 2022-10-21
 
 ### Fixed
