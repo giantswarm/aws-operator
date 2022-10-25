@@ -16,9 +16,20 @@ version: 2.1
 orbs:
   architect: giantswarm/architect@4.24.0
 
+jobs:
+  experiment-with-abs:
+    docker:
+      - entrypoint: /bin/bash
+        image: quay.io/giantswarm/app-build-suite:1.1.2-circleci
+    steps:
+      - checkout
+      - run: python -m app_build_suite --chart-dir ./helm/aws-operator --steps validate
+
 workflows:
   build:
     jobs:
+      - experiment-with-abs
+
       - architect/go-build:
           name: go-build
           binary: aws-operator
