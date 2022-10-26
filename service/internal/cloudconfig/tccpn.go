@@ -350,13 +350,13 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			if key.IsChinaRegion(key.Region(cl)) {
 				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3.%s.%s/%s-g8s-%s-oidc-pod-identity-v2", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			} else {
+				if cloudfrontAliasDomain != "" {
+					apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontAliasDomain))
+				}
 				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontDomain))
 			}
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=https://%s", key.ClusterAPIEndpoint(cl)))
-			if cloudfrontAliasDomain != "" {
-				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=%s", cloudfrontAliasDomain))
-			}
 
 			serviceAccountKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-pub.pem"
 			serviceAccountSigningKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-priv.pem"
