@@ -449,9 +449,14 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 						return nil, microerror.Mask(err)
 					}
 
-					cloudfrontDomain = cm.Data["domain"]
+					// First try using the alias domain (irsa.bla12.k8s. ... ).
+					cloudfrontDomain = cm.Data["domainAlias"]
 					if cloudfrontDomain == "" {
-						return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+						// Default to cloudfront domain if there is no alias.
+						cloudfrontDomain = cm.Data["domain"]
+						if cloudfrontDomain == "" {
+							return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+						}
 					}
 
 				}
