@@ -161,7 +161,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var certFiles []certs.File
-	var cloudfrontDomain, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
+	var cloudfrontDomain, cloudfrontAliasDomain, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
 	{
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
@@ -296,6 +296,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 							return microerror.Mask(err)
 						}
 						cloudfrontDomain = cm.Data["domain"]
+						cloudfrontAliasDomain = cm.Data["domainAlias"]
 
 						return nil
 					})
@@ -353,6 +354,9 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			}
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=https://%s", key.ClusterAPIEndpoint(cl)))
+			if cloudfrontAliasDomain != "" {
+				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=%s", cloudfrontAliasDomain))
+			}
 
 			serviceAccountKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-pub.pem"
 			serviceAccountSigningKeyFilePath = "/etc/kubernetes/ssl/service-account-v2-priv.pem"
