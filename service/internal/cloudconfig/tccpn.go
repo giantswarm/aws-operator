@@ -170,7 +170,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var certFiles []certs.File
-	var cloudfrontDomain, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
+	var cloudfrontDomain, cloudfrontAliasDomain, encryptionConfig, serviceAccountV2Pub, serviceAccountV2Priv string
 	{
 		g := &errgroup.Group{}
 		m := sync.Mutex{}
@@ -301,7 +301,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 						return microerror.Mask(err)
 					}
 					cloudfrontDomain = cm.Data["domain"]
-
+					cloudfrontAliasDomain = cm.Data["domainAlias"]
 				}
 				return nil
 			})
@@ -353,6 +353,9 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			if key.IsChinaRegion(key.Region(cl)) {
 				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://s3.%s.%s/%s-g8s-%s-oidc-pod-identity-v2", key.Region(cl), awsEndpoint, cc.Status.TenantCluster.AWS.AccountID, key.ClusterID(&cr)))
 			} else {
+				if cloudfrontAliasDomain != "" {
+					apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontAliasDomain))
+				}
 				apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--service-account-issuer=https://%s", cloudfrontDomain))
 			}
 			apiExtraArgs = append(apiExtraArgs, fmt.Sprintf("--api-audiences=sts.%s", awsEndpoint))
