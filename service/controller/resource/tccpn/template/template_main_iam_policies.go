@@ -25,7 +25,6 @@ const TemplateMainIAMPolicies = `
           - Effect: "Allow"
             Action: "ec2:*"
             Resource: "*"
-          {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
             Action:
               - "kms:Encrypt"
@@ -33,17 +32,16 @@ const TemplateMainIAMPolicies = `
               - "kms:ReEncrypt*"
               - "kms:GenerateDataKey*"
               - "kms:DescribeKey"
-            Resource: "{{ .IAMPolicies.KMSKeyARN }}"
+            Resource: "*"
           - Effect: "Allow"
             Action:
               - "kms:CreateGrant"
               - "kms:ListGrants"
               - "kms:RevokeGrant"
-            Resource: "{{ .IAMPolicies.KMSKeyARN }}"
+            Resource: "*"
             Condition:
               Bool:
                 kms:GrantIsForAWSResource: "true"
-          {{- end }}
           - Effect: "Allow"
             Action:
               - "s3:GetBucketLocation"
