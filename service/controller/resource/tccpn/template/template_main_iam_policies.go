@@ -27,8 +27,22 @@ const TemplateMainIAMPolicies = `
             Resource: "*"
           {{- if .IAMPolicies.KMSKeyARN }}
           - Effect: "Allow"
-            Action: "kms:Decrypt"
+            Action:
+              - "kms:Encrypt"
+              - "kms:Decrypt"
+              - "kms:ReEncrypt*"
+              - "kms:GenerateDataKey*"
+              - "kms:DescribeKey"
             Resource: "{{ .IAMPolicies.KMSKeyARN }}"
+          - Effect: "Allow"
+            Action:
+              - "kms:CreateGrant"
+              - "kms:ListGrants"
+              - "kms:RevokeGrant"
+            Resource: "{{ .IAMPolicies.KMSKeyARN }}"
+            Condition:
+              Bool:
+                kms:GrantIsForAWSResource: "true"
           {{- end }}
           - Effect: "Allow"
             Action:
