@@ -104,6 +104,23 @@ Resources:
             Resource: "*"
           - Effect: "Allow"
             Action:
+              - "kms:Encrypt"
+              - "kms:Decrypt"
+              - "kms:ReEncrypt*"
+              - "kms:GenerateDataKey*"
+              - "kms:DescribeKey"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "kms:CreateGrant"
+              - "kms:ListGrants"
+              - "kms:RevokeGrant"
+            Resource: "*"
+            Condition:
+              Bool:
+                kms:GrantIsForAWSResource: "true"
+          - Effect: "Allow"
+            Action:
               - "s3:GetBucketLocation"
               - "s3:ListAllMyBuckets"
             Resource: "*"
