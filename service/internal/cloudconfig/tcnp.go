@@ -208,7 +208,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			params.DisableKubeProxy = false
 		}
 
-		params.DisableKubeProxy = false
 		params.Cluster = g8sConfig.Cluster
 		params.DockerhubToken = t.config.DockerhubToken
 		params.EnableCSIMigrationAWS = true

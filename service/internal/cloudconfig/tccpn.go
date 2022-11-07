@@ -493,7 +493,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		}
 
 		params.BaseDomain = key.TenantClusterBaseDomain(cl)
-		params.DisableKubeProxy = false
 		params.Cluster = g8sConfig.Cluster
 		params.DisableEncryptionAtREST = true
 		// Ingress Controller service is not created via ignition.
