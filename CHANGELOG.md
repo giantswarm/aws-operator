@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use custom KMS key for encryption on your Amazon EBS volumes.
 - Enable IRSA by default in release v19.0.0.
 - Bump k8scc to 15.1.1.
+- Added EFS policy to the ec2 instance role to allow to use the EFS driver out of the box
 
 ### Fixed
 
