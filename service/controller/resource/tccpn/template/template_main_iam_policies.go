@@ -105,6 +105,27 @@ const TemplateMainIAMPolicies = `
               - ec2:CreateTags
             Resource:
               - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:network-interface/*
+          #### Used for EFS
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:DescribeAccessPoints
+            - elasticfilesystem:DescribeFileSystems
+            - elasticfilesystem:DescribeMountTargets
+            - ec2:DescribeAvailabilityZones
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:CreateAccessPoint
+            Resource: "*"
+            Condition:
+              StringLike:
+                aws:RequestTag/efs.csi.aws.com/cluster: 'true'
+          - Effect: Allow
+            Action: elasticfilesystem:DeleteAccessPoint
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/efs.csi.aws.com/cluster: 'true'
   ControlPlaneNodesInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
