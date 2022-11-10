@@ -27,3 +27,8 @@ CVE-2022-21221 until=2023-01-01
 CVE-2021-20329 until=2023-01-01
 CVE-2022-32149 until=2023-01-01
 
+sonatype-2020-0921 until=2023-01-01
+sonatype-2020-1258 until=2023-01-01
+sonatype-2019-0890 until=2023-01-01
+sonatype-2021-1485 until=2023-01-01
+
