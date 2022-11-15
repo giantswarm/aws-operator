@@ -442,7 +442,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 	}
 
 	var cloudfrontDomain string
-	var cloudfrontEnabled bool
+	var cloudfrontAliasDomain string
 	{
 		// ignore China, Cloudfront does not work.
 		if r.route53Enabled {
@@ -458,18 +458,13 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 						return nil, microerror.Mask(err)
 					}
 
-					// First try using the alias domain (irsa.bla12.k8s. ... ).
-					cloudfrontDomain = cm.Data["domainAlias"]
-					if cloudfrontDomain == "" {
-						// Default to cloudfront domain if there is no alias.
-						cloudfrontDomain = cm.Data["domain"]
-						if cloudfrontDomain == "" {
-							return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
-						}
-					}
+					cloudfrontDomain = cm.Data["domain"]
+					cloudfrontAliasDomain = cm.Data["domainAlias"]
 
+					if cloudfrontDomain == "" {
+						return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+					}
 				}
-				cloudfrontEnabled = true
 			}
 		}
 	}
@@ -477,19 +472,19 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 	var iamPolicies *template.ParamsMainIAMPolicies
 	{
 		iamPolicies = &template.ParamsMainIAMPolicies{
-			AccountID:            cc.Status.TenantCluster.AWS.AccountID,
-			AWSBaseDomain:        key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
-			CloudfrontEnabled:    cloudfrontEnabled,
-			CloudfrontDomain:     cloudfrontDomain,
-			ClusterID:            key.ClusterID(&cr),
-			EC2ServiceDomain:     key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
-			HostedZoneID:         cc.Status.TenantCluster.DNS.HostedZoneID,
-			InternalHostedZoneID: cc.Status.TenantCluster.DNS.InternalHostedZoneID,
-			KMSKeyARN:            ek,
-			Region:               cc.Status.TenantCluster.AWS.Region,
-			RegionARN:            key.RegionARN(cc.Status.TenantCluster.AWS.Region),
-			S3Bucket:             key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
-			Route53Enabled:       r.route53Enabled,
+			AccountID:             cc.Status.TenantCluster.AWS.AccountID,
+			AWSBaseDomain:         key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
+			CloudfrontDomain:      cloudfrontDomain,
+			CloudfrontAliasDomain: cloudfrontAliasDomain,
+			ClusterID:             key.ClusterID(&cr),
+			EC2ServiceDomain:      key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
+			HostedZoneID:          cc.Status.TenantCluster.DNS.HostedZoneID,
+			InternalHostedZoneID:  cc.Status.TenantCluster.DNS.InternalHostedZoneID,
+			KMSKeyARN:             ek,
+			Region:                cc.Status.TenantCluster.AWS.Region,
+			RegionARN:             key.RegionARN(cc.Status.TenantCluster.AWS.Region),
+			S3Bucket:              key.BucketName(&cr, cc.Status.TenantCluster.AWS.AccountID),
+			Route53Enabled:        r.route53Enabled,
 		}
 	}
 
