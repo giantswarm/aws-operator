@@ -154,3 +154,7 @@ func IsUpdateInProgress(err error) bool {
 
 	return false
 }
+
+var emptyDataError = &microerror.Error{
+	Kind: "emtpyDataError",
+}

@@ -443,7 +443,6 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 
 	var cloudfrontDomain string
 	var cloudfrontAliasDomain string
-	var cloudfrontEnabled bool
 	{
 		// ignore China, Cloudfront does not work.
 		if r.route53Enabled {
@@ -461,8 +460,11 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 
 					cloudfrontDomain = cm.Data["domain"]
 					cloudfrontAliasDomain = cm.Data["domainAlias"]
+
+					if cloudfrontDomain == "" {
+						return nil, microerror.Maskf(emptyDataError, "domain value in irsa cloudfront configmap for cluster must not be empty")
+					}
 				}
-				cloudfrontEnabled = true
 			}
 		}
 	}
@@ -472,7 +474,6 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 		iamPolicies = &template.ParamsMainIAMPolicies{
 			AccountID:             cc.Status.TenantCluster.AWS.AccountID,
 			AWSBaseDomain:         key.AWSBaseDomain(cc.Status.TenantCluster.AWS.Region),
-			CloudfrontEnabled:     cloudfrontEnabled,
 			CloudfrontDomain:      cloudfrontDomain,
 			CloudfrontAliasDomain: cloudfrontAliasDomain,
 			ClusterID:             key.ClusterID(&cr),
