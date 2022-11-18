@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.14.2] - 2022-11-18
+
 ### Fixed
 
 - Added EFS policy to the ec2 instance role to allow to use the EFS driver out of the box
@@ -541,7 +543,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.14.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v10.14.2...HEAD
+[10.14.2]: https://github.com/giantswarm/aws-operator/compare/v10.14.1...v10.14.2
 [10.14.1]: https://github.com/giantswarm/aws-operator/compare/v10.14.0...v10.14.1
 [10.14.0]: https://github.com/giantswarm/aws-operator/compare/v10.13.0...v10.14.0
 [10.13.0]: https://github.com/giantswarm/aws-operator/compare/v10.12.0...v10.13.0
