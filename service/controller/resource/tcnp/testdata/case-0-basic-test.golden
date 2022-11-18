@@ -185,6 +185,27 @@ Resources:
             Condition:
               StringLike:
                 ec2:ResourceTag/ebs.csi.aws.com/cluster: 'true'
+          #### Used for EFS
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:DescribeAccessPoints
+            - elasticfilesystem:DescribeFileSystems
+            - elasticfilesystem:DescribeMountTargets
+            - ec2:DescribeAvailabilityZones
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:CreateAccessPoint
+            Resource: "*"
+            Condition:
+              StringLike:
+                aws:RequestTag/efs.csi.aws.com/cluster: 'true'
+          - Effect: Allow
+            Action: elasticfilesystem:DeleteAccessPoint
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/efs.csi.aws.com/cluster: 'true'
   NodePoolInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
