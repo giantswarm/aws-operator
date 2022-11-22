@@ -20,6 +20,8 @@ const (
 	AWSCNIDefaultMinimumIPTarget = "40"
 	AWSCNIDefaultWarmIPTarget    = "10"
 
+	AWSCloudControllerManager = "aws-cloud-controller-manager"
+
 	ELBInstanceStateInService = "InService"
 
 	DrainerResyncPeriod = time.Minute * 2

@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.3.0
+#    devctl@5.7.0
 #
 name: Create Release PR
 on:
@@ -140,10 +140,52 @@ jobs:
       - name: Prepare release changes
         run: |
           architect prepare-release ${{ env.architect_flags }} --version "${{ needs.gather_facts.outputs.version }}"
+      - name: Update version field in Chart.yaml
+        run: |
+          # Define chart_dir
+          repository="${{ needs.gather_facts.outputs.repo_name }}"
+          chart="helm/${repository}"
+
+          # Check chart directory.
+          if [ ! -d "${chart}" ]
+          then
+            echo "Could not find chart directory '${chart}', adding app suffix."
+
+            # Add app suffix.
+            chart="helm/${repository}-app"
+
+            # Check chart directory with app suffix.
+            if [ ! -d "${chart}" ]
+            then
+              echo "Could not find chart directory '${chart}', removing app suffix."
+
+              # Remove app suffix.
+              chart="helm/${repository%-app}"
+
+              if [ ! -d "${chart}" ]
+              then
+                # Print error.
+                echo "Could not find chart directory '${chart}', doing nothing."
+              fi
+            fi
+          fi
+
+          # Define chart YAML.
+          chart_yaml="${chart}/Chart.yaml"
+
+          # Check chart YAML.
+          if [ -f "${chart_yaml}" ]
+          then
+            # check if version in Chart.yaml is templated using architect
+            if [ $(grep -c "^version:.*\.Version.*$" "${chart_yaml}") = "0" ]; then
+              yq -i '.version = "${{ needs.gather_facts.outputs.version }}"' "${chart_yaml}"
+            fi
+          fi
+
       - name: Bump go module defined in go.mod if needed
         run: |
           if [ "${{ needs.gather_facts.outputs.is_major }}" = true ] && test -f "go.mod"; then
-            go install github.com/marwan-at-work/mod/cmd/mod@v0.4.1
+            go install github.com/marwan-at-work/mod/cmd/mod@v0.4.2
             mod upgrade
           fi
       - name: Create release commit
@@ -165,4 +207,4 @@ jobs:
           base: "${{ needs.gather_facts.outputs.base }}"
           version: "${{ needs.gather_facts.outputs.version }}"
         run: |
-          hub pull-request -f  -m "Release v${{ env.version }}" -a ${{ github.actor }} -b ${{ env.base }} -h ${{ needs.gather_facts.outputs.branch }}
+          hub pull-request -f -m "Release v${{ env.version }}" -a ${{ github.actor }} -b ${{ env.base }} -h ${{ needs.gather_facts.outputs.branch }}

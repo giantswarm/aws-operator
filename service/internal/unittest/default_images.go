@@ -1,6 +1,6 @@
 package unittest
 
-import k8scloudconfig "github.com/giantswarm/k8scloudconfig/v13/pkg/template"
+import k8scloudconfig "github.com/giantswarm/k8scloudconfig/v14/pkg/template"
 
 func DefaultImages() k8scloudconfig.Images {
 	return k8scloudconfig.Images{
