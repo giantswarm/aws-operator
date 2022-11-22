@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Added EFS policy to the ec2 instance role to allow to use the EFS driver out of the box
+
 ### Added
 
 - Use external cloud controller manager for AWS.

@@ -2,10 +2,29 @@
 # Waiting for more direct dependencies to move away.
 CVE-2022-29153 until=2023-06-25
 CVE-2022-24687 until=2023-06-25
+CVE-2021-41803 until=2023-06-25
+CVE-2021-41803 until=2023-06-25
 
 # Pending github.com/kataras/iris release > 12.1.8
-CVE-2021-23772 until=2022-08-25
+CVE-2021-23772 until=2023-08-25
+
+### github.com/nats-io/nats-server
+# Stack-based Buffer Overflow
+CVE-2022-42709 until=2023-08-25
+# Denial of Service (DoS)
+CVE-2022-42708 until=2023-08-25
+
+### pkg:golang/golang.org/x/text@v0.3.7
+# Missing Release of Resource after Effective Lifetime
+CVE-2022-32149 until=2023-08-25
 
 # Affects github.com/urfave/negroni. v2.0.2 is availabe but still affected.
 # Issue is an open redirect (user can manipulate a link served to other users).
 sonatype-2021-1485 until=2023-06-25
+
+# https://ossindex.sonatype.org/vulnerability/sonatype-2022-5436
+sonatype-2022-5436 until=2023-06-25
+
+
+
+
