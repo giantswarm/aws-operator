@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.2.0] - 2022-11-24
+
 ### Changed
 
 - Bump k8scc to 15.2.0.
@@ -845,7 +847,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.2.0...HEAD
+[14.2.0]: https://github.com/giantswarm/aws-operator/compare/v14.1.0...v14.2.0
 [14.1.0]: https://github.com/giantswarm/aws-operator/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/giantswarm/aws-operator/compare/v13.2.4...v14.0.0
 [13.2.4]: https://github.com/giantswarm/aws-operator/compare/v13.2.3...v13.2.4
