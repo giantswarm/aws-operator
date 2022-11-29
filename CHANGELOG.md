@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add flatcar 3374.2.0.
 
+### Changed
+
+- Bump k8scc to 15.3.0.
+
 ## [14.2.0] - 2022-11-24
 
 ### Changed
