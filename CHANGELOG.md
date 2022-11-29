@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add flatcar 3374.2.0.
+
 ## [14.2.0] - 2022-11-24
 
 ### Changed
