@@ -1,84 +1,34 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.9.0
+#    devctl@5.15.0
 #
-name: 'Check if values schema file has been updated'
-on: pull_request
+name: 'Values and schema'
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - 'helm/**/values.yaml'
+      - 'helm/**/values.schema.json'
 
 jobs:
   check:
-    name: 'Check values.yaml and its schema in PR'
+    name: 'validate values.yaml against values.schema.json'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: 'Check if values.schema.json was updated'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          fetch-depth: 0
+
+      - name: Install validator
         run: |
-          echo "Comparing ${GITHUB_BASE_REF}...${GITHUB_HEAD_REF}"
+          wget -q -O ${HOME}/yajsv https://github.com/neilpa/yajsv/releases/download/v1.4.1/yajsv.linux.amd64
+          chmod +x ${HOME}/yajsv
 
-          # check if repo contains a schema file
-          if grep -q "values.schema.json" <<< $(git ls-tree -r --name-only ${GITHUB_SHA}); then
-
-            # get a list of files changed in the PR
-            CHANGED_FILES=$(gh api repos/{owner}/{repo}/compare/${GITHUB_BASE_REF}...${GITHUB_HEAD_REF} \
-              --jq ".files[].filename")
-
-            # check if values.yaml in main chart was modified by this PR
-            # (this won't check values files in subcharts)
-            if grep -q 'helm\/[-a-z].*\/values.yaml' <<< "${CHANGED_FILES}" ; then
-
-              # get the path to values.yaml
-              VALUES_FILE=$(gh api repos/{owner}/{repo}/compare/${GITHUB_BASE_REF}...${GITHUB_HEAD_REF} \
-                --jq ".files[].filename" | grep 'helm\/[-a-z].*\/values.yaml')
-
-              # fetch branches so we can use them to compare
-              git fetch &> /dev/null
-
-              # calculate hash of the keys from values.yaml from the default branch
-              DEFAULT_BRANCH_SHA=$(git show origin/${GITHUB_BASE_REF}:${VALUES_FILE} \
-                | yq -P 'sort_keys(..)' -o=json | jq -r '[paths | join(".")]' \
-                | sha1sum | awk '{print $1}')
-
-              # calculate hash of the keys from values.yaml from this branch
-              THIS_BRANCH_SHA=$(git show origin/${GITHUB_HEAD_REF}:${VALUES_FILE} \
-                | yq -P 'sort_keys(..)' -o=json | jq -r '[paths | join(".")]' \
-                | sha1sum | awk '{print $1}')
-
-              # compare hashes of the values files
-              if [[ "${DEFAULT_BRANCH_SHA}" != "${THIS_BRANCH_SHA}" ]]; then
-
-                # values file structure has been modified so we need to ensure the schema
-                # file is also updated
-
-                if grep -q "values.schema.json" <<< "${CHANGED_FILES}" ; then
-                  # we assume that the schema has been updated, nothing to do
-                  echo "PASSED: values.yaml and values.schema.json both appear to have been updated"
-                  exit 0
-                else
-                  # schema must be updated
-                  echo "FAILED: values.yaml was updated but values.schema.json hasn't been regenerated"
-                  echo "Please refer to this document: https://intranet.giantswarm.io/docs/organizational-structure/teams/cabbage/app-updates/helm-values-schema/"
-                  exit 1
-                fi
-
-              else
-                # values file structure hasn't changed, nothing to do
-                echo "values.yaml structure hasn't been changed by this PR"
-                exit 0
-              fi
-
-            else
-              # values file not included in PR, nothing to see here
-              echo "values.yaml not included in this PR"
-              exit 0
-            fi
-
-          else
-
-            # if grep returns negative then there isn't a values.schema.json to check
-            echo "No values.schema.json file found in branch '${GITHUB_BASE_REF}', nothing to check"
-            exit 0
-
-          fi
+      - name: 'Check if values.yaml is a valid instance of values.schema.json'
+        run: |
+          HELM_DIR=$(dirname $(git diff --name-only origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+           | grep 'helm/[-a-z].*\/values\.' | head -1))
+          ${HOME}/yajsv -s ${HELM_DIR}/values.schema.json ${HELM_DIR}/values.yaml
