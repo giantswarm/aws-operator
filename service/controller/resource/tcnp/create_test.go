@@ -33,8 +33,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 // It uses golden file as reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
-//  go test ./service/controller/resource/tcnp -run Test_Controller_Resource_TCNP_Template_Render -update
-//
+//	go test ./service/controller/resource/tcnp -run Test_Controller_Resource_TCNP_Template_Render -update
 func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string

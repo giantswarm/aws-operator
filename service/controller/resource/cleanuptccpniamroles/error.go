@@ -21,8 +21,7 @@ var notFoundError = &microerror.Error{
 
 // IsNotFound asserts notFoundError.
 //
-//     NoSuchEntity: The role with name gs-cluster-apzh0-role-4z8jm cannot be found.
-//
+//	NoSuchEntity: The role with name gs-cluster-apzh0-role-4z8jm cannot be found.
 func IsNotFound(err error) bool {
 	c := microerror.Cause(err)
 

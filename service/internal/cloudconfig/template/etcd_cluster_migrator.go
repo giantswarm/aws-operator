@@ -7,8 +7,7 @@ package template
 // managed app via our app catalogue, which only deploys the etcd-cluster-migrator on demand in
 // case a Tenant Cluster is migrating automatically from 1 to 3 masters. See also the TODO issue below.
 //
-//     https://github.com/giantswarm/giantswarm/issues/11397
-//
+//	https://github.com/giantswarm/giantswarm/issues/11397
 const EtcdClusterMigratorService = `
 [Unit]
 Description=Install etcd-cluster-migrator

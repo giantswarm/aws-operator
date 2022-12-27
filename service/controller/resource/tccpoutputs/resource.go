@@ -25,7 +25,6 @@ type Config struct {
 //
 // The TCCP manages the VPC Peering Connection. The peering connection ID is
 // added to the controller context and used in the CPF stack.
-//
 type Resource struct {
 	logger micrologger.Logger
 
