@@ -8,14 +8,14 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
-	github.com/giantswarm/apiextensions/v6 v6.4.0
+	github.com/giantswarm/apiextensions/v6 v6.4.1
 	github.com/giantswarm/backoff v1.0.0
 	github.com/giantswarm/badnodedetector/v2 v2.0.0
 	github.com/giantswarm/certs/v4 v4.0.0
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
 	github.com/giantswarm/k8scloudconfig/v15 v15.3.0
-	github.com/giantswarm/k8smetadata v0.14.0
+	github.com/giantswarm/k8smetadata v0.16.1
 	github.com/giantswarm/kubelock/v4 v4.0.0
 	github.com/giantswarm/microendpoint v1.0.0
 	github.com/giantswarm/microerror v0.4.0
