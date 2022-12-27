@@ -3,7 +3,7 @@ package s3object
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -79,7 +79,7 @@ func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interf
 			return nil, microerror.Mask(err)
 		}
 
-		body, err := ioutil.ReadAll(o.Body)
+		body, err := io.ReadAll(o.Body)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

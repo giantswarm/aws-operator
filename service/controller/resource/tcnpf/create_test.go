@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -25,8 +25,7 @@ var update = flag.Bool("update", false, "update .golden CF template file")
 // It uses golden file as reference template and when changes to template are
 // intentional, they can be updated by providing -update flag for go test.
 //
-//  go test ./service/controller/resource/tcnpf -run Test_Controller_Resource_TCNPF_Template_Render -update
-//
+//	go test ./service/controller/resource/tcnpf -run Test_Controller_Resource_TCNPF_Template_Render -update
 func Test_Controller_Resource_TCNPF_Template_Render(t *testing.T) {
 	testCases := []struct {
 		name string
@@ -57,12 +56,12 @@ func Test_Controller_Resource_TCNPF_Template_Render(t *testing.T) {
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
-				err := ioutil.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
+				err := os.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 			}
-			goldenFile, err := ioutil.ReadFile(p)
+			goldenFile, err := os.ReadFile(p)
 			if err != nil {
 				t.Fatal(err)
 			}

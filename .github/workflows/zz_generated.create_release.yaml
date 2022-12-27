@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.9.0
+#    devctl@5.15.0
 #
 name: Create Release
 on:
@@ -50,7 +50,7 @@ jobs:
           fi
           version="${version#v}" # Strip "v" prefix.
           echo "version=\"${version}\""
-          echo "::set-output name=version::${version}"
+          echo "version=${version}" >> $GITHUB_OUTPUT
       - name: Checkout code
         if: ${{ steps.get_version.outputs.version != '' }}
         uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
             path=''
           fi
           echo "path=\"$path\""
-          echo "::set-output name=path::${path}"
+          echo "path=${path}" >> $GITHUB_OUTPUT
       - name: Check if reference version
         id: ref_version
         run: |
@@ -81,7 +81,7 @@ jobs:
             refversion=true
           fi
           echo "refversion =\"${refversion}\""
-          echo "::set-output name=refversion::${refversion}"
+          echo "refversion=${refversion}" >> $GITHUB_OUTPUT
   update_project_go:
     name: Update project.go
     runs-on: ubuntu-20.04
@@ -114,7 +114,7 @@ jobs:
           version="${{ needs.gather_facts.outputs.version }}"
           new_version="$(semver bump patch $version)-dev"
           echo "version=\"$version\" new_version=\"$new_version\""
-          echo "::set-output name=new_version::${new_version}"
+          echo "new_version=${new_version}" >> $GITHUB_OUTPUT
           sed -Ei "s/(version[[:space:]]*=[[:space:]]*)\"${version}\"/\1\"${new_version}\"/" $file
           if git diff --exit-code $file ; then
             echo "error: no changes in \"$file\"" >&2
