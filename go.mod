@@ -3,34 +3,34 @@ module github.com/giantswarm/aws-operator/v14
 go 1.18
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.11.2
-	github.com/aws/aws-sdk-go v1.44.67
+	github.com/aws/amazon-vpc-cni-k8s v1.12.0
+	github.com/aws/aws-sdk-go v1.44.167
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
-	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/giantswarm/apiextensions/v6 v6.4.0
+	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
+	github.com/giantswarm/apiextensions/v6 v6.4.1
 	github.com/giantswarm/backoff v1.0.0
 	github.com/giantswarm/badnodedetector/v2 v2.0.0
 	github.com/giantswarm/certs/v4 v4.0.0
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
 	github.com/giantswarm/k8scloudconfig/v15 v15.3.0
-	github.com/giantswarm/k8smetadata v0.14.0
+	github.com/giantswarm/k8smetadata v0.16.1
 	github.com/giantswarm/kubelock/v4 v4.0.0
 	github.com/giantswarm/microendpoint v1.0.0
 	github.com/giantswarm/microerror v0.4.0
 	github.com/giantswarm/microkit v1.0.0
-	github.com/giantswarm/micrologger v0.6.0
+	github.com/giantswarm/micrologger v1.0.0
 	github.com/giantswarm/operatorkit/v7 v7.1.0
 	github.com/giantswarm/randomkeys/v3 v3.0.0
 	github.com/giantswarm/release-operator/v3 v3.2.0
 	github.com/giantswarm/tenantcluster/v6 v6.0.0
 	github.com/giantswarm/to v0.4.0
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.12.2
-	github.com/spf13/viper v1.12.0
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	github.com/prometheus/client_golang v1.14.0
+	github.com/spf13/viper v1.14.0
+	golang.org/x/sync v0.1.0
 	k8s.io/api v0.24.1
 	k8s.io/apiextensions-apiserver v0.24.1
 	k8s.io/apimachinery v0.24.1
@@ -48,7 +48,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/giantswarm/exporterkit v1.0.0 // indirect
 	github.com/giantswarm/microstorage v0.2.0 // indirect
@@ -82,28 +82,28 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
+	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.34.0 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
-	github.com/spf13/afero v1.8.2 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
+	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/cobra v1.4.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/subosito/gotenv v1.4.0 // indirect
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
-	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb // indirect
-	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
-	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
-	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
+	github.com/subosito/gotenv v1.4.1 // indirect
+	golang.org/x/net v0.1.0 // indirect
+	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/term v0.1.0 // indirect
+	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/ini.v1 v1.66.6 // indirect
+	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/resty.v1 v1.12.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -120,14 +120,13 @@ replace (
 	github.com/containernetworking/cni => github.com/containernetworking/cni v0.8.1
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
-	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.13.0
+	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.16.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
-	github.com/hashicorp/consul => github.com/hashicorp/consul v1.10.10
-	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.9.0
-	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.18
-	github.com/nats-io/jwt => github.com/nats-io/jwt/v2 v2.2.0
-	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.8.3
-	github.com/pkg/sftp => github.com/pkg/sftp v1.13.4
+	github.com/hashicorp/consul => github.com/hashicorp/consul v1.14.3
+	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.9.1
+	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.21
+	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.9.10
+	github.com/pkg/sftp => github.com/pkg/sftp v1.13.5
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
