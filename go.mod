@@ -3,11 +3,11 @@ module github.com/giantswarm/aws-operator/v14
 go 1.18
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.11.2
-	github.com/aws/aws-sdk-go v1.44.67
+	github.com/aws/amazon-vpc-cni-k8s v1.12.0
+	github.com/aws/aws-sdk-go v1.44.167
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
-	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/ghodss/yaml d8423dcdf344
 	github.com/giantswarm/apiextensions/v6 v6.4.0
 	github.com/giantswarm/backoff v1.0.0
 	github.com/giantswarm/badnodedetector/v2 v2.0.0
@@ -26,11 +26,11 @@ require (
 	github.com/giantswarm/release-operator/v3 v3.2.0
 	github.com/giantswarm/tenantcluster/v6 v6.0.0
 	github.com/giantswarm/to v0.4.0
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.12.2
-	github.com/spf13/viper v1.12.0
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	github.com/prometheus/client_golang v1.14.0
+	github.com/spf13/viper v1.14.0
+	golang.org/x/sync v0.1.0
 	k8s.io/api v0.24.1
 	k8s.io/apiextensions-apiserver v0.24.1
 	k8s.io/apimachinery v0.24.1
@@ -120,14 +120,14 @@ replace (
 	github.com/containernetworking/cni => github.com/containernetworking/cni v0.8.1
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
-	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.13.0
+	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.16.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
-	github.com/hashicorp/consul => github.com/hashicorp/consul v1.10.10
-	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.9.0
-	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.18
-	github.com/nats-io/jwt => github.com/nats-io/jwt/v2 v2.2.0
-	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.8.3
-	github.com/pkg/sftp => github.com/pkg/sftp v1.13.4
+	github.com/hashicorp/consul => github.com/hashicorp/consul v1.14.3
+	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.9.1
+	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.21
+	github.com/nats-io/jwt => github.com/nats-io/jwt/v2 v2.3.0
+	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.9.10
+	github.com/pkg/sftp => github.com/pkg/sftp v1.13.5
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
