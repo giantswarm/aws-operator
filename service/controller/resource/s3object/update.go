@@ -3,7 +3,7 @@ package s3object
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"github.com/giantswarm/microerror"
@@ -101,7 +101,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 		var c []byte
 		{
-			c, err = ioutil.ReadAll(currentS3Object.Body)
+			c, err = io.ReadAll(currentS3Object.Body)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}
@@ -110,7 +110,7 @@ func (r *Resource) newUpdateChange(ctx context.Context, obj, currentState, desir
 
 		var d []byte
 		{
-			d, err = ioutil.ReadAll(desiredS3Object.Body)
+			d, err = io.ReadAll(desiredS3Object.Body)
 			if err != nil {
 				return nil, microerror.Mask(err)
 			}

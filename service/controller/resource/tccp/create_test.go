@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -215,12 +215,12 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 			p := filepath.Join("testdata", unittest.NormalizeFileName(tc.name)+".golden")
 
 			if *update {
-				err := ioutil.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
+				err := os.WriteFile(p, []byte(templateBody), 0644) // nolint: gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 			}
-			goldenFile, err := ioutil.ReadFile(p)
+			goldenFile, err := os.ReadFile(p)
 			if err != nil {
 				t.Fatal(err)
 			}
