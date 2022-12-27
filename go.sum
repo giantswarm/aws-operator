@@ -217,8 +217,8 @@ github.com/getsentry/sentry-go v0.16.0/go.mod h1:ZXCloQLj0pG7mja5NK6NPf2V4A88YJ4
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344 h1:Arcl6UOIS/kgO2nW3A65HN+7CMjSDP/gofXL4CZt1V4=
 github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344/go.mod h1:GIjDIg/heH5DOkXY3YJ/wNhfHsQHoXGjl8G8amsYQ1I=
-github.com/giantswarm/apiextensions/v6 v6.4.0 h1:dnpk3URr7/YwFrZnTwZpFzaCyb01j1nLacWVP1b/9ME=
-github.com/giantswarm/apiextensions/v6 v6.4.0/go.mod h1:Wgc2Rx8YAYF2HidjabEvhsj5ADL+RteIC86ofulY+YE=
+github.com/giantswarm/apiextensions/v6 v6.4.1 h1:s8Y6SjBI0fFDPOooZl9wMnU3Ah4zfxsl1VutlhPvMiI=
+github.com/giantswarm/apiextensions/v6 v6.4.1/go.mod h1:Wgc2Rx8YAYF2HidjabEvhsj5ADL+RteIC86ofulY+YE=
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/backoff v1.0.0 h1:1oeTvyPsm1tJrHlSmfxbIWuoCNWPOkWJCb8kfLvE2T0=
 github.com/giantswarm/backoff v1.0.0/go.mod h1:l/WqbggvG5Ndxxws0LUgVEvP5E82Qj5/PF8SMip/1QM=
@@ -234,8 +234,8 @@ github.com/giantswarm/k8sclient/v7 v7.0.1 h1:UmRwgsw5Uda27tpIblPo7nWjp/nq5qwqxEP
 github.com/giantswarm/k8sclient/v7 v7.0.1/go.mod h1:zJTXammjLHSiukMIO4+a6eUDgzj/lJxEXFZ22mC0WXc=
 github.com/giantswarm/k8scloudconfig/v15 v15.3.0 h1:0rCoab+gr2KsUGAIAeTUFbpMsEPhLI+24i3+tTAK1fY=
 github.com/giantswarm/k8scloudconfig/v15 v15.3.0/go.mod h1:U/8wnDDk6aiL7g81AtB0dfnyJjiubJNlaUgBakHRgNo=
-github.com/giantswarm/k8smetadata v0.14.0 h1:fnjtS+AanST4di0mDfmL3AfX7EV8Zf5H4SIT7Ic43lY=
-github.com/giantswarm/k8smetadata v0.14.0/go.mod h1:k3DYCMdspxhk7efLkQdX1b8UZ71ijOCG3ZoIU8+5xgw=
+github.com/giantswarm/k8smetadata v0.16.1 h1:d6dXsT1BjKBynGUYSYQ/4ZPcbq95kdzguowdlq+5KjY=
+github.com/giantswarm/k8smetadata v0.16.1/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubelock/v4 v4.0.0 h1:qvFGOIlDthAD8r32WcorT8R4gp3c1dpnDbHuLsDU2ZA=
 github.com/giantswarm/kubelock/v4 v4.0.0/go.mod h1:XbqPs1m+NafHSjXvOXsb3UjE5DvhyNk47tfGcQJl1iY=
 github.com/giantswarm/microendpoint v1.0.0 h1:vW6VXPaWXBPZc9Q99FgPcjYprAKLItufKFcydBH47Xc=
