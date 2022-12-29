@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.12.0
-	github.com/aws/aws-sdk-go v1.44.167
+	github.com/aws/aws-sdk-go v1.44.170
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
@@ -123,7 +123,7 @@ replace (
 	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.16.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.14.3
-	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.9.1
+	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.10.0
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.21
 	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.9.10
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.5
