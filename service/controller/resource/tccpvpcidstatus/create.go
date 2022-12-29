@@ -5,7 +5,7 @@ import (
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/reconciliationcanceledcontext"
+	"github.com/giantswarm/operatorkit/v8/pkg/controller/context/reconciliationcanceledcontext"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"

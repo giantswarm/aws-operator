@@ -250,8 +250,8 @@ github.com/giantswarm/micrologger v1.0.0 h1:5W4h3K414CXhoXQ3rkGbrMl8yUGdbCLKMdg/
 github.com/giantswarm/micrologger v1.0.0/go.mod h1:jFY9TUZLYnQ437GwbodmGmwEJ5cImEJ1f5NTPyDHB24=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
-github.com/giantswarm/operatorkit/v7 v7.1.0 h1:yRUwj9ZUqBd+UV0C5n784+Qe6y/olILtg444XD6hjLA=
-github.com/giantswarm/operatorkit/v7 v7.1.0/go.mod h1:5enwhyIjd4xKrYXV9+enqttcmB9BE2Ocl1V12IwJIuw=
+github.com/giantswarm/operatorkit/v8 v8.0.0 h1:AM1Xxg8X6xQjhxh+Jn1Tiv2MkpG8Ro4gqEsytZBBU5M=
+github.com/giantswarm/operatorkit/v8 v8.0.0/go.mod h1:dPrvvQj2UNBw6jLDYqvGhnDfJImwih8A+F3Oc1VS8XM=
 github.com/giantswarm/randomkeys/v3 v3.0.0 h1:68C+laq+2DgvfYPs8tz7249Oc0gYE14W93moJ4s7pSg=
 github.com/giantswarm/randomkeys/v3 v3.0.0/go.mod h1:O47AZ2x6xJ4+LpSz5Gq4i8duaTFeaffyA8g39amF1FQ=
 github.com/giantswarm/release-operator/v3 v3.2.0 h1:bZFiVGuEdx73222C+4m8sRGqpaNQR7ZCqsWGSwNDJkE=

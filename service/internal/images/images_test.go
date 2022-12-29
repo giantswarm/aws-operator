@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/cachekeycontext"
+	"github.com/giantswarm/operatorkit/v8/pkg/controller/context/cachekeycontext"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
 
 	"github.com/giantswarm/aws-operator/v14/service/internal/unittest"
