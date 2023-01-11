@@ -14,7 +14,7 @@ require (
 	github.com/giantswarm/certs/v4 v4.0.0
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
-	github.com/giantswarm/k8scloudconfig/v15@a2f97e3949a2ec44a31216f434b48c9aa1b31ec6
+	github.com/giantswarm/k8scloudconfig/v15 v15.3.1-0.20230111104145-a2f97e3949a2
 	github.com/giantswarm/k8smetadata v0.16.1
 	github.com/giantswarm/kubelock/v4 v4.0.0
 	github.com/giantswarm/microendpoint v1.0.0
@@ -51,6 +51,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/giantswarm/exporterkit v1.0.0 // indirect
+	github.com/giantswarm/k8scloudconfig/v15 v15.3.1-0.20230111104145-a2f97e3949a2 // indirect
 	github.com/giantswarm/microstorage v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v1.0.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
