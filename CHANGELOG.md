@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump k8scc to 15.2.0.
+- Bump k8scc to 15.4.0.
 
 ## [14.1.0] - 2022-11-16
 
