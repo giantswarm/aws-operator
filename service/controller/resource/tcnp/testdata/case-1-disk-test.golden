@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Tenant Cluster Node Pool Cloud Formation Stack.
 Outputs:
   DockerVolumeSizeGB:
-    Value: 100
+    Value: 11
   InstanceImage:
     Value: ami-0a9a5d2b65cce04eb
   InstanceType:
@@ -224,25 +224,25 @@ Resources:
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: 100
+            VolumeSize: 11
             VolumeType: gp3
         - DeviceName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: 100
+            VolumeSize: 12
             VolumeType: gp3
         - DeviceName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: 10
+            VolumeSize: 13
             VolumeType: gp3
         - DeviceName: /dev/xvdi
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: 100
+            VolumeSize: 10
             VolumeType: gp3
         IamInstanceProfile:
           Name: !Ref NodePoolInstanceProfile

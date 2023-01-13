@@ -20,6 +20,27 @@ func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDep
 	return strconv.Itoa(cr.Spec.NodePool.Machine.DockerVolumeSizeGB)
 }
 
+func MachineDeploymentContainerdVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) string {
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSContainerdVolumeSize]
+	if !ok {
+		//Default back to current value
+		return MachineDeploymentDockerVolumeSizeGB(cr)
+	}
+	return result
+}
+
+func MachineDeploymentLoggingVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) int {
+	result, ok := cr.ObjectMeta.Annotations[annotation.AWSLoggingVolumeSize]
+	if !ok {
+		return 10
+	}
+	value, error := strconv.Atoi(result)
+	if error != nil {
+		return 10
+	}
+	return value
+}
+
 func MachineDeploymentInstanceType(cr infrastructurev1alpha3.AWSMachineDeployment) string {
 	return cr.Spec.Provider.Worker.InstanceType
 }

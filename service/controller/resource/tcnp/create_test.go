@@ -45,6 +45,11 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 			cr:   unittest.DefaultMachineDeployment(),
 			re:   unittest.DefaultRelease(),
 		},
+		{
+			name: "case 1: disk test",
+			cr:   unittest.MachineDeploymentWithDisks(unittest.DefaultMachineDeployment(), "10", 11, 12, "13"),
+			re:   unittest.DefaultRelease(),
+		},
 	}
 
 	for i, tc := range testCases {
