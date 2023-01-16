@@ -2,12 +2,12 @@ package unittest
 
 import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
+	metadata "github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/to"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/pkg/label"
-	metadata "github.com/giantswarm/k8smetadata/pkg/annotation"
 )
 
 const (
