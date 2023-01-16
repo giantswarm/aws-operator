@@ -21,20 +21,30 @@ func MachineDeploymentDockerVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDep
 }
 
 func MachineDeploymentContainerdVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) string {
+	defaultValue := MachineDeploymentDockerVolumeSizeGB(cr)
+
+	//If there is no tag, default to docker volume size
 	result, ok := cr.ObjectMeta.Annotations[annotation.AWSContainerdVolumeSize]
 	if !ok {
-		//Default back to current value
-		return MachineDeploymentDockerVolumeSizeGB(cr)
+		return defaultValue
 	}
-	return result
+	//If the value of the tag is not a number, default to docker volume size
+	_, error := strconv.Atoi(result)
+	if error == nil {
+		return result
+	} else {
+		return defaultValue
+	}
 }
 
 func MachineDeploymentLoggingVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	result, ok := cr.ObjectMeta.Annotations[annotation.AWSLoggingVolumeSize]
+	//If there is no tag, default to 15Gb
 	if !ok {
 		return 15
 	}
 	value, error := strconv.Atoi(result)
+	//If the content of the tag is not a number, default to 15Gb
 	if error != nil {
 		return 15
 	}
