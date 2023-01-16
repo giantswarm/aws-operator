@@ -236,7 +236,7 @@ Resources:
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
-            VolumeSize: 10
+            VolumeSize: 15
             VolumeType: gp3
         - DeviceName: /dev/xvdi
           Ebs:
