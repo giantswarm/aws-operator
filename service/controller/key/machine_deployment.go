@@ -32,11 +32,11 @@ func MachineDeploymentContainerdVolumeSizeGB(cr infrastructurev1alpha3.AWSMachin
 func MachineDeploymentLoggingVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	result, ok := cr.ObjectMeta.Annotations[annotation.AWSLoggingVolumeSize]
 	if !ok {
-		return 10
+		return 15
 	}
 	value, error := strconv.Atoi(result)
 	if error != nil {
-		return 10
+		return 15
 	}
 	return value
 }
