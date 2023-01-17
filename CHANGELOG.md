@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Allow disk size configuration of logging volume. New default value is 15Gb.
+- Allow different values for docker and containerd volume.
+
 ## [14.4.0] - 2023-01-13
 
 ### Changed

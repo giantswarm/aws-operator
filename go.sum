@@ -234,8 +234,8 @@ github.com/giantswarm/k8sclient/v7 v7.0.1 h1:UmRwgsw5Uda27tpIblPo7nWjp/nq5qwqxEP
 github.com/giantswarm/k8sclient/v7 v7.0.1/go.mod h1:zJTXammjLHSiukMIO4+a6eUDgzj/lJxEXFZ22mC0WXc=
 github.com/giantswarm/k8scloudconfig/v15 v15.4.0 h1:bv92A4t7BjpR3WiHLx75wgmwThv5w61P476RojPvnQQ=
 github.com/giantswarm/k8scloudconfig/v15 v15.4.0/go.mod h1:U/8wnDDk6aiL7g81AtB0dfnyJjiubJNlaUgBakHRgNo=
-github.com/giantswarm/k8smetadata v0.16.1 h1:d6dXsT1BjKBynGUYSYQ/4ZPcbq95kdzguowdlq+5KjY=
-github.com/giantswarm/k8smetadata v0.16.1/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
+github.com/giantswarm/k8smetadata v0.18.0 h1:Mnwymj/u1s7f517onaujokqp043/hFdbPKT4IuQfYdQ=
+github.com/giantswarm/k8smetadata v0.18.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubelock/v4 v4.0.0 h1:qvFGOIlDthAD8r32WcorT8R4gp3c1dpnDbHuLsDU2ZA=
 github.com/giantswarm/kubelock/v4 v4.0.0/go.mod h1:XbqPs1m+NafHSjXvOXsb3UjE5DvhyNk47tfGcQJl1iY=
 github.com/giantswarm/microendpoint v1.0.0 h1:vW6VXPaWXBPZc9Q99FgPcjYprAKLItufKFcydBH47Xc=
