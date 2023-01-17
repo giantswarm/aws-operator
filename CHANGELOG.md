@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
+- bump version of the k8scloudconfig to `v15.4.2`
 - Allow disk size configuration of logging volume. New default value is 15Gb.
 - Allow different values for docker and containerd volume.
 
