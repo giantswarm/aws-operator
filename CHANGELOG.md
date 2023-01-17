@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update k8scloudconfig to allow setting custom kernel parameters in the 'net.*' namespace.
+
 ### Added
 
 - Allow disk size configuration of logging volume. New default value is 15Gb.
