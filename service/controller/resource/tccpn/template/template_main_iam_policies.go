@@ -193,6 +193,7 @@ const TemplateMainIAMPolicies = `
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
+          {{- if or (ne .IAMPolicies.Region "cn-north-1") (ne .IAMPolicies.Region "cn-northwest-1") }}
           - Effect: Allow
             Action:
               - 'iam:CreateServiceLinkedRole'
@@ -200,6 +201,15 @@ const TemplateMainIAMPolicies = `
             Condition:
               StringEquals:
                 'iam:AWSServiceName': elasticloadbalancing.amazonaws.com
+          {{- else }}
+          - Effect: Allow
+            Action:
+              - 'iam:CreateServiceLinkedRole'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'iam:AWSServiceName': elasticloadbalancing.{{ .IAMPolicies.Region }}.amazonaws.com.cn
+          {{- end }}
           - Effect: Allow
             Action:
               - 'ec2:DescribeAccountAttributes'
@@ -258,7 +268,7 @@ const TemplateMainIAMPolicies = `
           - Effect: Allow
             Action:
               - 'ec2:CreateTags'
-            Resource: 'arn:aws:ec2:*:*:security-group/*'
+            Resource: 'arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:security-group/*'
             Condition:
               StringEquals:
                 'ec2:CreateAction': CreateSecurityGroup
@@ -268,7 +278,7 @@ const TemplateMainIAMPolicies = `
             Action:
               - 'ec2:CreateTags'
               - 'ec2:DeleteTags'
-            Resource: 'arn:aws:ec2:*:*:security-group/*'
+            Resource: 'arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:security-group/*'
             Condition:
               'Null':
                 'aws:RequestTag/elbv2.k8s.aws/cluster': 'true'
@@ -302,9 +312,9 @@ const TemplateMainIAMPolicies = `
               - 'elasticloadbalancing:AddTags'
               - 'elasticloadbalancing:RemoveTags'
             Resource:
-              - 'arn:aws:elasticloadbalancing:*:*:targetgroup/*/*'
-              - 'arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*'
-              - 'arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:targetgroup/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/net/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/app/*/*'
             Condition:
               'Null':
                 'aws:RequestTag/elbv2.k8s.aws/cluster': 'true'
@@ -314,10 +324,10 @@ const TemplateMainIAMPolicies = `
               - 'elasticloadbalancing:AddTags'
               - 'elasticloadbalancing:RemoveTags'
             Resource:
-              - 'arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*'
-              - 'arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*'
-              - 'arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*'
-              - 'arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:listener/net/*/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:listener/app/*/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:listener-rule/net/*/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:listener-rule/app/*/*/*'
           - Effect: Allow
             Action:
               - 'elasticloadbalancing:ModifyLoadBalancerAttributes'
@@ -336,7 +346,7 @@ const TemplateMainIAMPolicies = `
             Action:
               - 'elasticloadbalancing:RegisterTargets'
               - 'elasticloadbalancing:DeregisterTargets'
-            Resource: 'arn:aws:elasticloadbalancing:*:*:targetgroup/*/*'
+            Resource: 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:targetgroup/*/*'
           - Effect: Allow
             Action:
               - 'elasticloadbalancing:SetWebAcl'
