@@ -184,6 +184,22 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		externalSNAT = *key.ExternalSNAT(cl)
 	}
 
+	hasCilium, err := key.HasCilium(&cl)
+	var awsCNIPrefix bool
+
+	if !hasCilium {
+		{
+			if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
+				awsCNIPrefix = true
+			}
+		}
+		{
+			if v, ok := md.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == "true" {
+				awsCNIPrefix = true
+			}
+		}
+	}
+
 	var params k8scloudconfig.Params
 	{
 		// Default registry, kubernetes, etcd images etcd.
@@ -192,7 +208,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
 
-		hasCilium, err := key.HasCilium(&cl)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -203,6 +218,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			params.DisableKubeProxy = true
 		} else {
 			params.EnableAWSCNI = true
+			params.AWSCNISubnetPrefixMode = awsCNIPrefix
 			params.DisableCalico = false
 			params.CalicoPolicyOnly = true
 			params.DisableKubeProxy = false
