@@ -519,7 +519,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 		BlockDeviceMapping: template.ParamsMainLaunchTemplateBlockDeviceMapping{
 			Containerd: template.ParamsMainLaunchTemplateBlockDeviceMappingContainerd{
 				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingContainerdVolume{
-					Size: key.MachineDeploymentDockerVolumeSizeGB(cr),
+					Size: key.MachineDeploymentContainerdVolumeSizeGB(cr),
 				},
 			},
 			Docker: template.ParamsMainLaunchTemplateBlockDeviceMappingDocker{
@@ -534,7 +534,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 			},
 			Logging: template.ParamsMainLaunchTemplateBlockDeviceMappingLogging{
 				Volume: template.ParamsMainLaunchTemplateBlockDeviceMappingLoggingVolume{
-					Size: 100,
+					Size: key.MachineDeploymentLoggingVolumeSizeGB(cr),
 				},
 			},
 		},
