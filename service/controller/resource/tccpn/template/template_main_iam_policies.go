@@ -166,14 +166,14 @@ const TemplateMainIAMPolicies = `
             Principal:
               AWS: !GetAtt IAMManagerRole.Arn
             Action: "sts:AssumeRole"
-          {{- if or (ne .IAMPolicies.Region "cn-north-1") (ne .IAMPolicies.Region "cn-northwest-1") }}
+          {{- if or (eq .IAMPolicies.Region "cn-north-1") (eq .IAMPolicies.Region "cn-northwest-1") }}
           - Effect: "Allow"
             Principal:
-              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ IAMPolicies.ClusterID }}-oidc-pod-identity"
+              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringLike:
-                "s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ IAMPolicies.ClusterID }}-oidc-pod-identity:sub": "system:serviceaccount:*:aws-load-balancer-controller*"
+                "s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity:sub": "system:serviceaccount:*:aws-load-balancer-controller*"
           {{- end }}
           {{- if ne .IAMPolicies.CloudfrontDomain "" }}
           - Effect: "Allow"
@@ -202,15 +202,7 @@ const TemplateMainIAMPolicies = `
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          {{- if or (ne .IAMPolicies.Region "cn-north-1") (ne .IAMPolicies.Region "cn-northwest-1") }}
-          - Effect: Allow
-            Action:
-              - 'iam:CreateServiceLinkedRole'
-            Resource: '*'
-            Condition:
-              StringEquals:
-                'iam:AWSServiceName': elasticloadbalancing.amazonaws.com
-          {{- else }}
+          {{- if or (eq .IAMPolicies.Region "cn-north-1") (eq .IAMPolicies.Region "cn-northwest-1") }}
           - Effect: Allow
             Action:
               - 'iam:CreateServiceLinkedRole'
@@ -218,6 +210,14 @@ const TemplateMainIAMPolicies = `
             Condition:
               StringEquals:
                 'iam:AWSServiceName': elasticloadbalancing.{{ .IAMPolicies.Region }}.amazonaws.com.cn
+          {{- else }}
+          - Effect: Allow
+            Action:
+              - 'iam:CreateServiceLinkedRole'
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'iam:AWSServiceName': elasticloadbalancing.amazonaws.com
           {{- end }}
           - Effect: Allow
             Action:
