@@ -2,6 +2,7 @@ package unittest
 
 import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
+	metadata "github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/to"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -59,6 +60,15 @@ func DefaultMachineDeployment() infrastructurev1alpha3.AWSMachineDeployment {
 
 func MachineDeploymentWithAZs(machineDeployment infrastructurev1alpha3.AWSMachineDeployment, azs []string) infrastructurev1alpha3.AWSMachineDeployment {
 	machineDeployment.Spec.Provider.AvailabilityZones = azs
+
+	return machineDeployment
+}
+
+func MachineDeploymentWithDisks(machineDeployment infrastructurev1alpha3.AWSMachineDeployment, containerd string, docker int, kubelet int, logging string) infrastructurev1alpha3.AWSMachineDeployment {
+	machineDeployment.ObjectMeta.Annotations[metadata.AWSContainerdVolumeSize] = containerd
+	machineDeployment.ObjectMeta.Annotations[metadata.AWSLoggingVolumeSize] = logging
+	machineDeployment.Spec.NodePool.Machine.DockerVolumeSizeGB = docker
+	machineDeployment.Spec.NodePool.Machine.KubeletVolumeSizeGB = kubelet
 
 	return machineDeployment
 }

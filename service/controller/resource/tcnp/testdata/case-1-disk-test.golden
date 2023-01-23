@@ -1,0 +1,545 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Tenant Cluster Node Pool Cloud Formation Stack.
+Outputs:
+  DockerVolumeSizeGB:
+    Value: 11
+  InstanceImage:
+    Value: ami-0a9a5d2b65cce04eb
+  InstanceType:
+    Value: m5.2xlarge
+  OperatorVersion:
+    Value: 7.3.0
+  ReleaseVersion:
+    Value: 100.0.0
+Resources:
+  NodePoolAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnetEuCentral1a
+        - !Ref PrivateSubnetEuCentral1c
+      AvailabilityZones:
+        - eu-central-1a
+        - eu-central-1c
+      DesiredCapacity: 3
+      MinSize: 3
+      MaxSize: 5
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref NodePoolLaunchTemplate
+            Version: !GetAtt NodePoolLaunchTemplate.LatestVersionNumber
+          Overrides:
+            - InstanceType: m5.2xlarge
+              WeightedCapacity: 1
+            - InstanceType: m4.2xlarge
+              WeightedCapacity: 1
+        InstancesDistribution:
+          OnDemandBaseCapacity: 0
+          OnDemandPercentageAboveBaseCapacity: 100
+          SpotAllocationStrategy: lowest-price
+          SpotInstancePools: 2
+      # We define a lifecycle hook as part of the ASG in order to drain nodes
+      # properly on Node Pool deletion. Earlier we defined a separate lifecycle
+      # hook referencing the ASG name. In this setting when deleting a Node Pool
+      # the lifecycle hook was never executed. We always want node draining for
+      # reliably managing customer workloads.
+      LifecycleHookSpecificationList:
+        - DefaultResult: CONTINUE
+          HeartbeatTimeout: 3600
+          LifecycleHookName: NodePool
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+
+      # 10 seconds after a new node comes into service, the ASG checks the new
+      # instance's health.
+      HealthCheckGracePeriod: 10
+
+      MetricsCollection:
+        - Granularity: "1Minute"
+      Tags:
+        - Key: Name
+          Value: 8y5ck-worker
+          PropagateAtLaunch: true
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/8y5ck
+          Value: true
+          PropagateAtLaunch: false
+        - Key: k8s.io/cluster-autoscaler/node-template/label/giantswarm.io/machine-deployment
+          Value: al9qy
+          PropagateAtLaunch: false
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+
+        # Minimum amount of nodes that must always be running during a rolling
+        # update.
+        MinInstancesInService: 2
+
+        # Maximum amount of nodes being rolled at the same time.
+        MaxBatchSize: 1
+
+        # After creating a new instance, pause the rolling update on the ASG for
+        # specified time.
+        PauseTime: PT10M
+  NodePoolRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: gs-cluster-8y5ck-role-al9qy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: "sts:AssumeRole"
+  NodePoolRolePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: gs-cluster-8y5ck-policy-al9qy
+      Roles:
+        - Ref: NodePoolRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "ec2:Describe*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "ec2:AttachVolume"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "ec2:DetachVolume"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketLocation"
+              - "s3:ListAllMyBuckets"
+            Resource: "*"
+          - Effect: "Allow"
+            Action: "s3:ListBucket"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck"
+          - Effect: "Allow"
+            Action: "s3:GetObject"
+            Resource: "arn:aws:s3:::tenant-account-g8s-8y5ck/*"
+          - Effect: "Allow"
+            Action:
+              - "ecr:GetAuthorizationToken"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:GetRepositoryPolicy"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchGetImage"
+            Resource: "*"
+          # Following rules are required to make the AWS CNI work. See also
+          # https://github.com/aws/amazon-vpc-cni-k8s#setup.
+          - Effect: Allow
+            Action:
+              - ec2:AssignPrivateIpAddresses
+              - ec2:AttachNetworkInterface
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceTypes
+              - ec2:DescribeTags
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DetachNetworkInterface
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:UnassignPrivateIpAddresses
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource:
+              - arn:aws:ec2:*:*:network-interface/*
+
+          # Following rules are required for EBS snapshots.
+          - Effect: Allow
+            Action:
+            - ec2:CreateSnapshot
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - ec2:CreateTags
+            Resource:
+            - arn:aws:ec2:*:*:snapshot/*
+            Condition:
+              StringEquals:
+                ec2:CreateAction:
+                - CreateSnapshot
+          - Effect: Allow
+            Action:
+            - ec2:DeleteTags
+            Resource:
+            - arn:aws:ec2:*:*:snapshot/*
+          - Effect: Allow
+            Action:
+            - ec2:DeleteSnapshot
+            Resource: "*"
+            Condition:
+              StringLike:
+                ec2:ResourceTag/CSIVolumeSnapshotName: "*"
+          - Effect: Allow
+            Action:
+            - ec2:DeleteSnapshot
+            Resource: "*"
+            Condition:
+              StringLike:
+                ec2:ResourceTag/ebs.csi.aws.com/cluster: 'true'
+          #### Used for EFS
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:DescribeAccessPoints
+            - elasticfilesystem:DescribeFileSystems
+            - elasticfilesystem:DescribeMountTargets
+            - ec2:DescribeAvailabilityZones
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:CreateAccessPoint
+            Resource: "*"
+            Condition:
+              StringLike:
+                aws:RequestTag/efs.csi.aws.com/cluster: 'true'
+          - Effect: Allow
+            Action: elasticfilesystem:DeleteAccessPoint
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/efs.csi.aws.com/cluster: 'true'
+  NodePoolInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: gs-cluster-8y5ck-profile-al9qy
+      Roles:
+        - Ref: NodePoolRole
+  NodePoolLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: 8y5ck-al9qy-LaunchTemplate
+      LaunchTemplateData:
+        BlockDeviceMappings:
+        - DeviceName: /dev/xvdh
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 11
+            VolumeType: gp3
+        - DeviceName: /dev/xvdg
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 12
+            VolumeType: gp3
+        - DeviceName: /dev/xvdf
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 13
+            VolumeType: gp3
+        - DeviceName: /dev/xvdi
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: true
+            VolumeSize: 10
+            VolumeType: gp3
+        IamInstanceProfile:
+          Name: !Ref NodePoolInstanceProfile
+        ImageId: ami-0a9a5d2b65cce04eb
+        InstanceType: m5.2xlarge
+        MetadataOptions:
+          HttpTokens: optional
+          HttpPutResponseHopLimit: 2
+        Monitoring:
+          Enabled: true
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false
+            DeviceIndex: 0
+            Groups:
+              - !Ref GeneralSecurityGroup
+        TagSpecifications:
+        - ResourceType: instance
+          Tags:
+            - Key: giantswarm.io/release
+              Value: 100.0.0
+        UserData:
+          Fn::Base64: |
+            {
+              "ignition": {
+                "version": "2.2.0",
+                "config": {
+                  "append": [
+                    {
+                      "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tcnp-al9qy"
+                    }
+                  ]
+                }
+              },
+              "storage": {
+                "filesystems": [
+                  {
+                    "name": "docker",
+                    "mount": {
+                      "device": "/dev/xvdh",
+                      "wipeFilesystem": true,
+                      "label": "docker",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "kubelet",
+                    "mount": {
+                      "device": "/dev/xvdg",
+                      "wipeFilesystem": true,
+                      "label": "kubelet",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "log",
+                    "mount": {
+                      "device": "/dev/xvdf",
+                      "wipeFilesystem": true,
+                      "label": "log",
+                      "format": "xfs"
+                    }
+                  },
+                  {
+                    "name": "containerd",
+                    "mount": {
+                      "device": "/dev/xvdi",
+                      "wipeFilesystem": true,
+                      "label": "containerd",
+                      "format": "xfs"
+                    }
+                  }
+                ]
+              }
+            }
+  
+  PrivateRouteTableEuCentral1a:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-id
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-al9qy
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1a
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  NATRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: nat-gateway-id-eu-central-1a
+  PrivateRouteTableEuCentral1c:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-id
+      Tags:
+      - Key: Name
+        Value: 8y5ck-private-al9qy
+      - Key: giantswarm.io/availability-zone
+        Value: eu-central-1c
+      - Key: giantswarm.io/route-table-type
+        Value: private
+  NATRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: nat-gateway-id-eu-central-1c
+  GeneralSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: General Node Pool Security Group For Basic Traffic Rules.
+      SecurityGroupIngress:
+      -
+        Description: Allow traffic from control plane CIDR to 22 for SSH access.
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from tenant cluster CIDR to 2049 for NFS access.
+        IpProtocol: tcp
+        FromPort: 2049
+        ToPort: 2049
+        CidrIp: 10.0.0.0/24
+      -
+        Description: Allow traffic from control plane CIDR to 4194 for cadvisor scraping.
+        IpProtocol: tcp
+        FromPort: 4194
+        ToPort: 4194
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 10250 for kubelet scraping.
+        IpProtocol: tcp
+        FromPort: 10250
+        ToPort: 10250
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 10300 for node-exporter scraping.
+        IpProtocol: tcp
+        FromPort: 10300
+        ToPort: 10300
+        CidrIp: 10.1.0.0/16
+      -
+        Description: Allow traffic from control plane CIDR to 10301 for kube-state-metrics scraping.
+        IpProtocol: tcp
+        FromPort: 10301
+        ToPort: 10301
+        CidrIp: 10.1.0.0/16
+      Tags:
+        - Key: Name
+          Value: 8y5ck-worker
+      VpcId: vpc-id
+  GeneralInternalAPIIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Internal API Security Group.
+      GroupId: internal-api-security-group-id
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  GeneralMasterIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCNP General Security Group to the TCCP Master Security Group.
+      GroupId: master-security-group-id
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  PodsIngressRuleFromWorkers:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from workers to pods.
+      GroupId: awscni-security-group-id
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  PodsIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from pods to the worker nodes.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: awscni-security-group-id
+  InternalIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic between workloads within the Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: !Ref GeneralSecurityGroup
+  MasterGeneralIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      Description: Allow traffic from the TCCP Master Security Group to the TCNP General Security Group.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: master-security-group-id
+  
+  NodePoolToNodePoolRuleSgTest1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: GeneralSecurityGroup
+    Properties:
+      # The rule description is used for identifying the ingress rule. Thus it
+      # must not change. Otherwise the tcnpsecuritygroups resource will not be
+      # able to properly find the current and desired state of the ingress
+      # rules.
+      Description: Allow traffic from other Node Pool Security Groups to the Security Group of this Node Pool.
+      GroupId: !Ref GeneralSecurityGroup
+      IpProtocol: -1
+      FromPort: -1
+      ToPort: -1
+      SourceSecurityGroupId: sg-test1
+  
+  PrivateSubnetEuCentral1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 10.100.3.0/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1a
+      VpcId: vpc-id
+    DependsOn: VpcCidrBlock
+  PrivateSubnetRouteTableAssociationEuCentral1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      SubnetId: !Ref PrivateSubnetEuCentral1a
+  PrivateSubnetEuCentral1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1c
+      CidrBlock: 10.100.3.64/27
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: PrivateSubnetEuCentral1c
+      VpcId: vpc-id
+    DependsOn: VpcCidrBlock
+  PrivateSubnetRouteTableAssociationEuCentral1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      SubnetId: !Ref PrivateSubnetEuCentral1c
+  VpcCidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      CidrBlock: 10.100.8.0/24
+      VpcId: vpc-id
+  VPCPeeringRouteEuCentral1a:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.1.0.0/16
+      RouteTableId: !Ref PrivateRouteTableEuCentral1a
+      VpcPeeringConnectionId: peering-connection-id
+  VPCPeeringRouteEuCentral1c:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 10.1.0.0/16
+      RouteTableId: !Ref PrivateRouteTableEuCentral1c
+      VpcPeeringConnectionId: peering-connection-id
+  VPCS3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      VpcId: vpc-id
+      RouteTableIds:
+        - !Ref PrivateRouteTableEuCentral1a
+        - !Ref PrivateRouteTableEuCentral1c
+      ServiceName: 'com.amazonaws.eu-central-1.s3'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-bucket"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*"
+          - Sid: "8y5ck-vpc-s3-endpoint-policy-object"
+            Principal : "*"
+            Effect: "Allow"
+            Action: "s3:*"
+            Resource: "arn:aws:s3:::*/*"
