@@ -71,37 +71,6 @@ func MachineDeploymentKubeletVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDe
 	return strconv.Itoa(cr.Spec.NodePool.Machine.KubeletVolumeSizeGB)
 }
 
-func MachineDeploymentContainerdVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) string {
-	defaultValue := MachineDeploymentDockerVolumeSizeGB(cr)
-
-	//If there is no tag, default to docker volume size
-	result, ok := cr.ObjectMeta.Annotations[annotation.AWSContainerdVolumeSize]
-	if !ok {
-		return defaultValue
-	}
-	//If the value of the tag is not a number, default to docker volume size
-	_, error := strconv.Atoi(result)
-	if error == nil {
-		return result
-	} else {
-		return defaultValue
-	}
-}
-
-func MachineDeploymentLoggingVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) int {
-	result, ok := cr.ObjectMeta.Annotations[annotation.AWSLoggingVolumeSize]
-	//If there is no tag, default to 15Gb
-	if !ok {
-		return 15
-	}
-	value, error := strconv.Atoi(result)
-	//If the content of the tag is not a number, default to 15Gb
-	if error != nil {
-		return 15
-	}
-	return value
-}
-
 // MachineDeploymentParseMaxBatchSize will try parse the value into valid maxBatchSize
 // valid values can be either:
 // an integer between 0 < x
