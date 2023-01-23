@@ -30,11 +30,11 @@ workflows:
       # Ensure that for every commit (all branches), and for every new release tag,
       # an image is pushed to Quay.
       - architect/push-to-docker:
+          context: architect
           name: push-to-quay
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
-          context: architect
           requires:
             - go-build
           filters:
@@ -42,12 +42,11 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-docker:
-          context: "architect"
+          context: architect
           name: push-to-docker
           image: "docker.io/giantswarm/aws-operator"
           username_envar: "DOCKER_USERNAME"
           password_envar: "DOCKER_PASSWORD"
-          context: architect
           requires:
             - go-build
           # Needed to trigger job also on git tag.
