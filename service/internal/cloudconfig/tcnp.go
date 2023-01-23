@@ -187,16 +187,14 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 	hasCilium, err := key.HasCilium(&cl)
 	var awsCNIPrefix bool
 
-	true_value := "true"
-
 	if !hasCilium {
 		{
-			if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == true_value {
+			if _, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok {
 				awsCNIPrefix = true
 			}
 		}
 		{
-			if v, ok := md.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == true_value {
+			if _, ok := md.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok {
 				awsCNIPrefix = true
 			}
 		}
