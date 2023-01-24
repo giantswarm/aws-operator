@@ -42,7 +42,6 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-docker:
-          context: architect
           name: push-to-docker
           context: architect
           image: "docker.io/giantswarm/aws-operator"
