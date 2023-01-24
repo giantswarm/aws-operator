@@ -31,6 +31,7 @@ workflows:
       # an image is pushed to Quay.
       - architect/push-to-docker:
           name: push-to-quay
+          context: architect
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
@@ -41,8 +42,8 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-docker:
-          context: "architect"
           name: push-to-docker
+          context: architect
           image: "docker.io/giantswarm/aws-operator"
           username_envar: "DOCKER_USERNAME"
           password_envar: "DOCKER_PASSWORD"
@@ -57,6 +58,7 @@ workflows:
       # an image gets pushed to the Aliyun registry.
       - architect/push-to-docker:
           name: push-to-aliyun
+          context: architect
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
@@ -74,6 +76,7 @@ workflows:
       # if manually approved.
       - hold-push-to-aliyun-pr:
           type: approval
+          context: architect
           requires:
             - go-build
           filters:
@@ -86,6 +89,7 @@ workflows:
           image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
+          context: architect
           requires:
             - hold-push-to-aliyun-pr
           filters:
@@ -101,6 +105,7 @@ workflows:
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
+          context: architect
           requires:
             - push-to-aliyun
             - push-to-quay
@@ -120,6 +125,7 @@ workflows:
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
+          context: architect
           requires:
             - push-to-quay
             - push-to-docker
