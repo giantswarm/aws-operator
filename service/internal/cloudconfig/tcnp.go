@@ -185,8 +185,11 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 	}
 
 	hasCilium, err := key.HasCilium(&cl)
-	var awsCNIPrefix bool
+	if err != nil {
+		return nil, microerror.Mask(err)
+	}
 
+	var awsCNIPrefix bool
 	true_value := "true"
 
 	if !hasCilium {
@@ -209,10 +212,6 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params = k8scloudconfig.Params{}
 
 		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
-
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
 		if hasCilium {
 			params.EnableAWSCNI = false
 			params.DisableCalico = true
