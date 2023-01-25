@@ -45,7 +45,6 @@ workflows:
       - architect/push-to-docker:
           context: architect
           name: push-to-docker
-          context: architect
           image: "docker.io/giantswarm/aws-operator"
           username_envar: "DOCKER_USERNAME"
           password_envar: "DOCKER_PASSWORD"
