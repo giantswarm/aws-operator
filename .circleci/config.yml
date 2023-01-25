@@ -32,7 +32,6 @@ workflows:
       - architect/push-to-docker:
           context: architect
           name: push-to-quay
-          context: architect
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
           password_envar: "QUAY_PASSWORD"
