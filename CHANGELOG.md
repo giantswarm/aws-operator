@@ -14,11 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update k8scloudconfig to allow setting custom kernel parameters in the 'net.*' namespace.
+- Remove IP limit when prefix delegation is enabled. IP limit will be 110 for nodes with Prefix Delegation.
 
 ### Added
 
 - Allow disk size configuration of logging volume. New default value is 15Gb.
 - Allow different values for docker and containerd volume.
+
+### Fixed
+
+- Fix Docker rate limit for pulling images.
 
 ## [14.4.0] - 2023-01-13
 
