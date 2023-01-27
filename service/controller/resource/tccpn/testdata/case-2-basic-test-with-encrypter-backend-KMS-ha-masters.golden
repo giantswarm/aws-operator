@@ -421,7 +421,7 @@ Resources:
   ALBControllerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: 8y5ck-ALBController-Role
+      RoleName: gs-8y5ck-ALBController-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -439,7 +439,7 @@ Resources:
   ALBControllerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: 8y5ck-ALBController-Policy
+      PolicyName: gs-8y5ck-ALBController-Policy
       Roles:
         - Ref: "ALBControllerRole"
       PolicyDocument:

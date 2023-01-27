@@ -158,7 +158,7 @@ const TemplateMainIAMPolicies = `
   ALBControllerRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: {{ .IAMPolicies.ClusterID }}-ALBController-Role
+      RoleName: gs-{{ .IAMPolicies.ClusterID }}-ALBController-Role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -196,7 +196,7 @@ const TemplateMainIAMPolicies = `
   ALBControllerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: {{ .IAMPolicies.ClusterID }}-ALBController-Policy
+      PolicyName: gs-{{ .IAMPolicies.ClusterID }}-ALBController-Policy
       Roles:
         - Ref: "ALBControllerRole"
       PolicyDocument:
