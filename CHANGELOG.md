@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adjust ALBController IAM role name.
 
+### Changed
+
+- Add AMIs for flatcar versions 3374.2.1, 3374.2.2 and 3374.2.3.
+
 ## [14.5.0] - 2023-01-26
 
 ### Added
