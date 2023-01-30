@@ -116,8 +116,10 @@ require (
 )
 
 replace (
+	github.com/containerd/containerd => github.com/containerd/containerd v1.6.16
 	github.com/containernetworking/cni => github.com/containernetworking/cni v1.1.2
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
+	github.com/deislabs/oras => github.com/deislabs/oras v0.16.0
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/getsentry/sentry-go => github.com/getsentry/sentry-go v0.17.0
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
@@ -125,7 +127,10 @@ replace (
 	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.10.0
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.22
 	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.9.11
+	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2
+	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.4
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.5
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
+	helm.sh/helm/v3 => helm.sh/helm/v3 v3.11.0
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
