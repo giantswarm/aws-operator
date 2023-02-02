@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Label node pool nodes with `cgroups.giantswarm.io/version` to indicate which cgroup version they are running.
+
 ## [14.6.0] - 2023-01-30
 
 ### Fixed

@@ -11,6 +11,7 @@ const (
 	MasterID          = "giantswarm.io/master-id"
 	Organization      = "giantswarm.io/organization"
 	Provider          = "giantswarm.io/provider"
+	CGroupVersion     = "cgroups.giantswarm.io/version"
 )
 
 const (

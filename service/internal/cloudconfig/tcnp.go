@@ -3,6 +3,7 @@ package cloudconfig
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
@@ -245,6 +246,15 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params.Images = im
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Versions = v
+
+		cgroupsLabelValue := "v2"
+		if forceCGroupsV1 {
+			cgroupsLabelValue = "v1"
+		}
+		labels := params.Cluster.Kubernetes.Kubelet.Labels
+		splitted := strings.Split(labels, ",")
+		splitted = append(splitted, fmt.Sprintf("%s=%s", label.CGroupVersion, cgroupsLabelValue))
+		params.Cluster.Kubernetes.Kubelet.Labels = strings.Join(splitted, ",")
 
 		ignitionPath := k8scloudconfig.GetIgnitionPath(t.config.IgnitionPath)
 		params.Files, err = k8scloudconfig.RenderFiles(ignitionPath, params)
