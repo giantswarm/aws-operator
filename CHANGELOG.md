@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.7.0] - 2023-02-02
+
 ### Added
 
 - Label node pool nodes with `cgroups.giantswarm.io/version` to indicate which cgroup version they are running.
@@ -897,7 +899,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.6.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.7.0...HEAD
+[14.7.0]: https://github.com/giantswarm/aws-operator/compare/v14.6.0...v14.7.0
 [14.6.0]: https://github.com/giantswarm/aws-operator/compare/v14.5.0...v14.6.0
 [14.5.0]: https://github.com/giantswarm/aws-operator/compare/v14.4.0...v14.5.0
 [14.4.0]: https://github.com/giantswarm/aws-operator/compare/v14.3.0...v14.4.0
