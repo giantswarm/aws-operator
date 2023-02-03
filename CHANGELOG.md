@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [14.7.1] - 2023-02-03
 
+- Switch container registry in China
+
 ## [14.7.0] - 2023-02-02
 
 ### Added
