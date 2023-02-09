@@ -171,6 +171,11 @@ func (e *TCNPExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-lib-kubelet.mount",
 			Enabled:      true,
 		},
+		{
+			AssetContent: template.PullPauseContainer,
+			Name:         "pull-pause-container.service",
+			Enabled:      true,
+		},
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset

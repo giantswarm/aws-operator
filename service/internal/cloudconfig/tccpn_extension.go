@@ -437,6 +437,11 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "var-log.mount",
 			Enabled:      true,
 		},
+		{
+			AssetContent: template.PullPauseContainer,
+			Name:         "pull-pause-container.service",
+			Enabled:      true,
+		},
 	}
 
 	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app
