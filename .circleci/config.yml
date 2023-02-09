@@ -14,7 +14,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@4.24.0
+  architect: giantswarm/architect@4.27.0
 
 workflows:
   build:
@@ -30,6 +30,7 @@ workflows:
       # Ensure that for every commit (all branches), and for every new release tag,
       # an image is pushed to Quay.
       - architect/push-to-docker:
+          context: architect
           name: push-to-quay
           image: "quay.io/giantswarm/aws-operator"
           username_envar: "QUAY_USERNAME"
@@ -41,7 +42,7 @@ workflows:
               only: /^v.*/
 
       - architect/push-to-docker:
-          context: "architect"
+          context: architect
           name: push-to-docker
           image: "docker.io/giantswarm/aws-operator"
           username_envar: "DOCKER_USERNAME"
@@ -57,9 +58,10 @@ workflows:
       # an image gets pushed to the Aliyun registry.
       - architect/push-to-docker:
           name: push-to-aliyun
-          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          image: "giantswarm-registry.cn-shanghai.cr.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
+          context: architect
           requires:
             - go-build
           filters:
@@ -74,6 +76,7 @@ workflows:
       # if manually approved.
       - hold-push-to-aliyun-pr:
           type: approval
+          context: architect
           requires:
             - go-build
           filters:
@@ -83,9 +86,10 @@ workflows:
               ignore: /^v.*/
       - architect/push-to-docker:
           name: push-to-aliyun-pr
-          image: "registry-intl.cn-shanghai.aliyuncs.com/giantswarm/aws-operator"
+          image: "giantswarm-registry.cn-shanghai.cr.aliyuncs.com/giantswarm/aws-operator"
           username_envar: "ALIYUN_USERNAME"
           password_envar: "ALIYUN_PASSWORD"
+          context: architect
           requires:
             - hold-push-to-aliyun-pr
           filters:
@@ -101,6 +105,7 @@ workflows:
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
+          context: architect
           requires:
             - push-to-aliyun
             - push-to-quay
@@ -120,6 +125,7 @@ workflows:
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
+          context: architect
           requires:
             - push-to-quay
             - push-to-docker
