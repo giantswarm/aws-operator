@@ -167,19 +167,6 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0644,
 		},
-		{
-			AssetContent: template.ImagePuller,
-			Path:         "/opt/bin/pull-image",
-			Owner: k8scloudconfig.Owner{
-				Group: k8scloudconfig.Group{
-					Name: FileOwnerGroupName,
-				},
-				User: k8scloudconfig.User{
-					Name: FileOwnerUserName,
-				},
-			},
-			Permissions: FilePermission,
-		},
 	}
 
 	// TODO we install etcd-cluster-migrator in every case of HA masters. The etcd-cluster-migrator app
@@ -448,11 +435,6 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		{
 			AssetContent: template.EphemeralVarLogMount,
 			Name:         "var-log.mount",
-			Enabled:      true,
-		},
-		{
-			AssetContent: template.PullPauseContainer,
-			Name:         "pull-pause-container.service",
 			Enabled:      true,
 		},
 	}
