@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Allow node pools to scale from zero.
+
 ## [14.7.1] - 2023-02-03
 
 - Switch container registry in China

@@ -62,11 +62,10 @@ func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha3.AWSMac
 		return false, microerror.Mask(err)
 	}
 
-	asgEmpty := cc.Status.TenantCluster.ASG.IsEmpty()
 	asgMaxEqual := cc.Status.TenantCluster.ASG.MaxSize == key.MachineDeploymentScalingMax(cr)
 	asgMinEqual := cc.Status.TenantCluster.ASG.MinSize == key.MachineDeploymentScalingMin(cr)
 
-	if !asgEmpty && !asgMaxEqual {
+	if !asgMaxEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCNP stack should scale up",
@@ -74,7 +73,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha3.AWSMac
 		)
 		return true, nil
 	}
-	if !asgEmpty && !asgMinEqual {
+	if !asgMinEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",
 			"message", "detected TCNP stack should scale down",
