@@ -28,6 +28,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
+	if cc.Client.TenantCluster.K8s == nil {
+		r.logger.Debugf(ctx, "kubernetes clients are not available in controller context yet")
+		r.logger.Debugf(ctx, "canceling resource")
+
+		return nil
+	}
+
 	ctrlClient := cc.Client.TenantCluster.K8s.CtrlClient()
 
 	masters := &v1.NodeList{}
