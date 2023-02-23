@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/metricsresource"
 	"github.com/giantswarm/operatorkit/v7/pkg/resource/wrapper/retryresource"
 	"github.com/giantswarm/randomkeys/v3"
+	"github.com/giantswarm/tenantcluster/v6/pkg/tenantcluster"
 	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/giantswarm/aws-operator/v14/client/aws"
@@ -37,6 +38,7 @@ import (
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpsubnets"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpvpcid"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpvpcpcx"
+	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/v14/service/internal/changedetection"
 	"github.com/giantswarm/aws-operator/v14/service/internal/cloudconfig"
 	"github.com/giantswarm/aws-operator/v14/service/internal/cloudtags"
@@ -351,6 +353,35 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var tenantCluster tenantcluster.Interface
+	{
+		c := tenantcluster.Config{
+			CertsSearcher: certsSearcher,
+			Logger:        config.Logger,
+			CertID:        certs.AWSOperatorAPICert,
+		}
+
+		tenantCluster, err = tenantcluster.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
+	var tenantClientsResource resource.Interface
+	{
+		c := tenantclients.Config{
+			Logger: config.Logger,
+			Tenant: tenantCluster,
+
+			ToClusterFunc: newControlPlaneToClusterFunc(config.K8sClient.CtrlClient()),
+		}
+
+		tenantClientsResource, err = tenantclients.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpAZsResource resource.Interface
 	{
 		c := tccpazs.Config{
@@ -484,6 +515,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
 		awsClientResource,
+		tenantClientsResource,
 		accountIDResource,
 		tccpOutputsResource,
 		tccpnOutputsResource,
