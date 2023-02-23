@@ -39,8 +39,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	for _, node := range masters.Items {
-		n := &node
-		if !util.IsNodeReady(n) {
+		n := node
+		if !util.IsNodeReady(&n) {
 			r.logger.Debugf(ctx, "Node %s is not ready, not completing lifecycle hooks")
 			continue
 		}
