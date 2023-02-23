@@ -30,6 +30,7 @@ import (
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/snapshotid"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpazs"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpn"
+	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpnlifecycle"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpnoutputs"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpoutputs"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tccpsecuritygroups"
@@ -406,6 +407,18 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		}
 	}
 
+	var tccpnLifecycle resource.Interface
+	{
+		c := tccpnlifecycle.Config{
+			Logger: config.Logger,
+		}
+
+		tccpnLifecycle, err = tccpnlifecycle.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var tccpnResource resource.Interface
 	{
 		c := tccpn.Config{
@@ -487,6 +500,7 @@ func newControlPlaneResources(config ControlPlaneConfig) ([]resource.Interface, 
 		// the information given in the controller context.
 		s3ObjectResource,
 		tccpnResource,
+		tccpnLifecycle,
 
 		// All these resources implement cleanup functionality only being executed
 		// on delete events.
