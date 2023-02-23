@@ -14,9 +14,9 @@ WantedBy=multi-user.target
 
 const MasterInstanceHealtCheckTimer = `
 [Unit]
-Description=Execute master-instance-healthcheck every 5 minutes
+Description=Execute master-instance-healthcheck every minute
 [Timer]
-OnCalendar=*:0/5
+OnCalendar=*-*-* *:*:00
 [Install]
 WantedBy=multi-user.target
 `
