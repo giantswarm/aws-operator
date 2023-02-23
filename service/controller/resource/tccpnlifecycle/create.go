@@ -91,7 +91,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		_, err = cc.Client.TenantCluster.AWS.AutoScaling.CompleteLifecycleAction(i)
-		if err != nil {
+		if IsNoActiveLifeCycleAction(err) {
+			r.logger.Debugf(ctx, "did not find life cycle hook action for tenant cluster node %#q", instanceId)
+		} else if err != nil {
 			return microerror.Mask(err)
 		}
 	}
