@@ -234,7 +234,7 @@ func Test_Controller_Resource_TCCPN_Template_Render(t *testing.T) {
 				}
 			}
 
-			params, err := r.newTemplateParams(ctx, aws)
+			params, err := r.newTemplateParams(ctx, aws, false)
 			if err != nil {
 				t.Fatal(err)
 			}
