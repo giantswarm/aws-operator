@@ -7,7 +7,9 @@ After=k8s-kubelet.service etcd3.service
 Requires=k8s-kubelet.service etcd3.service
 [Service]
 Type=simple
-Restart=on-failure
+Restart=always
+RestartSec=15
+ExecStartPre=/opt/bin/etcd-healthcheck
 ExecStart=/opt/bin/master-instance-lifecycle-continue
 [Install]
 WantedBy=multi-user.target
@@ -38,4 +40,24 @@ else
     echo "Failed to complete lifecycle action. Got error: $output"
     exit 1
 fi
+`
+
+const ETCDHealthCheck = `#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+statuscode=$(ETCDCTL_API=3 etcdctl \
+    --cert /etc/kubernetes/ssl/etcd/client-crt.pem \
+    --key /etc/kubernetes/ssl/etcd/client-key.pem \
+    --cacert /etc/kubernetes/ssl/etcd/client-ca.pem \
+    --endpoints "127.0.0.1:2379" endpoint health --write-out json | jq .[].health)
+
+  if [ $statuscode = "true" ]; then
+     echo "ETCD is healthy."
+     return 0
+  fi
+
+  echo "ETCD is not healthy yet."
+  return 1
 `

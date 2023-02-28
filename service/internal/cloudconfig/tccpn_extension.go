@@ -231,7 +231,20 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0744,
 		}
-		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker, lifeCycleContinue)
+		etcdHealthCheck := k8scloudconfig.FileMetadata{
+			AssetContent: template.ETCDHealthCheck,
+			Path:         "/opt/bin/etcd-healthcheck",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0744,
+		}
+		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker, lifeCycleContinue, etcdHealthCheck)
 	}
 
 	if !e.hasCilium {
