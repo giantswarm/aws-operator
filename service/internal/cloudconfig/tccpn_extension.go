@@ -218,7 +218,20 @@ func (e *TCCPNExtension) Files() ([]k8scloudconfig.FileAsset, error) {
 			},
 			Permissions: 0744,
 		}
-		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker)
+		lifeCycleContinue := k8scloudconfig.FileMetadata{
+			AssetContent: template.MasterInstanceLifecycleContinue,
+			Path:         "/opt/bin/master-instance-lifecycle-continue",
+			Owner: k8scloudconfig.Owner{
+				Group: k8scloudconfig.Group{
+					Name: FileOwnerGroupName,
+				},
+				User: k8scloudconfig.User{
+					Name: FileOwnerUserName,
+				},
+			},
+			Permissions: 0744,
+		}
+		filesMeta = append(filesMeta, etcdClusterMigratorManifest, etcdClusterMigratorInstaller, healthChecker, lifeCycleContinue)
 	}
 
 	if !e.hasCilium {
@@ -464,7 +477,13 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 			Name:         "master-instance-healthcheck.timer",
 			Enabled:      true,
 		}
-		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer)
+		// Lifecycle hook after etcd started.
+		lifeCycleContinue := k8scloudconfig.UnitMetadata{
+			AssetContent: template.MasterInstanceLifecycleContinueService,
+			Name:         "master-lifecycle-continue.service",
+			Enabled:      true,
+		}
+		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer, lifeCycleContinue)
 	}
 
 	var newUnits []k8scloudconfig.UnitAsset
