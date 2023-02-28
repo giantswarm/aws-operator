@@ -55,9 +55,9 @@ statuscode=$(ETCDCTL_API=3 etcdctl \
 
   if [ $statuscode = "true" ]; then
      echo "ETCD is healthy."
-     return 0
+     exit 0
   fi
 
   echo "ETCD is not healthy yet."
-  return 1
+  exit 1
 `
