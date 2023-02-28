@@ -3,8 +3,8 @@ package template
 const MasterInstanceLifecycleContinueService = `
 [Unit]
 Description=master-instance-lifecycle-continue job
-After=k8s-kubelet.service etcd3.service
-Requires=k8s-kubelet.service etcd3.service
+After=k8s-kubelet.service 
+Requires=k8s-kubelet.service 
 [Service]
 Type=simple
 Restart=always
