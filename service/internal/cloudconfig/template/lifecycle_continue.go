@@ -3,11 +3,11 @@ package template
 const MasterInstanceLifecycleContinueService = `
 [Unit]
 Description=master-instance-lifecycle-continue job
-After=k8s-kubelet.service 
-Requires=k8s-kubelet.service 
+Requires=network.target
+After=network.target
 [Service]
 Type=simple
-Restart=always
+Restart=on-failure
 RestartSec=15
 ExecStartPre=/opt/bin/etcd-healthcheck
 ExecStart=/opt/bin/master-instance-lifecycle-continue

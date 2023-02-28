@@ -493,7 +493,7 @@ func (e *TCCPNExtension) Units() ([]k8scloudconfig.UnitAsset, error) {
 		// Lifecycle hook after etcd started.
 		lifeCycleContinue := k8scloudconfig.UnitMetadata{
 			AssetContent: template.MasterInstanceLifecycleContinueService,
-			Name:         "master-lifecycle-continue.service",
+			Name:         "master-instance-lifecycle-continue.service",
 			Enabled:      true,
 		}
 		unitsMeta = append(unitsMeta, etcdClusterMigratorService, healthCheckService, healthCheckTimer, lifeCycleContinue)
