@@ -23,9 +23,9 @@ set -o pipefail
 export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
 
 # AWS Autoscaling Group Name
-export AUTOSCALINGGROUP=$(docker run --rm docker.io/giantswarm/awscli:2.7.35 autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
+export AUTOSCALINGGROUP=$(docker run --rm {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
 
-output=$(docker run --rm -i docker.io/giantswarm/awscli:2.7.35 autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE 2>&1 > /dev/null)
+output=$(docker run --rm -i {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling complete-lifecycle-action --auto-scaling-group-name $AUTOSCALINGGROUP --lifecycle-hook-name ControlPlaneLaunching --instance-id $INSTANCEID --lifecycle-action-result CONTINUE 2>&1 > /dev/null)
 
 # We ignore the following error: An error occurred (ValidationError) when calling the CompleteLifecycleAction operation: No active Lifecycle Action found with instance ID i-0f9f9f9f9f9f9f9f9
 # This happens when the lifecycle hook is already completed.
