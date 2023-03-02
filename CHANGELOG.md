@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Adjust the tccpn stack heartbeat to improve cluster upgrades.
+
 ## [14.7.1] - 2023-02-03
+
+### Changed
 
 - Switch container registry in China
 

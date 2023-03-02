@@ -36,13 +36,15 @@ const TemplateMainAutoScalingGroup = `
       # hook referencing the ASG name. In this setting when deleting a Node Pool
       # the lifecycle hook was never executed. We always want node draining for
       # reliably managing customer workloads.
+      # The launching hook has always has to be higher than the terminating one to ensure
+      # the etcd volume is detached before the instance is marked as healthy.
       LifecycleHookSpecificationList:
         - DefaultResult: CONTINUE
-          HeartbeatTimeout: 300
+          HeartbeatTimeout: 1020
           LifecycleHookName: ControlPlaneLaunching
           LifecycleTransition: autoscaling:EC2_INSTANCE_LAUNCHING
         - DefaultResult: CONTINUE
-          HeartbeatTimeout: 3600
+          HeartbeatTimeout: 900
           LifecycleHookName: ControlPlane
           LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
       {{- end }}
