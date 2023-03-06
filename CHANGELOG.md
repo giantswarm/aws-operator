@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump k8s-api-healthz image to 0.2.0.
+
 ### Fixed
 
 - Don't mark master instance as unhealthy if local etcd instance is unresponsive but the whole etcd cluster is also down.
