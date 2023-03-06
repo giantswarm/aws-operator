@@ -100,7 +100,7 @@ function etcd_status {
     --endpoints "https://etcd.{{ .BaseDomain }}:2379" endpoint health --write-out json | jq .[].health)
 
   if [ $statuscode != "true" ]; then
-     echo "etcd cluster as a whole is not healthy, can't reliably tell if local instance is working fine or not"
+     echo "etcd cluster as a whole is not healthy, can't reliably tell if local instance is working fine or not" 
      return 0
   fi
 
@@ -126,6 +126,15 @@ function apiserver_status {
   if [ $statuscode -eq 200 ]; then
     return 0
   fi
+
+  # Check if API is up through the load balancer
+  statuscode=$(curl -k https://api.{{ .BaseDomain }}/healthz -o /dev/null -w '%{http_code}\n' -s)
+
+  if [ $statuscode -ne 200 ]; then
+    echo "k8s api is not up, can't reliably tell if local instance is working fine or not"
+    return 0
+  fi
+
   return 1
 }
 
