@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Don't mark master instance as unhealthy if local etcd instance is unresponsive but the whole etcd cluster is down. 
+
 ## [14.8.0] - 2023-03-02
 
 ### Changed

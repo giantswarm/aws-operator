@@ -78,7 +78,7 @@ function retry() {
   return $exitCode
 }
 
-# Checking etcd
+# Checking if local etcd instance is unhealthy while the cluster as a whole is working fine.
 function etcd_status {
   local statuscode
 
@@ -91,6 +91,19 @@ function etcd_status {
   if [ $statuscode = "true" ]; then
      return 0
   fi
+
+  # Check if etcd cluster is healthy (meaning only local instance is failed)
+  statuscode=$(ETCDCTL_API=3 etcdctl \
+    --cert /etc/kubernetes/ssl/etcd/client-crt.pem \
+    --key /etc/kubernetes/ssl/etcd/client-key.pem \
+    --cacert /etc/kubernetes/ssl/etcd/client-ca.pem \
+    --endpoints "https://etcd.{{ .BaseDomain }}:2379" endpoint health --write-out json | jq .[].health)
+
+  if [ $statuscode != "true" ]; then
+     echo "etcd cluster as a whole is not healthy, can't reliably tell if local instance is working fine or not"
+     return 0
+  fi
+
   return 1
 }
 
