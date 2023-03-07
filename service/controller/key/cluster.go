@@ -44,7 +44,7 @@ const (
 const (
 	// KubernetesAPIHealthzVersion is a tag representing the version of
 	// https://github.com/giantswarm/k8s-api-healthz/ used.
-	KubernetesAPIHealthzVersion = "0.1.1"
+	KubernetesAPIHealthzVersion = "0.2.0"
 	// K8sSetupNetworkEnvironment is a tag representing the version of
 	// https://github.com/giantswarm/k8s-setup-network-environment used.
 	K8sSetupNetworkEnvironment = "0.2.0"
