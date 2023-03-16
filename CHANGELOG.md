@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- When creating a cluster, create the master ASGs in parallel.
+
 ## [14.9.0] - 2023-03-07
 
 ### Changed
