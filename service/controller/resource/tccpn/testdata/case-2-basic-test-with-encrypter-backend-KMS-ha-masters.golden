@@ -79,7 +79,6 @@ Resources:
     DependsOn:
     - MasterEni2
     - EtcdVolume2
-    - ControlPlaneNodeAutoScalingGroup
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1b
@@ -144,7 +143,6 @@ Resources:
     DependsOn:
     - MasterEni3
     - EtcdVolume3
-    - ControlPlaneNodeAutoScalingGroup2
     Properties:
       VPCZoneIdentifier:
         - subnet-id-eu-central-1c
