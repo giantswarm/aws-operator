@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.10.0] - 2023-03-16
+
 ### Changed
 
 - When creating a cluster, create the master ASGs in parallel.
@@ -926,7 +928,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.9.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.10.0...HEAD
+[14.10.0]: https://github.com/giantswarm/aws-operator/compare/v14.9.0...v14.10.0
 [14.9.0]: https://github.com/giantswarm/aws-operator/compare/v14.8.0...v14.9.0
 [14.8.0]: https://github.com/giantswarm/aws-operator/compare/v14.7.1...v14.8.0
 [14.7.1]: https://github.com/giantswarm/aws-operator/compare/v14.7.0...v14.7.1
