@@ -505,6 +505,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			InitialClusterState: etcdInitialClusterState,
 			HighAvailability:    multiMasterEnabled,
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
+			QuotaBackendBytes:   key.EtcdQuotaBackendBytes(cluster),
 		}
 		// we need to explicitly set InitialCluster for single master, since k8scc qhas different config logic which does nto work for AWS
 		if !multiMasterEnabled {
