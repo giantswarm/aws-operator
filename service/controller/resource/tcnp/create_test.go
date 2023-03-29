@@ -11,7 +11,7 @@ import (
 	"github.com/ghodss/yaml"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/micrologger/microloggertest"
-	releasev1alpha1 "github.com/giantswarm/release-operator/v3/api/v1alpha1"
+	releasev1alpha1 "github.com/giantswarm/release-operator/v4/api/v1alpha1"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tcnp/template"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
-	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/cachekeycontext"
+	"github.com/giantswarm/operatorkit/v8/pkg/controller/context/cachekeycontext"
 	gocache "github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
