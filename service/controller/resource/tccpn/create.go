@@ -179,7 +179,7 @@ func (r *Resource) createStack(ctx context.Context, cr infrastructurev1alpha3.AW
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := r.newTemplateParams(ctx, cr)
+		params, err := r.newTemplateParams(ctx, cr, true)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -250,7 +250,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AW
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane nodes cloud formation stack")
 
-		params, err := r.newTemplateParams(ctx, cr)
+		params, err := r.newTemplateParams(ctx, cr, false)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -292,7 +292,7 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AW
 	return nil
 }
 
-func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMainAutoScalingGroup, error) {
+func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane, newCluster bool) (*template.ParamsMainAutoScalingGroup, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -320,7 +320,7 @@ func (r *Resource) newAutoScalingGroup(ctx context.Context, cr infrastructurev1a
 		dependsOn := []string{key.ControlPlaneENIResourceName(m.ID), key.ControlPlaneVolumeResourceName(m.ID)}
 		// ASG for second and third master will have chain dependency on the previous one
 		// to have rolling update of one ASG after the previous one.
-		if m.ID == 2 || m.ID == 3 {
+		if !newCluster && (m.ID == 2 || m.ID == 3) {
 			dependsOn = append(dependsOn, key.ControlPlaneASGResourceName(&cr, m.ID-1))
 		}
 		item := template.ParamsMainAutoScalingGroupItem{
@@ -649,10 +649,10 @@ func (r *Resource) newRecordSets(ctx context.Context, cr infrastructurev1alpha3.
 	return recordSets, nil
 }
 
-func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (*template.ParamsMain, error) {
+func (r *Resource) newTemplateParams(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane, newCluster bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
-		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr)
+		autoScalingGroup, err := r.newAutoScalingGroup(ctx, cr, newCluster)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
