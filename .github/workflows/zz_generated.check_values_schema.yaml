@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.15.0
+#    devctl@5.19.0
 #
 name: 'Values and schema'
 on:
@@ -9,8 +9,9 @@ on:
       - master
       - main
     paths:
-      - 'helm/**/values.yaml'
-      - 'helm/**/values.schema.json'
+      - 'helm/**/values.yaml'         # default helm chart values
+      - 'helm/**/values.schema.json'  # schema
+      - 'helm/**/ci/ci-values.yaml'   # overrides for CI (can contain required entries)
 
 jobs:
   check:
@@ -29,6 +30,15 @@ jobs:
 
       - name: 'Check if values.yaml is a valid instance of values.schema.json'
         run: |
-          HELM_DIR=$(dirname $(git diff --name-only origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
-           | grep 'helm/[-a-z].*\/values\.' | head -1))
-          ${HOME}/yajsv -s ${HELM_DIR}/values.schema.json ${HELM_DIR}/values.yaml
+          HELM_DIR=$(git diff --name-only origin/${GITHUB_BASE_REF} ${GITHUB_SHA} \
+           | grep 'helm/[-a-z].*\/' | head -1 | awk -F '/' '{print $1"/"$2}')
+          VALUES=${HELM_DIR}/values.yaml
+          if [ -f ${HELM_DIR}/ci/ci-values.yaml ]; then
+            # merge ci-values.yaml into values.yaml (providing required values)
+            echo -e "\nMerged values:\n=============="
+            yq '. *= load("'${HELM_DIR}'/ci/ci-values.yaml")' ${HELM_DIR}/values.yaml | tee ${HELM_DIR}/combined-values.yaml
+            echo -e "\n==============\n"
+            VALUES=${HELM_DIR}/combined-values.yaml
+          fi
+
+          ${HOME}/yajsv -s ${HELM_DIR}/values.schema.json ${VALUES}

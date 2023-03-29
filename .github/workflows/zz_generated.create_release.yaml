@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.15.0
+#    devctl@5.19.0
 #
 name: Create Release
 on:
@@ -90,12 +90,12 @@ jobs:
       - gather_facts
     steps:
       - name: Install architect
-        uses: giantswarm/install-binary-action@v1.0.0
+        uses: giantswarm/install-binary-action@v1.1.0
         with:
           binary: "architect"
-          version: "6.1.0"
+          version: "6.10.0"
       - name: Install semver
-        uses: giantswarm/install-binary-action@v1.0.0
+        uses: giantswarm/install-binary-action@v1.1.0
         with:
           binary: "semver"
           version: "3.2.0"
@@ -200,7 +200,7 @@ jobs:
     if: ${{ needs.gather_facts.outputs.version }}
     steps:
       - name: Install semver
-        uses: giantswarm/install-binary-action@v1.0.0
+        uses: giantswarm/install-binary-action@v1.1.0
         with:
           binary: "semver"
           version: "3.0.0"
