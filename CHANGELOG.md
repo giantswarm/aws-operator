@@ -7,7 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.10.0] - 2023-03-16
+
+### Changed
+
+- When creating a cluster, create the master ASGs in parallel.
+
+## [14.9.0] - 2023-03-07
+
+### Changed
+
+- Bump k8s-api-healthz image to 0.2.0.
+
+### Fixed
+
+- Don't mark master instance as unhealthy if local etcd instance is unresponsive but the whole etcd cluster is also down.
+- Don't mark master instance as unhealthy if local API server instance is unresponsive but the whole API server is also down.
+
+## [14.8.0] - 2023-03-02
+
+### Changed
+
+- Adjust the tccpn stack heartbeat to improve cluster upgrades.
+
 ## [14.7.1] - 2023-02-03
+
+### Changed
 
 - Switch container registry in China
 
@@ -903,7 +928,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.10.0...HEAD
+[14.10.0]: https://github.com/giantswarm/aws-operator/compare/v14.9.0...v14.10.0
+[14.9.0]: https://github.com/giantswarm/aws-operator/compare/v14.8.0...v14.9.0
+[14.8.0]: https://github.com/giantswarm/aws-operator/compare/v14.7.1...v14.8.0
 [14.7.1]: https://github.com/giantswarm/aws-operator/compare/v14.7.0...v14.7.1
 [14.7.0]: https://github.com/giantswarm/aws-operator/compare/v14.6.0...v14.7.0
 [14.6.0]: https://github.com/giantswarm/aws-operator/compare/v14.5.0...v14.6.0
