@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Set ENV for nftables in `aws-cni`.
 - Bump k8s-api-healthz image to 0.2.0.
 
 ### Fixed
