@@ -254,8 +254,6 @@ github.com/giantswarm/operatorkit/v7 v7.1.0 h1:yRUwj9ZUqBd+UV0C5n784+Qe6y/olILtg
 github.com/giantswarm/operatorkit/v7 v7.1.0/go.mod h1:5enwhyIjd4xKrYXV9+enqttcmB9BE2Ocl1V12IwJIuw=
 github.com/giantswarm/randomkeys/v3 v3.0.0 h1:68C+laq+2DgvfYPs8tz7249Oc0gYE14W93moJ4s7pSg=
 github.com/giantswarm/randomkeys/v3 v3.0.0/go.mod h1:O47AZ2x6xJ4+LpSz5Gq4i8duaTFeaffyA8g39amF1FQ=
-github.com/giantswarm/release-operator/v3 v3.2.0 h1:bZFiVGuEdx73222C+4m8sRGqpaNQR7ZCqsWGSwNDJkE=
-github.com/giantswarm/release-operator/v3 v3.2.0/go.mod h1:joFBezcw9qe089tVAfqhRTVMDtYBsfQ98mJ6tKau2sY=
 github.com/giantswarm/release-operator/v4 v4.0.0 h1:b4zNzBz7C1FleK1Ka/W9jlbowMBSPNb7BWf/Aasrc3Y=
 github.com/giantswarm/release-operator/v4 v4.0.0/go.mod h1:8OqMj1HZVN50NXNSA/zcLrmEUPNa+eOMHkpLHkUBf9Q=
 github.com/giantswarm/tenantcluster/v6 v6.0.0 h1:IWJQ+3nj82a66cUsB+Nwi7O6lAvFI0MA0vtwM+28CU8=

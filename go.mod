@@ -23,7 +23,7 @@ require (
 	github.com/giantswarm/micrologger v1.0.0
 	github.com/giantswarm/operatorkit/v7 v7.1.0
 	github.com/giantswarm/randomkeys/v3 v3.0.0
-	github.com/giantswarm/release-operator/v3 v3.2.0
+	github.com/giantswarm/release-operator/v4 v4.0.0
 	github.com/giantswarm/tenantcluster/v6 v6.0.0
 	github.com/giantswarm/to v0.4.0
 	github.com/google/go-cmp v0.5.9
@@ -52,7 +52,6 @@ require (
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/giantswarm/exporterkit v1.0.0 // indirect
 	github.com/giantswarm/microstorage v0.2.0 // indirect
-	github.com/giantswarm/release-operator/v4 v4.0.0 // indirect
 	github.com/giantswarm/versionbundle v1.0.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
