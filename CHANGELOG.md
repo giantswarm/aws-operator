@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.12.0] - 2023-04-04
+
 ### Changed
 
 - Set ENV for nftables in `aws-cni`.
@@ -938,7 +940,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.11.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.12.0...HEAD
+[14.12.0]: https://github.com/giantswarm/aws-operator/compare/v14.11.0...v14.12.0
 [14.11.0]: https://github.com/giantswarm/aws-operator/compare/v14.10.0...v14.11.0
 [14.10.0]: https://github.com/giantswarm/aws-operator/compare/v14.9.0...v14.10.0
 [14.9.0]: https://github.com/giantswarm/aws-operator/compare/v14.8.0...v14.9.0
