@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improved etcd resiliency and allow customization of `--quota-backend-bytes`.
+
 ## [14.10.0] - 2023-03-16
 
 ### Changed

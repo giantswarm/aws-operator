@@ -10,7 +10,7 @@ import (
 	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v4/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v15/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v16/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v3"
@@ -505,6 +505,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			InitialClusterState: etcdInitialClusterState,
 			HighAvailability:    multiMasterEnabled,
 			NodeName:            key.ControlPlaneEtcdNodeName(mapping.ID),
+			QuotaBackendBytes:   key.EtcdQuotaBackendBytes(cluster),
 		}
 		// we need to explicitly set InitialCluster for single master, since k8scc qhas different config logic which does nto work for AWS
 		if !multiMasterEnabled {

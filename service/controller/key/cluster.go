@@ -135,6 +135,20 @@ func CiliumPodsCIDRBlock(cluster apiv1beta1.Cluster) string {
 	return cluster.Annotations[annotation.CiliumPodCidr]
 }
 
+func EtcdQuotaBackendBytes(cluster apiv1beta1.Cluster) int64 {
+	str := cluster.Annotations["etcd.giantswarm.io/quota-backend-bytes"]
+	if str != "" {
+		i, err := strconv.Atoi(str)
+		if err != nil {
+			return 0
+		}
+
+		return int64(i)
+	}
+
+	return 0
+}
+
 // HasCilium returns true if the release uses cilium as CNI. Cilium will be added in v19, so any release >= v19.0.0
 func HasCilium(cluster LabelsGetter) (bool, error) {
 	release := cluster.GetLabels()[label.Release]
