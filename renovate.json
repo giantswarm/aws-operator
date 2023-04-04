@@ -47,5 +47,13 @@
     "zricethezav/gitleaks-action",
     "actions/setup-go"
   ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^helm\\/.+\\/values\\.yaml$"],
+      "matchStrings": ["repo: (?<depName>.*)\n(\\s)*version: (?<currentValue>.*?)\n"],
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    }
+  ],
   "schedule": [ "after 6am on thursday" ]
 }

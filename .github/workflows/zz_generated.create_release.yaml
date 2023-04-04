@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.19.0
+#    devctl@5.21.0
 #
 name: Create Release
 on:
@@ -122,8 +122,8 @@ jobs:
           fi
       - name: Set up git identity
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "dev@giantswarm.io"
+          git config --local user.name "taylorbot"
       - name: Commit changes
         run: |
           file="${{ needs.gather_facts.outputs.project_go_path }}"
@@ -131,13 +131,13 @@ jobs:
           git commit -m "Bump version to ${{ steps.update_project_go.outputs.new_version }}"
       - name: Push changes
         env:
-          REMOTE_REPO: "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          REMOTE_REPO: "https://${{ github.actor }}:${{ secrets.TAYLORBOT_GITHUB_ACTION }}@github.com/${{ github.repository }}.git"
           branch: "${{ github.ref }}-version-bump"
         run: |
           git push "${REMOTE_REPO}" HEAD:${{ env.branch }}
       - name: Create PR
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.TAYLORBOT_GITHUB_ACTION }}"
           base: "${{ github.ref }}"
           branch: "${{ github.ref }}-version-bump"
           version: "${{ needs.gather_facts.outputs.version }}"
@@ -171,22 +171,22 @@ jobs:
           path: ./CHANGELOG.md
       - name: Set up git identity
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "dev@giantswarm.io"
+          git config --local user.name "taylorbot"
       - name: Create tag
         run: |
           version="${{ needs.gather_facts.outputs.version }}"
           git tag "v$version" ${{ github.sha }}
       - name: Push tag
         env:
-          REMOTE_REPO: "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          REMOTE_REPO: "https://${{ github.actor }}:${{ secrets.TAYLORBOT_GITHUB_ACTION }}@github.com/${{ github.repository }}.git"
         run: |
           git push "${REMOTE_REPO}" --tags
       - name: Create release
         id: create_gh_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.TAYLORBOT_GITHUB_ACTION }}"
         with:
           body: ${{ steps.changelog_reader.outputs.changes }}
           tag_name: "v${{ needs.gather_facts.outputs.version }}"
