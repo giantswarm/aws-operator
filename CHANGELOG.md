@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Set ENV for nftables in `aws-cni`.
+
 ## [14.11.0] - 2023-04-04
 
 ### Changed
