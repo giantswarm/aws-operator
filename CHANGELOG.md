@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added ami IDs for flatcar `3374.2.4` and `3374.2.5`.
+
 ## [14.12.0] - 2023-04-04
 
 ### Changed
