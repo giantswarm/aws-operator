@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.12.1] - 2023-04-05
+
 ### Added
 
 - Added ami IDs for flatcar `3374.2.4` and `3374.2.5`.
@@ -944,7 +946,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.12.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.12.1...HEAD
+[14.12.1]: https://github.com/giantswarm/aws-operator/compare/v14.12.0...v14.12.1
 [14.12.0]: https://github.com/giantswarm/aws-operator/compare/v14.11.0...v14.12.0
 [14.11.0]: https://github.com/giantswarm/aws-operator/compare/v14.10.0...v14.11.0
 [14.10.0]: https://github.com/giantswarm/aws-operator/compare/v14.9.0...v14.10.0
