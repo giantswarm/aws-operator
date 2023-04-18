@@ -618,8 +618,8 @@ Resources:
               Federated: "arn:aws:iam::tenant-account:oidc-provider/122424fd.cloudfront.net"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
-              StringEquals:
-                "122424fd.cloudfront.net:sub": "system:serviceaccount:kube-system:external-dns"
+              StringLike:
+                "122424fd.cloudfront.net:sub": "system:serviceaccount:kube-system:*"
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
     Properties:

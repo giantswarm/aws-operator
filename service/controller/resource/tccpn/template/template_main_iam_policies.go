@@ -383,8 +383,8 @@ const TemplateMainIAMPolicies = `
               Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/{{ .IAMPolicies.CloudfrontDomain }}"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
-              StringEquals:
-                "{{ .IAMPolicies.CloudfrontDomain }}:sub": "system:serviceaccount:kube-system:external-dns"
+              StringLike:
+                "{{ .IAMPolicies.CloudfrontDomain }}:sub": "system:serviceaccount:kube-system:*"
           {{- end }}
           {{- if ne .IAMPolicies.CloudfrontAliasDomain "" }}
           - Effect: "Allow"
@@ -392,8 +392,8 @@ const TemplateMainIAMPolicies = `
               Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/{{ .IAMPolicies.CloudfrontAliasDomain }}"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
-              StringEquals:
-                "{{ .IAMPolicies.CloudfrontAliasDomain }}:sub": "system:serviceaccount:kube-system:external-dns"
+              StringLike:
+                "{{ .IAMPolicies.CloudfrontAliasDomain }}:sub": "system:serviceaccount:kube-system:*"
           {{- end }}
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
