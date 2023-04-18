@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Use `alpine` as image for aws-cni's `routes-fixer`. 
+
 ### Changed
 
 - Allow externalDNS role to be assumed by any SA containing "external-dns" to allow multiple app deployments.
+
 
 ## [14.12.1] - 2023-04-05
 
