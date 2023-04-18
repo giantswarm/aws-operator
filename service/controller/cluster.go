@@ -94,6 +94,7 @@ type ClusterConfig struct {
 	IncludeTags                bool
 	InstallationName           string
 	IPAMNetworkRange           net.IPNet
+	RegistryDomain             string
 	RouteTables                string
 	Route53Enabled             bool
 }
@@ -836,8 +837,9 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var prepareAwsCniForMigrationResource resource.Interface
 	{
 		c := prepareawscniformigration.Config{
-			Logger:     config.Logger,
-			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:         config.Logger,
+			CtrlClient:     config.K8sClient.CtrlClient(),
+			RegistryDomain: config.RegistryDomain,
 		}
 
 		prepareAwsCniForMigrationResource, err = prepareawscniformigration.New(c)

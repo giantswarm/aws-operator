@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Use `alpine` as image for aws-cni's `routes-fixer`. 
+
 ## [14.12.1] - 2023-04-05
 
 ### Added

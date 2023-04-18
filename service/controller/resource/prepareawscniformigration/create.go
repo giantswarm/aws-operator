@@ -2,6 +2,7 @@ package prepareawscniformigration
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
@@ -109,8 +110,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "Daemonset %q doesn't have routes-fixer container", dsName)
 		ds.Spec.Template.Spec.Containers = append(ds.Spec.Template.Spec.Containers, corev1.Container{
 			Name:    "routes-fixer",
-			Image:   ds.Spec.Template.Spec.Containers[0].Image,
-			Command: []string{"/usr/bin/bash"},
+			Image:   fmt.Sprintf("%s/giantswarm/alpine:3.17.3", r.registryDomain),
+			Command: []string{"/bin/sh"},
 			Args: []string{
 				"-c",
 				getScript(key.CiliumPodsCIDRBlock(cluster)),
