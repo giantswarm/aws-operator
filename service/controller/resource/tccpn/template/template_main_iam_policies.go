@@ -384,7 +384,7 @@ const TemplateMainIAMPolicies = `
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringLike:
-                "{{ .IAMPolicies.CloudfrontDomain }}:sub": "system:serviceaccount:*:*"
+                "{{ .IAMPolicies.CloudfrontDomain }}:sub": "system:serviceaccount:*:external-dns*"
           {{- end }}
           {{- if ne .IAMPolicies.CloudfrontAliasDomain "" }}
           - Effect: "Allow"
@@ -393,7 +393,7 @@ const TemplateMainIAMPolicies = `
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringLike:
-                "{{ .IAMPolicies.CloudfrontAliasDomain }}:sub": "system:serviceaccount:*:*"
+                "{{ .IAMPolicies.CloudfrontAliasDomain }}:sub": "system:serviceaccount:*:external-dns*"
           {{- end }}
   Route53ManagerRolePolicy:
     Type: "AWS::IAM::Policy"
