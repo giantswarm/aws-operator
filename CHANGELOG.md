@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.13.0] - 2023-04-18
+
 ### Fixed
 
 - Use `alpine` as image for aws-cni's `routes-fixer`. 
@@ -955,7 +957,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.12.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.13.0...HEAD
+[14.13.0]: https://github.com/giantswarm/aws-operator/compare/v14.12.1...v14.13.0
 [14.12.1]: https://github.com/giantswarm/aws-operator/compare/v14.12.0...v14.12.1
 [14.12.0]: https://github.com/giantswarm/aws-operator/compare/v14.11.0...v14.12.0
 [14.11.0]: https://github.com/giantswarm/aws-operator/compare/v14.10.0...v14.11.0
