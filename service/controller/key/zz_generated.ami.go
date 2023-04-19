@@ -1141,7 +1141,32 @@ var amiJSON = []byte(`{
     "us-east-2": "ami-0a77adb1004715426",
     "us-west-1": "ami-0c3ba8b8a957c11f4",
     "us-west-2": "ami-01d91e07373a1216b"
-  }
+  },
+  "3510.2.0": {
+    "af-south-1": "ami-0c000693826089834",
+    "ap-east-1": "ami-04e71e87a93325971",
+    "ap-northeast-1": "ami-0731de417af7aba36",
+    "ap-northeast-2": "ami-04dd39064be0087c2",
+    "ap-south-1": "ami-04cb6303c754dbd43",
+    "ap-southeast-1": "ami-08972301e946ecdbd",
+    "ap-southeast-2": "ami-0190b8ead758041d3",
+    "ap-southeast-3": "ami-0a034a5b018a83f4e",
+    "ca-central-1": "ami-0542101d46d8ab4dc",
+    "cn-north-1": "ami-07a8388a34effc49d",
+    "cn-northwest-1": "ami-03d2325ac25989a46",
+    "eu-central-1": "ami-0263a6ef2fb6af08e",
+    "eu-north-1": "ami-079371ef73b9dcad6",
+    "eu-south-1": "ami-0b335fe7d2e6499c0",
+    "eu-west-1": "ami-0f919cd8416126f2a",
+    "eu-west-2": "ami-062a8cead6d5eb495",
+    "eu-west-3": "ami-0833f457d52ba5906",
+    "me-south-1": "ami-03aa1864cde4c60fe",
+    "sa-east-1": "ami-034175dde57f2e9f2",
+    "us-east-1": "ami-09689f38175491db9",
+    "us-east-2": "ami-033f192100c9980a1",
+    "us-west-1": "ami-07a8a027c32ef1115",
+    "us-west-2": "ami-08d7c3221e6f57e1f"
+   }
 }`)
 
 func init() {
