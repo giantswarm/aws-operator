@@ -37,7 +37,6 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		{
 			i := &s3.CreateBucketInput{
-				ACL:             aws.String("bucket-owner-full-control"),
 				Bucket:          aws.String(bucketInput.Name),
 				ObjectOwnership: aws.String(s3.ObjectOwnershipObjectWriter),
 			}
