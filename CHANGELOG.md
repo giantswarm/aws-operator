@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Fixed
 
-- Added ami IDs for flatcar `3510.2.0`.
+- Allow to enable ACLs for a S3 buckets.
 
 ## [14.13.0] - 2023-04-18
 
