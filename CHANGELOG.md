@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Allow to enable ACLs for a S3 buckets.
+
 ## [14.8.0] - 2023-03-02
 
 ### Changed
