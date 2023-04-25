@@ -38,7 +38,7 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 		{
 			i := &s3.CreateBucketInput{
 				Bucket:          aws.String(bucketInput.Name),
-				ObjectOwnership: aws.String(s3.ObjectOwnershipBucketOwnerEnforced),
+				ObjectOwnership: aws.String(s3.ObjectOwnershipBucketOwnerPreferred),
 			}
 
 			_, err = cc.Client.TenantCluster.AWS.S3.CreateBucket(i)
