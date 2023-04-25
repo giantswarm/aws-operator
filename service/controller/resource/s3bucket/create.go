@@ -37,9 +37,9 @@ func (r *Resource) ApplyCreateChange(ctx context.Context, obj, createChange inte
 
 		{
 			i := &s3.CreateBucketInput{
-				ACL:             aws.String(s3.PermissionFullControl),
-				Bucket:          aws.String(bucketInput.Name),
-				ObjectOwnership: aws.String(s3.ObjectOwnershipBucketOwnerPreferred),
+				GrantFullControl: aws.String("fullGrant"),
+				Bucket:           aws.String(bucketInput.Name),
+				ObjectOwnership:  aws.String(s3.ObjectOwnershipBucketOwnerPreferred),
 			}
 
 			_, err = cc.Client.TenantCluster.AWS.S3.CreateBucket(i)
