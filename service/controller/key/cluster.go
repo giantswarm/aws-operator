@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha512"
 	"fmt"
-	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/giantswarm/microerror"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
+	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/pkg/label"
 	"github.com/giantswarm/aws-operator/v14/pkg/project"
 )
