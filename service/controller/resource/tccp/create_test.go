@@ -198,7 +198,7 @@ func Test_Controller_Resource_TCCP_Template_Render(t *testing.T) {
 
 			cl := unittest.DefaultCAPIClusterWithLabels(tc.cr.Name, map[string]string{})
 
-			params, err := r.newParamsMain(tc.ctx, cl, tc.cr, time.Time{})
+			params, err := r.newParamsMain(tc.ctx, cl, tc.cr, time.Time{}, true)
 			if err != nil {
 				t.Fatal(err)
 			}
