@@ -3,7 +3,6 @@ package awscnicleaner
 import (
 	"context"
 	"fmt"
-	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"time"
 
 	"github.com/giantswarm/backoff"
@@ -15,6 +14,7 @@ import (
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v14/service/controller/key"
 )
