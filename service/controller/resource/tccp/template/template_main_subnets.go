@@ -3,7 +3,6 @@ package template
 const TemplateMainSubnets = `
 {{- define "subnets" -}}
 {{- $v := .Subnets }}
-  {{- if .EnableAWSCNI }}
   {{- range $v.AWSCNISubnets }}
   {{ .Name }}:
     Type: AWS::EC2::Subnet
@@ -23,7 +22,6 @@ const TemplateMainSubnets = `
     Properties:
       RouteTableId: !Ref {{ .RouteTableAssociation.RouteTableName }}
       SubnetId: !Ref {{ .RouteTableAssociation.SubnetName }}
-  {{- end }}
   {{- end }}
   {{- range $v.PublicSubnets }}
   {{ .Name }}:

@@ -144,7 +144,7 @@ func (r *Resource) createStack(ctx context.Context, cl apiv1beta1.Cluster, cr in
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newParamsMain(ctx, cl, cr, time.Now())
+		params, err := r.newParamsMain(ctx, cl, cr, time.Now(), true)
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -202,7 +202,7 @@ func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev
 	return awstags.NewCloudFormation(tags), nil
 }
 
-func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, t time.Time) (*template.ParamsMain, error) {
+func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, t time.Time, newCluster bool) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		internetGateway, err := r.newParamsMainInternetGateway(ctx, cr)
@@ -233,7 +233,7 @@ func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr 
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		subnets, err := r.newParamsMainSubnets(ctx, cr)
+		subnets, err := r.newParamsMainSubnets(ctx, cl, cr, newCluster)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -484,8 +484,8 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 	}
 
 	podSubnet := r.cidrBlockAWSCNI
-	if key.AWSCNIPodsCIDRBlock(cr) != "" {
-		podSubnet = key.AWSCNIPodsCIDRBlock(cr)
+	if key.PodsCIDRBlock(cr) != "" {
+		podSubnet = key.PodsCIDRBlock(cr)
 	}
 
 	var securityGroups *template.ParamsMainSecurityGroups
@@ -512,11 +512,14 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 	return securityGroups, nil
 }
 
-func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newParamsMainSubnets(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, isNewCluster bool) (*template.ParamsMainSubnets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
+
+	enableAWSCNI := key.IsAWSCNINeeded(cl)
+	isOldCluster := !isNewCluster
 
 	zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
 
@@ -525,19 +528,21 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 	})
 
 	var awsCNISubnets []template.ParamsMainSubnetsSubnet
-	for _, az := range zones {
-		snetName := key.SanitizeCFResourceName(key.AWSCNISubnetName(az.Name))
-		snet := template.ParamsMainSubnetsSubnet{
-			AvailabilityZone: az.Name,
-			CIDR:             az.Subnet.AWSCNI.CIDR.String(),
-			Name:             snetName,
-			RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
-				Name:           key.SanitizeCFResourceName(key.AWSCNISubnetRouteTableAssociationName(az.Name)),
-				RouteTableName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
-				SubnetName:     snetName,
-			},
+	if enableAWSCNI || isOldCluster {
+		for _, az := range zones {
+			snetName := key.SanitizeCFResourceName(key.AWSCNISubnetName(az.Name))
+			snet := template.ParamsMainSubnetsSubnet{
+				AvailabilityZone: az.Name,
+				CIDR:             az.Subnet.AWSCNI.CIDR.String(),
+				Name:             snetName,
+				RouteTableAssociation: template.ParamsMainSubnetsSubnetRouteTableAssociation{
+					Name:           key.SanitizeCFResourceName(key.AWSCNISubnetRouteTableAssociationName(az.Name)),
+					RouteTableName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
+					SubnetName:     snetName,
+				},
+			}
+			awsCNISubnets = append(awsCNISubnets, snet)
 		}
-		awsCNISubnets = append(awsCNISubnets, snet)
 	}
 
 	var publicSubnets []template.ParamsMainSubnetsSubnet
@@ -618,8 +623,8 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, 
 
 	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 	podSubnet := r.cidrBlockAWSCNI
-	if key.AWSCNIPodsCIDRBlock(cr) != "" {
-		podSubnet = key.AWSCNIPodsCIDRBlock(cr)
+	if key.PodsCIDRBlock(cr) != "" {
+		podSubnet = key.PodsCIDRBlock(cr)
 	}
 
 	var vpc *template.ParamsMainVPC
@@ -651,7 +656,7 @@ func (r *Resource) updateStack(ctx context.Context, cl apiv1beta1.Cluster, cr in
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newParamsMain(ctx, cl, cr, time.Now())
+		params, err := r.newParamsMain(ctx, cl, cr, time.Now(), false)
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -169,8 +169,12 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 		podSubnet := r.cidrBlockAWSCNI
-		if key.AWSCNIPodsCIDRBlock(cl) != "" {
-			podSubnet = key.AWSCNIPodsCIDRBlock(cl)
+		if key.PodsCIDRBlock(cl) != "" {
+			podSubnet = key.PodsCIDRBlock(cl)
+		}
+		// If there is an TODO annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
+		if key.LegacyAWSCniCIDRBlock(cl) != "" {
+			podSubnet = key.LegacyAWSCniCIDRBlock(cl)
 		}
 
 		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha512"
 	"fmt"
+	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"strconv"
 	"strings"
 	"time"
@@ -127,12 +128,16 @@ func ExternalSNAT(cluster infrastructurev1alpha3.AWSCluster) *bool {
 	return cluster.Spec.Provider.Pods.ExternalSNAT
 }
 
-func AWSCNIPodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+func PodsCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
 	return cluster.Spec.Provider.Pods.CIDRBlock
 }
 
 func CiliumPodsCIDRBlock(cluster apiv1beta1.Cluster) string {
 	return cluster.Annotations[annotation.CiliumPodCidr]
+}
+
+func LegacyAWSCniCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
+	return cluster.Annotations[annotation2.LegacyAwsCniPodCidr]
 }
 
 func EtcdQuotaBackendBytes(cluster apiv1beta1.Cluster) int64 {
