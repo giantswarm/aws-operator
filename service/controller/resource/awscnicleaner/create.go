@@ -3,6 +3,7 @@ package awscnicleaner
 import (
 	"context"
 	"fmt"
+	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"time"
 
 	"github.com/giantswarm/backoff"
@@ -145,8 +146,10 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
-		r.logger.Debugf(ctx, "Migrating cilium pod cidr from %q annotation to AWSCluster.Spec.Provider.Pods.CIDRBlock", annotation.CiliumPodCidr)
+		r.logger.Debugf(ctx, "Migrating AWS CNI pod cidr from AWSCluster.Spec.Provider.Pods.CIDRBlock to %q annotation", annotation2.LegacyAwsCniPodCidr)
+		cr.Annotations[annotation2.LegacyAwsCniPodCidr] = cr.Spec.Provider.Pods.CIDRBlock
 
+		r.logger.Debugf(ctx, "Migrating cilium pod cidr from %q annotation to AWSCluster.Spec.Provider.Pods.CIDRBlock", annotation.CiliumPodCidr)
 		// Update pod cidr on AWSCluster CR
 		cr.Spec.Provider.Pods.CIDRBlock = key.CiliumPodsCIDRBlock(cluster)
 		err = r.ctrlClient.Update(ctx, &cr)
