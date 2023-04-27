@@ -14,7 +14,7 @@ import (
 	"github.com/giantswarm/microerror"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	annotation2 "github.com/giantswarm/aws-operator/v14/pkg/annotation"
+	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/pkg/label"
 	"github.com/giantswarm/aws-operator/v14/pkg/project"
 )
@@ -137,7 +137,7 @@ func CiliumPodsCIDRBlock(cluster apiv1beta1.Cluster) string {
 }
 
 func LegacyAWSCniCIDRBlock(cluster infrastructurev1alpha3.AWSCluster) string {
-	return cluster.Annotations[annotation2.LegacyAwsCniPodCidr]
+	return cluster.Annotations[awsoperatorannotation.LegacyAwsCniPodCidr]
 }
 
 func EtcdQuotaBackendBytes(cluster apiv1beta1.Cluster) int64 {

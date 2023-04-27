@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Do not delete aws-cni subnets when switching to cilium.
+
 ## [14.15.0] - 2023-04-25
 
 ### Fixed

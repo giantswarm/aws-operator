@@ -144,7 +144,7 @@ func (r *Resource) createStack(ctx context.Context, cl apiv1beta1.Cluster, cr in
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newParamsMain(ctx, cl, cr, time.Now(), true)
+		params, err := r.newParamsMain(ctx, cl, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -202,7 +202,7 @@ func (r *Resource) getCloudFormationTags(ctx context.Context, cr infrastructurev
 	return awstags.NewCloudFormation(tags), nil
 }
 
-func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, t time.Time, newCluster bool) (*template.ParamsMain, error) {
+func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, t time.Time) (*template.ParamsMain, error) {
 	var params *template.ParamsMain
 	{
 		internetGateway, err := r.newParamsMainInternetGateway(ctx, cr)
@@ -524,8 +524,6 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		return zones[i].Name < zones[j].Name
 	})
 
-	fmt.Println(zones)
-
 	var awsCNISubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
 		if az.Subnet.AWSCNI.CIDR.IP != nil && az.Subnet.AWSCNI.CIDR.Mask != nil {
@@ -662,7 +660,7 @@ func (r *Resource) updateStack(ctx context.Context, cl apiv1beta1.Cluster, cr in
 	{
 		r.logger.Debugf(ctx, "computing the template of the tenant cluster's control plane cloud formation stack")
 
-		params, err := r.newParamsMain(ctx, cl, cr, time.Now(), false)
+		params, err := r.newParamsMain(ctx, cl, cr, time.Now())
 		if err != nil {
 			return microerror.Mask(err)
 		}
