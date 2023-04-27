@@ -400,6 +400,8 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 			// Needed when switching from aws-cni to cilium, in order to delete aws-cni subnets.
 			mapping.AWSCNI.Subnet.CIDR = net.IPNet{}
 			mapping.AWSCNI.Subnet.ID = ""
+
+			azMapping[az] = mapping
 		}
 	}
 

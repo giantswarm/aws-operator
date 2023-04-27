@@ -524,6 +524,8 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 		return zones[i].Name < zones[j].Name
 	})
 
+	fmt.Println(zones)
+
 	var awsCNISubnets []template.ParamsMainSubnetsSubnet
 	for _, az := range zones {
 		if az.Subnet.AWSCNI.CIDR.IP != nil && az.Subnet.AWSCNI.CIDR.Mask != nil {
