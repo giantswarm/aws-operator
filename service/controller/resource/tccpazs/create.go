@@ -395,11 +395,11 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 				} else {
 					return nil, microerror.Maskf(invalidConfigError, "no free subnets left for allocation despite additional availability zone %#q", az)
 				}
-			} else {
-				// Needed when switching from aws-cni to cilium, in order to delete aws-cni subnets.
-				mapping.AWSCNI.Subnet.CIDR = net.IPNet{}
-				mapping.AWSCNI.Subnet.ID = ""
 			}
+		} else {
+			// Needed when switching from aws-cni to cilium, in order to delete aws-cni subnets.
+			mapping.AWSCNI.Subnet.CIDR = net.IPNet{}
+			mapping.AWSCNI.Subnet.ID = ""
 		}
 	}
 
