@@ -147,6 +147,9 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
 		r.logger.Debugf(ctx, "Migrating AWS CNI pod cidr from AWSCluster.Spec.Provider.Pods.CIDRBlock to %q annotation", annotation2.LegacyAwsCniPodCidr)
+		if cr.Annotations == nil {
+			cr.Annotations = make(map[string]string)
+		}
 		cr.Annotations[annotation2.LegacyAwsCniPodCidr] = cr.Spec.Provider.Pods.CIDRBlock
 
 		r.logger.Debugf(ctx, "Migrating cilium pod cidr from %q annotation to AWSCluster.Spec.Provider.Pods.CIDRBlock", annotation.CiliumPodCidr)
