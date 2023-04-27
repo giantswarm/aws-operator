@@ -612,6 +612,7 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, 
 
 	legacyAWSCniPodSubnet := ""
 	if enableAWSCNI {
+		r.logger.Debug(ctx, "newParamsMainVPC inside if enableAWSCNI")
 		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 			rtName := template.ParamsMainVPCRouteTableName{
 				ResourceName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
@@ -625,6 +626,7 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, 
 			legacyAWSCniPodSubnet = key.PodsCIDRBlock(cr)
 		}
 	} else {
+		r.logger.Debug(ctx, "newParamsMainVPC inside else")
 		// If there is an aws-operator.giantswarm.io/legacy-aws-cni-pod-cidr annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
 		if key.LegacyAWSCniCIDRBlock(cr) != "" {
 			legacyAWSCniPodSubnet = key.LegacyAWSCniCIDRBlock(cr)

@@ -196,6 +196,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		var awsCNISubnet net.IPNet
 		if key.IsAWSCNINeeded(cluster) {
+			r.logger.Debug(ctx, "EnsureCreated inside if key.IsAWSCNINeeded(cluster)")
 			// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 			podSubnet := r.cidrBlockAWSCNI
 			if key.PodsCIDRBlock(awsCluster) != "" {
@@ -209,6 +210,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			awsCNISubnet = *sn
 		} else {
+			r.logger.Debug(ctx, "EnsureCreated inside else")
 			// If there is an aws-operator.giantswarm.io/legacy-aws-cni-pod-cidr annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
 			if key.LegacyAWSCniCIDRBlock(awsCluster) != "" {
 				podSubnet := key.LegacyAWSCniCIDRBlock(awsCluster)
