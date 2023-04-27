@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.8.1] - 2023-04-27
+
 ### Fixed
 
 - Allow to enable ACLs for a S3 buckets.
@@ -915,7 +917,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.8.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.8.1...HEAD
+[14.8.1]: https://github.com/giantswarm/aws-operator/compare/v14.8.0...v14.8.1
 [14.8.0]: https://github.com/giantswarm/aws-operator/compare/v14.7.1...v14.8.0
 [14.7.1]: https://github.com/giantswarm/aws-operator/compare/v14.7.0...v14.7.1
 [14.7.0]: https://github.com/giantswarm/aws-operator/compare/v14.6.0...v14.7.0
