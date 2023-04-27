@@ -196,7 +196,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	{
 		var awsCNISubnet net.IPNet
 		if key.IsAWSCNINeeded(cluster) {
-			r.logger.Debug(ctx, "EnsureCreated inside if key.IsAWSCNINeeded(cluster)")
 			// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
 			podSubnet := r.cidrBlockAWSCNI
 			if key.PodsCIDRBlock(awsCluster) != "" {
@@ -210,7 +209,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			awsCNISubnet = *sn
 		} else {
-			r.logger.Debug(ctx, "EnsureCreated inside else")
 			// If there is an aws-operator.giantswarm.io/legacy-aws-cni-pod-cidr annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
 			if key.LegacyAWSCniCIDRBlock(awsCluster) != "" {
 				podSubnet := key.LegacyAWSCniCIDRBlock(awsCluster)
@@ -377,24 +375,30 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 			r.logger.Debugf(ctx, "recovering private subnet %#q for availability zone %#q", mapping.Private.Subnet.CIDR.String(), az)
 		}
 
-		if needsAwsCNI && mapping.AWSCNISubnetEmpty() {
-			if len(awsCNISubnets) > 0 {
-				r.logger.Debugf(ctx, "availability zone %#q does not have aws-cni subnet allocated", az)
+		if needsAwsCNI {
+			if mapping.AWSCNISubnetEmpty() {
+				if len(awsCNISubnets) > 0 {
+					r.logger.Debugf(ctx, "availability zone %#q does not have aws-cni subnet allocated", az)
 
-				// The AWS CNI CIDRs are not divided into public/private per AZ. We only
-				// split by the IPAM limit. So here we simply take the first free CIDR
-				// and remove it below.
-				awsCNISubnet := awsCNISubnets[0]
+					// The AWS CNI CIDRs are not divided into public/private per AZ. We only
+					// split by the IPAM limit. So here we simply take the first free CIDR
+					// and remove it below.
+					awsCNISubnet := awsCNISubnets[0]
 
-				// Update available AZ mapping by removing the CIDR we are about to
-				// allocate.
-				awsCNISubnets = awsCNISubnets[1:]
+					// Update available AZ mapping by removing the CIDR we are about to
+					// allocate.
+					awsCNISubnets = awsCNISubnets[1:]
 
-				mapping.AWSCNI.Subnet.CIDR = awsCNISubnet
+					mapping.AWSCNI.Subnet.CIDR = awsCNISubnet
 
-				azMapping[az] = mapping
+					azMapping[az] = mapping
+				} else {
+					return nil, microerror.Maskf(invalidConfigError, "no free subnets left for allocation despite additional availability zone %#q", az)
+				}
 			} else {
-				return nil, microerror.Maskf(invalidConfigError, "no free subnets left for allocation despite additional availability zone %#q", az)
+				// Needed when switching from aws-cni to cilium, in order to delete aws-cni subnets.
+				mapping.AWSCNI.Subnet.CIDR = net.IPNet{}
+				mapping.AWSCNI.Subnet.ID = ""
 			}
 		}
 	}
