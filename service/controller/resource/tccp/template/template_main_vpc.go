@@ -12,7 +12,7 @@ const TemplateMainVPC = `
       Tags:
         - Key: Name
           Value: {{ $v.ClusterID }}
-  {{- if .EnableAWSCNI }}
+  {{- if $v.CIDRBlockAWSCNI }}
   VPCCIDRBlockAWSCNI:
     Type: AWS::EC2::VPCCidrBlock
     DependsOn:

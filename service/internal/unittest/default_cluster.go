@@ -99,6 +99,9 @@ func DefaultCluster() infrastructurev1alpha3.AWSCluster {
 }
 
 func DefaultCAPIClusterWithLabels(clusterID string, labels map[string]string) apiv1beta1.Cluster {
+	if labels == nil {
+		labels = make(map[string]string)
+	}
 	labels[label.Cluster] = clusterID
 	cr := apiv1beta1.Cluster{
 		ObjectMeta: metav1.ObjectMeta{

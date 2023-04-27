@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/microerror"
 	"k8s.io/apimachinery/pkg/api/meta"
+	"sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v14/pkg/awstags"
@@ -35,9 +36,35 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha3.AWSCluster
+	var awsCluster infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
+
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.GetNamespace()),
+			client.MatchingLabels{label.Cluster: key.ClusterID(cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(list.Items) == 0 {
+			r.logger.Debugf(ctx, "awscluster cr not available yet")
+			r.logger.Debugf(ctx, "canceling resource")
+			return nil
+		}
+		if len(list.Items) > 1 {
+			return microerror.Mask(tooManyCRsError)
+		}
+
+		awsCluster = list.Items[0]
+	}
+
+	var cluster v1beta1.Cluster
+	{
+		var list v1beta1.ClusterList
 
 		err := r.k8sClient.CtrlClient().List(
 			ctx,
@@ -58,7 +85,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(tooManyCRsError)
 		}
 
-		cl = list.Items[0]
+		cluster = list.Items[0]
 	}
 
 	var cp infrastructurev1alpha3.AWSControlPlane
@@ -107,7 +134,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// We need to cancel the resource early in case the ipam resource did not
 	// yet allocate a subnet for the tenant cluster. Note that the Tenant
 	// Cluster subnet allocation is performed by the IPAM handler.
-	if key.StatusClusterNetworkCIDR(cl) == "" {
+	if key.StatusClusterNetworkCIDR(awsCluster) == "" {
 		r.logger.Debugf(ctx, "cluster subnet not yet allocated")
 		r.logger.Debugf(ctx, "canceling resource")
 
@@ -167,28 +194,39 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	{
-		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
-		podSubnet := r.cidrBlockAWSCNI
-		if key.PodsCIDRBlock(cl) != "" {
-			podSubnet = key.PodsCIDRBlock(cl)
-		}
-		// If there is an TODO annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
-		if key.LegacyAWSCniCIDRBlock(cl) != "" {
-			podSubnet = key.LegacyAWSCniCIDRBlock(cl)
-		}
+		var awsCNISubnet net.IPNet
+		if key.IsAWSCNINeeded(cluster) {
+			// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
+			podSubnet := r.cidrBlockAWSCNI
+			if key.PodsCIDRBlock(awsCluster) != "" {
+				podSubnet = key.PodsCIDRBlock(awsCluster)
+			}
 
-		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
-		if err != nil {
-			return microerror.Mask(err)
+			_, sn, err := net.ParseCIDR(podSubnet)
+			if err != nil {
+				return microerror.Mask(err)
+			}
+
+			awsCNISubnet = *sn
+		} else {
+			// If there is an aws-operator.giantswarm.io/legacy-aws-cni-pod-cidr annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
+			if key.LegacyAWSCniCIDRBlock(awsCluster) != "" {
+				podSubnet := key.LegacyAWSCniCIDRBlock(awsCluster)
+				_, sn, err := net.ParseCIDR(podSubnet)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+				awsCNISubnet = *sn
+			}
 		}
 
 		// Parse TCCP network CIDR.
-		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cl))
+		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(awsCluster))
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
-		azMapping, err = r.ensureAZsAreAssignedWithSubnet(ctx, *awsCNISubnet, *tccpSubnet, azMapping)
+		azMapping, err = r.ensureAZsAreAssignedWithSubnet(ctx, awsCNISubnet, *tccpSubnet, azMapping, key.IsAWSCNINeeded(cluster))
 		if err != nil {
 			return microerror.Mask(err)
 		}
@@ -200,8 +238,6 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				"level", "debug",
 				"message", "computed controller context spec",
 				"availability-zone", az.Name,
-				"aws-cni-subnet-cidr", az.Subnet.AWSCNI.CIDR.String(),
-				"aws-cni-subnet-id", az.Subnet.AWSCNI.ID,
 				"private-subnet-cidr", az.Subnet.Private.CIDR.String(),
 				"private-subnet-id", az.Subnet.Private.ID,
 				"public-subnet-cidr", az.Subnet.Public.CIDR.String(),
@@ -219,7 +255,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 // ensureAZsAreAssignedWithSubnet iterates over AZ-mapping map, removes
 // subnets that are already in use from available subnets' list and then assigns
 // one to AZs that doesn't have subnet assigned yet.
-func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISubnet net.IPNet, tccpSubnet net.IPNet, azMapping map[string]mapping) (map[string]mapping, error) {
+func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISubnet net.IPNet, tccpSubnet net.IPNet, azMapping map[string]mapping, needsAwsCNI bool) (map[string]mapping, error) {
 	// Split TCCP network between maximum number of AZs. This is because of
 	// current limitation in IPAM design and AWS TCCP infrastructure
 	// design.
@@ -233,9 +269,13 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 
 	// According to the IPAM limitations we split the AWS CNI CIDR by 4. This is
 	// so we assign one of its split to each availability zone.
-	awsCNISubnets, err := ipam.Split(awsCNISubnet, MaxAZs)
-	if err != nil {
-		return nil, microerror.Mask(err)
+	// When aws cni is not enabled, we don't have any subnet.
+	awsCNISubnets := make([]net.IPNet, 0)
+	if awsCNISubnet.IP != nil && awsCNISubnet.Mask != nil {
+		awsCNISubnets, err = ipam.Split(awsCNISubnet, MaxAZs)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var azNames []string
@@ -335,7 +375,7 @@ func (r *Resource) ensureAZsAreAssignedWithSubnet(ctx context.Context, awsCNISub
 			r.logger.Debugf(ctx, "recovering private subnet %#q for availability zone %#q", mapping.Private.Subnet.CIDR.String(), az)
 		}
 
-		if mapping.AWSCNISubnetEmpty() {
+		if needsAwsCNI && mapping.AWSCNISubnetEmpty() {
 			if len(awsCNISubnets) > 0 {
 				r.logger.Debugf(ctx, "availability zone %#q does not have aws-cni subnet allocated", az)
 
@@ -428,10 +468,6 @@ func newAZSpec(azMapping map[string]mapping) []controllercontext.ContextSpecTena
 		az := controllercontext.ContextSpecTenantClusterTCCPAvailabilityZone{
 			Name: name,
 			Subnet: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnet{
-				AWSCNI: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI{
-					CIDR: sp.AWSCNI.Subnet.CIDR,
-					ID:   sp.AWSCNI.Subnet.ID,
-				},
 				Private: controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetPrivate{
 					CIDR: sp.Private.Subnet.CIDR,
 					ID:   sp.Private.Subnet.ID,
@@ -441,6 +477,13 @@ func newAZSpec(azMapping map[string]mapping) []controllercontext.ContextSpecTena
 					ID:   sp.Public.Subnet.ID,
 				},
 			},
+		}
+
+		if sp.AWSCNI.Subnet.CIDR.IP != nil && sp.AWSCNI.Subnet.CIDR.Mask != nil {
+			az.Subnet.AWSCNI = controllercontext.ContextSpecTenantClusterTCCPAvailabilityZoneSubnetAWSCNI{
+				CIDR: sp.AWSCNI.Subnet.CIDR,
+				ID:   sp.AWSCNI.Subnet.ID,
+			}
 		}
 
 		spec = append(spec, az)

@@ -640,60 +640,6 @@ Resources:
       IpProtocol: -1
       CidrIp: 127.0.0.1/32
   
-  AWSCNISubnetEuCentral1a:
-    Type: AWS::EC2::Subnet
-    DependsOn:
-    - VPCCIDRBlockAWSCNI
-    Properties:
-      AvailabilityZone: eu-central-1a
-      CidrBlock: <nil>
-      Tags:
-      - Key: Name
-        Value: AWSCNISubnetEuCentral1a
-      - Key: giantswarm.io/subnet-type
-        Value: aws-cni
-      VpcId: !Ref VPC
-  AWSCNISubnetRouteTableAssociationEuCentral1a:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1a
-      SubnetId: !Ref AWSCNISubnetEuCentral1a
-  AWSCNISubnetEuCentral1b:
-    Type: AWS::EC2::Subnet
-    DependsOn:
-    - VPCCIDRBlockAWSCNI
-    Properties:
-      AvailabilityZone: eu-central-1b
-      CidrBlock: <nil>
-      Tags:
-      - Key: Name
-        Value: AWSCNISubnetEuCentral1b
-      - Key: giantswarm.io/subnet-type
-        Value: aws-cni
-      VpcId: !Ref VPC
-  AWSCNISubnetRouteTableAssociationEuCentral1b:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1b
-      SubnetId: !Ref AWSCNISubnetEuCentral1b
-  AWSCNISubnetEuCentral1c:
-    Type: AWS::EC2::Subnet
-    DependsOn:
-    - VPCCIDRBlockAWSCNI
-    Properties:
-      AvailabilityZone: eu-central-1c
-      CidrBlock: <nil>
-      Tags:
-      - Key: Name
-        Value: AWSCNISubnetEuCentral1c
-      - Key: giantswarm.io/subnet-type
-        Value: aws-cni
-      VpcId: !Ref VPC
-  AWSCNISubnetRouteTableAssociationEuCentral1c:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref AWSCNIRouteTableEuCentral1c
-      SubnetId: !Ref AWSCNISubnetEuCentral1c
   PublicSubnetEuCentral1a:
     Type: AWS::EC2::Subnet
     Properties:

@@ -233,7 +233,7 @@ func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr 
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
-		subnets, err := r.newParamsMainSubnets(ctx, cl, cr, newCluster)
+		subnets, err := r.newParamsMainSubnets(ctx, cr)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -512,14 +512,11 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 	return securityGroups, nil
 }
 
-func (r *Resource) newParamsMainSubnets(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster, isNewCluster bool) (*template.ParamsMainSubnets, error) {
+func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainSubnets, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
-
-	enableAWSCNI := key.IsAWSCNINeeded(cl)
-	isOldCluster := !isNewCluster
 
 	zones := cc.Spec.TenantCluster.TCCP.AvailabilityZones
 
@@ -528,8 +525,8 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cl apiv1beta1.Clust
 	})
 
 	var awsCNISubnets []template.ParamsMainSubnetsSubnet
-	if enableAWSCNI || isOldCluster {
-		for _, az := range zones {
+	for _, az := range zones {
+		if az.Subnet.AWSCNI.CIDR.IP != nil && az.Subnet.AWSCNI.CIDR.Mask != nil {
 			snetName := key.SanitizeCFResourceName(key.AWSCNISubnetName(az.Name))
 			snet := template.ParamsMainSubnetsSubnet{
 				AvailabilityZone: az.Name,
@@ -612,6 +609,8 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, 
 		}
 		routeTableNames = append(routeTableNames, rtName)
 	}
+
+	legacyAWSCniPodSubnet := ""
 	if enableAWSCNI {
 		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 			rtName := template.ParamsMainVPCRouteTableName{
@@ -619,19 +618,24 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, 
 			}
 			routeTableNames = append(routeTableNames, rtName)
 		}
-	}
 
-	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
-	podSubnet := r.cidrBlockAWSCNI
-	if key.PodsCIDRBlock(cr) != "" {
-		podSubnet = key.PodsCIDRBlock(cr)
+		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
+		legacyAWSCniPodSubnet = r.cidrBlockAWSCNI
+		if key.PodsCIDRBlock(cr) != "" {
+			legacyAWSCniPodSubnet = key.PodsCIDRBlock(cr)
+		}
+	} else {
+		// If there is an aws-operator.giantswarm.io/legacy-aws-cni-pod-cidr annotation set, means we are running cilium but still want the AWS cni subnets to be created using the old CIDR
+		if key.LegacyAWSCniCIDRBlock(cr) != "" {
+			legacyAWSCniPodSubnet = key.LegacyAWSCniCIDRBlock(cr)
+		}
 	}
 
 	var vpc *template.ParamsMainVPC
 	{
 		vpc = &template.ParamsMainVPC{
 			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
-			CIDRBlockAWSCNI:  podSubnet,
+			CIDRBlockAWSCNI:  legacyAWSCniPodSubnet,
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,

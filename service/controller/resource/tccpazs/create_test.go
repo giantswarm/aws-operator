@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/to"
 	"github.com/google/go-cmp/cmp"
+	"sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v14/service/controller/key"
@@ -21,7 +22,8 @@ import (
 func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	testCases := []struct {
 		name               string
-		cluster            infrastructurev1alpha3.AWSCluster
+		awscluster         infrastructurev1alpha3.AWSCluster
+		cluster            v1beta1.Cluster
 		controlPlane       infrastructurev1alpha3.AWSControlPlane
 		machineDeployments []infrastructurev1alpha3.AWSMachineDeployment
 		ctxStatusSubnets   []*ec2.Subnet
@@ -30,7 +32,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 	}{
 		{
 			name:               "case 0: keep control plane, 0 node pools",
-			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			awscluster:         unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			cluster:            unittest.DefaultCAPIClusterWithLabels(unittest.DefaultClusterID, nil),
 			controlPlane:       unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
@@ -63,7 +66,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		},
 		{
 			name:         "case 1: control plane and 1 node pool on same AZ",
-			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			awscluster:   unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			cluster:      unittest.DefaultCAPIClusterWithLabels(unittest.DefaultClusterID, nil),
 			controlPlane: unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1a"}),
@@ -102,7 +106,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		},
 		{
 			name:         "case 2: create control plane and 1 node pool on different AZ",
-			cluster:      unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			awscluster:   unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			cluster:      unittest.DefaultCAPIClusterWithLabels(unittest.DefaultClusterID, nil),
 			controlPlane: unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{
 				unittest.MachineDeploymentWithAZs(unittest.DefaultMachineDeployment(), []string{"eu-central-1b"}),
@@ -142,7 +147,8 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 		},
 		{
 			name:               "case 3: keep control plane and delete 1 node pool from different AZ",
-			cluster:            unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			awscluster:         unittest.ClusterWithNetworkCIDR(unittest.DefaultCluster(), toNetPtr(mustParseCIDR("10.100.3.0/24"))),
+			cluster:            unittest.DefaultCAPIClusterWithLabels(unittest.DefaultClusterID, nil),
 			controlPlane:       unittest.DefaultAWSControlPlaneWithAZs("eu-central-1a"),
 			machineDeployments: []infrastructurev1alpha3.AWSMachineDeployment{},
 			ctxStatusSubnets: []*ec2.Subnet{
@@ -225,6 +231,11 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			// Prepare all the necessary runtime objects using the abstract controller
 			// client.
 			{
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.awscluster)
+				if err != nil {
+					t.Fatal(err)
+				}
+
 				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster)
 				if err != nil {
 					t.Fatal(err)
@@ -249,7 +260,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			}
 			cc.Status.TenantCluster.TCCP.Subnets = tc.ctxStatusSubnets
 
-			err = r.EnsureCreated(ctx, &tc.cluster)
+			err = r.EnsureCreated(ctx, &tc.awscluster)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
@@ -281,6 +292,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 		awsCNISubnet net.IPNet
 		tccpSubnet   net.IPNet
 		inputAZs     map[string]mapping
+		needsAWSCni  bool
 		expectedAZs  map[string]mapping
 		errorMatcher func(error) bool
 	}{
@@ -293,6 +305,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 				"eu-central-1b": {},
 				"eu-central-1c": {},
 			},
+			needsAWSCni: true,
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
 					AWSCNI: network{
@@ -389,6 +402,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 					},
 				},
 			},
+			needsAWSCni: true,
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
 					AWSCNI: network{
@@ -469,6 +483,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 					},
 				},
 			},
+			needsAWSCni: true,
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
 					AWSCNI: network{
@@ -582,6 +597,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 				},
 				"eu-central-1d": {},
 			},
+			needsAWSCni: true,
 			expectedAZs: map[string]mapping{
 				"eu-central-1a": {
 					AWSCNI: network{
@@ -729,6 +745,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 				},
 				"eu-central-1e": {},
 			},
+			needsAWSCni:  true,
 			expectedAZs:  nil,
 			errorMatcher: IsInvalidConfig,
 		},
@@ -754,7 +771,7 @@ func Test_ensureAZsAreAssignedWithSubnet(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			ctx := controllercontext.NewContext(context.Background(), controllercontext.Context{})
-			azs, err := r.ensureAZsAreAssignedWithSubnet(ctx, tc.awsCNISubnet, tc.tccpSubnet, tc.inputAZs)
+			azs, err := r.ensureAZsAreAssignedWithSubnet(ctx, tc.awsCNISubnet, tc.tccpSubnet, tc.inputAZs, tc.needsAWSCni)
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
