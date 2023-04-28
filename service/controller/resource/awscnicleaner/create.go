@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
@@ -15,6 +14,7 @@ import (
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v14/service/controller/key"
 )

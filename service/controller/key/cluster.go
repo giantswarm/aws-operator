@@ -10,11 +10,11 @@ import (
 
 	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
-	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
+	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
 	"github.com/giantswarm/aws-operator/v14/pkg/label"
 	"github.com/giantswarm/aws-operator/v14/pkg/project"
 )
