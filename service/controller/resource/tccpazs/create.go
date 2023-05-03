@@ -35,7 +35,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		return microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha3.AWSCluster
+	var awsCluster infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
 
@@ -50,7 +50,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		}
 
 		if len(list.Items) == 0 {
-			r.logger.Debugf(ctx, "cluster cr not available yet")
+			r.logger.Debugf(ctx, "awscluster cr not available yet")
 			r.logger.Debugf(ctx, "canceling resource")
 			return nil
 		}
@@ -58,7 +58,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			return microerror.Mask(tooManyCRsError)
 		}
 
-		cl = list.Items[0]
+		awsCluster = list.Items[0]
 	}
 
 	var cp infrastructurev1alpha3.AWSControlPlane
@@ -107,7 +107,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	// We need to cancel the resource early in case the ipam resource did not
 	// yet allocate a subnet for the tenant cluster. Note that the Tenant
 	// Cluster subnet allocation is performed by the IPAM handler.
-	if key.StatusClusterNetworkCIDR(cl) == "" {
+	if key.StatusClusterNetworkCIDR(awsCluster) == "" {
 		r.logger.Debugf(ctx, "cluster subnet not yet allocated")
 		r.logger.Debugf(ctx, "canceling resource")
 
@@ -168,18 +168,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	{
 		// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
-		podSubnet := r.cidrBlockAWSCNI
-		if key.AWSCNIPodsCIDRBlock(cl) != "" {
-			podSubnet = key.AWSCNIPodsCIDRBlock(cl)
+		legacyAWSCniPodSubnet := r.cidrBlockAWSCNI
+		if key.PodsCIDRBlock(awsCluster) != "" {
+			legacyAWSCniPodSubnet = key.PodsCIDRBlock(awsCluster)
+		}
+		if key.LegacyAWSCniCIDRBlock(awsCluster) != "" {
+			legacyAWSCniPodSubnet = key.LegacyAWSCniCIDRBlock(awsCluster)
 		}
 
-		_, awsCNISubnet, err := net.ParseCIDR(podSubnet)
+		_, awsCNISubnet, err := net.ParseCIDR(legacyAWSCniPodSubnet)
 		if err != nil {
 			return microerror.Mask(err)
 		}
 
 		// Parse TCCP network CIDR.
-		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(cl))
+		_, tccpSubnet, err := net.ParseCIDR(key.StatusClusterNetworkCIDR(awsCluster))
 		if err != nil {
 			return microerror.Mask(err)
 		}

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [14.15.0] - 2023-04-25
 
+### Changed
+
+- Do not delete aws-cni subnets when switching to cilium.
+
 ### Fixed
 
 - Allow to enable ACLs for a S3 buckets.
