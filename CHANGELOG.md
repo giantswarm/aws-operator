@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.16.0] - 2023-05-03
+
 ### Changed
 
 - Do not delete aws-cni subnets when switching to cilium.
@@ -973,7 +975,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.15.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.16.0...HEAD
+[14.16.0]: https://github.com/giantswarm/aws-operator/compare/v14.15.0...v14.16.0
 [14.15.0]: https://github.com/giantswarm/aws-operator/compare/v14.14.0...v14.15.0
 [14.14.0]: https://github.com/giantswarm/aws-operator/compare/v14.13.0...v14.14.0
 [14.13.0]: https://github.com/giantswarm/aws-operator/compare/v14.12.1...v14.13.0
