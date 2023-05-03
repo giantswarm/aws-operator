@@ -242,8 +242,14 @@ func (r *Resource) newParamsMain(ctx context.Context, cl apiv1beta1.Cluster, cr 
 			return nil, microerror.Mask(err)
 		}
 
+		enableAWSCni := key.IsAWSCNINeeded(cl)
+		// If we have the aws-operator.giantswarm.io/legacy-aws-cni-pod-cidr, we still need to keep AWS cni subnets around.
+		if key.LegacyAWSCniCIDRBlock(cr) != "" {
+			enableAWSCni = true
+		}
+
 		params = &template.ParamsMain{
-			EnableAWSCNI:    key.IsAWSCNINeeded(cl),
+			EnableAWSCNI:    enableAWSCni,
 			InternetGateway: internetGateway,
 			LoadBalancers:   loadBalancers,
 			NATGateway:      natGateway,
@@ -484,8 +490,8 @@ func (r *Resource) newParamsMainSecurityGroups(ctx context.Context, cr infrastru
 	}
 
 	podSubnet := r.cidrBlockAWSCNI
-	if key.AWSCNIPodsCIDRBlock(cr) != "" {
-		podSubnet = key.AWSCNIPodsCIDRBlock(cr)
+	if key.PodsCIDRBlock(cr) != "" {
+		podSubnet = key.PodsCIDRBlock(cr)
 	}
 
 	var securityGroups *template.ParamsMainSecurityGroups
@@ -587,8 +593,6 @@ func (r *Resource) newParamsMainSubnets(ctx context.Context, cr infrastructurev1
 }
 
 func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, cr infrastructurev1alpha3.AWSCluster) (*template.ParamsMainVPC, error) {
-	enableAWSCNI := key.IsAWSCNINeeded(cl)
-
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return nil, microerror.Mask(err)
@@ -607,26 +611,32 @@ func (r *Resource) newParamsMainVPC(ctx context.Context, cl apiv1beta1.Cluster, 
 		}
 		routeTableNames = append(routeTableNames, rtName)
 	}
-	if enableAWSCNI {
+
+	var legacyAWSCniPodSubnet string
+
+	if key.IsAWSCNINeeded(cl) {
 		for _, az := range cc.Spec.TenantCluster.TCCP.AvailabilityZones {
 			rtName := template.ParamsMainVPCRouteTableName{
 				ResourceName: key.SanitizeCFResourceName(key.AWSCNIRouteTableName(az.Name)),
 			}
 			routeTableNames = append(routeTableNames, rtName)
 		}
-	}
 
-	// Allow the actual VPC subnet CIDR to be overwritten by the CR spec.
-	podSubnet := r.cidrBlockAWSCNI
-	if key.AWSCNIPodsCIDRBlock(cr) != "" {
-		podSubnet = key.AWSCNIPodsCIDRBlock(cr)
+		legacyAWSCniPodSubnet = r.cidrBlockAWSCNI
+		if key.PodsCIDRBlock(cr) != "" {
+			legacyAWSCniPodSubnet = key.PodsCIDRBlock(cr)
+		}
+	} else {
+		if key.LegacyAWSCniCIDRBlock(cr) != "" {
+			legacyAWSCniPodSubnet = key.LegacyAWSCniCIDRBlock(cr)
+		}
 	}
 
 	var vpc *template.ParamsMainVPC
 	{
 		vpc = &template.ParamsMainVPC{
 			CidrBlock:        key.StatusClusterNetworkCIDR(cr),
-			CIDRBlockAWSCNI:  podSubnet,
+			CIDRBlockAWSCNI:  legacyAWSCniPodSubnet,
 			ClusterID:        key.ClusterID(&cr),
 			InstallationName: r.installationName,
 			HostAccountID:    cc.Status.ControlPlane.AWSAccountID,
