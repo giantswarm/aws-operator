@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.13.2] - 2023-05-05
+
 ### Changed
 
 - Disable ETCD compaction request from apiserver.
@@ -967,7 +969,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.13.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.13.2...HEAD
+[14.13.2]: https://github.com/giantswarm/aws-operator/compare/v14.13.1...v14.13.2
 [14.13.1]: https://github.com/giantswarm/aws-operator/compare/v14.13.0...v14.13.1
 [14.13.0]: https://github.com/giantswarm/aws-operator/compare/v14.12.1...v14.13.0
 [14.12.1]: https://github.com/giantswarm/aws-operator/compare/v14.12.0...v14.12.1
