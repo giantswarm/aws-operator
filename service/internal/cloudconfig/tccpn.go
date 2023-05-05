@@ -380,7 +380,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	// Pod CIDR precedence:
 	// 1) cilium-specific annotation (used during upgrades from v17 to v18+)
 	// 2) awscluster podcidr field (used for new clusters where overlap with VPC is not important).
-	podCidr := key.AWSCNIPodsCIDRBlock(cl)
+	podCidr := key.PodsCIDRBlock(cl)
 	if key.CiliumPodsCIDRBlock(cluster) != "" {
 		podCidr = key.CiliumPodsCIDRBlock(cluster)
 	}

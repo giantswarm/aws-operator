@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.22.0
+#    devctl@5.24.0
 #
 
 APPLICATION    := $(shell go list -m | cut -d '/' -f 3)
