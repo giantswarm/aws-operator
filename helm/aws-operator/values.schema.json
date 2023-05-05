@@ -1,0 +1,421 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "aws": {
+            "type": "object",
+            "properties": {
+                "accessKeyID": {
+                    "type": "string"
+                },
+                "advancedMonitoringEC2": {
+                    "type": "boolean"
+                },
+                "availabilityZone": {
+                    "type": "string"
+                },
+                "availabilityZones": {
+                    "type": "array"
+                },
+                "cni": {
+                    "type": "object",
+                    "properties": {
+                        "externalSNAT": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "includeTags": {
+                    "type": "boolean"
+                },
+                "instance": {
+                    "type": "object",
+                    "properties": {
+                        "alike": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "loggingBucket": {
+                    "type": "object",
+                    "properties": {
+                        "delete": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "podInfraContainerImage": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "object",
+                    "properties": {
+                        "arn": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "route53": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "routeTables": {
+                    "type": "string"
+                },
+                "s3AccessLogsExpiration": {
+                    "type": "integer"
+                },
+                "secretAccessKey": {
+                    "type": "string"
+                },
+                "trustedAdvisor": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "vault": {
+                    "type": "object",
+                    "properties": {
+                        "address": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "installation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "pod": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "user": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "ports": {
+            "type": "object",
+            "properties": {
+                "ingress": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "port": {
+                                "type": "integer"
+                            },
+                            "protocol": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "project": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "commit": {
+                    "type": "string"
+                }
+            }
+        },
+        "registry": {
+            "type": "object",
+            "properties": {
+                "dockerhub": {
+                    "type": "object",
+                    "properties": {
+                        "token": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "mirrors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "resources": {
+            "type": "object",
+            "properties": {
+                "limits": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
+                        "memory": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "requests": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
+                        "memory": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "securityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "capabilities": {
+                    "type": "object",
+                    "properties": {
+                        "drop": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "privileged": {
+                    "type": "boolean"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "tenant": {
+            "type": "object",
+            "properties": {
+                "cni": {
+                    "type": "object",
+                    "properties": {
+                        "mask": {
+                            "type": "integer"
+                        },
+                        "mtu": {
+                            "type": "integer"
+                        },
+                        "subnet": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "docker": {
+                    "type": "object",
+                    "properties": {
+                        "daemon": {
+                            "type": "object",
+                            "properties": {
+                                "cidr": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "ipam": {
+                    "type": "object",
+                    "properties": {
+                        "network": {
+                            "type": "object",
+                            "properties": {
+                                "cidr": {
+                                    "type": "string"
+                                },
+                                "privateSubnetMaskBits": {
+                                    "type": "integer"
+                                },
+                                "publicSubnetMaskBits": {
+                                    "type": "integer"
+                                },
+                                "subnetMaskBits": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "kubernetes": {
+                    "type": "object",
+                    "properties": {
+                        "api": {
+                            "type": "object",
+                            "properties": {
+                                "auth": {
+                                    "type": "object",
+                                    "properties": {
+                                        "provider": {
+                                            "type": "object",
+                                            "properties": {
+                                                "oidc": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "clientID": {
+                                                            "type": "string"
+                                                        },
+                                                        "groupsClaim": {
+                                                            "type": "string"
+                                                        },
+                                                        "issuerURL": {
+                                                            "type": "string"
+                                                        },
+                                                        "usernameClaim": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "security": {
+                                    "type": "object",
+                                    "properties": {
+                                        "whitelist": {
+                                            "type": "object",
+                                            "properties": {
+                                                "private": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "enabled": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "subnetList": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "public": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "enabled": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "subnetList": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "serviceIPRange": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "clusterDomain": {
+                            "type": "string"
+                        },
+                        "networkSetup": {
+                            "type": "object",
+                            "properties": {
+                                "docker": {
+                                    "type": "object",
+                                    "properties": {
+                                        "image": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ssh": {
+                    "type": "object",
+                    "properties": {
+                        "ssoPublicKey": {
+                            "type": "string"
+                        },
+                        "userList": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
