@@ -143,6 +143,18 @@ spec:
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir
+        - image: {{.RegistryDomain}}/giantswarm/alpine:3.17.3
+          imagePullPolicy: Always
+          name: setup-sysctl
+          command:
+          - ash
+          - "-c"
+          - "echo 'net.ipv4.conf.eth0.rp_filter=2' >/host/etc/sysctl.d/99-aws-node.conf"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /host/etc/sysctl.d
+              name: sysctl-d
       containers:
         - image: {{.RegistryDomain}}/giantswarm/aws-cni:v{{.AWSCNIVersion}}
           ports:
@@ -282,6 +294,10 @@ spec:
             path: /var/run/aws-node
             type: DirectoryOrCreate
           name: run-dir
+        - hostPath:
+            path: /etc/sysctl.d
+            type: DirectoryOrCreate
+          name: sysctl-d
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
