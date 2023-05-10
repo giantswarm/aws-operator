@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Ensure `net.ipv4.conf.eth0.rp_filter` is set to `2` if aws-CNI is used.
+- Make `routes-fixer` script compatible with alpine.
 
 ## [14.17.0] - 2023-05-05
 

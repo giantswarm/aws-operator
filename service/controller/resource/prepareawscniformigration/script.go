@@ -17,7 +17,7 @@ do
   sleep 5
 done
 
-lines="$(ip route show table all|grep "scope link" |grep -Po "dev \Keth[0-9*] table [0-9]+"|sed 's/ table /|/')"
+lines="$(ip route show table all|grep "scope link"|grep -E "dev eth[0-9]+ table [0-9]+"|awk '{ print $3 "|" $5 }')"
 
 while : ; do
   for line in $lines
