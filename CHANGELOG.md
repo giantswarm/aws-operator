@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.13.3] - 2023-05-10
+
 ### Fixed
 
 - Ensure `net.ipv4.conf.eth0.rp_filter` is set to `2` if aws-CNI is used.
@@ -973,7 +975,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.13.2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.13.3...HEAD
+[14.13.3]: https://github.com/giantswarm/aws-operator/compare/v14.13.2...v14.13.3
 [14.13.2]: https://github.com/giantswarm/aws-operator/compare/v14.13.1...v14.13.2
 [14.13.1]: https://github.com/giantswarm/aws-operator/compare/v14.13.0...v14.13.1
 [14.13.0]: https://github.com/giantswarm/aws-operator/compare/v14.12.1...v14.13.0
