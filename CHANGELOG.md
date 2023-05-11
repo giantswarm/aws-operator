@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add toleration for new control-plane taint.
+
 ### Fixed
 
 - Ensure `net.ipv4.conf.eth0.rp_filter` is set to `2` if aws-CNI is used.
