@@ -42,6 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Unmanage interfaces for CNI eth[1-9] on workers eth[2-9] on masters
+
+### Changed
+
 - Check if all nodes are rolled before deleting AWS CNI resources when upgrading from v18 to v19.
 - Change Route53 Trust Policy to allow other applications to use the role.
 
