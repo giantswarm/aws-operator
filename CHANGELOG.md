@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Added pss exceptions for volumes.
+
 ## [14.17.1] - 2023-05-11
 
 ### Added
