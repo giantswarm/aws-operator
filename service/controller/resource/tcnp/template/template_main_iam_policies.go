@@ -84,7 +84,7 @@ const TemplateMainIAMPolicies = `
 
           {{- if .IAMPolicies.CiliumENIMode }}
           # Following rules are required to make the Cilium in AWS ENI mode work. See also
-          https://docs.cilium.io/en/v1.13/network/concepts/ipam/eni/#required-privileges
+          # https://docs.cilium.io/en/v1.13/network/concepts/ipam/eni/#required-privileges
           - Effect: Allow
             Action:
               - ec2:DescribeInstances
