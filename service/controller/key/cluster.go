@@ -228,6 +228,10 @@ func IsAWSCNINeeded(cluster apiv1beta1.Cluster) bool {
 		return true
 	}
 
+	if IsCiliumEniModeEnabled(cluster) {
+		return true
+	}
+
 	_, needed := cluster.Annotations[annotation.CiliumPodCidr]
 
 	return needed
