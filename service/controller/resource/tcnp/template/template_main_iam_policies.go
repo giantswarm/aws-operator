@@ -82,6 +82,27 @@ const TemplateMainIAMPolicies = `
               - arn:{{ .IAMPolicies.RegionARN }}:ec2:*:*:network-interface/*
           {{- end }}
 
+          {{- if .IAMPolicies.CiliumENIMode }}
+          # Following rules are required to make the Cilium in AWS ENI mode work. See also
+          https://docs.cilium.io/en/v1.13/network/concepts/ipam/eni/#required-privileges
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:CreateTags
+              - ec2:ModifyNetworkInterfaceAttribute
+              - ec2:DeleteNetworkInterface
+              - ec2:AssignPrivateIpAddresses
+              - ec2:DescribeSecurityGroups
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DescribeVpcs
+              - ec2:DescribeInstanceTypes
+              - ec2:AttachNetworkInterface
+              - ec2:UnassignPrivateIpAddresses
+              - ec2:DescribeSubnets
+            Resource: "*"
+          {{- end }}
+
           # Following rules are required for EBS snapshots.
           - Effect: Allow
             Action:

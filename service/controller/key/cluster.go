@@ -233,6 +233,11 @@ func IsAWSCNINeeded(cluster apiv1beta1.Cluster) bool {
 	return needed
 }
 
+func IsCiliumEniModeEnabled(cluster apiv1beta1.Cluster) bool {
+	// TODO detect from cluster annotation.
+	return true
+}
+
 func MasterAvailabilityZone(cluster infrastructurev1alpha3.AWSCluster) string {
 	return cluster.Spec.Provider.Master.AvailabilityZone
 }

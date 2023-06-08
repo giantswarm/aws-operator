@@ -4,6 +4,7 @@ type ParamsMainIAMPolicies struct {
 	Cluster          ParamsMainIAMPoliciesCluster
 	EC2ServiceDomain string
 	EnableAWSCNI     bool
+	CiliumENIMode    bool
 	KMSKeyARN        string
 	NodePool         ParamsMainIAMPoliciesNodePool
 	RegionARN        string
