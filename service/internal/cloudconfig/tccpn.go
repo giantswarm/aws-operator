@@ -10,7 +10,7 @@ import (
 	"github.com/blang/semver"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/certs/v4/pkg/certs"
-	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v16/pkg/template"
+	k8scloudconfig "github.com/giantswarm/k8scloudconfig/v17/pkg/template"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/randomkeys/v3"
@@ -499,7 +499,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.DockerhubToken = t.config.DockerhubToken
-		params.EnableCSIMigrationAWS = true
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort,
 			InitialClusterState: etcdInitialClusterState,
