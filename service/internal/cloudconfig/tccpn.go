@@ -499,7 +499,6 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		// It gets created by the Ingress Controller app if it is installed in the tenant cluster.
 		params.DisableIngressControllerService = true
 		params.DockerhubToken = t.config.DockerhubToken
-		params.EnableCSIMigrationAWS = true
 		params.Etcd = k8scloudconfig.Etcd{
 			ClientPort:          key.EtcdPort,
 			InitialClusterState: etcdInitialClusterState,
