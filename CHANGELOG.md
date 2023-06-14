@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Remove implementation of `prepareawscniformigration` and `restrictawsnodedaemonset` to avoid race condition issues during cluster upgrades.
+
 ## [14.13.3] - 2023-05-10
 
 ### Fixed
