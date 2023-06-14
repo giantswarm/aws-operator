@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	operatorlabel "github.com/giantswarm/aws-operator/v14/pkg/label"
-	"github.com/giantswarm/aws-operator/v14/pkg/project"
 	"github.com/giantswarm/backoff"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
@@ -17,6 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
+	operatorlabel "github.com/giantswarm/aws-operator/v14/pkg/label"
+	"github.com/giantswarm/aws-operator/v14/pkg/project"
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v14/service/controller/key"
 )
