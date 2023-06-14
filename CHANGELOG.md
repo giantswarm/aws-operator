@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Removed
-
-- Remove CSIMigration feature flag (enabled by default with k8s 1.23).
-
 ## [14.17.1] - 2023-05-11
 
 ### Added
