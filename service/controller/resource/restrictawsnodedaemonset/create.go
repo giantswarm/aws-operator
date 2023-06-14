@@ -102,11 +102,29 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil {
 			expr = ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions
 		}
-		expr = append(expr, corev1.NodeSelectorRequirement{
-			Key:      label.OperatorVersion,
-			Operator: "NotIn",
-			Values:   []string{project.Version()},
-		})
+		found := false
+		if len(expr) > 0 {
+			// Check if we already have a requirement for aws-operator version.
+			for i, exp := range expr {
+				if exp.Key == label.OperatorVersion && exp.Operator == "NotIn" && exp.Values[0] != project.Version() {
+					expr[i] = corev1.NodeSelectorRequirement{
+						Key:      label.OperatorVersion,
+						Operator: "NotIn",
+						Values:   []string{project.Version()},
+					}
+
+					found = true
+					break
+				}
+			}
+		}
+		if !found {
+			expr = append(expr, corev1.NodeSelectorRequirement{
+				Key:      label.OperatorVersion,
+				Operator: "NotIn",
+				Values:   []string{project.Version()},
+			})
+		}
 
 		if ds.Spec.Template.Spec.Affinity == nil {
 			ds.Spec.Template.Spec.Affinity = &corev1.Affinity{
