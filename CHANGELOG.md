@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Check if all nodes are rolled before deleting AWS CNI resources when upgrading from v18 to v19.
+
 ## [14.17.1] - 2023-05-11
 
 ### Added
