@@ -68,45 +68,25 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		} else if err != nil {
 			return microerror.Mask(err)
 		}
+		requirements := make([]corev1.NodeSelectorRequirement, 0)
+
 		// Check if the daemonset already has the node affinity entry we need.
 		if ds.Spec.Template.Spec.Affinity != nil &&
 			ds.Spec.Template.Spec.Affinity.NodeAffinity != nil &&
-			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil {
+			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil &&
+			len(ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms) > 0 {
 
-			found := false
-			aff := ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution
-			for _, expression := range aff.NodeSelectorTerms[0].MatchExpressions {
-				if expression.Key == label.OperatorVersion &&
-					expression.Operator == "NotIn" &&
-					expression.Values[0] == project.Version() {
+			requirements = ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions
+		}
 
-					// Node affinity entry found, nothing to do.
-					r.logger.Debugf(ctx, "Daemonset %q is already restricted", dsName)
-
-					found = true
-					break
-				}
-			}
-
-			if found {
-				continue
-			}
+		newRequirements, changed := ensureAndFilterNodeSelectorRequirements(requirements)
+		if !changed {
+			r.logger.Debugf(ctx, "Daemonset %q is already filtered to only run on old nodes", dsName)
+			return nil
 		}
 
 		// Node affinity entry missing, add it.
 		r.logger.Debugf(ctx, "Daemonset %q needs to be patched", dsName)
-		expr := []corev1.NodeSelectorRequirement{}
-
-		if ds.Spec.Template.Spec.Affinity != nil &&
-			ds.Spec.Template.Spec.Affinity.NodeAffinity != nil &&
-			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil {
-			expr = ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions
-		}
-		expr = append(expr, corev1.NodeSelectorRequirement{
-			Key:      label.OperatorVersion,
-			Operator: "NotIn",
-			Values:   []string{project.Version()},
-		})
 
 		if ds.Spec.Template.Spec.Affinity == nil {
 			ds.Spec.Template.Spec.Affinity = &corev1.Affinity{
@@ -114,14 +94,14 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 					RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
 						NodeSelectorTerms: []corev1.NodeSelectorTerm{
 							{
-								MatchExpressions: expr,
+								MatchExpressions: newRequirements,
 							},
 						},
 					},
 				},
 			}
 		} else {
-			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions = expr
+			ds.Spec.Template.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions = newRequirements
 		}
 
 		err = ctrlClient.Update(ctx, &ds)
@@ -133,4 +113,42 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	}
 
 	return nil
+}
+
+// ensureAndFilterNodeSelectorRequirements looks for a `requirement` having key == "aws-operator.giantswarm.io/version" and operator == "NotIn"
+// and ensures it has the corect value (the project version of the running aws operator). It leaves all other requirements untouched.
+func ensureAndFilterNodeSelectorRequirements(requirements []corev1.NodeSelectorRequirement) ([]corev1.NodeSelectorRequirement, bool) {
+	ret := make([]corev1.NodeSelectorRequirement, 0)
+	changed := false
+	found := false
+
+	for _, requirement := range requirements {
+		// Check if Key or Operator are not the ones we're looking for.
+		if requirement.Key != label.OperatorVersion || requirement.Operator != "NotIn" {
+			// This requirement is acting on a different label than the one we care, keep it as-is.
+			ret = append(ret, requirement)
+		} else {
+			// This requirement is using the same key and operator as the one we expected to set, so let's check if the value matches.
+			if len(requirement.Values) != 1 || requirement.Values[0] != project.Version() {
+				// Requirement is not valid, let's remove it.
+				changed = true
+			} else {
+				// Requirement as we wanted is already there.
+				found = true
+				ret = append(ret, requirement)
+			}
+		}
+	}
+
+	if !found {
+		ret = append(ret, corev1.NodeSelectorRequirement{
+			Key:      label.OperatorVersion,
+			Operator: "NotIn",
+			Values:   []string{project.Version()},
+		})
+
+		changed = true
+	}
+
+	return ret, changed
 }
