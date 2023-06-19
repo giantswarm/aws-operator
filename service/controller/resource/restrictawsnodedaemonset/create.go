@@ -115,6 +115,8 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	return nil
 }
 
+// ensureAndFilterNodeSelectorRequirements looks for a `requirement` having key == "aws-operator.giantswarm.io/version" and operator == "NotIn"
+// and ensures it has the corect value (the project version of the running aws operator). It leaves all other requirements untouched.
 func ensureAndFilterNodeSelectorRequirements(requirements []corev1.NodeSelectorRequirement) ([]corev1.NodeSelectorRequirement, bool) {
 	ret := make([]corev1.NodeSelectorRequirement, 0)
 	changed := false
