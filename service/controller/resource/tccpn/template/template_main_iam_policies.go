@@ -170,11 +170,11 @@ const TemplateMainIAMPolicies = `
           {{- if or (eq .IAMPolicies.Region "cn-north-1") (eq .IAMPolicies.Region "cn-northwest-1") }}
           - Effect: "Allow"
             Principal:
-              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity"
+              Federated: "arn:{{ .IAMPolicies.RegionARN }}:iam::{{ .IAMPolicies.AccountID }}:oidc-provider/s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity-v2"
             Action: "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringLike:
-                "s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity:sub": "system:serviceaccount:*:aws-load-balancer-controller*"
+                "s3.{{ .IAMPolicies.Region }}.amazonaws.com.cn/{{ .IAMPolicies.AccountID }}-g8s-{{ .IAMPolicies.ClusterID }}-oidc-pod-identity-v2:sub": "system:serviceaccount:*:aws-load-balancer-controller*"
           {{- end }}
           {{- if ne .IAMPolicies.CloudfrontDomain "" }}
           - Effect: "Allow"
