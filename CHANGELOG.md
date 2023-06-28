@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Unmanage interfaces for CNI eth[1-9] on workers eth[2-9] on masters
 
+## [14.17.1-patch2] - 2023-06-28
+
 ### Changed
 
 - Check if all nodes are rolled before deleting AWS CNI resources when upgrading from v18 to v19.
@@ -1044,6 +1046,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [14.19.1]: https://github.com/giantswarm/aws-operator/compare/v14.19.0...v14.19.1
 [14.19.0]: https://github.com/giantswarm/aws-operator/compare/v14.18.0...v14.19.0
 [14.18.0]: https://github.com/giantswarm/aws-operator/compare/v14.17.1...v14.18.0
+[14.17.1-patch2]: https://github.com/giantswarm/aws-operator/compare/v14.17.1...v14.17.1-patch2
 [14.17.1]: https://github.com/giantswarm/aws-operator/compare/v14.17.0...v14.17.1
 [14.17.0]: https://github.com/giantswarm/aws-operator/compare/v14.16.0...v14.17.0
 [14.16.0]: https://github.com/giantswarm/aws-operator/compare/v14.15.0...v14.16.0
