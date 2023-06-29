@@ -159,14 +159,14 @@ func ControllerManagerTerminatedPodGcThreshold(cluster apiv1beta1.Cluster) int {
 	if str != "" {
 		i, err := strconv.Atoi(str)
 		if err != nil {
-      // when 0 is returned than the default value configured in k8scloudconfig will be used
+			// when 0 is returned than the default value configured in k8scloudconfig will be used
 			return 0
 		}
 
 		return int(i)
 	}
 
-  // when 0 is returned than the default value configured in k8scloudconfig will be used
+	// when 0 is returned than the default value configured in k8scloudconfig will be used
 	return 0
 }
 
