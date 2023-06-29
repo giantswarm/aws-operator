@@ -154,6 +154,22 @@ func EtcdQuotaBackendBytes(cluster apiv1beta1.Cluster) int64 {
 	return 0
 }
 
+func ControllerManagerTerminatedPodGcThreshold(cluster apiv1beta1.Cluster) int {
+	str := cluster.Annotations["controllermanager.giantswarm.io/terminated-pod-gc-threshold"]
+	if str != "" {
+		i, err := strconv.Atoi(str)
+		if err != nil {
+      // when 0 is returned than the default value configured in k8scloudconfig will be used
+			return 0
+		}
+
+		return int(i)
+	}
+
+  // when 0 is returned than the default value configured in k8scloudconfig will be used
+	return 0
+}
+
 // HasCilium returns true if the release uses cilium as CNI. Cilium will be added in v19, so any release >= v19.0.0
 func HasCilium(cluster LabelsGetter) (bool, error) {
 	release := cluster.GetLabels()[label.Release]
