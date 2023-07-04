@@ -232,8 +232,6 @@ github.com/giantswarm/ipam v0.3.0 h1:QNb4k5Zu6nGsqJkAM7dLM1J6TiUP+LGjo9CPR+ewZBk
 github.com/giantswarm/ipam v0.3.0/go.mod h1:xG4cMEKwHlbE0aZ7x2H5j7o81U13LIStA73XCECdk+I=
 github.com/giantswarm/k8sclient/v7 v7.0.1 h1:UmRwgsw5Uda27tpIblPo7nWjp/nq5qwqxEPHWcvzsHk=
 github.com/giantswarm/k8sclient/v7 v7.0.1/go.mod h1:zJTXammjLHSiukMIO4+a6eUDgzj/lJxEXFZ22mC0WXc=
-github.com/giantswarm/k8scloudconfig/v16 v16.3.1-0.20230629142511-142d629b2e1d h1:1Y+PQNzroWM4DP8i2SW50p3sAFw7uIbz94HwxKtcthw=
-github.com/giantswarm/k8scloudconfig/v16 v16.3.1-0.20230629142511-142d629b2e1d/go.mod h1:9QNKXwjyBCWup2ek+kRZ356zw38QhQ2QgwuHuK9zzQo=
 github.com/giantswarm/k8scloudconfig/v16 v16.4.0 h1:WCYNSfdrPfN/rGmQDwkUjnkNd3cmKr+SktyX/l7WfBI=
 github.com/giantswarm/k8scloudconfig/v16 v16.4.0/go.mod h1:9QNKXwjyBCWup2ek+kRZ356zw38QhQ2QgwuHuK9zzQo=
 github.com/giantswarm/k8smetadata v0.20.0 h1:wvKD2SkFsNxQkbnvRbq/e2DHVqoQVeNxehGOmcIdTL8=
