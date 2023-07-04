@@ -5,11 +5,9 @@ metadata:
   namespace: {{ include "resource.default.namespace" . }}
   labels:
     {{- include "labels.common" . | nindent 4 }}
-    giantswarm.io/monitoring: "true"
-  annotations:
-    prometheus.io/scrape: "true"
 spec:
   ports:
-  - port: 8000
+  - name: http
+    port: 8000
   selector:
     {{- include "labels.selector" . | nindent 4 }}
