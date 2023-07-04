@@ -542,6 +542,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 		params.Kubernetes.Apiserver.ServiceAccountSigningKeyFilePath = serviceAccountSigningKeyFilePath
 		params.Kubernetes.Kubelet.CommandExtraArgs = kubeletExtraArgs
 		params.Kubernetes.ControllerManager.CommandExtraArgs = controllerManagerExtraArgs
+		params.ControllerManagerTerminatedPodGcThreshold = key.ControllerManagerTerminatedPodGcThreshold(cluster)
 		params.RegistryMirrors = t.config.RegistryMirrors
 		params.SSOPublicKey = t.config.SSOPublicKey
 		params.Images = im

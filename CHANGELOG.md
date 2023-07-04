@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for customizing `controller-manager` `terminated-pod-gc-threshold` value through annotation `controllermanager.giantswarm.io/terminated-pod-gc-threshold`
+
 ### Changed
 
 - Check if all nodes are rolled before deleting AWS CNI resources when upgrading from v18 to v19.
