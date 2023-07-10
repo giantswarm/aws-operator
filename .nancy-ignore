@@ -1,7 +1,7 @@
 # Hashicorp consul and sdk are not intended for public use and will not receive updates.
 # Waiting for more direct dependencies to move away.
-CVE-2022-29153 until=2023-06-25
-CVE-2022-24687 until=2023-06-25
+CVE-2022-29153
+CVE-2022-24687
 
 # Pending github.com/kataras/iris release > 12.1.8
 CVE-2021-23772 until=2022-08-25
@@ -30,3 +30,4 @@ CVE-2023-25809
 CVE-2023-28642
 CVE-2023-26125
 CVE-2023-29401
+CVE-2023-32731

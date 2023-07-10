@@ -15,6 +15,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
+	operatorlabel "github.com/giantswarm/aws-operator/v14/pkg/label"
+	"github.com/giantswarm/aws-operator/v14/pkg/project"
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v14/service/controller/key"
 )
@@ -72,9 +74,33 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 			return nil
 		}
-
-		r.logger.Debugf(ctx, "Daemonset %q/%q has no replicas, deleting all resources", dsNamespace, dsName)
 	}
+
+	// Ensure all nodes' AWS operator label match the running version.
+	{
+		nodes := &corev1.NodeList{}
+		err = wcCtrlClient.List(ctx, nodes)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		for _, n := range nodes.Items {
+			value, found := n.Labels[operatorlabel.OperatorVersion]
+			if !found {
+				r.logger.Debugf(ctx, "Node %q does not have label %s. Cannot safely determine if we can clean up AWS CNI resources", n.Name, operatorlabel.OperatorVersion)
+				r.logger.Debugf(ctx, "canceling resource")
+				return nil
+			}
+
+			if value != project.Version() {
+				r.logger.Debugf(ctx, "Node %q has value %q for label %s. All nodes must have value %q in order to be able to clean up AWS CNI resources.", n.Name, value, operatorlabel.OperatorVersion, project.Version())
+				r.logger.Debugf(ctx, "canceling resource")
+				return nil
+			}
+		}
+	}
+
+	r.logger.Debugf(ctx, "Deleting all AWS CNI-related resources")
 
 	// Get Cluster CR
 	cluster := apiv1beta1.Cluster{}

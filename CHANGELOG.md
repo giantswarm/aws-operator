@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for customizing `controller-manager` `terminated-pod-gc-threshold` value through annotation `controllermanager.giantswarm.io/terminated-pod-gc-threshold`
+- Add Service Monitor.
+
+### Changed
+
+- Check if all nodes are rolled before deleting AWS CNI resources when upgrading from v18 to v19.
+- Change Route53 Trust Policy to allow other applications to use the role.
+
 ### Fixed
 
+- Change AWS LB Controller Trust Policy for the new S3 bucket.
 - Added pss exceptions for volumes.
 
 ## [14.17.1] - 2023-05-11
