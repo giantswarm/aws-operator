@@ -1,0 +1,42 @@
+apiVersion: kyverno.io/v2alpha1
+kind: PolicyException
+metadata:
+  name: {{ .Chart.Name }}-exceptions
+  namespace: {{ include "resource.default.namespace" . }}
+spec:
+  exceptions:
+  - policyName: disallow-host-path
+    ruleNames:
+    - host-path
+    - autogen-host-path
+  - policyName: restrict-volume-types
+    ruleNames:
+    - restricted-volumes
+    - autogen-restricted-volumes
+  - policyName: require-run-as-nonroot
+    ruleNames:
+    - run-as-non-root 
+    - autogen-run-as-non-root
+  - policyName: restrict-seccomp-strict
+    ruleNames:
+    - restrict-seccomp 
+    - restrict-seccomp
+  - policyName: disallow-capabilities-strict
+    ruleNames:
+    - disallow-capabilities
+    - autogen-disallow-capabilities
+  - policyName: disallow-privilege-escalation
+    ruleNames:
+    - disallow-privilege-escalation
+    - autogen-disallow-privilege-escalation
+  match:
+    any:
+    - resources:
+        kinds:
+        - Deployment
+        - ReplicaSet
+        - Pod
+        namespaces:
+        - {{ include "resource.default.namespace" . }}
+        names:
+        - {{ .Chart.Name }}*
