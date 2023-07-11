@@ -1,7 +1,7 @@
 apiVersion: kyverno.io/v2alpha1
 kind: PolicyException
 metadata:
-  name: {{ .Chart.name }}-exceptions
+  name: {{ .Chart.Name }}-exceptions
   namespace: {{ include "resource.default.namespace" . }}
 spec:
   exceptions:
@@ -39,4 +39,4 @@ spec:
         namespaces:
         - {{ include "resource.default.namespace" . }}
         names:
-        - {{ .Chart.name }}*
+        - {{ .Chart.Name }}*
