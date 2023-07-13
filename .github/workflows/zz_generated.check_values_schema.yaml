@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.24.0
+#    devctl@6.4.0
 #
 name: 'Values and schema'
 on:
@@ -34,6 +34,12 @@ jobs:
         run: |
           for chart_yaml in helm/*/Chart.yaml; do
             helm_dir="${chart_yaml%/Chart.yaml}"
+
+            if [ ! -f ${helm_dir}/values.schema.json ]; then
+              echo "Skipping validation for '${helm_dir}' folder, because 'values.schema.json' does not exist..."
+              continue
+            fi
+
             values=${helm_dir}/values.yaml
             if [ -f ${helm_dir}/ci/ci-values.yaml ]; then
               # merge ci-values.yaml into values.yaml (providing required values)
