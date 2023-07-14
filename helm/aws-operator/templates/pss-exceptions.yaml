@@ -27,8 +27,8 @@ spec:
     - autogen-disallow-capabilities
   - policyName: disallow-privilege-escalation
     ruleNames:
-    - disallow-privilege-escalation
-    - autogen-disallow-privilege-escalation
+    - privilege-escalation
+    - autogen-privilege-escalation
   match:
     any:
     - resources:
