@@ -364,7 +364,7 @@ const TemplateMainIAMPolicies = `
                 'elasticloadbalancing:CreateAction':
                   - CreateTargetGroup
                   - CreateLoadBalancer
-              Null:
+              'Null':
                 'aws:RequestTag/elbv2.k8s.aws/cluster': 'false'
           - Effect: Allow
             Action:
