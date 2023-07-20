@@ -354,6 +354,20 @@ const TemplateMainIAMPolicies = `
                 'aws:ResourceTag/elbv2.k8s.aws/cluster': 'false'
           - Effect: Allow
             Action:
+              - 'elasticloadbalancing:AddTags'
+            Resource:
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:targetgroup/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/net/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/app/*/*'
+            Condition:
+              StringEquals:
+                'elasticloadbalancing:CreateAction':
+                  - CreateTargetGroup
+                  - CreateLoadBalancer
+              'Null':
+                'aws:RequestTag/elbv2.k8s.aws/cluster': 'false'
+          - Effect: Allow
+            Action:
               - 'elasticloadbalancing:RegisterTargets'
               - 'elasticloadbalancing:DeregisterTargets'
             Resource: 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:targetgroup/*/*'
