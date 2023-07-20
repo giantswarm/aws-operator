@@ -356,9 +356,9 @@ const TemplateMainIAMPolicies = `
             Action:
               - 'elasticloadbalancing:AddTags'
             Resource:
-              - "arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:targetgroup/*/*",
-              - "arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-              - "arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:targetgroup/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/net/*/*'
+              - 'arn:{{ .IAMPolicies.RegionARN }}:elasticloadbalancing:*:*:loadbalancer/app/*/*'
             Condition:
               StringEquals:
                 'elasticloadbalancing:CreateAction':

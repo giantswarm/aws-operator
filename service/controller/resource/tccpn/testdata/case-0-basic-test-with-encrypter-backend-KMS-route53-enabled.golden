@@ -403,9 +403,9 @@ Resources:
             Action:
               - 'elasticloadbalancing:AddTags'
             Resource:
-              - "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-              - "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-              - "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+              - 'arn:aws:elasticloadbalancing:*:*:targetgroup/*/*'
+              - 'arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*'
+              - 'arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*'
             Condition:
               StringEquals:
                 'elasticloadbalancing:CreateAction':
