@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update IAM policy for AWS LoadBalancer Controller.
+
 ## [14.19.0] - 2023-07-14
 
 ### Added
