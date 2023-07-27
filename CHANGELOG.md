@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.17.1-patch3] - 2023-07-27
+
 ### Changed
 
 - [Backport] Update IAM policy for AWS LoadBalancer Controller.
@@ -1006,7 +1008,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.17.1-patch2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.17.1-patch3...HEAD
+[14.17.1-patch3]: https://github.com/giantswarm/aws-operator/compare/v14.17.1-patch2...v14.17.1-patch3
 [14.17.1-patch2]: https://github.com/giantswarm/aws-operator/compare/v14.17.1...v14.17.1-patch2
 [14.17.1]: https://github.com/giantswarm/aws-operator/compare/v14.17.0...v14.17.1
 [14.17.0]: https://github.com/giantswarm/aws-operator/compare/v14.16.0...v14.17.0
