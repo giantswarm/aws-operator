@@ -19,12 +19,14 @@ spec:
     - autogen-run-as-non-root
   - policyName: restrict-seccomp-strict
     ruleNames:
-    - restrict-seccomp 
-    - restrict-seccomp
+    - check-seccomp-strict
+    - autogen-check-seccomp-strict
   - policyName: disallow-capabilities-strict
     ruleNames:
-    - disallow-capabilities
-    - autogen-disallow-capabilities
+    - adding-capabilities-strict
+    - autogen-adding-capabilities-strict
+    - require-drop-all
+    - autogen-require-drop-all
   - policyName: disallow-privilege-escalation
     ruleNames:
     - privilege-escalation
