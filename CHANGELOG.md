@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Update vulnerable net package.
+
 ## [14.19.1] - 2023-08-03
 
 ### Fixed
