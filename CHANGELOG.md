@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.19.2] - 2023-08-03
+
 ### Fixed
 
 - Update vulnerable net package.
@@ -1029,7 +1031,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.19.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.19.2...HEAD
+[14.19.2]: https://github.com/giantswarm/aws-operator/compare/v14.19.1...v14.19.2
 [14.19.1]: https://github.com/giantswarm/aws-operator/compare/v14.19.0...v14.19.1
 [14.19.0]: https://github.com/giantswarm/aws-operator/compare/v14.18.0...v14.19.0
 [14.18.0]: https://github.com/giantswarm/aws-operator/compare/v14.17.1...v14.18.0
