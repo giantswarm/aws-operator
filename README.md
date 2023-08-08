@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/giantswarm/aws-operator.svg?&style=shield&circle-token=8f0fe6ad08c090afa36c35ba5d926ac6ffe797e8)](https://circleci.com/gh/giantswarm/aws-operator) [![Docker Repository on Quay](https://quay.io/repository/giantswarm/aws-operator/status "Docker Repository on Quay")](https://quay.io/repository/giantswarm/aws-operator)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/giantswarm/aws-operator/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/giantswarm/aws-operator/tree/master)
 
 # aws-operator
 
@@ -189,7 +189,6 @@ images have been published on AWS, this mapping can be updating using
 ## Contact
 
 - Mailing list: [giantswarm](https://groups.google.com/forum/!forum/giantswarm)
-- IRC: #[giantswarm](irc://irc.freenode.org:6667/#giantswarm) on freenode.org
 - Bugs: [issues](https://github.com/giantswarm/aws-operator/issues)
 
 ## Contributing & Reporting Bugs
@@ -207,5 +206,5 @@ for details.
 
 
 ## Credit
-- https://golang.org
+
 - https://github.com/giantswarm/microkit
