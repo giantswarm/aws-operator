@@ -391,7 +391,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 	}
 
 	var controllerManagerExtraArgs []string
-	if hasCilium {
+	if hasCilium && !key.IsCiliumEniModeEnabled(cluster) {
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--allocate-node-cidrs=true")
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--cluster-cidr="+podCidr)
 		controllerManagerExtraArgs = append(controllerManagerExtraArgs, "--node-cidr-mask-size=25")
