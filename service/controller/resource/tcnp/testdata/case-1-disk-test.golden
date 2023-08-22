@@ -279,40 +279,32 @@ Resources:
               "storage": {
                 "filesystems": [
                   {
-                    "name": "docker",
-                    "mount": {
-                      "device": "/dev/xvdh",
-                      "wipeFilesystem": true,
-                      "label": "docker",
-                      "format": "xfs"
-                    }
+                    "path": "/var/lib/docker",
+                    "device": "/dev/xvdc",
+                    "wipeFilesystem": true,
+                    "label": "docker",
+                    "format": "xfs"
                   },
                   {
-                    "name": "kubelet",
-                    "mount": {
-                      "device": "/dev/xvdg",
-                      "wipeFilesystem": true,
-                      "label": "kubelet",
-                      "format": "xfs"
-                    }
+                    path: "/var/lib/kubelet",
+                    "device": "/dev/xvdg",
+                    "wipeFilesystem": true,
+                    "label": "kubelet",
+                    "format": "xfs"
                   },
                   {
-                    "name": "log",
-                    "mount": {
-                      "device": "/dev/xvdf",
-                      "wipeFilesystem": true,
-                      "label": "log",
-                      "format": "xfs"
-                    }
+                    path: "/var/log",
+                    "device": "/dev/xvdf",
+                    "wipeFilesystem": true,
+                    "label": "log",
+                    "format": "xfs"
                   },
                   {
-                    "name": "containerd",
-                    "mount": {
-                      "device": "/dev/xvdi",
-                      "wipeFilesystem": true,
-                      "label": "containerd",
-                      "format": "xfs"
-                    }
+                    "path": "/var/lib/containerd",
+                    "device": "/dev/xvdi",
+                    "wipeFilesystem": true,
+                    "label": "containerd",
+                    "format": "xfs"
                   }
                 ]
               }

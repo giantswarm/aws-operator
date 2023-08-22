@@ -14,31 +14,25 @@ const Small = `{
   "storage": {
     "filesystems": [
       {
-        "name": "docker",
-        "mount": {
-          "device": "/dev/xvdc",
-          "wipeFilesystem": true,
-          "label": "docker",
-          "format": "xfs"
-        }
+        "path": "/var/lib/docker",
+        "device": "/dev/xvdc",
+        "wipeFilesystem": true,
+        "label": "docker",
+        "format": "xfs"
       },
       {
-        "name": "log",
-        "mount": {
-          "device": "/dev/xvdf",
-          "wipeFilesystem": true,
-          "label": "log",
-          "format": "xfs"
-        }
+        path: "/var/log",
+        "device": "/dev/xvdf",
+        "wipeFilesystem": true,
+        "label": "log",
+        "format": "xfs"
       },
       {
-        "name": "etcd",
-        "mount": {
-          "device": "/dev/xvdh",
-          "wipeFilesystem": false,
-          "label": "etcd",
-          "format": "ext4"
-        }
+        "path": "/var/lib/etcd",
+        "device": "/dev/xvdh",
+        "wipeFilesystem": false,
+        "label": "etcd",
+        "format": "ext4"
       }
     ]
   }
