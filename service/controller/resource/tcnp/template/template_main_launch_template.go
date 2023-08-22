@@ -9,24 +9,28 @@ const TemplateMainLaunchTemplate = `
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdh
+          VirtualName: /dev/xvdh
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Docker.Volume.Size }}
             VolumeType: gp3
         - DeviceName: /dev/xvdg
+          VirtualName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Kubelet.Volume.Size }}
             VolumeType: gp3
         - DeviceName: /dev/xvdf
+          VirtualName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: {{ .LaunchTemplate.BlockDeviceMapping.Logging.Volume.Size }}
             VolumeType: gp3
         - DeviceName: /dev/xvdi
+          VirtualName: /dev/xvdi
           Ebs:
             DeleteOnTermination: true
             Encrypted: true

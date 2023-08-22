@@ -426,24 +426,28 @@ Resources:
       LaunchTemplateData:
         BlockDeviceMappings:
         - DeviceName: /dev/xvdc
+          VirtualName: /dev/xvdc
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
             VolumeType: gp3
         - DeviceName: /dev/xvdg
+          VirtualName: /dev/xvdg
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
             VolumeType: gp3
         - DeviceName: /dev/xvdf
+          VirtualName: /dev/xvdf
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
             VolumeSize: 100
             VolumeType: gp3
         - DeviceName: /dev/xvdi
+          VirtualName: /dev/xvdi
           Ebs:
             DeleteOnTermination: true
             Encrypted: true
