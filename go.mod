@@ -51,6 +51,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/giantswarm/exporterkit v1.0.0 // indirect
+	github.com/giantswarm/k8scloudconfig/v17 v17.2.1-0.20230822100245-dbefc8d5b12f // indirect
 	github.com/giantswarm/microstorage v0.2.0 // indirect
 	github.com/giantswarm/versionbundle v1.0.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect

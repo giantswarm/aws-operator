@@ -518,7 +518,7 @@ Resources:
               "ignition": {
                 "version": "3.0.0",
                 "config": {
-                  "append": [
+                  "merge": [
                     {
                       "source": "s3://tenant-account-g8s-8y5ck/version/7.3.0/cloudconfig/v_6_1_0/cluster-8y5ck-tccpn-0"
                     }

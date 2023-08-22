@@ -4,7 +4,7 @@ const Small = `{
   "ignition": {
     "version": "3.0.0",
     "config": {
-      "append": [
+      "merge": [
         {
           "source": "{{ .S3URL }}"
         }

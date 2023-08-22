@@ -57,7 +57,7 @@ const TemplateMainLaunchTemplate = `
               "ignition": {
                 "version": "3.0.0",
                 "config": {
-                  "append": [
+                  "merge": [
                     {
                       "source": "{{ .LaunchTemplate.SmallCloudConfig.S3URL }}"
                     }
