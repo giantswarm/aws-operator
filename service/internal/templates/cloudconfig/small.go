@@ -21,7 +21,7 @@ const Small = `{
         "format": "xfs"
       },
       {
-        path: "/var/log",
+        "path": "/var/log",
         "device": "/dev/xvdf",
         "wipeFilesystem": true,
         "label": "log",

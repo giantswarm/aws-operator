@@ -74,14 +74,14 @@ const TemplateMainLaunchTemplate = `
                     "format": "xfs"
                   },
                   {
-                    path: "/var/lib/kubelet",
+                    "path": "/var/lib/kubelet",
                     "device": "/dev/xvdg",
                     "wipeFilesystem": true,
                     "label": "kubelet",
                     "format": "xfs"
                   },
                   {
-                    path: "/var/log",
+                    "path": "/var/log",
                     "device": "/dev/xvdf",
                     "wipeFilesystem": true,
                     "label": "log",
