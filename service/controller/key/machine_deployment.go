@@ -37,6 +37,15 @@ func MachineDeploymentContainerdVolumeSizeGB(cr infrastructurev1alpha3.AWSMachin
 	}
 }
 
+func MachineDeploymentFlatcarAlphaReleaseVersion(cr infrastructurev1alpha3.AWSMachineDeployment) string {
+	result, ok := cr.ObjectMeta.Annotations[annotation.FlatcarAlphaReleaseVersion]
+
+	if !ok {
+		return ""
+	}
+	return result
+}
+
 func MachineDeploymentLoggingVolumeSizeGB(cr infrastructurev1alpha3.AWSMachineDeployment) int {
 	result, ok := cr.ObjectMeta.Annotations[annotation.AWSLoggingVolumeSize]
 	//If there is no tag, default to 15Gb

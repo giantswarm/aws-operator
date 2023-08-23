@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Allow flatcar alpha releases for machine pools.
+
 ## [14.19.2] - 2023-08-03
 
 ### Fixed

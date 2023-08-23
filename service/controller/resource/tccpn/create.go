@@ -507,7 +507,7 @@ func (r *Resource) newLaunchTemplate(ctx context.Context, cr infrastructurev1alp
 
 	var ami string
 	{
-		ami, err = r.images.AMI(ctx, &cr)
+		ami, err = r.images.AMI(ctx, &cr, "")
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

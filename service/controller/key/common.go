@@ -68,10 +68,18 @@ const sslOnlyBucketPolicyTemplate = `{
 }`
 
 // AMI returns the EC2 AMI for the configured region and given version.
-func AMI(region string, release releasev1alpha1.Release) (string, error) {
-	osVersion, err := OSVersion(release)
-	if err != nil {
-		return "", microerror.Mask(err)
+func AMI(region string, release releasev1alpha1.Release, flatcarAlphaReleaseVersion string) (string, error) {
+
+	var osVersion string
+	var err error
+
+	if flatcarAlphaReleaseVersion == "" {
+		osVersion, err = OSVersion(release)
+		if err != nil {
+			return "", microerror.Mask(err)
+		}
+	} else {
+		osVersion = flatcarAlphaReleaseVersion
 	}
 
 	regionAMIs, ok := amiInfo[osVersion]
