@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Unmanage interfaces for CNI eth[1-9] on workers eth[2-9] on masters
+- Ensure calico image is at least 3.22.3 before upgrading to cilium in `eni` IPAM mode.
 
 ## [14.17.1-patch2] - 2023-06-28
 
