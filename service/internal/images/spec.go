@@ -11,7 +11,7 @@ type Interface interface {
 	// given object's region and release version. Paramter obj must be a
 	// metav1.Object and contain the Giant Swarm specific cluster ID label and
 	// release version label.
-	AMI(ctx context.Context, obj interface{}, flatcarAlphaReleaseVersion string) (string, error)
+	AMI(ctx context.Context, obj interface{}, flatcarReleaseVersion string) (string, error)
 	// AWSCNI looks up aws-cni version to compute the relevant Cloud Config
 	// images for the given object's release version. Paramter obj must be a
 	// metav1.Object and contain the Giant Swarm specific release version label.
