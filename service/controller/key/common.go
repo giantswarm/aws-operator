@@ -196,6 +196,11 @@ func IsV19Release(releaseVersion *semver.Version) bool {
 	return releaseVersion.Major >= v19.Major
 }
 
+func IsMinimumFlatcarVersion(flatcarVersion *semver.Version) bool {
+	minRelease, _ := semver.New("3689.0.0")
+	return flatcarVersion.GTE(*minRelease)
+}
+
 func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {
 	var labels string
 
