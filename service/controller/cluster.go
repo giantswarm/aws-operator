@@ -48,6 +48,7 @@ import (
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/peerrolearn"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/prepareawscniformigration"
+	"github.com/giantswarm/aws-operator/v14/service/controller/resource/preparecalicoformigration"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/region"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/restrictawsnodedaemonset"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/s3bucket"
@@ -848,6 +849,20 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
+	var prepareCalicoForMigrationResource resource.Interface
+	{
+		c := preparecalicoformigration.Config{
+			Logger:         config.Logger,
+			CtrlClient:     config.K8sClient.CtrlClient(),
+			RegistryDomain: config.RegistryDomain,
+		}
+
+		prepareCalicoForMigrationResource, err = preparecalicoformigration.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -873,6 +888,7 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		tccpSecurityGroupsResource,
 		s3BucketResource,
 		prepareAwsCniForMigrationResource,
+		prepareCalicoForMigrationResource,
 		tccpAZsResource,
 		tccpiResource,
 		tccpResource,
