@@ -73,12 +73,12 @@ func AMI(region string, release releasev1alpha1.Release, flatcarReleaseVersion s
 	var osVersion string
 	var err error
 
-	if flatcarReleaseVersion == "" {
-		osVersion, err = OSVersion(release)
-		if err != nil {
-			return "", microerror.Mask(err)
-		}
-	} else {
+	osVersion, err = OSVersion(release)
+	if err != nil {
+		return "", microerror.Mask(err)
+	}
+
+	if flatcarReleaseVersion != "" && IsFlatcarVersionNewer(osVersion, flatcarReleaseVersion) {
 		osVersion = flatcarReleaseVersion
 	}
 
@@ -196,9 +196,11 @@ func IsV19Release(releaseVersion *semver.Version) bool {
 	return releaseVersion.Major >= v19.Major
 }
 
-func IsMinimumFlatcarVersion(flatcarVersion *semver.Version) bool {
-	minRelease, _ := semver.New("3689.0.0")
-	return flatcarVersion.GTE(*minRelease)
+func IsFlatcarVersionNewer(currentVersion string, optionalVersion string) bool {
+	current, _ := semver.New(currentVersion)
+	optional, _ := semver.New(optionalVersion)
+
+	return optional.GT(*current)
 }
 
 func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {

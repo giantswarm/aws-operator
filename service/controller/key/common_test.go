@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/blang/semver"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -60,39 +59,38 @@ func TestIsMinimumFlatcarVersion(t *testing.T) {
 	testCases := []struct {
 		name           string
 		flatcarVersion string
+		releaseVersion string
 		expected       bool
 	}{
 		{
 			name:           "empty version",
 			flatcarVersion: "",
+			releaseVersion: "3510.2.6",
 			expected:       false,
 		},
 		{
-			name:           "wrong version",
-			flatcarVersion: "33",
+			name:           "same version",
+			flatcarVersion: "3510.2.6",
+			releaseVersion: "3510.2.6",
 			expected:       false,
-		},
-		{
-			name:           "minimum version",
-			flatcarVersion: "3689.0.0",
-			expected:       true,
 		},
 		{
 			name:           "lower version",
-			flatcarVersion: "3688.0.0",
+			flatcarVersion: "3488.0.0",
+			releaseVersion: "3510.2.6",
 			expected:       false,
 		},
 		{
 			name:           "higher version",
 			flatcarVersion: "3690.0.0",
+			releaseVersion: "3510.2.6",
 			expected:       true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			version, _ := semver.New(tc.flatcarVersion)
-			result := IsMinimumFlatcarVersion(version)
+			result := IsFlatcarVersionNewer(tc.releaseVersion, tc.flatcarVersion)
 			if result != tc.expected {
 				t.Errorf("expected %v, but got %v", tc.expected, result)
 			}

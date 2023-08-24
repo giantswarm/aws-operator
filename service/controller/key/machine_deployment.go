@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/blang/semver"
 	"github.com/dylanmei/iso8601"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
@@ -42,11 +41,6 @@ func MachineDeploymentFlatcarReleaseVersion(cr infrastructurev1alpha3.AWSMachine
 	result, ok := cr.ObjectMeta.Annotations[annotation.FlatcarReleaseVersion]
 
 	if !ok {
-		return ""
-	}
-
-	minRelease, _ := semver.New(result)
-	if !IsMinimumFlatcarVersion(minRelease) {
 		return ""
 	}
 
