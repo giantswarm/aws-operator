@@ -134,6 +134,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		if err != nil {
 			return microerror.Mask(err)
 		}
+		r.logger.Debugf(ctx, fmt.Sprintf("update node pool %v", update))
 
 		if scale {
 			err = r.updateStack(ctx, cr)
