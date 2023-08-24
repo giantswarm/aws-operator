@@ -122,11 +122,6 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSMa
 			return false, microerror.Mask(err)
 		}
 	}
-	t.logger.LogCtx(ctx,
-		"level", "debug",
-		"message", "AMI",
-		"reason", fmt.Sprintf("ami image current %s, expected ami %s", cc.Status.TenantCluster.TCNP.WorkerInstance.Image, ami),
-	)
 
 	amiEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Image == ami
 	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
