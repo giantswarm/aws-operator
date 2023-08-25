@@ -80,7 +80,7 @@ func Test_Images_Cache(t *testing.T) {
 			}
 
 			{
-				ami1, err = im.AMI(tc.ctx, &cl)
+				ami1, err = im.AMI(tc.ctx, &cl, "")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -107,7 +107,7 @@ func Test_Images_Cache(t *testing.T) {
 			}
 
 			{
-				ami2, err = im.AMI(tc.ctx, &cl)
+				ami2, err = im.AMI(tc.ctx, &cl, "")
 				if err != nil {
 					t.Fatal(err)
 				}

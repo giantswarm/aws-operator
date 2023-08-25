@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Allow newer flatcar releases for node pools as provided by AWS release.
+
 ## [14.19.2] - 2023-08-03
 
 ### Fixed

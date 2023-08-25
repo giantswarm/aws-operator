@@ -68,10 +68,18 @@ const sslOnlyBucketPolicyTemplate = `{
 }`
 
 // AMI returns the EC2 AMI for the configured region and given version.
-func AMI(region string, release releasev1alpha1.Release) (string, error) {
-	osVersion, err := OSVersion(release)
+func AMI(region string, release releasev1alpha1.Release, flatcarReleaseVersion string) (string, error) {
+
+	var osVersion string
+	var err error
+
+	osVersion, err = OSVersion(release)
 	if err != nil {
 		return "", microerror.Mask(err)
+	}
+
+	if flatcarReleaseVersion != "" && IsFlatcarVersionNewer(osVersion, flatcarReleaseVersion) {
+		osVersion = flatcarReleaseVersion
 	}
 
 	regionAMIs, ok := amiInfo[osVersion]
@@ -186,6 +194,13 @@ func IsDeleted(getter DeletionTimestampGetter) bool {
 func IsV19Release(releaseVersion *semver.Version) bool {
 	v19, _ := semver.New(V19AlphaRelease)
 	return releaseVersion.Major >= v19.Major
+}
+
+func IsFlatcarVersionNewer(currentVersion string, optionalVersion string) bool {
+	current, _ := semver.New(currentVersion)
+	optional, _ := semver.New(optionalVersion)
+
+	return optional.GT(*current)
 }
 
 func KubeletLabelsTCCPN(getter LabelsGetter, masterID int) string {

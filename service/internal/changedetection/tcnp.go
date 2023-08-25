@@ -92,6 +92,7 @@ func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha3.AWSMac
 //	The worker node's instance type changes.
 //	The operator's version changes.
 //	The composition of security groups changes.
+//	The AMI version changes.
 func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -114,12 +115,30 @@ func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSMa
 		}
 	}
 
+	var ami string
+	{
+		ami, err = key.AMI(cc.Status.TenantCluster.AWS.Region, currentRelease, key.MachineDeploymentFlatcarReleaseVersion(cr))
+		if err != nil {
+			return false, microerror.Mask(err)
+		}
+	}
+
+	amiEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Image == ami
 	componentVersionsEqual := releaseComponentsEqual(currentRelease, targetRelease)
 	dockerVolumeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.DockerVolumeSizeGB == key.MachineDeploymentDockerVolumeSizeGB(cr)
 	instanceTypeEqual := cc.Status.TenantCluster.TCNP.WorkerInstance.Type == key.MachineDeploymentInstanceType(cr)
 	operatorVersionEqual := cc.Status.TenantCluster.OperatorVersion == key.OperatorVersion(&cr)
 	securityGroupsEqual := securityGroupsEqual(cc.Status.TenantCluster.TCNP.SecurityGroupIDs, cc.Spec.TenantCluster.TCNP.SecurityGroupIDs)
 
+	if !amiEqual {
+		t.logger.LogCtx(ctx,
+			"level", "debug",
+			"message", "detected TCNP stack should update",
+			"reason", fmt.Sprintf("ami image changed from %s to %s", cc.Status.TenantCluster.TCNP.WorkerInstance.Image, ami),
+		)
+		t.event.Emit(ctx, &cr, "CFUpdateRequested", fmt.Sprintf("detected TCNP stack should update: ami changed from %s to %s", cc.Status.TenantCluster.TCNP.WorkerInstance.Image, ami))
+		return true, nil
+	}
 	if !componentVersionsEqual {
 		t.logger.LogCtx(ctx,
 			"level", "debug",

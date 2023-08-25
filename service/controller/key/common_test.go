@@ -54,3 +54,46 @@ func TestSanitizeCFResourceName(t *testing.T) {
 		})
 	}
 }
+
+func TestIsMinimumFlatcarVersion(t *testing.T) {
+	testCases := []struct {
+		name           string
+		flatcarVersion string
+		releaseVersion string
+		expected       bool
+	}{
+		{
+			name:           "empty version",
+			flatcarVersion: "",
+			releaseVersion: "3510.2.6",
+			expected:       false,
+		},
+		{
+			name:           "same version",
+			flatcarVersion: "3510.2.6",
+			releaseVersion: "3510.2.6",
+			expected:       false,
+		},
+		{
+			name:           "lower version",
+			flatcarVersion: "3488.0.0",
+			releaseVersion: "3510.2.6",
+			expected:       false,
+		},
+		{
+			name:           "higher version",
+			flatcarVersion: "3690.0.0",
+			releaseVersion: "3510.2.6",
+			expected:       true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := IsFlatcarVersionNewer(tc.releaseVersion, tc.flatcarVersion)
+			if result != tc.expected {
+				t.Errorf("expected %v, but got %v", tc.expected, result)
+			}
+		})
+	}
+}
