@@ -8,7 +8,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
-	github.com/giantswarm/apiextensions/v6 v6.5.0
+	github.com/giantswarm/apiextensions/v6 v6.6.0
 	github.com/giantswarm/backoff v1.0.0
 	github.com/giantswarm/badnodedetector/v2 v2.0.0
 	github.com/giantswarm/certs/v4 v4.0.0
@@ -23,7 +23,7 @@ require (
 	github.com/giantswarm/micrologger v1.0.0
 	github.com/giantswarm/operatorkit/v7 v7.1.0
 	github.com/giantswarm/randomkeys/v3 v3.0.0
-	github.com/giantswarm/release-operator/v4 v4.0.0
+	github.com/giantswarm/release-operator/v4 v4.1.0
 	github.com/giantswarm/tenantcluster/v6 v6.0.0
 	github.com/giantswarm/to v0.4.0
 	github.com/google/go-cmp v0.5.9
