@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allow newer flatcar releases for node pools as provided by AWS release.
 
+### Changed
+
+- Unmanage interfaces for CNI eth[1-9] on workers eth[2-9] on masters
+- [cilium eni mode] Only run calico and kube-proxy on old nodes during migration to cilium.
+
 ## [14.19.2] - 2023-08-03
 
 ### Fixed
@@ -39,11 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add support for customizing `controller-manager` `terminated-pod-gc-threshold` value through annotation `controllermanager.giantswarm.io/terminated-pod-gc-threshold`
 - Add Service Monitor.
-
-### Changed
-
-- Unmanage interfaces for CNI eth[1-9] on workers eth[2-9] on masters
-- [cilium eni mode] Only run calico and kube-proxy on old nodes during migration to cilium.
 
 ## [14.17.1-patch2] - 2023-06-28
 
