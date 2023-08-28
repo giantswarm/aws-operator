@@ -217,8 +217,8 @@ github.com/getsentry/sentry-go v0.17.0/go.mod h1:B82dxtBvxG0KaPD8/hfSV+VcHD+Lg/x
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344 h1:Arcl6UOIS/kgO2nW3A65HN+7CMjSDP/gofXL4CZt1V4=
 github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344/go.mod h1:GIjDIg/heH5DOkXY3YJ/wNhfHsQHoXGjl8G8amsYQ1I=
-github.com/giantswarm/apiextensions/v6 v6.5.0 h1:zCzZjB5nKQqINZr+HNONEuHHjuXx6kiXPDZxAVYfVAY=
-github.com/giantswarm/apiextensions/v6 v6.5.0/go.mod h1:Wgc2Rx8YAYF2HidjabEvhsj5ADL+RteIC86ofulY+YE=
+github.com/giantswarm/apiextensions/v6 v6.6.0 h1:qtsZuxsfigUB6xRd/UygQjh3Oaf54uXp+adbtgpCfiI=
+github.com/giantswarm/apiextensions/v6 v6.6.0/go.mod h1:Wgc2Rx8YAYF2HidjabEvhsj5ADL+RteIC86ofulY+YE=
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/backoff v1.0.0 h1:1oeTvyPsm1tJrHlSmfxbIWuoCNWPOkWJCb8kfLvE2T0=
 github.com/giantswarm/backoff v1.0.0/go.mod h1:l/WqbggvG5Ndxxws0LUgVEvP5E82Qj5/PF8SMip/1QM=
@@ -254,8 +254,8 @@ github.com/giantswarm/operatorkit/v7 v7.1.0 h1:yRUwj9ZUqBd+UV0C5n784+Qe6y/olILtg
 github.com/giantswarm/operatorkit/v7 v7.1.0/go.mod h1:5enwhyIjd4xKrYXV9+enqttcmB9BE2Ocl1V12IwJIuw=
 github.com/giantswarm/randomkeys/v3 v3.0.0 h1:68C+laq+2DgvfYPs8tz7249Oc0gYE14W93moJ4s7pSg=
 github.com/giantswarm/randomkeys/v3 v3.0.0/go.mod h1:O47AZ2x6xJ4+LpSz5Gq4i8duaTFeaffyA8g39amF1FQ=
-github.com/giantswarm/release-operator/v4 v4.0.0 h1:b4zNzBz7C1FleK1Ka/W9jlbowMBSPNb7BWf/Aasrc3Y=
-github.com/giantswarm/release-operator/v4 v4.0.0/go.mod h1:8OqMj1HZVN50NXNSA/zcLrmEUPNa+eOMHkpLHkUBf9Q=
+github.com/giantswarm/release-operator/v4 v4.1.0 h1:8FdLoJH0pZ26lrFwodurL+FMx+W1Jf2TrOXK4x0OOVE=
+github.com/giantswarm/release-operator/v4 v4.1.0/go.mod h1:8OqMj1HZVN50NXNSA/zcLrmEUPNa+eOMHkpLHkUBf9Q=
 github.com/giantswarm/tenantcluster/v6 v6.0.0 h1:IWJQ+3nj82a66cUsB+Nwi7O6lAvFI0MA0vtwM+28CU8=
 github.com/giantswarm/tenantcluster/v6 v6.0.0/go.mod h1:mH3WcxR5n20D/6g4iOMt55T1MFBp1syFbVjS/1+by9k=
 github.com/giantswarm/to v0.4.0 h1:x0GjbI94/nxcHztJiRtJzihCjgmUlEOto8RD98VA7WI=
