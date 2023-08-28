@@ -17,9 +17,10 @@ import (
 )
 
 const (
-	dsNamespace     = "kube-system"
-	awsNodeDsName   = "aws-node"
-	kubeProxyDsName = "kube-proxy"
+	dsNamespace      = "kube-system"
+	awsNodeDsName    = "aws-node"
+	calicoNodeDsName = "calico-node"
+	kubeProxyDsName  = "kube-proxy"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -66,6 +67,7 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	daemonsetNames := []string{awsNodeDsName}
 	if key.IsCiliumEniModeEnabled(cluster) {
 		daemonsetNames = append(daemonsetNames, kubeProxyDsName)
+		daemonsetNames = append(daemonsetNames, calicoNodeDsName)
 	}
 
 	for _, dsName := range daemonsetNames {
