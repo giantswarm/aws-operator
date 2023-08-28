@@ -7,6 +7,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/aws-operator/v14/pkg/label"
@@ -18,7 +19,7 @@ import (
 const (
 	dsNamespace     = "kube-system"
 	awsNodeDsName   = "aws-node"
-	KubeProxyDsName = "kube-proxy"
+	kubeProxyDsName = "kube-proxy"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -55,7 +56,19 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 
 	ctrlClient := cc.Client.TenantCluster.K8s.CtrlClient()
 
-	for _, dsName := range []string{awsNodeDsName} {
+	// Only run this if the Cluster CR has the cilium pod annotation
+	cluster := apiv1beta1.Cluster{}
+	err = r.ctrlClient.Get(ctx, client.ObjectKey{Namespace: cr.Namespace, Name: key.ClusterID(&cr)}, &cluster)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	daemonsetNames := []string{awsNodeDsName}
+	if key.IsCiliumEniModeEnabled(cluster) {
+		daemonsetNames = append(daemonsetNames, kubeProxyDsName)
+	}
+
+	for _, dsName := range daemonsetNames {
 		ds := appsv1.DaemonSet{}
 		err = ctrlClient.Get(ctx, client.ObjectKey{
 			Namespace: dsNamespace,

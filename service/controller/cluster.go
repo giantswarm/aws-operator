@@ -374,7 +374,8 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 	var restrictAwsNodeDaemonsetResource resource.Interface
 	{
 		c := restrictawsnodedaemonset.Config{
-			Logger: config.Logger,
+			CtrlClient: config.K8sClient.CtrlClient(),
+			Logger:     config.Logger,
 		}
 
 		restrictAwsNodeDaemonsetResource, err = restrictawsnodedaemonset.New(c)
