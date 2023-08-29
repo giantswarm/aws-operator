@@ -482,6 +482,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnetEuCentral1a
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: private
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1a:
@@ -498,6 +500,8 @@ Resources:
       Tags:
       - Key: Name
         Value: PrivateSubnetEuCentral1c
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: private
       VpcId: vpc-id
     DependsOn: VpcCidrBlock
   PrivateSubnetRouteTableAssociationEuCentral1c:

@@ -16,6 +16,8 @@ const TemplateMainSubnets = `
       - Key: kubernetes.io/role/internal-elb
         Value: 1
       {{- end }}
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: private
       VpcId: {{ .TCCP.VPC.ID }}
     DependsOn: VpcCidrBlock
   {{ .RouteTableAssociation.Name }}:
