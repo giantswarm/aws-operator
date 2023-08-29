@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Allow newer flatcar releases for node pools as provided by AWS release.
+- Add `sigs.k8s.io/cluster-api-provider-aws/role` tag to all subnets as preparation for migration to CAPI.
 
 ## [14.19.2] - 2023-08-03
 
