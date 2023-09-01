@@ -228,9 +228,23 @@ func IsAWSCNINeeded(cluster apiv1beta1.Cluster) bool {
 		return true
 	}
 
+	if IsCiliumEniModeEnabled(cluster) {
+		return true
+	}
+
 	_, needed := cluster.Annotations[annotation.CiliumPodCidr]
 
 	return needed
+}
+
+func IsCiliumEniModeEnabled(cluster apiv1beta1.Cluster) bool {
+	mode, found := cluster.Annotations[annotation.CiliumIpamModeAnnotation]
+	if !found {
+		// we default to 'kubernetes' mode
+		return false
+	}
+
+	return mode == annotation.CiliumIpamModeENI
 }
 
 func MasterAvailabilityZone(cluster infrastructurev1alpha3.AWSCluster) string {

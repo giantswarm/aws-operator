@@ -489,6 +489,7 @@ func (r *Resource) newIAMPolicies(ctx context.Context, cr infrastructurev1alpha3
 			},
 			EC2ServiceDomain: key.EC2ServiceDomain(cc.Status.TenantCluster.AWS.Region),
 			EnableAWSCNI:     key.IsAWSCNINeeded(cluster),
+			CiliumENIMode:    key.IsCiliumEniModeEnabled(cluster),
 			KMSKeyARN:        ek,
 			NodePool: template.ParamsMainIAMPoliciesNodePool{
 				ID: key.MachineDeploymentID(&cr),

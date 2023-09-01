@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow newer flatcar releases for node pools as provided by AWS release.
 - Add `sigs.k8s.io/cluster-api-provider-aws/role` tag to all subnets as preparation for migration to CAPI.
 
+### Changed
+
+- Unmanage interfaces for CNI eth[1-9] on workers eth[2-9] on masters
+- [cilium eni mode] Only run aws-node, calico and kube-proxy on old nodes during migration to cilium.
+
 ## [14.19.2] - 2023-08-03
 
 ### Fixed
