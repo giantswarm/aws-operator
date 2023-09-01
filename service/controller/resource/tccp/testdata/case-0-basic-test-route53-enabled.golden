@@ -707,6 +707,8 @@ Resources:
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: public
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -726,6 +728,8 @@ Resources:
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: public
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -745,6 +749,8 @@ Resources:
         Value: public
       - Key: kubernetes.io/role/elb
         Value: 1
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: public
       VpcId: !Ref VPC
   PublicSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -764,6 +770,8 @@ Resources:
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: private
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1a:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -783,6 +791,8 @@ Resources:
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: private
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1b:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -802,6 +812,8 @@ Resources:
         Value: private
       - Key: kubernetes.io/role/internal-elb
         Value: 1
+      - Key: sigs.k8s.io/cluster-api-provider-aws/role
+        Value: private
       VpcId: !Ref VPC
   PrivateSubnetRouteTableAssociationEuCentral1c:
     Type: AWS::EC2::SubnetRouteTableAssociation

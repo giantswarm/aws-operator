@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.20.0] - 2023-08-29
+
 ### Added
 
 - Allow newer flatcar releases for node pools as provided by AWS release.
+- Add `sigs.k8s.io/cluster-api-provider-aws/role` tag to all subnets as preparation for migration to CAPI.
 
 ### Changed
 
@@ -1040,7 +1043,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.19.2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.20.0...HEAD
+[14.20.0]: https://github.com/giantswarm/aws-operator/compare/v14.19.2...v14.20.0
 [14.19.2]: https://github.com/giantswarm/aws-operator/compare/v14.19.1...v14.19.2
 [14.19.1]: https://github.com/giantswarm/aws-operator/compare/v14.19.0...v14.19.1
 [14.19.0]: https://github.com/giantswarm/aws-operator/compare/v14.18.0...v14.19.0
