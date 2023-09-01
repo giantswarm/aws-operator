@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.21.0] - 2023-09-01
+
 ## [14.20.0] - 2023-08-29
 
 ### Added
@@ -1043,7 +1045,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.20.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.21.0...HEAD
+[14.21.0]: https://github.com/giantswarm/aws-operator/compare/v14.20.0...v14.21.0
 [14.20.0]: https://github.com/giantswarm/aws-operator/compare/v14.19.2...v14.20.0
 [14.19.2]: https://github.com/giantswarm/aws-operator/compare/v14.19.1...v14.19.2
 [14.19.1]: https://github.com/giantswarm/aws-operator/compare/v14.19.0...v14.19.1
