@@ -58,7 +58,7 @@ spec:
         - name: {{ include "name" . }}-configmap
           mountPath: /var/run/{{ include "name" . }}/configmap/
         - name: {{ include "name" . }}-ami
-          mountPath: /etc/ami.json
+          mountPath: /tmp/ami.json
         - name: {{ include "name" . }}-secret
           mountPath: /var/run/{{ include "name" . }}/secret/
           readOnly: true

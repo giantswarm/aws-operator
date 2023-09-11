@@ -39,7 +39,7 @@ const (
 
 	V19AlphaRelease = "19.0.0-alpha1"
 
-	amiFilePath = "/etc/ami.json"
+	amiFilePath = "/tmp/ami.json"
 )
 
 var amiInfo = map[string]map[string]string{}
@@ -81,12 +81,12 @@ func loadAMIs() error {
 
 	amiJSON, err := os.ReadFile(amiFilePath)
 	if err != nil {
-		panic(err)
+		return microerror.Mask(err)
 	}
 
 	err = json.Unmarshal(amiJSON, &amiInfo)
 	if err != nil {
-		panic(err)
+		return microerror.Mask(err)
 	}
 
 	return nil
