@@ -96,3 +96,5 @@ data:
         {{- end }}
       kubernetes:
         incluster: true
+  ami.json: |
+    {{- .Values.aws.amiJSON |nindent 4 }}
