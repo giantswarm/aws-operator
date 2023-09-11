@@ -6,4 +6,5 @@ version: [[ .Version ]]
 appVersion: [[ .AppVersion ]]
 annotations:
   application.giantswarm.io/team: "phoenix"
-  config.giantswarm.io/version: 1.x.x
+  changemeback.config.giantswarm.io/version: 1.x.x
+  config.giantswarm.io/version: aws-ami
