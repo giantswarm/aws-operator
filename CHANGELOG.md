@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Get AMI data from helm value rather than from hardcoded string in the code.
+
 ## [14.21.0] - 2023-09-01
 
 ## [14.20.0] - 2023-08-29

@@ -1,7 +1,9 @@
 package key
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 	"unicode"
@@ -36,7 +38,11 @@ const (
 	ServiceAccountV2Priv = "key"
 
 	V19AlphaRelease = "19.0.0-alpha1"
+
+	amiFilePath = "/tmp/ami.json"
 )
+
+var amiInfo = map[string]map[string]string{}
 
 const (
 	// TerminateUnhealthyNodeResyncPeriod defines resync period for the terminateunhealthynode controller
@@ -67,6 +73,25 @@ const sslOnlyBucketPolicyTemplate = `{
   ]
 }`
 
+func loadAMIs() error {
+	// Data already there, avoid reloading from file.
+	if len(amiInfo) > 0 {
+		return nil
+	}
+
+	amiJSON, err := os.ReadFile(amiFilePath)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	err = json.Unmarshal(amiJSON, &amiInfo)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
+}
+
 // AMI returns the EC2 AMI for the configured region and given version.
 func AMI(region string, release releasev1alpha1.Release, flatcarReleaseVersion string) (string, error) {
 
@@ -80,6 +105,11 @@ func AMI(region string, release releasev1alpha1.Release, flatcarReleaseVersion s
 
 	if flatcarReleaseVersion != "" && IsFlatcarVersionNewer(osVersion, flatcarReleaseVersion) {
 		osVersion = flatcarReleaseVersion
+	}
+
+	err = loadAMIs()
+	if err != nil {
+		return "", microerror.Mask(err)
 	}
 
 	regionAMIs, ok := amiInfo[osVersion]

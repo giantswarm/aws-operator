@@ -25,7 +25,7 @@ aws:
     enabled: false
   vault:
     address: "http://localhost:8200"
-
+  amiJSON: "{}"
 tenant:
   cni:
     mask: 16

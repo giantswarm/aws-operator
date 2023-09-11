@@ -2,6 +2,7 @@ package images
 
 import (
 	"context"
+	"os"
 	"strconv"
 	"testing"
 
@@ -28,6 +29,55 @@ func Test_Images_Cache(t *testing.T) {
 			ctx:           context.Background(),
 			expectCaching: false,
 		},
+	}
+
+	data := `{
+  "2345.3.0": {
+    "ap-east-1": "ami-0a813620447e80b05",
+    "ap-northeast-1": "ami-02af6d096f0a2f96c",
+    "ap-northeast-2": "ami-0dd7a397031040ff1",
+    "ap-south-1": "ami-03205de7c095444bb",
+    "ap-southeast-1": "ami-0666b8c77a4148316",
+    "ap-southeast-2": "ami-0be9b0ada4e9f0c7a",
+    "ca-central-1": "ami-0b0044f3e521384ae",
+    "eu-central-1": "ami-0c9ac894c7ec2e6dd",
+    "eu-north-1": "ami-06420e2a1713889dd",
+    "eu-west-1": "ami-09f0cd6af1e455cd9",
+    "eu-west-2": "ami-0b1588137b7790e8c",
+    "eu-west-3": "ami-01a8e028daf4d66cf",
+    "me-south-1": "ami-0a6518241a90f491f",
+    "sa-east-1": "ami-037e10c3bd117fb3e",
+    "us-east-1": "ami-007776654941e2586",
+    "us-east-2": "ami-0b0a4944bd30c6b85",
+    "us-west-1": "ami-02fefca3d52d15b1d",
+    "us-west-2": "ami-0390d41fd4e4a3529"
+  },
+  "2345.3.1": {
+    "ap-east-1": "ami-0e28e38ecce552688",
+    "ap-northeast-1": "ami-074891de68922e1f4",
+    "ap-northeast-2": "ami-0a1a6a05c79bcdfe4",
+    "ap-south-1": "ami-0765ae35424be8ad8",
+    "ap-southeast-1": "ami-0f20e37280d5c8c5c",
+    "ap-southeast-2": "ami-016e5e9a74cc6ef86",
+    "ca-central-1": "ami-09afcf2e90761d6e6",
+    "cn-north-1": "ami-019174dba14053d2a",
+    "cn-northwest-1": "ami-004e81bc53b1e6ffa",
+    "eu-central-1": "ami-0a9a5d2b65cce04eb",
+    "eu-north-1": "ami-0bbfc19aa4c355fe2",
+    "eu-west-1": "ami-002db020452770c0f",
+    "eu-west-2": "ami-024928e37dcc18a42",
+    "eu-west-3": "ami-083e4a190c9b050b1",
+    "me-south-1": "ami-078eb26f287443167",
+    "sa-east-1": "ami-01180d594d0315f65",
+    "us-east-1": "ami-011655f166912d5ba",
+    "us-east-2": "ami-0e30f3d8cbc900ff4",
+    "us-west-1": "ami-0360d32ce24f1f05f",
+    "us-west-2": "ami-0c1654a9988866a1f"
+  }
+}`
+	err := os.WriteFile("/tmp/ami.json", []byte(data), os.ModePerm) // nolint:gosec
+	if err != nil {
+		panic(err)
 	}
 
 	for i, tc := range testCases {
@@ -124,4 +174,6 @@ func Test_Images_Cache(t *testing.T) {
 			}
 		})
 	}
+
+	_ = os.Remove("/tmp/ami.json")
 }
