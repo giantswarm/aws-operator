@@ -174,4 +174,6 @@ func Test_Images_Cache(t *testing.T) {
 			}
 		})
 	}
+
+	_ = os.Remove("/tmp/ami.json")
 }
