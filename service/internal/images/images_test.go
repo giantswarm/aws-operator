@@ -75,7 +75,7 @@ func Test_Images_Cache(t *testing.T) {
     "us-west-2": "ami-0c1654a9988866a1f"
   }
 }`
-	err := os.WriteFile("/tmp/ami.json", []byte(data), os.ModePerm)
+	err := os.WriteFile("/tmp/ami.json", []byte(data), os.ModePerm) // nolint:gosec
 	if err != nil {
 		panic(err)
 	}
