@@ -20,6 +20,7 @@ import (
 	"github.com/giantswarm/randomkeys/v3"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v4/api/v1alpha1"
 	"github.com/spf13/viper"
+	autoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	"k8s.io/client-go/rest"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
@@ -101,6 +102,7 @@ func New(config Config) (*Service, error) {
 				infrastructurev1alpha3.AddToScheme,
 				releasev1alpha1.AddToScheme,
 				corev1alpha1.AddToScheme,
+				autoscalingv1.AddToScheme,
 			},
 			Logger:     config.Logger,
 			RestConfig: restConfig,
