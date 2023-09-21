@@ -11,6 +11,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	autoscalingv1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -261,6 +262,17 @@ func New(config Config) (*Resource, error) {
 			return &corev1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind: "ConfigMap",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "kube-proxy",
+					Namespace: "kube-system",
+				},
+			}
+		},
+		func() client.Object {
+			return &autoscalingv1.VerticalPodAutoscaler{
+				TypeMeta: metav1.TypeMeta{
+					Kind: "VerticalPodAutoscaler",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "kube-proxy",

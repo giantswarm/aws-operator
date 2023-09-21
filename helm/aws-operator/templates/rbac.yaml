@@ -150,6 +150,15 @@ rules:
       - eniconfigs.crd.k8s.amazonaws.com
     verbs:
       - delete
+  # aws-operator clean up kube-proxy resources, including VPA
+  - apiGroups:
+      - "autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalers
+    resourceNames:
+      - kube-proxy
+    verbs:
+      - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
