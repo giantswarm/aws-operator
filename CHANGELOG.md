@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Cleanup `kube-proxy` VPA after switching to Cilium.
+- Bump k8scc to enable max pod calculations when cilium is in ENI IPAM mode.
 
 ## [14.22.0] - 2023-09-11
 

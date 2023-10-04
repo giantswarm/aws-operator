@@ -74,7 +74,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		return nil, microerror.Mask(err)
 	}
 
-	var cl infrastructurev1alpha3.AWSCluster
+	var awsCluster infrastructurev1alpha3.AWSCluster
 	{
 		var list infrastructurev1alpha3.AWSClusterList
 		err := t.config.K8sClient.CtrlClient().List(
@@ -91,7 +91,15 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 			return nil, microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
 		}
 
-		cl = list.Items[0]
+		awsCluster = list.Items[0]
+	}
+
+	var cluster apiv1beta1.Cluster
+	{
+		err = t.config.K8sClient.CtrlClient().Get(ctx, client.ObjectKey{Namespace: awsCluster.Namespace, Name: awsCluster.Name}, &cluster)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
 	}
 
 	var md apiv1beta1.MachineDeployment
@@ -179,13 +187,13 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 	// Allow the actual externalSNAT to be set by the CR.
 	var externalSNAT bool
-	if key.ExternalSNAT(cl) == nil {
+	if key.ExternalSNAT(awsCluster) == nil {
 		externalSNAT = t.config.ExternalSNAT
 	} else {
-		externalSNAT = *key.ExternalSNAT(cl)
+		externalSNAT = *key.ExternalSNAT(awsCluster)
 	}
 
-	hasCilium, err := key.HasCilium(&cl)
+	hasCilium, err := key.HasCilium(&awsCluster)
 	if err != nil {
 		return nil, microerror.Mask(err)
 	}
@@ -195,7 +203,7 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 
 	if !hasCilium {
 		{
-			if v, ok := cl.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == true_value {
+			if v, ok := awsCluster.GetAnnotations()[annotation.AWSCNIPrefixDelegation]; ok && v == true_value {
 				awsCNIPrefix = true
 			}
 		}
@@ -212,12 +220,13 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		// Required for proper rending of the templates.
 		params = k8scloudconfig.Params{}
 
-		g8sConfig := cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr))
+		g8sConfig := cmaClusterToG8sConfig(t.config, awsCluster, key.KubeletLabelsTCNP(&cr))
 		if hasCilium {
 			params.EnableAWSCNI = false
 			params.DisableCalico = true
 			params.CalicoPolicyOnly = false
 			params.DisableKubeProxy = true
+			params.AWSCiliumENIMode = key.IsCiliumEniModeEnabled(cluster)
 		} else {
 			params.EnableAWSCNI = true
 			params.AWSCNISubnetPrefixMode = awsCNIPrefix
@@ -230,9 +239,9 @@ func (t *TCNP) NewTemplates(ctx context.Context, obj interface{}) ([]string, err
 		params.DockerhubToken = t.config.DockerhubToken
 		params.EnableCSIMigrationAWS = true
 		params.Extension = &TCNPExtension{
-			awsConfigSpec:  cmaClusterToG8sConfig(t.config, cl, key.KubeletLabelsTCNP(&cr)),
+			awsConfigSpec:  cmaClusterToG8sConfig(t.config, awsCluster, key.KubeletLabelsTCNP(&cr)),
 			cc:             cc,
-			cluster:        cl,
+			cluster:        awsCluster,
 			clusterCerts:   certFiles,
 			encrypter:      t.config.Encrypter,
 			encryptionKey:  ek,
