@@ -485,6 +485,7 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 			params.DisableCalico = true
 			params.CalicoPolicyOnly = false
 			params.DisableKubeProxy = true
+			params.AWSCiliumENIMode = key.IsCiliumEniModeEnabled(cluster)
 		} else {
 			params.EnableAWSCNI = true
 			params.DisableCalico = false
