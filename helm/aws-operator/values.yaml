@@ -133,3 +133,8 @@ serviceMonitor:
   interval: "60s"
   # -- (duration) Prometheus scrape timeout.
   scrapeTimeout: "45s"
+
+global:
+  rodSecurityStandards:
+    enforced: false
+
