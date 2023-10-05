@@ -135,6 +135,6 @@ serviceMonitor:
   scrapeTimeout: "45s"
 
 global:
-  rodSecurityStandards:
+  podSecurityStandards:
     enforced: false
 
