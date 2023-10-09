@@ -137,4 +137,3 @@ serviceMonitor:
 global:
   podSecurityStandards:
     enforced: false
-
