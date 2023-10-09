@@ -34,4 +34,3 @@ spec:
   hostIPC: false
   hostPID: false
 {{- end }}
-
