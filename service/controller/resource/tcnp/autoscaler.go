@@ -13,26 +13,10 @@ import (
 
 func (r *Resource) disableClusterAutoscaler(ctx context.Context, awscluster infrastructurev1alpha3.AWSCluster, wcclient ctrlClient.Client) error {
 	// Add or update an annotation to add 1 to the number of NPs blocking cluster-autoscaler
-	current := awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation]
-	desired := 1
-	if current != "" {
-		val, err := strconv.Atoi(current)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		desired = val + 1
-	}
-
-	r.logger.Debugf(ctx, "setting %s annotation to %d", MDBlockingClusterAutoscalerCountAnnotation, desired)
-
-	awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation] = strconv.Itoa(desired)
-	err := r.k8sClient.CtrlClient().Update(ctx, &awscluster)
+	_, err := r.updateAnnotation(ctx, awscluster, 1)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	r.logger.Debugf(ctx, "set %s annotation to %d", MDBlockingClusterAutoscalerCountAnnotation, desired)
 
 	// Scale cluster autoscaler to 0 replicas
 	err = r.scaleAutoscaler(ctx, wcclient, 0)
@@ -44,27 +28,11 @@ func (r *Resource) disableClusterAutoscaler(ctx context.Context, awscluster infr
 }
 
 func (r *Resource) enableClusterAutoscaler(ctx context.Context, awscluster infrastructurev1alpha3.AWSCluster, wcclient ctrlClient.Client) error {
-	// Add or update an annotation to add 1 to the number of NPs blocking cluster-autoscaler
-	current := awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation]
-	desired := 1
-	if current != "" {
-		val, err := strconv.Atoi(current)
-		if err != nil {
-			return microerror.Mask(err)
-		}
-
-		desired = val - 1
-	}
-
-	r.logger.Debugf(ctx, "setting %s annotation to %d", MDBlockingClusterAutoscalerCountAnnotation, desired)
-
-	awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation] = fmt.Sprint(desired)
-	err := r.k8sClient.CtrlClient().Update(ctx, &awscluster)
+	// Add or update an annotation to decrease 1 to the number of NPs blocking cluster-autoscaler
+	desired, err := r.updateAnnotation(ctx, awscluster, -1)
 	if err != nil {
 		return microerror.Mask(err)
 	}
-
-	r.logger.Debugf(ctx, "set %s annotation to %d", MDBlockingClusterAutoscalerCountAnnotation, desired)
 
 	if desired > 0 {
 		r.logger.Debugf(ctx, "there are %d MPs pending upgrade. NOT enabling cluster autoscaler", desired)
@@ -78,6 +46,35 @@ func (r *Resource) enableClusterAutoscaler(ctx context.Context, awscluster infra
 	}
 
 	return nil
+}
+
+func (r *Resource) updateAnnotation(ctx context.Context, awscluster infrastructurev1alpha3.AWSCluster, diff int) (int32, error) {
+	current := awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation]
+	desired := 1
+	if current != "" {
+		val, err := strconv.Atoi(current)
+		if err != nil {
+			return -1, microerror.Mask(err)
+		}
+
+		desired = val + diff
+	}
+
+	r.logger.Debugf(ctx, "setting %s annotation to %d", MDBlockingClusterAutoscalerCountAnnotation, desired)
+
+	if awscluster.Annotations == nil {
+		awscluster.Annotations = make(map[string]string)
+	}
+
+	awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation] = fmt.Sprint(desired)
+	err := r.k8sClient.CtrlClient().Update(ctx, &awscluster)
+	if err != nil {
+		return -1, microerror.Mask(err)
+	}
+
+	r.logger.Debugf(ctx, "set %s annotation to %d", MDBlockingClusterAutoscalerCountAnnotation, desired)
+
+	return int32(desired), nil
 }
 
 func (r *Resource) scaleAutoscaler(ctx context.Context, wcclient ctrlClient.Client, replicas int32) error {
