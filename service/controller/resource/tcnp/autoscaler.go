@@ -66,7 +66,12 @@ func (r *Resource) updateAnnotation(ctx context.Context, awscluster infrastructu
 		awscluster.Annotations = make(map[string]string)
 	}
 
-	awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation] = fmt.Sprint(desired)
+	if desired > 0 {
+		awscluster.Annotations[MDBlockingClusterAutoscalerCountAnnotation] = fmt.Sprint(desired)
+	} else {
+		delete(awscluster.Annotations, MDBlockingClusterAutoscalerCountAnnotation)
+	}
+
 	err := r.k8sClient.CtrlClient().Update(ctx, &awscluster)
 	if err != nil {
 		return -1, microerror.Mask(err)
