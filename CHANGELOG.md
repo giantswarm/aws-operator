@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `global.podSecurityStandards.enforced` value for PSS migration.
+- During an upgrade, disable cluster-autoscaler when machine pools are rolling. Enable when all are rolled.
 
 ## [14.23.0] - 2023-10-04
 

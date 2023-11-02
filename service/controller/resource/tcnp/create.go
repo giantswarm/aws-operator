@@ -26,6 +26,8 @@ import (
 
 const (
 	capabilityNamesIAM = "CAPABILITY_NAMED_IAM"
+
+	MDBlockingClusterAutoscalerCountAnnotation = "aws-operator.giantswarm.io/mds-blocking-cluster-autoscaler-count"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -36,6 +38,26 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
 		return microerror.Mask(err)
+	}
+
+	var awscluster infrastructurev1alpha3.AWSCluster
+	{
+		var list infrastructurev1alpha3.AWSClusterList
+		err := r.k8sClient.CtrlClient().List(
+			ctx,
+			&list,
+			client.InNamespace(cr.Namespace),
+			client.MatchingLabels{label.Cluster: key.ClusterID(&cr)},
+		)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		if len(list.Items) != 1 {
+			return microerror.Maskf(executionFailedError, "expected 1 CR got %d", len(list.Items))
+		}
+
+		awscluster = list.Items[0]
 	}
 
 	// Ensure some preconditions are met so we have all necessary information
@@ -125,6 +147,13 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 		r.logger.Debugf(ctx, "found the tenant cluster's node pool cloud formation stack already exists")
 	}
 
+	if cc.Client.TenantCluster.K8s == nil {
+		r.logger.Debugf(ctx, "kubernetes clients are not available in controller context yet")
+		r.logger.Debugf(ctx, "canceling resource")
+
+		return nil
+	}
+
 	{
 		scale, err := r.detection.ShouldScale(ctx, cr)
 		if err != nil {
@@ -154,10 +183,21 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			if tccpnUpdated {
+				// Ensure cluster autoscaler is disabled. See https://github.com/giantswarm/giantswarm/issues/28720
+				err = r.disableClusterAutoscaler(ctx, awscluster, cc.Client.TenantCluster.K8s.CtrlClient())
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
 				err = r.updateStack(ctx, cr)
 				if err != nil {
 					return microerror.Mask(err)
 				}
+			}
+		} else {
+			err = r.enableClusterAutoscaler(ctx, awscluster, cc.Client.TenantCluster.K8s.CtrlClient())
+			if err != nil {
+				return microerror.Mask(err)
 			}
 		}
 	}
