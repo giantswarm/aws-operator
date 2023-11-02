@@ -117,7 +117,7 @@ require (
 )
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.6.16
+	github.com/containerd/containerd => github.com/containerd/containerd v1.7.8
 	github.com/containernetworking/cni => github.com/containernetworking/cni v1.1.2
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/deislabs/oras => github.com/deislabs/oras v1.1.0
