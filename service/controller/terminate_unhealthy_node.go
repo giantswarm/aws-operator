@@ -26,12 +26,14 @@ import (
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/tenantclients"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/terminateunhealthynode"
 	"github.com/giantswarm/aws-operator/v14/service/internal/locker"
+	event "github.com/giantswarm/aws-operator/v14/service/internal/recorder"
 
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type TerminateUnhealthyNodeConfig struct {
 	K8sClient k8sclient.Interface
+	Event     event.Interface
 	Locker    locker.Interface
 	Logger    micrologger.Logger
 
@@ -45,6 +47,9 @@ type TerminateUnhealthyNode struct {
 func NewTerminateUnhealthyNode(config TerminateUnhealthyNodeConfig) (*TerminateUnhealthyNode, error) {
 	var err error
 
+	if config.Event == nil {
+		return nil, microerror.Maskf(invalidConfigError, "%T.Event must not be empty", config)
+	}
 	if config.K8sClient == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.K8sClient must not be empty", config)
 	}
@@ -181,6 +186,7 @@ func newTerminateUnhealthyNodeResources(config TerminateUnhealthyNodeConfig) ([]
 	var terminateUnhealthyNodeResource resource.Interface
 	{
 		c := terminateunhealthynode.Config{
+			Event:  config.Event,
 			Logger: config.Logger,
 		}
 

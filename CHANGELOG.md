@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `global.podSecurityStandards.enforced` value for PSS migration.
+- Emit event when an unhealthy node is terminated.
+- Bump `badnodedetector` to be able to use `node-problem-detector` app for unhealthy node termination.
 
 ## [14.23.0] - 2023-10-04
 

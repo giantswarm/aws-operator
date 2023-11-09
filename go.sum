@@ -223,8 +223,8 @@ github.com/giantswarm/apiextensions/v6 v6.6.0/go.mod h1:Wgc2Rx8YAYF2HidjabEvhsj5
 github.com/giantswarm/backoff v0.2.0/go.mod h1:Z3WRsFilSJ5H5VlFa4XhraoPr+9pmZgYasoY2OSfNOk=
 github.com/giantswarm/backoff v1.0.0 h1:1oeTvyPsm1tJrHlSmfxbIWuoCNWPOkWJCb8kfLvE2T0=
 github.com/giantswarm/backoff v1.0.0/go.mod h1:l/WqbggvG5Ndxxws0LUgVEvP5E82Qj5/PF8SMip/1QM=
-github.com/giantswarm/badnodedetector/v2 v2.0.0 h1:o7db58Ndga62dPjXouUMzDZxGikpb/ut7csbHPXMWy8=
-github.com/giantswarm/badnodedetector/v2 v2.0.0/go.mod h1:5GOyKly0ywEYs9se7lcuho98jK6Jgmq+vg4InGVEucU=
+github.com/giantswarm/badnodedetector/v3 v3.0.0 h1:rhC+xkeM6E1+71E/S1b3DVOD+EtAuzaJiXeH67FS2HA=
+github.com/giantswarm/badnodedetector/v3 v3.0.0/go.mod h1:bXi5UHMDDz2svvkcyo9fVvWXOApwRdAPiGw1ivkqJ1A=
 github.com/giantswarm/certs/v4 v4.0.0 h1:kaxovkDF2fiXxkLNB8WZ/RLyYdNctSfFM7VhNqka9t4=
 github.com/giantswarm/certs/v4 v4.0.0/go.mod h1:9hGD/dtmE8f/T9M70zaW8QeXHsawevSv7Xy70bMG51A=
 github.com/giantswarm/exporterkit v1.0.0 h1:6TwzJ5UklUp/xajBK3sx4gArFfMAAIEDs4/F1FvOCaE=
