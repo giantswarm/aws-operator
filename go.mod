@@ -31,11 +31,11 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/spf13/viper v1.15.0
 	golang.org/x/sync v0.5.0
-	k8s.io/api v0.25.0
+	k8s.io/api v0.26.1
 	k8s.io/apiextensions-apiserver v0.24.3
-	k8s.io/apimachinery v0.25.0
-	k8s.io/autoscaler/vertical-pod-autoscaler v0.13.0
-	k8s.io/client-go v0.25.0
+	k8s.io/apimachinery v0.26.1
+	k8s.io/autoscaler/vertical-pod-autoscaler v0.14.0
+	k8s.io/client-go v0.26.1
 	sigs.k8s.io/cluster-api v1.1.4
 	sigs.k8s.io/controller-runtime v0.12.3
 )
