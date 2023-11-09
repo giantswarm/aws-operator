@@ -10,7 +10,7 @@ require (
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
 	github.com/giantswarm/apiextensions/v6 v6.6.0
 	github.com/giantswarm/backoff v1.0.0
-	github.com/giantswarm/badnodedetector/v2 v2.0.0
+	github.com/giantswarm/badnodedetector/v3 v3.0.0
 	github.com/giantswarm/certs/v4 v4.0.0
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1

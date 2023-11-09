@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/giantswarm/badnodedetector/v2/pkg/detector"
+	"github.com/giantswarm/badnodedetector/v3/pkg/detector"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 	corev1 "k8s.io/api/core/v1"
@@ -112,6 +112,9 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node, clusterI
 	}
 	// expose metric about node termination
 	reportNodeTermination(clusterID, node.Name, instanceID)
+
+	// emit event about node termination
+	r.event.Emit(ctx, &node, "UnhealthyNodeTerminated", fmt.Sprintf("node %q (instance %q) was unhealthy so it was terminated", node.Name, instanceID))
 	return nil
 }
 

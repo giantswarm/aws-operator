@@ -384,6 +384,7 @@ func New(config Config) (*Service, error) {
 	{
 		c := controller.TerminateUnhealthyNodeConfig{
 			K8sClient: k8sClient,
+			Event:     event,
 			Locker:    kubeLockLocker,
 			Logger:    config.Logger,
 
