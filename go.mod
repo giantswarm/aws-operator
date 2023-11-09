@@ -132,6 +132,6 @@ replace (
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.10
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.6
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
-	helm.sh/helm/v3 => helm.sh/helm/v3 v3.11.0
+	helm.sh/helm/v3 => helm.sh/helm/v3 v3.13.2
 	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
 )
