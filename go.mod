@@ -14,14 +14,14 @@ require (
 	github.com/giantswarm/certs/v4 v4.0.0
 	github.com/giantswarm/ipam v0.3.0
 	github.com/giantswarm/k8sclient/v7 v7.0.1
-	github.com/giantswarm/k8scloudconfig/v16 v16.6.0
+	github.com/giantswarm/k8scloudconfig/v17 v17.2.0
 	github.com/giantswarm/k8smetadata v0.23.0
 	github.com/giantswarm/kubelock/v4 v4.0.0
 	github.com/giantswarm/microendpoint v1.0.0
 	github.com/giantswarm/microerror v0.4.0
 	github.com/giantswarm/microkit v1.0.0
 	github.com/giantswarm/micrologger v1.0.0
-	github.com/giantswarm/operatorkit/v7 v7.1.0
+	github.com/giantswarm/operatorkit/v8 v8.0.0
 	github.com/giantswarm/randomkeys/v3 v3.0.0
 	github.com/giantswarm/release-operator/v4 v4.1.0
 	github.com/giantswarm/tenantcluster/v6 v6.0.0
