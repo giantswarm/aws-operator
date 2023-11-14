@@ -100,10 +100,10 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/term v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/time v0.3.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/term v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/time v0.4.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
@@ -132,7 +132,7 @@ replace (
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.17.0
 	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.11.3
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.26
-	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.4
+	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.5
 	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.10
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.6
