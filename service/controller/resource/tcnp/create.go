@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
@@ -158,6 +159,11 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 				if err != nil {
 					return microerror.Mask(err)
 				}
+			}
+		} else {
+			err = r.ensureAutoscalerTag(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
 			}
 		}
 	}
@@ -922,4 +928,64 @@ func isTCCPNUpdated(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDep
 	}
 	// tccpn CF stack is updated and all master nodes have new operator version
 	return true, nil
+}
+
+func (r *Resource) ensureAutoscalerTag(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) error {
+	cc, err := controllercontext.FromContext(ctx)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	find := autoscaling.DescribeAutoScalingGroupsInput{
+		Filters: []*autoscaling.Filter{
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagInstallation)),
+				Values: []*string{
+					aws.String(r.installationName),
+				},
+			},
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagCluster)),
+				Values: []*string{
+					aws.String(key.ClusterID(&cr)),
+				},
+			},
+			{
+				Name: aws.String(fmt.Sprintf("tag:%s", key.TagMachineDeployment)),
+				Values: []*string{
+					aws.String(key.MachineDeploymentID(&cr)),
+				},
+			},
+		},
+		MaxRecords: aws.Int64(2),
+	}
+
+	// get ASG name
+	asgs, err := cc.Client.TenantCluster.AWS.AutoScaling.DescribeAutoScalingGroups(&find)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	if len(asgs.AutoScalingGroups) != 1 {
+		return microerror.Maskf(asgLookupError, "Expected to find exactly 1 ASG, got %d", len(asgs.AutoScalingGroups))
+	}
+
+	input := autoscaling.CreateOrUpdateTagsInput{
+		Tags: []*autoscaling.Tag{
+			{
+				Key:               aws.String("k8s.io/cluster-autoscaler/enabled"),
+				PropagateAtLaunch: aws.Bool(false),
+				ResourceId:        asgs.AutoScalingGroups[0].AutoScalingGroupName,
+				ResourceType:      aws.String("auto-scaling-group"),
+				Value:             aws.String("true"),
+			},
+		},
+	}
+
+	_, err = cc.Client.TenantCluster.AWS.AutoScaling.CreateOrUpdateTags(&input)
+	if err != nil {
+		return microerror.Mask(err)
+	}
+
+	return nil
 }

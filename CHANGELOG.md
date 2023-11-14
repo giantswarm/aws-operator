@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `badnodedetector` to be able to use `node-problem-detector` app for unhealthy node termination.
 - Add a additional IAM permission for `cluster-autoscaler`.
 
+### Changed
+
+- Disable cluster autoscaler during rollouts of node pool ASGs.
+
 ## [14.23.0] - 2023-10-04
 
 ### Fixed

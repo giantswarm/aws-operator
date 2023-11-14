@@ -153,3 +153,12 @@ var tccpnNotUpdatedError = &microerror.Error{
 func IsTccpnNotUpdated(err error) bool {
 	return microerror.Cause(err) == tccpnNotUpdatedError
 }
+
+var asgLookupError = &microerror.Error{
+	Kind: "asgLookupError",
+}
+
+// IsAsgLookup asserts asgLookupError.
+func IsAsgLookup(err error) bool {
+	return microerror.Cause(err) == asgLookupError
+}
