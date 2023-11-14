@@ -60,6 +60,7 @@ const TemplateMainIAMPolicies = `
             Action:
               - "autoscaling:DescribeAutoScalingGroups"
               - "autoscaling:DescribeAutoScalingInstances"
+              - "autoscaling:DescribeScalingActivities"
               - "autoscaling:DescribeTags"
               - "autoscaling:DescribeLaunchConfigurations"
               - "autoscaling:SetInstanceHealth"
