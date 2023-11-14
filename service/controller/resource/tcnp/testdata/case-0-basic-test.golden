@@ -60,9 +60,6 @@ Resources:
         - Key: Name
           Value: 8y5ck-worker
           PropagateAtLaunch: true
-        - Key: k8s.io/cluster-autoscaler/enabled
-          Value: true
-          PropagateAtLaunch: false
         - Key: k8s.io/cluster-autoscaler/8y5ck
           Value: true
           PropagateAtLaunch: false
