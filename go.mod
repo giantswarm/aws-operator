@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.12.1
-	github.com/aws/aws-sdk-go v1.47.7
+	github.com/aws/aws-sdk-go v1.47.10
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
