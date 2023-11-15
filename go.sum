@@ -234,8 +234,8 @@ github.com/giantswarm/ipam v0.3.0 h1:QNb4k5Zu6nGsqJkAM7dLM1J6TiUP+LGjo9CPR+ewZBk
 github.com/giantswarm/ipam v0.3.0/go.mod h1:xG4cMEKwHlbE0aZ7x2H5j7o81U13LIStA73XCECdk+I=
 github.com/giantswarm/k8sclient/v7 v7.0.1 h1:UmRwgsw5Uda27tpIblPo7nWjp/nq5qwqxEPHWcvzsHk=
 github.com/giantswarm/k8sclient/v7 v7.0.1/go.mod h1:zJTXammjLHSiukMIO4+a6eUDgzj/lJxEXFZ22mC0WXc=
-github.com/giantswarm/k8scloudconfig/v16 v16.6.0 h1:k5SoOxOcKusRaTgtqYKAy/4zXMn881g8IGwIM6hHYE4=
-github.com/giantswarm/k8scloudconfig/v16 v16.6.0/go.mod h1:9QNKXwjyBCWup2ek+kRZ356zw38QhQ2QgwuHuK9zzQo=
+github.com/giantswarm/k8scloudconfig/v17 v17.2.0 h1:qtSF8pRPZmOdgPwxWgJ7LVHjxwWP63HDP8R0kv2JMPc=
+github.com/giantswarm/k8scloudconfig/v17 v17.2.0/go.mod h1:peChY0p9SloYvoQfx5zCXIU6T//QdkG4y8LgFEWyuE4=
 github.com/giantswarm/k8smetadata v0.23.0 h1:iGwa1Nb45Sfcd5wqJEKBvxY1u5yXFg3Sq5Fw62nyRGA=
 github.com/giantswarm/k8smetadata v0.23.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubelock/v4 v4.0.0 h1:qvFGOIlDthAD8r32WcorT8R4gp3c1dpnDbHuLsDU2ZA=
@@ -252,8 +252,8 @@ github.com/giantswarm/micrologger v1.0.0 h1:5W4h3K414CXhoXQ3rkGbrMl8yUGdbCLKMdg/
 github.com/giantswarm/micrologger v1.0.0/go.mod h1:jFY9TUZLYnQ437GwbodmGmwEJ5cImEJ1f5NTPyDHB24=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
-github.com/giantswarm/operatorkit/v7 v7.1.0 h1:yRUwj9ZUqBd+UV0C5n784+Qe6y/olILtg444XD6hjLA=
-github.com/giantswarm/operatorkit/v7 v7.1.0/go.mod h1:5enwhyIjd4xKrYXV9+enqttcmB9BE2Ocl1V12IwJIuw=
+github.com/giantswarm/operatorkit/v8 v8.0.0 h1:AM1Xxg8X6xQjhxh+Jn1Tiv2MkpG8Ro4gqEsytZBBU5M=
+github.com/giantswarm/operatorkit/v8 v8.0.0/go.mod h1:dPrvvQj2UNBw6jLDYqvGhnDfJImwih8A+F3Oc1VS8XM=
 github.com/giantswarm/randomkeys/v3 v3.0.0 h1:68C+laq+2DgvfYPs8tz7249Oc0gYE14W93moJ4s7pSg=
 github.com/giantswarm/randomkeys/v3 v3.0.0/go.mod h1:O47AZ2x6xJ4+LpSz5Gq4i8duaTFeaffyA8g39amF1FQ=
 github.com/giantswarm/release-operator/v4 v4.1.0 h1:8FdLoJH0pZ26lrFwodurL+FMx+W1Jf2TrOXK4x0OOVE=
