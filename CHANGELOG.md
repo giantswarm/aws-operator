@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bump k8scc to disable PSPs in preparation for switch to PSS.
 - Disable cluster autoscaler during rollouts of node pool ASGs.
+
 
 ## [14.23.0] - 2023-10-04
 
