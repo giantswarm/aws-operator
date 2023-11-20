@@ -26,6 +26,8 @@ import (
 
 const (
 	capabilityNamesIAM = "CAPABILITY_NAMED_IAM"
+
+	clusterAutoscalerEnabledTagName = "k8s.io/cluster-autoscaler/enabled"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
@@ -154,10 +156,22 @@ func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {
 			}
 
 			if tccpnUpdated {
+				// Disable autoscaler for this node pool.
+				err = r.removeAutoscalerTag(ctx, cr)
+				if err != nil {
+					return microerror.Mask(err)
+				}
+
 				err = r.updateStack(ctx, cr)
 				if err != nil {
 					return microerror.Mask(err)
 				}
+			}
+		} else {
+			// Enable autoscaler for this node pool.
+			err = r.ensureAutoscalerTag(ctx, cr)
+			if err != nil {
+				return microerror.Mask(err)
 			}
 		}
 	}

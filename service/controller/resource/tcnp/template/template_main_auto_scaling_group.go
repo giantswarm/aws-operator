@@ -54,9 +54,6 @@ const TemplateMainAutoScalingGroup = `
         - Key: Name
           Value: {{ .AutoScalingGroup.Cluster.ID }}-worker
           PropagateAtLaunch: true
-        - Key: k8s.io/cluster-autoscaler/enabled
-          Value: true
-          PropagateAtLaunch: false
         - Key: k8s.io/cluster-autoscaler/{{ .AutoScalingGroup.Cluster.ID }}
           Value: true
           PropagateAtLaunch: false
