@@ -1,16 +1,3 @@
-# TODO the workflow is unnecessary complicated due to some deficiencies in our
-# deployment pipeline as of time of writing. Therefore the push to Aliyun is
-# kind of optional in pull requests so that it does not block the push to the
-# app catalog. This is to have faster iterations when working on a daily basis.
-# Nevertheless we want the image push to Aliyun to be finished before we want to
-# push to the app catalog in case we merge to master or push a tag, which
-# indicates a new release. This is to have a more reliable pipeline, with the
-# caveat that it takes longer and sometimes even breaks. Once the situation got
-# improved we can simplify the circle config again as modified in the pull
-# request linked below.
-#
-#     https://github.com/giantswarm/aws-operator/pull/2347
-#
 version: 2.1
 
 orbs:
@@ -27,30 +14,17 @@ workflows:
             tags:
               only: /^v.*/
 
-      # Ensure that for every commit (all branches), and for every new release tag,
-      # an image is pushed to Quay.
       - architect/push-to-registries:
           context: architect
           name: push-to-registries
           requires:
-            - hold-push-to-aliyun-pr
             - go-build
           filters:
             tags:
               only: /^v.*/
 
-      - hold-push-to-aliyun-pr:
-          type: approval
-          context: architect
-          requires:
-            - go-build
-          filters:
-            branches:
-              ignore: master
-            tags:
-              ignore: /^v.*/
       - architect/push-to-app-catalog:
-          name: push-to-app-catalog-master
+          name: push-to-app-catalog
           app_catalog: "control-plane-catalog"
           app_catalog_test: "control-plane-test-catalog"
           chart: "aws-operator"
@@ -58,23 +32,5 @@ workflows:
           requires:
             - push-to-registries
           filters:
-            branches:
-              only: master
             tags:
               only: /^v.*/
-
-      # Ensure that for every commit (branch other than master)
-      # there is an app version in the test catalog.
-      # Note: Making this app usable in china needs manual approval
-      # of the 'hold-push-to-aliyun-pr' job.
-      - architect/push-to-app-catalog:
-          name: push-to-app-catalog-pr
-          app_catalog: "control-plane-catalog"
-          app_catalog_test: "control-plane-test-catalog"
-          chart: "aws-operator"
-          context: architect
-          requires:
-            - push-to-registries
-          filters:
-            branches:
-              ignore: master
