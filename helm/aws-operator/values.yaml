@@ -66,7 +66,8 @@ tenant:
     clusterDomain: cluster.local
     networkSetup:
       docker:
-        image: giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9
+        image: 
+          giantswarm/k8s-setup-network-environment:1f4ffc52095ac368847ce3428ea99b257003d9b9
 
   ssh:
     userList: ""
@@ -76,9 +77,9 @@ installation:
   name: ""
 
 registry:
-  domain: docker.io
+  domain: gsoci.azurecr.io
   mirrors:
-  - giantswarm.azurecr.io
+    - giantswarm.azurecr.io
 
   dockerhub:
     token: token
@@ -121,7 +122,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   privileged: false
   runAsNonRoot: true
   seccompProfile:
