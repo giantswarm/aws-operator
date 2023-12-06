@@ -77,6 +77,6 @@ spec:
       resourceVersion: ""
   name: etcd-cluster-migrator
   namespace: kube-system
-  tarballURL: https://giantswarm.github.io/giantswarm-playground-catalog/etcd-cluster-migrator-1.1.0.tgz
-  version: 1.1.0
+  tarballURL: https://giantswarm.github.io/giantswarm-playground-catalog/etcd-cluster-migrator-1.2.0.tgz
+  version: 1.2.0
 `
