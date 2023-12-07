@@ -63,7 +63,7 @@ metadata:
     chart-operator.giantswarm.io/force-helm-upgrade: "true"
   labels:
     app: etcd-cluster-migrator
-    chart-operator.giantswarm.io/version: 1.0.0
+    chart-operator.giantswarm.io/version: 3.1.0
     giantswarm.io/organization: giantswarm
     giantswarm.io/managed-by: aws-operator
     giantswarm.io/service-type: managed
@@ -77,6 +77,6 @@ spec:
       resourceVersion: ""
   name: etcd-cluster-migrator
   namespace: kube-system
-  tarballURL: https://giantswarm.github.io/giantswarm-playground-catalog/etcd-cluster-migrator-1.1.0.tgz
-  version: 1.1.0
+  tarballURL: https://giantswarm.github.io/giantswarm-playground-catalog/etcd-cluster-migrator-1.2.0.tgz
+  version: 1.2.0
 `
