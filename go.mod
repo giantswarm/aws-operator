@@ -2,8 +2,6 @@ module github.com/giantswarm/aws-operator/v14
 
 go 1.21
 
-toolchain go1.21.5
-
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.12.1
 	github.com/aws/aws-sdk-go v1.48.2
@@ -38,14 +36,13 @@ require (
 	k8s.io/apimachinery v0.28.4
 	k8s.io/autoscaler/vertical-pod-autoscaler v0.13.0
 	k8s.io/client-go v0.28.4
-	sigs.k8s.io/cluster-api v1.1.4
+	sigs.k8s.io/cluster-api v1.6.0
 	sigs.k8s.io/controller-runtime v0.16.3
 )
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
@@ -141,5 +138,10 @@ replace (
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.6
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
 	helm.sh/helm/v3 => helm.sh/helm/v3 v3.13.2
-	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.0.5
+	k8s.io/api => k8s.io/api v0.28.3
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.28.3
+	k8s.io/apimachinery => k8s.io/apimachinery v0.28.3
+	k8s.io/client-go => k8s.io/client-go v0.28.3
+	sigs.k8s.io/cluster-api => sigs.k8s.io/cluster-api v1.6.0
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.16.3
 )

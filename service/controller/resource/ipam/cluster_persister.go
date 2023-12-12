@@ -7,8 +7,6 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -48,7 +46,7 @@ func (p *ClusterPersister) Persist(ctx context.Context, subnet net.IPNet, namesp
 
 	cr.Status.Provider.Network.CIDR = subnet.String()
 
-	err = p.ctrlClient.Status().Update(ctx, cr, &ctrlClient.UpdateOptions{Raw: &metav1.UpdateOptions{}})
+	err = p.ctrlClient.Status().Update(ctx, cr)
 	if err != nil {
 		return microerror.Mask(err)
 	}
