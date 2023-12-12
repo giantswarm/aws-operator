@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bump k8scc to fix calculation of max pods per node when in ENI mode.
+
 ### Changed
 
 - [Breaking change] Removed code that allowed switching from AWS-CNI to Cilium. Releases using this AWS-operator can't be upgraded to from v18 releases.
@@ -30,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump k8scc to disable PSPs in preparation for switch to PSS.
 - Disable cluster autoscaler during rollouts of node pool ASGs.
-
 
 ## [14.23.0] - 2023-10-04
 
