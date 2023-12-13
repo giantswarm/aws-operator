@@ -29,7 +29,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.17.0
-	github.com/spf13/viper v1.17.0
+	github.com/spf13/viper v1.18.1
 	golang.org/x/sync v0.5.0
 	k8s.io/api v0.28.4
 	k8s.io/apiextensions-apiserver v0.28.4
