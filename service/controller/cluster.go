@@ -29,7 +29,6 @@ import (
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/accountid"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/apiendpoint"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/v14/service/controller/resource/awscnicleaner"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/bridgezone"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/cleanupebsvolumes"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/cleanupenis"
@@ -47,9 +46,7 @@ import (
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/keepforcrs"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/natgatewayaddresses"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/peerrolearn"
-	"github.com/giantswarm/aws-operator/v14/service/controller/resource/prepareawscniformigration"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/region"
-	"github.com/giantswarm/aws-operator/v14/service/controller/resource/restrictawsnodedaemonset"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/s3bucket"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/secretfinalizer"
 	"github.com/giantswarm/aws-operator/v14/service/controller/resource/service"
@@ -366,19 +363,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 
 		tccpAZsResource, err = tccpazs.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var restrictAwsNodeDaemonsetResource resource.Interface
-	{
-		c := restrictawsnodedaemonset.Config{
-			CtrlClient: config.K8sClient.CtrlClient(),
-			Logger:     config.Logger,
-		}
-
-		restrictAwsNodeDaemonsetResource, err = restrictawsnodedaemonset.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -822,33 +806,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		}
 	}
 
-	var awsCniCleanerResource resource.Interface
-	{
-		c := awscnicleaner.Config{
-			CtrlClient: config.K8sClient.CtrlClient(),
-			Logger:     config.Logger,
-		}
-
-		awsCniCleanerResource, err = awscnicleaner.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
-	var prepareAwsCniForMigrationResource resource.Interface
-	{
-		c := prepareawscniformigration.Config{
-			Logger:         config.Logger,
-			CtrlClient:     config.K8sClient.CtrlClient(),
-			RegistryDomain: config.RegistryDomain,
-		}
-
-		prepareAwsCniForMigrationResource, err = prepareawscniformigration.New(c)
-		if err != nil {
-			return nil, microerror.Mask(err)
-		}
-	}
-
 	resources := []resource.Interface{
 		// All these resources only fetch information from remote APIs and put them
 		// into the controller context.
@@ -867,13 +824,11 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		// All these resources implement certain business logic and operate based on
 		// the information given in the controller context.
 		encryptionEnsurerResource,
-		restrictAwsNodeDaemonsetResource,
 		apiEndpointResource,
 		ipamResource,
 		bridgeZoneResource,
 		tccpSecurityGroupsResource,
 		s3BucketResource,
-		prepareAwsCniForMigrationResource,
 		tccpAZsResource,
 		tccpiResource,
 		tccpResource,
@@ -882,7 +837,6 @@ func newClusterResources(config ClusterConfig) ([]resource.Interface, error) {
 		endpointsResource,
 		eniConfigCRsResource,
 		secretFinalizerResource,
-		awsCniCleanerResource,
 
 		// All these resources implement logic to update CR status information.
 		tccpVPCIDStatusResource,
