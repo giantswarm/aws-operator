@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [15.0.0] - 2023-12-13
+
 ### Fixed
 
 - Bump k8scc to fix calculation of max pods per node when in ENI mode.
@@ -1086,7 +1088,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v15.0.0...HEAD
+[15.0.0]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...v15.0.0
 [14.24.1]: https://github.com/giantswarm/aws-operator/compare/v14.24.0...v14.24.1
 [14.24.0]: https://github.com/giantswarm/aws-operator/compare/v14.23.0...v14.24.0
 [14.23.0]: https://github.com/giantswarm/aws-operator/compare/v14.22.0...v14.23.0

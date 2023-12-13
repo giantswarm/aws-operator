@@ -14,10 +14,10 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	"github.com/giantswarm/aws-operator/v14/pkg/annotation"
-	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v14/service/controller/key"
-	"github.com/giantswarm/aws-operator/v14/service/internal/asg"
+	"github.com/giantswarm/aws-operator/v15/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v15/service/controller/key"
+	"github.com/giantswarm/aws-operator/v15/service/internal/asg"
 
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
