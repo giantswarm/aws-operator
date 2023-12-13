@@ -6,9 +6,9 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v14/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v14/service/controller/key"
-	"github.com/giantswarm/aws-operator/v14/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v15/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v15/service/controller/key"
+	"github.com/giantswarm/aws-operator/v15/service/internal/recorder"
 )
 
 const (

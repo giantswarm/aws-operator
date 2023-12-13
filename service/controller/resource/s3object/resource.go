@@ -5,8 +5,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v14/service/internal/cloudconfig"
-	"github.com/giantswarm/aws-operator/v14/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v15/service/internal/cloudconfig"
+	"github.com/giantswarm/aws-operator/v15/service/internal/encrypter"
 )
 
 const (
