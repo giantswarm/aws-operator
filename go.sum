@@ -102,8 +102,8 @@ github.com/giantswarm/ipam v0.3.0 h1:QNb4k5Zu6nGsqJkAM7dLM1J6TiUP+LGjo9CPR+ewZBk
 github.com/giantswarm/ipam v0.3.0/go.mod h1:xG4cMEKwHlbE0aZ7x2H5j7o81U13LIStA73XCECdk+I=
 github.com/giantswarm/k8sclient/v7 v7.2.0 h1:twh4egNcuTJEH7R/hYVhs8nwEXPlr0u/o9CB1Kv9H9A=
 github.com/giantswarm/k8sclient/v7 v7.2.0/go.mod h1:kZGRtOqe4vAKXtWm69tsj2Q9CpWlwzpa1uP1lfDtjlE=
-github.com/giantswarm/k8scloudconfig/v16 v16.8.0 h1:hfqvRisdcJ/dSlKGHP8WTq4dZUi1DEaUKi4N2eor768=
-github.com/giantswarm/k8scloudconfig/v16 v16.8.0/go.mod h1:AGnaR+F72BL0zgjPCcBWgBYXLunQ5OjeTC/c1MxVLTI=
+github.com/giantswarm/k8scloudconfig/v17 v17.2.0 h1:qtSF8pRPZmOdgPwxWgJ7LVHjxwWP63HDP8R0kv2JMPc=
+github.com/giantswarm/k8scloudconfig/v17 v17.2.0/go.mod h1:peChY0p9SloYvoQfx5zCXIU6T//QdkG4y8LgFEWyuE4=
 github.com/giantswarm/k8smetadata v0.23.0 h1:iGwa1Nb45Sfcd5wqJEKBvxY1u5yXFg3Sq5Fw62nyRGA=
 github.com/giantswarm/k8smetadata v0.23.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubelock/v4 v4.0.0 h1:qvFGOIlDthAD8r32WcorT8R4gp3c1dpnDbHuLsDU2ZA=
@@ -120,8 +120,8 @@ github.com/giantswarm/micrologger v1.1.1 h1:gpu9uq1Vixey20Zo5pra5m/5EsmLrNlTwIgj
 github.com/giantswarm/micrologger v1.1.1/go.mod h1:l84q1WCLdXtPimHoJlgYEAJ3lmLyWbPbHW1ZpV+wPaA=
 github.com/giantswarm/microstorage v0.2.0 h1:0m2W2wbWU0x4TRuqlC1U3Ibqt783E6/q8ZpLvELDkHc=
 github.com/giantswarm/microstorage v0.2.0/go.mod h1:Ylcw9vGyG5N7R6nhKvwZ5nt6I3B9IhREUWFIxsR/Lfw=
-github.com/giantswarm/operatorkit/v7 v7.2.0 h1:eoKInQ6Ka0NlQEEqjQbmbAFLW/eOjKHkH2+wBs/JuMU=
-github.com/giantswarm/operatorkit/v7 v7.2.0/go.mod h1:rvHDLhFd5P2tVx1GbnUTUURWmRWmHI+91M2GPcBEraM=
+github.com/giantswarm/operatorkit/v8 v8.0.0 h1:AM1Xxg8X6xQjhxh+Jn1Tiv2MkpG8Ro4gqEsytZBBU5M=
+github.com/giantswarm/operatorkit/v8 v8.0.0/go.mod h1:dPrvvQj2UNBw6jLDYqvGhnDfJImwih8A+F3Oc1VS8XM=
 github.com/giantswarm/randomkeys/v3 v3.0.0 h1:68C+laq+2DgvfYPs8tz7249Oc0gYE14W93moJ4s7pSg=
 github.com/giantswarm/randomkeys/v3 v3.0.0/go.mod h1:O47AZ2x6xJ4+LpSz5Gq4i8duaTFeaffyA8g39amF1FQ=
 github.com/giantswarm/release-operator/v4 v4.1.1 h1:rsGzS3dWQj7GBf3JyzCgJraljr1/3tOKW51OKyoQdrk=
@@ -323,8 +323,8 @@ github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtb
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/olekukonko/tablewriter v0.0.0-20170122224234-a0225b3f23b5/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
-github.com/onsi/ginkgo v1.7.0 h1:WSHQ+IS43OoUrWtD1/bbclrwK8TTH5hzp+umCiuxHgs=
 github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
+github.com/onsi/ginkgo v1.16.2 h1:HFB2fbVIlhIfCfOW81bZFbiC/RvnpXSdhbF2/DJr134=
 github.com/onsi/ginkgo/v2 v2.13.1 h1:LNGfMbR2OVGBfXjvRZIZ2YCTQdGKtPLvuI1rMCCj3OU=
 github.com/onsi/ginkgo/v2 v2.13.1/go.mod h1:XStQ8QcGwLyF4HdfcZB8SFOS/MWCgDuXMSBe6zrvLgM=
 github.com/onsi/gomega v1.4.3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=

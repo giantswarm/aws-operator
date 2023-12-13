@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/giantswarm/microerror"
-	"github.com/giantswarm/operatorkit/v7/pkg/controller/context/finalizerskeptcontext"
+	"github.com/giantswarm/operatorkit/v8/pkg/controller/context/finalizerskeptcontext"
 
 	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
 	"github.com/giantswarm/aws-operator/v14/service/controller/key"
