@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- [Breaking change] Removed code that allowed switching from AWS-CNI to Cilium. Releases using this AWS-operator can't be upgraded to from v18 releases.
+
 ## [14.24.1] - 2023-12-07
 
 ### Changed
