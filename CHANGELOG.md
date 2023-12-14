@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.23.1] - 2023-12-14
+
 ### Fixed
 
 - Bump k8scc to 16.6.1 to fix max pod calculation.
@@ -1062,7 +1064,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.23.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.23.1...HEAD
+[14.23.1]: https://github.com/giantswarm/aws-operator/compare/v14.23.0...v14.23.1
 [14.23.0]: https://github.com/giantswarm/aws-operator/compare/v14.22.0...v14.23.0
 [14.22.0]: https://github.com/giantswarm/aws-operator/compare/v14.21.0...v14.22.0
 [14.21.0]: https://github.com/giantswarm/aws-operator/compare/v14.20.0...v14.21.0
