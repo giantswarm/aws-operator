@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bump k8scc to 16.6.1 to fix max pod calculation.
+
 ## [14.23.0] - 2023-10-04
 
 ### Fixed
