@@ -12,10 +12,10 @@ import (
 	"github.com/giantswarm/micrologger"
 	releasev1alpha1 "github.com/giantswarm/release-operator/v4/api/v1alpha1"
 
-	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v14/service/controller/key"
-	"github.com/giantswarm/aws-operator/v14/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/v14/service/internal/releases"
+	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v15/service/controller/key"
+	"github.com/giantswarm/aws-operator/v15/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v15/service/internal/releases"
 )
 
 type TCNPConfig struct {

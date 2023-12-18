@@ -14,9 +14,9 @@ import (
 	"github.com/giantswarm/microerror"
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
-	awsoperatorannotation "github.com/giantswarm/aws-operator/v14/pkg/annotation"
-	"github.com/giantswarm/aws-operator/v14/pkg/label"
-	"github.com/giantswarm/aws-operator/v14/pkg/project"
+	awsoperatorannotation "github.com/giantswarm/aws-operator/v15/pkg/annotation"
+	"github.com/giantswarm/aws-operator/v15/pkg/label"
+	"github.com/giantswarm/aws-operator/v15/pkg/project"
 )
 
 const (

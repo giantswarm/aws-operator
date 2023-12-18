@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v14/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
 )
 
 const (

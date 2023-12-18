@@ -1,10 +1,10 @@
-module github.com/giantswarm/aws-operator/v14
+module github.com/giantswarm/aws-operator/v15
 
 go 1.21
 
 require (
-	github.com/aws/amazon-vpc-cni-k8s v1.12.1
-	github.com/aws/aws-sdk-go v1.48.2
+	github.com/aws/amazon-vpc-cni-k8s v1.15.4
+	github.com/aws/aws-sdk-go v1.49.2
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
@@ -29,7 +29,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.17.0
-	github.com/spf13/viper v1.17.0
+	github.com/spf13/viper v1.18.1
 	golang.org/x/sync v0.5.0
 	k8s.io/api v0.28.4
 	k8s.io/apiextensions-apiserver v0.28.4
@@ -122,7 +122,7 @@ require (
 )
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.7.8
+	github.com/containerd/containerd => github.com/containerd/containerd v1.7.11
 	github.com/containernetworking/cni => github.com/containernetworking/cni v1.1.2
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/deislabs/oras => github.com/deislabs/oras v1.1.0
@@ -132,12 +132,12 @@ replace (
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.17.0
 	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.11.3
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.26
-	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.5
+	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.7
 	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.10
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.6
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
-	helm.sh/helm/v3 => helm.sh/helm/v3 v3.13.2
+	helm.sh/helm/v3 => helm.sh/helm/v3 v3.13.3
 	k8s.io/api => k8s.io/api v0.28.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.28.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.28.3
