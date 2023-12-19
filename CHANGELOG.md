@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [Breaking change] Removed code that allowed switching from AWS-CNI to Cilium. Releases using this AWS-operator can't be upgraded to from v18 releases.
+- Configure `gsoci.azurecr.io` as the default container image registry.
 
 ## [14.24.1] - 2023-12-07
 
@@ -147,7 +148,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Allow externalDNS role to be assumed by any SA containing "external-dns" to allow multiple app deployments.
-
 
 ## [14.12.1] - 2023-04-05
 
@@ -285,7 +285,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix node draining logic during node termination. 
+- Fix node draining logic during node termination.
 
 ## [13.2.4] - 2022-10-27
 
@@ -319,7 +319,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enable Cilium or AWS-CNI conditionally based on the release number.
 - Disable external cloud controller manager because of upstream bug affecting 1.23 release.
-- Bump `k8scc` to enable authn and authz on `scheduler` and `controller-manager`.- 
+- Bump `k8scc` to enable authn and authz on `scheduler` and `controller-manager`.
 
 ## [13.0.0] - 2022-08-17
 
@@ -829,7 +829,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update `k8scloudconfig` to `v8.0.3`.
 
-
 ## [9.1.1] - 2020-09-23
 
 ### Fixed
@@ -936,7 +935,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix failing of ELB collector cache in case there is no ELB in AWS account
 
-
 ## [8.7.1] - 2020-07-08
 
 ### Added
@@ -955,8 +953,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix failing go template rendering of KMS encryption content.
 
-
-
 ## [8.7.0] 2020-06-19
 
 ### Added
@@ -973,8 +969,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix calico-policy only metrics endpoint.
 - Fix race condition in IPAM locking when lock already acquired.
 
-
-
 ## [8.6.1] 2020-05-21
 
 ### Added
@@ -984,8 +978,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix collector panic.
-
-
 
 ## [8.6.0] 2020-05-21
 
@@ -1003,8 +995,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Check Service Quota endpoint availability for the current AWS region
 - Fix RBAC rules for Control Plane CR migration.
-
-
 
 ## [8.5.0] 2020-05-11
 
@@ -1024,8 +1014,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix cluster creation by preventing S3 Object upload race condition.
 
-
-
 ## [8.4.0] 2020-04-23
 
 ### Added
@@ -1036,8 +1024,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve cleanup of `DrainerConfig` CRs after node draining.
 - Use release.Revision in Helm chart for Helm 3 support.
-
-
 
 ## [8.3.0] 2020-04-17
 
@@ -1057,15 +1043,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix aws operator policy for latest node pools version.
 - Make encryption key lookup graceful during cluster creation.
 
-
-
 ## [8.2.3] 2020-04-06
 
 ### Fixed
 
 - Fix error handling when creating Tenant Cluster API clients.
-
-
 
 ## [8.2.2] - 2020-04-03
 
@@ -1075,8 +1057,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use architect orb.
 - Fix subnet allocation for Availability Zones.
 - Switch to AWS CNI
-
-
 
 ## [8.2.1] - 2020-03-20
 

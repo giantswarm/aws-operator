@@ -76,9 +76,9 @@ installation:
   name: ""
 
 registry:
-  domain: docker.io
+  domain: gsoci.azurecr.io
   mirrors:
-  - giantswarm.azurecr.io
+    - giantswarm.azurecr.io
 
   dockerhub:
     token: token
@@ -121,7 +121,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   privileged: false
   runAsNonRoot: true
   seccompProfile:
