@@ -319,7 +319,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enable Cilium or AWS-CNI conditionally based on the release number.
 - Disable external cloud controller manager because of upstream bug affecting 1.23 release.
-- Bump `k8scc` to enable authn and authz on `scheduler` and `controller-manager`.-
+- Bump `k8scc` to enable authn and authz on `scheduler` and `controller-manager`.
+
+## [13.0.0] - 2022-08-17
+
+### Changed
+
+- Use Cloudfront Domain for IRSA for non-China regions.
+- Ensure `aws-node` daemonset does not schedule on upgraded nodes.
+- Ensure `aws-node` daemonset has `AWS_VPC_K8S_CNI_EXCLUDE_SNAT_CIDRS` env var set to the cilium cidr during migration to cilium.
+- Cleanup `aws-node` resources after a successful migration.
+- Cleanup `calico` resources after a successful migration.
+- Use `cilium.giantswarm.io/pod-cidr` annotation as Cilium Pod CIDR.
+- Add Flatcar `3227.2.1` AMI.
+- Bump `k8scloudconfig` to support newer flatcar.
+- Set EC2's `HttpPutResponseHopLimit` flag to 2.
+
+### Removed
+
+- Remove creation of cilium app config.
+
+## [13.0.0-alpha2] - 2022-07-27
+
+### Changed
+
+- Bump k8scc to fix apiserver's flags and make metrics-server to work.
 
 ## [13.0.0-alpha1] - 2022-07-25
 
