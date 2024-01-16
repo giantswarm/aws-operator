@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v15/service/controller/key"
+	"github.com/giantswarm/aws-operator/v16/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v16/service/controller/key"
 )
 
 func (r *Resource) GetCurrentState(ctx context.Context, obj interface{}) (interface{}, error) {

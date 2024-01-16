@@ -14,11 +14,11 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/tccpf/template"
-	"github.com/giantswarm/aws-operator/v15/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/v15/service/internal/cphostedzone"
-	"github.com/giantswarm/aws-operator/v15/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/v15/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/tccpf/template"
+	"github.com/giantswarm/aws-operator/v16/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v16/service/internal/cphostedzone"
+	"github.com/giantswarm/aws-operator/v16/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v16/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")

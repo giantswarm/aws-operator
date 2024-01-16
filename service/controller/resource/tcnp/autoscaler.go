@@ -9,8 +9,8 @@ import (
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v15/service/controller/key"
+	"github.com/giantswarm/aws-operator/v16/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v16/service/controller/key"
 )
 
 func (r *Resource) getASGName(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (string, error) {

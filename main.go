@@ -9,10 +9,10 @@ import (
 	"github.com/giantswarm/micrologger"
 	"github.com/spf13/viper"
 
-	"github.com/giantswarm/aws-operator/v15/flag"
-	"github.com/giantswarm/aws-operator/v15/pkg/project"
-	"github.com/giantswarm/aws-operator/v15/server"
-	"github.com/giantswarm/aws-operator/v15/service"
+	"github.com/giantswarm/aws-operator/v16/flag"
+	"github.com/giantswarm/aws-operator/v16/pkg/project"
+	"github.com/giantswarm/aws-operator/v16/server"
+	"github.com/giantswarm/aws-operator/v16/service"
 )
 
 var (

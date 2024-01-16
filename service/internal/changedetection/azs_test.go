@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v16/service/controller/controllercontext"
 )
 
 func Test_Detection_availabilityZonesEqual(t *testing.T) {

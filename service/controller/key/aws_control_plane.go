@@ -8,7 +8,7 @@ import (
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	"github.com/giantswarm/microerror"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/label"
+	"github.com/giantswarm/aws-operator/v16/pkg/label"
 )
 
 func ControlPlaneAvailabilityZones(cr infrastructurev1alpha3.AWSControlPlane) []string {

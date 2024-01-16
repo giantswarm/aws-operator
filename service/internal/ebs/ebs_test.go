@@ -11,7 +11,7 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/label"
+	"github.com/giantswarm/aws-operator/v16/pkg/label"
 )
 
 func Test_ListVolumes(t *testing.T) {
