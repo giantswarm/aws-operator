@@ -15,16 +15,16 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v15/client/aws"
-	"github.com/giantswarm/aws-operator/v15/pkg/label"
-	"github.com/giantswarm/aws-operator/v15/pkg/project"
-	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v15/service/controller/key"
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/awsclient"
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/drainerfinalizer"
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/drainerinitializer"
-	"github.com/giantswarm/aws-operator/v15/service/internal/asg"
-	event "github.com/giantswarm/aws-operator/v15/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v16/client/aws"
+	"github.com/giantswarm/aws-operator/v16/pkg/label"
+	"github.com/giantswarm/aws-operator/v16/pkg/project"
+	"github.com/giantswarm/aws-operator/v16/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v16/service/controller/key"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/awsclient"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/drainerfinalizer"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/drainerinitializer"
+	"github.com/giantswarm/aws-operator/v16/service/internal/asg"
+	event "github.com/giantswarm/aws-operator/v16/service/internal/recorder"
 )
 
 type MachineDeploymentDrainerConfig struct {

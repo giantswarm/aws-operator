@@ -13,10 +13,10 @@ import (
 	apiv1beta1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v15/service/controller/key"
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/tccp/template"
+	"github.com/giantswarm/aws-operator/v16/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v16/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v16/service/controller/key"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/tccp/template"
 )
 
 func (r *Resource) EnsureCreated(ctx context.Context, obj interface{}) error {

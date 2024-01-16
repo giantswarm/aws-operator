@@ -1,4 +1,4 @@
-module github.com/giantswarm/aws-operator/v15
+module github.com/giantswarm/aws-operator/v16
 
 go 1.21
 

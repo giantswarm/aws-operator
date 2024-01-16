@@ -1,9 +1,9 @@
 package kubernetes
 
 import (
-	"github.com/giantswarm/aws-operator/v15/flag/service/cluster/kubernetes/api"
-	"github.com/giantswarm/aws-operator/v15/flag/service/cluster/kubernetes/networksetup"
-	"github.com/giantswarm/aws-operator/v15/flag/service/cluster/kubernetes/ssh"
+	"github.com/giantswarm/aws-operator/v16/flag/service/cluster/kubernetes/api"
+	"github.com/giantswarm/aws-operator/v16/flag/service/cluster/kubernetes/networksetup"
+	"github.com/giantswarm/aws-operator/v16/flag/service/cluster/kubernetes/ssh"
 )
 
 type Kubernetes struct {

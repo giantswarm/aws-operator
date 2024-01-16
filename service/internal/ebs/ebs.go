@@ -12,8 +12,8 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v15/service/controller/key"
+	"github.com/giantswarm/aws-operator/v16/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v16/service/controller/key"
 )
 
 const (

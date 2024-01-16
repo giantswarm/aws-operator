@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/giantswarm/aws-operator/v15/flag/service/installation/guest/kubernetes/api"
+	"github.com/giantswarm/aws-operator/v16/flag/service/installation/guest/kubernetes/api"
 )
 
 type Kubernetes struct {
