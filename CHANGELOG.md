@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump k8scc to v17 to enable k8s 1.25 support.
+- Bump k8scc to v18 to enable k8s 1.25 support.
 
 ## [15.0.0] - 2023-12-13
 
