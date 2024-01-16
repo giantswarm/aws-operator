@@ -28,7 +28,7 @@ require (
 	github.com/giantswarm/to v0.4.0
 	github.com/google/go-cmp v0.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.17.0
+	github.com/prometheus/client_golang v1.18.0
 	github.com/spf13/viper v1.18.1
 	golang.org/x/sync v0.6.0
 	k8s.io/api v0.28.4
