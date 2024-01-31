@@ -249,7 +249,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			}
 			cc.Status.TenantCluster.TCCP.Subnets = tc.ctxStatusSubnets
 
-			err = r.EnsureCreated(ctx, &tc.cluster)
+			err = r.EnsureCreated(ctx, &tc.cluster) // nolint:gosec
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
