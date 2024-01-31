@@ -225,18 +225,18 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			// Prepare all the necessary runtime objects using the abstract controller
 			// client.
 			{
-				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster)
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				err = r.k8sClient.CtrlClient().Create(ctx, &tc.controlPlane)
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.controlPlane) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				for i := range tc.machineDeployments {
-					err := r.k8sClient.CtrlClient().Create(ctx, &tc.machineDeployments[i])
+					err := r.k8sClient.CtrlClient().Create(ctx, &tc.machineDeployments[i]) // nolint:gosec
 					if err != nil {
 						t.Fatal(err)
 					}
