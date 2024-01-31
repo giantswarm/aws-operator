@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@6.6.0
+#    devctl@6.17.1
 #
 name: gitleaks
 
@@ -10,8 +10,8 @@ jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
     - name: gitleaks-action
-      uses: zricethezav/gitleaks-action@v1.6.0
+      uses: giantswarm/gitleaks-action@main
