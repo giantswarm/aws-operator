@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
 	infrastructurev1alpha3 "github.com/giantswarm/apiextensions/v6/pkg/apis/infrastructure/v1alpha3"
 	"github.com/giantswarm/microerror"
@@ -109,7 +110,9 @@ func (h *HostedZone) lookup(ctx context.Context, client Route53, cr infrastructu
 	// installation. So we look it up.
 	h.logger.Debugf(ctx, "finding CP HostedZone IDs")
 
-	hostedZonesInput := &route53.ListHostedZonesByNameInput{}
+	hostedZonesInput := &route53.ListHostedZonesByNameInput{
+		DNSName: aws.String(cr.Spec.Cluster.DNS.Domain),
+	}
 
 	o, err := client.ListHostedZonesByName(hostedZonesInput)
 	if err != nil {
