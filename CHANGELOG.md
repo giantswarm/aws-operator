@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Route53 list hosted zones to avoid pagination issue.
+
 ## [14.24.1] - 2023-12-07
 
 ### Changed
