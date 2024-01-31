@@ -15,13 +15,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/awstags"
-	"github.com/giantswarm/aws-operator/v15/pkg/label"
-	"github.com/giantswarm/aws-operator/v15/service/controller/controllercontext"
-	"github.com/giantswarm/aws-operator/v15/service/controller/key"
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/tccpn/template"
-	"github.com/giantswarm/aws-operator/v15/service/internal/encrypter/kms"
-	"github.com/giantswarm/aws-operator/v15/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v16/pkg/awstags"
+	"github.com/giantswarm/aws-operator/v16/pkg/label"
+	"github.com/giantswarm/aws-operator/v16/service/controller/controllercontext"
+	"github.com/giantswarm/aws-operator/v16/service/controller/key"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/v16/service/internal/encrypter/kms"
+	"github.com/giantswarm/aws-operator/v16/service/internal/hamaster"
 )
 
 const (

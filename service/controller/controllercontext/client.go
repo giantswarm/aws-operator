@@ -3,7 +3,7 @@ package controllercontext
 import (
 	"github.com/giantswarm/k8sclient/v7/pkg/k8sclient"
 
-	"github.com/giantswarm/aws-operator/v15/client/aws"
+	"github.com/giantswarm/aws-operator/v16/client/aws"
 )
 
 type ContextClient struct {

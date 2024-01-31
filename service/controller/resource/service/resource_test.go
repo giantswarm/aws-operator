@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/label"
+	"github.com/giantswarm/aws-operator/v16/pkg/label"
 )
 
 func Test_toService(t *testing.T) {

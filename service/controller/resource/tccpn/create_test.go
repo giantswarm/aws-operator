@@ -14,16 +14,16 @@ import (
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/giantswarm/aws-operator/v15/pkg/label"
-	"github.com/giantswarm/aws-operator/v15/service/controller/resource/tccpn/template"
-	"github.com/giantswarm/aws-operator/v15/service/internal/changedetection"
-	"github.com/giantswarm/aws-operator/v15/service/internal/cloudtags"
-	"github.com/giantswarm/aws-operator/v15/service/internal/encrypter"
-	"github.com/giantswarm/aws-operator/v15/service/internal/hamaster"
-	"github.com/giantswarm/aws-operator/v15/service/internal/images"
-	"github.com/giantswarm/aws-operator/v15/service/internal/recorder"
-	"github.com/giantswarm/aws-operator/v15/service/internal/releases"
-	"github.com/giantswarm/aws-operator/v15/service/internal/unittest"
+	"github.com/giantswarm/aws-operator/v16/pkg/label"
+	"github.com/giantswarm/aws-operator/v16/service/controller/resource/tccpn/template"
+	"github.com/giantswarm/aws-operator/v16/service/internal/changedetection"
+	"github.com/giantswarm/aws-operator/v16/service/internal/cloudtags"
+	"github.com/giantswarm/aws-operator/v16/service/internal/encrypter"
+	"github.com/giantswarm/aws-operator/v16/service/internal/hamaster"
+	"github.com/giantswarm/aws-operator/v16/service/internal/images"
+	"github.com/giantswarm/aws-operator/v16/service/internal/recorder"
+	"github.com/giantswarm/aws-operator/v16/service/internal/releases"
+	"github.com/giantswarm/aws-operator/v16/service/internal/unittest"
 )
 
 var update = flag.Bool("update", false, "update .golden CF template file")
