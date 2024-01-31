@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.24.1-patch1] - 2024-01-31
+
 ### Fixed
 
 - Fix Route53 list hosted zones to avoid pagination issue.
@@ -1083,7 +1085,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v1.24.1-patch1...HEAD
+[1.24.1-patch1]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...v1.24.1-patch1
 [14.24.1]: https://github.com/giantswarm/aws-operator/compare/v14.24.0...v14.24.1
 [14.24.0]: https://github.com/giantswarm/aws-operator/compare/v14.23.0...v14.24.0
 [14.23.0]: https://github.com/giantswarm/aws-operator/compare/v14.22.0...v14.23.0
