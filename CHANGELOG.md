@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [16.1.0] - 2024-03-04
+
 ### Changed
 
 - Bump k8scc to avoid running etcd defrag on all masters at the same time.
@@ -1082,7 +1084,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v16.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v16.1.0...HEAD
+[16.1.0]: https://github.com/giantswarm/aws-operator/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.com/giantswarm/aws-operator/compare/v15.0.0...v16.0.0
 [15.0.0]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...v15.0.0
 [14.24.1]: https://github.com/giantswarm/aws-operator/compare/v14.24.0...v14.24.1
