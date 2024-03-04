@@ -91,6 +91,18 @@ func (r *Resource) terminateNode(ctx context.Context, node corev1.Node, clusterI
 		return microerror.Mask(err)
 	}
 
+	// Check if VM is managed by karpenter.
+	if node.GetLabels()["managed-by"] == "karpenter" {
+		r.logger.Debugf(ctx, "node %s is managed by karpenter, deleting it from k8s api", node.Name)
+
+		err = cc.Client.TenantCluster.K8s.CtrlClient().Delete(ctx, &node)
+		if err != nil {
+			return microerror.Mask(err)
+		}
+
+		return nil
+	}
+
 	instanceID, err := getInstanceId(node)
 	if err != nil {
 		return microerror.Mask(err)

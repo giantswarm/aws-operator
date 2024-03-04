@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Handle karpenter nodes in node-termination-handler.
+
 ## [15.0.0-patch1] - 2024-01-31
 
 ### Fixed
