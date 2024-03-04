@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump k8scc to avoid running etcd defrag on all masters at the same time.
+
 ### Fixed
 
 - Handle karpenter nodes in node-termination-handler.
