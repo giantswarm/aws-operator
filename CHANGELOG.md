@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [15.0.0-patch2] - 2024-03-04
+
 ### Fixed
 
 - Handle karpenter nodes in node-termination-handler.
@@ -1098,7 +1100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v15.0.0-patch1...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v15.0.0-patch2...HEAD
+[15.0.0-patch2]: https://github.com/giantswarm/aws-operator/compare/v15.0.0-patch1...v15.0.0-patch2
 [15.0.0-patch1]: https://github.com/giantswarm/aws-operator/compare/v15.0.0...v15.0.0-patch1
 [15.0.0]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...v15.0.0
 [14.24.1]: https://github.com/giantswarm/aws-operator/compare/v14.24.0...v14.24.1
