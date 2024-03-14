@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@6.17.1
+#    devctl@6.21.0
 #
 name: Create Release
 on:
@@ -32,11 +32,10 @@ jobs:
     steps:
       - name: Get version
         id: get_version
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          title="$(cat <<- 'COMMIT_MESSAGE_END' | head -n 1 -
-          ${{ github.event.head_commit.message }}
-          COMMIT_MESSAGE_END
-          )"
+          title=$(echo -n "${COMMIT_MESSAGE}" | head -1)
           # Matches strings like:
           #
           #   - "Release v1.2.3"
@@ -66,11 +65,10 @@ jobs:
           echo "path=${path}" >> $GITHUB_OUTPUT
       - name: Check if reference version
         id: ref_version
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          title="$(cat <<- 'COMMIT_MESSAGE_END' | head -n 1 -
-          ${{ github.event.head_commit.message }}
-          COMMIT_MESSAGE_END
-          )"
+          title=$(echo -n "${COMMIT_MESSAGE}" | head -1)
           if echo "${title}" | grep -qE '^release v[0-9]+\.[0-9]+\.[0-9]+([.-][^ .-][^ ]*)?( \(#[0-9]+\))?$' ; then
             version=$(echo "${title}" | cut -d ' ' -f 2)
           fi
@@ -90,12 +88,12 @@ jobs:
       - gather_facts
     steps:
       - name: Install architect
-        uses: giantswarm/install-binary-action@v1.1.0
+        uses: giantswarm/install-binary-action@v2.0.0
         with:
           binary: "architect"
-          version: "6.13.0"
+          version: "6.14.1"
       - name: Install semver
-        uses: giantswarm/install-binary-action@v1.1.0
+        uses: giantswarm/install-binary-action@v2.0.0
         with:
           binary: "semver"
           version: "3.2.0"
@@ -144,6 +142,15 @@ jobs:
           title: "Bump version to ${{ steps.update_project_go.outputs.new_version }}"
         run: |
           gh pr create --title "${{ env.title }}" --body "" --base ${{ env.base }} --head ${{ env.branch }} --reviewer ${{ github.actor }}
+      - name: Enable auto-merge for PR
+        env:
+          GITHUB_TOKEN: "${{ secrets.TAYLORBOT_GITHUB_ACTION }}"
+          base: "${{ github.ref }}"
+          branch: "${{ github.ref }}-version-bump"
+          version: "${{ needs.gather_facts.outputs.version }}"
+          title: "Bump version to ${{ steps.update_project_go.outputs.new_version }}"
+        run: |
+          gh pr merge --auto --squash "${{ env.branch }}" || echo "::warning::Auto-merge not allowed. Please adjust the repository settings."
   create_release:
     name: Create release
     runs-on: ubuntu-22.04
@@ -199,7 +206,7 @@ jobs:
     if: ${{ needs.gather_facts.outputs.version }}
     steps:
       - name: Install semver
-        uses: giantswarm/install-binary-action@v1.1.0
+        uses: giantswarm/install-binary-action@v2.0.0
         with:
           binary: "semver"
           version: "3.0.0"

@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@6.17.1
+#    devctl@6.21.0
 #
 name: Create Release PR
 on:
@@ -147,7 +147,7 @@ jobs:
         with:
           go-version: '=1.18.1'
       - name: Install architect
-        uses: giantswarm/install-binary-action@v1.1.0
+        uses: giantswarm/install-binary-action@v2.0.0
         with:
           binary: "architect"
           version: "6.11.0"
