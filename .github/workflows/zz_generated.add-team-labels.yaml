@@ -16,7 +16,7 @@ jobs:
           -O artifacts/users.yaml \
           https://raw.githubusercontent.com/giantswarm/github/main/tools/issue-automation/user-mapping.yaml
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: users
         path: artifacts/users.yaml
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_user_list
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       id: download-users
       with:
         name: users
