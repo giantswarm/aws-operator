@@ -18,7 +18,7 @@ jobs:
           -O artifacts/users.yaml \
           https://raw.githubusercontent.com/giantswarm/github/main/tools/issue-automation/user-mapping.yaml
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: users
         path: artifacts/users.yaml
@@ -30,7 +30,7 @@ jobs:
           -O artifacts/labels.yaml \
           https://raw.githubusercontent.com/giantswarm/github/main/tools/issue-automation/label-mapping.yaml
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: labels
         path: artifacts/labels.yaml
@@ -42,7 +42,7 @@ jobs:
     needs: build_user_list
     if: github.event.action == 'assigned'
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       id: download-users
       with:
         name: users
@@ -68,7 +68,7 @@ jobs:
     needs: build_user_list
     if: github.event.action == 'labeled'
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       id: download-labels
       with:
         name: labels
