@@ -132,7 +132,7 @@ replace (
 	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.11.4
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.12
-	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2
+	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.12
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.6
 	github.com/valyala/fasthttp v1.6.0 => github.com/valyala/fasthttp v1.38.0
