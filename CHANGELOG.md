@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bump k8scc to fix issues with IMDS v2.
+
 ## [16.1.0] - 2024-03-04
 
 ### Changed

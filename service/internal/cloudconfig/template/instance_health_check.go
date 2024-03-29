@@ -33,7 +33,7 @@ if test $(cut -d '.' -f1 /proc/uptime) -lt 900; then
 fi
 
 # AWS Metadata
-export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
+export INSTANCEID=$(/opt/imds-client /latest/meta-data/instance-id)
 
 # Additional ENVs
 . /etc/network-environment
