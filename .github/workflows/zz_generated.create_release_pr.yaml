@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@6.21.0
+#    devctl@6.23.3
 #
 name: Create Release PR
 on:
@@ -143,16 +143,16 @@ jobs:
     env:
       architect_flags: "--organisation ${{ github.repository_owner }} --project ${{ needs.gather_facts.outputs.repo_name }}"
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: '=1.18.1'
       - name: Install architect
-        uses: giantswarm/install-binary-action@v2.0.0
+        uses: giantswarm/install-binary-action@033b1a657eea23d9c42e77312b370e6125e4e38f  # v2.0.0
         with:
           binary: "architect"
           version: "6.11.0"
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ needs.gather_facts.outputs.branch }}
       - name: Prepare release changes
