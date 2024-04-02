@@ -25,7 +25,7 @@ set -o nounset
 set -o pipefail
 
 # AWS Metadata
-export INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id 2> /dev/null)
+export INSTANCEID=$(/opt/imds-client /latest/meta-data/instance-id)
 
 # AWS Autoscaling Group Name
 export AUTOSCALINGGROUP=$(docker run --rm {{ .RegistryDomain }}/giantswarm/awscli:2.7.35 autoscaling describe-auto-scaling-instances --instance-ids=$INSTANCEID --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
