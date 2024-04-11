@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.51.12
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dylanmei/iso8601 v0.1.0
-	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
+	github.com/ghodss/yaml v1.0.0
 	github.com/giantswarm/apiextensions/v6 v6.6.0
 	github.com/giantswarm/backoff v1.0.0
 	github.com/giantswarm/badnodedetector/v3 v3.0.0
