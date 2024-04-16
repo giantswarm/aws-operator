@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [15.1.0] - 2024-04-16
+
 ### Fixed
 
 - [Backport] Bump k8scc to 16.8.1 fix issues with IMDS v2.
@@ -1104,7 +1106,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v15.0.0-patch2...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v15.1.0...HEAD
+[15.1.0]: https://github.com/giantswarm/aws-operator/compare/v15.0.0-patch2...v15.1.0
 [15.0.0-patch2]: https://github.com/giantswarm/aws-operator/compare/v15.0.0-patch1...v15.0.0-patch2
 [15.0.0-patch1]: https://github.com/giantswarm/aws-operator/compare/v15.0.0...v15.0.0-patch1
 [15.0.0]: https://github.com/giantswarm/aws-operator/compare/v14.24.1...v15.0.0
