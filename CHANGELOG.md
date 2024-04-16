@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [Backport] Bump k8scc to 16.8.1 fix issues with IMDS v2.
+
 ## [15.0.0-patch2] - 2024-03-04
 
 ### Fixed
