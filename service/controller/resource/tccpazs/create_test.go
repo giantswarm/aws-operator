@@ -225,12 +225,12 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			// Prepare all the necessary runtime objects using the abstract controller
 			// client.
 			{
-				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster)
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.cluster) // noplint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				err = r.k8sClient.CtrlClient().Create(ctx, &tc.controlPlane)
+				err = r.k8sClient.CtrlClient().Create(ctx, &tc.controlPlane) // noplint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -249,7 +249,7 @@ func Test_EnsureCreated_AZ_Spec(t *testing.T) {
 			}
 			cc.Status.TenantCluster.TCCP.Subnets = tc.ctxStatusSubnets
 
-			err = r.EnsureCreated(ctx, &tc.cluster)
+			err = r.EnsureCreated(ctx, &tc.cluster) // noplint:gosec
 
 			switch {
 			case err == nil && tc.errorMatcher == nil:
