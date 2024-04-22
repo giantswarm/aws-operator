@@ -1,6 +1,6 @@
 # DO NOT EDIT. Generated with:
 #
-#    devctl@5.22.0
+#    devctl@6.23.3
 #
 name: 'Values and schema'
 on:
@@ -13,13 +13,15 @@ on:
       - 'helm/**/values.schema.json'  # schema
       - 'helm/**/ci/ci-values.yaml'   # overrides for CI (can contain required entries)
 
+  push: {}
+
 jobs:
   check:
     name: 'validate values.yaml against values.schema.json'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
 
@@ -30,15 +32,22 @@ jobs:
 
       - name: 'Check if values.yaml is a valid instance of values.schema.json'
         run: |
-          HELM_DIR=$(git diff --name-only origin/${GITHUB_BASE_REF} ${GITHUB_SHA} \
-           | grep 'helm/[-a-z].*\/' | head -1 | awk -F '/' '{print $1"/"$2}')
-          VALUES=${HELM_DIR}/values.yaml
-          if [ -f ${HELM_DIR}/ci/ci-values.yaml ]; then
-            # merge ci-values.yaml into values.yaml (providing required values)
-            echo -e "\nMerged values:\n=============="
-            yq '. *= load("'${HELM_DIR}'/ci/ci-values.yaml")' ${HELM_DIR}/values.yaml | tee ${HELM_DIR}/combined-values.yaml
-            echo -e "\n==============\n"
-            VALUES=${HELM_DIR}/combined-values.yaml
-          fi
+          for chart_yaml in helm/*/Chart.yaml; do
+            helm_dir="${chart_yaml%/Chart.yaml}"
 
-          ${HOME}/yajsv -s ${HELM_DIR}/values.schema.json ${VALUES}
+            if [ ! -f ${helm_dir}/values.schema.json ]; then
+              echo "Skipping validation for '${helm_dir}' folder, because 'values.schema.json' does not exist..."
+              continue
+            fi
+
+            values=${helm_dir}/values.yaml
+            if [ -f ${helm_dir}/ci/ci-values.yaml ]; then
+              # merge ci-values.yaml into values.yaml (providing required values)
+              echo -e "\nMerged values:\n=============="
+              yq '. *= load("'${helm_dir}'/ci/ci-values.yaml")' ${helm_dir}/values.yaml | tee ${helm_dir}/combined-values.yaml
+              echo -e "\n==============\n"
+              values=${helm_dir}/combined-values.yaml
+            fi
+
+            ${HOME}/yajsv -s ${helm_dir}/values.schema.json ${values}
+          done

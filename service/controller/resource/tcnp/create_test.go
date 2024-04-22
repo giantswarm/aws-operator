@@ -136,17 +136,17 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 				}
 
 				cl := unittest.DefaultCAPIClusterWithLabels(awsCl.Name, map[string]string{})
-				err = k.CtrlClient().Create(ctx, &cl)
+				err = k.CtrlClient().Create(ctx, &cl) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				err = k.CtrlClient().Create(ctx, &tc.cr)
+				err = k.CtrlClient().Create(ctx, &tc.cr) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				err = k.CtrlClient().Create(ctx, &tc.re)
+				err = k.CtrlClient().Create(ctx, &tc.re) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}

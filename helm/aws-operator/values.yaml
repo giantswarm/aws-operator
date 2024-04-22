@@ -126,3 +126,7 @@ securityContext:
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
+
+global:
+  podSecurityStandards:
+    enforced: false
