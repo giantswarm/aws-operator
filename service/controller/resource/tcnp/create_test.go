@@ -190,12 +190,12 @@ func Test_Controller_Resource_TCNP_Template_Render(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				err = k.CtrlClient().Create(ctx, &tc.cr) // noplint:gosec
+				err = k.CtrlClient().Create(ctx, &tc.cr) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				err = k.CtrlClient().Create(ctx, &tc.re) // noplint:gosec
+				err = k.CtrlClient().Create(ctx, &tc.re) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
