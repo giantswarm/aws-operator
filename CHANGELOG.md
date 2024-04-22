@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.22.0-patch1] - 2024-04-22
+
 ### Added
 
 - Backport - Add global.podSecurityStandards.enforced value for PSS migration.
@@ -1055,7 +1057,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.22.0...HEAD
+[Unreleased]: https://github.com/giantswarm/aws-operator/compare/v14.22.0-patch1...HEAD
+[14.22.0-patch1]: https://github.com/giantswarm/aws-operator/compare/v14.22.0...v14.22.0-patch1
 [14.22.0]: https://github.com/giantswarm/aws-operator/compare/v14.21.0...v14.22.0
 [14.21.0]: https://github.com/giantswarm/aws-operator/compare/v14.20.0...v14.21.0
 [14.20.0]: https://github.com/giantswarm/aws-operator/compare/v14.19.2...v14.20.0
