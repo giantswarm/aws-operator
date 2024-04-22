@@ -1,0 +1,36 @@
+version: 2.1
+
+orbs:
+  architect: giantswarm/architect@5.1.1
+
+workflows:
+  build:
+    jobs:
+      - architect/go-build:
+          name: go-build
+          binary: aws-operator
+          resource_class: xlarge
+          filters:
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-registries:
+          context: architect
+          name: push-to-registries
+          requires:
+            - go-build
+          filters:
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-app-catalog:
+          name: push-to-app-catalog
+          app_catalog: "control-plane-catalog"
+          app_catalog_test: "control-plane-test-catalog"
+          chart: "aws-operator"
+          context: architect
+          requires:
+            - push-to-registries
+          filters:
+            tags:
+              only: /^v.*/
