@@ -54,9 +54,8 @@ func NewTCNP(config TCNPConfig) (*TCNP, error) {
 
 // ShouldScale determines whether the reconciled TCNP stack should be scaled.
 //
-//     The node pool's scaling max changes.
-//     The node pool's scaling min changes.
-//
+//	The node pool's scaling max changes.
+//	The node pool's scaling min changes.
 func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
@@ -89,11 +88,10 @@ func (t *TCNP) ShouldScale(ctx context.Context, cr infrastructurev1alpha3.AWSMac
 
 // ShouldUpdate determines whether the reconciled TCNP stack should be updated.
 //
-//     The worker node's docker volume size changes.
-//     The worker node's instance type changes.
-//     The operator's version changes.
-//     The composition of security groups changes.
-//
+//	The worker node's docker volume size changes.
+//	The worker node's instance type changes.
+//	The operator's version changes.
+//	The composition of security groups changes.
 func (t *TCNP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSMachineDeployment) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {
