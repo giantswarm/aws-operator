@@ -20,7 +20,6 @@ type Config struct {
 // The TCNP manages the node pools upon MachineDeployment CRs. For instance the
 // TCNP stack contains the AWS ASG of the node pool and certain stack outputs
 // which this resource collects and puts into the controller context.
-//
 type Resource struct {
 	logger micrologger.Logger
 }

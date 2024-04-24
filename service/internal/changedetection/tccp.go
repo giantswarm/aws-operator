@@ -43,9 +43,8 @@ func NewTCCP(config TCCPConfig) (*TCCP, error) {
 
 // ShouldUpdate determines whether the reconciled TCCP stack should be updated.
 //
-//     The node pool's combined availability zone configuration changes.
-//     The operator's version changes.
-//
+//	The node pool's combined availability zone configuration changes.
+//	The operator's version changes.
 func (t *TCCP) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSCluster) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {

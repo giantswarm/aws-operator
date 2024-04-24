@@ -28,11 +28,10 @@ type Config struct {
 // runtime objects do still exist. This is to have a reliable deletion for the
 // following CRs.
 //
-//     watch         |    delete
-//     ---------------------------------------
-//     AWSCluster    |    AWSControlPlane
-//     AWSCluster    |    AWSMachineDeployment
-//
+//	watch         |    delete
+//	---------------------------------------
+//	AWSCluster    |    AWSControlPlane
+//	AWSCluster    |    AWSMachineDeployment
 type Resource struct {
 	k8sClient  k8sclient.Interface
 	logger     micrologger.Logger

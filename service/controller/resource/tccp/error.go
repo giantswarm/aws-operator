@@ -15,8 +15,7 @@ import (
 // This error should never be matched against and therefore there is no matcher
 // implement. For further information see:
 //
-//     https://github.com/giantswarm/fmt/blob/master/go/errors.md#matching-errors
-//
+//	https://github.com/giantswarm/fmt/blob/master/go/errors.md#matching-errors
 var executionFailedError = &microerror.Error{
 	Kind: "executionFailedError",
 }
@@ -68,8 +67,7 @@ var alreadyTerminatedError = &microerror.Error{
 // the AWS error code IncorrectInstanceState. The AWS errors might look like the
 // following example.
 //
-//     IncorrectInstanceState: The instance 'i-0b26c88f3546aefee' must be in a 'running', 'pending', 'stopping' or 'stopped' state for this operation.
-//
+//	IncorrectInstanceState: The instance 'i-0b26c88f3546aefee' must be in a 'running', 'pending', 'stopping' or 'stopped' state for this operation.
 func IsAlreadyTerminated(err error) bool {
 	c := microerror.Cause(err)
 

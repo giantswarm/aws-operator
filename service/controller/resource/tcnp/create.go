@@ -301,14 +301,13 @@ func (r *Resource) updateStack(ctx context.Context, cr infrastructurev1alpha3.AW
 // Example 2:
 // When end user is scaling cluster and adding restrictions to its size, it
 // might be that initial ASG configuration is following:
-// 		- Min: 3
-//		- Max: 10
-// 		- Desired: 10
+//   - Min: 3
+//   - Max: 10
+//   - Desired: 10
 //
 // Now end user decides that it must be scaled down so maximum size is decreased
 // to 7. When desired number of instances is temporarily bigger than maximum
 // number of instances, it must be fixed to be maximum number of instances.
-//
 func minDesiredWorkers(minWorkers, maxWorkers, statusDesiredCapacity int) int {
 	if statusDesiredCapacity > maxWorkers {
 		return maxWorkers

@@ -107,7 +107,6 @@ type Config struct {
 // cannot be deleted.
 //
 //	See https://github.com/giantswarm/aws-operator/pull/1373.
-//
 type Resource struct {
 	hostAWSConfig clientaws.Config
 	k8sClient     kubernetes.Interface
@@ -152,59 +151,58 @@ func (r *Resource) Name() string {
 // See also
 // https://godoc.org/github.com/aws/aws-sdk-go/service/route53#Route53.ListHostedZonesByName.
 //
-//     Retrieves a list of your hosted zones in lexicographic order.
+//	Retrieves a list of your hosted zones in lexicographic order.
 //
 // Here is an example to make it clearer. Let's consider the following hosted
 // zone name.
 //
-//     9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io
+//	9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io
 //
 // Given this name, findHostedZoneID will receive a response from Route53
 // similar to the following example, containing a single hosted zone carrying
 // its ID.
 //
-//     {
-//       ...
-//       HostedZones: [{
-//         ...
-//         Id: "/hostedzone/Z1A4QS1NDU6NW6",
-//         Name: "9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io.",
-//         ...
-//       }],
-//       ...
-//     }
+//	{
+//	  ...
+//	  HostedZones: [{
+//	    ...
+//	    Id: "/hostedzone/Z1A4QS1NDU6NW6",
+//	    Name: "9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io.",
+//	    ...
+//	  }],
+//	  ...
+//	}
 //
 // The example above was about a very specific domain name, which list result
 // could only find a single item in the response. Let's consider a less specific
 // domain name as input for findHostedZoneID.
 //
-//     k8s.ginger.eu-central-1.aws.gigantic.io
+//	k8s.ginger.eu-central-1.aws.gigantic.io
 //
 // The result from Route53 will again list all the childs within the given
 // domain name. In the example response below there where only two tenant
 // clusters.
 //
-//     {
-//       ...
-//       HostedZones: [{
-//         ...
-//         Id: "/hostedzone/Z1HJGG5VLG8GZH",
-//         Name: "k8s.ginger.eu-central-1.aws.gigantic.io.",
-//         ...
-//       },{
-//         ...
-//         Id: "/hostedzone/Z1KSFLSM1JEQYM",
-//         Name: "0tz6i.k8s.ginger.eu-central-1.aws.gigantic.io.",
-//         ...
-//       },{
-//         ...
-//         Id: "/hostedzone/Z1A4QS1NDU6NW6",
-//         Name: "9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io.",
-//         ...
-//       }],
-//       ...
-//     }
-//
+//	{
+//	  ...
+//	  HostedZones: [{
+//	    ...
+//	    Id: "/hostedzone/Z1HJGG5VLG8GZH",
+//	    Name: "k8s.ginger.eu-central-1.aws.gigantic.io.",
+//	    ...
+//	  },{
+//	    ...
+//	    Id: "/hostedzone/Z1KSFLSM1JEQYM",
+//	    Name: "0tz6i.k8s.ginger.eu-central-1.aws.gigantic.io.",
+//	    ...
+//	  },{
+//	    ...
+//	    Id: "/hostedzone/Z1A4QS1NDU6NW6",
+//	    Name: "9cvgo.k8s.ginger.eu-central-1.aws.gigantic.io.",
+//	    ...
+//	  }],
+//	  ...
+//	}
 func (r *Resource) findHostedZoneID(ctx context.Context, client *route53.Route53, name string) (string, error) {
 	in := &route53.ListHostedZonesByNameInput{
 		DNSName: aws.String(name),

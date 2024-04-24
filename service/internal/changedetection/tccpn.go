@@ -59,9 +59,8 @@ func NewTCCPN(config TCCPNConfig) (*TCCPN, error) {
 
 // ShouldUpdate determines whether the reconciled TCCPN stack should be updated.
 //
-//     The master node's instance type changes.
-//     The operator's version changes.
-//
+//	The master node's instance type changes.
+//	The operator's version changes.
 func (t *TCCPN) ShouldUpdate(ctx context.Context, cr infrastructurev1alpha3.AWSControlPlane) (bool, error) {
 	cc, err := controllercontext.FromContext(ctx)
 	if err != nil {

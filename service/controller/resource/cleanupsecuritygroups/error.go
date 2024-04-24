@@ -12,8 +12,7 @@ var dependencyViolationError = &microerror.Error{
 // IsDependencyViolation asserts dependencyViolationError. Additionally it
 // asserts AWS errors which may look like the following.
 //
-//     DependencyViolation: resource sg-07423aeb02946f323 has a dependent object\n\tstatus code: 400, request id: c16da859-433c-4e59-b598-ef17f9faa770
-//
+//	DependencyViolation: resource sg-07423aeb02946f323 has a dependent object\n\tstatus code: 400, request id: c16da859-433c-4e59-b598-ef17f9faa770
 func IsDependencyViolation(err error) bool {
 	c := microerror.Cause(err)
 
