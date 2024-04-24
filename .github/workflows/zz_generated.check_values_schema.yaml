@@ -1,0 +1,53 @@
+# DO NOT EDIT. Generated with:
+#
+#    devctl@6.23.3
+#
+name: 'Values and schema'
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - 'helm/**/values.yaml'         # default helm chart values
+      - 'helm/**/values.schema.json'  # schema
+      - 'helm/**/ci/ci-values.yaml'   # overrides for CI (can contain required entries)
+
+  push: {}
+
+jobs:
+  check:
+    name: 'validate values.yaml against values.schema.json'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Install validator
+        run: |
+          wget -q -O ${HOME}/yajsv https://github.com/neilpa/yajsv/releases/download/v1.4.1/yajsv.linux.amd64
+          chmod +x ${HOME}/yajsv
+
+      - name: 'Check if values.yaml is a valid instance of values.schema.json'
+        run: |
+          for chart_yaml in helm/*/Chart.yaml; do
+            helm_dir="${chart_yaml%/Chart.yaml}"
+
+            if [ ! -f ${helm_dir}/values.schema.json ]; then
+              echo "Skipping validation for '${helm_dir}' folder, because 'values.schema.json' does not exist..."
+              continue
+            fi
+
+            values=${helm_dir}/values.yaml
+            if [ -f ${helm_dir}/ci/ci-values.yaml ]; then
+              # merge ci-values.yaml into values.yaml (providing required values)
+              echo -e "\nMerged values:\n=============="
+              yq '. *= load("'${helm_dir}'/ci/ci-values.yaml")' ${helm_dir}/values.yaml | tee ${helm_dir}/combined-values.yaml
+              echo -e "\n==============\n"
+              values=${helm_dir}/combined-values.yaml
+            fi
+
+            ${HOME}/yajsv -s ${helm_dir}/values.schema.json ${values}
+          done

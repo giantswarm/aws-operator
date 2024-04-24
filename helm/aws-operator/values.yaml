@@ -103,3 +103,7 @@ ports:
 project:
   branch: "[[ .Branch ]]"
   commit: "[[ .SHA ]]"
+
+global:
+  podSecurityStandards:
+    enforced: false
