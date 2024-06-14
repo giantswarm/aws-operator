@@ -16,7 +16,7 @@ jobs:
           -O artifacts/users.yaml \
           https://raw.githubusercontent.com/giantswarm/github/main/tools/issue-automation/user-mapping.yaml
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: users
         path: artifacts/users.yaml
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_user_list
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e  # v4.1.7
       id: download-users
       with:
         name: users
@@ -46,7 +46,7 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
     - name: Apply label to issue
       if: ${{ env.LABEL != '' && env.LABEL != 'null' && env.LABEL != null }}
-      uses: actions-ecosystem/action-add-labels@v1
+      uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8  # v1.1.3
       with:
         github_token: ${{ secrets.ISSUE_AUTOMATION }}
         labels: |
