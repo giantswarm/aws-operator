@@ -309,10 +309,13 @@ func (t *TCCPN) newTemplate(ctx context.Context, obj interface{}, mapping hamast
 
 		err := g.Wait()
 		if certs.IsTimeout(err) {
+			t.config.Logger.Debugf(ctx, "BERK LOG", "reason", "CERT TIMEOUT")
 			return "", microerror.Maskf(timeoutError, "waited too long for certificates")
 		} else if randomkeys.IsTimeout(err) {
+			t.config.Logger.Debugf(ctx, "BERK LOG", "reason", "RANDOMKEYS TIMEOUT")
 			return "", microerror.Maskf(timeoutError, "waited too long for random keys")
 		} else if err != nil {
+			t.config.Logger.Debugf(ctx, "BERK LOG", "reason", "BOS TIMEOUT")
 			return "", microerror.Mask(err)
 		}
 	}
