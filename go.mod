@@ -122,7 +122,7 @@ require (
 
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.7.14
-	github.com/containernetworking/cni => github.com/containernetworking/cni v1.1.2
+	github.com/containernetworking/cni => github.com/containernetworking/cni v1.2.3
 	github.com/coreos/etcd v3.3.13+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/deislabs/oras => github.com/deislabs/oras v1.1.0
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
