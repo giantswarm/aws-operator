@@ -20,6 +20,10 @@ workflows:
           requires:
             - go-build
           filters:
+            branches:
+              ignore:
+                - main
+                - master
             tags:
               only: /^v.*/
 
@@ -32,5 +36,9 @@ workflows:
           requires:
             - push-to-registries
           filters:
+            branches:
+              ignore:
+                - main
+                - master
             tags:
               only: /^v.*/
