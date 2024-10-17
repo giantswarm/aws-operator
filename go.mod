@@ -1,6 +1,8 @@
 module github.com/giantswarm/aws-operator/v16
 
-go 1.21
+go 1.21.0
+
+toolchain go1.23.2
 
 require (
 	github.com/aws/amazon-vpc-cni-k8s v1.17.1
@@ -30,7 +32,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.19.0
 	github.com/spf13/viper v1.18.2
-	golang.org/x/sync v0.7.0
+	golang.org/x/sync v0.8.0
 	k8s.io/api v0.29.0
 	k8s.io/apiextensions-apiserver v0.29.0
 	k8s.io/apimachinery v0.29.2
@@ -97,12 +99,12 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/term v0.25.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/time v0.7.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
@@ -131,7 +133,7 @@ replace (
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.18.1
 	github.com/labstack/echo/v4 => github.com/labstack/echo/v4 v4.11.4
 	github.com/microcosm-cc/bluemonday => github.com/microcosm-cc/bluemonday v1.0.26
-	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.12
+	github.com/nats-io/nats-server/v2 => github.com/nats-io/nats-server/v2 v2.10.22
 	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.1.12
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.6
